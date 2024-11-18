@@ -11,7 +11,7 @@
 <script setup>
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
-import Accounts from "./components/Accounts/account.vue";
+import Accounts from "./components/Accounts/Account.vue";
 </script>
 
 <style scoped>
