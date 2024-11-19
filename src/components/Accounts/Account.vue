@@ -1,74 +1,179 @@
 <template>
+  <AddTelegramAccount
+    :openAddAccountStation="openAddAccount"
+    v-if="openAddAccountStation"
+  />
   <header>
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>
-      <h2 class="account">Telegram</h2>
+      <h2 class="account">{{ platformStationText }}</h2>
     </section>
     <section class="account-section">
-      <button class="account-list-button">
-        <img src="/account/down-arrow.svg" alt="" />Telegram
+      <button @click="openPlatformChoice" class="account-list-button">
+        <img src="/account/down-arrow.svg" alt="" />{{ platformStationText }}
       </button>
-      <button class="add-account-button">+ Добавить</button>
+      <div v-if="platformStation" class="black-fon">
+        <ul class="platform-list">
+          <li @click="choiceTelegram" class="platform">Telegram</li>
+          <li @click="choiceWhatsApp" class="platform">WhatsApp</li>
+        </ul>
+      </div>
+      <button @click="openAddAccount" class="add-account-button">
+        + Добавить
+      </button>
     </section>
   </header>
-  <TelegramAccount />
+  <TelegramAccount v-if="platformStationText === 'Telegram'" />
+  <AddWhatsAppAccount v-else />
 </template>
 
 <script setup>
 import TelegramAccount from "./TelegramAccount/TelegramAccount.vue";
+import AddTelegramAccount from "./TelegramAccount/AddTelegramAccount.vue";
+import AddWhatsAppAccount from "./TelegramAccount/WhatsAppAccount.vue";
+import { ref } from "vue";
+const openAddAccountStation = ref(false);
+const platformStationText = ref("Telegram");
+const platformStation = ref(false);
+
+function openPlatformChoice() {
+  platformStation.value = !platformStation.value;
+}
+
+function choiceTelegram() {
+  platformStationText.value = "Telegram";
+  platformStation.value = !platformStation.value;
+}
+
+function choiceWhatsApp() {
+  platformStationText.value = "WhatsApp";
+  platformStation.value = !platformStation.value;
+}
+
+function openAddAccount() {
+  openAddAccountStation.value = !openAddAccountStation.value;
+}
 </script>
 
 <style scoped>
 header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-left: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  gap: 1086px;
+  justify-content: space-between;
+  margin: 20px;
+  box-sizing: border-box;
 }
 
 .account-section {
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 
 .title {
   font-weight: 600;
-  font-size: 24px;
+  font-size: 22px;
   color: #000;
+  flex: 1; /* Title takes available space */
+  margin-right: 20px; /* Add space between title and buttons */
 }
 
 .account {
-  font-weight: 600;
-  font-size: 20px;
+  font-weight: 700;
+  font-size: 18px;
   color: #464646;
-  padding: 6px 11px;
   background: #f9f9f9;
   border-radius: 5px;
-}
-
-.account-list-button {
-  border-radius: 5px;
-  padding: 12px 13px;
-  background: rgba(73, 80, 202, 0.2);
-  font-weight: 600;
-  font-size: 16px;
-  color: #4047ca;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto; /* Don't let the account box expand */
+}
+
+.account-list-button,
+.add-account-button {
+  border-radius: 5px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.account-list-button {
+  background: rgba(73, 80, 202, 0.2);
+  font-weight: 600;
+  font-size: 14px;
+  color: #4047ca;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 
 .add-account-button {
-  border-radius: 5px;
-  padding: 12px 13px;
   background: #4950ca;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
+}
+
+.black-fon {
+  position: absolute;
+  z-index: 5;
+  width: 100%;
+  height: 100vh;
+  background: rgba(117, 117, 117, 0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.platform-list {
+  position: absolute;
+  z-index: 10;
+  right: 137px;
+  top: 150px;
+  border-radius: 10px;
+  width: 120px;
+  height: 70px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.platform {
+  padding: 4px;
+  transition: all 0.1s;
+  cursor: pointer;
+}
+
+.platform:hover {
+  text-align: center;
+  width: 100px;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+@media (max-width: 768px) {
+  .account {
+    display: none;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .platform-list {
+    left: 20px;
+    top: 180px;
+  }
 }
 </style>
