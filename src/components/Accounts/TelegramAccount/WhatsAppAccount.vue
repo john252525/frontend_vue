@@ -1,36 +1,67 @@
 <template>
-  <table>
-    <thead>
-      <tr>
-        <th class="table-login">ЛОГИН</th>
-        <th class="table-step">ШАГ</th>
-        <th class="table-action">ДЕЙСТВИЕ</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(item, index) in data" :key="index">
-        <td class="table-text-number">{{ item.login }}</td>
-        <td class="table-text">{{ item.step }}</td>
-        <td class="table-action-text">
-          <button class="action-table-button">
-            <img src="/telegramAccount/menu_table_button.svg" alt="" />Действия
-          </button>
-          <!-- <div class="black-fon"></div>
-            <ul class="action-list">
-              <li class="action">Настройки</li>
-              <li class="action">Скриншот</li>
-              <li class="action">Включить</li>
-              <li class="action">Выключить</li>
-              <li class="action">Сменить прокси</li>
-              <li class="action">Связать через QR</li>
-              <li class="action">Связать через код</li>
-              <li class="action">Проверить код</li>
-              <li class="action">Удалить аккаунт</li>
-            </ul> -->
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div>
+    <table>
+      <thead>
+        <tr>
+          <th class="table-login">ЛОГИН</th>
+          <th class="table-step">ШАГ</th>
+          <th class="table-action">ДЕЙСТВИЕ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in data" :key="index">
+          <td class="table-text-number">{{ item.login }}</td>
+          <td class="table-text">{{ item.step }}</td>
+          <td class="table-action-text">
+            <button
+              class="action-table-button"
+              @click="openModal($event, item)"
+            >
+              <img
+                src="/telegramAccount/menu_table_button.svg"
+                alt=""
+              />Действия
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div v-if="isModalOpen" class="black-fon" @click="closeModal">
+      <div
+        class="action-list"
+        :style="{
+          top: modalPosition.top + 'px',
+          left: modalPosition.left + 'px',
+        }"
+      >
+        <span class="action" @click="performAction('Action 1')">Настройки</span>
+        <span class="action" @click="performAction('Action 2')">Скриншот</span>
+        <span class="action action-on" @click="performAction('Action 3')"
+          >Включить</span
+        >
+        <span class="action" @click="performAction('Action 1')">Выключить</span>
+        <span class="action action-throw" @click="performAction('Action 1')"
+          >Сбросить</span
+        >
+        <span class="action" @click="performAction('Action 2')"
+          >Сменить прокси</span
+        >
+        <span class="action" @click="performAction('Action 3')"
+          >Связать через QR</span
+        >
+        <span class="action" @click="performAction('Action 1')"
+          >Связать через код</span
+        >
+        <span class="action" @click="performAction('Action 2')"
+          >Проверить код</span
+        >
+        <span class="action action-delete" @click="performAction('Action 3')"
+          >Удалить аккаунт</span
+        >
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -42,10 +73,32 @@ export default {
         { login: "+7 (922) 855-69-98", step: "" },
         { login: "+7 (922) 855-69-98", step: "" },
       ],
+      isModalOpen: false,
+      modalPosition: { top: 0, left: 0 },
+      selectedItem: null,
     };
+  },
+  methods: {
+    openModal(event, item) {
+      this.selectedItem = item;
+      this.isModalOpen = true;
+      const rect = event.target.getBoundingClientRect();
+      this.modalPosition = {
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      };
+    },
+    closeModal() {
+      this.isModalOpen = false;
+    },
+    performAction(action) {
+      alert(`Вы выбрали ${action} для ${this.selectedItem.login}`);
+      this.closeModal();
+    },
   },
 };
 </script>
+
 <style scoped>
 table {
   width: 100%;
@@ -71,12 +124,6 @@ table {
 
 .table-text-number {
   padding: 20px;
-}
-
-tbody {
-  width: 300px;
-  overflow-x: auto;
-  white-space: nowrap;
 }
 
 .table-text {
@@ -116,41 +163,41 @@ td {
   text-align: left;
 }
 
+tbody {
+  width: 300px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 thead {
   border: 1px solid #d9d9d9;
   height: 50px;
   background: #efefef;
 }
-.text-right {
-  text-align: right;
-}
 
 .black-fon {
-  position: absolute;
+  position: fixed;
   z-index: 5;
   width: 100%;
   height: 100vh;
-  opacity: 20%;
-  background: rgba(3, 3, 3, 0.3);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  background: rgba(117, 117, 117, 0.3);
+  top: 0;
+  left: 0;
 }
 
 .action-list {
   border-radius: 10px;
   width: 170px;
-  height: 280px;
+  height: auto;
   background: #ffffff;
   position: absolute;
-  z-index: 10;
-  right: 20px;
+  z-index: 20;
   display: flex;
-  align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  gap: 10px;
-  padding-left: 20px;
+  margin-left: -63px;
+  margin-top: 10px;
+  padding: 10px 0px 10px 10px;
 }
 
 .action {
@@ -158,103 +205,23 @@ thead {
   font-size: 15px;
   color: #000;
   cursor: pointer;
+  padding: 6px;
+}
+
+.action:hover {
+  background-color: #eeeeee;
+  border-radius: 5px 0px 0px 5px;
+}
+
+.action-on:hover {
+  color: green;
+}
+
+.action-throw:hover {
+  color: rgb(255, 0, 0);
+}
+
+.action-delete:hover {
+  color: rgb(255, 0, 0);
 }
 </style>
-
-<!-- 
-  <template>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Column 1</th>
-            <th>Column 2</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in items" :key="item.id" ref="row">
-            <td>{{ item.col1 }}</td>
-            <td>{{ item.col2 }}</td>
-            <td><button @click="openModal(item.id, $el)">Open Modal</button></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="modal-container" v-if="modalOpen">
-        <Modal :item="modalItem" @close="closeModal" :position="modalPosition" />
-      </div>
-    </div>
-  </template>
-  
-  <script>
-  import Modal from "./Modal.vue";
-  
-  export default {
-    components: {
-      Modal,
-    },
-    data() {
-      return {
-        items: [
-          { id: 1, col1: "Data 1", col2: "Info 1" },
-          { id: 2, col1: "Data 2", col2: "Info 2" },
-          { id: 3, col1: "Data 3", col2: "Info 3" },
-        ],
-        modalOpen: false,
-        modalItem: null,
-        modalPosition: null,
-      };
-    },
-    methods: {
-      openModal(itemId, rowElement) {
-        this.modalItem = this.items.find((item) => item.id === itemId);
-        this.modalOpen = true;
-        const rect = rowElement.getBoundingClientRect();
-        this.modalPosition = {
-          top: `${rect.top + window.scrollY}px`,
-          left: `${rect.left + window.scrollX}px`,
-        };
-      },
-      closeModal() {
-        this.modalOpen = false;
-        this.modalItem = null;
-        this.modalPosition = null;
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  th {
-    background-color: #f2f2f2;
-  }
-  
-  .table-container {
-    position: relative; /* Needed for absolute positioning of the modal */
-  }
-  
-  .modal-container {
-    position: absolute;
-  }
-  
-  /* Modal Styles (Adjust as needed) */
-  .modal {
-    background-color: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  }
-  </style> -->

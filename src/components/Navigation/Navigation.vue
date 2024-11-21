@@ -54,7 +54,7 @@ const props = defineProps({
 .pc-menu {
   display: flex;
   width: 260px;
-  height: 100vh;
+  /* height: 100vh; */
   box-sizing: border-box;
 }
 
@@ -65,10 +65,11 @@ nav {
 
 .line {
   width: 0.5px;
-  height: 100vh;
   background-color: #d9d9d9;
   margin-left: 260px;
   position: absolute;
+  top: 72px; /* Установите высоту вашего header */
+  bottom: 0; /* Это сделает линию до самого низа */
 }
 
 li {
@@ -136,7 +137,7 @@ li:hover {
   gap: 8px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .pc-menu {
     display: none;
   }

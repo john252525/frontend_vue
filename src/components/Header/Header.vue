@@ -9,10 +9,25 @@
           alt=""
         />
         <h2 class="logo-header">
-          <img src="/header/logo.svg" alt="logo" />Name-<span>API</span>
+          <img class="logo" src="/header/logo.svg" alt="logo" />Name-<span
+            >API</span
+          >
         </h2>
       </article>
-      <img src="/header/user_img.svg" alt="user" />
+      <article class="user-cont">
+        <h2 @click="balanceStationOn" class="balance-user">0.00 ₽</h2>
+        <img
+          @click="AccountMenuStationOn"
+          src="/header/user_img.svg"
+          alt="user"
+          class="user-icon"
+        />
+      </article>
+      <Balance :balanceStationOn="balanceStationOn" v-if="balanseStation" />
+      <AccountMenu
+        v-if="AccountMenuStation"
+        :AccountMenuStationOn="AccountMenuStationOn"
+      />
     </section>
     <div class="line"></div>
   </header>
@@ -24,15 +39,51 @@ const props = defineProps({
     type: Function,
   },
 });
+
+import Balance from "./Balance.vue";
+import AccountMenu from "./AccountMenu.vue";
+
+import { ref } from "vue";
+
+const balanseStation = ref(false);
+const AccountMenuStation = ref(false);
+
+function balanceStationOn() {
+  balanseStation.value = !balanseStation.value;
+}
+
+function AccountMenuStationOn() {
+  AccountMenuStation.value = !AccountMenuStation.value;
+}
 </script>
 
 <style scoped>
 section {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Distributes space between logo and profile */
+  justify-content: space-between;
   padding: 1rem;
   box-sizing: border-box;
+}
+
+.user-icon {
+  cursor: pointer;
+}
+
+.user-cont {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.balance-user {
+  font-weight: 700;
+  font-size: 14px;
+  color: #4047ca;
+  padding: 8px;
+  border: 1px solid rgba(64, 71, 202, 0.2);
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .logo-header-cont {
@@ -66,6 +117,16 @@ section {
 @media (max-width: 1024px) {
   .phone-menu {
     display: block;
+  }
+}
+
+@media (max-width: 500px) {
+  .logo {
+    display: none;
+  }
+
+  .logo-header {
+    display: none;
   }
 }
 </style>

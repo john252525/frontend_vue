@@ -35,29 +35,14 @@
           left: modalPosition.left + 'px',
         }"
       >
-        <span class="action" @click="performAction('Action 1')">Настройки</span>
-        <span class="action" @click="performAction('Action 2')">Скриншот</span>
-        <span class="action action-on" @click="performAction('Action 3')"
-          >Включить</span
-        >
-        <span class="action" @click="performAction('Action 1')">Выключить</span>
-        <span class="action action-throw" @click="performAction('Action 1')"
-          >Сбросить</span
+        <span class="action" @click="performAction('Action 1')"
+          >Действие 1</span
         >
         <span class="action" @click="performAction('Action 2')"
-          >Сменить прокси</span
+          >Действие 2</span
         >
         <span class="action" @click="performAction('Action 3')"
-          >Связать через QR</span
-        >
-        <span class="action" @click="performAction('Action 1')"
-          >Связать через код</span
-        >
-        <span class="action" @click="performAction('Action 2')"
-          >Проверить код</span
-        >
-        <span class="action action-delete" @click="performAction('Action 3')"
-          >Удалить аккаунт</span
+          >Действие 3</span
         >
       </div>
     </div>
@@ -180,7 +165,8 @@ thead {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  opacity: 0.3;
+  background: rgba(3, 3, 3, 0.3);
   top: 0;
   left: 0;
 }
@@ -191,13 +177,13 @@ thead {
   height: auto;
   background: #ffffff;
   position: absolute;
-  z-index: 20;
+  z-index: 10;
   display: flex;
+  align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  margin-left: -63px;
-  margin-top: 10px;
-  padding: 10px 0px 10px 10px;
+  gap: 10px;
+  padding-left: 20px;
 }
 
 .action {
@@ -205,23 +191,7 @@ thead {
   font-size: 15px;
   color: #000;
   cursor: pointer;
-  padding: 6px;
-}
-
-.action:hover {
-  background-color: #eeeeee;
-  border-radius: 5px 0px 0px 5px;
-}
-
-.action-on:hover {
-  color: green;
-}
-
-.action-throw:hover {
-  color: rgb(255, 0, 0);
-}
-
-.action-delete:hover {
-  color: rgb(255, 0, 0);
 }
 </style>
+
+Найти еще

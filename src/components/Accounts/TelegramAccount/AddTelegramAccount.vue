@@ -1,5 +1,5 @@
 <template>
-  <div class="black-fon"></div>
+  <div @click="openAddAccountStation" class="black-fon"></div>
   <section class="add-account">
     <header>
       <h2 class="title">Добавление аккаунта</h2>

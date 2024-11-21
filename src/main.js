@@ -1,6 +1,25 @@
-import './assets/main.css'
+import "./assets/main.css";
+import { createRouter, createWebHashHistory } from "vue-router";
+import { createApp } from "vue";
+import App from "./App.vue";
+import PersonalAccount from "./pages/Account.vue";
+import Login from "./pages/Login.vue";
+import Registration from "./pages/Registration.vue";
+import PasswordRecovery from "./pages/PasswordRecovery.vue";
+import test from "./pages/test.vue";
+const routes = [
+  { path: "/", name: "PersonalAccount", component: PersonalAccount },
+  { path: "/login", name: "Login", component: Login },
+  { path: "/registration", name: "Registration", component: Registration },
+  { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },
+  { path: "/test", name: "test", component: test },
+];
 
-import { createApp } from 'vue'
-import App from './App.vue'
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
+});
 
-createApp(App).mount('#app')
+const app = createApp(App);
+app.use(router);
+app.mount("#app");

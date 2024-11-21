@@ -12,12 +12,13 @@
       <button @click="openPlatformChoice" class="account-list-button">
         <img src="/account/down-arrow.svg" alt="" />{{ platformStationText }}
       </button>
-      <div v-if="platformStation" class="black-fon">
+      <article v-if="platformStation">
+        <div @click="openPlatformChoice" class="black-fon"></div>
         <ul class="platform-list">
           <li @click="choiceTelegram" class="platform">Telegram</li>
           <li @click="choiceWhatsApp" class="platform">WhatsApp</li>
         </ul>
-      </div>
+      </article>
       <button @click="openAddAccount" class="add-account-button">
         + Добавить
       </button>
