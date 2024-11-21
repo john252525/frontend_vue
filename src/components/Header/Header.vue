@@ -74,6 +74,7 @@ section {
   display: flex;
   align-items: center;
   gap: 16px;
+  width: 121px;
 }
 
 .balance-user {
@@ -90,6 +91,7 @@ section {
   display: flex;
   align-items: center;
   gap: 20px;
+  width: 215px;
 }
 
 .logo-header {
