@@ -1,7 +1,7 @@
 <template>
   <section class="password-recovery-section">
     <form>
-      <h2 class="title">Востановление пароля</h2>
+      <h2 class="title">Восстановление пароля</h2>
       <p class="subtitle">
         Введите свою электронную почту, и мы пришлем вам код для сброса вашего
         пароля!
