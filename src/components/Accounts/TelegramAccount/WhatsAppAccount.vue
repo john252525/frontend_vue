@@ -19,7 +19,7 @@
             >
               <img
                 src="/telegramAccount/menu_table_button.svg"
-                alt=""
+                alt="Меню действий"
               />Действия
             </button>
           </td>
@@ -35,28 +35,34 @@
           left: modalPosition.left + 'px',
         }"
       >
-        <span class="action" @click="performAction('Action 1')">Настройки</span>
-        <span class="action" @click="performAction('Action 2')">Скриншот</span>
-        <span class="action action-on" @click="performAction('Action 3')"
+        <span class="action" @click="performAction('Настройки')"
+          >Настройки</span
+        >
+        <span class="action" @click="performAction('Скриншот')">Скриншот</span>
+        <span class="action action-on" @click="performAction('Включить')"
           >Включить</span
         >
-        <span class="action" @click="performAction('Action 1')">Выключить</span>
-        <span class="action action-throw" @click="performAction('Action 1')"
+        <span class="action" @click="performAction('Выключить')"
+          >Выключить</span
+        >
+        <span class="action action-throw" @click="performAction('Сбросить')"
           >Сбросить</span
         >
-        <span class="action" @click="performAction('Action 2')"
+        <span class="action" @click="performAction('Сменить прокси')"
           >Сменить прокси</span
         >
-        <span class="action" @click="performAction('Action 3')"
+        <span class="action" @click="performAction('Связать через QR')"
           >Связать через QR</span
         >
-        <span class="action" @click="performAction('Action 1')"
+        <span class="action" @click="performAction('Связать через код')"
           >Связать через код</span
         >
-        <span class="action" @click="performAction('Action 2')"
+        <span class="action" @click="performAction('Проверить код')"
           >Проверить код</span
         >
-        <span class="action action-delete" @click="performAction('Action 3')"
+        <span
+          class="action action-delete"
+          @click="performAction('Удалить аккаунт')"
           >Удалить аккаунт</span
         >
       </div>
@@ -82,7 +88,7 @@ export default {
     openModal(event, item) {
       this.selectedItem = item;
       this.isModalOpen = true;
-      const rect = event.target.getBoundingClientRect();
+      const rect = event.currentTarget.getBoundingClientRect();
       this.modalPosition = {
         top: rect.bottom + window.scrollY,
         left: rect.left + window.scrollX,
@@ -217,11 +223,10 @@ thead {
   color: green;
 }
 
-.action-throw:hover {
-  color: rgb(255, 0, 0);
-}
-
+.action-throw:hover,
 .action-delete:hover {
   color: rgb(255, 0, 0);
 }
 </style>
+
+Найти еще

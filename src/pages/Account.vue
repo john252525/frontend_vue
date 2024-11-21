@@ -35,7 +35,6 @@ main {
 
 .page-container {
   display: flex;
-  /* min-height: 100vh; */
 }
 
 .navigation {

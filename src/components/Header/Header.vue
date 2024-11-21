@@ -1,32 +1,31 @@
 <template>
   <header>
-    <section>
+    <section class="header-content">
       <article class="logo-header-cont">
         <img
           @click="phoneMenuOn"
           class="phone-menu"
           src="/header/menu_phone.svg"
-          alt=""
+          alt="Меню для телефона"
         />
         <h2 class="logo-header">
-          <img class="logo" src="/header/logo.svg" alt="logo" />Name-<span
-            >API</span
-          >
+          <img class="logo" src="/header/logo.svg" alt="Логотип" />
+          Name-<span>API</span>
         </h2>
       </article>
       <article class="user-cont">
-        <h2 @click="balanceStationOn" class="balance-user">0.00 ₽</h2>
+        <h2 @click="toggleBalanceStation" class="balance-user">0.00 ₽</h2>
         <img
-          @click="AccountMenuStationOn"
+          @click="toggleAccountMenu"
           src="/header/user_img.svg"
-          alt="user"
+          alt="Пользователь"
           class="user-icon"
         />
       </article>
-      <Balance :balanceStationOn="balanceStationOn" v-if="balanseStation" />
+      <Balance :balanceStationOn="toggleBalanceStation" v-if="balanseStation" />
       <AccountMenu
         v-if="AccountMenuStation"
-        :AccountMenuStationOn="AccountMenuStationOn"
+        :AccountMenuStationOn="toggleAccountMenu"
       />
     </section>
     <div class="line"></div>
@@ -34,31 +33,30 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+import Balance from "./Balance.vue";
+import AccountMenu from "./AccountMenu.vue";
+
 const props = defineProps({
   phoneMenuOn: {
     type: Function,
   },
 });
 
-import Balance from "./Balance.vue";
-import AccountMenu from "./AccountMenu.vue";
-
-import { ref } from "vue";
-
 const balanseStation = ref(false);
 const AccountMenuStation = ref(false);
 
-function balanceStationOn() {
+function toggleBalanceStation() {
   balanseStation.value = !balanseStation.value;
 }
 
-function AccountMenuStationOn() {
+function toggleAccountMenu() {
   AccountMenuStation.value = !AccountMenuStation.value;
 }
 </script>
 
 <style scoped>
-section {
+.header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,6 +114,7 @@ section {
 .phone-menu {
   display: none;
 }
+
 @media (max-width: 1024px) {
   .phone-menu {
     display: block;
@@ -123,10 +122,7 @@ section {
 }
 
 @media (max-width: 500px) {
-  .logo {
-    display: none;
-  }
-
+  .logo,
   .logo-header {
     display: none;
   }

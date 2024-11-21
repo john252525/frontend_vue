@@ -2,35 +2,39 @@
   <aside class="pc-menu">
     <nav>
       <ul>
-        <li>
-          <img src="/navigation/home.svg" alt="home" />
+        <li @click="navigateTo('home')">
+          <img src="/navigation/accaunts.svg" alt="Главная" />
           <p class="page">Главная</p>
         </li>
-        <li>
-          <img src="/navigation/accaunts.svg" alt="accaunts" />
+        <li @click="navigateTo('accounts')">
+          <img src="/navigation/accaunts.svg" alt="Аккаунты" />
           <p class="page">Аккаунты</p>
         </li>
       </ul>
     </nav>
     <div class="line"></div>
   </aside>
-  <div v-if="phoneMenuStation" class="black-fon">
-    <aside class="phone-menu">
+  <div v-if="phoneMenuStation" class="black-fon" @click="phoneMenuOn">
+    <aside class="phone-menu" @click.stop>
       <header class="logo-phone-cont">
         <h2 class="logo-phone">
-          <img src="/header/logo.svg" alt="logo" />Name-<span>API</span>
+          <img src="/header/logo.svg" alt="Логотип" />Name-<span>API</span>
         </h2>
-        <img @click="phoneMenuOn" src="/navigation/close.svg" alt="" />
+        <img
+          @click="phoneMenuOn"
+          src="/navigation/close.svg"
+          alt="Закрыть меню"
+        />
       </header>
       <div class="line-menu"></div>
       <nav>
         <ul>
-          <li>
-            <img src="/navigation/home.svg" alt="home" />
+          <li @click="navigateTo('home')">
+            <img src="/navigation/home.svg" alt="Главная" />
             <p class="page">Главная</p>
           </li>
-          <li>
-            <img src="/navigation/accaunts.svg" alt="accaunts" />
+          <li @click="navigateTo('accounts')">
+            <img src="/navigation/accaunts.svg" alt="Аккаунты" />
             <p class="page">Аккаунты</p>
           </li>
         </ul>
@@ -43,18 +47,23 @@
 const props = defineProps({
   phoneMenuOn: {
     type: Function,
+    required: true,
   },
   phoneMenuStation: {
     type: Boolean,
+    required: true,
   },
 });
+
+function navigateTo(page) {
+  console.log(`Navigating to ${page}`);
+}
 </script>
 
 <style scoped>
 .pc-menu {
   display: flex;
   width: 260px;
-  /* height: 100vh; */
   box-sizing: border-box;
 }
 
@@ -99,9 +108,8 @@ li:hover {
   width: 100%;
   height: 100vh;
   background: rgba(117, 117, 117, 0.3);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
 }
 
 .phone-menu {
