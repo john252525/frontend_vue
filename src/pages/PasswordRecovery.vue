@@ -18,7 +18,7 @@
       </div>
       <button class="send-сode-button">Отправить</button>
       <p class="login-account-button">
-        Вспомнили пароль? <span @click="navigateToLogin"> Войти</span>
+        Вспомнили пароль? <span @click="navigateToLogin">Войти</span>
       </p>
     </form>
   </section>
