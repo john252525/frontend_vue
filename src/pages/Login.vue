@@ -5,52 +5,130 @@
       <div class="input-cont">
         <label class="name-input" for="name">Почта</label>
         <input
+          :style="inputStyle.login"
           type="email"
           placeholder="name@company.com"
-          id="name"
-          v-model="name"
+          id="login"
+          v-model="formData.login"
           required
         />
+        <p v-if="inputStyle.loginStation" class="error-message">
+          Введите корректный E-mail
+        </p>
       </div>
       <div class="input-cont">
         <label class="name-input" for="email">Пароль</label>
         <input
+          :style="inputStyle.password"
           placeholder="Введите пароль"
           type="password"
-          id="email"
-          v-model="email"
+          id="password"
+          v-model="formData.password"
           required
         />
-        <p @click="navigateToForgot" class="forgot-password-text">
+        <p v-if="inputStyle.passwordStation" class="error-message">
+          Введите корректный Пароль
+        </p>
+        <p @click="navigateTo('/Forgot')" class="forgot-password-text">
           Забыли пароль?
         </p>
       </div>
-      <button class="login-account-button">Войти</button>
+      <button @click="login" class="login-account-button">Войти</button>
       <p class="create-account-button">
-        Нет аккаунта? <span @click="navigateToRegister">Создать аккаунт</span>
+        Нет аккаунта?
+        <span @click="navigateTo('/Registration')">Создать аккаунт</span>
       </p>
     </form>
   </section>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      form: {
-        login: "",
-        password: "",
-      },
-    };
+<script setup>
+import { useRouter } from "vue-router";
+import { ref, reactive } from "vue";
+
+const formData = reactive({
+  login: "",
+  password: "",
+});
+
+const inputStyle = reactive({
+  password: {
+    border: "0.5px solid #c1c1c1",
+    background: "#fcfcfc",
   },
-  methods: {
-    navigateToRegister() {
-      this.$router.push("/Registration");
-    },
-    navigateToForgot() {
-      this.$router.push("/Forgot");
-    },
+  login: {
+    border: "0.5px solid #c1c1c1",
+    background: "#fcfcfc",
   },
+  passwordStation: false,
+  loginStation: false,
+});
+
+function errorStyleStation(input, station) {
+  if (input === "login") {
+    if (station === "on") {
+      inputStyle.login.border = "0.5px solid #be2424";
+      inputStyle.login.background = "#ffeaea";
+      inputStyle.loginStation = true;
+    } else if (station === "off") {
+      inputStyle.login.border = "0.5px solid #c1c1c1";
+      inputStyle.login.background = "#fcfcfc";
+      inputStyle.loginStation = false;
+    }
+  } else if (input === "password") {
+    if (station === "on") {
+      inputStyle.password.border = "0.5px solid #be2424";
+      inputStyle.password.background = "#ffeaea";
+      inputStyle.passwordStation = true;
+    } else if (station === "off") {
+      inputStyle.password.border = "0.5px solid #c1c1c1";
+      inputStyle.password.background = "#fcfcfc";
+      inputStyle.passwordStation = false;
+    }
+  }
+}
+
+function login() {
+  const login = formData.login;
+  const password = formData.password;
+
+  const stationAuth = reactive({
+    login: false,
+    password: false,
+  });
+
+  if (login.length === 0) {
+    errorStyleStation("login", "on");
+  } else if (login.length > 30) {
+    errorStyleStation("login", "on");
+  } else if (login.length < 10) {
+    errorStyleStation("login", "on");
+  } else if (!login.includes("@")) {
+    errorStyleStation("login", "on");
+  } else {
+    errorStyleStation("login", "off");
+    stationAuth.login = true;
+  }
+
+  if (password.length === 0) {
+    errorStyleStation("password", "on");
+  } else if (password.length > 20) {
+    errorStyleStation("password", "on");
+  } else if (password.length < 8) {
+    errorStyleStation("password", "on");
+  } else {
+    errorStyleStation("password", "off");
+    stationAuth.password = true;
+  }
+
+  if (stationAuth.password === true && stationAuth.login === true) {
+    console.log("авторизация");
+  }
+}
+
+const navigateTo = (page) => {
+  const router = useRouter();
+  router.push(page);
 };
 </script>
 
@@ -93,15 +171,19 @@ export default {
 }
 
 input {
-  border: 0.5px solid #c1c1c1;
   border-radius: 5px;
   padding-left: 10px;
   width: 550px;
   height: 45px;
-  background: #fcfcfc;
   font-weight: 400;
   font-size: 14px;
   color: #000;
+}
+
+.error-message {
+  font-weight: 500;
+  font-size: 16px;
+  color: #d33838;
 }
 
 .forgot-password-text {
@@ -169,6 +251,10 @@ input {
   .login-section {
     width: 350px;
     height: 504px;
+  }
+
+  .error-message {
+    font-size: 14px;
   }
 
   input {

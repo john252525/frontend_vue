@@ -25,13 +25,13 @@
     </section>
   </header>
   <TelegramAccount v-if="platformStationText === 'Telegram'" />
-  <AddWhatsAppAccount v-else />
+  <WhatsAppAccount v-else />
 </template>
 
 <script setup>
-import TelegramAccount from "./TelegramAccount/TelegramAccount.vue";
-import AddTelegramAccount from "./TelegramAccount/AddTelegramAccount.vue";
-import AddWhatsAppAccount from "./TelegramAccount/WhatsAppAccount.vue";
+import TelegramAccount from "./TelegramAccount/TelegramAccount/TelegramAccount.vue";
+import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
+import WhatsAppAccount from "./TelegramAccount/WhatsAppAccount/WhatsAppAccount.vue";
 import { ref } from "vue";
 const openAddAccountStation = ref(false);
 const platformStationText = ref("Telegram");

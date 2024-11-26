@@ -12,33 +12,42 @@
     <form>
       <div class="input-cont">
         <label for="name">Платформа</label>
-        <button @click="openList" class="open-list-platform-button">
-          Telegram <img src="/telegramAccount/arrow-down.svg" alt="" />
+        <button
+          :style="inputStyle.list"
+          @click="openList"
+          class="open-list-platform-button"
+        >
+          {{ formData.sourceList }}
+          <img class="img-input" src="/telegramAccount/arrow-down.svg" alt="" />
         </button>
         <ul v-if="listStation" class="list-platform">
-          <li class="platform">Выберите платформу</li>
-          <li class="platform">Telegram</li>
-          <li class="platform">WhatsApp</li>
+          <li @click="addSource('Выберите платформу')" class="platform">
+            Выберите платформу
+          </li>
+          <li @click="addSource('telegram')" class="platform">Telegram</li>
+          <li @click="addSource('whatsapp')" class="platform">WhatsApp</li>
         </ul>
       </div>
       <div class="input-cont">
-        <label for="email">Логин</label>
+        <label for="login">Логин</label>
         <input
+          :style="inputStyle.login"
           placeholder="Ваш логин или номер телефона"
           class="login-input"
           type="email"
-          id="email"
-          v-model="email"
+          id="login"
+          v-model="formData.login"
           required
         />
       </div>
     </form>
-    <button class="add-account-button">Добавить</button>
+    <button @click="addAccount" class="add-account-button">Добавить</button>
   </section>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
+import axios from "axios";
 const props = defineProps({
   openAddAccountStation: {
     type: Function,
@@ -46,11 +55,112 @@ const props = defineProps({
 });
 
 const listStation = ref(false);
-const formData = reactive({});
+
+const inputStyle = reactive({
+  list: {
+    border: "0.5px solid #c1c1c1",
+    background: "fcfcfc",
+  },
+  login: {
+    border: "0.5px solid #c1c1c1",
+    background: "fcfcfc",
+  },
+});
+
+const formData = reactive({
+  token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+  login: "",
+  proxyString: "",
+  webhookUrls: [],
+  source: "",
+  sourceList: "Выберите платформу",
+  success: null,
+  error: null,
+});
+
+function errorStyleStation(input, station) {
+  if (input === "list") {
+    if (station === "on") {
+      inputStyle.list.border = "0.5px solid #be2424";
+      inputStyle.list.background = "#ffeaea";
+    } else if (station === "off") {
+      inputStyle.list.border = "0.5px solid #c1c1c1";
+      inputStyle.list.background = "#fcfcfc";
+    }
+  } else if (input === "login") {
+    if (station === "on") {
+      inputStyle.login.border = "0.5px solid #be2424";
+      inputStyle.login.background = "#ffeaea";
+    } else if (station === "off") {
+      inputStyle.login.border = "0.5px solid #c1c1c1";
+      inputStyle.login.background = "#fcfcfc";
+    }
+  }
+}
+
+function addSource(source) {
+  formData.source = source;
+  listStation.value = false;
+  if (source === "telegram") {
+    formData.sourceList = "Telegram";
+  } else if (source === "whatsapp") {
+    formData.sourceList = "WhatsApp";
+  } else {
+    formData.sourceList = "Выберите платформу";
+  }
+}
 
 function openList() {
   listStation.value = !listStation.value;
 }
+
+const addAccount = async () => {
+  formData.error = null;
+  if (formData.sourceList === "Выберите платформу") {
+    errorStyleStation("list", "on");
+  } else {
+    errorStyleStation("list", "off");
+  }
+
+  if (formData.login.length === 0) {
+    errorStyleStation("login", "on");
+  } else {
+    errorStyleStation("login", "off");
+  }
+
+  if (
+    formData.sourceList != "Выберите платформу" &&
+    formData.login.length > 0
+  ) {
+    try {
+      const response = await axios.post(
+        "https://b2288.apitter.com/instances/addAccount",
+        {
+          token: formData.token,
+          login: formData.login,
+          proxyString: formData.proxyString,
+          webhookUrls: formData.proxyString,
+          source: formData.source,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+          },
+        }
+      );
+
+      console.log("Аккаунт успешно создан:", response.data);
+      location.reload();
+    } catch (error) {
+      error.value = error.message || "Произошла ошибка.";
+      console.error("Ошибка при создании аккаунта:", error);
+      if (error.response) {
+        console.error("Ошибка сервера:", error.response.data);
+      }
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -112,11 +222,9 @@ label {
 }
 
 .login-input {
-  border: 0.5px solid #c1c1c1;
   border-radius: 5px;
   width: 200px;
   height: 36px;
-  background: #fcfcfc;
   font-weight: 400;
   font-size: 13px;
   color: #000;
@@ -124,15 +232,17 @@ label {
 }
 
 .open-list-platform-button {
-  border: 0.5px solid #c1c1c1;
   border-radius: 5px;
   width: 213px;
   height: 40px;
-  background: #fcfcfc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 120px;
+  text-align: left;
+  position: relative;
+}
+
+.img-input {
+  position: absolute;
+  right: 6px;
+  top: 16px;
 }
 
 .list-platform {
@@ -145,6 +255,8 @@ label {
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
+  margin-top: -5px;
+  margin-left: 1px;
   gap: 6px;
   padding-left: 10px;
 }
