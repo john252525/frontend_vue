@@ -15,6 +15,11 @@ span {
   margin: 0;
 }
 
+select {
+  font-family: "Montserrat", serif;
+  margin: 0;
+}
+
 ul {
   list-style-type: none;
   margin: 0;

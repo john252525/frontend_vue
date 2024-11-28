@@ -1,52 +1,117 @@
 <template>
   <div @click="openAddAccountStation" class="black-fon"></div>
   <section class="add-account">
-    <header>
-      <h2 class="title">Добавление аккаунта</h2>
-      <img
-        @click="openAddAccountStation"
-        src="/telegramAccount/close.svg"
-        alt=""
-      />
-    </header>
     <form>
-      <div class="input-cont">
-        <label for="name">Платформа</label>
-        <button
-          :style="inputStyle.list"
-          @click="openList"
-          class="open-list-platform-button"
-        >
-          {{ formData.sourceList }}
-          <img class="img-input" src="/telegramAccount/arrow-down.svg" alt="" />
-        </button>
-        <ul v-if="listStation" class="list-platform">
-          <li @click="addSource('Выберите платформу')" class="platform">
-            Выберите платформу
-          </li>
-          <li @click="addSource('telegram')" class="platform">Telegram</li>
-          <li @click="addSource('whatsapp')" class="platform">WhatsApp</li>
-        </ul>
+      <h2 class="title">Добавить аккаунты</h2>
+      <div class="cont-input">
+        <label for="category">Выберите категорию</label>
+        <select class="select-style" v-model="selectCategry" id="itemSelect">
+          <option value="messenger">
+            {{ values[1] }}
+          </option>
+          <option value="">
+            {{ values[2] }}
+          </option>
+        </select>
       </div>
-      <div class="input-cont">
-        <label for="login">Логин</label>
-        <input
-          :style="inputStyle.login"
-          placeholder="Ваш логин или номер телефона"
-          class="login-input"
-          type="email"
-          id="login"
-          v-model="formData.login"
-          required
-        />
-      </div>
+      <section v-if="selectCategry === 'messenger'">
+        <article class="cont-input">
+          <label for="category">Выберите мессенджер</label>
+          <select
+            class="select-style"
+            v-model="selectMessenger"
+            id="itemSelect"
+          >
+            <option value="whatsapp">
+              {{ values[3] }}
+            </option>
+            <option value="telegram">
+              {{ values[4] }}
+            </option>
+            <option value="cms">
+              {{ values[5] }}
+            </option>
+          </select>
+        </article>
+
+        <article v-if="selectMessenger === 'whatsapp'" class="cont-input">
+          <label for="category">Тип</label>
+          <select class="select-style" v-model="selectApi" id="itemSelect">
+            <option value="api">
+              {{ values[11] }}
+            </option>
+            <option value="api">
+              {{ values[12] }}
+            </option>
+            <option value="api">
+              {{ values[13] }}
+            </option>
+          </select>
+        </article>
+
+        <article v-if="selectMessenger === 'telegram'" class="cont-input">
+          <label for="category">Тип</label>
+          <select class="select-style" v-model="selectApi" id="itemSelect">
+            <option>Тип</option>
+            <option value="api">
+              {{ values[6] }}
+            </option>
+            <option value="api">
+              {{ values[7] }}
+            </option>
+          </select>
+        </article>
+
+        <article v-if="selectMessenger === 'cms'" class="cont-input">
+          <label for="category">Тип</label>
+          <select class="select-style" v-model="selectApi" id="itemSelect">
+            <option>Тип</option>
+            <option value="api">
+              {{ values[6] }}
+            </option>
+            <option value="api">
+              {{ values[7] }}
+            </option>
+          </select>
+        </article>
+
+        <article v-if="selectApi === 'api'" class="cont-input">
+          <label for="category">Токен</label>
+          <input
+            placeholder="Логин"
+            class="input-style"
+            type="text"
+            id="password"
+            v-model="formData.token"
+            required
+          />
+        </article>
+
+        <article class="cont-input">
+          <label for="category">Логин</label>
+          <input
+            placeholder="Логин"
+            class="input-style"
+            type="text"
+            id="password"
+            v-model="formData.login"
+            required
+          />
+        </article>
+      </section>
+      <button
+        v-if="selectApi === 'api'"
+        class="create-acciount-button"
+        @click="addAccount"
+      >
+        Добавить
+      </button>
     </form>
-    <button @click="addAccount" class="add-account-button">Добавить</button>
   </section>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 const props = defineProps({
   openAddAccountStation: {
@@ -54,18 +119,9 @@ const props = defineProps({
   },
 });
 
-const listStation = ref(false);
-
-const inputStyle = reactive({
-  list: {
-    border: "0.5px solid #c1c1c1",
-    background: "fcfcfc",
-  },
-  login: {
-    border: "0.5px solid #c1c1c1",
-    background: "fcfcfc",
-  },
-});
+const selectCategry = ref("");
+const selectMessenger = ref("");
+const selectApi = ref("");
 
 const formData = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
@@ -78,89 +134,95 @@ const formData = reactive({
   error: null,
 });
 
-function errorStyleStation(input, station) {
-  if (input === "list") {
-    if (station === "on") {
-      inputStyle.list.border = "0.5px solid #be2424";
-      inputStyle.list.background = "#ffeaea";
-    } else if (station === "off") {
-      inputStyle.list.border = "0.5px solid #c1c1c1";
-      inputStyle.list.background = "#fcfcfc";
-    }
-  } else if (input === "login") {
-    if (station === "on") {
-      inputStyle.login.border = "0.5px solid #be2424";
-      inputStyle.login.background = "#ffeaea";
-    } else if (station === "off") {
-      inputStyle.login.border = "0.5px solid #c1c1c1";
-      inputStyle.login.background = "#fcfcfc";
-    }
-  }
-}
+const ids = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+];
+const values = ref({});
+const loading = ref({});
+const error = ref({});
 
-function addSource(source) {
-  formData.source = source;
-  listStation.value = false;
-  if (source === "telegram") {
-    formData.sourceList = "Telegram";
-  } else if (source === "whatsapp") {
-    formData.sourceList = "WhatsApp";
-  } else {
-    formData.sourceList = "Выберите платформу";
-  }
-}
+const changeStation = (categoryOne, value) => {
+  station.category.messenger = true;
+  console.log();
+};
 
-function openList() {
-  listStation.value = !listStation.value;
-}
+const getItemById = async (id, returnValue = "name") => {
+  loading.value[id] = true;
+  error.value[id] = null;
+
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/getAddInstanceForm",
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const flatData = response.data;
+    const item = flatData.find((item) => item.id === id);
+
+    if (item) {
+      values.value[id] = item[returnValue];
+    } else {
+      error.value[id] = `Элемент с id ${id} не найден.`;
+    }
+  } catch (err) {
+    error.value[id] =
+      "Ошибка: " + (err.message || "Произошла ошибка при загрузке данных.");
+  } finally {
+    loading.value[id] = false;
+  }
+};
 
 const addAccount = async () => {
-  formData.error = null;
-  if (formData.sourceList === "Выберите платформу") {
-    errorStyleStation("list", "on");
-  } else {
-    errorStyleStation("list", "off");
-  }
-
-  if (formData.login.length === 0) {
-    errorStyleStation("login", "on");
-  } else {
-    errorStyleStation("login", "off");
-  }
-
-  if (
-    formData.sourceList != "Выберите платформу" &&
-    formData.login.length > 0
-  ) {
-    try {
-      const response = await axios.post(
-        "https://b2288.apitter.com/instances/addAccount",
-        {
-          token: formData.token,
-          login: formData.login,
-          proxyString: formData.proxyString,
-          webhookUrls: formData.proxyString,
-          source: formData.source,
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/addAccount",
+      {
+        token: formData.token,
+        login: formData.login,
+        proxyString: formData.proxyString,
+        webhookUrls: formData.proxyString,
+        source: selectMessenger.value,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         },
-        {
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-          },
-        }
-      );
-
-      console.log("Аккаунт успешно создан:", response.data);
-      location.reload();
-    } catch (error) {
-      error.value = error.message || "Произошла ошибка.";
-      console.error("Ошибка при создании аккаунта:", error);
-      if (error.response) {
-        console.error("Ошибка сервера:", error.response.data);
       }
+    );
+
+    console.log("Аккаунт успешно создан:", response.data);
+    // location.reload();
+  } catch (error) {
+    error.value = error.message || "Произошла ошибка.";
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
     }
   }
 };
+onMounted(() => {
+  ids.forEach((id) => {
+    getItemById(id, "value");
+  });
+});
 </script>
 
 <style scoped>
@@ -181,187 +243,95 @@ const addAccount = async () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 15px;
-  width: 604px;
-  height: 290px;
-  background: #ffffff;
+  border-radius: 10px;
+  width: 593px;
+  height: 625px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
 }
 
-header {
-  display: flex;
-  align-items: center;
-  margin-top: 34px;
-  margin-left: 54px;
-  gap: 225px;
+form {
+  margin-top: 30px;
+}
+
+.cont-input {
+  margin-top: 20px;
 }
 
 .title {
   font-weight: 600;
-  font-size: 22px;
+  font-size: 20px;
   color: #000;
+  margin-bottom: 24px;
 }
 
-form {
+.input-style {
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  width: 481px;
+  height: 43px;
+  padding-left: 5px;
+  background: #fcfcfc;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 70px;
-  margin-top: 44px;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  color: #343434;
+  margin-top: 10px;
+  outline: none;
 }
 
-.input-cont {
+.select-style {
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  width: 490px;
+  height: 45px;
+  background: #fcfcfc;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  font-weight: 400;
+  font-size: 16px;
+  color: #343434;
+  margin-top: 10px;
+  outline: none;
 }
 
 label {
   font-weight: 500;
-  font-size: 18px;
+  font-size: 16px;
   color: #000;
 }
 
-.login-input {
-  border-radius: 5px;
-  width: 200px;
-  height: 36px;
-  font-weight: 400;
-  font-size: 13px;
-  color: #000;
-  padding-left: 10px;
-}
-
-.open-list-platform-button {
-  border-radius: 5px;
-  width: 213px;
-  height: 40px;
-  text-align: left;
-  position: relative;
-}
-
-.img-input {
-  position: absolute;
-  right: 6px;
-  top: 16px;
-}
-
-.list-platform {
+.category-list {
+  margin-top: 5px;
+  background: #fcfcfc;
   border: 0.5px solid #c1c1c1;
   border-radius: 5px;
-  width: 170px;
-  height: 80px;
-  background: #fcfcfc;
+  width: 465px;
+  padding: 10px;
   display: flex;
+  padding-left: 10px;
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  margin-top: -5px;
-  margin-left: 1px;
   gap: 6px;
-  padding-left: 10px;
 }
 
-.platform {
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  cursor: pointer;
+.select-container {
+  width: 300px;
+  margin: 20px auto;
+  text-align: center;
 }
 
-.add-account-button {
+.create-acciount-button {
   border-radius: 5px;
-  position: absolute;
-  right: 54px;
-  bottom: 25px;
-  width: 130px;
-  height: 40px;
+  width: 490px;
+  height: 44px;
   background: #4950ca;
   font-weight: 600;
   font-size: 14px;
   color: #fff;
-}
-
-@media (max-width: 650px) {
-  .add-account {
-    width: 470px;
-    height: 360px;
-  }
-
-  .add-account-button {
-    right: 29px;
-    bottom: 18px;
-    width: 130px;
-    height: 40px;
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    margin-top: 34px;
-    gap: 140px;
-    margin-left: 30px;
-  }
-
-  form {
-    align-items: center;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 40px;
-  }
-
-  .login-input {
-    width: 400px;
-    height: 36px;
-  }
-
-  .open-list-platform-button {
-    width: 415px;
-    height: 40px;
-    gap: 320px;
-  }
-}
-
-@media (max-width: 470px) {
-  .add-account {
-    width: 350px;
-    height: 380px;
-  }
-
-  .add-account-button {
-    right: 29px;
-    bottom: 18px;
-    width: 130px;
-    height: 40px;
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    margin-top: 34px;
-    gap: 45px;
-    margin-left: 40px;
-  }
-
-  .title {
-    font-size: 18px;
-  }
-
-  form {
-    align-items: center;
-    flex-direction: column;
-    gap: 20px;
-    margin-top: 40px;
-  }
-
-  .login-input {
-    width: 250px;
-    height: 36px;
-  }
-
-  .open-list-platform-button {
-    width: 268px;
-    height: 40px;
-    gap: 175px;
-  }
+  margin-top: 20px;
 }
 </style>
