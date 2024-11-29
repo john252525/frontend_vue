@@ -3,106 +3,116 @@
   <section class="add-account">
     <form>
       <h2 class="title">Добавить аккаунты</h2>
-      <div class="cont-input">
-        <label for="category">Выберите категорию</label>
-        <select class="select-style" v-model="selectCategry" id="itemSelect">
-          <option value="messenger">
-            {{ values[1] }}
-          </option>
-          <option value="">
-            {{ values[2] }}
-          </option>
-        </select>
-      </div>
-      <section v-if="selectCategry === 'messenger'">
-        <article class="cont-input">
-          <label for="category">Выберите мессенджер</label>
-          <select
-            class="select-style"
-            v-model="selectMessenger"
-            id="itemSelect"
-          >
+        <div class="cont-input">
+          <label for="category">Выберите категорию</label>
+          <select @change="resetFormData" class="select-style" v-model="formData.select.selectCategry" id="itemSelect">
+            <option value="messenger">
+              {{ values[1] }}
+            </option>
+            <option value="crm">
+              {{ values[2] }}
+            </option>
+          </select>
+        </div>
+
+        <section v-if="formData.select.selectCategry === 'messenger'">
+          <article class="cont-input">
+            <label for="category">Выберите мессенджер</label>
+          <select class="select-style" v-model="formData.select.selectMessenger" id="itemSelect">
             <option value="whatsapp">
               {{ values[3] }}
             </option>
             <option value="telegram">
               {{ values[4] }}
             </option>
-            <option value="cms">
+            <option value="sms">
               {{ values[5] }}
             </option>
           </select>
-        </article>
+          </article>
+          <article v-if="formData.select.selectMessenger === 'whatsapp'" class="cont-input">
+            <label for="category">Тип</label>
+          <select class="select-style" v-model="formData.select.selectApi" id="itemSelect">
+            <option value="touchapi">
+              {{ values[6] }}
+            </option>
+            <option value="edna">
+              {{ values[7] }}
+            </option>
+          </select>
+          </article>
+          <article v-if="formData.select.selectApi === 'edna' && formData.select.selectMessenger ==='whatsapp'" class="cont-input">
+            <label for="category">Токен</label>
+            <input
+             :style="styleInput.token"
+            class="input-style"
+              placeholder="Токен"
+              type="text"
+              id="text"
+              v-model="formData.formInput.token"
+              required
+            />
+          </article>
+          <article v-if="(formData.select.selectApi === 'edna' || formData.select.selectMessenger === 'telegram') && formData.select.selectMessenger != 'sms'" class="cont-input">
+            <label for="category">Логин</label>
+            <input
+             :style="styleInput.login"
+            class="input-style"
+              placeholder="Логин"
+              type="text"
+              id="text"
+              v-model="formData.formInput.login"
+              required
+            />
+          </article>
+        </section>
 
-        <article v-if="selectMessenger === 'whatsapp'" class="cont-input">
-          <label for="category">Тип</label>
-          <select class="select-style" v-model="selectApi" id="itemSelect">
-            <option value="api">
+        <section v-if="formData.select.selectCategry === 'crm'">
+          <article class="cont-input">
+            <label for="category">Тип</label>
+          <select class="select-style" v-model="formData.select.selectApi" id="itemSelect">
+            <option value="amocrm">
               {{ values[11] }}
             </option>
-            <option value="api">
+            <option value="bitrix24">
               {{ values[12] }}
             </option>
-            <option value="api">
+            <option value="megaplan">
               {{ values[13] }}
             </option>
           </select>
-        </article>
-
-        <article v-if="selectMessenger === 'telegram'" class="cont-input">
-          <label for="category">Тип</label>
-          <select class="select-style" v-model="selectApi" id="itemSelect">
-            <option>Тип</option>
-            <option value="api">
-              {{ values[6] }}
-            </option>
-            <option value="api">
-              {{ values[7] }}
-            </option>
-          </select>
-        </article>
-
-        <article v-if="selectMessenger === 'cms'" class="cont-input">
-          <label for="category">Тип</label>
-          <select class="select-style" v-model="selectApi" id="itemSelect">
-            <option>Тип</option>
-            <option value="api">
-              {{ values[6] }}
-            </option>
-            <option value="api">
-              {{ values[7] }}
-            </option>
-          </select>
-        </article>
-
-        <article v-if="selectApi === 'api'" class="cont-input">
-          <label for="category">Токен</label>
-          <input
-            placeholder="Логин"
+          </article>
+        <section  v-if="formData.select.selectApi === 'megaplan'">
+          <article class="cont-input">
+            <label for="category">Токен</label>
+            <input
+             :style="styleInput.token"
             class="input-style"
-            type="text"
-            id="password"
-            v-model="formData.token"
-            required
-          />
-        </article>
-
-        <article class="cont-input">
-          <label for="category">Логин</label>
-          <input
-            placeholder="Логин"
-            class="input-style"
-            type="text"
-            id="password"
-            v-model="formData.login"
-            required
-          />
-        </article>
-      </section>
+              placeholder="Токен"
+              type="text"
+              id="text"
+              v-model="formData.formInput.token"
+              required
+            />
+          </article>
+          <article class="cont-input">
+            <label for="category">Логин</label>
+            <input
+            :style="styleInput.login"
+              class="input-style"
+              placeholder="Логин"
+              type="text"
+              id="text"
+              v-model="formData.formInput.login"
+              required
+            />
+          </article>
+        </section>
+        </section>
       <button
-        v-if="selectApi === 'api'"
+        
         class="create-acciount-button"
-        @click="addAccount"
+        @click="addAccountCheck"
       >
         Добавить
       </button>
@@ -119,20 +129,32 @@ const props = defineProps({
   },
 });
 
-const selectCategry = ref("");
-const selectMessenger = ref("");
-const selectApi = ref("");
-
 const formData = reactive({
-  token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-  login: "",
-  proxyString: "",
-  webhookUrls: [],
-  source: "",
-  sourceList: "Выберите платформу",
-  success: null,
-  error: null,
-});
+ select: {
+  selectCategry: '',
+  selectMessenger: '',
+  selectApi: ''
+ },
+ formInput: {
+  login: '',
+  tokenEdna: ''
+ },
+ requestData: {
+  error: '',
+  loading: ''
+ }
+})
+
+const styleInput = reactive({
+token: {
+    border: '0.5px solid #c1c1c1',
+    background: 'fcfcfc'
+  },
+  login: {
+    border: '0.5px solid #c1c1c1',
+    background: 'fcfcfc'
+  }
+})
 
 const ids = [
   "1",
@@ -189,16 +211,71 @@ const getItemById = async (id, returnValue = "name") => {
   }
 };
 
+const formatStyle = (category, input, station) => {
+  if (category === 'telegram') {
+    console.log('sdsdsd')
+    if (input === 'login') {
+      if (station === 'true') {
+        styleInput.login.border = "0.5px solid #be2424";
+        styleInput.login.background = "#ffeaea";
+      } else if (station === 'false') {
+        styleInput.login.border = "0.5px solid #c1c1c1";
+        styleInput.login.background = "#fcfcfc";
+      }
+    }
+  } else if (category === 'edna') {
+    if (input === 'token') {
+      if (station === 'true') {
+        styleInput.token.border = "0.5px solid #be2424";
+        styleInput.token.background = "#ffeaea";
+      } else if (station === 'false') {
+        styleInput.token.border = "0.5px solid #c1c1c1";
+        styleInput.token.background = "#fcfcfc";
+      }
+    }
+  } else if (category === 'megaplan') {
+    if (input === 'token') {
+      if (station === 'true') {
+        styleInput.token.border = "0.5px solid #be2424";
+        styleInput.token.background = "#ffeaea";
+      } else if (station === 'false') {
+        styleInput.token.border = "0.5px solid #c1c1c1";
+        styleInput.token.background = "#fcfcfc";
+      }
+    } if (input === 'login') {
+      if (station === 'true') {
+        styleInput.login.border = "0.5px solid #be2424";
+        styleInput.login.background = "#ffeaea";
+      } else if (station === 'false') {
+        styleInput.login.border = "0.5px solid #c1c1c1";
+        styleInput.login.background = "#fcfcfc";
+      }
+    }
+  }
+}
+
+
+const resetFormData = () => {
+  formData.select.selectApi = ''
+  formData.select.selectMessenger = ''
+  formData.formInput.login = ''
+  formData.formInput.token = ''
+  formData.formInput.login = ''
+  formData.formInput.token = ''
+}
+
 const addAccount = async () => {
-  try {
+   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/addAccount",
       {
-        token: formData.token,
-        login: formData.login,
-        proxyString: formData.proxyString,
-        webhookUrls: formData.proxyString,
-        source: selectMessenger.value,
+        token: formData.formInput.token,
+        login: formData.formInput.login,
+        type: formData.select.selectApi,
+        group: formData.select.selectCategry,
+        proxyString: '',
+        webhookUrls: '',
+        source: formData.select.selectMessenger,
       },
       {
         headers: {
@@ -209,7 +286,7 @@ const addAccount = async () => {
     );
 
     console.log("Аккаунт успешно создан:", response.data);
-    // location.reload();
+    location.reload();
   } catch (error) {
     error.value = error.message || "Произошла ошибка.";
     console.error("Ошибка при создании аккаунта:", error);
@@ -217,6 +294,37 @@ const addAccount = async () => {
       console.error("Ошибка сервера:", error.response.data);
     }
   }
+}
+
+const addAccountCheck = async () => {
+
+ if (formData.select.selectMessenger === 'telegram') {
+  if (formData.formInput.login === '') {
+    formatStyle('telegram', 'login', 'true')
+  } else {
+    formatStyle('telegram', 'login', 'false')
+    addAccount()
+  } 
+ } if (formData.select.selectApi === 'edna') {
+    if (formData.formInput.token === '') {
+      formatStyle('edna', 'token', 'true')
+    } else {
+      formatStyle('edna', 'token', 'false')
+      addAccount()
+    }
+ } if (formData.select.selectApi === 'megaplan') {
+  if (formData.formInput.login === '') {
+    formatStyle('megaplan', 'login', 'true')
+  } else {
+    formatStyle('megaplan', 'login', 'false')
+  } if (formData.formInput.token === '') {
+    formatStyle('megaplan', 'token', 'true')
+  } else {
+    formatStyle('megaplan', 'token', 'false')
+  } if (formData.formInput.token != '' && formData.formInput.login != '') {
+    addAccount()
+  }
+ } 
 };
 onMounted(() => {
   ids.forEach((id) => {
@@ -267,16 +375,14 @@ form {
 }
 
 .input-style {
-  border: 0.5px solid #c1c1c1;
   border-radius: 5px;
   width: 481px;
   height: 43px;
   padding-left: 5px;
-  background: #fcfcfc;
   display: flex;
   align-items: center;
-  font-weight: 400;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 16px;
   color: #343434;
   margin-top: 10px;
   outline: none;
@@ -290,7 +396,7 @@ form {
   background: #fcfcfc;
   display: flex;
   align-items: center;
-  font-weight: 400;
+  font-weight: 500  ;
   font-size: 16px;
   color: #343434;
   margin-top: 10px;
