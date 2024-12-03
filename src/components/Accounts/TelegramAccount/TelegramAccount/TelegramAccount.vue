@@ -43,6 +43,7 @@
       @update:qrCodeData="updateqrCodeData"
       :changeStationSettingsModal="changeStationSettingsModal"
       :changeStationQrModal="changeStationQrModal"
+      :changeStationGetByCode="changeStationGetByCode"
     />
     <SettignsModal
       :closeModal="closeModal"
@@ -55,6 +56,11 @@
       :changeStationQrModal="changeStationQrModal"
       :qrCodeData="qrCodeData"
     />
+    <getByCode
+      v-if="getByCodeStation"
+      :changeStationGetByCode="changeStationGetByCode"
+      :selectedItems="selectedItems"
+    />
   </div>
 </template>
 
@@ -63,6 +69,8 @@ import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 import Modal from "./Modal.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
+import getByCode from "./ModalAccount/GetByCode.vue";
+
 import QrModal from "./ModalAccount/qrModal.vue";
 
 const dataAccount = reactive({
@@ -72,6 +80,7 @@ const dataAccount = reactive({
 });
 
 const qrCodeData = ref([]);
+const getByCodeStation = ref(false);
 const qrModalStation = ref(false);
 const settingsModalStation = ref(false);
 const instanceData = ref([]);
@@ -138,6 +147,10 @@ const changeStationSettingsModal = () => {
 
 const changeStationQrModal = () => {
   qrModalStation.value = !qrModalStation.value;
+};
+
+const changeStationGetByCode = () => {
+  getByCodeStation.value = !getByCodeStation.value;
 };
 
 const closeModal = () => {

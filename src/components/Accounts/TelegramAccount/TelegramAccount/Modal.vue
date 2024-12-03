@@ -8,7 +8,7 @@
       }"
     >
       <span class="action" @click="handleSubmit">Настройки</span>
-      <span class="action" @click="performActions('Скриншот')">Скриншот</span>
+      <span class="action" @click="screenshot">Скриншот</span>
       <span class="action action-on" @click="getNewProxy">Включить</span>
       <span class="action" @click="createRequest('forceStop')">Выключить</span>
       <span class="action action-throw" @click="resetAccount">Сбросить</span>
@@ -16,7 +16,7 @@
         >Сменить прокси</span
       >
       <span class="action" @click="EnablebyQR">Связать через QR</span>
-      <span class="action" @click="enableByCode">Связать через код</span>
+      <span class="action" @click="handleSubmitCode">Связать через код</span>
       <span class="action" @click="performAction('Проверить код')"
         >Проверить код</span
       >
@@ -56,6 +56,9 @@ const props = defineProps({
   changeStationQrModal: {
     type: Function,
   },
+  changeStationGetByCode: {
+    type: Function,
+  },
 });
 const emit = defineEmits();
 const { selectedItem } = toRefs(props);
@@ -63,6 +66,12 @@ const { selectedItem } = toRefs(props);
 const handleSubmit = () => {
   emit("update:selectedItems", selectedItem.value);
   props.changeStationSettingsModal();
+  props.closeModal();
+};
+
+const handleSubmitCode = () => {
+  emit("update:selectedItems", selectedItem.value);
+  props.changeStationGetByCode();
   props.closeModal();
 };
 
@@ -127,6 +136,37 @@ const getQr = async () => {
       console.log(responseQr.value);
 
       qrData.value = Array.from(responseQr.value.split(","));
+    } else {
+      console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const screenshot = async () => {
+  const { source, login } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/screenshot",
+      {
+        source: "whatsapp",
+        login: "helly",
+        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        },
+      }
+    );
+    console.log(response);
+    if (response.data.ok === true) {
+      console.log(responseQr.value);
     } else {
       console.log(response.data.ok);
     }
@@ -211,7 +251,6 @@ const setState = async () => {
         source: "whatsapp",
         login: "helly",
         token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        phone: "89228556998",
         setState: true,
       },
       {
