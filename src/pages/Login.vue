@@ -45,7 +45,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
-
+const router = useRouter();
 const formData = reactive({
   login: "",
   password: "",
@@ -127,7 +127,6 @@ function login() {
 }
 
 const navigateTo = (page) => {
-  const router = useRouter();
   router.push(page);
 };
 </script>

@@ -37,9 +37,23 @@
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
       :modalPosition="modalPosition"
-      :performAction="performAction"
       :selectedItem="selectedItem"
-      :deleteAccount="deleteAccount"
+      :qrCodeData="qrCodeData"
+      @update:selectedItems="updateSelectedItems"
+      @update:qrCodeData="updateqrCodeData"
+      :changeStationSettingsModal="changeStationSettingsModal"
+      :changeStationQrModal="changeStationQrModal"
+    />
+    <SettignsModal
+      :closeModal="closeModal"
+      :selectedItems="selectedItems"
+      :settingsModalStation="settingsModalStation"
+      :changeStationSettingsModal="changeStationSettingsModal"
+    />
+    <QrModal
+      :qrModalStation="qrModalStation"
+      :changeStationQrModal="changeStationQrModal"
+      :qrCodeData="qrCodeData"
     />
   </div>
 </template>
@@ -48,6 +62,8 @@
 import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 import Modal from "./Modal.vue";
+import SettignsModal from "./ModalAccount/settingsModal.vue";
+import QrModal from "./ModalAccount/qrModal.vue";
 
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
@@ -55,22 +71,15 @@ const dataAccount = reactive({
   error: null,
 });
 
-function formatPhoneNumber(phoneNumber) {
-  const regex = /^8(\d{3})(\d{3})(\d{2})(\d{2})$/;
-  const match = phoneNumber.match(regex);
-
-  if (!match) {
-    return phoneNumber;
-  }
-
-  return `+7 (${match[1]}) ${match[2]}-${match[3]}-${match[4]}`;
-}
-
+const qrCodeData = ref([]);
+const qrModalStation = ref(false);
+const settingsModalStation = ref(false);
 const instanceData = ref([]);
 const accounts = ref([]);
 const isModalOpen = ref(false);
 const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
+const selectedItems = ref(null);
 
 const getAccounts = async () => {
   try {
@@ -112,40 +121,34 @@ const openModal = (event, item) => {
   };
 };
 
+function formatPhoneNumber(phoneNumber) {
+  const regex = /^8(\d{3})(\d{3})(\d{2})(\d{2})$/;
+  const match = phoneNumber.match(regex);
+
+  if (!match) {
+    return phoneNumber;
+  }
+
+  return `+7 (${match[1]}) ${match[2]}-${match[3]}-${match[4]}`;
+}
+
+const changeStationSettingsModal = () => {
+  settingsModalStation.value = !settingsModalStation.value;
+};
+
+const changeStationQrModal = () => {
+  qrModalStation.value = !qrModalStation.value;
+};
+
 const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const performAction = (action) => {
-  alert(`Вы выбрали ${action} для ${selectedItem.value.login}`);
-  closeModal();
+const updateSelectedItems = (newValue) => {
+  selectedItems.value = newValue;
 };
-
-const deleteAccount = async () => {
-  console.log(selectedItem.value.login);
-  // try {
-  //   const response = await axios.post(
-  //     "https://b2288.apitter.com/instances/deleteAccount",
-  //     {
-  //       login: selectedItem.value.login,
-  //       token: dataAccount.token,
-  //       skipDetails: true,
-  //     },
-  //     {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${dataAccount.token}`,
-  //       },
-  //     }
-  //   );
-  //   console.log(response.data);
-  // } catch (error) {
-  //   error.value = error.message || "Произошла ошибка.";
-  //   console.error("Ошибка при получении списка аккаунтов:", error);
-  //   if (error.response) {
-  //     console.error("Ответ сервера:", error.response.data);
-  //   }
-  // }
+const updateqrCodeData = (newValue) => {
+  qrCodeData.value = newValue;
 };
 
 onMounted(getAccounts);
