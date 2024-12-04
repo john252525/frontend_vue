@@ -24,17 +24,17 @@
       </button>
     </section>
   </header>
-  <TelegramAccount v-if="platformStationText === 'Telegram'" />
-  <WhatsAppAccount v-else />
+  <AccountList :platformStationTextValue="platformStationTextValue" />
 </template>
 
 <script setup>
-import TelegramAccount from "./TelegramAccount/TelegramAccount/TelegramAccount.vue";
 import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
-import WhatsAppAccount from "./TelegramAccount/WhatsAppAccount/WhatsAppAccount.vue";
+import AccountList from "./Accounts/AccountsList.vue";
 import { ref } from "vue";
+
+const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
-const platformStationText = ref("Telegram");
+const platformStationText = localStorage.getItem("accountStationText");
 const platformStation = ref(false);
 
 function openPlatformChoice() {
@@ -42,12 +42,16 @@ function openPlatformChoice() {
 }
 
 function choiceTelegram() {
-  platformStationText.value = "Telegram";
+  location.reload();
+  localStorage.setItem("accountStation", "telegram");
+  localStorage.setItem("accountStationText", "Telegram");
   platformStation.value = !platformStation.value;
 }
 
 function choiceWhatsApp() {
-  platformStationText.value = "WhatsApp";
+  location.reload();
+  localStorage.setItem("accountStation", "whatsapp");
+  localStorage.setItem("accountStationText", "WhatsApp");
   platformStation.value = !platformStation.value;
 }
 

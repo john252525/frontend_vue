@@ -4,12 +4,19 @@
     <section class="get-by-code-section">
       <section class="number-section" v-if="!codeStation">
         <input
-          class="num-input"
+          :class="styleInput ? 'num-input-error' : 'num-input'"
           v-model="userNumber"
           type="number"
           placeholder="Введите номер"
         />
-        <button class="next-button" @click="enableByCode">Далее</button>
+        <button
+          v-if="stationLoading === true"
+          class="next-button"
+          @click="enableByCode"
+        >
+          Загрузка...
+        </button>
+        <button v-else class="next-button" @click="enableByCode">Далее</button>
       </section>
       <section v-else>
         <h2 class="code-text">{{ userCode }}</h2>
@@ -34,8 +41,11 @@ const props = defineProps({
   },
 });
 
+const styleInput = ref(false);
+
 const { selectedItems } = toRefs(props);
 
+const stationLoading = ref(false);
 const userNumber = ref(null);
 const userCode = ref(null);
 
@@ -43,6 +53,7 @@ const codeStation = ref(false);
 
 const createRequest = async (request) => {
   const { source, login } = selectedItems.value;
+
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/${request}`,
@@ -157,6 +168,7 @@ const getAuthCode = async () => {
       console.log(response.data);
       userCode.value = response.data.data.authCode;
       codeStation.value = true;
+      stationLoading.value = false;
     } else {
       console.log(response.data.ok);
     }
@@ -169,10 +181,16 @@ const getAuthCode = async () => {
 };
 
 const enableByCode = async () => {
-  await createRequest("forceStop");
-  await enablePhoneAuth();
-  await setState();
-  await getAuthCode();
+  if (userNumber.value === null) {
+    styleInput.value = true;
+    return;
+  } else {
+    stationLoading.value = true;
+    await createRequest("forceStop");
+    await enablePhoneAuth();
+    await setState();
+    await getAuthCode();
+  }
 };
 </script>
 
@@ -196,7 +214,6 @@ const enableByCode = async () => {
 
 .number-section {
   display: flex;
-  /* align-items: center; */
   flex-direction: column;
 }
 
@@ -224,6 +241,18 @@ const enableByCode = async () => {
   color: #000;
   border: 0.5px solid #c1c1c1;
   background: #fcfcfc;
+}
+
+.num-input-error {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 350px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
 }
 
 .next-button {

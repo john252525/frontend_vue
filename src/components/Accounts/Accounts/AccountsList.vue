@@ -61,6 +61,7 @@
       :changeStationGetByCode="changeStationGetByCode"
       :selectedItems="selectedItems"
     />
+    <!-- <LoadingMoadal /> -->
   </div>
 </template>
 
@@ -70,9 +71,8 @@ import axios from "axios";
 import Modal from "./Modal.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode.vue";
-
 import QrModal from "./ModalAccount/qrModal.vue";
-
+import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
   source: "telegram",
@@ -95,7 +95,7 @@ const getAccounts = async () => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
-        source: dataAccount.source,
+        source: localStorage.getItem("accountStation"),
         token: dataAccount.token,
         skipDetails: true,
       },
@@ -255,5 +255,3 @@ thead {
   background: #efefef;
 }
 </style>
-
-Найти еще

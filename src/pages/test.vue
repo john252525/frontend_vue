@@ -1,47 +1,63 @@
 <template>
   <div>
-    <h2>QR-код:</h2>
-    <qrcode-vue :value="currentQr" :size="128" v-if="currentQr" />
+    <label for="search">Поиск:</label>
+    <input
+      id="search"
+      type="text"
+      v-model="searchTerm"
+      placeholder="Введите текст для поиска..."
+      @input="filterOptions"
+    />
+    <ul v-if="searchTerm && filteredOptions.length > 0">
+      <li
+        v-for="(option, index) in filteredOptions"
+        :key="index"
+        @click="selectOption(option)"
+      >
+        {{ option }}
+      </li>
+    </ul>
+    <p v-else-if="searchTerm">Ничего не найдено</p>
+
+    <!-- Отображение выбранного значения -->
+    <p v-if="selectedOption">Выбранная опция: {{ selectedOption }}</p>
   </div>
 </template>
 
 <script setup>
-import axios from "axios";
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import QrcodeVue from "qrcode.vue";
+import { ref, computed } from "vue";
 
-const qrData = ref([]); // Массив QR-кодов
-const currentIndex = ref(0); // Индекс текущего QR-кода
-const currentQr = ref(""); // Текущий QR-код
-let intervalId = null; // Идентификатор интервала
+// Пример массива данных для поиска
+const options = ref(["Опция 1", "Опция 2", "Амок", "Тест", "Пример", "Амок 2"]);
+const searchTerm = ref("");
+const selectedOption = ref(null); // Переменная для хранения выбранной опции
 
-// Функция для обновления текущего QR-кода
-const updateQrCode = () => {
-  if (qrData.value.length > 0) {
-    currentQr.value = qrData.value[currentIndex.value];
-    currentIndex.value = (currentIndex.value + 1) % qrData.value.length;
-  }
+const filteredOptions = computed(() => {
+  return options.value.filter((option) =>
+    option.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
+});
+
+// Функция для выбора опции
+const selectOption = (option) => {
+  selectedOption.value = option; // Записываем выбранное значение в переменную
+  searchTerm.value = ""; // Очищаем поле ввода после выбора
 };
-
-// Запускаем интервал при монтировании компонента
-onMounted(() => {
-  initData();
-  intervalId = setInterval(updateQrCode, 5000); // Обновляем QR-код каждые 5 секунд
-
-  // Останавливаем интервал через 1 минуту
-  setTimeout(() => {
-    clearInterval(intervalId);
-  }, 60000); // 60000 миллисекунд = 1 минута
-});
-
-// Очищаем интервал при размонтировании компонента
-onBeforeUnmount(() => {
-  clearInterval(intervalId);
-});
 </script>
 
-<style scoped>
-.qr-container {
-  margin: 20px;
+<style>
+/* Добавьте стили по мере необходимости */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 5px;
+  cursor: pointer;
+}
+
+li:hover {
+  background-color: #f0f0f0;
 }
 </style>
