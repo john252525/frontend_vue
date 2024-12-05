@@ -7,13 +7,14 @@
         left: modalPosition.left + 'px',
       }"
     >
+      <span @click="EnablebyQR">dsdsds</span>
       <span class="action" @click="handleSubmit">Настройки</span>
       <span class="action" @click="screenshot">Скриншот</span>
       <span class="action action-on" @click="getNewProxy">Включить</span>
       <span class="action" @click="createRequest('forceStop')">Выключить</span>
       <span class="action action-throw" @click="resetAccount">Сбросить</span>
       <span class="action" @click="getNewProxy">Сменить прокси</span>
-      <span class="action" @click="">Связать через QR</span>
+      <span class="action" @click="EnablebyQR">Связать через QR</span>
       <span class="action" @click="handleSubmitCode">Связать через код</span>
       <span class="action" @click="performAction('Проверить код')"
         >Проверить код</span
@@ -93,8 +94,8 @@ const handleSubmitCode = () => {
   props.closeModal();
 };
 
-const qrCodeDataSubmit = () => {
-  emit("update:qrCodeData", qrData.value);
+const qrCodeDataSubmit = async () => {
+  await emit("update:qrCodeData", qrData.value);
   props.closeModal();
 };
 
@@ -105,7 +106,7 @@ const createRequest = async (request) => {
       `https://b2288.apitter.com/instances/${request}`,
       {
         source: source,
-        login: login,
+        login: "helly",
         token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
       },
       {
@@ -118,18 +119,27 @@ const createRequest = async (request) => {
     if (response.data.ok === true) {
       if (request === "getQr") {
         responseQr.value = response.data.data.value;
+        console.log(response.data);
         console.log(responseQr.value);
+        console.log("qr");
         qrData.value = Array.from(responseQr.value.split(","));
+        stationLoading.account.result = true;
+        setTimeout(() => {
+          changeStationLoadingModal();
+          stationLoading.account.result = undefined;
+        }, 2000);
       } else if (request === "deleteAccount") {
         stationLoading.account.result = true;
         setTimeout(() => {
           changeStationLoadingModal();
           location.reload();
+          stationLoading.account.result = undefined;
         }, 2000);
       } else if (request === "getNewProxy") {
         stationLoading.account.result = true;
         setTimeout(() => {
           changeStationLoadingModal();
+          stationLoading.account.result = undefined;
         }, 2000);
       } else {
         console.log(`${request} - Успешно`);
@@ -247,15 +257,17 @@ const EnablebyQR = async (value) => {
     await createRequest("forceStop");
     await disablePhoneAuth();
     await setStateTelegram();
-    await createRequest("getqr");
+    await createRequest("getQr");
     await qrCodeDataSubmit();
     props.changeStationQrModal();
     console.log("telega");
   } else {
+    stationLoading.value = "enablebyQR";
+    changeStationLoadingModal();
     await createRequest("forceStop");
     await disablePhoneAuth();
     await setState();
-    await createRequest("getqr");
+    await createRequest("getQr");
     await qrCodeDataSubmit();
     props.changeStationQrModal();
     console.log("wat");

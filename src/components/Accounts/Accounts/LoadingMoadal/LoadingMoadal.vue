@@ -17,6 +17,8 @@
           ? "Изменение прокси"
           : stationLoading.value === "resetAccount"
           ? "Cбрасывание аккаунты"
+          : stationLoading.value === "enablebyQR"
+          ? "Загрузка"
           : "хз"
       }}
     </h2>
@@ -43,7 +45,8 @@ const { stationLoading } = toRefs(props);
   width: 300px;
   height: 30px;
   background: #fcfcfc;
-  position: absolute;
+  position: fixed;
+  z-index: 100;
   top: 90px;
   right: 15px;
   display: flex;
@@ -60,7 +63,8 @@ const { stationLoading } = toRefs(props);
   box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
     0 0 4px 0 rgba(85, 255, 195, 0.04);
   background: #aef6b0;
-  position: absolute;
+  position: fixed;
+  z-index: 100;
   top: 90px;
   right: 15px;
   display: flex;
@@ -70,6 +74,45 @@ const { stationLoading } = toRefs(props);
 
 .title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
+  color: rgb(51, 51, 51);
+}
+
+@media (max-width: 1000px) {
+  .loading-section {
+    width: 250px;
+    height: 25px;
+    top: 90px;
+    right: 15px;
+  }
+
+  .loading-section-true {
+    width: 250px;
+    height: 25px;
+    top: 90px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 550px) {
+  .loading-section {
+    width: 150px;
+    height: 20px;
+    top: 90px;
+    right: 15px;
+  }
+
+  .loading-section-true {
+    width: 150px;
+    height: 20px;
+    top: 90px;
+    right: 15px;
+  }
+
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(51, 51, 51);
+  }
 }
 </style>
