@@ -75,10 +75,10 @@ nav {
 .line {
   width: 0.5px;
   background-color: #d9d9d9;
-  margin-left: 260px;
   position: absolute;
-  top: 72px; /* Установите высоту вашего header */
-  bottom: 0; /* Это сделает линию до самого низа */
+  top: 72px;
+  height: calc(100% - 72px);
+  left: 260px;
 }
 
 li {

@@ -1,38 +1,44 @@
 <template>
-  <div>
-    <table>
-      <thead>
-        <tr>
-          <th class="table-login">ЛОГИН</th>
-          <th class="table-step">ШАГ</th>
-          <th class="table-action">ДЕЙСТВИЕ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-if="instanceData.length > 0"
-          v-for="(item, index) in instanceData"
-          :key="index"
-        >
-          <td class="table-text-number">{{ formatPhoneNumber(item.login) }}</td>
-          <td class="table-text">{{ item.step }}</td>
-          <td class="table-action-text">
-            <button
-              class="action-table-button"
-              @click="openModal($event, item)"
-            >
-              <img
-                src="/telegramAccount/menu_table_button.svg"
-                alt="Меню действий"
-              />Действия
-            </button>
-          </td>
-        </tr>
-        <div v-else>
-          <h2 class="loading-data-text">Загрузка данных...</h2>
-        </div>
-      </tbody>
-    </table>
+  <section class="account-list-section">
+    <div class="table-container">
+      <table class="table">
+        <thead class="table-header">
+          <tr>
+            <th class="table-login">ЛОГИН</th>
+            <th class="table-step">ШАГ</th>
+            <th class="table-action">ДЕЙСТВИЕ</th>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          <tr
+            v-if="instanceData.length > 0"
+            v-for="(item, index) in instanceData"
+            :key="index"
+          >
+            <td class="table-text-number">
+              {{ formatPhoneNumber(item.login) }}
+            </td>
+            <td class="table-text">{{ item.step }}</td>
+            <td class="table-action-text">
+              <button
+                class="action-table-button"
+                @click="openModal($event, item)"
+              >
+                <img
+                  src="/telegramAccount/menu_table_button.svg"
+                  alt="Меню действий"
+                />Действия
+              </button>
+            </td>
+          </tr>
+          <tr v-else>
+            <td colspan="3">
+              <h2 class="loading-data-text">Загрузка данных...</h2>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <Modal
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
@@ -62,7 +68,7 @@
       :selectedItems="selectedItems"
     />
     <!-- <LoadingMoadal /> -->
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -168,6 +174,20 @@ onMounted(getAccounts);
 </script>
 
 <style scoped>
+.table-container {
+  max-width: 100%;
+  overflow-x: auto;
+  height: 83vh;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 50px;
+  background: #efefef;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -200,6 +220,7 @@ table {
 .table-action {
   text-align: right;
   padding: 8px;
+  padding-right: 15px;
 }
 
 .table-text-number {
@@ -222,6 +243,7 @@ table {
   font-weight: 600;
   font-size: 14px;
   color: #4047ca;
+  margin-right: 5px;
 }
 
 .action-table-button img {
@@ -241,17 +263,5 @@ td {
   font-size: 14px;
   color: #000;
   text-align: left;
-}
-
-tbody {
-  width: 300px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-thead {
-  border: 1px solid #d9d9d9;
-  height: 50px;
-  background: #efefef;
 }
 </style>

@@ -1,63 +1,132 @@
 <template>
-  <div>
-    <label for="search">Поиск:</label>
-    <input
-      id="search"
-      type="text"
-      v-model="searchTerm"
-      placeholder="Введите текст для поиска..."
-      @input="filterOptions"
-    />
-    <ul v-if="searchTerm && filteredOptions.length > 0">
-      <li
-        v-for="(option, index) in filteredOptions"
-        :key="index"
-        @click="selectOption(option)"
-      >
-        {{ option }}
-      </li>
-    </ul>
-    <p v-else-if="searchTerm">Ничего не найдено</p>
-
-    <!-- Отображение выбранного значения -->
-    <p v-if="selectedOption">Выбранная опция: {{ selectedOption }}</p>
+  <div class="container">
+    <aside class="aside-menu">
+      <!-- Содержимое вашего aside меню -->
+    </aside>
+    <div class="line"></div>
+    <div class="account-list">
+      <!-- Список аккаунтов с возможным скроллом -->
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <div>Аккаунт 1</div>
+      <div>Аккаунт 2</div>
+      <div>Аккаунт 3</div>
+      <div>Аккаунт 4</div>
+      <div>Аккаунт 5</div>
+      <div>Аккаунт 6</div>
+      <div>Аккаунт 7</div>
+      <div>Аккаунт 8</div>
+      <div>Аккаунт 9</div>
+      <div>Аккаунт 10</div>
+      <!-- Добавьте больше аккаунтов для тестирования скролла -->
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-
-// Пример массива данных для поиска
-const options = ref(["Опция 1", "Опция 2", "Амок", "Тест", "Пример", "Амок 2"]);
-const searchTerm = ref("");
-const selectedOption = ref(null); // Переменная для хранения выбранной опции
-
-const filteredOptions = computed(() => {
-  return options.value.filter((option) =>
-    option.toLowerCase().includes(searchTerm.value.toLowerCase())
-  );
-});
-
-// Функция для выбора опции
-const selectOption = (option) => {
-  selectedOption.value = option; // Записываем выбранное значение в переменную
-  searchTerm.value = ""; // Очищаем поле ввода после выбора
-};
-</script>
-
-<style>
-/* Добавьте стили по мере необходимости */
-ul {
-  list-style-type: none;
-  padding: 0;
+<style scoped>
+.container {
+  display: flex; /* Убедитесь, что контейнер для aside и списка является flex-контейнером */
+  height: 100vh; /* Устанавливаем высоту контейнера на весь экран */
+  position: relative; /* Позволяет абсолютному позиционированию дочерних элементов */
 }
 
-li {
-  padding: 5px;
-  cursor: pointer;
+.aside-menu {
+  width: 260px; /* Ширина вашего aside меню */
+  /* Другие стили для aside-menu */
 }
 
-li:hover {
-  background-color: #f0f0f0;
+.account-list {
+  flex-grow: 1; /* Позволяет списку занимать оставшееся пространство */
+  overflow-y: auto; /* Позволяет вертикальный скролл */
+  padding: 20px; /* Добавьте отступы, если нужно */
+}
+
+.line {
+  width: 0.5px;
+  background-color: #d9d9d9;
+  position: absolute;
+  top: 72px; /* Высота вашего header */
+  bottom: 0; /* Устанавливаем линию до самого низа */
+  left: 260px; /* Позиционируем линию на нужном расстоянии от левой стороны */
 }
 </style>
+
+<script></script>
