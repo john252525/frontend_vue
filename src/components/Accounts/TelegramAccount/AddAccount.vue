@@ -485,6 +485,28 @@ onMounted(() => {
   justify-content: center;
 }
 
+.add-account.fade-enter-active, .add-account.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.add-account.fade-enter, .add-account.fade-leave-to {
+  opacity: 0;
+}
+
+.add-account {
+  animation: fadeIn 0.6s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%); 
+  }
+  to {
+    opacity: 1;
+    /* transform: translateY(0); */
+  }
+}
+
 form {
   margin-top: 30px;
 }

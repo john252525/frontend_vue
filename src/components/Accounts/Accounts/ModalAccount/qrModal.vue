@@ -40,14 +40,12 @@ const updateQrCode = () => {
 
 onMounted(() => {
   intervalId = setInterval(updateQrCode, 5000);
-
   setTimeout(() => {
     clearInterval(intervalId);
     props.changeStationQrModal();
-  }, 60000); // 60000 миллисекунд = 1 минута
+  }, 60000); 
 });
 
-// Очищаем интервал при размонтировании компонента
 onBeforeUnmount(() => {
   clearInterval(intervalId);
 });

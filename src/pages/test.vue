@@ -1,132 +1,79 @@
 <template>
-  <div class="container">
-    <aside class="aside-menu">
-      <!-- Содержимое вашего aside меню -->
-    </aside>
-    <div class="line"></div>
-    <div class="account-list">
-      <!-- Список аккаунтов с возможным скроллом -->
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <div>Аккаунт 1</div>
-      <div>Аккаунт 2</div>
-      <div>Аккаунт 3</div>
-      <div>Аккаунт 4</div>
-      <div>Аккаунт 5</div>
-      <div>Аккаунт 6</div>
-      <div>Аккаунт 7</div>
-      <div>Аккаунт 8</div>
-      <div>Аккаунт 9</div>
-      <div>Аккаунт 10</div>
-      <!-- Добавьте больше аккаунтов для тестирования скролла -->
-    </div>
+  <div v-if="isVisible" class="black-fon"></div>
+  <div>
+    <button @click="toggle">Toggle Block</button>
+    <transition name="fade">
+      <div v-if="isVisible" class="fade-in">
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+        <span class="action">Настройки</span>
+
+      </div>
+    </transition>
   </div>
 </template>
 
-<style scoped>
-.container {
-  display: flex; /* Убедитесь, что контейнер для aside и списка является flex-контейнером */
-  height: 100vh; /* Устанавливаем высоту контейнера на весь экран */
-  position: relative; /* Позволяет абсолютному позиционированию дочерних элементов */
+<script setup>
+import { ref } from 'vue';
+
+const isVisible = ref(false);
+
+const toggle = () => {
+  isVisible.value = !isVisible.value;
+};
+</script>
+
+<style>
+
+.fade-in {
+  border-radius: 10px;
+    width: 170px;
+    height: auto;
+    background: #6b4b4b;
+    position: absolute;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* margin-left: -63px; */
+    margin-top: 10px;
+    padding: 10px 0px 10px 10px;
+}
+.black-fon {
+    position: fixed;
+    z-index: 5;
+    width: 100%;
+    height: 100vh;
+    background: rgba(117, 117, 117, 0.3);
+    top: 0;
+    left: 0;
+  }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 
-.aside-menu {
-  width: 260px; /* Ширина вашего aside меню */
-  /* Другие стили для aside-menu */
+.fade-in {
+  animation: fadeIn 0.5s forwards;
 }
 
-.account-list {
-  flex-grow: 1; /* Позволяет списку занимать оставшееся пространство */
-  overflow-y: auto; /* Позволяет вертикальный скролл */
-  padding: 20px; /* Добавьте отступы, если нужно */
-}
-
-.line {
-  width: 0.5px;
-  background-color: #d9d9d9;
-  position: absolute;
-  top: 72px; /* Высота вашего header */
-  bottom: 0; /* Устанавливаем линию до самого низа */
-  left: 260px; /* Позиционируем линию на нужном расстоянии от левой стороны */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* Добавление эффекта смещения */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
-
-<script></script>

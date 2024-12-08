@@ -27,7 +27,7 @@
                 <img
                   src="/telegramAccount/menu_table_button.svg"
                   alt="Меню действий"
-                />Действия
+                /> {{ loadingStation ? "Загрузка..." : "Действие" }}
               </button>
             </td>
           </tr>
@@ -45,6 +45,7 @@
       :modalPosition="modalPosition"
       :selectedItem="selectedItem"
       :qrCodeData="qrCodeData"
+            @update:loadingStation="updateLoading"
       @update:selectedItems="updateSelectedItems"
       @update:qrCodeData="updateqrCodeData"
       :changeStationSettingsModal="changeStationSettingsModal"
@@ -67,7 +68,6 @@
       :changeStationGetByCode="changeStationGetByCode"
       :selectedItems="selectedItems"
     />
-    <!-- <LoadingMoadal /> -->
   </section>
 </template>
 
@@ -95,6 +95,8 @@ const isModalOpen = ref(false);
 const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
 const selectedItems = ref(null);
+const loadingStation = ref(false)
+
 
 const getAccounts = async () => {
   try {
@@ -168,6 +170,10 @@ const updateSelectedItems = (newValue) => {
 };
 const updateqrCodeData = (newValue) => {
   qrCodeData.value = newValue;
+};
+
+const updateLoading = (newValue) => {
+  loadingStation.value = newValue;
 };
 
 onMounted(getAccounts);
@@ -244,6 +250,17 @@ table {
   font-size: 14px;
   color: #4047ca;
   margin-right: 5px;
+  transition: all 0.15s;
+}
+
+.action-table-button:hover {
+  background: rgba(23, 30, 162, 0.2);
+  transition: all 0.15s;
+}
+
+.action-table-button:active {
+  background: rgba(0, 4, 78, 0.2);
+  transition: all 0.15s;
 }
 
 .action-table-button img {

@@ -115,6 +115,17 @@ header {
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: all 0.25s;
+}
+
+.account-list-button:hover {
+  background: rgba(0, 13, 255, 0.2);
+  transition: all 0.25s;
+}
+
+.account-list-button:active {
+  background: rgba(17, 21, 93, 0.2);
+  transition: all 0.25s;
 }
 
 .add-account-button {
@@ -122,6 +133,17 @@ header {
   font-weight: 600;
   font-size: 14px;
   color: #fff;
+  transition: all 0.25s;
+}
+
+.add-account-button:hover {
+  background: #565cc8;
+  transition: all 0.25s;
+}
+
+.add-account-button:active {
+  background: #3e43ae;
+  transition: all 0.25s;
 }
 
 .black-fon {
@@ -149,6 +171,27 @@ header {
   justify-content: center;
   flex-direction: column;
   gap: 2px;
+}
+.platform-list.fade-enter-active, .platform-list.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.platform-list.fade-enter, .platform-list.fade-leave-to {
+  opacity: 0;
+}
+
+.platform-list {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px); 
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .platform {

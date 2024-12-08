@@ -4,11 +4,14 @@
     <section class="get-by-code-section">
       <section class="number-section" v-if="!codeStation">
         <input
-          :class="styleInput ? 'num-input-error' : 'num-input'"
-          v-model="userNumber"
-          type="number"
-          placeholder="Введите номер"
-        />
+            :class="styleInput ? 'num-input-error' : 'num-input'"
+            placeholder="Логин"
+            @input="formatPhone"
+            type="text"
+            id="phone"
+            v-model="phone"
+            required
+          />
         <button
           v-if="stationLoading === true"
           class="next-button"
@@ -46,10 +49,28 @@ const styleInput = ref(false);
 const { selectedItems } = toRefs(props);
 
 const stationLoading = ref(false);
-const userNumber = ref(null);
 const userCode = ref(null);
 
 const codeStation = ref(false);
+
+const phone = ref("+7 ");
+
+const formatPhone = () => {
+  const cleaned = phone.value.replace(/\D/g, "");
+
+  if (cleaned.length === 0) {
+    phone.value = "+7 ";
+    return;
+  }
+
+  const match = cleaned.match(/^(7)?(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+  if (match) {
+    phone.value = `+7 (${match[2]}) ${match[3]}${
+      match[4] ? "-" + match[4] : ""
+    }`;
+  }
+};
 
 const createRequest = async (request) => {
   const { source, login } = selectedItems.value;
@@ -91,7 +112,7 @@ const enablePhoneAuth = async () => {
         source: "whatsapp",
         login: "helly",
         token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        phone: userNumber.value,
+        phone: phone.value,
       },
       {
         headers: {
@@ -181,7 +202,7 @@ const getAuthCode = async () => {
 };
 
 const enableByCode = async () => {
-  if (userNumber.value === null) {
+  if (phone.value === null) {
     styleInput.value = true;
     return;
   } else {

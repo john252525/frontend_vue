@@ -41,6 +41,28 @@ const handleLogout = () => {
   padding: 12px 0;
 }
 
+.account-menu-section, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.account-menu-section, .fade-leave-to {
+  opacity: 0;
+}
+
+.account-menu-section{
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px); 
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .line {
   background-color: #d9d9d9;
   height: 1px;
@@ -65,5 +87,23 @@ const handleLogout = () => {
 
 .out-account-button:hover {
   color: #b64040;
+}
+
+@media (max-width: 1000px) {
+  .account-menu-section {
+    width: 200px;
+    background: #fff;
+    padding: 12px 0;
+    border-radius: 10px 0 0 10px;
+} 
+
+.email-user {
+  font-size: 16px;
+}
+
+.out-account-button {
+  font-size: 16px;
+  margin-left: 20px;
+}
 }
 </style>

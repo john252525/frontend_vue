@@ -52,6 +52,28 @@ const handleTopUp = () => {
   padding: 12px;
 }
 
+.balance-user-section, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.balance-user-section, .fade-leave-to {
+  opacity: 0;
+}
+
+.balance-user-section {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px); 
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .balance-text {
   font-weight: 700;
   font-size: 16px;
@@ -86,5 +108,13 @@ const handleTopUp = () => {
   font-size: 14px;
   color: #535353;
   text-align: center;
+}
+
+
+@media (max-width: 1000px) {
+  .balance-user-section {
+  width: 150px;
+  height: 130px;
+}
 }
 </style>
