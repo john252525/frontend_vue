@@ -7,8 +7,10 @@ import Login from "./pages/Login.vue";
 import Registration from "./pages/Registration.vue";
 import PasswordRecovery from "./pages/PasswordRecovery.vue";
 import test from "./pages/test.vue";
+import MainPage from "./pages/MainPage.vue";
 const routes = [
-  { path: "/", name: "PersonalAccount", component: PersonalAccount },
+  { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
+  { path: "/", name: "MainPage", component: MainPage },
   { path: "/login", name: "Login", component: Login },
   { path: "/registration", name: "Registration", component: Registration },
   { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },

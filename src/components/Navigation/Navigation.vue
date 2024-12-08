@@ -29,11 +29,11 @@
       <div class="line-menu"></div>
       <nav>
         <ul>
-          <li @click="navigateTo('home')">
+          <li @click="navigateTo('/')">
             <img src="/navigation/home.svg" alt="Главная" />
             <p class="page">Главная</p>
           </li>
-          <li @click="navigateTo('accounts')">
+          <li @click="navigateTo('Accounts')">
             <img src="/navigation/accaunts.svg" alt="Аккаунты" />
             <p class="page">Аккаунты</p>
           </li>
@@ -44,6 +44,9 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+const router = useRouter();
+
 const props = defineProps({
   phoneMenuOn: {
     type: Function,
@@ -55,9 +58,9 @@ const props = defineProps({
   },
 });
 
-function navigateTo(page) {
-  console.log(`Navigating to ${page}`);
-}
+const navigateTo = (page) => {
+  router.push(page);
+};
 </script>
 
 <style scoped>

@@ -1,17 +1,5 @@
 <template>
-  <Header :phoneMenuOn="phoneMenuOn" />
-  <div class="page-container">
-    <Navigation
-      :phoneMenuStation="phoneMenuStation"
-      :phoneMenuOn="phoneMenuOn"
-      class="navigation"
-    />
-    <main>
-      <section>
         <Accounts />
-      </section>
-    </main>
-  </div>
 </template>
 
 <script setup>
