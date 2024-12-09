@@ -82,6 +82,10 @@ const formatPhone = () => {
   }
 };
 
+const getInternationalFormat = () => {
+  return phone.value.replace(/\D/g, "");
+};
+
 const changeStationLoadingModal = () => {
   stationLoading.modalStation = !stationLoading.modalStation;
 };
@@ -123,14 +127,14 @@ const createRequest = async (request) => {
 
 const enablePhoneAuth = async () => {
   const { source, login } = selectedItems.value;
+  const internationalPhone = getInternationalFormat();
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/enablePhoneAuth",
       {
-        source: "whatsapp",
-        login: "helly",
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        phone: phone.value,
+        source: source,
+        login: login,
+        phone: internationalPhone,
       },
       {
         headers: {
@@ -164,9 +168,8 @@ const setState = async () => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/setState",
       {
-        source: "whatsapp",
-        login: "helly",
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        source: source,
+        login: login,
         setState: true,
       },
       {
@@ -201,9 +204,8 @@ const getAuthCode = async () => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getAuthCode",
       {
-        source: "whatsapp",
-        login: "helly",
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        source: source,
+        login: login,
       },
       {
         headers: {

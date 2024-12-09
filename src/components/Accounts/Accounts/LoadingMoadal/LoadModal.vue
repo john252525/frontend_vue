@@ -1,19 +1,23 @@
 <template>
-  <div class="black-fon"></div>
-  <div class="action-list">
-    <div class="spinner"></div>
-  </div>
+  <section v-if="stationLoading.loading">
+    <div class="black-fon"></div>
+    <section class="loading">
+      <div class="spinner"></div>
+    </section>
+  </section>
 </template>
 
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, defineProps, toRefs } from "vue";
 
 const props = defineProps({
-  isLoading: {
-    type: Boolean,
+  stationLoading: {
+    type: Object,
     required: true,
   },
 });
+
+const { stationLoading } = toRefs(props);
 </script>
 
 <style scoped>
@@ -27,7 +31,7 @@ const props = defineProps({
   left: 0;
 }
 
-.action-list {
+.loading {
   border-radius: 20px;
   background: #ffffff;
   position: absolute;

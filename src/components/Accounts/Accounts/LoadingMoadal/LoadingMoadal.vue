@@ -2,12 +2,23 @@
   <section v-if="stationLoading.modalStation">
     <section v-if="!stationLoading.account.error" class="loading-section-true">
       <h2 class="title-true">
-        <img src="/account/gal.svg" alt="" /> Операция успешно выполнена
+        <img src="/account/gal.svg" alt="" />
+        Операция успешно выполнена
+        <img
+          @click="changeStationLoadingModal"
+          src="/account/close-true.svg"
+          alt=""
+        />
       </h2>
     </section>
     <section v-else class="loading-section-error">
       <h2 class="title-error">
         <img src="/account/error.svg" alt="" /> Ошибка! Операция прервана
+        <img
+          @click="changeStationLoadingModal"
+          src="/account/close-error.svg"
+          alt=""
+        />
       </h2>
     </section>
   </section>
@@ -20,6 +31,9 @@ const props = defineProps({
   stationLoading: {
     type: Object,
     required: true,
+  },
+  changeStationLoadingModal: {
+    type: Function,
   },
 });
 

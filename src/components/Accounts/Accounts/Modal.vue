@@ -11,7 +11,7 @@
         <span class="action" @click="handleSubmit">Настройки</span>
         <span class="action" @click="screenshot">Скриншот</span>
         <span class="action action-on">Включить</span>
-        <span class="action" @click="forceStop">Выключить</span>
+        <span class="action" @click="forceStopActive">Выключить</span>
         <span class="action action-throw" @click="resetAccount">Сбросить</span>
         <span class="action" @click="getNewProxy">Сменить прокси</span>
         <span class="action" @click="EnablebyQR">Связать через QR</span>
@@ -25,13 +25,19 @@
       </div>
     </transition>
   </div>
-  <LoadingMoadal :stationLoading="stationLoading" />
+  <LoadingMoadal
+    :changeStationLoadingModal="changeStationLoadingModal"
+    :stationLoading="stationLoading"
+  />
+  <LoadMoadal :stationLoading="stationLoading" />
 </template>
 
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import axios from "axios";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
+import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
+
 const props = defineProps({
   closeModal: {
     type: Function,
@@ -81,6 +87,7 @@ const changeLadingStation = () => {
 };
 
 const stationLoading = reactive({
+  loading: false,
   value: "",
   modalStation: false,
   deleteAccount: {
@@ -133,11 +140,13 @@ const createRequest = async (request) => {
         console.log("qr");
         qrData.value = Array.from(responseQr.value.split(","));
         stationLoading.account.result = true;
+        stationLoading.loading = false;
         setTimeout(() => {
           changeStationLoadingModal();
           stationLoading.account.result = undefined;
         }, 2000);
       } else if (request === "deleteAccount") {
+        stationLoading.loading = false;
         location.reload();
         setTimeout(() => {
           changeStationLoadingModal();
@@ -146,6 +155,7 @@ const createRequest = async (request) => {
         changeStationLoadingModal();
         updateLoadingStation.value = false;
         changeLadingStation();
+        stationLoading.loading = false;
         setTimeout(() => {
           changeStationLoadingModal();
         }, 5000);
@@ -186,6 +196,7 @@ const forceStop = async (request) => {
       }
     );
     if (response.data.ok === true) {
+      stationLoading.loading = false;
       stationLoading.account.error = false;
       changeStationLoadingModal();
       setTimeout(() => {
@@ -304,37 +315,41 @@ const setStateTelegram = async () => {
 
 const EnablebyQR = async (value) => {
   if (value === "telegram") {
+    stationLoading.loading = true;
     await createRequest("forceStop");
     await disablePhoneAuth();
     await setStateTelegram();
     await createRequest("getQr");
     await qrCodeDataSubmit();
-    console.log("telega");
   } else {
+    stationLoading.loading = true;
     await createRequest("forceStop");
     await disablePhoneAuth();
     await setState();
     await createRequest("getQr");
     await qrCodeDataSubmit();
-    console.log("wat");
   }
+};
+
+const forceStopActive = async () => {
+  stationLoading.loading = true;
+  forceStop();
 };
 
 const getNewProxy = async () => {
   createRequest("getNewProxy");
-  updateLoadingStation.value = true;
-  changeLadingStation();
+  stationLoading.loading = true;
 };
 
 const resetAccount = async () => {
+  stationLoading.loading = true;
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
 };
 
 const deleteAccount = async () => {
-  stationLoading.value = "deleteAccount";
-  changeStationLoadingModal();
+  stationLoading.loading = true;
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };
