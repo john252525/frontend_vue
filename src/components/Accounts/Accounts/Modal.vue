@@ -217,7 +217,6 @@ const disablePhoneAuth = async () => {
       {
         source: source,
         login: login,
-        phone: "89228556998",
       },
       {
         headers: {
