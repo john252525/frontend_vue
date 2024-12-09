@@ -217,9 +217,8 @@ const disablePhoneAuth = async () => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/disablePhoneAuth",
       {
-        source: "whatsapp",
-        login: "helly",
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        source: source,
+        login: login,
         phone: "89228556998",
       },
       {
@@ -249,8 +248,8 @@ const setState = async () => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/setState",
       {
-        source: "whatsapp",
-        login: "helly",
+        source: source,
+        login: login,
         token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         setState: true,
       },
