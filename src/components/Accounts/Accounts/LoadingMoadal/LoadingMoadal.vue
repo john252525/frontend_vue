@@ -126,44 +126,4 @@ const { stationLoading } = toRefs(props);
     transform: translateX(0);
   }
 }
-
-@media (max-width: 1000px) {
-  .loading-section {
-    width: 250px;
-    height: 25px;
-    top: 90px;
-    right: 15px;
-  }
-
-  .loading-section-true {
-    width: 250px;
-    height: 25px;
-    top: 90px;
-    right: 15px;
-  }
-}
-
-@media (max-width: 550px) {
-  .loading-section {
-    width: 150px;
-    height: 20px;
-    top: 90px;
-    right: 15px;
-  }
-
-  .loading-section-true {
-    width: 150px;
-    height: 20px;
-    top: 90px;
-    right: 15px;
-  }
-
-  .title {
-    font-size: 14px;
-    font-weight: 600;
-    color: rgb(51, 51, 51);
-  }
-}
 </style>
-
-Найти еще
