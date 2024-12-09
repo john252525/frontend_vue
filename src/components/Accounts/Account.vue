@@ -31,7 +31,8 @@
 import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
 import { ref } from "vue";
-
+localStorage.setItem("accountStationText", "Telegram");
+localStorage.setItem("accountStation", "telegram");
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = localStorage.getItem("accountStationText");
@@ -172,10 +173,12 @@ header {
   flex-direction: column;
   gap: 2px;
 }
-.platform-list.fade-enter-active, .platform-list.fade-leave-active {
+.platform-list.fade-enter-active,
+.platform-list.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.platform-list.fade-enter, .platform-list.fade-leave-to {
+.platform-list.fade-enter,
+.platform-list.fade-leave-to {
   opacity: 0;
 }
 
@@ -186,7 +189,7 @@ header {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px); 
+    transform: translateY(10px);
   }
   to {
     opacity: 1;

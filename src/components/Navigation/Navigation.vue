@@ -2,7 +2,7 @@
   <aside class="pc-menu">
     <nav>
       <ul>
-        <li @click="navigateTo('home')">
+        <li @click="navigateTo('/')">
           <img src="/navigation/accaunts.svg" alt="Главная" />
           <p class="page">Главная</p>
         </li>
