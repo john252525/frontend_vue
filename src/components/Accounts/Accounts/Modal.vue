@@ -11,13 +11,17 @@
         <span class="action" @click="handleSubmit">Настройки</span>
         <span class="action" @click="screenshot">Скриншот</span>
         <span class="action action-on">Включить</span>
-        <span class="action" @click="createRequest('forceStop')">Выключить</span>
+        <span class="action" @click="forceStop">Выключить</span>
         <span class="action action-throw" @click="resetAccount">Сбросить</span>
         <span class="action" @click="getNewProxy">Сменить прокси</span>
         <span class="action" @click="EnablebyQR">Связать через QR</span>
         <span class="action" @click="handleSubmitCode">Связать через код</span>
-        <span class="action" @click="performAction('Проверить код')">Проверить код</span>
-        <span class="action action-delete" @click="deleteAccount">Удалить аккаунт</span>
+        <span class="action" @click="performAction('Проверить код')"
+          >Проверить код</span
+        >
+        <span class="action action-delete" @click="deleteAccount"
+          >Удалить аккаунт</span
+        >
       </div>
     </transition>
   </div>
@@ -48,7 +52,7 @@ const props = defineProps({
     type: Object,
   },
   loadingStation: {
-    type: Boolean 
+    type: Boolean,
   },
   changeStationSettingsModal: {
     type: Function,
@@ -61,9 +65,9 @@ const props = defineProps({
   },
 });
 const emit = defineEmits();
-const { selectedItem,loadingStation } = toRefs(props);
+const { selectedItem, loadingStation } = toRefs(props);
 const responseQr = ref(null);
-const updateLoadingStation = ref(false)
+const updateLoadingStation = ref(false);
 const qrData = ref([]);
 const accountStationText = localStorage.getItem("accountStation");
 const handleSubmit = () => {
@@ -86,6 +90,7 @@ const stationLoading = reactive({
   account: {
     station: false,
     result: undefined,
+    error: false,
   },
 });
 
@@ -111,7 +116,7 @@ const createRequest = async (request) => {
       `https://b2288.apitter.com/instances/${request}`,
       {
         source: source,
-        login: 'helly',
+        login: login,
         token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
       },
       {
@@ -134,19 +139,17 @@ const createRequest = async (request) => {
           stationLoading.account.result = undefined;
         }, 2000);
       } else if (request === "deleteAccount") {
-        stationLoading.account.result = true;
+        location.reload();
         setTimeout(() => {
           changeStationLoadingModal();
-          location.reload();
-          stationLoading.account.result = undefined;
-        }, 2000);
+        }, 1000);
       } else if (request === "getNewProxy") {
-          changeStationLoadingModal();
-          updateLoadingStation.value = false
-          changeLadingStation()
+        changeStationLoadingModal();
+        updateLoadingStation.value = false;
+        changeLadingStation();
         setTimeout(() => {
           changeStationLoadingModal();
-        }, 2000);
+        }, 5000);
       } else {
         console.log(`${request} - Успешно`);
       }
@@ -155,6 +158,53 @@ const createRequest = async (request) => {
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
+    stationLoading.account.error = true;
+    changeStationLoadingModal();
+    setTimeout(() => {
+      changeStationLoadingModal();
+      stationLoading.account.error = false;
+    }, 5000);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const forceStop = async (request) => {
+  const { source, login } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      `https://b2288.apitter.com/instances/${request}`,
+      {
+        source: source,
+        login: login,
+        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        },
+      }
+    );
+    if (response.data.ok === true) {
+      stationLoading.account.error = false;
+      changeStationLoadingModal();
+      setTimeout(() => {
+        changeStationLoadingModal();
+        stationLoading.account.error = false;
+      }, 5000);
+    } else {
+      console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error(`${request} - Ошибка`, error);
+    stationLoading.account.error = true;
+    changeStationLoadingModal();
+    setTimeout(() => {
+      changeStationLoadingModal();
+      stationLoading.account.error = false;
+    }, 5000);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
@@ -265,30 +315,24 @@ const EnablebyQR = async (value) => {
     await setStateTelegram();
     await createRequest("getQr");
     await qrCodeDataSubmit();
-    props.changeStationQrModal();
     console.log("telega");
   } else {
-    stationLoading.value = "enablebyQR";
-    changeStationLoadingModal();
     await createRequest("forceStop");
     await disablePhoneAuth();
     await setState();
     await createRequest("getQr");
     await qrCodeDataSubmit();
-    props.changeStationQrModal();
     console.log("wat");
   }
 };
 
 const getNewProxy = async () => {
-    createRequest("getNewProxy");
-   updateLoadingStation.value = true
-   changeLadingStation()
+  createRequest("getNewProxy");
+  updateLoadingStation.value = true;
+  changeLadingStation();
 };
 
 const resetAccount = async () => {
-  stationLoading.value = "resetAccount";
-  changeStationLoadingModal();
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
@@ -300,38 +344,39 @@ const deleteAccount = async () => {
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };
-
 </script>
 
 <style scoped>
-  .black-fon {
-    position: fixed;
-    z-index: 5;
-    width: 100%;
-    height: 100vh;
-    background: rgba(117, 117, 117, 0.3);
-    top: 0;
-    left: 0;
-  }
-  
-  .action-list {
-    border-radius: 10px;
-    width: 170px;
-    height: auto;
-    background: #ffffff;
-    position: absolute;
-    z-index: 20;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    margin-left: -63px;
-    margin-top: 10px;
-    padding: 10px 0px 10px 10px;
-  }
-  .action-list.fade-enter-active,   .action-list.fade-leave-active {
+.black-fon {
+  position: fixed;
+  z-index: 5;
+  width: 100%;
+  height: 100vh;
+  background: rgba(117, 117, 117, 0.3);
+  top: 0;
+  left: 0;
+}
+
+.action-list {
+  border-radius: 10px;
+  width: 170px;
+  height: auto;
+  background: #ffffff;
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: -63px;
+  margin-top: 10px;
+  padding: 10px 0px 10px 10px;
+}
+.action-list.fade-enter-active,
+.action-list.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.action-list.fade-enter,   .action-list.fade-leave-to {
+.action-list.fade-enter,
+.action-list.fade-leave-to {
   opacity: 0;
 }
 
@@ -342,33 +387,33 @@ const deleteAccount = async () => {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px); 
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-  
-  .action {
-    font-weight: 500;
-    font-size: 15px;
-    color: #000;
-    cursor: pointer;
-    padding: 6px;
-  }
-  
-  .action:hover {
-    background-color: #eeeeee;
-    border-radius: 5px 0px 0px 5px;
-  }
-  
-  .action-on:hover {
-    color: green;
-  }
-  
-  .action-throw:hover,
-  .action-delete:hover {
-    color: rgb(255, 0, 0);
-  }
-  </style>
+
+.action {
+  font-weight: 500;
+  font-size: 15px;
+  color: #000;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.action:hover {
+  background-color: #eeeeee;
+  border-radius: 5px 0px 0px 5px;
+}
+
+.action-on:hover {
+  color: green;
+}
+
+.action-throw:hover,
+.action-delete:hover {
+  color: rgb(255, 0, 0);
+}
+</style>

@@ -27,7 +27,8 @@
                 <img
                   src="/telegramAccount/menu_table_button.svg"
                   alt="Меню действий"
-                /> {{ loadingStation ? "Загрузка..." : "Действие" }}
+                />
+                {{ loadingStation ? "Загрузка..." : "Действие" }}
               </button>
             </td>
           </tr>
@@ -45,7 +46,7 @@
       :modalPosition="modalPosition"
       :selectedItem="selectedItem"
       :qrCodeData="qrCodeData"
-            @update:loadingStation="updateLoading"
+      @update:loadingStation="updateLoading"
       @update:selectedItems="updateSelectedItems"
       @update:qrCodeData="updateqrCodeData"
       :changeStationSettingsModal="changeStationSettingsModal"
@@ -95,8 +96,7 @@ const isModalOpen = ref(false);
 const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
 const selectedItems = ref(null);
-const loadingStation = ref(false)
-
+const loadingStation = ref(false);
 
 const getAccounts = async () => {
   try {
@@ -204,7 +204,6 @@ table {
   font-size: 14px;
   color: #000000;
   margin-top: 20px;
-  margin-left: 20px;
   text-align: center;
   padding: 10px;
   background-color: #efefef;

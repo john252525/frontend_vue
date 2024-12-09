@@ -1,19 +1,20 @@
 <template>
   <div>
     <div @click="props.changeStationGetByCode" class="black-fon"></div>
+    <LoadingMoadal :stationLoading="stationLoading" />
     <section class="get-by-code-section">
       <section class="number-section" v-if="!codeStation">
         <input
-            :class="styleInput ? 'num-input-error' : 'num-input'"
-            placeholder="Логин"
-            @input="formatPhone"
-            type="text"
-            id="phone"
-            v-model="phone"
-            required
-          />
+          :class="styleInput ? 'num-input-error' : 'num-input'"
+          placeholder="Логин"
+          @input="formatPhone"
+          type="text"
+          id="phone"
+          v-model="phone"
+          required
+        />
         <button
-          v-if="stationLoading === true"
+          v-if="stationLoading.stationLoading === true"
           class="next-button"
           @click="enableByCode"
         >
@@ -32,8 +33,10 @@
 </template>
 
 <script setup>
-import { ref, toRefs } from "vue";
+import { ref, toRefs, reactive } from "vue";
 import axios from "axios";
+
+import LoadingMoadal from "../LoadingMoadal/LoadingMoadal.vue";
 
 const props = defineProps({
   selectedItems: {
@@ -44,11 +47,18 @@ const props = defineProps({
   },
 });
 
+const stationLoading = reactive({
+  modalStation: false,
+  account: {
+    error: false,
+  },
+  stationLoading: false,
+});
+
 const styleInput = ref(false);
 
 const { selectedItems } = toRefs(props);
 
-const stationLoading = ref(false);
 const userCode = ref(null);
 
 const codeStation = ref(false);
@@ -72,6 +82,10 @@ const formatPhone = () => {
   }
 };
 
+const changeStationLoadingModal = () => {
+  stationLoading.modalStation = !stationLoading.modalStation;
+};
+
 const createRequest = async (request) => {
   const { source, login } = selectedItems.value;
 
@@ -91,12 +105,16 @@ const createRequest = async (request) => {
       }
     );
     if (response.data.ok === true) {
-      console.log(`${request} - Успешно`);
     } else {
       console.log(response.data.ok);
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
+    stationLoading.account.error = true;
+    changeStationLoadingModal();
+    setTimeout(() => {
+      changeStationLoadingModal();
+    }, 5000);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
@@ -129,6 +147,11 @@ const enablePhoneAuth = async () => {
     }
   } catch (error) {
     console.error("Ошибка при создании аккаунта:", error);
+    stationLoading.account.error = true;
+    changeStationLoadingModal();
+    setTimeout(() => {
+      changeStationLoadingModal();
+    }, 5000);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
@@ -161,6 +184,11 @@ const setState = async () => {
     }
   } catch (error) {
     console.error("Ошибка при создании аккаунта:", error);
+    stationLoading.account.error = true;
+    changeStationLoadingModal();
+    setTimeout(() => {
+      changeStationLoadingModal();
+    }, 5000);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
@@ -185,11 +213,26 @@ const getAuthCode = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log("Состояние установлено");
-      console.log(response.data);
-      userCode.value = response.data.data.authCode;
-      codeStation.value = true;
-      stationLoading.value = false;
+      if (response.data.data.status === "error") {
+        console.log("sds");
+        stationLoading.account.error = true;
+        stationLoading.stationLoading = false;
+        changeStationLoadingModal();
+        setTimeout(() => {
+          changeStationLoadingModal();
+        }, 5000);
+      } else {
+        console.log("Состояние установлено");
+        console.log(response.data);
+        userCode.value = response.data.data.authCode;
+        codeStation.value = true;
+        stationLoading.stationLoading = false;
+        stationLoading.account.error = false;
+        changeStationLoadingModal();
+        setTimeout(() => {
+          changeStationLoadingModal();
+        }, 5000);
+      }
     } else {
       console.log(response.data.ok);
     }
@@ -202,11 +245,12 @@ const getAuthCode = async () => {
 };
 
 const enableByCode = async () => {
-  if (phone.value === null) {
+  if (phone.value.length != 17) {
     styleInput.value = true;
     return;
   } else {
-    stationLoading.value = true;
+    styleInput.value = false;
+    stationLoading.stationLoading = true;
     await createRequest("forceStop");
     await enablePhoneAuth();
     await setState();
@@ -250,6 +294,30 @@ const enableByCode = async () => {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
+}
+
+.get-by-code-section.fade-enter-active,
+.get-by-code-section.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.get-by-code-section.fade-enter,
+.get-by-code-section.fade-leave-to {
+  opacity: 0;
+}
+
+.get-by-code-section {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .num-input {
