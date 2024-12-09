@@ -117,7 +117,6 @@ const createRequest = async (request) => {
       {
         source: source,
         login: login,
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
       },
       {
         headers: {
@@ -178,7 +177,6 @@ const forceStop = async (request) => {
       {
         source: source,
         login: login,
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
       },
       {
         headers: {
@@ -250,7 +248,6 @@ const setState = async () => {
       {
         source: source,
         login: login,
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         setState: true,
       },
       {
@@ -282,7 +279,6 @@ const setStateTelegram = async () => {
       {
         source: "whatsapp",
         login: "helly",
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         setState: true,
         qrLogin: true,
       },
