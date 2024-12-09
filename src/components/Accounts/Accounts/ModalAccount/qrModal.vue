@@ -38,17 +38,17 @@ const updateQrCode = () => {
   }
 };
 
-onMounted(() => {
-  intervalId = setInterval(updateQrCode, 5000);
-  setTimeout(() => {
-    clearInterval(intervalId);
-    props.changeStationQrModal();
-  }, 60000); 
-});
+// onMounted(() => {
+//   intervalId = setInterval(updateQrCode, 5000);
+//   setTimeout(() => {
+//     clearInterval(intervalId);
+//     props.changeStationQrModal();
+//   }, 60000);
+// });
 
-onBeforeUnmount(() => {
-  clearInterval(intervalId);
-});
+// onBeforeUnmount(() => {
+//   clearInterval(intervalId);
+// });
 </script>
 
 <style scoped>
