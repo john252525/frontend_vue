@@ -31,8 +31,8 @@
 import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
 import { ref } from "vue";
-localStorage.setItem("accountStationText", "Telegram");
-localStorage.setItem("accountStation", "telegram");
+// localStorage.setItem("accountStationText", "Telegram");
+// localStorage.setItem("accountStation", "telegram");g
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = localStorage.getItem("accountStationText");
