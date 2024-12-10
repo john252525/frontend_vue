@@ -63,6 +63,7 @@
       :qrModalStation="qrModalStation"
       :changeStationQrModal="changeStationQrModal"
       :qrCodeData="qrCodeData"
+      :changeStationQrModalOn="changeStationQrModalOn"
     />
     <getByCode
       v-if="getByCodeStation"
@@ -155,6 +156,10 @@ const changeStationSettingsModal = () => {
 
 const changeStationQrModal = () => {
   qrModalStation.value = !qrModalStation.value;
+};
+
+const changeStationQrModalOn = () => {
+  qrModalStation.value = true;
 };
 
 const changeStationGetByCode = () => {

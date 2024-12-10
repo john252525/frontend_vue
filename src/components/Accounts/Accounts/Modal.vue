@@ -141,10 +141,11 @@ const createRequest = async (request) => {
         qrData.value = Array.from(responseQr.value.split(","));
         stationLoading.account.result = true;
         stationLoading.loading = false;
+        changeStationLoadingModal();
         setTimeout(() => {
           changeStationLoadingModal();
-          stationLoading.account.result = undefined;
-        }, 2000);
+          stationLoading.loading = false;
+        }, 5000);
       } else if (request === "deleteAccount") {
         stationLoading.loading = false;
         location.reload();
@@ -371,13 +372,12 @@ const deleteAccount = async () => {
   width: 170px;
   height: auto;
   background: #ffffff;
-  position: absolute;
+  position: sticky;
   z-index: 20;
   display: flex;
   justify-content: center;
   flex-direction: column;
-  margin-left: -63px;
-  margin-top: 10px;
+  margin: 23px;
   padding: 10px 0px 10px 10px;
 }
 .action-list.fade-enter-active,
