@@ -367,4 +367,46 @@ const enableByCode = async () => {
   font-weight: 600;
   margin-top: 20px;
 }
+
+@media (max-width: 450px) {
+  .num-input {
+    padding-left: 10px;
+    width: 300px;
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .num-input-error {
+    padding-left: 10px;
+    width: 300px;
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .next-button {
+    width: 315px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 400px) {
+  .num-input {
+    padding-left: 10px;
+    width: 250px;
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .num-input-error {
+    padding-left: 10px;
+    width: 250px;
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .next-button {
+    width: 265px;
+    height: 35px;
+  }
+}
 </style>

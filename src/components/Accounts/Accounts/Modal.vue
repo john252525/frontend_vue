@@ -135,17 +135,9 @@ const createRequest = async (request) => {
     if (response.data.ok === true) {
       if (request === "getQr") {
         responseQr.value = response.data.data.value;
-        console.log(response.data);
-        console.log(responseQr.value);
-        console.log("qr");
         qrData.value = Array.from(responseQr.value.split(","));
         stationLoading.account.result = true;
         stationLoading.loading = false;
-        changeStationLoadingModal();
-        setTimeout(() => {
-          changeStationLoadingModal();
-          stationLoading.loading = false;
-        }, 5000);
       } else if (request === "deleteAccount") {
         stationLoading.loading = false;
         location.reload();

@@ -98,7 +98,7 @@ watch(currentQr, (newValue) => {
   font-size: 14px;
   color: rgb(255, 255, 255);
   font-weight: 600;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .loading {
