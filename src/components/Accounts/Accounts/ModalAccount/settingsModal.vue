@@ -1,18 +1,29 @@
 <template>
   <div v-if="settingsModalStation">
     <div @click="props.changeStationSettingsModal()" class="black-fon"></div>
+    <LoadModal
+      :changeStationLoadingModal="changeStationLoadingModal"
+      :stationLoading="stationLoading"
+    />
     <form @submit.prevent="submitForm">
       <h2 @click="changeStationSettingsModal" class="title">
         Webhook URLs (указывать с новой строки)
       </h2>
-      <textarea id="messageTextarea" v-model="message"></textarea>
-      <button class="submit-button" @click="settingsAccount">Сохранить</button>
+      <textarea id="messageTextarea" v-model="webhookUrlsText"></textarea>
+      <button
+        class="submit-button"
+        @click="addNewUrl"
+        :disabled="loadingStatiom"
+      >
+        {{ loadingStatiom ? "Загрузка..." : "Сохранить" }}
+      </button>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref, toRefs } from "vue";
+import LoadModal from "../LoadingMoadal/LoadingMoadal.vue";
+import { ref, toRefs, watch, reactive } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -30,34 +41,43 @@ const props = defineProps({
   },
 });
 
-const { selectedItems } = toRefs(props);
-const message = ref("");
-const messages = ref([]);
+const { selectedItems, settingsModalStation } = toRefs(props);
+const webhookUrlsText = ref(""); // Создаем реактивную переменную для текстового поля
+const loadingStatiom = ref(false);
 
-const submitForm = () => {
-  if (message.value.trim() !== "") {
-    messages.value.push({ text: message.value });
-    message.value = "";
-  }
+const stationLoading = reactive({
+  loading: false,
+  value: "",
+  modalStation: false,
+  deleteAccount: {
+    station: false,
+    result: undefined,
+  },
+  account: {
+    station: false,
+    result: undefined,
+    error: false,
+  },
+});
+
+const changeStationLoadingModal = () => {
+  stationLoading.modalStation = !stationLoading.modalStation;
 };
 
-const settingsAccount = async () => {
+const getInfoAccount = async () => {
   try {
+    loadingStatiom.value = true; // Устанавливаем состояние загрузки
     if (!selectedItems.value) {
       console.error("selectedItems не определен");
       return;
     }
     const { source, login } = selectedItems.value;
 
-    await submitForm();
-
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfo",
       {
         source: source,
         login: login,
-        token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        webhookUrls: messages.value,
       },
       {
         headers: {
@@ -67,14 +87,69 @@ const settingsAccount = async () => {
       }
     );
 
-    console.log("Аккаунт успешно создан:", response.data);
+    console.log("Информация о аккаунте", response.data);
+    const { webhookUrls } = response.data.data;
+    if (Array.isArray(webhookUrls)) {
+      webhookUrlsText.value = webhookUrls.join("\n"); // Объединяем значения с новой строки
+    }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
+  } finally {
+    loadingStatiom.value = false; // Сбрасываем состояние загрузки в любом случае
   }
 };
+
+const addNewUrl = async () => {
+  try {
+    loadingStatiom.value = true; // Устанавливаем состояние загрузки
+    if (!selectedItems.value) {
+      console.error("selectedItems не определен");
+      return;
+    }
+    const { source, login } = selectedItems.value;
+
+    // Разделяем строки в textarea на массив
+    const webhookUrlsArray = webhookUrlsText.value
+      .split("\n")
+      .map((url) => url.trim())
+      .filter((url) => url);
+
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/updateAccount",
+      {
+        source: source,
+        login: login,
+        webhookUrls: webhookUrlsArray, // Передаем массив URL
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        },
+      }
+    );
+
+    console.log("Информация о аккаунте", response.data);
+  } catch (error) {
+    console.error("error", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  } finally {
+    loadingStatiom.value = false;
+    changeStationLoadingModal();
+    location.reload();
+  }
+};
+
+watch(settingsModalStation, (newValue) => {
+  if (newValue === true) {
+    getInfoAccount();
+  }
+});
 </script>
 
 <style scoped>
@@ -134,5 +209,31 @@ textarea {
   color: rgb(255, 255, 255);
   font-weight: 600;
   margin-top: 12px;
+}
+
+@media (max-width: 450px) {
+  textarea {
+    max-width: 300px;
+    max-height: 500px;
+    min-width: 300px;
+    min-height: 400px;
+  }
+
+  form {
+    padding: 20px 25px;
+  }
+}
+
+@media (max-width: 400px) {
+  textarea {
+    max-width: 250px;
+    max-height: 450px;
+    min-width: 250px;
+    min-height: 400px;
+  }
+
+  form {
+    padding: 20px 25px;
+  }
 }
 </style>

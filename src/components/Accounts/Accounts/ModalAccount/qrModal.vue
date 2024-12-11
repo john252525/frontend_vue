@@ -31,32 +31,52 @@ const modalQr = ref(false);
 const { qrCodeData, qrModalStation } = toRefs(props);
 const currentIndex = ref(0);
 const currentQr = ref("");
-const dataQr = ref([]);
 let intervalId = null;
+
+const getCombinedQrCode = () => {
+  return qrCodeData.value.join("");
+};
 
 const updateQrCode = () => {
   if (qrCodeData.value.length > 0) {
-    currentQr.value = qrCodeData.value[currentIndex.value];
-    currentIndex.value = (currentIndex.value + 1) % qrCodeData.value.length;
+    currentQr.value = getCombinedQrCode();
   }
 };
 
 watch(qrCodeData, (newValue) => {
   if (newValue.length > 0) {
+    updateQrCode();
     modalQr.value = true;
-    console.log("qrCodeData");
     intervalId = setInterval(updateQrCode, 5000);
+
     setTimeout(() => {
       clearInterval(intervalId);
-      if (qrModalStation.value === true) {
+      if (qrModalStation.value) {
+        props.changeStationQrModal();
         modalQr.value = false;
-        console.log("err");
-      } else {
-        return;
       }
     }, 60000);
+  } else {
+    currentQr.value = "";
   }
 });
+
+// watch(qrCodeData, (newValue) => {
+//   if (newValue.length > 0) {
+//     modalQr.value = true;
+//     console.log("qrCodeData");
+//     intervalId = setInterval(updateQrCode, 5000);
+//     setTimeout(() => {
+//       clearInterval(intervalId);
+//       if (qrModalStation.value === true) {
+//         modalQr.value = false;
+//         console.log("err");
+//       } else {
+//         return;
+//       }
+//     }, 60000);
+//   }
+// });
 watch(currentQr, (newValue) => {
   if (newValue.length > 0) {
     props.changeStationQrModalOn();

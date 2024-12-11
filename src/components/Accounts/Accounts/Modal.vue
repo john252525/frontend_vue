@@ -14,7 +14,9 @@
         <span class="action" @click="forceStopActive">Выключить</span>
         <span class="action action-throw" @click="resetAccount">Сбросить</span>
         <span class="action" @click="getNewProxy">Сменить прокси</span>
-        <span class="action" @click="EnablebyQR">Связать через QR</span>
+        <span class="action" @click="startEnableByQR('whatsapp')"
+          >Связать через QR</span
+        >
         <span class="action" @click="handleSubmitCode">Связать через код</span>
         <span class="action" @click="performAction('Проверить код')"
           >Проверить код</span
@@ -138,6 +140,8 @@ const createRequest = async (request) => {
         qrData.value = Array.from(responseQr.value.split(","));
         stationLoading.account.result = true;
         stationLoading.loading = false;
+        console.log("qr");
+        // qrCodeDataSubmit();
       } else if (request === "deleteAccount") {
         stationLoading.loading = false;
         location.reload();
@@ -306,22 +310,34 @@ const setStateTelegram = async () => {
   }
 };
 
+let intervalId = null;
+
 const EnablebyQR = async (value) => {
+  stationLoading.loading = true;
+  await createRequest("forceStop");
+  await disablePhoneAuth();
+
   if (value === "telegram") {
-    stationLoading.loading = true;
-    await createRequest("forceStop");
-    await disablePhoneAuth();
     await setStateTelegram();
-    await createRequest("getQr");
-    await qrCodeDataSubmit();
   } else {
-    stationLoading.loading = true;
-    await createRequest("forceStop");
-    await disablePhoneAuth();
     await setState();
+  }
+
+  await qrCodeDataSubmit();
+};
+
+const startEnableByQR = async (value) => {
+  await EnablebyQR(value);
+
+  intervalId = setInterval(async () => {
     await createRequest("getQr");
     await qrCodeDataSubmit();
-  }
+  }, 5000);
+
+  setTimeout(() => {
+    clearInterval(intervalId);
+    stationLoading.loading = false;
+  }, 60000);
 };
 
 const forceStopActive = async () => {
