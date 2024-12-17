@@ -10,7 +10,9 @@
       >
         <span class="action" @click="handleSubmit">Настройки</span>
         <span class="action" @click="screenshot">Скриншот</span>
-        <span class="action action-on">Включить</span>
+        <span class="action action-on" @click="changeEnableStation"
+          >Включить</span
+        >
         <span class="action" @click="forceStopActive">Выключить</span>
         <span class="action action-throw" @click="resetAccount">Сбросить</span>
         <span class="action" @click="getNewProxy">Сменить прокси</span>
@@ -69,6 +71,9 @@ const props = defineProps({
     type: Function,
   },
   changeStationGetByCode: {
+    type: Function,
+  },
+  changeEnableStation: {
     type: Function,
   },
 });

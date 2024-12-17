@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div @click="props.changeStationGetByCode" class="black-fon"></div>
-    <LoadingMoadal :stationLoading="stationLoading" />
+  <section class="whatsapp-code-section">
     <section class="get-by-code-section">
       <section class="number-section" v-if="!codeStation">
         <input
@@ -29,19 +27,16 @@
         </button>
       </section>
     </section>
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, toRefs, reactive } from "vue";
+import { ref, toRefs, reactive, inject } from "vue";
 import axios from "axios";
 
-import LoadingMoadal from "../LoadingMoadal/LoadingMoadal.vue";
+import LoadingMoadal from "../../LoadingMoadal/LoadingMoadal.vue";
 
 const props = defineProps({
-  selectedItems: {
-    type: Object,
-  },
   changeStationGetByCode: {
     type: Function,
   },
@@ -57,7 +52,7 @@ const stationLoading = reactive({
 
 const styleInput = ref(false);
 
-const { selectedItems } = toRefs(props);
+const { getByCodeStation, selectedItems } = inject("Items");
 
 const userCode = ref(null);
 
@@ -262,14 +257,18 @@ const enableByCode = async () => {
 </script>
 
 <style scoped>
-.black-fon {
+.whatsapp-code-section {
   position: fixed;
-  z-index: 5;
-  width: 100%;
-  height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background-color: white;
+  padding: 25px 30px;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
 }
 
 .code-text {
@@ -284,30 +283,16 @@ const enableByCode = async () => {
   flex-direction: column;
 }
 
-.get-by-code-section {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  background-color: white;
-  padding: 25px 30px;
-  border-radius: 10px;
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-}
-
-.get-by-code-section.fade-enter-active,
-.get-by-code-section.fade-leave-active {
+.whatsapp-code-section .fade-enter-active,
+.whatsapp-code-section .fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.get-by-code-section.fade-enter,
-.get-by-code-section.fade-leave-to {
+.whatsapp-code-section .fade-enter,
+.whatsapp-code-section .fade-leave-to {
   opacity: 0;
 }
 
-.get-by-code-section {
+.whatsapp-code-section {
   animation: fadeIn 0.5s forwards;
 }
 

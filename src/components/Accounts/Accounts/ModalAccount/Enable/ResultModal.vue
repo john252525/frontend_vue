@@ -6,8 +6,7 @@
       </div>
       <p class="error-message">
         Неизвестная ошибка, <br />
-        пожалуйста,<br />
-        попробуйте еще раз
+        пожалуйста, попробуйте еще раз
       </p>
     </section>
   </div>
@@ -24,12 +23,6 @@ import { ref, watch } from "vue";
   align-items: center;
 }
 
-button {
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
-
 .result-section {
   display: flex;
   align-items: center;
@@ -40,7 +33,7 @@ button {
 .circle {
   width: 50px;
   height: 50px;
-  border: 1.5px solid #b73131;
+  border: 1.9px solid #b73131;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -63,9 +56,9 @@ button {
 }
 
 .error-message {
-  margin-top: 18px;
+  margin-top: 24px;
   font-size: 18px;
-  font-weight: 400;
+  font-weight: 500;
   color: #b73131;
   text-align: center;
   transition: opacity 0.5s ease;

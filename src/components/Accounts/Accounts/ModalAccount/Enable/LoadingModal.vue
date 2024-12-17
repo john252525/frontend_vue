@@ -1,6 +1,5 @@
 <template>
-  <section v-if="stationLoading.loading">
-    <div class="black-fon"></div>
+  <section v-if="stationLoading">
     <section class="loading">
       <div class="spinner"></div>
     </section>
@@ -12,7 +11,7 @@ import { defineProps, toRefs } from "vue";
 
 const props = defineProps({
   stationLoading: {
-    type: Object,
+    type: Boolean,
     required: true,
   },
 });
@@ -21,16 +20,6 @@ const { stationLoading } = toRefs(props);
 </script>
 
 <style scoped>
-.black-fon {
-  position: fixed;
-  z-index: 5;
-  width: 100%;
-  height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
-  top: 0;
-  left: 0;
-}
-
 .loading {
   border-radius: 20px;
   background: #ffffff;

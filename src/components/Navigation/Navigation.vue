@@ -29,11 +29,11 @@
       <div class="line-menu"></div>
       <nav>
         <ul>
-          <li @click="navigateTo('/')">
+          <li @click="clickMenu('/')">
             <img src="/navigation/home.svg" alt="Главная" />
             <p class="page">Главная</p>
           </li>
-          <li @click="navigateTo('Accounts')">
+          <li @click="clickMenu('Accounts')">
             <img src="/navigation/accaunts.svg" alt="Аккаунты" />
             <p class="page">Аккаунты</p>
           </li>
@@ -57,6 +57,11 @@ const props = defineProps({
     required: true,
   },
 });
+
+const clickMenu = (page) => {
+  props.phoneMenuOn();
+  router.push(page);
+};
 
 const navigateTo = (page) => {
   router.push(page);

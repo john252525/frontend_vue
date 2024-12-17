@@ -52,6 +52,7 @@
       :changeStationSettingsModal="changeStationSettingsModal"
       :changeStationQrModal="changeStationQrModal"
       :changeStationGetByCode="changeStationGetByCode"
+      :changeEnableStation="changeEnableStation"
     />
     <SettignsModal
       :closeModal="closeModal"
@@ -69,17 +70,27 @@
       v-if="getByCodeStation"
       :changeStationGetByCode="changeStationGetByCode"
       :selectedItems="selectedItems"
+      :getByCodeStation="getByCodeStation"
+    />
+    <!-- <getScreen /> -->
+    <Enable
+      v-if="enableStation"
+      :enableStation="enableStation"
+      :selectedItem="selectedItem"
+      :changeEnableStation="changeEnableStation"
     />
   </section>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
 import Modal from "./Modal.vue";
+import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
-import getByCode from "./ModalAccount/GetByCode.vue";
+import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
+// import getScreen from "./ModalAccount/getScreen.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
@@ -88,7 +99,9 @@ const dataAccount = reactive({
 });
 
 const qrCodeData = ref([]);
+const enableStation = ref(false);
 const getByCodeStation = ref(false);
+const getScreenStation = ref(false);
 const qrModalStation = ref(false);
 const settingsModalStation = ref(false);
 const instanceData = ref([]);
@@ -98,6 +111,14 @@ const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
+
+const changeEnableStation = () => {
+  enableStation.value = !enableStation.value;
+};
+
+const changeGetScreenStation = () => {
+  getScreenStation.value = !getScreenStation.value;
+};
 
 const getAccounts = async () => {
   try {
@@ -173,6 +194,7 @@ const closeModal = () => {
 const updateSelectedItems = (newValue) => {
   selectedItems.value = newValue;
 };
+
 const updateqrCodeData = (newValue) => {
   qrCodeData.value = newValue;
 };
@@ -182,6 +204,8 @@ const updateLoading = (newValue) => {
 };
 
 onMounted(getAccounts);
+
+provide("selectedItems", { selectedItems });
 </script>
 
 <style scoped>
