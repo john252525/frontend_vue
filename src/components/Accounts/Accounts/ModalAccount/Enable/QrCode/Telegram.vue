@@ -14,7 +14,7 @@ import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
 const { startFunc, offQrCodeStation } = inject("accountItems");
-
+const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 
@@ -113,7 +113,7 @@ const getQr = async () => {
       if (!response.data.data.value) {
         clearInterval(intervalId);
         qrCodeData.link = previousLink; // Отображаем предыдущую ссылку
-        closeModal(); // Закрываем модальное окно
+        changeEnableStation();
       }
     }
   } catch (error) {
@@ -165,7 +165,7 @@ const EnablebyQR = async () => {
     count++;
     if (count >= 6) {
       clearInterval(intervalId);
-      closeModal(); // Закрываем модальное окно
+      changeEnableStation();
     }
   }, 20000); // 20 секунд
 };

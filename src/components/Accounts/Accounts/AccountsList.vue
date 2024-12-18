@@ -53,6 +53,8 @@
       :changeStationQrModal="changeStationQrModal"
       :changeStationGetByCode="changeStationGetByCode"
       :changeEnableStation="changeEnableStation"
+      :getScreenStation="getScreenStation"
+      :changeGetScreenStation="changeGetScreenStation"
     />
     <SettignsModal
       :closeModal="closeModal"
@@ -72,7 +74,11 @@
       :selectedItems="selectedItems"
       :getByCodeStation="getByCodeStation"
     />
-    <!-- <getScreen /> -->
+    <getScreen
+      v-if="getScreenStation"
+      :changeGetScreenStation="changeGetScreenStation"
+      :selectedItem="selectedItem"
+    />
     <Enable
       v-if="enableStation"
       :enableStation="enableStation"
@@ -90,7 +96,7 @@ import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
-// import getScreen from "./ModalAccount/getScreen.vue";
+import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
@@ -206,6 +212,7 @@ const updateLoading = (newValue) => {
 onMounted(getAccounts);
 
 provide("selectedItems", { selectedItems });
+provide("changeEnableStation", { changeEnableStation });
 </script>
 
 <style scoped>

@@ -6,6 +6,7 @@
     <ChallengeRequired v-if="station.ChallengeRequired" />
     <LoadingModal :stationLoading="station.stationLoading" />
     <ResultModal v-if="station.result" />
+    <ResultModalTrue v-if="station.resultTrue" />
   </section>
 </template>
 
@@ -15,6 +16,7 @@ import GetCode from "./GetCode/GetCode.vue";
 import ResultModal from "./ResultModal.vue";
 import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
 import LoadingModal from "./LoadingModal.vue";
+import ResultModalTrue from "./ResultModalTrue.vue";
 import { ref, toRefs, provide, reactive } from "vue";
 import axios from "axios";
 const props = defineProps({
@@ -35,6 +37,7 @@ const station = reactive({
   ChallengeRequired: false,
   stationLoading: false,
   result: null,
+  resultTrue: false,
 });
 
 const offQrCodeStation = () => {
@@ -97,7 +100,7 @@ const setState = async (request) => {
     );
     if (response.data.data.status === "ok") {
       station.stationLoading = false;
-      console.log("все ок");
+      station.resultTrue = true;
     } else if (response.data.data.error) {
       station.stationLoading = false;
       if (response.data.data.error.message === "QR received") {
@@ -119,6 +122,9 @@ const setState = async (request) => {
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
+    console.log("ошибка");
+    station.result = true;
+    station.stationLoading = false;
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }

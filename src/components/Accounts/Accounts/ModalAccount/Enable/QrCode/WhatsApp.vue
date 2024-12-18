@@ -1,10 +1,23 @@
 <template>
-  <section class="qr-whatsapp-section">
+  <section v-if="!station.phone" class="qr-whatsapp-section">
     <LoadingModal :stationLoading="stationLoading" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
-      <h2 @click="getCode" class="title">Связать через ввод кода</h2>
+      <h2 @click="getPhone" class="title">Связать через ввод кода</h2>
     </article>
+  </section>
+  <section v-if="station.phone" class="number-section">
+    <input
+      :class="station.inpPhone ? 'num-input-error' : 'num-input'"
+      placeholder="7 (900) 000-000"
+      @input="formatPhone"
+      class="num-input"
+      type="text"
+      id="phone"
+      v-model="phone"
+      required
+    />
+    <button @click="getCode" class="next-button">Далее</button>
   </section>
 </template>
 
@@ -13,9 +26,13 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
-
+const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login } = selectedItem.value;
+
+const station = reactive({
+  phone: false,
+});
 
 const stationLoading = ref(false);
 const qrCodeData = reactive({
@@ -23,8 +40,31 @@ const qrCodeData = reactive({
   station: false,
 });
 
-let intervalId = null; // Для хранения идентификатора интервала
-let previousLink = ""; // Для хранения предыдущей ссылки
+let intervalId = null;
+let previousLink = "";
+
+const phone = ref("7 ");
+
+const formatPhone = () => {
+  const cleaned = phone.value.replace(/\D/g, "");
+
+  if (cleaned.length === 0) {
+    phone.value = "7 ";
+    return;
+  }
+
+  const match = cleaned.match(/^(7)?(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+  if (match) {
+    phone.value = `7 (${match[2]}) ${match[3]}${
+      match[4] ? "-" + match[4] : ""
+    }`;
+  }
+};
+
+const getInternationalFormat = () => {
+  return phone.value.replace(/\D/g, "");
+};
 
 const forceStop = async () => {
   stationLoading.value = true;
@@ -56,13 +96,14 @@ const forceStop = async () => {
 };
 
 const disablePhoneAuth = async () => {
+  const internationalPhone = getInternationalFormat();
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/disablePhoneAuth",
       {
         source: source,
         login: login,
-        phone: "79228556998",
+        phone: internationalPhone,
       },
       {
         headers: {
@@ -125,6 +166,7 @@ const enablePhoneAuth = async () => {
       {
         source: source,
         login: login,
+        phone: "79228556998",
       },
       {
         headers: {
@@ -172,7 +214,7 @@ const getQr = async () => {
       if (!response.data.data.value) {
         clearInterval(intervalId);
         qrCodeData.link = previousLink; // Отображаем предыдущую ссылку
-        closeModal(); // Закрываем модальное окно
+        changeEnableStation();
       }
     }
   } catch (error) {
@@ -196,7 +238,7 @@ const EnablebyQR = async () => {
     count++;
     if (count >= 6) {
       clearInterval(intervalId);
-      closeModal(); // Закрываем модальное окно
+      changeEnableStation();
     }
   }, 20000); // 20 секунд
 };
@@ -204,6 +246,10 @@ const EnablebyQR = async () => {
 const closeModal = () => {
   // Логика для закрытия модального окна
   qrCodeData.station = false; // Сброс состояния QR-кода
+};
+
+const getPhone = async () => {
+  station.phone = true;
 };
 
 const getCode = async () => {
@@ -230,5 +276,45 @@ onBeforeUnmount(() => {
   padding: 4px;
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
+}
+
+.number-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.num-input {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 350px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+}
+
+.num-input-error {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 350px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
+}
+
+.next-button {
+  width: 365px;
+  height: 35px;
+  border-radius: 5px;
+  background-color: #4950ca;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  margin-top: 20px;
 }
 </style>

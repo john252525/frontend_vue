@@ -16,13 +16,13 @@
   <LoadingModal :stationLoading="station.stationLoading" />
   <section v-if="station.code">
     <h2 class="code-text">{{ userCode }}</h2>
-    <button class="close-button" @click="sendCode">Закрыть</button>
   </section>
 </template>
 <script setup>
 import { ref, toRefs, reactive, inject } from "vue";
 import axios from "axios";
 import LoadingModal from "../LoadingModal.vue";
+const { changeEnableStation } = inject("changeEnableStation");
 const phone = ref("7 ");
 const station = reactive({
   stationLoading: false,
@@ -181,9 +181,19 @@ const getAuthCode = async () => {
         },
       }
     );
+
     if (response.data.ok === true) {
       console.log("Состояние установлено");
       console.log(response.data);
+
+      // Проверяем, пустое ли значение authCode
+      if (!response.data.data.authCode) {
+        console.error("Ошибка: authCode пустой");
+        clearInterval(authCodeInterval); // Останавливаем интервал
+        station.stationLoading = false; // Останавливаем загрузку
+        return; // Выходим из функции
+      }
+
       station.stationLoading = false;
       station.code = true;
       userCode.value = response.data.data.authCode;
@@ -198,13 +208,6 @@ const getAuthCode = async () => {
   }
 };
 
-const sendCode = async () => {
-  await forceStop();
-  await enablePhoneAuth();
-  await setState();
-  await getAuthCode();
-};
-
 const nextButton = () => {
   if (phone.value.length != 16) {
     station.inpPhone = true;
@@ -213,12 +216,10 @@ const nextButton = () => {
     station.phone = false;
     station.stationLoading = true;
 
-    // Запускаем интервал для вызова getAuthCode
     authCodeInterval = setInterval(() => {
       getAuthCode();
-    }, 20000); // Каждые 20 секунд
+    }, 20000);
 
-    // Останавливаем интервал через 1 минуту
     setTimeout(() => {
       clearInterval(authCodeInterval);
       authCodeInterval = null; // Сбрасываем переменную интервала
@@ -226,6 +227,13 @@ const nextButton = () => {
 
     sendCode();
   }
+};
+
+const sendCode = async () => {
+  await forceStop();
+  await enablePhoneAuth();
+  await setState();
+  await getAuthCode();
 };
 
 const getQr = async () => {

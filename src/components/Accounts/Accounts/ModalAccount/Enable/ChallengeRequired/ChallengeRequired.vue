@@ -10,21 +10,24 @@
   </section>
   <ResultModal v-if="station.station === false" />
   <LoadingModal :station-loading="station.loading" />
+  <ResultModalTrue v-if="station.resultTrue" />
 </template>
 
 <script setup>
 import axios from "axios";
 import ResultModal from "../ResultModal.vue";
+import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
 import { ref, inject, reactive } from "vue";
 const code = ref("");
 const { selectedItem, offQrQrStation, startFunc } = inject("accountItems");
 const { source, login } = selectedItem.value;
-
+const { changeEnableStation } = inject("changeEnableStation");
 const station = reactive({
   station: undefined,
   loading: false,
   code: true,
+  resultTrue: false,
 });
 
 const solveChallenge = async () => {
@@ -47,8 +50,7 @@ const solveChallenge = async () => {
       }
     );
     if (response.data.data.status === "ok") {
-      console.log("Ok", source);
-      console.log(response.data);
+      station.resultTrue = true;
       station.loading = false;
     } else {
       console.log(response.data);
@@ -71,7 +73,7 @@ const disablePhoneAuth = async () => {
       {
         source: source,
         login: login,
-        code: `{{ ${code.value} }}`,
+        phone: "89228556998",
       },
       {
         headers: {
@@ -99,10 +101,9 @@ const disablePhoneAuth = async () => {
 };
 
 const getQr = async () => {
-  // await disablePhoneAuth();
-  await offQrQrStation();
-  // await startFunc();
-  // startFunc();
+  await disablePhoneAuth();
+  await changeEnableStation();
+  await startFunc();
 };
 </script>
 

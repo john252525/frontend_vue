@@ -1,6 +1,7 @@
 <template>
   <section class="telegram-code-section">
     <LoadingModal :stationLoading="station.loading" />
+    <ResultModalTrue v-if="station.resultTrue" />
     <section v-if="station.code" class="auth-code">
       <div class="input-cont">
         <label for="code">Код Telegram</label>
@@ -32,6 +33,7 @@
 <script setup>
 import { inject, reactive, ref, onMounted } from "vue";
 import axios from "axios";
+import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
@@ -44,6 +46,7 @@ const station = reactive({
     twoFactor: false,
     challengeRequired: false,
   },
+  resultTrue: false,
 });
 
 const formData = reactive({
@@ -142,8 +145,7 @@ const solveChallenge = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log("stop", source);
-      console.log(response.data);
+      station.resultTrue = true;
     } else {
       console.log(response.data.ok);
     }
@@ -173,8 +175,7 @@ const twoFactorAuth = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log("stop", source);
-      console.log(response.data);
+      station.resultTrue = true;
     } else {
       console.log(response.data.ok);
     }

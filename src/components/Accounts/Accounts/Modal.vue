@@ -9,7 +9,7 @@
         }"
       >
         <span class="action" @click="handleSubmit">Настройки</span>
-        <span class="action" @click="screenshot">Скриншот</span>
+        <span class="action" @click="changeGetScreenStation">Скриншот</span>
         <span class="action action-on" @click="changeEnableStation"
           >Включить</span
         >
@@ -22,9 +22,6 @@
           >Связать через QR</span
         >
         <span class="action" @click="handleSubmitCode">Связать через код</span>
-        <span class="action" @click="performAction('Проверить код')"
-          >Проверить код</span
-        >
         <span class="action action-delete" @click="ChangeconfirmStation"
           >Удалить аккаунт</span
         >
@@ -59,8 +56,7 @@
     :loadingStop="loadingStop"
   />
 </template>
-<!-- :forceStop="createRequest('forceStop')"
-    :deleteAccount="createRequest('deleteAccount')" -->
+
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import axios from "axios";
@@ -68,6 +64,7 @@ import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
+import GetScreen from "./ModalAccount/GetScreen.vue";
 
 const props = defineProps({
   closeModal: {
@@ -102,6 +99,12 @@ const props = defineProps({
   },
   changeEnableStation: {
     type: Function,
+  },
+  changeGetScreenStation: {
+    type: Function,
+  },
+  getScreenStation: {
+    type: Boolean,
   },
 });
 const emit = defineEmits();
