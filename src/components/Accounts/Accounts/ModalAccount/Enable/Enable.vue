@@ -28,7 +28,7 @@ const props = defineProps({
     type: Function,
   },
 });
-
+ChangeconfirmStation;
 const station = reactive({
   qrCode: false,
   getCode: false,

@@ -14,7 +14,9 @@
           >Включить</span
         >
         <span class="action" @click="forceStopActive">Выключить</span>
-        <span class="action action-throw" @click="resetAccount">Сбросить</span>
+        <span class="action action-throw" @click="ChangeconfirmStationReset"
+          >Сбросить</span
+        >
         <span class="action" @click="getNewProxy">Сменить прокси</span>
         <span class="action" @click="startEnableByQR('whatsapp')"
           >Связать через QR</span
@@ -23,7 +25,7 @@
         <span class="action" @click="performAction('Проверить код')"
           >Проверить код</span
         >
-        <span class="action action-delete" @click="deleteAccount"
+        <span class="action action-delete" @click="ChangeconfirmStation"
           >Удалить аккаунт</span
         >
       </div>
@@ -34,13 +36,38 @@
     :stationLoading="stationLoading"
   />
   <LoadMoadal :stationLoading="stationLoading" />
-</template>
 
+  <ConfirmDelete
+    :loadingStart="loadingStart"
+    :ChangeconfirmStation="ChangeconfirmStation"
+    v-if="confirmStation.delete"
+    :selectedItem="selectedItem"
+    :changeStationLoadingModal="changeStationLoadingModal"
+    :errorStationOn="errorStationOn"
+    :errorStationOff="errorStationOff"
+    :loadingStop="loadingStop"
+  />
+
+  <ConfirmReset
+    :loadingStart="loadingStart"
+    :ChangeconfirmStationReset="ChangeconfirmStationReset"
+    v-if="confirmStation.reset"
+    :selectedItem="selectedItem"
+    :changeStationLoadingModal="changeStationLoadingModal"
+    :errorStationOn="errorStationOn"
+    :errorStationOff="errorStationOff"
+    :loadingStop="loadingStop"
+  />
+</template>
+<!-- :forceStop="createRequest('forceStop')"
+    :deleteAccount="createRequest('deleteAccount')" -->
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import axios from "axios";
+import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
+import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 
 const props = defineProps({
   closeModal: {
@@ -93,6 +120,11 @@ const changeLadingStation = () => {
   emit("update:loadingStation", updateLoadingStation.value);
 };
 
+const confirmStation = reactive({
+  delete: false,
+  reset: false,
+});
+
 const stationLoading = reactive({
   loading: false,
   value: "",
@@ -107,6 +139,30 @@ const stationLoading = reactive({
     error: false,
   },
 });
+
+const errorStationOn = () => {
+  stationLoading.account.error = true;
+};
+
+const errorStationOff = () => {
+  stationLoading.account.error = true;
+};
+
+const ChangeconfirmStation = () => {
+  confirmStation.delete = !confirmStation.delete;
+};
+
+const ChangeconfirmStationReset = () => {
+  confirmStation.reset = !confirmStation.reset;
+};
+
+const loadingStart = () => {
+  stationLoading.loading = true;
+};
+
+const loadingStop = () => {
+  stationLoading.loading = false;
+};
 
 const changeStationLoadingModal = () => {
   stationLoading.modalStation = !stationLoading.modalStation;
@@ -149,7 +205,7 @@ const createRequest = async (request) => {
         // qrCodeDataSubmit();
       } else if (request === "deleteAccount") {
         stationLoading.loading = false;
-        location.reload();
+        // location.reload();
         setTimeout(() => {
           changeStationLoadingModal();
         }, 1000);
@@ -360,12 +416,6 @@ const resetAccount = async () => {
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
-};
-
-const deleteAccount = async () => {
-  stationLoading.loading = true;
-  await createRequest("forceStop");
-  await createRequest("deleteAccount");
 };
 </script>
 
