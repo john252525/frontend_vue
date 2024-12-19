@@ -17,10 +17,12 @@
   <section v-if="station.code">
     <h2 class="code-text">{{ userCode }}</h2>
   </section>
+  <ResultModal v-if="station.error" />
 </template>
 <script setup>
 import { ref, toRefs, reactive, inject } from "vue";
 import axios from "axios";
+import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
 const { changeEnableStation } = inject("changeEnableStation");
 const phone = ref("7 ");
@@ -29,6 +31,7 @@ const station = reactive({
   phone: true,
   code: false,
   inpPhone: false,
+  error: false,
 });
 let authCodeInterval = null; // Переменная для хранения интервала
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
@@ -188,10 +191,10 @@ const getAuthCode = async () => {
 
       // Проверяем, пустое ли значение authCode
       if (!response.data.data.authCode) {
-        console.error("Ошибка: authCode пустой");
-        clearInterval(authCodeInterval); // Останавливаем интервал
-        station.stationLoading = false; // Останавливаем загрузку
-        return; // Выходим из функции
+        station.error = true;
+        clearInterval(authCodeInterval);
+        station.stationLoading = false;
+        return;
       }
 
       station.stationLoading = false;
@@ -311,5 +314,6 @@ const getQr = async () => {
   padding: 4px;
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
+  cursor: pointer;
 }
 </style>

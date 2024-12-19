@@ -159,6 +159,7 @@ const setState = async () => {
 };
 
 const enablePhoneAuth = async () => {
+  const internationalPhone = getInternationalFormat();
   stationLoading.value = true;
   try {
     const response = await axios.post(
@@ -166,7 +167,7 @@ const enablePhoneAuth = async () => {
       {
         source: source,
         login: login,
-        phone: "79228556998",
+        phone: internationalPhone,
       },
       {
         headers: {
@@ -276,6 +277,7 @@ onBeforeUnmount(() => {
   padding: 4px;
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .number-section {

@@ -198,5 +198,6 @@ onBeforeUnmount(() => {
   padding: 4px;
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
+  cursor: pointer;
 }
 </style>

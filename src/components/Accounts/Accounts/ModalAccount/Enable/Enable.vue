@@ -17,7 +17,7 @@ import ResultModal from "./ResultModal.vue";
 import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
 import LoadingModal from "./LoadingModal.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
-import { ref, toRefs, provide, reactive } from "vue";
+import { ref, toRefs, provide, onMounted, reactive } from "vue";
 import axios from "axios";
 const props = defineProps({
   selectedItem: {
@@ -137,9 +137,13 @@ const startFunc = async () => {
   await setState();
 };
 
-if (enableStation.value === true) {
+// if (enableStation.value === true) {
+//   startFunc();
+// }
+
+onMounted(() => {
   startFunc();
-}
+});
 
 provide("accountItems", {
   startFunc,
