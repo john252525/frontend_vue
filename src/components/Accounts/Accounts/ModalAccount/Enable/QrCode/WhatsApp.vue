@@ -1,6 +1,7 @@
 <template>
   <section v-if="!station.phone" class="qr-whatsapp-section">
     <LoadingModal :stationLoading="stationLoading" />
+    <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
       <h2 @click="getPhone" class="title">Связать через ввод кода</h2>
@@ -8,7 +9,7 @@
   </section>
   <section v-if="station.phone" class="number-section">
     <input
-      :class="station.inpPhone ? 'num-input-error' : 'num-input'"
+      :class="station.errorPhone ? 'num-input-error' : 'num-input'"
       placeholder="7 (900) 000-000"
       @input="formatPhone"
       class="num-input"
@@ -26,12 +27,15 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
+import ResultModal from "../ResultModal.vue";
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login } = selectedItem.value;
 
 const station = reactive({
   phone: false,
+  error: false,
+  errorPhone: false,
 });
 
 const stationLoading = ref(false);
@@ -64,98 +68,6 @@ const formatPhone = () => {
 
 const getInternationalFormat = () => {
   return phone.value.replace(/\D/g, "");
-};
-
-const forceStop = async () => {
-  stationLoading.value = true;
-  try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
-      {
-        source: source,
-        login: login,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        },
-      }
-    );
-    if (response.data.ok === true) {
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error(`${request} - Ошибка`, error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
-const disablePhoneAuth = async () => {
-  const internationalPhone = getInternationalFormat();
-  try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/disablePhoneAuth",
-      {
-        source: source,
-        login: login,
-        phone: internationalPhone,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        },
-      }
-    );
-
-    if (response.data.ok === true) {
-      console.log("Аунтефикация 0ff");
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
-const setState = async () => {
-  try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
-      {
-        source: source,
-        login: login,
-        setState: true,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        },
-      }
-    );
-
-    if (response.data.ok === true) {
-      console.log("Состояние установлено");
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
 };
 
 const enablePhoneAuth = async () => {
@@ -220,17 +132,13 @@ const getQr = async () => {
     }
   } catch (error) {
     console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
+    station.error = true;
+    return;
   }
 };
 
 const EnablebyQR = async () => {
-  console.log(source);
-  await forceStop();
-  await disablePhoneAuth();
-  await setState();
+  stationLoading.value = true;
   await getQr();
 
   let count = 0;
@@ -254,8 +162,14 @@ const getPhone = async () => {
 };
 
 const getCode = async () => {
-  await offQrCodeStation();
+  const phone = getInternationalFormat();
+  if (phone.length != 11) {
+    console.log("error");
+    station.errorPhone = true;
+    return;
+  }
   await enablePhoneAuth();
+  await offQrCodeStation();
   await startFunc();
 };
 

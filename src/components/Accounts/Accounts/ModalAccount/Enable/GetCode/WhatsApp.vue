@@ -54,6 +54,10 @@ const formatPhone = () => {
   }
 };
 
+const getInternationalFormat = () => {
+  return phone.value.replace(/\D/g, "");
+};
+
 const forceStop = async () => {
   try {
     const response = await axios.post(
@@ -118,7 +122,6 @@ const disablePhoneAuth = async () => {
       {
         source: source,
         login: login,
-        phone: "79228556998",
       },
       {
         headers: {
@@ -205,9 +208,7 @@ const getAuthCode = async () => {
     }
   } catch (error) {
     console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
+    return;
   }
 };
 
@@ -233,9 +234,9 @@ const nextButton = () => {
 };
 
 const sendCode = async () => {
-  await forceStop();
-  await enablePhoneAuth();
-  await setState();
+  // await forceStop();
+  // await enablePhoneAuth();
+  // await setState();
   await getAuthCode();
 };
 

@@ -27,66 +27,6 @@ const qrCodeData = reactive({
 let intervalId = null; // Для хранения идентификатора интервала
 let previousLink = ""; // Для хранения предыдущей ссылки
 
-const forceStop = async () => {
-  stationLoading.value = true;
-  try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
-      {
-        source: source,
-        login: login,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        },
-      }
-    );
-    if (response.data.ok === true) {
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error(`${request} - Ошибка`, error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
-const setState = async () => {
-  try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
-      {
-        source: source,
-        login: login,
-        setState: true,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-        },
-      }
-    );
-
-    if (response.data.ok === true) {
-      console.log("Состояние установлено");
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
 const getQr = async () => {
   try {
     const response = await axios.post(
@@ -154,9 +94,6 @@ const enablePhoneAuth = async () => {
 };
 
 const EnablebyQR = async () => {
-  console.log(source);
-  await forceStop();
-  await setState();
   await getQr();
 
   let count = 0;
