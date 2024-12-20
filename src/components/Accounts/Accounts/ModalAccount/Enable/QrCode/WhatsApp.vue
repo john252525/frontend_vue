@@ -36,6 +36,7 @@ const station = reactive({
   phone: false,
   error: false,
   errorPhone: false,
+  qrSend: false,
 });
 
 const stationLoading = ref(false);
@@ -153,8 +154,7 @@ const EnablebyQR = async () => {
 };
 
 const closeModal = () => {
-  // Логика для закрытия модального окна
-  qrCodeData.station = false; // Сброс состояния QR-кода
+  qrCodeData.station = false;
 };
 
 const getPhone = async () => {

@@ -1,26 +1,12 @@
 <template>
-  <section v-if="station.phone" class="number-section">
-    <input
-      :class="station.inpPhone ? 'num-input-error' : 'num-input'"
-      placeholder="Логин"
-      @input="formatPhone"
-      class="num-input"
-      type="text"
-      id="phone"
-      v-model="phone"
-      required
-    />
-    <button class="next-button" @click="nextButton">Далее</button>
-    <h2 @click="getQr" class="title">Связать через сканирование QR</h2>
-  </section>
   <LoadingModal :stationLoading="station.stationLoading" />
-  <section v-if="station.code">
+  <section v-if="userCode != null">
     <h2 class="code-text">{{ userCode }}</h2>
   </section>
   <ResultModal v-if="station.error" />
 </template>
 <script setup>
-import { ref, toRefs, reactive, inject } from "vue";
+import { ref, toRefs, reactive, onMounted, inject } from "vue";
 import axios from "axios";
 import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
@@ -87,13 +73,14 @@ const forceStop = async () => {
 };
 
 const enablePhoneAuth = async () => {
+  const phone = getInternationalFormat();
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/enablePhoneAuth",
       {
         source: source,
         login: login,
-        phone: "79228556998",
+        phone: phone,
       },
       {
         headers: {
@@ -213,30 +200,21 @@ const getAuthCode = async () => {
 };
 
 const nextButton = () => {
-  if (phone.value.length != 16) {
-    station.inpPhone = true;
-    return;
-  } else {
-    station.phone = false;
-    station.stationLoading = true;
+  station.phone = false;
+  station.stationLoading = true;
 
-    authCodeInterval = setInterval(() => {
-      getAuthCode();
-    }, 20000);
+  authCodeInterval = setInterval(() => {
+    getAuthCode();
+  }, 20000);
 
-    setTimeout(() => {
-      clearInterval(authCodeInterval);
-      authCodeInterval = null; // Сбрасываем переменную интервала
-    }, 60000); // 60000 мс = 1 минута
+  setTimeout(() => {
+    clearInterval(authCodeInterval);
+    authCodeInterval = null; // Сбрасываем переменную интервала
+  }, 60000); // 60000 мс = 1 минута
 
-    sendCode();
-  }
+  sendCode();
 };
-
 const sendCode = async () => {
-  // await forceStop();
-  // await enablePhoneAuth();
-  // await setState();
   await getAuthCode();
 };
 
@@ -245,6 +223,10 @@ const getQr = async () => {
   await offQrQrStation();
   await startFunc();
 };
+
+onMounted(() => {
+  nextButton();
+});
 </script>
 
 <style scoped>
