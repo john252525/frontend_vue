@@ -1,9 +1,12 @@
 <template>
-  <section v-if="stationLoading">
-    <section class="loading">
-      <div class="spinner"></div>
+  <transition name="fade">
+    <section v-if="stationLoading">
+      <section class="loading">
+        <div class="spinner"></div>
+        <h2 v-if="textLoadin" class="title">{{ textLoadin }}</h2>
+      </section>
     </section>
-  </section>
+  </transition>
 </template>
 
 <script setup>
@@ -14,6 +17,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  textLoadin: {
+    type: String,
+    required: true
+  }
 });
 
 const { stationLoading } = toRefs(props);
@@ -45,12 +52,41 @@ const { stationLoading } = toRefs(props);
   animation: spin 1s linear infinite; /* Анимация вращения */
 }
 
+.title {
+font-weight: 400;
+font-size: 20px;
+margin-top: 20px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+
+.loading.fade-enter-active,
+.loading.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.loading.fade-enter,
+.loading.fade-leave-to {
+  opacity: 0;
+}
+
+.loading {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

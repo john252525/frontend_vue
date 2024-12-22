@@ -14,9 +14,13 @@
       </button>
       <article v-if="platformStation">
         <div @click="openPlatformChoice" class="black-fon"></div>
-        <ul class="platform-list">
-          <li @click="choiceTelegram" class="platform">Telegram</li>
-          <li @click="choiceWhatsApp" class="platform">WhatsApp</li>
+        <ul v-if="platformStationText === 'Telegram'" class="platform-list-telegram">
+          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">Telegram</li>
+          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">WhatsApp</li>
+        </ul>
+        <ul v-else class="platform-list-whatsapp">
+          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">Telegram</li>
+          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">WhatsApp</li>
         </ul>
       </article>
       <button @click="openAddAccount" class="add-account-button">
@@ -32,7 +36,7 @@ import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
 import { ref } from "vue";
 // localStorage.setItem("accountStationText", "Telegram");
-// localStorage.setItem("accountStation", "telegram");g
+// localStorage.setItem("accountStation", "telegram");
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = localStorage.getItem("accountStationText");
@@ -42,17 +46,10 @@ function openPlatformChoice() {
   platformStation.value = !platformStation.value;
 }
 
-function choiceTelegram() {
+function choiceNetWork(value, valueTwo) {
   location.reload();
-  localStorage.setItem("accountStation", "telegram");
-  localStorage.setItem("accountStationText", "Telegram");
-  platformStation.value = !platformStation.value;
-}
-
-function choiceWhatsApp() {
-  location.reload();
-  localStorage.setItem("accountStation", "whatsapp");
-  localStorage.setItem("accountStationText", "WhatsApp");
+  localStorage.setItem("accountStation", value);
+  localStorage.setItem("accountStationText", valueTwo);
   platformStation.value = !platformStation.value;
 }
 
@@ -158,10 +155,10 @@ header {
   transform: translate(-50%, -50%);
 }
 
-.platform-list {
+.platform-list-telegram {
   position: absolute;
   z-index: 10;
-  right: 137px;
+  right: 141px;
   top: 150px;
   border-radius: 10px;
   width: 120px;
@@ -173,27 +170,57 @@ header {
   flex-direction: column;
   gap: 2px;
 }
-.platform-list.fade-enter-active,
-.platform-list.fade-leave-active {
+
+.platform-list-whatsapp {
+ position: absolute;
+  z-index: 10;
+  right: 141px;
+  top: 150px;
+  border-radius: 10px;
+  width:130px;
+  height: 70px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.platform-list-telegram .fade-enter-active,
+.platform-list-telegram .fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.platform-list.fade-enter,
-.platform-list.fade-leave-to {
+.platform-list-telegram .fade-enter,
+.platform-list-telegram .fade-leave-to {
   opacity: 0;
 }
 
-.platform-list {
+.platform-list-telegram  {
+  animation: fadeIn 0.5s forwards;
+}
+
+.platform-list-whatsapp.fade-enter-active,
+.platform-list-whatsapp.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.platform-list-whatsapp.fade-enter,
+.platform-list-whatsapp.fade-leave-to {
+  opacity: 0;
+}
+
+.platform-list-whatsapp {
   animation: fadeIn 0.5s forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    /* transform: translateY(5px); */
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    /* transform: translateY(0); */
   }
 }
 

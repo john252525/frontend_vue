@@ -1,17 +1,19 @@
 <template>
   <div @click="ChangeconfirmStation" class="black-fon"></div>
-  <section class="confirm-modal">
-    <article class="circle">
-      <span>!</span>
-    </article>
-    <h2 class="title">Вы подтверждаете удаление аккаунта?</h2>
-    <article class="button-cont">
-      <button class="confirm-button" @click="confirm">Продолжить</button>
-      <button class="cansel-button" @click="ChangeconfirmStation">
-        Отмена
-      </button>
-    </article>
-  </section>
+  <transition name="fade">
+    <section class="confirm-modal">
+      <article class="circle">
+        <span>!</span>
+      </article>
+      <h2 class="title">Вы подтверждаете удаление аккаунта?</h2>
+      <article class="button-cont">
+        <button class="confirm-button" @click="confirm">Продолжить</button>
+        <button class="cansel-button" @click="ChangeconfirmStation">
+          Отмена
+        </button>
+      </article>
+    </section>
+  </transition>
 </template>
 
 <script setup>
@@ -64,7 +66,7 @@ const createRequest = async (request) => {
         props.loadingStop();
         location.reload();
         setTimeout(() => {
-          props.changeStationLoadingModal();
+          props.changeStationLoadingModal(false);
         }, 1000);
       } else {
         console.log(`${request} - Успешно`);
@@ -75,9 +77,9 @@ const createRequest = async (request) => {
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
     props.errorStationOn();
-    props.changeStationLoadingModal();
+    props.changeStationLoadingModal(true);
     setTimeout(() => {
-      props.changeStationLoadingModal();
+      props.changeStationLoadingModal(false);
       props.errorStationOff();
     }, 5000);
     if (error.response) {
@@ -88,7 +90,7 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStation();
-  await props.loadingStart();
+  await props.loadingStart('Удаление аккаунта...');
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };
@@ -160,6 +162,30 @@ const confirm = async () => {
   font-size: 12px;
   color: #000;
   background-color: transparent;
+}
+
+
+.confirm-modal.fade-enter-active,
+.confirm-modal.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.confirm-modal.fade-enter,
+.confirm-modal.fade-leave-to {
+  opacity: 0;
+}
+
+.confirm-modal {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 420px) {

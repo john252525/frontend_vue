@@ -1,6 +1,6 @@
 <template>
   <div class="black-fon">
-    <LoadingModal :stationLoading="station.loading" />
+    <LoadingModal :textLoadin="station.textLoadin" :stationLoading="station.loading" />
     <section v-if="station.screen" class="screen-section">
       <img class="screen-img" :src="base64Image" alt="screenshot" />
       <button @click="changeGetScreenStation" class="close">Закрыть</button>
@@ -28,6 +28,7 @@ const props = defineProps({
 const station = reactive({
   loading: false,
   screen: false,
+  textLoadin: ''
 });
 
 const { selectedItem, getScreenStation } = toRefs(props);
@@ -69,6 +70,7 @@ const sendScreen = async () => {
   getScreen();
 };
 onMounted(() => {
+  station.textLoadin = 'Генерируем изображение...'
   station.loading = true;
   sendScreen();
 });

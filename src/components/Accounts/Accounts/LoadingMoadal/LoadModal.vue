@@ -1,10 +1,13 @@
 <template>
-  <section v-if="stationLoading.loading">
-    <div class="black-fon"></div>
-    <section class="loading">
-      <div class="spinner"></div>
+  <transition name="fade">
+    <section v-if="stationLoading.loading">
+      <div class="black-fon"></div>
+      <section  class="loading">
+        <div class="spinner"></div>
+        <h2 v-if="textLoadin" class="title">{{textLoadin}}</h2>
+      </section>
     </section>
-  </section>
+  </transition>
 </template>
 
 <script setup>
@@ -15,6 +18,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  textLoadin: {
+    type: String,
+    required: true
+  }
 });
 
 const { stationLoading } = toRefs(props);
@@ -44,7 +51,7 @@ const { stationLoading } = toRefs(props);
   align-items: center;
   flex-direction: column;
   gap: 8px;
-  padding: 15px;
+  padding: 20px;
 }
 
 .spinner {
@@ -56,6 +63,12 @@ const { stationLoading } = toRefs(props);
   animation: spin 1s linear infinite; /* Анимация вращения */
 }
 
+.title {
+font-weight: 400;
+font-size: 20px;
+margin-top: 20px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -64,4 +77,28 @@ const { stationLoading } = toRefs(props);
     transform: rotate(360deg);
   }
 }
+
+.loading.fade-enter-active,
+.loading.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.loading.fade-enter,
+.loading.fade-leave-to {
+  opacity: 0;
+}
+
+.loading {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    /* transform: translate(-50%, -48%); */
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 </style>
