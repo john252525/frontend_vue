@@ -1,8 +1,12 @@
 <template>
-  <LoadingModal :stationLoading="station.stationLoading" />
+  <LoadingModal
+    :textLoadin="station.text"
+    :stationLoading="station.stationLoading"
+  />
   <section v-if="userCode != null">
     <h2 class="code-text">{{ userCode }}</h2>
   </section>
+  <h2 @click="getQr" class="title">Связать через сканирование QR</h2>
   <ResultModal v-if="station.error" />
 </template>
 <script setup>
@@ -18,6 +22,7 @@ const station = reactive({
   code: false,
   inpPhone: false,
   error: false,
+  text: "",
 });
 let authCodeInterval = null; // Переменная для хранения интервала
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
@@ -215,6 +220,7 @@ const nextButton = () => {
   sendCode();
 };
 const sendCode = async () => {
+  station.text = "Генерируем код...";
   await getAuthCode();
 };
 
@@ -245,6 +251,17 @@ onMounted(() => {
   color: #000;
   border: 0.5px solid #c1c1c1;
   background: #fcfcfc;
+}
+
+.title {
+  margin-top: 16px;
+  font-weight: 500;
+  font-size: 18px;
+  text-align: center;
+  padding: 4px;
+  background-color: rgb(243, 243, 243);
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .num-input-error {

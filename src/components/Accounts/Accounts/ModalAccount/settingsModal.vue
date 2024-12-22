@@ -6,7 +6,8 @@
       :stationLoading="stationLoading"
     />
     <form @submit.prevent="submitForm">
-      <h2 @click="changeStationSettingsModal" class="title">
+      <h2 class="title">Настройки аккаунта</h2>
+      <h2 @click="changeStationSettingsModal" class="subtitle">
         Webhook URLs (указывать с новой строки)
       </h2>
       <textarea id="messageTextarea" v-model="webhookUrlsText"></textarea>
@@ -178,6 +179,13 @@ form {
 }
 
 .title {
+  font-size: 22px;
+  color: rgb(0, 0, 0);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.subtitle {
   font-size: 14px;
   color: rgb(78, 78, 78);
   font-weight: 600;

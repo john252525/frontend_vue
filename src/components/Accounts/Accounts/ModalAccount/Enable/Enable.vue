@@ -4,7 +4,10 @@
     <QrCode v-if="station.qrCode" />
     <GetCode v-if="station.getCode" />
     <ChallengeRequired v-if="station.ChallengeRequired" />
-    <LoadingModal :stationLoading="station.stationLoading" />
+    <LoadingModal
+      :textLoadin="station.text"
+      :stationLoading="station.stationLoading"
+    />
     <ResultModal v-if="station.result" />
     <ResultModalTrue v-if="station.resultTrue" />
   </section>
@@ -38,6 +41,7 @@ const station = reactive({
   stationLoading: false,
   result: null,
   resultTrue: false,
+  text: "",
 });
 
 const offQrCodeStation = () => {
@@ -133,13 +137,11 @@ const setState = async (request) => {
 
 const startFunc = async () => {
   station.stationLoading = true;
+  station.result = false;
+  station.text = "Проверяем аккаунт...";
   await forceStop();
   await setState();
 };
-
-// if (enableStation.value === true) {
-//   startFunc();
-// }
 
 onMounted(() => {
   startFunc();

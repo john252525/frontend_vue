@@ -9,7 +9,12 @@
         }"
       >
         <span class="action" @click="handleSubmit">Настройки</span>
-        <span class="action" v-if="accountStationText === 'whatsapp'" @click="changeGetScreenStation">Скриншот</span>
+        <span
+          class="action"
+          v-if="accountStationText === 'whatsapp'"
+          @click="changeGetScreenStation"
+          >Скриншот</span
+        >
         <span class="action action-on" @click="changeEnableStation"
           >Включить</span
         >
@@ -32,7 +37,10 @@
     :changeStationLoadingModal="changeStationLoadingModal"
     :stationLoading="stationLoading"
   />
-  <LoadMoadal :stationLoading="stationLoading" :textLoadin="stationLoading.text" />
+  <LoadMoadal
+    :stationLoading="stationLoading"
+    :textLoadin="stationLoading.text"
+  />
 
   <ConfirmDelete
     :loadingStart="loadingStart"
@@ -131,7 +139,7 @@ const confirmStation = reactive({
 const stationLoading = reactive({
   loading: false,
   value: "",
-  text: '',
+  text: "",
   modalStation: false,
   deleteAccount: {
     station: false,
@@ -162,7 +170,7 @@ const ChangeconfirmStationReset = () => {
 
 const loadingStart = (value) => {
   stationLoading.loading = true;
-  stationLoading.text = value
+  stationLoading.text = value;
 };
 
 const loadingStop = () => {
@@ -170,7 +178,7 @@ const loadingStop = () => {
 };
 
 const changeStationLoadingModal = (value) => {
-  stationLoading.modalStation = value
+  stationLoading.modalStation = value;
 };
 
 const handleSubmitCode = () => {
@@ -215,12 +223,12 @@ const createRequest = async (request) => {
           changeStationLoadingModal();
         }, 1000);
       } else if (request === "getNewProxy") {
-        stationLoading.modalStation = true
+        stationLoading.modalStation = true;
         updateLoadingStation.value = false;
         changeLadingStation();
         stationLoading.loading = false;
         setTimeout(() => {
-          stationLoading.modalStation = false
+          stationLoading.modalStation = false;
         }, 5000);
       } else {
         console.log(`${request} - Успешно`);
@@ -231,9 +239,9 @@ const createRequest = async (request) => {
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
     stationLoading.account.error = true;
-    stationLoading.modalStation = true
+    stationLoading.modalStation = true;
     setTimeout(() => {
-      stationLoading.modalStation = false
+      stationLoading.modalStation = false;
       stationLoading.account.error = false;
     }, 5000);
     if (error.response) {
@@ -261,9 +269,9 @@ const forceStop = async (request) => {
     if (response.data.ok === true) {
       stationLoading.loading = false;
       stationLoading.account.error = false;
-      stationLoading.modalStation = true
+      stationLoading.modalStation = true;
       setTimeout(() => {
-        stationLoading.modalStation = false
+        stationLoading.modalStation = false;
         stationLoading.account.error = false;
       }, 5000);
     } else {
@@ -272,9 +280,9 @@ const forceStop = async (request) => {
   } catch (error) {
     console.error(`${request} - Ошибка`, error);
     stationLoading.account.error = true;
-    cstationLoading.modalStation = true
+    cstationLoading.modalStation = true;
     setTimeout(() => {
-      stationLoading.modalStation = false
+      stationLoading.modalStation = false;
       stationLoading.account.error = false;
     }, 5000);
     if (error.response) {
@@ -408,13 +416,14 @@ const startEnableByQR = async (value) => {
 
 const forceStopActive = async () => {
   stationLoading.loading = true;
+  stationLoading.text = "Выключение аккаунта...";
   forceStop();
 };
 
 const getNewProxy = async () => {
   createRequest("getNewProxy");
   stationLoading.loading = true;
-  stationLoading.text = 'Генерируем прокси...'
+  stationLoading.text = "Генерируем прокси...";
 };
 
 const resetAccount = async () => {

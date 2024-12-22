@@ -3,6 +3,7 @@
     :openAddAccountStation="openAddAccount"
     v-if="openAddAccountStation"
   />
+  <!-- <AddAccount /> -->
   <header>
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>
@@ -14,13 +15,24 @@
       </button>
       <article v-if="platformStation">
         <div @click="openPlatformChoice" class="black-fon"></div>
-        <ul v-if="platformStationText === 'Telegram'" class="platform-list-telegram">
-          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">Telegram</li>
-          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">WhatsApp</li>
+        <ul
+          v-if="platformStationText === 'Telegram'"
+          class="platform-list-telegram"
+        >
+          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">
+            Telegram
+          </li>
+          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">
+            WhatsApp
+          </li>
         </ul>
         <ul v-else class="platform-list-whatsapp">
-          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">Telegram</li>
-          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">WhatsApp</li>
+          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">
+            Telegram
+          </li>
+          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">
+            WhatsApp
+          </li>
         </ul>
       </article>
       <button @click="openAddAccount" class="add-account-button">
@@ -34,6 +46,7 @@
 <script setup>
 import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
+import AddAccount from "./Accounts/AddAccount/AddAccount.vue";
 import { ref } from "vue";
 // localStorage.setItem("accountStationText", "Telegram");
 // localStorage.setItem("accountStation", "telegram");
@@ -172,12 +185,12 @@ header {
 }
 
 .platform-list-whatsapp {
- position: absolute;
+  position: absolute;
   z-index: 10;
   right: 141px;
   top: 150px;
   border-radius: 10px;
-  width:130px;
+  width: 130px;
   height: 70px;
   background: #ffffff;
   display: flex;
@@ -196,7 +209,7 @@ header {
   opacity: 0;
 }
 
-.platform-list-telegram  {
+.platform-list-telegram {
   animation: fadeIn 0.5s forwards;
 }
 

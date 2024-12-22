@@ -8,12 +8,14 @@
         Неизвестная ошибка, <br />
         пожалуйста, попробуйте еще раз
       </p>
+      <button @click="startFunc" class="reload-button">Повторить</button>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
+const { startFunc } = inject("accountItems");
 </script>
 
 <style scoped>
@@ -41,9 +43,34 @@ import { ref, watch } from "vue";
   animation: rotate 1s ease-in-out forwards;
 }
 
+.reload-button {
+  border-radius: 5px;
+  width: 100px;
+  height: 30px;
+  background: #b73131;
+  font-weight: 600;
+  font-size: 12px;
+  color: #fff;
+  margin-top: 24px;
+  animation: opacity 0.5s ease-in-out forwards;
+}
+
+.reload-img {
+  margin-top: 36px;
+}
+
 .plus {
   font-size: 30px;
   color: #ff0000; /* Цвет плюса */
+}
+
+@keyframes opacity {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes rotate {

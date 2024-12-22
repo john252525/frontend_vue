@@ -90,7 +90,7 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStationReset();
-  await props.loadingStart('Сброс аккаунта');
+  await props.loadingStart("Сброс аккаунта...");
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");

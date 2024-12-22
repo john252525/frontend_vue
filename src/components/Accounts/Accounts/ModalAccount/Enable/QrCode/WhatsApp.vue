@@ -1,6 +1,6 @@
 <template>
   <section v-if="!station.phone" class="qr-whatsapp-section">
-    <LoadingModal :stationLoading="stationLoading" />
+    <LoadingModal :textLoadin="station.text" :stationLoading="stationLoading" />
     <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
@@ -37,6 +37,7 @@ const station = reactive({
   error: false,
   errorPhone: false,
   qrSend: false,
+  text: "",
 });
 
 const stationLoading = ref(false);
@@ -140,6 +141,7 @@ const getQr = async () => {
 
 const EnablebyQR = async () => {
   stationLoading.value = true;
+  station.text = "Генерируем QR-код...";
   await getQr();
 
   let count = 0;

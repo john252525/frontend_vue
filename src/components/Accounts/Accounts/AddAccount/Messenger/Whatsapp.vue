@@ -3,17 +3,17 @@
     <div>
       <div @click="dropdownOpen" class="dropdown-select">
         <h2
-          v-if="!category"
+          v-if="!accountData.messenger"
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
           Тип
         </h2>
         <h2 :class="{ unactive: !isDropdownOpen }" v-else class="item-selected">
-          {{ category }}
+          {{ accountData.messenger }}
         </h2>
         <h2
-          v-if="category && !isDropdownOpen"
+          v-if="accountData.messenger && !isDropdownOpen"
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
@@ -28,52 +28,29 @@
       </div>
       <nav v-if="isDropdownOpen" class="dropdown-options">
         <ul>
-          <li @click="selectCategory('Категория 1')" class="dropdown-option">
-            Категория 1
+          <li @click="selectMessangerFunc('Touchapi')" class="dropdown-option">
+            Touchapi
           </li>
         </ul>
         <ul>
-          <li @click="selectCategory('Категория 2')" class="dropdown-option">
-            Категория 2
-          </li>
-        </ul>
-        <ul>
-          <li @click="selectCategory('Категория 3')" class="dropdown-option">
-            Категория 3
+          <li @click="selectMessangerFunc('Edna')" class="dropdown-option">
+            Edna
           </li>
         </ul>
       </nav>
     </div>
   </section>
 </template>
-<!-- 
-<script>
-export default {
-  data() {
-    return {
-      selectedCategory: "",
-      isDropdownOpen: false,
-      categories: [
-        { value: "category1", text: "Категория 1" },
-        { value: "category2", text: "Категория 2" },
-        { value: "category3", text: "Категория 3" },
-      ],
-    };
-  },
-  methods: {
-    toggleDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen;
-    },
-    selectCategory(value) {
-      this.selectedCategory = value;
-      this.isDropdownOpen = false;
-    },
-  },
-};
-</script> -->
 
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
+const { accountData } = inject("accountData");
+
+const props = defineProps({
+  selectMessanger: {
+    type: Function,
+  },
+});
 
 const isDropdownOpen = ref(false);
 const category = ref("");
@@ -83,83 +60,17 @@ const selectCategory = (value) => {
   dropdownOpen();
 };
 
+const selectMessangerFunc = (value) => {
+  props.selectMessanger(value);
+  dropdownOpen();
+};
+
 const dropdownOpen = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 </script>
 
 <style scoped>
-/* .dropdown {
-  margin: 20px;
-  position: relative;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.dropdown-select {
-  position: relative;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-}
-
-.selected {
-  font-size: 14px;
-  font-weight: 500;
-  position: absolute;
-  top: -10px;
-  background-color: white;
-  padding: 0px 7px;
-  transition: all 0.25s;
-}
-
-.selected.up {
-  position: relative;
-  top: 0px;
-  transition: all 0.25s;
-}
-
-.dropdown-options {
-  top: 100%;
-  left: 0;
-  right: 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  z-index: 10;
-}
-
-.dropdown-option {
-  padding: 10px;
-  cursor: pointer;
-}
-
-.dropdown-option:hover {
-  background-color: #f0f0f0;
-}
-
-.arrow {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid #000;
-  transition: transform 0.3s;
-}
-
-.arrow.up {
-  transform: rotate(180deg);
-} */
-
 .dropdown-select {
   position: relative;
   border: 0.5px solid #c1c1c1;
@@ -188,14 +99,14 @@ label {
 
 .selected.active {
   position: relative;
-  font-size: 18px;
+  font-size: 16px;
   padding: 0px 0px;
   transition: all 0.15s;
   top: 0;
 }
 
 .item-selected {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   margin-left: 12px;
 }

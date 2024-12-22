@@ -19,8 +19,8 @@ const props = defineProps({
   },
   textLoadin: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const { stationLoading } = toRefs(props);
@@ -53,9 +53,11 @@ const { stationLoading } = toRefs(props);
 }
 
 .title {
-font-weight: 400;
-font-size: 20px;
-margin-top: 20px;
+  font-weight: 400;
+  font-size: 20px;
+  margin-top: 20px;
+  width: 250px;
+  text-align: center;
 }
 
 @keyframes spin {
@@ -64,29 +66,6 @@ margin-top: 20px;
   }
   100% {
     transform: rotate(360deg);
-  }
-}
-
-
-.loading.fade-enter-active,
-.loading.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.loading.fade-enter,
-.loading.fade-leave-to {
-  opacity: 0;
-}
-
-.loading {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 </style>
