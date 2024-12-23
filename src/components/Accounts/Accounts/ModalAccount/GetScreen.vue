@@ -1,6 +1,9 @@
 <template>
   <div class="black-fon">
-    <LoadingModal :textLoadin="station.textLoadin" :stationLoading="station.loading" />
+    <LoadingModal
+      :textLoadin="station.textLoadin"
+      :stationLoading="station.loading"
+    />
     <section v-if="station.screen" class="screen-section">
       <img class="screen-img" :src="base64Image" alt="screenshot" />
       <button @click="changeGetScreenStation" class="close">Закрыть</button>
@@ -28,7 +31,7 @@ const props = defineProps({
 const station = reactive({
   loading: false,
   screen: false,
-  textLoadin: ''
+  textLoadin: "",
 });
 
 const { selectedItem, getScreenStation } = toRefs(props);
@@ -47,7 +50,7 @@ const getScreen = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );
@@ -70,7 +73,7 @@ const sendScreen = async () => {
   getScreen();
 };
 onMounted(() => {
-  station.textLoadin = 'Генерируем изображение...'
+  station.textLoadin = "Генерируем изображение...";
   station.loading = true;
   sendScreen();
 });

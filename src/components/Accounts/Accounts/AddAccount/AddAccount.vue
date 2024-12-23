@@ -98,8 +98,11 @@
         accountData.messenger === 'WhatsApp' &&
         accountData.category === 'Messenger'
       "
+      @update-login="updateLogin"
+      @update-token="updateToken"
       :selectType="selectType"
     />
+    <button @click="AddAccount" class="create-account-button">Добавить</button>
   </section>
 </template>
 
@@ -112,6 +115,8 @@ const accountData = reactive({
   category: "",
   messenger: "",
   type: "",
+  login: "",
+  token: "",
 });
 
 const isOpen = reactive({
@@ -136,11 +141,54 @@ const selectMessenger = (value) => {
   dropdownOpen("messenger");
 };
 
+const updateLogin = (newLogin) => {
+  accountData.login = newLogin;
+};
+
+const updateToken = (newToken) => {
+  accountData.token = newToken;
+};
+
 const dropdownOpen = (value) => {
   if (value === "category") {
     isOpen.category = !isOpen.category;
   } else if (value === "messenger") {
     isOpen.messenger = !isOpen.messenger;
+  }
+};
+
+const AddAccount = () => {
+  if (!accountData.category) {
+    console.log("Нет категории");
+    return;
+  } else {
+    if (accountData.category === "Messenger") {
+      console.log("category: Messenger");
+    } else if (accountData.category === "CRM") {
+      console.log("category: CRM");
+    }
+  }
+  if (!accountData.messenger) {
+    console.log("Нет messenger");
+  } else {
+    if (accountData.messenger === "WhatsApp") {
+      console.log("messenger: WhatsApp");
+      if (!accountData.type) {
+        console.log("messenger: WhatsApp | type: NONE");
+        return;
+      } else {
+        if (accountData.type === "Touchapi") {
+          console.log("messenger: WhatsApp | type: Touchapi");
+        } else if (accountData.type === "Edna") {
+          console.log("messenger: WhatsApp | type: edna");
+          if
+        }
+      }
+    } else if (accountData.messenger === "Telegram") {
+      console.log("messenger: Telegram");
+    } else if (accountData.messenger === "SMS") {
+      console.log("messenger: SMS");
+    }
   }
 };
 
@@ -169,6 +217,17 @@ provide("accountData", { accountData });
   font-size: 18px;
   color: #000;
   margin-top: 24px;
+}
+
+.create-account-button {
+  border-radius: 5px;
+  width: 490px;
+  height: 44px;
+  background: #4950ca;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 20px;
 }
 
 .dropdown-select {

@@ -57,7 +57,7 @@ const createRequest = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );
@@ -90,7 +90,7 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStation();
-  await props.loadingStart('Удаление аккаунта...');
+  await props.loadingStart("Удаление аккаунта...");
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };
@@ -163,7 +163,6 @@ const confirm = async () => {
   color: #000;
   background-color: transparent;
 }
-
 
 .confirm-modal.fade-enter-active,
 .confirm-modal.fade-leave-active {

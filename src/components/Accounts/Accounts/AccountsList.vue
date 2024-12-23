@@ -132,13 +132,13 @@ const getAccounts = async () => {
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
         source: localStorage.getItem("accountStation"),
-        token: dataAccount.token,
+        token: localStorage.getItem("accountToken"),
         skipDetails: true,
       },
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${dataAccount.token}`,
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );

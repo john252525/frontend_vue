@@ -57,7 +57,7 @@ const createRequest = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );

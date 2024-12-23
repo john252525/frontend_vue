@@ -45,6 +45,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
+import axios from "axios";
 const router = useRouter();
 const formData = reactive({
   login: "",
@@ -88,6 +89,37 @@ function errorStyleStation(input, station) {
   }
 }
 
+const loginAccount = async () => {
+  try {
+    const response = await axios.post(
+      `https://b2288.apitter.com/login`,
+      {
+        username: formData.login,
+        password: formData.password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        },
+      }
+    );
+    if (response.data.ok === true) {
+      localStorage.setItem("accountToken", response.data.token);
+      localStorage.setItem("accountStationText", "Telegram");
+      localStorage.setItem("accountStation", "telegram");
+      location.reload();
+    } else {
+      console.log("нет", response.data);
+    }
+  } catch (error) {
+    console.error(`${request} - Ошибка`, error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
 function login() {
   const login = formData.login;
   const password = formData.password;
@@ -112,17 +144,13 @@ function login() {
 
   if (password.length === 0) {
     errorStyleStation("password", "on");
-  } else if (password.length > 20) {
-    errorStyleStation("password", "on");
-  } else if (password.length < 8) {
-    errorStyleStation("password", "on");
   } else {
     errorStyleStation("password", "off");
     stationAuth.password = true;
   }
 
   if (stationAuth.password === true && stationAuth.login === true) {
-    console.log("авторизация");
+    loginAccount();
   }
 }
 

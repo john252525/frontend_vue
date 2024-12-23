@@ -43,6 +43,7 @@
       <div>
         <input
           v-model="formData.token"
+          @input="updateToken"
           placeholder="Токен"
           type="text"
           class="input-data"
@@ -51,6 +52,7 @@
       <div>
         <input
           v-model="formData.login"
+          @input="updateLogin"
           placeholder="Логин"
           type="text"
           class="input-data"
@@ -61,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, inject, reactive } from "vue";
+import { ref, inject, reactive, defineEmits } from "vue";
 const { accountData } = inject("accountData");
 
 const props = defineProps({
@@ -69,13 +71,21 @@ const props = defineProps({
     type: Function,
   },
 });
-
+const emit = defineEmits();
 const isDropdownOpen = ref(false);
 
 const formData = reactive({
   token: "",
   login: "",
 });
+
+const updateLogin = () => {
+  emit("update-login", formData.login);
+};
+
+const updateToken = () => {
+  emit("update-token", formData.token);
+};
 
 const selectMessangerFunc = (value) => {
   props.selectType(value);

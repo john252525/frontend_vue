@@ -3,7 +3,7 @@
     :openAddAccountStation="openAddAccount"
     v-if="openAddAccountStation"
   />
-  <!-- <AddAccount /> -->
+  <AddAccount />
   <header>
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>
@@ -47,9 +47,7 @@
 import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccount.vue";
-import { ref } from "vue";
-// localStorage.setItem("accountStationText", "Telegram");
-// localStorage.setItem("accountStation", "telegram");
+import { ref, onMounted } from "vue";
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = localStorage.getItem("accountStationText");
