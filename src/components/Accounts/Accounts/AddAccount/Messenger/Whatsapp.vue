@@ -3,17 +3,17 @@
     <div>
       <div @click="dropdownOpen" class="dropdown-select">
         <h2
-          v-if="!accountData.messenger"
+          v-if="!accountData.type"
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
           Тип
         </h2>
         <h2 :class="{ unactive: !isDropdownOpen }" v-else class="item-selected">
-          {{ accountData.messenger }}
+          {{ accountData.type }}
         </h2>
         <h2
-          v-if="accountData.messenger && !isDropdownOpen"
+          v-if="accountData.type && !isDropdownOpen"
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
@@ -39,29 +39,46 @@
         </ul>
       </nav>
     </div>
+    <section v-if="accountData.type === 'Edna'">
+      <div>
+        <input
+          v-model="formData.token"
+          placeholder="Токен"
+          type="text"
+          class="input-data"
+        />
+      </div>
+      <div>
+        <input
+          v-model="formData.login"
+          placeholder="Логин"
+          type="text"
+          class="input-data"
+        />
+      </div>
+    </section>
   </section>
 </template>
 
 <script setup>
-import { ref, inject } from "vue";
+import { ref, inject, reactive } from "vue";
 const { accountData } = inject("accountData");
 
 const props = defineProps({
-  selectMessanger: {
+  selectType: {
     type: Function,
   },
 });
 
 const isDropdownOpen = ref(false);
-const category = ref("");
 
-const selectCategory = (value) => {
-  category.value = value;
-  dropdownOpen();
-};
+const formData = reactive({
+  token: "",
+  login: "",
+});
 
 const selectMessangerFunc = (value) => {
-  props.selectMessanger(value);
+  props.selectType(value);
   dropdownOpen();
 };
 
@@ -83,7 +100,7 @@ const dropdownOpen = () => {
   font-weight: 500;
   font-size: 16px;
   color: #343434;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 .selected {
@@ -130,6 +147,7 @@ const dropdownOpen = () => {
 }
 
 .dropdown-options {
+  position: absolute;
   border: 0.5px solid #c1c1c1;
   border-top: 0px;
   border-radius: 5px;
@@ -140,6 +158,7 @@ const dropdownOpen = () => {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  z-index: 100;
 }
 
 .dropdown-option {
@@ -164,6 +183,65 @@ const dropdownOpen = () => {
 }
 
 .dropdown-options {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-data {
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  width: 478px;
+  height: 45px;
+  background: #fcfcfc;
+  font-weight: 500;
+  font-size: 14px;
+  color: #343434;
+  margin-top: 30px;
+  padding-left: 10px;
+}
+
+.input-data.fade-enter-active,
+.input-data.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.input-data.fade-enter,
+.input-data.fade-leave-to {
+  opacity: 0;
+}
+
+.input-data {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dropdown-select.fade-enter-active,
+.dropdown-select.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.dropdown-select.fade-enter,
+.dropdown-select.fade-leave-to {
+  opacity: 0;
+}
+
+.dropdown-select {
   animation: fadeIn 0.5s forwards;
 }
 

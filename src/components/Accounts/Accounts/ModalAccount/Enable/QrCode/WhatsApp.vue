@@ -1,10 +1,13 @@
 <template>
   <section v-if="!station.phone" class="qr-whatsapp-section">
-    <LoadingModal :textLoadin="station.text" :stationLoading="stationLoading" />
+    <LoadingModal
+      :textLoadin="station.text"
+      :stationLoading="station.loading"
+    />
     <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
-      <h2 @click="getPhone" class="title">Связать через ввод кода</h2>
+      <h2 @click="stopEnableByQR" class="title">Связать через ввод кода</h2>
     </article>
   </section>
   <section v-if="station.phone" class="number-section">
@@ -38,15 +41,17 @@ const station = reactive({
   errorPhone: false,
   qrSend: false,
   text: "",
+  loading: false,
 });
 
-const stationLoading = ref(false);
 const qrCodeData = reactive({
   link: "",
   station: false,
 });
 
-let intervalId = null;
+const stationLoading = ref(true);
+const intervalId = ref(null);
+const isRunning = ref(false);
 let previousLink = "";
 
 const phone = ref("7 ");
@@ -74,7 +79,7 @@ const getInternationalFormat = () => {
 
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
-  stationLoading.value = true;
+  station.loading = true;
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/enablePhoneAuth`,
@@ -123,7 +128,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
       qrCodeData.link = response.data.data.value;
       qrCodeData.station = true;
-      stationLoading.value = false;
+      station.loading = false;
     } else {
       // Если значение пустое, останавливаем запросы
       if (!response.data.data.value) {
@@ -139,20 +144,46 @@ const getQr = async () => {
   }
 };
 
-const EnablebyQR = async () => {
+// const EnablebyQR = async () => {
+//   station.loading = true;
+//   station.text = "Генерируем QR-код...";
+//   await getQr();
+
+//   let count = 0;
+//   intervalId = setInterval(async () => {
+//     await getQr();
+//     count++;
+//     if (count >= 6) {
+//       clearInterval(intervalId);
+//       changeEnableStation();
+//     }
+//   }, 20000); // 20 секунд
+// };
+
+const startEnableByQR = async () => {
   stationLoading.value = true;
+  station.loading = true;
   station.text = "Генерируем QR-код...";
   await getQr();
 
   let count = 0;
-  intervalId = setInterval(async () => {
+  isRunning.value = true; // Устанавливаем состояние в "работает"
+
+  intervalId.value = setInterval(async () => {
     await getQr();
     count++;
     if (count >= 6) {
-      clearInterval(intervalId);
+      clearInterval(intervalId.value);
+      isRunning.value = false; // Устанавливаем состояние в "не работает"
       changeEnableStation();
     }
   }, 20000); // 20 секунд
+};
+
+const stopEnableByQR = () => {
+  clearInterval(intervalId.value); // Останавливаем интервал
+  isRunning.value = false; // Устанавливаем состояние в "не работает"
+  station.phone = true;
 };
 
 const closeModal = () => {
@@ -161,6 +192,7 @@ const closeModal = () => {
 
 const getPhone = async () => {
   station.phone = true;
+  clearInterval(intervalId);
 };
 
 const getCode = async () => {
@@ -176,12 +208,12 @@ const getCode = async () => {
 };
 
 onMounted(() => {
-  EnablebyQR();
+  startEnableByQR();
 });
 
-onBeforeUnmount(() => {
-  clearInterval(intervalId);
-});
+// onBeforeUnmount(() => {
+//   clearInterval(intervalId);
+// });
 </script>
 
 <style scoped>

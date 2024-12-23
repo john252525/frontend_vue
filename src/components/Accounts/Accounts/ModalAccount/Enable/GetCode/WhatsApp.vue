@@ -24,7 +24,8 @@ const station = reactive({
   error: false,
   text: "",
 });
-let authCodeInterval = null; // Переменная для хранения интервала
+let authCodeInterval = null;
+const isRunning = ref(false);
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const userCode = ref(null);
@@ -208,6 +209,8 @@ const nextButton = () => {
   station.phone = false;
   station.stationLoading = true;
 
+  isRunning.value = true; // Устанавливаем состояние в "работает"
+
   authCodeInterval = setInterval(() => {
     getAuthCode();
   }, 20000);
@@ -215,16 +218,21 @@ const nextButton = () => {
   setTimeout(() => {
     clearInterval(authCodeInterval);
     authCodeInterval = null; // Сбрасываем переменную интервала
+    isRunning.value = false; // Устанавливаем состояние в "не работает"
   }, 60000); // 60000 мс = 1 минута
 
   sendCode();
 };
+
 const sendCode = async () => {
   station.text = "Генерируем код...";
   await getAuthCode();
 };
 
 const getQr = async () => {
+  clearInterval(authCodeInterval); // Останавливаем интервал
+  authCodeInterval = null; // Сбрасываем переменную интервала
+  isRunning.value = false; // Устанавливаем состояние в "не работает"
   await disablePhoneAuth();
   await offQrQrStation();
   await startFunc();

@@ -1,33 +1,38 @@
 <template>
   <div class="black-fon"></div>
   <section class="add-account-section">
-    <!-- <div>
-      <div @click="dropdownOpen" class="dropdown-select">
+    <div>
+      <h2 class="title">Добавить аккаунты</h2>
+      <div @click="dropdownOpen('category')" class="dropdown-select">
         <h2
           v-if="!accountData.category"
           class="selected"
-          :class="{ active: isDropdownOpen }"
+          :class="{ active: isOpen.category }"
         >
           Выберите категорию
         </h2>
-        <h2 :class="{ unactive: !isDropdownOpen }" v-else class="item-selected">
+        <h2
+          :class="{ unactive: !isOpen.category }"
+          v-else
+          class="item-selected"
+        >
           {{ accountData.category }}
         </h2>
         <h2
-          v-if="accountData.category && !isDropdownOpen"
+          v-if="accountData.category && !isOpen.category"
           class="selected"
-          :class="{ active: isDropdownOpen }"
+          :class="{ active: isOpen.category }"
         >
           Выберите категорию
         </h2>
         <img
           class="arrow"
-          :class="{ up: isDropdownOpen }"
+          :class="{ up: isOpen.category }"
           src="/account/arrow.svg"
           alt=""
         />
       </div>
-      <nav v-if="isDropdownOpen" class="dropdown-options">
+      <nav v-if="isOpen.category" class="dropdown-options">
         <ul>
           <li @click="selectCategory('Messenger')" class="dropdown-option">
             Messenger
@@ -37,8 +42,64 @@
           <li @click="selectCategory('CRM')" class="dropdown-option">CRM</li>
         </ul>
       </nav>
-    </div> -->
-    <Whatsapp :selectMessanger="selectMessanger" />
+    </div>
+    <div>
+      <div
+        v-if="accountData.category === 'Messenger'"
+        @click="dropdownOpen('messenger')"
+        class="dropdown-select"
+      >
+        <h2
+          v-if="!accountData.messenger"
+          class="selected"
+          :class="{ active: isOpen.messenger }"
+        >
+          Выберите мессенджер
+        </h2>
+        <h2
+          :class="{ unactive: !isOpen.messenger }"
+          v-else
+          class="item-selected"
+        >
+          {{ accountData.messenger }}
+        </h2>
+        <h2
+          v-if="accountData.messenger && !isOpen.messenger"
+          class="selected"
+          :class="{ active: isOpen.messenger }"
+        >
+          Выберите мессенджер
+        </h2>
+        <img
+          class="arrow"
+          :class="{ up: isOpen.messenger }"
+          src="/account/arrow.svg"
+          alt=""
+        />
+      </div>
+      <nav v-if="isOpen.messenger" class="dropdown-options">
+        <ul>
+          <li @click="selectMessenger('WhatsApp')" class="dropdown-option">
+            WhatsApp
+          </li>
+        </ul>
+        <ul>
+          <li @click="selectMessenger('Telegram')" class="dropdown-option">
+            Telegram
+          </li>
+        </ul>
+        <ul>
+          <li @click="selectMessenger('SMS')" class="dropdown-option">SMS</li>
+        </ul>
+      </nav>
+    </div>
+    <Whatsapp
+      v-if="
+        accountData.messenger === 'WhatsApp' &&
+        accountData.category === 'Messenger'
+      "
+      :selectType="selectType"
+    />
   </section>
 </template>
 
@@ -53,20 +114,34 @@ const accountData = reactive({
   type: "",
 });
 
+const isOpen = reactive({
+  category: false,
+  messenger: false,
+});
+
 const isDropdownOpen = ref(false);
 
-const selectMessanger = (value) => {
-  accountData.messenger = value;
-  console.log(accountData.messenger);
+const selectType = (value) => {
+  accountData.type = value;
+  console.log(accountData.type);
 };
 
 const selectCategory = (value) => {
   accountData.category = value;
-  dropdownOpen();
+  dropdownOpen("category");
 };
 
-const dropdownOpen = () => {
-  isDropdownOpen.value = !isDropdownOpen.value;
+const selectMessenger = (value) => {
+  accountData.messenger = value;
+  dropdownOpen("messenger");
+};
+
+const dropdownOpen = (value) => {
+  if (value === "category") {
+    isOpen.category = !isOpen.category;
+  } else if (value === "messenger") {
+    isOpen.messenger = !isOpen.messenger;
+  }
 };
 
 provide("accountData", { accountData });
@@ -84,7 +159,16 @@ provide("accountData", { accountData });
   height: 625px;
   background: #fff;
   display: flex;
-  justify-content: center;
+  /* justify-content: center; */
+  align-items: center;
+  flex-direction: column;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #000;
+  margin-top: 24px;
 }
 
 .dropdown-select {
@@ -99,7 +183,7 @@ provide("accountData", { accountData });
   font-weight: 500;
   font-size: 16px;
   color: #343434;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 .selected {
@@ -146,6 +230,7 @@ provide("accountData", { accountData });
 }
 
 .dropdown-options {
+  position: absolute;
   border: 0.5px solid #c1c1c1;
   border-top: 0px;
   border-radius: 5px;
@@ -156,6 +241,7 @@ provide("accountData", { accountData });
   display: flex;
   flex-direction: column;
   gap: 1px;
+  z-index: 100;
 }
 
 .dropdown-option {
@@ -180,6 +266,30 @@ provide("accountData", { accountData });
 }
 
 .dropdown-options {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-select.fade-enter-active,
+.dropdown-select.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.dropdown-select.fade-enter,
+.dropdown-select.fade-leave-to {
+  opacity: 0;
+}
+
+.dropdown-select {
   animation: fadeIn 0.5s forwards;
 }
 
