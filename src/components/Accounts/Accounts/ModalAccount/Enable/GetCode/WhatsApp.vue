@@ -190,6 +190,7 @@ const getAuthCode = async () => {
         station.error = true;
         clearInterval(authCodeInterval);
         station.stationLoading = false;
+
         return;
       }
 
@@ -219,6 +220,7 @@ const nextButton = () => {
     clearInterval(authCodeInterval);
     authCodeInterval = null; // Сбрасываем переменную интервала
     isRunning.value = false; // Устанавливаем состояние в "не работает"
+    changeEnableStation();
   }, 60000); // 60000 мс = 1 минута
 
   sendCode();
