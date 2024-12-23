@@ -214,6 +214,7 @@ onMounted(() => {
 // onBeforeUnmount(() => {
 //   clearInterval(intervalId);
 // });
+defineExpose({ stopEnableByQR });
 </script>
 
 <style scoped>
@@ -226,6 +227,16 @@ onMounted(() => {
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
   cursor: pointer;
+}
+
+.blak-fon {
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+  height: 100vh;
+  background: rgba(117, 117, 117, 0.3);
+  top: 0;
+  left: 0;
 }
 
 .number-section {

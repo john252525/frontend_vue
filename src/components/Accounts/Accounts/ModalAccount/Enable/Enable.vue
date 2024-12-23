@@ -1,8 +1,8 @@
 <template>
-  <div @click="props.changeEnableStation" class="black-fon"></div>
+  <div @click="allStop" class="black-fon"></div>
   <section class="enable-section">
-    <QrCode v-if="station.qrCode" />
-    <GetCode v-if="station.getCode" />
+    <QrCode ref="subComponentRef" v-if="station.qrCode" />
+    <GetCode ref="subComponent" v-if="station.getCode" />
     <ChallengeRequired v-if="station.ChallengeRequired" />
     <LoadingModal
       :textLoadin="station.text"
@@ -34,6 +34,8 @@ const props = defineProps({
   },
 });
 
+let isRunning = false; // Флаг для отслеживания выполнения функции
+
 const station = reactive({
   qrCode: false,
   getCode: false,
@@ -43,6 +45,34 @@ const station = reactive({
   resultTrue: false,
   text: "",
 });
+
+const subComponent = ref(null);
+const subComponentRef = ref(null);
+const stopAuthCode = () => {
+  if (subComponent.value) {
+    // Проверяем, есть ли у подкомпонента функция stopAuthCode
+    const child = subComponent.value.getChild(); // Получаем дочерний компонент
+    if (child && typeof child.stopAuthCode === "function") {
+      child.stopAuthCode(); // Вызываем функцию остановки в дочернем компоненте
+    }
+  }
+};
+
+const handleStopEnableByQR = () => {
+  if (subComponentRef.value) {
+    const childComponent = subComponentRef.value.getChild(); // Получаем дочерний компонент
+    if (childComponent && typeof childComponent.stopEnableByQR === "function") {
+      childComponent.stopEnableByQR(); // Вызываем функцию остановки в дочернем компоненте
+    }
+  }
+};
+
+const allStop = () => {
+  handleStopEnableByQR();
+  stopAuthCode();
+  props.changeEnableStation();
+  isRunning = false;
+};
 
 const offQrCodeStation = () => {
   station.qrCode = false;
@@ -136,11 +166,16 @@ const setState = async (request) => {
 };
 
 const startFunc = async () => {
+  isRunning = true; // Устанавливаем флаг, что функция запущена
   station.stationLoading = true;
   station.result = false;
   station.text = "Проверяем аккаунт...";
+
   await forceStop();
-  await setState();
+  if (isRunning) {
+    // Проверяем флаг перед вызовом setState
+    await setState();
+  }
 };
 
 onMounted(() => {

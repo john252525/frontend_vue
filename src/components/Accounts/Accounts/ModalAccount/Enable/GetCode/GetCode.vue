@@ -1,7 +1,7 @@
 <template>
   <section>
     <Telegram v-if="source === 'telegram'" />
-    <WhatsApp v-else />
+    <WhatsApp ref="child" v-else />
   </section>
 </template>
 
@@ -12,6 +12,12 @@ import WhatsApp from "./WhatsApp.vue";
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const qrStateBolean = ref(false);
+
+const child = ref(null);
+
+const getChild = () => {
+  return child.value; // Возвращаем реф на дочерний компонент
+};
 
 const changeQrStateBoleanOn = () => {
   qrStateBolean.value = true;
@@ -26,6 +32,7 @@ provide("qrStateBolean", {
   changeQrStateBoleanOn,
   changeQrStateBoleanOff,
 });
+defineExpose({ getChild });
 </script>
 
 <style scoped></style>

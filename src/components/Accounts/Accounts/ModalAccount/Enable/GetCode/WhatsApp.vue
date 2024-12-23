@@ -238,9 +238,17 @@ const getQr = async () => {
   await startFunc();
 };
 
+const stopAuthCode = () => {
+  clearInterval(authCodeInterval); // Останавливаем интервал
+  authCodeInterval = null; // Сбрасываем переменную интервала
+  isRunning.value = false; // Устанавливаем состояние в "не работает"
+};
+
 onMounted(() => {
   nextButton();
 });
+
+defineExpose({ stopAuthCode });
 </script>
 
 <style scoped>
