@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, inject, reactive, defineEmits } from "vue";
+import { ref, inject, reactive, watch, defineEmits } from "vue";
 const { accountData } = inject("accountData");
 
 const props = defineProps({
@@ -95,8 +95,17 @@ const selectMessangerFunc = (value) => {
 const dropdownOpen = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
-</script>
 
+watch(accountData.type, (newValue) => {
+  if (newValue) {
+    formData.login = ''
+  formData.token = ''
+  console.log('dsds')
+  }
+  
+})
+
+</script>
 <style scoped>
 .dropdown-select {
   position: relative;

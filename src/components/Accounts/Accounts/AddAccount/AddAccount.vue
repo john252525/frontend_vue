@@ -93,6 +93,19 @@
         </ul>
       </nav>
     </div>
+    <div>
+      <input
+      v-if="
+        accountData.messenger === 'Telegram' &&
+        accountData.category === 'Messenger'
+      "
+      @input="checkInputTelegram"
+        v-model="accountData.tgLogin"
+        placeholder="Логин"
+        type="text"
+        class="input-data"
+      />
+    </div>
     <Whatsapp
       v-if="
         accountData.messenger === 'WhatsApp' &&
@@ -102,7 +115,7 @@
       @update-token="updateToken"
       :selectType="selectType"
     />
-    <button @click="AddAccount" class="create-account-button">Добавить</button>
+    <button v-if="accountData.button" @click="AddAccount" class="create-account-button">Добавить</button>
   </section>
 </template>
 
@@ -116,7 +129,9 @@ const accountData = reactive({
   messenger: "",
   type: "",
   login: "",
+  tgLogin: '',
   token: "",
+  button: false
 });
 
 const isOpen = reactive({
@@ -128,7 +143,17 @@ const isDropdownOpen = ref(false);
 
 const selectType = (value) => {
   accountData.type = value;
-  console.log(accountData.type);
+  if (value === 'Touchapi') {
+    accountData.button = true 
+  } else if ('Edna') {
+    if(accountData.token) {
+      return
+    } else {
+      accountData.button = false  
+    }
+  } else {
+    accountData.button = false 
+  }
 };
 
 const selectCategory = (value) => {
@@ -138,7 +163,25 @@ const selectCategory = (value) => {
 
 const selectMessenger = (value) => {
   accountData.messenger = value;
+  if (value === 'Telegram') {
+    if (accountData.tgLogin) {
+      accountData.button = true
+      return
+    } else{
+      accountData.button = false
+    }
+  } else if (accountData.messenger === 'WhatsApp') {
+    accountData.button = false  
+    accountData.type = ''
+  } else {
+    accountData.button = false
+
+  } 
   dropdownOpen("messenger");
+};
+
+const checkInputTelegram = () => {
+  accountData.button = accountData.tgLogin.trim() !== '';
 };
 
 const updateLogin = (newLogin) => {
@@ -147,6 +190,11 @@ const updateLogin = (newLogin) => {
 
 const updateToken = (newToken) => {
   accountData.token = newToken;
+  if (newToken) {
+    accountData.button = true
+  } else {
+    accountData.button = false
+  }
 };
 
 const dropdownOpen = (value) => {
@@ -156,7 +204,7 @@ const dropdownOpen = (value) => {
     isOpen.messenger = !isOpen.messenger;
   }
 };
-
+ 
 const AddAccount = () => {
   if (!accountData.category) {
     console.log("Нет категории");
@@ -181,7 +229,11 @@ const AddAccount = () => {
           console.log("messenger: WhatsApp | type: Touchapi");
         } else if (accountData.type === "Edna") {
           console.log("messenger: WhatsApp | type: edna");
-          if
+            if(!accountData.token) {
+              console.log("messenger: WhatsApp | type: edna | token: NoNE")
+            } else {
+              accountData.button = true
+            }
         }
       }
     } else if (accountData.messenger === "Telegram") {
@@ -228,6 +280,30 @@ provide("accountData", { accountData });
   font-size: 14px;
   color: #fff;
   margin-top: 20px;
+}
+
+.create-account-button.fade-enter-active,
+.create-account-button.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.create-account-button.fade-enter,
+.create-account-button.fade-leave-to {
+  opacity: 0;
+}
+
+.create-account-button {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-select {
@@ -360,6 +436,41 @@ provide("accountData", { accountData });
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.input-data {
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  width: 478px;
+  height: 45px;
+  background: #fcfcfc;
+  font-weight: 500;
+  font-size: 14px;
+  color: #343434;
+  margin-top: 30px;
+  padding-left: 10px;
+}
+
+.input-data.fade-enter-active,
+.input-data.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.input-data.fade-enter,
+.input-data.fade-leave-to {
+  opacity: 0;
+}
+
+.input-data {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

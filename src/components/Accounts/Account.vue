@@ -3,7 +3,7 @@
     :openAddAccountStation="openAddAccount"
     v-if="openAddAccountStation"
   />
-  <AddAccount />
+  <!-- <AddAccount /> -->
   <header>
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>
