@@ -3,12 +3,16 @@
     <nav>
       <ul>
         <li @click="navigateTo('/')">
-          <img src="/navigation/accaunts.svg" alt="Главная" />
+          <img src="/navigation/home.svg" alt="Главная" />
           <p class="page">Главная</p>
         </li>
         <li @click="navigateTo('accounts')">
           <img src="/navigation/accaunts.svg" alt="Аккаунты" />
           <p class="page">Аккаунты</p>
+        </li>
+        <li @click="navigateTo('Mailing')">
+          <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+          <p class="page">Рассылки</p>
         </li>
       </ul>
     </nav>
@@ -36,6 +40,10 @@
           <li @click="clickMenu('Accounts')">
             <img src="/navigation/accaunts.svg" alt="Аккаунты" />
             <p class="page">Аккаунты</p>
+          </li>
+          <li @click="clickMenu('Accounts')">
+            <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+            <p class="page">Рассылки</p>
           </li>
         </ul>
       </nav>

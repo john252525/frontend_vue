@@ -8,9 +8,11 @@ import Registration from "./pages/Registration.vue";
 import PasswordRecovery from "./pages/PasswordRecovery.vue";
 import test from "./pages/test.vue";
 import MainPage from "./pages/MainPage.vue";
+import Mailing from "./pages/Mailing.vue";
 const routes = [
   { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
   { path: "/", name: "MainPage", component: MainPage },
+  { path: "/Mailing", name: "Mailing", component: Mailing },
   { path: "/login", name: "Login", component: Login },
   { path: "/registration", name: "Registration", component: Registration },
   { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },
