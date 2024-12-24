@@ -1,5 +1,5 @@
 <template>
-  <div class="black-fon"></div>
+  <div @click="openAddAccountStation" class="black-fon"></div>
   <section class="add-account-section">
     <div>
       <h2 class="title">Добавить аккаунты</h2>
@@ -43,95 +43,127 @@
         </ul>
       </nav>
     </div>
-    <div>
-      <div
-        v-if="accountData.category === 'Messenger'"
-        @click="dropdownOpen('messenger')"
-        class="dropdown-select"
-      >
-        <h2
-          v-if="!accountData.messenger"
-          class="selected"
-          :class="{ active: isOpen.messenger }"
-        >
-          Выберите мессенджер
-        </h2>
-        <h2
-          :class="{ unactive: !isOpen.messenger }"
-          v-else
-          class="item-selected"
-        >
-          {{ accountData.messenger }}
-        </h2>
-        <h2
-          v-if="accountData.messenger && !isOpen.messenger"
-          class="selected"
-          :class="{ active: isOpen.messenger }"
-        >
-          Выберите мессенджер
-        </h2>
-        <img
-          class="arrow"
-          :class="{ up: isOpen.messenger }"
-          src="/account/arrow.svg"
-          alt=""
-        />
-      </div>
-      <nav v-if="isOpen.messenger" class="dropdown-options">
-        <ul>
-          <li @click="selectMessenger('WhatsApp')" class="dropdown-option">
-            WhatsApp
-          </li>
-        </ul>
-        <ul>
-          <li @click="selectMessenger('Telegram')" class="dropdown-option">
-            Telegram
-          </li>
-        </ul>
-        <ul>
-          <li @click="selectMessenger('SMS')" class="dropdown-option">SMS</li>
-        </ul>
-      </nav>
-    </div>
-    <div>
-      <input
-      v-if="
-        accountData.messenger === 'Telegram' &&
-        accountData.category === 'Messenger'
-      "
-      @input="checkInputTelegram"
-        v-model="accountData.tgLogin"
-        placeholder="Логин"
-        type="text"
-        class="input-data"
-      />
-    </div>
-    <Whatsapp
-      v-if="
-        accountData.messenger === 'WhatsApp' &&
-        accountData.category === 'Messenger'
-      "
+    <Crm
       @update-login="updateLogin"
       @update-token="updateToken"
       :selectType="selectType"
+      v-if="accountData.category === 'CRM'"
     />
-    <button v-if="accountData.button" @click="AddAccount" class="create-account-button">Добавить</button>
+    <section v-else>
+      <div>
+        <div
+          v-if="accountData.category === 'Messenger'"
+          @click="dropdownOpen('messenger')"
+          class="dropdown-select"
+        >
+          <h2
+            v-if="!accountData.messenger"
+            class="selected"
+            :class="{ active: isOpen.messenger }"
+          >
+            Выберите мессенджер
+          </h2>
+          <h2
+            :class="{ unactive: !isOpen.messenger }"
+            v-else
+            class="item-selected"
+          >
+            {{ accountData.messenger }}
+          </h2>
+          <h2
+            v-if="accountData.messenger && !isOpen.messenger"
+            class="selected"
+            :class="{ active: isOpen.messenger }"
+          >
+            Выберите мессенджер
+          </h2>
+          <img
+            class="arrow"
+            :class="{ up: isOpen.messenger }"
+            src="/account/arrow.svg"
+            alt=""
+          />
+        </div>
+        <nav v-if="isOpen.messenger" class="dropdown-options">
+          <ul>
+            <li @click="selectMessenger('WhatsApp')" class="dropdown-option">
+              WhatsApp
+            </li>
+          </ul>
+          <ul>
+            <li @click="selectMessenger('Telegram')" class="dropdown-option">
+              Telegram
+            </li>
+          </ul>
+          <ul>
+            <li @click="selectMessenger('SMS')" class="dropdown-option">SMS</li>
+          </ul>
+        </nav>
+      </div>
+      <div>
+        <input
+          v-if="
+            accountData.messenger === 'Telegram' &&
+            accountData.category === 'Messenger'
+          "
+          @input="checkInputTelegram"
+          v-model="accountData.tgLogin"
+          placeholder="Логин"
+          type="text"
+          class="input-data"
+        />
+      </div>
+      <Whatsapp
+        v-if="
+          accountData.messenger === 'WhatsApp' &&
+          accountData.category === 'Messenger'
+        "
+        @update-login="updateLogin"
+        @update-token="updateToken"
+        :selectType="selectType"
+      />
+    </section>
+    <button
+      v-if="accountData.button"
+      @click="AddAccount"
+      class="create-account-button"
+    >
+      Добавить
+    </button>
   </section>
 </template>
 
 <script setup>
 import Whatsapp from "./Messenger/Whatsapp.vue";
+import Crm from "./Crm/Crm.vue";
+import axios from "axios";
+import { ref, reactive, watch, provide, computed } from "vue";
 
-import { ref, reactive, provide } from "vue";
+const props = defineProps({
+  openAddAccountStation: {
+    type: Function,
+  },
+});
 
 const accountData = reactive({
   category: "",
   messenger: "",
   type: "",
   login: "",
-  tgLogin: '',
+  tgLogin: "",
   token: "",
-  button: false
+  button: false,
+});
+
+const data = reactive({
+  category: "",
+  messenger: "",
+  type: "",
+});
+
+const station = reactive({
+  login: false,
+  token: false,
 });
 
 const isOpen = reactive({
@@ -143,57 +175,127 @@ const isDropdownOpen = ref(false);
 
 const selectType = (value) => {
   accountData.type = value;
-  if (value === 'Touchapi') {
-    accountData.button = true 
-  } else if ('Edna') {
-    if(accountData.token) {
-      return
+  if (value === "Touchapi") {
+    // accountData.button = true;
+  } else if ("Edna") {
+    if (accountData.token) {
+      return;
     } else {
-      accountData.button = false  
+      accountData.button = false;
     }
   } else {
-    accountData.button = false 
+    accountData.button = false;
   }
 };
 
 const selectCategory = (value) => {
   accountData.category = value;
+  if (value === "Messenger") {
+    data.category = "messenger";
+    accountData.button = false;
+  } else if (value === "CRM") {
+    accountData.type = "";
+
+    accountData.messenger = "";
+    accountData.button = false;
+    data.category = "crm";
+  }
   dropdownOpen("category");
 };
 
 const selectMessenger = (value) => {
   accountData.messenger = value;
-  if (value === 'Telegram') {
+  if (value === "Telegram") {
+    data.messenger = "telegram";
     if (accountData.tgLogin) {
-      accountData.button = true
-      return
-    } else{
-      accountData.button = false
+      accountData.button = true;
+      return;
+    } else {
+      accountData.button = false;
     }
-  } else if (accountData.messenger === 'WhatsApp') {
-    accountData.button = false  
-    accountData.type = ''
+  } else if (accountData.messenger === "WhatsApp") {
+    data.messenger = "whatsapp";
+    accountData.button = false;
+    accountData.type = "";
+  } else if (accountData.messenger === "SMS") {
+    data.messenger = "sms";
+    accountData.button = true;
   } else {
-    accountData.button = false
-
-  } 
+    accountData.button = false;
+  }
   dropdownOpen("messenger");
 };
 
+const addAccount = async () => {
+  const login = ref("");
+  if (data.messenger === "whatsapp") {
+    login.value = accountData.login;
+  } else if (data.messenger === "telegram") {
+    login.value = accountData.tgLogin;
+  }
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/addAccount",
+      {
+        token: accountData.token,
+        login: login.value,
+        type: data.type,
+        group: data.category,
+        proxyString: "",
+        webhookUrls: "",
+        source: data.messenger,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+
+    if ((response.data.ok = "true")) {
+      console.log("Аккаунт успешно создан:", response.data);
+      console.log(login);
+      console.log(accountData.token);
+      console.log(accountData.login);
+      console.log(data.type);
+      console.log(data.category);
+      console.log(data.messenger);
+    } else {
+      console.log(accountData.token);
+      console.log(accountData.login);
+      console.log(data.type);
+      console.log(data.category);
+      console.log(data.messenger);
+    }
+    // location.reload();
+  } catch (error) {
+    error.value = error.message || "Произошла ошибка.";
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
 const checkInputTelegram = () => {
-  accountData.button = accountData.tgLogin.trim() !== '';
+  accountData.button = accountData.tgLogin.trim() !== "";
 };
 
 const updateLogin = (newLogin) => {
   accountData.login = newLogin;
+  if (newLogin && accountData.type === "Touchapi") {
+    console.log("sds");
+    accountData.button = true;
+  }
 };
 
 const updateToken = (newToken) => {
   accountData.token = newToken;
   if (newToken) {
-    accountData.button = true
+    station.token = true;
   } else {
-    accountData.button = false
+    station.token = false;
   }
 };
 
@@ -204,7 +306,7 @@ const dropdownOpen = (value) => {
     isOpen.messenger = !isOpen.messenger;
   }
 };
- 
+
 const AddAccount = () => {
   if (!accountData.category) {
     console.log("Нет категории");
@@ -227,23 +329,41 @@ const AddAccount = () => {
       } else {
         if (accountData.type === "Touchapi") {
           console.log("messenger: WhatsApp | type: Touchapi");
+          if (!accountData.login) {
+            return;
+          } else {
+            addAccount();
+          }
         } else if (accountData.type === "Edna") {
           console.log("messenger: WhatsApp | type: edna");
-            if(!accountData.token) {
-              console.log("messenger: WhatsApp | type: edna | token: NoNE")
-            } else {
-              accountData.button = true
-            }
+          if (!accountData.token || !accountData.login) {
+            console.log("messenger: WhatsApp | type: edna | token: NoNE");
+          } else {
+            addAccount();
+          }
         }
       }
     } else if (accountData.messenger === "Telegram") {
       console.log("messenger: Telegram");
+      if (!accountData.tgLogin) {
+        console.log("нет логина тг");
+      } else {
+        addAccount();
+      }
     } else if (accountData.messenger === "SMS") {
       console.log("messenger: SMS");
     }
   }
 };
-
+watch(
+  () => [accountData.login, accountData.token],
+  ([newLogin, newToken]) => {
+    if (newLogin.trim() !== "" && newToken.trim() !== "") {
+      accountData.button = true;
+    }
+    // accountData.button = newLogin.trim() !== "" && newToken.trim() !== "";
+  }
+);
 provide("accountData", { accountData });
 </script>
 

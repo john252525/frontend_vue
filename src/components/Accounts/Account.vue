@@ -1,9 +1,12 @@
 <template>
-  <AddTelegramAccount
+  <!-- <AddTelegramAccount
+    :openAddAccountStation="openAddAccount"
+    v-if="openAddAccountStation"
+  /> -->
+  <AddAccount
     :openAddAccountStation="openAddAccount"
     v-if="openAddAccountStation"
   />
-  <!-- <AddAccount /> -->
   <header>
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>

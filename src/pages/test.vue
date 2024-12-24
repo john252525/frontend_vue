@@ -1,224 +1,68 @@
 <template>
-  <section>
-    <div>
-      <div @click="dropdownOpen" class="dropdown-select">
-        <h2
-          v-if="!category"
-          class="selected"
-          :class="{ active: isDropdownOpen }"
-        >
-          Тип
-        </h2>
-        <h2 :class="{ unactive: !isDropdownOpen }" v-else class="item-selected">
-          {{ category }}
-        </h2>
-        <h2
-          v-if="category && !isDropdownOpen"
-          class="selected"
-          :class="{ active: isDropdownOpen }"
-        >
-          Тип
-        </h2>
-        <img
-          class="arrow"
-          :class="{ up: isDropdownOpen }"
-          src="/account/arrow.svg"
-          alt=""
-        />
-      </div>
-      <nav v-if="isDropdownOpen" class="dropdown-options">
-        <ul>
-          <li @click="selectCategory('Категория 1')" class="dropdown-option">
-            Категория 1
-          </li>
-        </ul>
-        <ul>
-          <li @click="selectCategory('Категория 2')" class="dropdown-option">
-            Категория 2
-          </li>
-        </ul>
-        <ul>
-          <li @click="selectCategory('Категория 3')" class="dropdown-option">
-            Категория 3
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </section>
+  <div>
+    <input
+      class="input-data"
+      v-model="searchQuery"
+      @focus="showOptions = true"
+      placeholder="Введите текст..."
+    />
+    <ul class="dropdown-options" v-if="showOptions && filteredOptions.length">
+      <li
+        v-for="option in filteredOptions"
+        :key="option"
+        @click="selectOption(option)"
+      >
+        {{ option }}
+      </li>
+    </ul>
+  </div>
 </template>
-<!-- 
-<script>
-export default {
-  data() {
-    return {
-      selectedCategory: "",
-      isDropdownOpen: false,
-      categories: [
-        { value: "category1", text: "Категория 1" },
-        { value: "category2", text: "Категория 2" },
-        { value: "category3", text: "Категория 3" },
-      ],
-    };
-  },
-  methods: {
-    toggleDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen;
-    },
-    selectCategory(value) {
-      this.selectedCategory = value;
-      this.isDropdownOpen = false;
-    },
-  },
-};
-</script> -->
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const isDropdownOpen = ref(false);
-const category = ref("");
+const searchQuery = ref("");
+const options = ref([
+  "Apple",
+  "Banana",
+  "Orange",
+  "Grape",
+  "Mango",
+  "Pineapple",
+]);
+const filteredOptions = ref([]);
+const showOptions = ref(false);
 
-const selectCategory = (value) => {
-  category.value = value;
-  dropdownOpen();
+const filterOptions = () => {
+  filteredOptions.value = options.value.filter((option) => {
+    return option.toLowerCase().includes(searchQuery.value.toLowerCase());
+  });
 };
 
-const dropdownOpen = () => {
-  isDropdownOpen.value = !isDropdownOpen.value;
+const selectOption = (option) => {
+  searchQuery.value = option;
+  showOptions.value = false; // Скрыть список
 };
+
+watch(searchQuery, filterOptions);
 </script>
 
-<style scoped>
-/* .dropdown {
-  margin: 20px;
-  position: relative;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.dropdown-select {
-  position: relative;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-}
-
-.selected {
-  font-size: 14px;
-  font-weight: 500;
-  position: absolute;
-  top: -10px;
-  background-color: white;
-  padding: 0px 7px;
-  transition: all 0.25s;
-}
-
-.selected.up {
-  position: relative;
-  top: 0px;
-  transition: all 0.25s;
-}
-
-.dropdown-options {
-  top: 100%;
-  left: 0;
-  right: 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  z-index: 10;
-}
-
-.dropdown-option {
-  padding: 10px;
-  cursor: pointer;
-}
-
-.dropdown-option:hover {
-  background-color: #f0f0f0;
-}
-
-.arrow {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid #000;
-  transition: transform 0.3s;
-}
-
-.arrow.up {
-  transform: rotate(180deg);
-} */
-
-.dropdown-select {
-  position: relative;
+<style>
+.input-data {
   border: 0.5px solid #c1c1c1;
   border-radius: 5px;
-  width: 490px;
+  width: 478px;
   height: 45px;
   background: #fcfcfc;
-  display: flex;
-  align-items: center;
   font-weight: 500;
-  font-size: 16px;
-  color: #343434;
-  margin-top: 50px;
-}
-
-.selected {
-  position: absolute;
   font-size: 14px;
-  font-weight: 500;
-  margin-left: 12px;
-  background-color: white;
-  padding: 0px 8px;
-  top: -11px;
-  transition: all 0.15s;
-}
-
-.selected.active {
-  position: relative;
-  font-size: 18px;
-  padding: 0px 0px;
-  transition: all 0.15s;
-  top: 0;
-}
-
-.item-selected {
-  font-size: 18px;
-  font-weight: 500;
-  margin-left: 12px;
-}
-
-.item-selected.unactive {
-  font-size: 16px;
-  font-weight: 500;
-  margin-left: 12px;
-  color: #696969;
-  transition: all 0.05s;
-}
-
-.arrow {
-  position: absolute;
-  right: 10px;
-  transition: transform 0.3s;
-}
-
-.arrow.up {
-  transform: rotate(180deg);
+  color: #343434;
+  margin-top: 30px;
+  padding-left: 10px;
 }
 
 .dropdown-options {
+  position: absolute;
   border: 0.5px solid #c1c1c1;
   border-top: 0px;
   border-radius: 5px;
@@ -229,41 +73,6 @@ label {
   display: flex;
   flex-direction: column;
   gap: 1px;
-}
-
-.dropdown-option {
-  font-size: 16px;
-  padding: 4px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.dropdown-option:hover {
-  background-color: #eeeeee;
-  transition: all 0.15s;
-}
-
-.dropdown-options.fade-enter-active,
-.dropdown-options.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.dropdown-options.fade-enter,
-.action-list.fade-leave-to {
-  opacity: 0;
-}
-
-.dropdown-options {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  z-index: 100;
 }
 </style>

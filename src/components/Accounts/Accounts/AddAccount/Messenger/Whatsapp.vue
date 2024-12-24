@@ -39,6 +39,15 @@
         </ul>
       </nav>
     </div>
+    <div v-if="accountData.type === 'Touchapi'">
+      <input
+        v-model="formData.login"
+        @input="updateLogin"
+        placeholder="Логин"
+        type="text"
+        class="input-data"
+      />
+    </div>
     <section v-if="accountData.type === 'Edna'">
       <div>
         <input
@@ -98,13 +107,11 @@ const dropdownOpen = () => {
 
 watch(accountData.type, (newValue) => {
   if (newValue) {
-    formData.login = ''
-  formData.token = ''
-  console.log('dsds')
+    formData.login = "";
+    formData.token = "";
+    console.log("dsds");
   }
-  
-})
-
+});
 </script>
 <style scoped>
 .dropdown-select {
