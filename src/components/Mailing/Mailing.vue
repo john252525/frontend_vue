@@ -4,14 +4,25 @@
       <h2 class="title">Рассылки</h2>
     </section>
     <section class="account-section">
-      <button class="add-account-button">+ Добавить</button>
+      <button @click="changeAddMailing" class="add-account-button">
+        + Добавить
+      </button>
     </section>
   </header>
   <MailingList />
+  <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
 </template>
 
 <script setup>
+import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
+import { ref } from "vue";
+
+const addMailing = ref(false);
+
+const changeAddMailing = () => {
+  addMailing.value = !addMailing.value;
+};
 </script>
 
 <style scoped>

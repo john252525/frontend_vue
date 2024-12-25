@@ -59,11 +59,13 @@
 import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
 import Mailing from "@/components/Mailing/Mailing.vue";
+import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
 import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
 const station = reactive({
   isModalOpen: false,
   infoMailing: false,
+  isAddMailing: false,
 });
 
 const selectedItem = ref(null);
@@ -103,6 +105,10 @@ const openModal = (event, item) => {
 
 const closeModal = () => {
   station.isModalOpen = false;
+};
+
+const changeisAddMailing = () => {
+  station.isAddMailing = !station.isAddMailing;
 };
 
 const changeInfoMailing = () => {

@@ -132,7 +132,6 @@ const getAccounts = async () => {
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
         source: localStorage.getItem("accountStation"),
-        token: localStorage.getItem("accountToken"),
         skipDetails: true,
       },
       {
