@@ -3,11 +3,29 @@
     <nav>
       <ul>
         <li @click="navigateTo('/')">
-          <img src="/navigation/home.svg" alt="Главная" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="svg-icon"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
+            ></path>
+          </svg>
+
           <p class="page">Главная</p>
         </li>
         <li @click="navigateTo('accounts')">
-          <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="svg-icon"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+            ></path>
+          </svg>
+
           <p class="page">Аккаунты</p>
         </li>
         <li @click="navigateTo('Mailing')">
@@ -34,14 +52,32 @@
       <nav>
         <ul>
           <li @click="clickMenu('/')">
-            <img src="/navigation/home.svg" alt="Главная" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="svg-icon"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
+              ></path>
+            </svg>
+
             <p class="page">Главная</p>
           </li>
-          <li @click="clickMenu('Accounts')">
-            <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+          <li @click="clickMenu('accounts')">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="svg-icon"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+              ></path>
+            </svg>
+
             <p class="page">Аккаунты</p>
           </li>
-          <li @click="clickMenu('Accounts')">
+          <li @click="clickMenu('Mailing')">
             <img src="/navigation/accaunts.svg" alt="Аккаунты" />
             <p class="page">Рассылки</p>
           </li>
@@ -79,7 +115,7 @@ const navigateTo = (page) => {
 <style scoped>
 .pc-menu {
   display: flex;
-  width: 260px;
+  width: 230px;
   box-sizing: border-box;
 }
 
@@ -88,13 +124,20 @@ nav {
   margin-left: 8px;
 }
 
+.svg-icon {
+  width: 22px; /* 24px */
+  height: 22px; /* 24px */
+  fill: #6b7280; /* Tailwind gray-500 */
+  transition: all 75ms; /* Переход для всех свойств за 75 мс */
+}
+
 .line {
   width: 0.5px;
-  background-color: #d9d9d9;
+  background-color: #ebebeb;
   position: absolute;
-  top: 72px;
+  top: 56px;
   height: calc(100% - 72px);
-  left: 260px;
+  left: 230px;
 }
 
 li {
@@ -102,20 +145,25 @@ li {
   align-items: center;
   gap: 12px;
   margin-bottom: 4px;
-  padding: 10px 0px 10px 10px;
+  padding: 8px 0px 8px 8px;
   cursor: pointer;
 }
 
 .page {
+  font-family: system-ui;
+  font-size: 16px;
   font-weight: 400;
-  font-size: 17px;
-  color: #000;
+  color: black;
 }
 
 li:hover {
   background-color: #eeeeee;
   border-radius: 10px;
-  width: 233px;
+  width: 200px;
+}
+
+li:hover .svg-icon path {
+  fill: #111827;
 }
 
 .black-fon {

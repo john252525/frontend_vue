@@ -3,30 +3,26 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  font-family: system-ui;
 }
 
 h2 {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
 h1 {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
 h3 {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
 span {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
 select {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
@@ -57,12 +53,10 @@ li {
 }
 
 p {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 
 button {
-  font-family: "Montserrat", serif;
   margin: 0;
   border: none;
   outline: none;
@@ -71,7 +65,6 @@ button {
 
 th,
 td {
-  font-family: "Montserrat", serif;
   margin: 0;
 }
 

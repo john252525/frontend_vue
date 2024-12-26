@@ -9,8 +9,12 @@
           alt="Меню для телефона"
         />
         <h2 class="logo-header">
-          <img class="logo" src="/header/logo.svg" alt="Логотип" />
-          Name-<span>API</span>
+          <img
+            src="https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico"
+            class="logo-img"
+            alt="Logo"
+          />
+          Touch-API
         </h2>
       </article>
       <article class="user-cont">
@@ -60,12 +64,18 @@ function toggleAccountMenu() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 12px;
   box-sizing: border-box;
+  margin: 0px -18px 0px 4px;
+}
+
+.logo-img {
+  height: 2rem;
 }
 
 .user-icon {
   cursor: pointer;
+  height: 2rem;
 }
 
 .user-cont {
@@ -77,7 +87,7 @@ function toggleAccountMenu() {
 
 .balance-user {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   color: #4047ca;
   padding: 8px;
   border: 1px solid rgba(64, 71, 202, 0.2);
@@ -93,8 +103,9 @@ function toggleAccountMenu() {
 }
 
 .logo-header {
-  font-weight: 600;
-  font-size: 26px;
+  font-family: system-ui;
+  font-weight: 500;
+  font-size: 24px;
   color: #000;
   display: flex;
   align-items: center;
@@ -108,7 +119,7 @@ function toggleAccountMenu() {
 .line {
   width: 100%;
   height: 0.5px;
-  background-color: #d9d9d9;
+  background-color: #ebebeb;
 }
 
 .phone-menu {

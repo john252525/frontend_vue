@@ -447,7 +447,7 @@ const resetAccount = async () => {
 
 .action-list {
   border-radius: 10px;
-  width: 170px;
+  width: 150px;
   height: auto;
   background: #ffffff;
   position: sticky;
@@ -455,7 +455,7 @@ const resetAccount = async () => {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  margin: 23px;
+  margin: 12px;
   padding: 10px 0px 10px 10px;
 }
 .action-list.fade-enter-active,
@@ -483,11 +483,11 @@ const resetAccount = async () => {
 }
 
 .action {
-  font-weight: 500;
-  font-size: 15px;
+  font-weight: 400;
+  font-size: 14px;
   color: #000;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
 }
 
 .action:hover {
