@@ -136,7 +136,7 @@ nav {
   background-color: #ebebeb;
   position: absolute;
   top: 56px;
-  height: calc(100% - 72px);
+  height: calc(100% - 57px);
   left: 230px;
 }
 

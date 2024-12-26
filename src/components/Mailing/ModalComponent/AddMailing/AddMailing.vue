@@ -1,28 +1,20 @@
 <template>
-  <div @click="changeAddMailing" class="black-fon"></div>
   <section class="add-mailing-section">
-    <div class="button-cont">
-      <button
-        :class="{ active: station.file }"
-        @click="remakeStation('file')"
-        class="contact-button"
-      >
-        Файл
-      </button>
-      <button
-        :class="{ active: station.text }"
-        @click="remakeStation('text')"
-        class="contact-button"
-      >
-        Текст
-      </button>
-    </div>
+    <h2 class="title">
+      <img
+        @click="changeAddMailing"
+        class="out"
+        src="/millingInfo/out.svg"
+        alt=""
+      />
+      Содание рассылки
+    </h2>
     <section class="component">
-      <File :station="station" />
+      <File :changeAddMailing="changeAddMailing" />
     </section>
   </section>
 </template>
-station
+
 <script setup>
 import File from "./Component/File.vue";
 import Text from "./Component/Text.vue";
@@ -56,19 +48,30 @@ provide("station", station);
 
 <style scoped>
 .add-mailing-section {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  border-radius: 10px;
-  width: 680px;
-  height: 740px;
-  background: #fff;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  margin-top: 24px;
+  margin-left: 36px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  /* justify-content: center; */
-  flex-direction: column;
+  gap: 6px;
+}
+
+.out {
+  margin-top: 5px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.out:hover {
+  transition: all 0.15s;
+  transform: translate(-5px);
 }
 
 .button-cont {
@@ -98,5 +101,15 @@ provide("station", station);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .add-mailing-section {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    margin-top: 24px;
+    margin-left: 16px;
+  }
 }
 </style>

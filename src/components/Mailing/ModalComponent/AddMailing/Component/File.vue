@@ -10,65 +10,65 @@
         </select>
       </article>
       <article class="textarea-comp">
-        <textarea
-          v-if="messageError"
-          :class="{ active: station.text }"
-          v-model="messageText"
-          class="message-text-error"
-          placeholder="В тексте можно использовать данные из загружаемой базы.
-Пример: %G% (где G - другой столбец)"
-          name="text"
-          id="text"
-        ></textarea>
-        <textarea
-          v-else
-          :class="{ active: station.text }"
-          v-model="messageText"
-          class="message-text"
-          placeholder="В тексте можно использовать данные из загружаемой базы.
-Пример: %G% (где G - другой столбец)"
-          name="text"
-          id="text"
-        ></textarea>
-        <textarea
-          :class="{ active: station.text }"
-          v-if="station.text && !messageContactError"
-          placeholder="79111111111;ольга
+        <div class="textextarea-cont">
+          <textarea
+            placeholder="79111111111;ольга
 79111111111;иван          "
-          v-model="inputText"
-          @input="updateArray"
-          class="message-text"
-          name="text"
-          id="text"
-        ></textarea>
-        <textarea
-          :class="{ active: station.text }"
-          v-if="station.text && messageContactError"
-          placeholder="79111111111;ольга
-79111111111;иван          "
-          v-model="inputText"
-          @input="updateArray"
-          class="message-text-error"
-          name="text"
-          id="text"
-        ></textarea>
-      </article>
-      <article v-if="station.file" class="file-upload-comp">
-        <div class="file-upload-container">
-          <label
-            for="other-upload"
-            class="file-upload-label"
-            :class="{ error: errorFile }"
-            >Загрузить файл</label
-          >
-          <input
-            type="file"
-            id="other-upload"
-            @change="handleOtherFileUpload"
-            class="file-input"
-          />
-          <div v-if="otherFile" class="file-preview">
-            <p class="file-name">{{ otherFile.name }}</p>
+            :class="{ error: messageContactError }"
+            v-model="inputText"
+            @input="updateArray"
+            class="message-text"
+            name="text"
+            id="text"
+          ></textarea>
+          <div class="file-upload-container">
+            <div class="file-cont">
+              <h2 class="title">Номера телефонов:</h2>
+              <label
+                for="other-upload"
+                class="file-upload-label"
+                :class="{ error: errorFile }"
+                >Загрузить файл</label
+              >
+              <input
+                type="file"
+                id="other-upload"
+                @change="handleOtherFileUpload"
+                class="file-input"
+              />
+              <div v-if="otherFile" class="file-preview">
+                <p class="file-name">{{ otherFile.name }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="textextarea-cont">
+          <textarea
+            v-model="messageText"
+            class="message-text"
+            placeholder="В тексте можно использовать данные из загружаемой базы.
+Пример: %G% (где G - другой столбец)"
+            :class="{ error: messageError }"
+            name="text"
+            id="text"
+          ></textarea>
+          <div class="file-upload-container">
+            <div class="file-cont">
+              <h2 class="title">Вложение:</h2>
+              <label for="image-upload" class="file-upload-label"
+                >Загрузить файл</label
+              >
+              <input
+                type="file"
+                id="image-upload"
+                @change="handleImageUpload"
+                accept="image/*"
+                class="file-input"
+              />
+            </div>
+            <div v-if="imageFile" class="file-preview">
+              <p class="file-name">{{ imageFile.name }}</p>
+            </div>
           </div>
         </div>
       </article>
@@ -77,26 +77,6 @@
       <article class="name-comp">
         <h2 class="title">Название:</h2>
         <input v-model="nameMailing" type="text" class="name-input" />
-      </article>
-      <article class="upload-file-comp">
-        <div class="file-upload-container">
-          <div class="file-cont">
-            <h2 class="title">Картинка:</h2>
-            <label for="image-upload" class="file-upload-label"
-              >Загрузить файл</label
-            >
-            <input
-              type="file"
-              id="image-upload"
-              @change="handleImageUpload"
-              accept="image/*"
-              class="file-input"
-            />
-          </div>
-          <div v-if="imageFile" class="file-preview">
-            <p class="file-name">{{ imageFile.name }}</p>
-          </div>
-        </div>
       </article>
 
       <article class="days-comp">
@@ -114,7 +94,7 @@
               v-model="selectedDays"
               @change="updateSelectedDays"
             />
-            <label :for="'day-' + (index + 1)">
+            <label class="day-text" :for="'day-' + (index + 1)">
               <span class="custom-checkbox"></span>
               {{ day }}
             </label>
@@ -124,43 +104,47 @@
 
       <article class="title-comp">
         <h2 class="title">Время (по МСК):</h2>
-        <div class="time-selection">
-          <label for="start-time">c</label>
-          <input
-            type="time"
-            id="start-time"
-            v-model="startTime"
-            @change="updateTimes"
-          />
-        </div>
-        <div class="time-selection">
-          <label for="end-time">по</label>
-          <input
-            type="time"
-            id="end-time"
-            v-model="endTime"
-            @change="updateTimes"
-          />
+        <div class="time-cont">
+          <div class="time-selection">
+            <label class="label-time" for="start-time">c</label>
+            <input
+              type="time"
+              id="start-time"
+              v-model="startTime"
+              @change="updateTimes"
+            />
+          </div>
+          <div class="time-selection">
+            <label class="label-time" for="end-time">по</label>
+            <input
+              type="time"
+              id="end-time"
+              v-model="endTime"
+              @change="updateTimes"
+            />
+          </div>
         </div>
       </article>
       <article class="time-comp">
-        <h2 class="title">Задержка между сообщениями:</h2>
-        <div class="time-selection">
-          <label for="start-num">с</label>
-          <select class="time-select" id="start-num" v-model="startNum">
-            <option v-for="minute in minutes" :key="minute" :value="minute">
-              {{ minute }}
-            </option>
-          </select>
-        </div>
-        <div class="time-selection">
-          <label for="end-num">по</label>
-          <select class="time-select" id="end-num" v-model="endNum">
-            <option v-for="minute in minutes" :key="minute" :value="minute">
-              {{ minute }}
-            </option>
-          </select>
-          <p class="min">мин.</p>
+        <h2 class="title-mess">Задержка между сообщениями:</h2>
+        <div class="time-cont">
+          <div class="time-selection">
+            <label class="label-time" for="start-num">от</label>
+            <select class="time-select" id="start-num" v-model="startNum">
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
+          </div>
+          <div class="time-selection">
+            <label class="label-time" for="end-num">до</label>
+            <select class="time-select" id="end-num" v-model="endNum">
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
+            <p class="min">мин.</p>
+          </div>
         </div>
       </article>
     </section>
@@ -172,7 +156,7 @@
             id="remove-duplicates"
             v-model="removeDuplicates"
           />
-          <label for="remove-duplicates">
+          <label class="settings-text" for="remove-duplicates">
             <span class="custom-checkbox"></span>
             Удалить дубликаты контактов
           </label>
@@ -184,7 +168,7 @@
             id="existing-dialogs"
             v-model="sendOnlyExistingDialogs"
           />
-          <label for="existing-dialogs">
+          <label class="settings-text" for="existing-dialogs">
             <span class="custom-checkbox"></span>
             Отправка только по уже существующим диалогам
           </label>
@@ -196,7 +180,7 @@
             id="random-order"
             v-model="sendMessagesRandomOrder"
           />
-          <label for="random-order">
+          <label class="settings-text" for="random-order">
             <span class="custom-checkbox"></span>
             Отправлять сообщения в случайном порядке
           </label>
@@ -214,7 +198,14 @@ const props = defineProps({
   station: {
     type: Object,
   },
+  changeAddMailing: {
+    type: Function,
+  },
 });
+
+import { useRouter } from "vue-router";
+const router = useRouter();
+
 const stations = inject("station");
 const { station } = toRefs(props);
 const days = ref(["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]);
@@ -257,6 +248,10 @@ const handleImageUpload = (event) => {
     reader.readAsDataURL(file);
     console.log("Загруженная картинка:", imageFile.value);
   }
+};
+
+const navigateTo = (page) => {
+  router.push(page);
 };
 
 // Обработчик загрузки другого файла
@@ -311,7 +306,7 @@ async function createWhatsAppBroadcast() {
     if (response.data.ok === true) {
       console.log(startNum.value);
       console.log("Ответ от API:", response.data);
-      location.reload();
+      props.changeAddMailing();
     } else {
       console.log("ошибка");
     }
@@ -324,29 +319,27 @@ async function createWhatsAppBroadcast() {
 }
 
 const createMailing = () => {
-  if (stations.file === true) {
-    if (otherFile.value === null) {
-      errorFile.value = true;
-    } else {
-      errorFile.value = false;
-    }
-    if (otherFile.value != null && messageText.value) {
-      createWhatsAppBroadcast();
-    }
-  } else {
+  if (otherFile.value === null && !inputText.value) {
     if (!inputText.value) {
       messageContactError.value = true;
     } else {
       messageContactError.value = false;
     }
-    if (inputText.value && messageText.value) {
-      createWhatsAppBroadcast();
+
+    if (otherFile.value === null) {
+      errorFile.value = true;
+    } else {
+      errorFile.value = false;
     }
-  }
-  if (!messageText.value) {
+  } else if (!messageText.value) {
     messageError.value = true;
+    messageContactError.value = false;
+    errorFile.value = false;
   } else {
     messageError.value = false;
+    messageContactError.value = false;
+    errorFile.value = false;
+    createWhatsAppBroadcast();
   }
 };
 </script>
@@ -355,36 +348,26 @@ const createMailing = () => {
 .message-text {
   border: 1px solid #e6e6e6;
   border-radius: 10px;
-  width: 590px;
-  height: 103px;
   background: #f6f6f6;
   padding-left: 10px;
   padding-top: 10px;
   max-width: 574px;
   min-width: 574px;
-  max-height: 97px;
-  min-height: 97px;
+  max-height: 80px;
+  min-height: 80px;
 }
 
-.message-text-error {
-  border: 1px solid #fa7171;
+.message-text.error {
+  border: 1px solid #e6e6e6;
   border-radius: 10px;
-  width: 590px;
-  height: 103px;
   background: #f6f6f6;
   padding-left: 10px;
   padding-top: 10px;
   max-width: 574px;
   min-width: 574px;
-  max-height: 97px;
-  min-height: 97px;
-}
-
-.message-text-error.active {
-  max-width: 255px;
-  min-width: 255px;
-  max-height: 97px;
-  min-height: 97px;
+  max-height: 80px;
+  min-height: 80px;
+  border: 1px solid #fa7171;
 }
 
 .message-text.active {
@@ -394,12 +377,19 @@ const createMailing = () => {
   min-height: 97px;
 }
 
+.textextarea-cont {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .file-section {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
   margin-top: 0px;
 }
 
@@ -427,7 +417,13 @@ const createMailing = () => {
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 16px;
+  color: #000;
+}
+
+.title-mess {
+  font-weight: 500;
   font-size: 16px;
   color: #000;
 }
@@ -456,6 +452,22 @@ label {
   position: relative;
 }
 
+.settings-text {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  position: relative;
+}
+
+.label-time {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  position: relative;
+}
+
 .custom-checkbox {
   position: absolute;
   left: 0;
@@ -469,7 +481,7 @@ label {
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox {
-  background-color: #4950ca; /* Цвет фона при выборе */
+  background: oklch(0.541 0.198 267);
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox::after {
@@ -479,7 +491,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   top: 2.5px;
   width: 3px;
   height: 7px;
-  border: solid white; /* Цвет галочки */
+  border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -494,11 +506,17 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   align-items: center;
 }
 
+.time-cont {
+  display: flex;
+  align-items: center;
+}
+
 input[type="time"] {
-  padding: 6px;
+  padding: 4px;
   border: 1px solid #000;
   border-radius: 5px;
   outline: none;
+  font-size: 12px;
   transition: border-color 0.3s;
   margin-left: 6px;
 }
@@ -513,7 +531,8 @@ input[type="time"]:focus {
 }
 
 .time-select {
-  padding: 6px;
+  padding: 4px;
+  font-size: 14px;
   border: 1px solid #000;
   border-radius: 3px;
   outline: none;
@@ -532,6 +551,8 @@ input[type="time"]:focus {
 
 .file-upload-container {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .file-cont {
@@ -551,12 +572,16 @@ input[type="time"]:focus {
 .file-upload-label {
   display: inline-block;
   padding: 4px 8px;
-  background-color: #4950ca;
+  background: oklch(0.541 0.198 267);
   color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 14px;
+  font-size: 12px;
+}
+
+.file-upload-label.error {
+  background: red;
 }
 
 .file-upload-label.error {
@@ -586,7 +611,6 @@ input[type="time"]:focus {
   color: #333;
 }
 
-/* Стили для нового раздела алфавита */
 .alphabet-comp {
   display: flex;
   align-items: center;
@@ -595,7 +619,8 @@ input[type="time"]:focus {
 }
 
 .alphabet-select {
-  padding: 6px;
+  padding: 4px;
+  font-size: 12px;
   border: 1px solid #000;
   border-radius: 3px;
   outline: none;
@@ -609,12 +634,13 @@ input[type="time"]:focus {
 .create {
   border-radius: 5px;
   width: 100%;
-  height: 38px;
-  background: #4950ca;
+  height: 34px;
+  background: oklch(0.541 0.198 267);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   color: #fff;
   transition: all 0.25s;
+  margin-bottom: 36px;
 }
 
 .name-comp {
@@ -626,14 +652,102 @@ input[type="time"]:focus {
 .name-input {
   border: 1px solid #000;
   border-radius: 3px;
-  padding: 4px 16px;
-  width: 90px;
-  height: 20px;
+  padding: 4px 8px;
+  width: 80px;
+  height: 14px;
 }
 
 .textarea-comp {
   display: flex;
   align-items: center;
-  gap: 50px;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 820px) {
+  .message-text {
+    max-width: 520px;
+    min-width: 520px;
+    max-height: 80px;
+    min-height: 80px;
+  }
+
+  .message-text.error {
+    max-width: 520px;
+    min-width: 520px;
+    max-height: 80px;
+    min-height: 80px;
+    border: 1px solid #fa7171;
+  }
+}
+
+@media (max-width: 570px) {
+  .message-text {
+    max-width: 400px;
+    min-width: 400px;
+  }
+
+  .message-text.error {
+    max-width: 400px;
+    min-width: 400px;
+  }
+  .title-mess {
+    width: 130px;
+  }
+
+  .days-comp {
+    align-items: flex-start;
+    gap: 4px;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 450px) {
+  .message-text {
+    max-width: 300px;
+    min-width: 300px;
+  }
+
+  .message-text.error {
+    max-width: 300px;
+    min-width: 300px;
+  }
+  .title-mess {
+    width: 130px;
+  }
+
+  .days-comp {
+    align-items: flex-start;
+    gap: 4px;
+    flex-direction: column;
+  }
+
+  .title-comp {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .time-comp {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .label-time {
+    padding-left: 0px;
+  }
+
+  .time-cont {
+    gap: 14px;
+  }
+  .settings-text {
+    font-size: 16px;
+    width: 200px;
+  }
+
+  .day-text {
+    font-size: 12px;
+  }
 }
 </style>

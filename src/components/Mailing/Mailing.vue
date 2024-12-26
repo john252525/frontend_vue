@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header v-if="!addMailing">
     <section class="account-section">
       <h2 class="title">Рассылки</h2>
     </section>
@@ -20,7 +20,7 @@
       </button>
     </section>
   </header>
-  <MailingList />
+  <MailingList v-if="!addMailing" />
   <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
 </template>
 
