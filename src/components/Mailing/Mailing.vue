@@ -5,7 +5,18 @@
     </section>
     <section class="account-section">
       <button @click="changeAddMailing" class="add-account-button">
-        + Добавить
+        <svg
+          class="svg-icon"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+        Добавить
       </button>
     </section>
   </header>
@@ -30,7 +41,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 20px;
+  margin: 18px 12px 18px 18px;
   box-sizing: border-box;
 }
 
@@ -40,30 +51,29 @@ header {
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 22px;
   color: #000;
-  flex: 1; /* Title takes available space */
-  margin-right: 20px; /* Add space between title and buttons */
+  flex: 1;
+  margin-right: 8px;
 }
 
 .account {
   font-weight: 700;
   font-size: 18px;
-  color: #464646;
+  color: #6b7280;
   background: #f9f9f9;
   border-radius: 5px;
   padding: 5px 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto; /* Don't let the account box expand */
+  flex: 0 0 auto;
 }
 
 .account-list-button,
 .add-account-button {
   border-radius: 5px;
-  padding: 10px 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,11 +81,18 @@ header {
   flex: 0 0 auto;
 }
 
+.bi-view-list {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
 .account-list-button {
-  background: rgba(73, 80, 202, 0.2);
+  background: oklch(0.65 0.22 267 / 0.16);
   font-weight: 600;
-  font-size: 14px;
-  color: #4047ca;
+  font-size: 12px;
+  padding: 10px 12px;
+  color: oklch(0.4 0.18 267 / 0.86);
   margin-right: 10px;
   display: flex;
   align-items: center;
@@ -93,12 +110,21 @@ header {
   transition: all 0.25s;
 }
 
+.svg-icon {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem; /* 20px */
+  margin-right: 0.25rem; /* 4px */
+  margin-left: -0.25rem; /* -4px */
+  fill: currentColor; /* Заполнение текущим цветом */
+}
+
 .add-account-button {
-  background: #4950ca;
+  background: oklch(0.541 0.198 267);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   color: #fff;
   transition: all 0.25s;
+  padding: 8px 12px;
 }
 
 .add-account-button:hover {
@@ -125,10 +151,10 @@ header {
 .platform-list-telegram {
   position: absolute;
   z-index: 10;
-  right: 141px;
-  top: 150px;
+  right: 122px;
+  top: 120px;
   border-radius: 10px;
-  width: 120px;
+  width: 100px;
   height: 70px;
   background: #ffffff;
   display: flex;
@@ -141,10 +167,10 @@ header {
 .platform-list-whatsapp {
   position: absolute;
   z-index: 10;
-  right: 141px;
-  top: 150px;
+  right: 122px;
+  top: 120px;
   border-radius: 10px;
-  width: 130px;
+  width: 108px;
   height: 70px;
   background: #ffffff;
   display: flex;
@@ -195,11 +221,12 @@ header {
   padding: 4px;
   transition: all 0.1s;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .platform:hover {
   text-align: center;
-  width: 100px;
+  width: 80px;
   background-color: #eeeeee;
   border-radius: 5px;
   transition: all 0.2s;

@@ -130,13 +130,20 @@ provide("selectedItem", { selectedItem });
   position: sticky;
   top: 0;
   z-index: 1;
-  height: 50px;
-  background: #efefef;
+  background: rgb(243 244 246);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.bi-list {
+  width: 16px; /* Ширина и высота иконки */
+  height: 16px;
+  fill: currentColor; /* Использует текущий цвет текста */
+  margin-bottom: -4px;
+  margin-right: 6px;
 }
 
 .loading-data-text {
@@ -152,44 +159,46 @@ table {
 
 .table-login {
   text-align: left;
-  padding: 8px 8px 8px 20px;
+  padding: 1rem;
   width: 200px;
 }
 
 .table-step {
   text-align: left;
-  padding: 8px;
-  width: 200px;
+  padding: 1rem;
+  width: 220px;
 }
 
 .table-action {
   text-align: right;
-  padding: 8px;
+  padding: 1rem;
   padding-right: 15px;
 }
 
 .table-text-number {
-  padding: 20px;
+  padding: 1rem;
 }
 
 .table-text {
-  padding: 8px;
+  padding: 1rem;
 }
 
 .table-action-text {
-  padding: 8px;
+  padding: 1rem;
   text-align: right;
 }
 
 .action-table-button {
-  border-radius: 5px;
-  padding: 9px 11px;
-  background: rgba(73, 80, 202, 0.2);
+  background: oklch(0.65 0.22 267 / 0.16);
   font-weight: 600;
-  font-size: 14px;
-  color: #4047ca;
-  margin-right: 5px;
-  transition: all 0.15s;
+  font-size: 12px;
+  padding: 10px 12px;
+  color: oklch(0.4 0.18 267 / 0.86);
+  margin-right: 10px;
+  gap: 6px;
+  transition: all 0.25s;
+  border-radius: 5px;
+  margin-right: -3px;
 }
 
 .action-table-button:hover {
@@ -208,16 +217,34 @@ table {
 
 th,
 td {
-  padding: 8px;
+  padding: 1rem;
   font-weight: 500;
-  font-size: 14px;
-  color: #989898;
+  font-size: 11px;
+  color: #6b7280;
 }
 
 td {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
   color: #000;
   text-align: left;
+}
+
+tr {
+  position: relative; /* Позволяет псевдоэлементу позиционироваться относительно строки */
+}
+
+tr:not(:last-child):after {
+  content: ""; /* Создает пустой контент для псевдоэлемента */
+  position: absolute; /* Абсолютное позиционирование относительно строки */
+  left: 0;
+  right: 0;
+  bottom: 0; /* Позиционируем линию внизу строки */
+  height: 1px; /* Высота линии */
+  background-color: #ebebeb;
+}
+
+tr:hover {
+  background: rgb(243 244 246);
 }
 </style>
