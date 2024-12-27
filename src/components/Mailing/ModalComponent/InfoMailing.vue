@@ -1,40 +1,47 @@
 <template>
   <div @click="changeInfoMailing" class="black-fon"></div>
   <section class="info-mailing-section">
-    <h2 class="title">
-      Информация
-      <img @click="changeInfoMailing" src="/millingInfo/close.svg" alt="" />
-    </h2>
-    <section>
-      <h3>
-        Название: <span>{{ selectedItem.name }}</span>
-      </h3>
-      <h3>
-        Дни недели: <span> {{ weekDaysList.join(", ") }}</span>
-      </h3>
-      <h3>
-        Время:
-        <span
-          >{{ selectedItem.options.hours.min }}-{{
-            selectedItem.options.hours.max
-          }}</span
-        >
-      </h3>
+    <div v-if="!station.message">
+      <h2 class="title">
+        Информация
+        <img @click="changeInfoMailing" src="/millingInfo/close.svg" alt="" />
+      </h2>
+      <section>
+        <h3>
+          Название: <span>{{ selectedItem.name }}</span>
+        </h3>
+        <h3>
+          Дни недели: <span> {{ weekDaysList.join(", ") }}</span>
+        </h3>
+        <h3>
+          Время:
+          <span
+            >{{ selectedItem.options.hours.min }}-{{
+              selectedItem.options.hours.max
+            }}</span
+          >
+        </h3>
 
-      <h3>
-        Задержка:
-        <span>{{ delayInMinutes.min }} - {{ delayInMinutes.max }} мин</span>
-      </h3>
-      <h3>
-        Сообщения: <span> {{ selectedItem.recipients }}</span>
-      </h3>
-    </section>
-    <button class="edit-maling">Редактировать</button>
+        <h3>
+          Задержка:
+          <span>{{ delayInMinutes.min }} - {{ delayInMinutes.max }} мин</span>
+        </h3>
+        <h3>
+          Сообщения:
+          <span @click="changeStationMessage">
+            {{ selectedItem.recipients }}</span
+          >
+        </h3>
+      </section>
+      <button class="edit-maling">Редактировать</button>
+    </div>
+    <MessageLise :selectedItem="selectedItem" v-if="station.message" />
   </section>
 </template>
 
 <script setup>
 import { inject, reactive, ref, toRefs, watch } from "vue";
+import MessageLise from "./MessageLise.vue";
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -44,6 +51,14 @@ const props = defineProps({
   },
 });
 const { selectedItem } = toRefs(props);
+
+const station = reactive({
+  message: false,
+});
+
+const changeStationMessage = () => {
+  station.message = !station.message;
+};
 
 const delayInMinutes = ref({
   min: null,
@@ -100,7 +115,7 @@ watch(
 }
 
 .title {
-  font-weight: 600;
+  font-weight: 500;
   font-size: 24px;
   color: #000;
   margin-bottom: 34px;
@@ -117,7 +132,7 @@ h3 {
 }
 
 span {
-  font-weight: 600;
+  font-weight: 400;
   font-size: 20px;
   color: #626262;
 }
@@ -126,7 +141,7 @@ span {
   border-radius: 5px;
   width: 430px;
   height: 33px;
-  background: #4950ca;
+  background: oklch(0.541 0.198 267);
   font-weight: 600;
   font-size: 18px;
   color: #fff;
@@ -136,5 +151,35 @@ span {
 img {
   position: absolute;
   right: 45px;
+}
+
+@media (max-width: 600px) {
+  .info-mailing-section {
+    padding: 25px 40px;
+    background: #ffffff;
+    z-index: 10;
+  }
+
+  .edit-maling {
+    width: 300px;
+    height: 33px;
+    font-size: 16px;
+    margin-top: 34px;
+  }
+}
+
+@media (max-width: 400px) {
+  .info-mailing-section {
+    padding: 25px 20px;
+    background: #ffffff;
+    z-index: 10;
+  }
+
+  .edit-maling {
+    width: 300px;
+    height: 33px;
+    font-size: 16px;
+    margin-top: 34px;
+  }
 }
 </style>

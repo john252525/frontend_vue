@@ -4,9 +4,10 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">НАЗВАНИЕ</th>
-            <th class="table-step">ДАТА СОЗДАНИЯ</th>
-            <th class="table-action">ДЕЙСТВИЕ</th>
+            <th class="table-login">ID</th>
+            <th class="table-num">Телефон</th>
+            <th class="table-text">Текст</th>
+            <th class="table-status">Статус</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -16,21 +17,12 @@
             :key="index"
           >
             <td class="table-text-number">
-              <span v-if="item.name.length > 0">{{ item.name }}</span>
-              <span v-else>Рассылка</span>
+              <span>{{ item.id }}</span>
             </td>
-            <td class="table-text">{{ item.dt_create }}</td>
-            <td class="table-action-text">
-              <button
-                class="action-table-button"
-                @click="openModal($event, item)"
-              >
-                <img
-                  src="/telegramAccount/menu_table_button.svg"
-                  alt="Меню действий"
-                />
-                Действие
-              </button>
+            <td class="table-text">{{ item.to }}</td>
+            <td class="table-text">{{ item.text }}</td>
+            <td v-if="item.state === 0" class="table-text state">
+              Ожидание отправки
             </td>
           </tr>
           <tr v-else>
@@ -42,103 +34,59 @@
       </table>
     </div>
   </section>
-  <Modal
-    v-if="station.isModalOpen"
-    :closeModal="closeModal"
-    :modalPosition="modalPosition"
-    :changeInfoMailing="changeInfoMailing"
-    :selectedItem="selectedItem"
-    :changeDeleteMailing="changeDeleteMailing"
-    :refreshMailingLists="getMailingLists"
-  />
-  <InfoMailing
-    :changeInfoMailing="changeInfoMailing"
-    :selectedItem="selectedItem"
-    v-if="station.infoMailing"
-  />
-  <ConfirmDelete
-    v-if="station.deleteMailing"
-    :selectedItem="selectedItem"
-    :changeDeleteMailing="changeDeleteMailing"
-  />
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide } from "vue";
+import { ref, reactive, onMounted, toRefs, provide } from "vue";
 import axios from "axios";
-import Mailing from "@/components/Mailing/Mailing.vue";
-import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
-import ConfirmDelete from "../ModalComponent/confirmModal/confirmDelete.vue";
-import Modal from "../ModalComponent/Modal.vue";
-import InfoMailing from "../ModalComponent/InfoMailing.vue";
 
-const station = reactive({
-  isModalOpen: false,
-  infoMailing: false,
-  isAddMailing: false,
-  deleteMailing: false,
+const props = defineProps({
+  selectedItem: {
+    type: Object,
+  },
+  changeInfoMailing: {
+    type: Function,
+  },
 });
+const { selectedItem } = toRefs(props);
 
-const selectedItem = ref(null);
 const mailingLists = ref([]);
-const modalPosition = ref({ top: 0, left: 0 });
 
-const getMailingLists = async () => {
-  const token = "d7039fe337873da68d28945cd6e5c61d";
-  const apiUrl = "https://whatsapi.ru/ru/api/autosend/whatsapp/list/";
+const getMessages = async () => {
+  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/view/${selectedItem.value.id}/`;
+
   try {
     const response = await axios.get(apiUrl, {
       params: {
-        token,
+        token: "d7039fe337873da68d28945cd6e5c61d",
+        limit: 10,
+        offset: 0,
+        sort: "asc",
       },
     });
-    mailingLists.value = response.data.result.items;
-    if (response.data.ok === true) {
-      console.log(response.data.result.items);
+
+    if (response.data.ok) {
+      mailingLists.value = response.data.result.items;
+      console.log(response.data);
     } else {
-      console.log("er");
+      console.error("Ошибка при получении данных:", response.data);
     }
-    console.log(response.data);
   } catch (error) {
-    console.error("Ошибка при получении данных:", error.message);
+    console.error(
+      "Ошибка при отправке запроса:",
+      error.response ? error.response.data : error.message
+    );
   }
 };
 
-const openModal = (event, item) => {
-  selectedItem.value = item;
-  station.isModalOpen = true;
-  const rect = event.currentTarget.getBoundingClientRect();
-  modalPosition.value = {
-    top: rect.bottom + window.scrollY,
-    left: rect.left + window.scrollX,
-  };
-};
-
-const closeModal = () => {
-  station.isModalOpen = false;
-};
-
-const changeisAddMailing = () => {
-  station.isAddMailing = !station.isAddMailing;
-};
-
-const changeDeleteMailing = () => {
-  station.deleteMailing = !station.deleteMailing;
-};
-
-const changeInfoMailing = () => {
-  station.infoMailing = !station.infoMailing;
-};
-
-onMounted(getMailingLists);
-provide("selectedItem", { selectedItem });
+onMounted(getMessages);
 </script>
 
 <style scoped>
 .table-container {
   max-width: 100%;
   overflow-x: auto;
-  height: 83vh;
+  height: auto;
 }
 
 .table-header {
@@ -175,13 +123,29 @@ table {
 .table-login {
   text-align: left;
   padding: 1rem;
-  width: 200px;
+  width: 20px;
 }
 
-.table-step {
+.table-num {
   text-align: left;
   padding: 1rem;
-  width: 220px;
+  width: 100px;
+}
+
+.table-text {
+  text-align: left;
+  padding: 1rem;
+  width: 300px;
+}
+
+.state {
+  text-align: right;
+}
+
+.table-status {
+  text-align: right;
+  padding: 1rem;
+  width: 100px;
 }
 
 .table-action {

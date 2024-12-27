@@ -8,9 +8,21 @@
           left: modalPosition.left + 'px',
         }"
       >
+        <span
+          @click="updateStatus(1)"
+          v-if="selectedItem.state === 0"
+          class="action"
+          >Включить</span
+        >
+        <span
+          @click="updateStatus(0)"
+          v-if="selectedItem.state === 1"
+          class="action"
+          >Выключить</span
+        >
         <span @click="changeInfoMailing" class="action">Информация</span>
-        <span class="action">Редактировать</span>
-        <span class="action">Удалить</span>
+        <span @click="getMessages" class="action">Редактировать</span>
+        <span class="action" @click="changeDeleteMailing">Удалить</span>
       </div>
     </transition>
   </div>
@@ -18,6 +30,8 @@
 
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
+import axios from "axios";
+
 const props = defineProps({
   modalPosition: {
     type: Object,
@@ -28,7 +42,90 @@ const props = defineProps({
   changeInfoMailing: {
     type: Function,
   },
+  selectedItem: {
+    type: Object,
+  },
+  changeDeleteMailing: {
+    type: Function,
+  },
+  refreshMailingLists: {
+    type: Function,
+  },
 });
+
+const { selectedItem } = toRefs(props);
+
+const updateStatus = async (state) => {
+  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/state/${selectedItem.value.id}/${state}/`;
+  const params = {
+    token: "d7039fe337873da68d28945cd6e5c61d",
+  };
+  try {
+    const response = await axios.post(apiUrl, params, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    if (response.data.ok === true) {
+      console.log("Статус изменен", response.data);
+      props.refreshMailingLists(); // Вызов функции обновления списка
+    } else {
+      console.log("Ошибка", response.data);
+    }
+  } catch (error) {
+    console.error(
+      "Ошибка при отправке запроса:",
+      error.response ? error.response.data : error.message
+    );
+  }
+};
+
+const getMessages = async () => {
+  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/view/${1}/`;
+
+  try {
+    const response = await axios.get(apiUrl, {
+      params: {
+        token: "d7039fe337873da68d28945cd6e5c61d",
+        limit: 10,
+        offset: 0,
+        sort: "asc",
+      },
+    });
+
+    if (response.data.ok) {
+      console.log(response.data);
+    } else {
+      console.error("Ошибка при получении данных:", response.data);
+    }
+  } catch (error) {
+    console.error(
+      "Ошибка при отправке запроса:",
+      error.response ? error.response.data : error.message
+    );
+  }
+};
+
+// const getMailingLists = async () => {
+//   const token = "d7039fe337873da68d28945cd6e5c61d";
+//   const apiUrl = "https://whatsapi.ru/ru/api/autosend/whatsapp/list/";
+//   try {
+//     const response = await axios.get(apiUrl, {
+//       params: {
+//         token,
+//       },
+//     });
+//     if (response.data.ok === true) {
+//       console.log(response.data.result.items);
+//     } else {
+//       console.log("er");
+//     }
+//     console.log(response.data);
+//   } catch (error) {
+//     console.error("Ошибка при получении данных:", error.message);
+//   }
+// };
 </script>
 
 <style scoped>
