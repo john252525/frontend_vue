@@ -226,4 +226,21 @@ tr:not(:last-child):after {
 tr:hover {
   background: rgb(243 244 246);
 }
+
+@media (max-width: 400px) {
+  th,
+  td {
+    padding: 1rem;
+    font-weight: 500;
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  td {
+    font-weight: 500;
+    font-size: 12px;
+    color: #000;
+    text-align: left;
+  }
+}
 </style>

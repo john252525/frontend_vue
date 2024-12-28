@@ -28,7 +28,7 @@
         </h3>
         <h3>
           Сообщения:
-          <span @click="changeStationMessage">
+          <span class="message-text" @click="changeStationMessage">
             {{ selectedItem.recipients }}</span
           >
         </h3>
@@ -121,6 +121,11 @@ watch(
   margin-bottom: 34px;
   display: flex;
   align-items: center;
+}
+
+.message-text {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 h3 {
