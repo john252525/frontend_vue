@@ -11,7 +11,7 @@
         </thead>
         <tbody class="tbody">
           <tr
-            v-if="instanceData.length > 0"
+            v-if="dataStation"
             v-for="(item, index) in instanceData"
             :key="index"
           >
@@ -41,9 +41,18 @@
               </button>
             </td>
           </tr>
-          <tr v-else>
+          <tr v-else-if="dataStationNone">
             <td colspan="3">
-              <h2 class="loading-data-text">Загрузка данных...</h2>
+              <div class="none-account-cont">
+                <h2>Аккаунтов не найдено</h2>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="loadDataStation">
+            <td colspan="3">
+              <div class="load-cont">
+                <LoadAccount />
+              </div>
             </td>
           </tr>
         </tbody>
@@ -107,12 +116,16 @@ import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
+import LoadAccount from "./LoadAccount.vue";
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
   source: "telegram",
   error: null,
 });
 
+const dataStationNone = ref(false);
+const dataStation = ref(false);
+const loadDataStation = ref(false);
 const qrCodeData = ref([]);
 const enableStation = ref(false);
 const getByCodeStation = ref(false);
@@ -136,6 +149,7 @@ const changeGetScreenStation = () => {
 };
 
 const getAccounts = async () => {
+  loadDataStation.value = true;
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
@@ -150,11 +164,22 @@ const getAccounts = async () => {
         },
       }
     );
-    accounts.value = response.data;
-    instanceData.value = accounts.value.data.instances.map((instance) => ({
-      ...instance,
-      step: instance.step === null ? "Н/Д" : instance.step,
-    }));
+
+    if ((response.data.ok = true)) {
+      accounts.value = response.data;
+      instanceData.value = accounts.value.data.instances.map((instance) => ({
+        ...instance,
+        step: instance.step === null ? "Н/Д" : instance.step,
+      }));
+      if (instanceData.value.length === 0) {
+        console.log("данных нет");
+        loadDataStation.value = false;
+        dataStationNone.value = true;
+      } else {
+        loadDataStation.value = false;
+        dataStation.value = true;
+      }
+    }
   } catch (error) {
     error.value = error.message || "Произошла ошибка.";
     console.error("Ошибка при получении списка аккаунтов:", error);
@@ -248,6 +273,29 @@ table {
   fill: currentColor; /* Использует текущий цвет текста */
   margin-bottom: -4px;
   margin-right: 6px;
+}
+
+.load-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -10px;
+}
+
+.none-account-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 0px;
+  width: 100%;
+  background-color: #ebf5ff;
+}
+
+.none-account-cont h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #969696;
 }
 
 .loading-data-text {

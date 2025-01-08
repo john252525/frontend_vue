@@ -2,25 +2,29 @@
   <div @click="changeDeleteMailing" class="black-fon"></div>
   <transition name="fade">
     <section class="confirm-modal">
-      <article class="circle">
-        <span>!</span>
-      </article>
-      <h2 class="title">Вы подтверждаете удаление рассылки?</h2>
-      <article class="button-cont">
-        <button @click="deleteMailing" class="confirm-button">
-          Продолжить
-        </button>
-        <button @click="changeDeleteMailing" class="cansel-button">
-          Отмена
-        </button>
-      </article>
+      <LoadMoadal v-if="loadStation" :text="'Удаление рассылки'" />
+      <section class="cont" v-else>
+        <article class="circle">
+          <span>!</span>
+        </article>
+        <h2 class="title">Вы подтверждаете удаление рассылки?</h2>
+        <article class="button-cont">
+          <button @click="deleteMailing" class="confirm-button">
+            Продолжить
+          </button>
+          <button @click="changeDeleteMailing" class="cansel-button">
+            Отмена
+          </button>
+        </article>
+      </section>
     </section>
   </transition>
 </template>
 
 <script setup>
-import { toRefs } from "vue";
+import { toRefs, ref } from "vue";
 import axios from "axios";
+import LoadMoadal from "../LoadModal/LoadModal.vue";
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -28,11 +32,15 @@ const props = defineProps({
   changeDeleteMailing: {
     type: Function,
   },
+  refreshMailingLists: {
+    type: Function,
+  },
 });
 
 const { selectedItem } = toRefs(props);
-
+const loadStation = ref(false);
 const deleteMailing = async () => {
+  loadStation.value = true;
   const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/delete/${selectedItem.value.id}/`;
   const params = {
     token: "d7039fe337873da68d28945cd6e5c61d",
@@ -46,7 +54,9 @@ const deleteMailing = async () => {
 
     if (response.data.ok === true) {
       console.log("Рассылка успешно удалена:", response.data);
-      location.reload();
+      props.refreshMailingLists();
+      props.changeDeleteMailing();
+      loadStation.value = false;
     } else {
       console.log("Ошибка при удалении рассылки:", response.data);
     }
@@ -70,6 +80,12 @@ const deleteMailing = async () => {
   width: 389px;
   height: 208px;
   background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.cont {
   display: flex;
   align-items: center;
   justify-content: center;

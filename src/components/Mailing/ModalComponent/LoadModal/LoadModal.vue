@@ -6,11 +6,17 @@
       <div></div>
       <div></div>
     </div>
-    <div class="text">Загрузка</div>
+    <div class="text">{{ text }}</div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+const props = defineProps({
+  text: {
+    type: String,
+  },
+});
+</script>
 
 <style scoped>
 .container {

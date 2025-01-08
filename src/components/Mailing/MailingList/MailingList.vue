@@ -35,7 +35,9 @@
           </tr>
           <tr v-else>
             <td colspan="3">
-              <h2 class="loading-data-text">Загрузка данных...</h2>
+              <div class="load-cont">
+                <LoadAccount />
+              </div>
             </td>
           </tr>
         </tbody>
@@ -60,6 +62,7 @@
     v-if="station.deleteMailing"
     :selectedItem="selectedItem"
     :changeDeleteMailing="changeDeleteMailing"
+    :refreshMailingLists="getMailingLists"
   />
 </template>
 
@@ -71,7 +74,7 @@ import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
 import ConfirmDelete from "../ModalComponent/confirmModal/confirmDelete.vue";
 import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
-
+import LoadAccount from "./LoadAccount.vue";
 const station = reactive({
   isModalOpen: false,
   infoMailing: false,
@@ -176,6 +179,13 @@ table {
   text-align: left;
   padding: 1rem;
   width: 200px;
+}
+
+.load-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -10px;
 }
 
 .table-step {
