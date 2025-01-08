@@ -44,7 +44,7 @@
           <tr v-else-if="dataStationNone">
             <td colspan="3">
               <div class="none-account-cont">
-                <h2>Аккаунтов не найдено</h2>
+                <h2>Аккаунты отсутствуют.</h2>
               </div>
             </td>
           </tr>
@@ -183,6 +183,8 @@ const getAccounts = async () => {
   } catch (error) {
     error.value = error.message || "Произошла ошибка.";
     console.error("Ошибка при получении списка аккаунтов:", error);
+    loadDataStation.value = false;
+    dataStationNone.value = true;
     if (error.response) {
       console.error("Ответ сервера:", error.response.data);
     }
@@ -284,18 +286,21 @@ table {
 
 .none-account-cont {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-direction: column;
   margin-top: 0px;
+  height: 50px;
   width: 100%;
   background-color: #ebf5ff;
+  border-radius: 5px;
 }
 
 .none-account-cont h2 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  color: #969696;
+  color: #17388d;
+  margin-left: 10px;
 }
 
 .loading-data-text {

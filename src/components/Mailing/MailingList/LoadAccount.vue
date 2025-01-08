@@ -1,56 +1,42 @@
 <template>
-  <div class="lds-facebook">
-    <div></div>
-    <div></div>
-    <div></div>
+  <div class="cont">
+    <h3>Загрузка...</h3>
   </div>
 </template>
 
 <script setup></script>
 
 <style scoped>
-.lds-facebook,
-.lds-facebook div {
-  box-sizing: border-box;
+.cont {
+  background-color: #f9fafb;
+  width: 100%;
+  height: 50px;
+  border-radius: 5px;
+  border: 1px solid #d8d8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.lds-facebook {
-  display: inline-block;
-  position: relative;
-  width: 40px; /* Уменьшена ширина */
-  height: 40px; /* Уменьшена высота */
+
+h3 {
+  color: #4966b1;
+  font-size: 10px;
+  font-weight: 500;
+  background-color: #cee3fd;
+  padding: 4px 14px;
+  border-radius: 20px;
+  animation: shimmer 1s infinite;
 }
-.lds-facebook div {
-  display: inline-block;
-  position: absolute;
-  left: 4px; /* Уменьшено расстояние слева */
-  width: 8px; /* Уменьшена ширина каждого блока */
-  background-color: #ebebeb;
-  border-radius: 10px;
-  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-}
-.lds-facebook div:nth-child(1) {
-  left: 4px;
-  animation-delay: -0.24s;
-}
-.lds-facebook div:nth-child(2) {
-  left: 16px; /* Уменьшено расстояние */
-  animation-delay: -0.12s;
-}
-.lds-facebook div:nth-child(3) {
-  left: 28px; /* Уменьшено расстояние */
-  animation-delay: 0s;
-}
-@keyframes lds-facebook {
+
+@keyframes shimmer {
   0% {
-    top: 4px; /* Уменьшено начальное положение */
-    height: 32px; /* Уменьшена высота */
+    opacity: 0.7;
   }
-  50%,
+  50% {
+    opacity: 1;
+  }
   100% {
-    top: 12px; /* Уменьшено конечное положение */
-    height: 16px; /* Уменьшена высота */
+    opacity: 0.7;
   }
 }
 </style>
-
-Найти еще

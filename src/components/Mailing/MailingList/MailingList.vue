@@ -11,7 +11,7 @@
         </thead>
         <tbody class="tbody">
           <tr
-            v-if="mailingLists.length > 0"
+            v-if="dataStation"
             v-for="(item, index) in mailingLists"
             :key="index"
           >
@@ -33,7 +33,14 @@
               </button>
             </td>
           </tr>
-          <tr v-else>
+          <tr v-else-if="dataStationNone">
+            <td colspan="3">
+              <div class="none-account-cont">
+                <h2>Аккаунтов не найдено</h2>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="loadDataStation">
             <td colspan="3">
               <div class="load-cont">
                 <LoadAccount />
@@ -82,11 +89,16 @@ const station = reactive({
   deleteMailing: false,
 });
 
+const dataStationNone = ref(false);
+const dataStation = ref(false);
+const loadDataStation = ref(false);
+
 const selectedItem = ref(null);
 const mailingLists = ref([]);
 const modalPosition = ref({ top: 0, left: 0 });
 
 const getMailingLists = async () => {
+  loadDataStation.value = true;
   const token = "d7039fe337873da68d28945cd6e5c61d";
   const apiUrl = "https://whatsapi.ru/ru/api/autosend/whatsapp/list/";
   try {
@@ -96,10 +108,13 @@ const getMailingLists = async () => {
       },
     });
     mailingLists.value = response.data.result.items;
-    if (response.data.ok === true) {
-      console.log(response.data.result.items);
+    if (mailingLists.value.length === 0) {
+      console.log("данных нет");
+      loadDataStation.value = false;
+      dataStationNone.value = true;
     } else {
-      console.log("er");
+      loadDataStation.value = false;
+      dataStation.value = true;
     }
     console.log(response.data);
   } catch (error) {
@@ -173,6 +188,25 @@ table {
   padding: 10px;
   background-color: #efefef;
   border-radius: 6px;
+}
+
+.none-account-cont {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 0px;
+  height: 50px;
+  width: 100%;
+  background-color: #ebf5ff;
+  border-radius: 5px;
+}
+
+.none-account-cont h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #17388d;
+  margin-left: 10px;
 }
 
 .table-login {
