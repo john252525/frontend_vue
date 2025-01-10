@@ -59,6 +59,7 @@
     :selectedItem="selectedItem"
     :changeDeleteMailing="changeDeleteMailing"
     :refreshMailingLists="getMailingLists"
+    :changeisEditMailing="changeisEditMailing"
   />
   <InfoMailing
     :changeInfoMailing="changeInfoMailing"
@@ -71,6 +72,11 @@
     :changeDeleteMailing="changeDeleteMailing"
     :refreshMailingLists="getMailingLists"
   />
+  <EditMailing
+    v-if="station.editMailing"
+    :changeisEditMailing="changeisEditMailing"
+    :selectedItem="selectedItem"
+  />
 </template>
 
 <script setup>
@@ -82,11 +88,13 @@ import ConfirmDelete from "../ModalComponent/confirmModal/confirmDelete.vue";
 import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
 import LoadAccount from "./LoadAccount.vue";
+import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
 const station = reactive({
   isModalOpen: false,
   infoMailing: false,
   isAddMailing: false,
   deleteMailing: false,
+  editMailing: false,
 });
 
 const dataStationNone = ref(false);
@@ -134,6 +142,10 @@ const openModal = (event, item) => {
 
 const closeModal = () => {
   station.isModalOpen = false;
+};
+
+const changeisEditMailing = () => {
+  station.editMailing = !station.editMailing;
 };
 
 const changeisAddMailing = () => {

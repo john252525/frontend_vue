@@ -21,7 +21,7 @@
           >Выключить</span
         >
         <span @click="changeInfoMailing" class="action">Информация</span>
-        <span @click="getMessages" class="action">Редактировать</span>
+        <span @click="changeisEditMailing" class="action">Редактировать</span>
         <span class="action" @click="changeDeleteMailing">Удалить</span>
       </div>
     </transition>
@@ -49,6 +49,9 @@ const props = defineProps({
     type: Function,
   },
   refreshMailingLists: {
+    type: Function,
+  },
+  changeisEditMailing: {
     type: Function,
   },
 });

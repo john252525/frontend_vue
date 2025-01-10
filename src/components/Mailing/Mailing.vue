@@ -1,3 +1,4 @@
+<!-- Mailing.vue -->
 <template>
   <header v-if="!addMailing">
     <section class="account-section">

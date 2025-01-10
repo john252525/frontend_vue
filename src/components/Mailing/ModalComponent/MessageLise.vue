@@ -1,5 +1,9 @@
 <template>
   <section class="account-list-section">
+    <h2 class="title">
+      <img @click="changeStationMessage" src="/millingInfo/out.svg" alt="" />
+      Список Сообщений
+    </h2>
     <div class="table-container">
       <table class="table">
         <thead class="table-header">
@@ -47,6 +51,9 @@ const props = defineProps({
   changeInfoMailing: {
     type: Function,
   },
+  changeStationMessage: {
+    type: Function,
+  },
 });
 const { selectedItem } = toRefs(props);
 
@@ -89,6 +96,27 @@ onMounted(getMessages);
   height: auto;
 }
 
+.title {
+  font-weight: 500;
+  font-size: 24px;
+  color: #000;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title img {
+  margin-top: 5px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.title img:hover {
+  transition: all 0.15s;
+  transform: translate(-5px);
+}
+
 .table-header {
   position: sticky;
   top: 0;
@@ -113,11 +141,10 @@ table {
   font-weight: 600;
   font-size: 14px;
   color: #000000;
-  margin-top: 20px;
-  text-align: center;
-  padding: 10px;
-  background-color: #efefef;
+  /* text-align: center; */
+  /* padding: 10px; */
   border-radius: 6px;
+  /* width: 100%; */
 }
 
 .table-login {

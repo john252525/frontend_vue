@@ -8,6 +8,11 @@
       </h2>
       <section>
         <h3>
+          Статус:
+          <span class="active" v-if="selectedItem.state === 1">Активен</span>
+          <span class="no-active" v-else>Неактивен</span>
+        </h3>
+        <h3>
           Название: <span>{{ selectedItem.name }}</span>
         </h3>
         <h3>
@@ -35,7 +40,11 @@
       </section>
       <button class="edit-maling">Редактировать</button>
     </div>
-    <MessageLise :selectedItem="selectedItem" v-if="station.message" />
+    <MessageLise
+      :changeStationMessage="changeStationMessage"
+      :selectedItem="selectedItem"
+      v-if="station.message"
+    />
   </section>
 </template>
 
@@ -126,6 +135,14 @@ watch(
 .message-text {
   text-decoration: underline;
   cursor: pointer;
+}
+
+.no-active {
+  color: red;
+}
+
+.active {
+  color: green;
 }
 
 h3 {
