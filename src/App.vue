@@ -19,20 +19,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 
 const phoneMenuStation = ref(false);
 
-function phoneMenuOn() {
-  phoneMenuStation.value = !phoneMenuStation.value;
-}
-
-// Получаем текущий маршрут и маршрутизатор
+// Получаем текущий маршрут
 const route = useRoute();
-const router = useRouter();
 
 // Проверяем, является ли текущая страница одной из страниц: Login, Registration или PasswordRecovery
 const isAuthPage = computed(() => {
@@ -43,19 +38,9 @@ const isAuthPage = computed(() => {
   );
 });
 
-// Проверка токена и перенаправление
-onMounted(() => {
-  const token = localStorage.getItem("accountToken");
-
-  // Если токен существует и мы не на странице аутентификации, перенаправляем на Личный кабинет
-  if (token && !isAuthPage.value) {
-    router.push({ name: "PersonalAccount" });
-  }
-  // Если токена нет и мы не на странице аутентификации, перенаправляем на страницу Входа
-  else if (!token && !isAuthPage.value) {
-    router.push({ name: "Login" });
-  }
-});
+function phoneMenuOn() {
+  phoneMenuStation.value = !phoneMenuStation.value;
+}
 </script>
 
 <style scoped>
@@ -72,3 +57,5 @@ main {
   width: 260px;
 }
 </style>
+
+Найти еще

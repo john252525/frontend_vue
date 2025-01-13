@@ -106,6 +106,7 @@ const loginAccount = async () => {
     );
     if (response.data.ok === true) {
       localStorage.setItem("accountToken", response.data.token);
+      localStorage.setItem("accountData", formData.login);
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
       location.reload();

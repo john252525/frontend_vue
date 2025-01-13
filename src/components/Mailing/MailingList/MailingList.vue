@@ -6,6 +6,7 @@
           <tr>
             <th class="table-login">НАЗВАНИЕ</th>
             <th class="table-step">ДАТА СОЗДАНИЯ</th>
+            <th class="table-status">СТАТУС</th>
             <th class="table-action">ДЕЙСТВИЕ</th>
           </tr>
         </thead>
@@ -20,6 +21,8 @@
               <span v-else>Рассылка</span>
             </td>
             <td class="table-text">{{ item.dt_create }}</td>
+            <td class="table-state-active" v-if="item.state === 1">Активен</td>
+            <td class="table-state" v-if="item.state === 0">Неактивен</td>
             <td class="table-action-text">
               <button
                 class="action-table-button"
@@ -30,6 +33,15 @@
                   alt="Меню действий"
                 />
                 Действие
+              </button>
+              <button
+                class="action-table-button-phone"
+                @click="openModal($event, item)"
+              >
+                <img
+                  src="/telegramAccount/menu_table_button.svg"
+                  alt="Меню действий"
+                />
               </button>
             </td>
           </tr>
@@ -166,8 +178,9 @@ provide("selectedItem", { selectedItem });
 
 <style scoped>
 .table-container {
-  max-width: 100%;
+  /* max-width: 100%; */
   overflow-x: auto;
+  overflow-y: auto;
   height: 83vh;
 }
 
@@ -175,11 +188,13 @@ provide("selectedItem", { selectedItem });
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgb(243 244 246);
+  background: rgb(243, 244, 246);
 }
 
-table {
+.table {
   width: 100%;
+  min-width: 600px;
+  /* overflow-y: auto; */
   border-collapse: collapse;
 }
 
@@ -224,7 +239,6 @@ table {
 .table-login {
   text-align: left;
   padding: 1rem;
-  width: 200px;
 }
 
 .load-cont {
@@ -237,7 +251,11 @@ table {
 .table-step {
   text-align: left;
   padding: 1rem;
-  width: 220px;
+}
+
+.table-status {
+  text-align: left;
+  padding: 1rem;
 }
 
 .table-action {
@@ -246,12 +264,40 @@ table {
   padding-right: 15px;
 }
 
+.table-login {
+  width: 30%;
+}
+
+.table-step {
+  width: 25%;
+}
+
+.table-status {
+  width: 20%;
+}
+
+.table-action {
+  width: 25%;
+}
+
 .table-text-number {
   padding: 1rem;
 }
 
 .table-text {
   padding: 1rem;
+}
+
+.table-state {
+  padding: 1rem;
+  text-align: left;
+  color: rgb(211, 59, 59);
+}
+
+.table-state-active {
+  padding: 1rem;
+  text-align: left;
+  color: rgb(32, 179, 40);
 }
 
 .table-action-text {
@@ -270,6 +316,10 @@ table {
   transition: all 0.25s;
   border-radius: 5px;
   margin-right: -3px;
+}
+
+.action-table-button-phone {
+  display: none;
 }
 
 .action-table-button:hover {

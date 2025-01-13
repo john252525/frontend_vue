@@ -1,5 +1,5 @@
 import "./assets/main.css";
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { createApp } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
@@ -9,6 +9,7 @@ import PasswordRecovery from "./pages/PasswordRecovery.vue";
 import test from "./pages/test.vue";
 import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
+
 const routes = [
   { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
   { path: "/", name: "MainPage", component: MainPage },
@@ -20,8 +21,28 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("accountToken");
+  const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
+    to.name
+  );
+  if (token) {
+    if (isAuthPage) {
+      next({ name: "PersonalAccount" });
+    } else {
+      next();
+    }
+  } else {
+    if (!isAuthPage) {
+      next({ name: "Login" });
+    } else {
+      next();
+    }
+  }
 });
 
 const app = createApp(App);

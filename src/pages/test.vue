@@ -1,84 +1,99 @@
 <template>
-  <div class="container">
-    <div class="lds-ring">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
+  <section class="account-list-section">
+    <div class="table-container">
+      <table class="table">
+        <thead class="table-header">
+          <tr>
+            <th class="table-login">Название</th>
+            <th class="table-step">Дата</th>
+            <th class="table-status">Статус</th>
+            <th class="table-action">Действие</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in mailingLists" :key="index">
+            <td>{{ item.name }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.status }}</td>
+            <td>
+              <button class="action-button" @click="handleAction(item)">
+                Действие
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="text">Загрузка</div>
-  </div>
+  </section>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+
+const mailingLists = ref([
+  { name: "МегаРассылка", date: "2023-01-01 16:22:45", status: "Активен" },
+  { name: "Рассылка 2", date: "2023-02-01", status: "Неактивен" },
+  { name: "Рассылка 3", date: "2023-03-01", status: "Активен" },
+]);
+
+const handleAction = (item) => {
+  console.log("Действие для:", item);
+};
+</script>
 
 <style scoped>
-.container {
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  white-space: nowrap;
+.table-container {
+  max-width: 100%;
+  overflow-x: auto; /* Включаем горизонтальную прокрутку */
 }
 
-.text {
-  font-size: 20px;
-  font-weight: 400;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header {
+  background-color: #f3f4f6;
+}
+
+th,
+td {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.action-button {
+  background-color: #4caf50; /* Зеленый цвет */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
   display: inline-block;
-  animation: shimmer 2s infinite;
-  color: rgb(0, 0, 0); /* Серый цвет текста */
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
-.lds-ring,
-.lds-ring div {
-  box-sizing: border-box;
-}
-.lds-ring {
-  display: inline-block;
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-.lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 64px;
-  height: 64px;
-  margin: 8px;
-  border: 7px solid currentColor;
-  border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: oklch(0.541 0.198 267) transparent transparent transparent;
-}
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
-.lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
-}
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.action-button:hover {
+  background-color: #45a049; /* Темно-зеленый цвет при наведении */
 }
 
-@keyframes shimmer {
-  0% {
-    opacity: 0.7;
+/* Адаптивные стили */
+@media (max-width: 600px) {
+  .table-container {
+    overflow-x: auto; /* Обеспечиваем горизонтальную прокрутку */
+    -webkit-overflow-scrolling: touch; /* Обеспечение плавного скролла на мобильных устройствах */
   }
-  50% {
-    opacity: 1;
+
+  th,
+  td {
+    font-size: 12px; /* Уменьшение размера шрифта на маленьких экранах */
   }
-  100% {
-    opacity: 0.7;
+
+  .action-button {
+    padding: 8px 10px; /* Уменьшение размера кнопки */
   }
 }
 </style>

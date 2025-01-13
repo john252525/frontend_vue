@@ -39,8 +39,13 @@
   <div v-if="phoneMenuStation" class="black-fon" @click="phoneMenuOn">
     <aside class="phone-menu" @click.stop>
       <header class="logo-phone-cont">
-        <h2 class="logo-phone">
-          <img src="/header/logo.svg" alt="Логотип" />Name-<span>API</span>
+        <h2 class="logo-header">
+          <img
+            src="https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico"
+            class="logo-img"
+            alt="Logo"
+          />
+          Touch-API
         </h2>
         <img
           @click="phoneMenuOn"
@@ -124,6 +129,16 @@ nav {
   margin-left: 8px;
 }
 
+.logo-header {
+  font-family: system-ui;
+  font-weight: 500;
+  font-size: 24px;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .svg-icon {
   width: 22px; /* 24px */
   height: 22px; /* 24px */
@@ -138,6 +153,10 @@ nav {
   top: 56px;
   height: calc(100% - 57px);
   left: 230px;
+}
+
+.logo-img {
+  height: 2rem;
 }
 
 li {

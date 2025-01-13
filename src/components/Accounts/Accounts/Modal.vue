@@ -41,7 +41,6 @@
     :stationLoading="stationLoading"
     :textLoadin="stationLoading.text"
   />
-
   <ConfirmDelete
     :loadingStart="loadingStart"
     :ChangeconfirmStation="ChangeconfirmStation"
@@ -72,6 +71,7 @@ import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
+// import LoadingMoadal from "../Accounts/LoadingMoadal/LoadingMoadal.vue";
 import GetScreen from "./ModalAccount/GetScreen.vue";
 
 const props = defineProps({

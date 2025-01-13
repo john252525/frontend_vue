@@ -1,21 +1,25 @@
 <template>
   <div @click="AccountMenuStationOn" class="black-fon"></div>
   <section class="account-menu-section">
-    <h2 class="email-user">your.email@mail.ru</h2>
+    <h2 class="email-user">{{ storedData }}</h2>
     <div class="line"></div>
-    <h2 class="out-account-button" @click="handleLogout">Выйти</h2>
+    <h2 class="out-account-button" @click="leaveAccount">Выйти</h2>
   </section>
 </template>
 
 <script setup>
+import { ref, reactive } from "vue";
 const props = defineProps({
   AccountMenuStationOn: {
     type: Function,
   },
 });
 
-const handleLogout = () => {
-  console.log("Выход из аккаунта");
+const storedData = localStorage.getItem("accountData");
+
+const leaveAccount = () => {
+  localStorage.removeItem("accountToken");
+  location.reload();
 };
 </script>
 
@@ -41,21 +45,23 @@ const handleLogout = () => {
   padding: 12px 0;
 }
 
-.account-menu-section, .fade-leave-active {
+.account-menu-section,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.account-menu-section, .fade-leave-to {
+.account-menu-section,
+.fade-leave-to {
   opacity: 0;
 }
 
-.account-menu-section{
+.account-menu-section {
   animation: fadeIn 0.5s forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateX(20px); 
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
@@ -95,15 +101,15 @@ const handleLogout = () => {
     background: #fff;
     padding: 12px 0;
     border-radius: 10px 0 0 10px;
-} 
+  }
 
-.email-user {
-  font-size: 16px;
-}
+  .email-user {
+    font-size: 16px;
+  }
 
-.out-account-button {
-  font-size: 16px;
-  margin-left: 20px;
-}
+  .out-account-button {
+    font-size: 16px;
+    margin-left: 20px;
+  }
 }
 </style>
