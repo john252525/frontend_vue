@@ -254,19 +254,8 @@ const addAccount = async () => {
     );
 
     if ((response.data.ok = "true")) {
-      console.log("Аккаунт успешно создан:", response.data);
-      console.log(login);
-      console.log(accountData.token);
-      console.log(accountData.login);
-      console.log(data.type);
-      console.log(data.category);
-      console.log(data.messenger);
+      location.reload();
     } else {
-      console.log(accountData.token);
-      console.log(accountData.login);
-      console.log(data.type);
-      console.log(data.category);
-      console.log(data.messenger);
     }
     // location.reload();
   } catch (error) {
