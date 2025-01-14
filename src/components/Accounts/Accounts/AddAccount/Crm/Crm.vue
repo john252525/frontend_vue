@@ -167,4 +167,25 @@ watch(searchQuery, filterOptions);
 li {
   cursor: pointer;
 }
+
+@media (max-width: 600px) {
+  .input-data {
+    width: 387px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 500px) {
+  .input-data {
+    width: 338px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 500px) {
+  .input-data {
+    width: 287px;
+    height: 45px;
+  }
+}
 </style>

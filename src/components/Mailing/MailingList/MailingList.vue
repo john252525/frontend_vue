@@ -53,7 +53,7 @@
             </td>
           </tr>
           <tr v-if="loadDataStation">
-            <td colspan="3">
+            <td class="accout-load-cont" colspan="4">
               <div class="load-cont">
                 <LoadAccount />
               </div>
@@ -64,7 +64,7 @@
     </div>
   </section>
   <Modal
-    v-if="station.isModalOpen"
+    :isModalOpen="station.isModalOpen"
     :closeModal="closeModal"
     :modalPosition="modalPosition"
     :changeInfoMailing="changeInfoMailing"
@@ -77,6 +77,7 @@
     :changeInfoMailing="changeInfoMailing"
     :selectedItem="selectedItem"
     v-if="station.infoMailing"
+    :changeisEditMailing="changeisEditMailingInfo"
   />
   <ConfirmDelete
     v-if="station.deleteMailing"
@@ -160,6 +161,11 @@ const changeisEditMailing = () => {
   station.editMailing = !station.editMailing;
 };
 
+const changeisEditMailingInfo = () => {
+  changeInfoMailing();
+  station.editMailing = !station.editMailing;
+};
+
 const changeisAddMailing = () => {
   station.isAddMailing = !station.isAddMailing;
 };
@@ -178,7 +184,6 @@ provide("selectedItem", { selectedItem });
 
 <style scoped>
 .table-container {
-  /* max-width: 100%; */
   overflow-x: auto;
   overflow-y: auto;
   height: 83vh;
@@ -194,7 +199,6 @@ provide("selectedItem", { selectedItem });
 .table {
   width: 100%;
   min-width: 600px;
-  /* overflow-y: auto; */
   border-collapse: collapse;
 }
 
@@ -246,6 +250,10 @@ provide("selectedItem", { selectedItem });
   align-items: center;
   justify-content: center;
   margin-top: -10px;
+}
+
+.accout-load-cont {
+  width: 100%;
 }
 
 .table-step {
@@ -367,5 +375,23 @@ tr:not(:last-child):after {
 
 tr:hover {
   background: rgb(243 244 246);
+}
+
+@media (max-width: 700px) {
+  .table-login {
+    width: 20%;
+  }
+
+  .table-step {
+    width: 45%;
+  }
+
+  .table-status {
+    width: 10%;
+  }
+
+  .table-action {
+    width: 25%;
+  }
 }
 </style>

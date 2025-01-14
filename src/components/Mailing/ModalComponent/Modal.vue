@@ -1,5 +1,5 @@
 <template>
-  <div @click="closeModal" class="black-fon">
+  <div @click="closeModal" v-if="isModalOpen" class="black-fon">
     <transition name="fade">
       <div
         class="action-list"
@@ -26,10 +26,15 @@
       </div>
     </transition>
   </div>
+  <LoadingMoadal
+    :stationLoading="stationLoading"
+    :changeStationLoadingModal="offModalSuc"
+  />
 </template>
 
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
+import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -45,6 +50,9 @@ const props = defineProps({
   selectedItem: {
     type: Object,
   },
+  isModalOpen: {
+    type: Boolean,
+  },
   changeDeleteMailing: {
     type: Function,
   },
@@ -53,6 +61,15 @@ const props = defineProps({
   },
   changeisEditMailing: {
     type: Function,
+  },
+});
+
+const stationLoading = reactive({
+  modalStation: false,
+  account: {
+    station: false,
+    result: undefined,
+    error: false,
   },
 });
 
@@ -71,8 +88,12 @@ const updateStatus = async (state) => {
     });
 
     if (response.data.ok === true) {
+      stationLoading.modalStation = true;
       console.log("Статус изменен", response.data);
-      props.refreshMailingLists(); // Вызов функции обновления списка
+      props.refreshMailingLists();
+      setTimeout(() => {
+        offModalSuc();
+      }, 5000);
     } else {
       console.log("Ошибка", response.data);
     }
@@ -82,6 +103,10 @@ const updateStatus = async (state) => {
       error.response ? error.response.data : error.message
     );
   }
+};
+
+const offModalSuc = () => {
+  stationLoading.modalStation = false;
 };
 
 const getMessages = async () => {
@@ -109,26 +134,6 @@ const getMessages = async () => {
     );
   }
 };
-
-// const getMailingLists = async () => {
-//   const token = "d7039fe337873da68d28945cd6e5c61d";
-//   const apiUrl = "https://whatsapi.ru/ru/api/autosend/whatsapp/list/";
-//   try {
-//     const response = await axios.get(apiUrl, {
-//       params: {
-//         token,
-//       },
-//     });
-//     if (response.data.ok === true) {
-//       console.log(response.data.result.items);
-//     } else {
-//       console.log("er");
-//     }
-//     console.log(response.data);
-//   } catch (error) {
-//     console.error("Ошибка при получении данных:", error.message);
-//   }
-// };
 </script>
 
 <style scoped>

@@ -281,4 +281,91 @@ watch(accountData.type, (newValue) => {
     transform: translateY(0);
   }
 }
+
+@media (max-width: 600px) {
+  .dropdown-select {
+    width: 400px;
+    height: 45px;
+    font-size: 16px;
+    margin-top: 30px;
+  }
+
+  .dropdown-options {
+    border-top: 0px;
+    padding: 10px;
+    width: 380px;
+    height: auto;
+    gap: 1px;
+  }
+
+  .create-account-button {
+    width: 400px;
+    height: 44px;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .input-data {
+    width: 387px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 500px) {
+  .dropdown-select {
+    width: 350px;
+    height: 45px;
+    font-size: 16px;
+    margin-top: 30px;
+  }
+
+  .dropdown-options {
+    border-top: 0px;
+    padding: 10px;
+    width: 330px;
+    height: auto;
+    gap: 1px;
+  }
+
+  .create-account-button {
+    width: 350px;
+    height: 44px;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .input-data {
+    width: 338px;
+    height: 45px;
+  }
+}
+
+@media (max-width: 400px) {
+  .dropdown-select {
+    width: 300px;
+    height: 45px;
+    font-size: 16px;
+    margin-top: 30px;
+  }
+
+  .dropdown-options {
+    border-top: 0px;
+    padding: 10px;
+    width: 280px;
+    height: auto;
+    gap: 1px;
+  }
+
+  .create-account-button {
+    width: 300px;
+    height: 44px;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .input-data {
+    width: 287px;
+    height: 45px;
+  }
+}
 </style>

@@ -252,8 +252,8 @@ provide("changeEnableStation", { changeEnableStation });
 
 <style scoped>
 .table-container {
-  max-width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
   height: 83vh;
 }
 
@@ -261,12 +261,29 @@ provide("changeEnableStation", { changeEnableStation });
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgb(243 244 246);
+  background: rgb(243, 244, 246);
 }
 
-table {
+.table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
+}
+
+.table-login {
+  width: 30%;
+}
+
+.table-step {
+  width: 25%;
+}
+
+.table-status {
+  width: 20%;
+}
+
+.table-action {
+  width: 25%;
 }
 
 .bi-list {

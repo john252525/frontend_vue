@@ -38,7 +38,9 @@
           >
         </h3>
       </section>
-      <button class="edit-maling">Редактировать</button>
+      <button class="edit-maling" @click="changeisEditMailing">
+        Редактировать
+      </button>
     </div>
     <MessageLise
       :changeStationMessage="changeStationMessage"
@@ -56,6 +58,9 @@ const props = defineProps({
     type: Object,
   },
   changeInfoMailing: {
+    type: Function,
+  },
+  changeisEditMailing: {
     type: Function,
   },
 });

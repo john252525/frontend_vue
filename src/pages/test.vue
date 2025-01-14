@@ -1,99 +1,115 @@
 <template>
-  <section class="account-list-section">
-    <div class="table-container">
-      <table class="table">
-        <thead class="table-header">
-          <tr>
-            <th class="table-login">Название</th>
-            <th class="table-step">Дата</th>
-            <th class="table-status">Статус</th>
-            <th class="table-action">Действие</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in mailingLists" :key="index">
-            <td>{{ item.name }}</td>
-            <td>{{ item.date }}</td>
-            <td>{{ item.status }}</td>
-            <td>
-              <button class="action-button" @click="handleAction(item)">
-                Действие
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th v-for="(header, index) in headers" :key="index">{{ header }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, rowIndex) in items" :key="rowIndex">
+          <td v-for="(cell, cellIndex) in row" :key="cellIndex">
+            {{ cell }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 
-const mailingLists = ref([
-  { name: "МегаРассылка", date: "2023-01-01 16:22:45", status: "Активен" },
-  { name: "Рассылка 2", date: "2023-02-01", status: "Неактивен" },
-  { name: "Рассылка 3", date: "2023-03-01", status: "Активен" },
+const headers = ref([
+  "Имя",
+  "Возраст",
+  "Город",
+  "Профессия",
+  "Email",
+  "Дополнительные Данные", // Пример добавления длинного столбца
 ]);
 
-const handleAction = (item) => {
-  console.log("Действие для:", item);
-};
+const items = ref([
+  [
+    "Иван Иванов",
+    30,
+    "Москва",
+    "Инженер",
+    "ivan.ivanov@example.com",
+    "Очень длинная строка с дополнительной информацией для теста",
+  ],
+  [
+    "Мария Петрова",
+    25,
+    "Санкт-Петербург",
+    "Дизайнер",
+    "maria.petrova@example.com",
+    "Ещё одна длинная строка данных",
+  ],
+  [
+    "Петр Сидоров",
+    40,
+    "Новосибирск",
+    "Менеджер",
+    "petr.sidorov@example.com",
+    "Дополнительные данные и еще немного информации",
+  ],
+  // ... more rows ...
+  [
+    "Alice Green",
+    28,
+    "London",
+    "Architect",
+    "alice.green@example.com",
+    "Some very long details here, a string that should cause horizontal overflow for testing purposes",
+  ],
+  [
+    "Bob Blue",
+    35,
+    "New York",
+    "Doctor",
+    "bob.blue@example.com",
+    "Additional data with some more details to test the responsiveness of this table",
+  ],
+]);
 </script>
 
 <style scoped>
 .table-container {
-  max-width: 100%;
-  overflow-x: auto; /* Включаем горизонтальную прокрутку */
+  overflow-x: auto; /* Enables horizontal scroll */
+  width: 100%; /* Takes full width on desktop */
+  margin-bottom: 20px; /* Adds bottom margin for spacing */
 }
 
-.table {
-  width: 100%;
+table {
   border-collapse: collapse;
-}
-
-.table-header {
-  background-color: #f3f4f6;
+  border-spacing: 0;
+  width: 100%; /* Takes full width for larger screens */
 }
 
 th,
 td {
-  padding: 1rem;
-  border: 1px solid #ddd;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
   text-align: left;
+  white-space: nowrap; /* предотвращаем перенос текста на новую строку*/
 }
 
-.action-button {
-  background-color: #4caf50; /* Зеленый цвет */
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 5px;
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
 
-.action-button:hover {
-  background-color: #45a049; /* Темно-зеленый цвет при наведении */
-}
-
-/* Адаптивные стили */
+/* Стиль для мобильных экранов  */
 @media (max-width: 600px) {
-  .table-container {
-    overflow-x: auto; /* Обеспечиваем горизонтальную прокрутку */
-    -webkit-overflow-scrolling: touch; /* Обеспечение плавного скролла на мобильных устройствах */
+  table {
+    min-width: 100%; /* Ensure a minimum width to force horizontal scroll */
+    width: auto;
   }
-
   th,
   td {
-    font-size: 12px; /* Уменьшение размера шрифта на маленьких экранах */
-  }
-
-  .action-button {
-    padding: 8px 10px; /* Уменьшение размера кнопки */
+    font-size: 14px; /* Уменьшим шрифт на мобильных устройствах */
+    padding: 8px 5px; /* Уменьшим отступ для большего количества контента */
   }
 }
 </style>

@@ -47,8 +47,15 @@ function phoneMenuOn() {
 main {
   flex: 1;
   box-sizing: border-box;
+  display: flex;
+  overflow: hidden;
 }
-
+main > section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
 .page-container {
   display: flex;
 }
@@ -57,5 +64,3 @@ main {
   width: 260px;
 }
 </style>
-
-Найти еще
