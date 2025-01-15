@@ -1,5 +1,5 @@
 import "./assets/main.css";
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router"; // Измените здесь
 import { createApp } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
@@ -21,7 +21,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(), // Измените здесь
   routes,
 });
 
