@@ -27,19 +27,23 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("accountToken");
-  console.log("Token:", token); // Отладка токена
+  console.log("Current Route:", to.name);
+  console.log("Token:", token);
+
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );
 
   if (token) {
     if (isAuthPage) {
+      console.log("Redirecting to PersonalAccount");
       next({ name: "PersonalAccount" });
     } else {
       next();
     }
   } else {
     if (!isAuthPage) {
+      console.log("Redirecting to Login");
       next({ name: "Login" });
     } else {
       next();
