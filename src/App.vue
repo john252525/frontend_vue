@@ -31,6 +31,7 @@ const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
 };
 
+// Определяем, является ли текущая страница страницей аутентификации
 const isAuthPage = computed(() => {
   return ["Login", "Registration", "PasswordRecovery"].includes(route.name);
 });

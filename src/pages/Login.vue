@@ -33,7 +33,9 @@
           Забыли пароль?
         </p>
       </div>
-      <button @click="login" class="login-account-button">Войти</button>
+      <button @click="login" type="button" class="login-account-button">
+        Войти
+      </button>
       <p class="create-account-button">
         Нет аккаунта?
         <span @click="navigateTo('/Registration')">Создать аккаунт</span>
@@ -109,6 +111,7 @@ const loginAccount = async () => {
       localStorage.setItem("accountData", formData.login);
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
+      console.log(response.data);
       location.reload();
     } else {
       console.log("нет", response.data);
