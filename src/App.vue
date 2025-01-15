@@ -19,28 +19,34 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 
 const phoneMenuStation = ref(false);
 
 // Получаем текущий маршрут
-const route = useRoute();
-
-// Проверяем, является ли текущая страница одной из страниц: Login, Registration или PasswordRecovery
-const isAuthPage = computed(() => {
-  return (
-    route.name === "Login" ||
-    route.name === "Registration" ||
-    route.name === "PasswordRecovery"
-  );
-});
+const router = useRouter();
 
 function phoneMenuOn() {
   phoneMenuStation.value = !phoneMenuStation.value;
 }
+
+const isAuthPage = computed(() => {});
+
+// Проверка токена и перенаправление
+onMounted(() => {
+  const token = localStorage.getItem("accountToken");
+  // Если токен существует и мы не на странице аутентификации, перенаправляем на Личный кабинет
+  if (token && !isAuthPage.value) {
+    router.push({ name: "PersonalAccount" });
+  }
+  // Если токена нет и мы не на странице аутентификации, перенаправляем на страницу Входа
+  else if (!token && !isAuthPage.value) {
+    router.push({ name: "Login" });
+  }
+});
 </script>
 
 <style scoped>
