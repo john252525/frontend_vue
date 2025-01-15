@@ -1,5 +1,5 @@
 import "./assets/main.css";
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import { createApp } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
@@ -21,29 +21,29 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem("accountToken");
-  const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
-    to.name
-  );
-  if (token) {
-    if (isAuthPage) {
-      next({ name: "PersonalAccount" });
-    } else {
-      next();
-    }
-  } else {
-    if (!isAuthPage) {
-      next({ name: "Login" });
-    } else {
-      next();
-    }
-  }
-});
+// router.beforeEach((to, from, next) => {
+//   const token = localStorage.getItem("accountToken");
+//   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
+//     to.name
+//   );
+//   if (token) {
+//     if (isAuthPage) {
+//       next({ name: "PersonalAccount" });
+//     } else {
+//       next();
+//     }
+//   } else {
+//     if (!isAuthPage) {
+//       next({ name: "Login" });
+//     } else {
+//       next();
+//     }
+//   }
+// });
 
 const app = createApp(App);
 app.use(router);

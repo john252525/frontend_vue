@@ -30,6 +30,7 @@
         <span class="action action-delete" @click="ChangeconfirmStation"
           >Удалить аккаунт</span
         >
+        <span class="action" @click="test">текс</span>
       </div>
     </transition>
   </div>
@@ -431,6 +432,36 @@ const resetAccount = async () => {
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
+};
+
+const test = async () => {
+  const { source, login } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/getChats",
+      {
+        source: source,
+        login: login,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+
+    if (response.data.ok === true) {
+      console.log(response.data);
+    } else {
+      console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
 };
 </script>
 
