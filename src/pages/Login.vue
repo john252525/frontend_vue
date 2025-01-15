@@ -112,7 +112,7 @@ const loginAccount = async () => {
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
       console.log(response.data);
-      location.reload();
+      router.push("/MainPage");
     } else {
       console.log("нет", response.data);
     }

@@ -11,23 +11,14 @@ import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
 
 const routes = [
-  {
-    path: "/personal-account",
-    name: "PersonalAccount",
-    component: PersonalAccount,
-  },
+  { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
   { path: "/", name: "MainPage", component: MainPage },
-  { path: "/mailing", name: "Mailing", component: Mailing },
+  { path: "/Mailing", name: "Mailing", component: Mailing },
   { path: "/login", name: "Login", component: Login },
   { path: "/registration", name: "Registration", component: Registration },
-  {
-    path: "/password-recovery",
-    name: "PasswordRecovery",
-    component: PasswordRecovery,
-  },
+  { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },
   { path: "/test", name: "test", component: test },
 ];
-
 const router = createRouter({
   history: createWebHistory(),
   routes,
