@@ -27,6 +27,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("accountToken");
+  console.log("Token:", token); // Отладка токена
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );
