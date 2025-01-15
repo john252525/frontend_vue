@@ -25,25 +25,26 @@ const router = createRouter({
   routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   const token = localStorage.getItem("accountToken");
-//   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
-//     to.name
-//   );
-//   if (token) {
-//     if (isAuthPage) {
-//       next({ name: "PersonalAccount" });
-//     } else {
-//       next();
-//     }
-//   } else {
-//     if (!isAuthPage) {
-//       next({ name: "Login" });
-//     } else {
-//       next();
-//     }
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("accountToken");
+  const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
+    to.name
+  );
+
+  if (token) {
+    if (isAuthPage) {
+      next({ name: "PersonalAccount" });
+    } else {
+      next();
+    }
+  } else {
+    if (!isAuthPage) {
+      next({ name: "Login" });
+    } else {
+      next();
+    }
+  }
+});
 
 const app = createApp(App);
 app.use(router);

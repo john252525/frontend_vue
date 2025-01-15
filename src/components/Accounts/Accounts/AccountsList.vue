@@ -254,6 +254,7 @@ provide("changeEnableStation", { changeEnableStation });
 .table-container {
   overflow-x: auto;
   overflow-y: auto;
+  max-width: 100%;
   height: 83vh;
 }
 
@@ -266,25 +267,21 @@ provide("changeEnableStation", { changeEnableStation });
 
 .table {
   width: 100%;
-  min-width: 600px;
+  /* min-width: 600px; */
   border-collapse: collapse;
 }
 
-.table-login {
+/* .table-login {
   width: 30%;
 }
 
 .table-step {
-  width: 25%;
-}
-
-.table-status {
-  width: 20%;
+  width: 50%;
 }
 
 .table-action {
-  width: 25%;
-}
+  width: 20%;
+} */
 
 .bi-list {
   width: 16px; /* Ширина и высота иконки */
