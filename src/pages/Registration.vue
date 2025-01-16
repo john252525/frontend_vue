@@ -8,7 +8,7 @@
           type="email"
           placeholder="name@company.com"
           id="name"
-          v-model="name"
+          v-model="formData.login"
           required
           class="input-reg"
         />
@@ -19,7 +19,7 @@
           placeholder="Введите пароль"
           type="password"
           id="email"
-          v-model="email"
+          v-model="formData.password"
           required
           class="input-reg"
         />
@@ -47,29 +47,55 @@
           >Я принимаю Положения и условия</label
         >
       </div>
-      <button class="registration-account-button">Зарегистрироваться</button>
+      <button @click="loginAccount" class="registration-account-button">
+        Зарегистрироваться
+      </button>
       <p class="login-account-button">
-        Есть аккаунт? <span @click="navigateToLogin">Войти</span>
+        Есть аккаунт? <span @click="navigateTo('/Login')">Войти</span>
       </p>
     </form>
   </section>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      form: {
-        login: "",
-        password: "",
+<script setup>
+import axios from "axios";
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
+const formData = reactive({
+  login: "",
+  password: "",
+});
+
+const navigateTo = (page) => {
+  router.push(page);
+};
+
+const loginAccount = async () => {
+  try {
+    const response = await axios.post(
+      `https://b2288.apitter.com/login`,
+      {
+        username: formData.login,
+        password: formData.password,
       },
-    };
-  },
-  methods: {
-    navigateToLogin() {
-      this.$router.push("/Login");
-    },
-  },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
+        },
+      }
+    );
+    if (response.data.ok === true) {
+      navigateTo("/Login");
+      console.log(response.data);
+    }
+  } catch (error) {
+    console.error(`${request} - Ошибка`, error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
 };
 </script>
 <style scoped>
