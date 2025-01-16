@@ -1,5 +1,5 @@
 import "./assets/main.css";
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import { createApp } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
@@ -20,7 +20,7 @@ const routes = [
   { path: "/test", name: "test", component: test },
 ];
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 
