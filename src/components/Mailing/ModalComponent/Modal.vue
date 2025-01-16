@@ -23,6 +23,7 @@
         <span @click="changeInfoMailing" class="action">Информация</span>
         <span @click="changeisEditMailing" class="action">Редактировать</span>
         <span class="action" @click="changeDeleteMailing">Удалить</span>
+        <span @click="trst"> ntrc</span>
       </div>
     </transition>
   </div>
@@ -103,6 +104,10 @@ const updateStatus = async (state) => {
       error.response ? error.response.data : error.message
     );
   }
+};
+
+const trst = () => {
+  console.log(localStorage.getItem("accountToken"));
 };
 
 const offModalSuc = () => {

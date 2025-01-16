@@ -37,7 +37,7 @@
                     d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
                   ></path>
                 </svg>
-                {{ loadingStation ? "Загрузка..." : "Действие" }}
+                Действие
               </button>
             </td>
           </tr>
@@ -73,6 +73,7 @@
       :changeEnableStation="changeEnableStation"
       :getScreenStation="getScreenStation"
       :changeGetScreenStation="changeGetScreenStation"
+      :chatsStation="chatsStation"
     />
     <SettignsModal
       :closeModal="closeModal"
@@ -139,6 +140,7 @@ const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
+const chatsStation = ref(false);
 
 const changeEnableStation = () => {
   enableStation.value = !enableStation.value;
@@ -194,6 +196,9 @@ const getAccounts = async () => {
 const openModal = (event, item) => {
   selectedItem.value = item;
   isModalOpen.value = true;
+  localStorage.setItem("userInfo", JSON.stringify(selectedItem.value));
+  console.log(localStorage.getItem("userInfo"));
+  getInfo();
   const rect = event.currentTarget.getBoundingClientRect();
   modalPosition.value = {
     top: rect.bottom + window.scrollY,
@@ -230,6 +235,7 @@ const changeStationGetByCode = () => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  chatsStation.value = false;
 };
 
 const updateSelectedItems = (newValue) => {
@@ -242,6 +248,36 @@ const updateqrCodeData = (newValue) => {
 
 const updateLoading = (newValue) => {
   loadingStation.value = newValue;
+};
+
+const getInfo = async () => {
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/getInfo",
+      {
+        source: selectedItem.value.source,
+        login: selectedItem.value.login,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+    if (response.data.data.step) {
+      if (response.data.data.step.value === 5) {
+        chatsStation.value = true;
+      }
+    } else {
+      console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
 };
 
 onMounted(getAccounts);

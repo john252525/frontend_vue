@@ -22,6 +22,12 @@
         <span class="action action-throw" @click="ChangeconfirmStationReset"
           >Сбросить</span
         >
+        <span
+          class="action"
+          v-if="chatsStation === true"
+          @click="navigateToChat"
+          >Чат</span
+        >
         <span class="action" @click="getNewProxy">Сменить прокси</span>
         <span class="action" @click="startEnableByQR('whatsapp')"
           >Связать через QR</span
@@ -30,7 +36,6 @@
         <span class="action action-delete" @click="ChangeconfirmStation"
           >Удалить аккаунт</span
         >
-        <span class="action" @click="test">текс</span>
       </div>
     </transition>
   </div>
@@ -66,7 +71,15 @@
 </template>
 
 <script setup>
-import { toRefs, ref, defineProps, reactive, watch } from "vue";
+import {
+  toRefs,
+  ref,
+  defineProps,
+  reactive,
+  onMounted,
+  inject,
+  watch,
+} from "vue";
 import axios from "axios";
 import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
@@ -115,13 +128,18 @@ const props = defineProps({
   getScreenStation: {
     type: Boolean,
   },
+  chatsStation: {
+    type: Boolean,
+  },
 });
 
 const emit = defineEmits();
-const { selectedItem, loadingStation } = toRefs(props);
+const { selectedItem, loadingStation, chatsStation } = toRefs(props);
+import { useRouter } from "vue-router";
 const updateLoadingStation = ref(false);
 const qrData = ref([]);
 const accountStationText = localStorage.getItem("accountStation");
+const router = useRouter();
 const handleSubmit = () => {
   emit("update:selectedItems", selectedItem.value);
   props.changeStationSettingsModal();
@@ -159,6 +177,10 @@ const errorStationOn = () => {
 
 const errorStationOff = () => {
   stationLoading.account.error = true;
+};
+
+const navigateToChat = () => {
+  router.push("/Chats");
 };
 
 const ChangeconfirmStation = () => {
@@ -435,10 +457,136 @@ const resetAccount = async () => {
 };
 
 const test = async () => {
+  console.log(localStorage.getItem("accountToken"));
   const { source, login } = selectedItem.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getChats",
+      "https://b2288.apitter.com/instances/getChatMessages",
+      {
+        source: source,
+        login: login,
+        to: "79608151077",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+    console.log(response.data);
+    if (response.data.ok === true) {
+      console.log(response.data);
+    } else {
+      console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка при создании аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+// const test = async () => {
+//   console.log(localStorage.getItem("accountToken"));
+//   const { source, login } = selectedItem.value;
+//   try {
+//     const response = await axios.post(
+//       "https://b2288.apitter.com/instances/getChatMessages",
+//       {
+//         source: source,
+//         login: login,
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json; charset=utf-8",
+//           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+//         },
+//       }
+//     );
+
+//     if (response.data.ok === true) {
+//       console.log(response.data);
+//     } else {
+//       console.log(response.data.ok);
+//     }
+//   } catch (error) {
+//     console.error("Ошибка при создании аккаунта:", error);
+//     if (error.response) {
+//       console.error("Ошибка сервера:", error.response.data);
+//     }
+//   }
+// };
+
+// const test = async () => {
+//   const { source, login } = selectedItem.value;
+//   try {
+//     const response = await axios.post(
+//       "https://b2288.apitter.com/instances/getChatMessages",
+//       {
+//         source: source,
+//         login: login,
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json; charset=utf-8",
+//           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+//         },
+//       }
+//     );
+
+//     // Обработка данных
+//     const messages = response.data; // Предполагается, что данные приходят в формате JSON
+//     console.log(messages);
+
+//     // Здесь вы можете обновить состояние вашего приложения с полученными данными
+//   } catch (error) {
+//     console.error("Ошибка при получении сообщений:", error);
+//     if (error.response) {
+//       console.error("Ошибка сервера:", error.response.data);
+//     }
+//   }
+// };
+
+// const to = "79228933680";
+// const text = "Тест";
+// const content = [];
+
+// const sendMessage = async (to, text, content) => {
+//   const { source, login } = selectedItem.value;
+//   try {
+//     const response = await axios.post(
+//       "https://b2288.apitter.com/instances/sendMessage",
+//       {
+//         source: source,
+//         login: login,
+//         msg: {
+//           to: to,
+//           text: text || null,
+//           content: content || [],
+//         },
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json; charset=utf-8",
+//           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+//         },
+//       }
+//     );
+//     console.log("Сообщение отправлено:", response.data);
+//   } catch (error) {
+//     console.error("Ошибка при отправке сообщения:", error);
+//     if (error.response) {
+//       console.error("Ошибка сервера:", error.response.data);
+//     }
+//   }
+// };
+
+const getInfo = async () => {
+  const { source, login } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/getInfo",
       {
         source: source,
         login: login,
@@ -463,6 +611,11 @@ const test = async () => {
     }
   }
 };
+
+// if (isModalOpen.value === true) {
+//   getInfo();
+// }
+onMounted(getInfo);
 </script>
 
 <style scoped>

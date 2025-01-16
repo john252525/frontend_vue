@@ -37,10 +37,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
-
 const props = defineProps({
   phoneMenuOn: {
     type: Function,

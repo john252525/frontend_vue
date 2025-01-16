@@ -14,19 +14,18 @@
   </div>
   <div v-else class="auth-container">
     <router-view></router-view>
-    <!-- Отображаем только router-view для страниц входа, регистрации и восстановления пароля -->
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, provide } from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 
+const chatStation = ref(false);
 const phoneMenuStation = ref(false);
 const route = useRoute();
-
 const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
 };
