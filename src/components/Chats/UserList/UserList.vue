@@ -1,15 +1,19 @@
 <template>
-  <div class="chat-list">
-    <div
+  <aside class="chat-list">
+    <section
+      v-if="chats"
       v-for="chat in chats"
       :key="chat.phone"
       class="chat-item"
       @click="selectChat(chat)"
     >
-      <div class="chat-info">
-        <div class="chat-name">{{ chat.name }}</div>
-        <div class="chat-last-message">
-          {{ formatLastMessage(chat.lastMessage?.body) }}
+      <div class="chat-user-cont">
+        <img src="/chats/user-chat-icon.svg" alt="" />
+        <div class="chat-info">
+          <div class="chat-name">{{ chat.name }}</div>
+          <div class="chat-last-message">
+            {{ formatLastMessage(chat.lastMessage?.body) }}
+          </div>
         </div>
       </div>
       <div class="chat-meta">
@@ -18,14 +22,17 @@
           {{ chat.unreadCount }}
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+    <section class="loading-chat-list" v-else>
+      <Loading />
+    </section>
+  </aside>
 </template>
 
 <script setup>
 import axios from "axios";
 import { onMounted, ref } from "vue";
-
+import Loading from "./Loading.vue";
 const props = defineProps({
   selectChat: {
     type: Function,
@@ -80,11 +87,18 @@ const formatLastMessage = (message) => {
 
 <style scoped>
 .chat-list {
-  width: 450px; /* Ширина списка чатов */
-  border-right: 1px solid #eaeaea; /* Разделитель */
+  width: 450px;
+  border-right: 1px solid #eaeaea;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 93vh; /* Высота на весь экран */
+  height: 93vh;
+}
+
+.loading-chat-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 93vh;
 }
 
 .chat-item {
@@ -92,70 +106,80 @@ const formatLastMessage = (message) => {
   justify-content: space-between;
   padding: 10px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0; /* Разделитель между чатами */
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
 }
 
 .chat-item:hover {
-  background-color: #f7f7f7; /* Цвет при наведении */
+  background-color: #f0f0f0;
 }
 
 .chat-info {
-  flex-grow: 1; /* Занимает оставшееся пространство */
+  flex-grow: 1;
+  font-size: 14px;
+}
+
+.chat-user-cont {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .chat-name {
-  font-weight: bold; /* Жирный текст для имени */
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .chat-last-message {
-  color: #888; /* Цвет для последнего сообщения */
-  white-space: nowrap; /* Запрет на перенос строки */
-  overflow: hidden; /* Скрыть переполнение */
-  text-overflow: ellipsis; /* Добавить многоточие в конце */
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-meta {
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* Выравнивание по правому краю */
+  align-items: flex-end;
 }
 
 .chat-timestamp {
-  font-size: 12px; /* Размер шрифта для времени */
-  color: #888; /* Цвет для времени */
+  font-size: 12px;
+  color: #888;
 }
 
 .chat-unread {
-  background-color: #007bff; /* Цвет фона для непрочитанных сообщений */
-  color: white; /* Цвет текста для непрочитанных сообщений */
-  border-radius: 12px; /* Закругление углов */
-  padding: 2px 6px; /* Отступы */
-  font-size: 12px; /* Размер шрифта для непрочитанных сообщений */
+  background-color: #007bff;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 12px;
 }
 
-/* Стилизация скроллбара для вебkit-браузеров (Chrome, Safari) */
 .chat-list::-webkit-scrollbar {
-  width: 8px; /* Ширина скроллбара */
+  width: 4px; /* Ширина скроллбара */
+  display: none;
+}
+
+.chat-list:hover::-webkit-scrollbar {
+  display: block;
 }
 
 .chat-list::-webkit-scrollbar-track {
-  background: #f0f0f0; /* Цвет фона трека скроллбара */
-  border-radius: 200px; /* Закругление углов трека */
+  background: rgb(226, 226, 226); /* Цвет фона скроллбара */
 }
 
 .chat-list::-webkit-scrollbar-thumb {
-  background: #6d8196; /* Цвет скроллбара */
-  border-radius: 200px; /* Закругление углов скроллбара */
+  background: rgb(209, 209, 209); /* Цвет ползунка */
+  border-radius: 5px; /* Закругление углов ползунка */
 }
 
-.chat-list::-webkit-scrollbar-thumb:hover {
-  background: #9ea6af; /* Цвет скроллбара при наведении */
-  border-radius: 200px; /* Закругление углов скроллбара */
-}
-
-/* Стили для Firefox */
-.chat-list {
-  scrollbar-width: thin; /* Тонкий скроллбар */
-  scrollbar-color: #c2c2c2 #f0f0f0; /* Цвет скроллбара и трека */
+.krig {
+  width: 45px;
+  height: 45px;
+  background-color: red;
+  border-radius: 100px;
 }
 </style>

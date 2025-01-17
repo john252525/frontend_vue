@@ -1,26 +1,60 @@
 <template>
-  <section class="message-section">
+  <section v-if="!chatInfo" class="no-message-section">
+    <h2 class="change-message">Выберите чат для начала общения</h2>
+  </section>
+  <section v-else class="message-section">
     <header class="user-info-section">
-      <h2 class="name-user">{{ chatInfo.name }}</h2>
+      <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
+      <div>
+        <h2 class="name-user">{{ chatInfo.name }}</h2>
+        <span class="status-user">Онлайн</span>
+      </div>
     </header>
-    <div class="messages">
+    <div v-if="!loading" class="messages">
       <div
         v-for="message in messages"
         :key="message.item"
         :class="['message', message.outgoing ? 'outgoing' : 'incoming']"
       >
         <div class="message-content">
-          <p class="message-text">{{ message.text }}</p>
-          <div class="message-time">{{ message.time }}</div>
+          <p v-if="message.text" class="message-text">{{ message.text }}</p>
+          <img
+            v-if="
+              message.content &&
+              message.content.length > 0 &&
+              message.content[0].src &&
+              message.content[0].type === 'sticker'
+            "
+            :src="message.content[0].src"
+            alt="Sticker"
+            class="sticker"
+          />
+          <img
+            v-if="
+              message.content &&
+              message.content.length > 0 &&
+              message.content[0].src &&
+              message.content[0].type === 'image'
+            "
+            :src="message.content[0].src"
+            alt="Sticker"
+            class="img-message"
+          />
+          <div class="message-time">{{ formatTimestamp(message.time) }}</div>
         </div>
       </div>
     </div>
+    <Loading v-if="loading" />
+    <SendMessage />
   </section>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, toRefs } from "vue";
 import axios from "axios";
+import SendMessage from "./SendMessage.vue";
+import Loading from "./Loading.vue";
+const loading = ref(false);
 const props = defineProps({
   chatInfo: {
     type: Object,
@@ -28,7 +62,7 @@ const props = defineProps({
 });
 const { chatInfo } = toRefs(props);
 const messages = ref(null);
-const test = async () => {
+const getMessage = async () => {
   console.log(localStorage.getItem("accountToken"));
   try {
     const response = await axios.post(
@@ -47,7 +81,9 @@ const test = async () => {
     );
     console.log(response.data);
     if (response.data.ok === true) {
+      changeLoading();
       messages.value = response.data.data.messages;
+      console.log(messages.value);
       console.log(response.data);
     } else {
       console.log(response.data.ok);
@@ -70,14 +106,26 @@ const formatMessageText = (text) => {
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
 
+const changeLoading = () => {
+  loading.value = !loading.value;
+  console.log(loading.value);
+};
+
 watch(
   () => chatInfo.value,
   (newPhone) => {
-    test();
+    console.log("новые");
+    changeLoading();
+    getMessage();
   }
 );
 
-onMounted(test);
+// onMounted(getMessage);
+if (chatInfo.value) {
+  if (chatInfo.value.phone) {
+    getMessage();
+  }
+}
 </script>
 
 <style scoped>
@@ -85,9 +133,16 @@ onMounted(test);
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  overflow-y: auto; /* Прокрутка, если сообщений много */
-  height: 90vh; /* Высота на весь экран */
+  overflow-y: auto;
+  height: 81vh;
+}
+
+.change-message {
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #f1f1f1;
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
 .message-section {
@@ -99,15 +154,38 @@ onMounted(test);
 .user-info-section {
   width: 100%;
   height: 40px;
-  /* border-bottom: 1px solid #ebebeb; */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 10px;
 }
 
 .name-user {
+  font-weight: 600;
   font-size: 16px;
+  color: #000;
+  margin-bottom: -5px;
+}
+
+.sticker {
+  width: 100px;
+  border-radius: 10px;
+}
+
+.img-message {
+  border-radius: 10px;
+  width: 250px;
+}
+
+.status-user {
   font-weight: 500;
+  font-size: 12px;
+  color: #969696;
+}
+
+.user-img {
+  width: 35px;
+  height: 35px;
 }
 
 .message {
