@@ -4,11 +4,12 @@
     <Navigation
       :phoneMenuStation="phoneMenuStation"
       :phoneMenuOn="phoneMenuOn"
+      :chatStation="chatStation"
       class="navigation"
     />
     <main>
       <section>
-        <router-view></router-view>
+        <router-view @routeChanged="checkChatStation"></router-view>
       </section>
     </main>
   </div>
@@ -18,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, computed, provide } from "vue";
+import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -26,8 +27,14 @@ import Navigation from "./components/Navigation/Navigation.vue";
 const chatStation = ref(false);
 const phoneMenuStation = ref(false);
 const route = useRoute();
+
 const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
+};
+
+// Check if the current route is the chat page
+const checkChatStation = () => {
+  chatStation.value = route.name === "Chats"; // Change "Chats" to the exact name used in your routes
 };
 
 // Определяем, является ли текущая страница страницей аутентификации
@@ -49,6 +56,7 @@ main > section {
   flex-direction: column;
   overflow: auto;
 }
+
 .page-container {
   display: flex;
 }
@@ -63,5 +71,3 @@ main > section {
   background-color: #f0f0f0; /* Фоновый цвет для аутентификации */
 }
 </style>
-
-Найти еще

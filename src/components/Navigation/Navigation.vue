@@ -1,5 +1,5 @@
 <template>
-  <aside class="pc-menu">
+  <aside class="pc-menu" v-if="!isChatPage">
     <nav>
       <ul>
         <li @click="navigateTo('/')">
@@ -24,7 +24,6 @@
               d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
             ></path>
           </svg>
-
           <p class="page">Аккаунты</p>
         </li>
         <li @click="navigateTo('Mailing')">
@@ -35,28 +34,13 @@
     </nav>
     <div class="line"></div>
   </aside>
+
   <div
-    v-if="phoneMenuStation && chatStation"
+    v-if="phoneMenuStation && (chatStation || isChatPage)"
     class="black-fon"
     @click="phoneMenuOn"
   >
     <aside class="phone-menu" @click.stop>
-      <header class="logo-phone-cont">
-        <h2 class="logo-header">
-          <img
-            src="https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico"
-            class="logo-img"
-            alt="Logo"
-          />
-          Touch-API
-        </h2>
-        <img
-          @click="phoneMenuOn"
-          src="/navigation/close.svg"
-          alt="Закрыть меню"
-        />
-      </header>
-      <div class="line-menu"></div>
       <nav>
         <ul>
           <li @click="clickMenu('/')">
@@ -69,24 +53,13 @@
                 d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"
               ></path>
             </svg>
-
             <p class="page">Главная</p>
           </li>
           <li @click="clickMenu('accounts')">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="svg-icon"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
-              ></path>
-            </svg>
-
             <p class="page">Аккаунты</p>
           </li>
           <li @click="clickMenu('Mailing')">
-            <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+            <img src="/navigation/accaunts.svg" alt="Рассылки" />
             <p class="page">Рассылки</p>
           </li>
         </ul>
@@ -96,22 +69,17 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-const router = useRouter();
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({
-  phoneMenuOn: {
-    type: Function,
-    required: true,
-  },
-  phoneMenuStation: {
-    type: Boolean,
-    required: true,
-  },
-  chatStation: {
-    type: Boolean,
-  },
+  phoneMenuOn: Function,
+  phoneMenuStation: Boolean,
+  chatStation: Boolean,
 });
+
+const route = useRoute();
+const router = useRouter();
 
 const clickMenu = (page) => {
   props.phoneMenuOn();
@@ -121,6 +89,10 @@ const clickMenu = (page) => {
 const navigateTo = (page) => {
   router.push(page);
 };
+
+const isChatPage = computed(() => {
+  return route.name === "Chats"; // Change "Chats" to the exact name used in your routes
+});
 </script>
 
 <style scoped>
@@ -245,7 +217,11 @@ li:hover .svg-icon path {
 
 @media (max-width: 768px) {
   .pc-menu {
-    display: none;
+    display: none; /* Hide PC menu on mobile */
+  }
+
+  .phone-menu {
+    display: block; /* Show mobile menu */
   }
 }
 </style>

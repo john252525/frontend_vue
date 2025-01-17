@@ -8,7 +8,7 @@
       @click="selectChat(chat)"
     >
       <div class="chat-user-cont">
-        <img src="/chats/user-chat-icon.svg" alt="" />
+        <img class="user-chat-icon" src="/chats/user-chat-icon.svg" alt="" />
         <div class="chat-info">
           <div class="chat-name">{{ chat.name }}</div>
           <div class="chat-last-message">
@@ -77,7 +77,7 @@ const formatTimestamp = (timestamp) => {
 onMounted(test);
 
 const formatLastMessage = (message) => {
-  const maxLength = 30; // Максимальная длина строки
+  const maxLength = 20; // Максимальная длина строки
   if (message && message.length > maxLength) {
     return message.slice(0, maxLength) + "..."; // Обрезаем и добавляем многоточие
   }
@@ -91,14 +91,15 @@ const formatLastMessage = (message) => {
   border-right: 1px solid #eaeaea;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 93vh;
+  height: 94vh;
+  position: relative;
 }
 
 .loading-chat-list {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 93vh;
+  height: 94vh;
 }
 
 .chat-item {
@@ -118,6 +119,8 @@ const formatLastMessage = (message) => {
 .chat-info {
   flex-grow: 1;
   font-size: 14px;
+  display: flex;
+  flex-direction: column; /* Добавлено для вертикального выравнивания */
 }
 
 .chat-user-cont {
@@ -130,22 +133,27 @@ const formatLastMessage = (message) => {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 6px;
+  white-space: nowrap; /* Запрет на перенос строки */
+  overflow: hidden; /* Скрыть переполнение */
+  text-overflow: ellipsis; /* Добавить многоточие */
 }
 
 .chat-last-message {
   color: #888;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; /* Запрет на перенос строки */
+  overflow: hidden; /* Скрыть переполнение */
+  text-overflow: ellipsis; /* Добавить многоточие */
 }
 
 .chat-meta {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
 .chat-timestamp {
+  position: absolute;
   font-size: 12px;
   color: #888;
 }
@@ -181,5 +189,11 @@ const formatLastMessage = (message) => {
   height: 45px;
   background-color: red;
   border-radius: 100px;
+}
+
+@media (max-width: 768px) {
+  .chat-list {
+    width: 100%;
+  }
 }
 </style>

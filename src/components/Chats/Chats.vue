@@ -1,27 +1,70 @@
 <template>
-  <section v-if="userInfo">
+  <section class="pc-version" v-if="userInfo">
     <UserList :selectChat="selectChat" />
-    <MessageList :chatInfo="chatInfo" />
+    <MessageList
+      :changeMessageListStation="changeMessageListStation"
+      :chatInfo="chatInfo"
+    />
   </section>
-  <section v-else>sdsds</section>
+  <section class="phone-version" v-if="userInfo">
+    <UserList :style="style.UserList" :selectChat="selectChat" />
+    <MessageList
+      :style="style.MessageList"
+      :changeMessageListStation="changeMessageListStation"
+      :chatInfo="chatInfo"
+    />
+  </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import axios from "axios";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
+const messageListStation = ref(false);
+
+const style = reactive({
+  MessageList: {
+    display: "none",
+  },
+
+  UserList: {
+    display: "block",
+  },
+});
+
+const changeMessageListStation = () => {
+  style.UserList.display = "block";
+  style.MessageList.display = "none";
+};
+
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const selectChat = (chat) => {
+  style.UserList.display = "none";
+  style.MessageList.display = "block";
   chatInfo.value = chat;
   console.log(chat.phone);
 };
 </script>
 
 <style scoped>
-section {
+.pc-version {
   display: flex;
   align-items: flex-start;
+}
+
+.phone-version {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .pc-version {
+    display: none;
+  }
+
+  .phone-version {
+    display: block;
+  }
 }
 </style>

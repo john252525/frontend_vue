@@ -1,7 +1,7 @@
 <template>
   <section class="send-message">
-    <img class="file-img" src="/chats/file.svg" alt="" />
     <div class="img-cont">
+      <img class="file-img" src="/chats/file.svg" alt="" />
       <article class="smile-img-cont">
         <input
           class="send-message-input"
@@ -10,15 +10,61 @@
         />
         <img class="smile-img" src="/chats/smile.svg" alt="" />
       </article>
-      <img class="send-img" src="/chats/send.svg" alt="" />
+      <img @click="sendMessage" class="send-img" src="/chats/send.svg" alt="" />
     </div>
   </section>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import axios from "axios";
+const messageText = ref("dsds");
+
+const sendMessage = async () => {
+  const token = localStorage.getItem("accountToken"); // Получите токен из локального хранилища
+  const login = "helly"; // Замените на актуальный номер телефона
+
+  // Создание объекта сообщения
+  const message = {
+    to: "+227 94 59 19 01",
+    text: messageText.value || null,
+    content: messageText.value
+      ? []
+      : [{ type: "text", src: messageText.value }],
+  };
+
+  try {
+    const response = await axios.post(
+      "https://cloud.controller.touch-api.com/api/sendMessage",
+      {
+        source: "whatsapp",
+        token: token,
+        login: "helly",
+        msg: message,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+
+    console.log("Сообщение отправлено:", response.data);
+    messageText.value = ""; // Очистить поле ввода после отправки
+  } catch (error) {
+    console.error("Ошибка при отправке сообщения:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+</script>
 
 <style scoped>
 .send-message {
+  position: absolute;
+  bottom: 0;
   width: 100%;
   background-color: #f5f5f5;
   height: 7.8vh;
@@ -32,16 +78,27 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex: 1; /* Позволяет .img-cont занимать оставшееся пространство */
 }
 
 .smile-img-cont {
+  display: flex;
   position: relative;
+  flex: 1;
 }
 
 .file-img,
 .smile-img,
 .send-img {
   cursor: pointer;
+}
+
+.send-img {
+  margin-right: 20px;
+}
+
+.file-img {
+  margin-left: 20px;
 }
 
 .smile-img {
@@ -52,10 +109,10 @@
 
 .send-message-input {
   border-radius: 233px;
-  width: 1050px;
+  width: 100%;
   height: 36px;
-  /* background: #dfdfdf; */
   border: 1px solid #d4d4d4;
   padding-left: 10px;
+  box-sizing: border-box;
 }
 </style>

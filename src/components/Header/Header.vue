@@ -4,7 +4,7 @@
       <article class="logo-header-cont">
         <img
           @click="phoneMenuOn"
-          class="phone-menu"
+          :class="{ s: isChatPage, 'phone-menu': !isChatPage }"
           src="/header/menu_phone.svg"
           alt="Меню для телефона"
         />
@@ -37,9 +37,11 @@
 </template>
 
 <script setup>
-import { ref, inject } from "vue";
+import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
+
 const props = defineProps({
   phoneMenuOn: {
     type: Function,
@@ -56,6 +58,11 @@ function toggleBalanceStation() {
 function toggleAccountMenu() {
   AccountMenuStation.value = !AccountMenuStation.value;
 }
+
+const route = useRoute();
+const isChatPage = computed(() => {
+  return route.name === "Chats"; // Ensure "Chats" matches the route name for the chat page
+});
 </script>
 
 <style scoped>
@@ -111,10 +118,6 @@ function toggleAccountMenu() {
   gap: 8px;
 }
 
-.logo-header span {
-  color: #4950ca;
-}
-
 .line {
   width: 100%;
   height: 0.5px;
@@ -125,7 +128,7 @@ function toggleAccountMenu() {
   display: none;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .phone-menu {
     display: block;
   }

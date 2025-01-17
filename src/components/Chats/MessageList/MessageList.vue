@@ -4,6 +4,10 @@
   </section>
   <section v-else class="message-section">
     <header class="user-info-section">
+      <div @click="changeMessageListStation" class="phone-out">
+        <img src="/chats/out.svg" alt="" />
+        <span class="out-text">Назад</span>
+      </div>
       <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
       <div>
         <h2 class="name-user">{{ chatInfo.name }}</h2>
@@ -58,6 +62,9 @@ const loading = ref(false);
 const props = defineProps({
   chatInfo: {
     type: Object,
+  },
+  changeMessageListStation: {
+    type: Function,
   },
 });
 const { chatInfo } = toRefs(props);
@@ -134,7 +141,21 @@ if (chatInfo.value) {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: 81vh;
+  height: 80vh;
+  margin-top: 60px;
+}
+
+.messages::-webkit-scrollbar {
+  width: 10px; /* Ширина скроллбара */
+}
+
+.messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: rgb(209, 209, 209); /* Цвет ползунка */
+  border-radius: 5px; /* Закругление углов ползунка */
 }
 
 .change-message {
@@ -146,18 +167,24 @@ if (chatInfo.value) {
 }
 
 .message-section {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 94vh;
 }
 
 .user-info-section {
+  z-index: 100;
+  position: absolute;
+  margin-top: 10px;
+  padding-left: 18px;
   width: 100%;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  box-sizing: border-box;
 }
 
 .name-user {
@@ -215,5 +242,41 @@ if (chatInfo.value) {
   font-size: 12px; /* Размер шрифта для времени */
   color: #888; /* Цвет для времени */
   margin-top: 5px; /* Отступ сверху */
+}
+
+.phone-out {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 10px;
+}
+
+.out-text {
+  margin-top: -2px;
+  color: #bcbcbc;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .user-info-section {
+    position: absolute;
+    margin-top: -40px;
+    padding-left: 18px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    box-sizing: border-box;
+  }
+
+  .messages {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 60vh;
+    margin-top: 50px;
+  }
 }
 </style>
