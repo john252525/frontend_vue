@@ -77,9 +77,9 @@ const formatTimestamp = (timestamp) => {
 onMounted(test);
 
 const formatLastMessage = (message) => {
-  const maxLength = 20; // Максимальная длина строки
+  const maxLength = 20;
   if (message && message.length > maxLength) {
-    return message.slice(0, maxLength) + "..."; // Обрезаем и добавляем многоточие
+    return message.slice(0, maxLength) + "...";
   }
   return message || "Нет сообщений";
 };
@@ -91,7 +91,7 @@ const formatLastMessage = (message) => {
   border-right: 1px solid #eaeaea;
   overflow-y: auto;
   overflow-x: hidden;
-  height: 94vh;
+  height: 100vh;
   position: relative;
 }
 
@@ -120,7 +120,7 @@ const formatLastMessage = (message) => {
   flex-grow: 1;
   font-size: 14px;
   display: flex;
-  flex-direction: column; /* Добавлено для вертикального выравнивания */
+  flex-direction: column;
 }
 
 .chat-user-cont {
@@ -133,16 +133,16 @@ const formatLastMessage = (message) => {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 6px;
-  white-space: nowrap; /* Запрет на перенос строки */
-  overflow: hidden; /* Скрыть переполнение */
-  text-overflow: ellipsis; /* Добавить многоточие */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-last-message {
   color: #888;
-  white-space: nowrap; /* Запрет на перенос строки */
-  overflow: hidden; /* Скрыть переполнение */
-  text-overflow: ellipsis; /* Добавить многоточие */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-meta {
@@ -167,21 +167,16 @@ const formatLastMessage = (message) => {
 }
 
 .chat-list::-webkit-scrollbar {
-  width: 4px; /* Ширина скроллбара */
-  display: none;
-}
-
-.chat-list:hover::-webkit-scrollbar {
-  display: block;
+  width: 6px;
 }
 
 .chat-list::-webkit-scrollbar-track {
-  background: rgb(226, 226, 226); /* Цвет фона скроллбара */
+  background-color: #f9f9f9;
 }
 
 .chat-list::-webkit-scrollbar-thumb {
-  background: rgb(209, 209, 209); /* Цвет ползунка */
-  border-radius: 5px; /* Закругление углов ползунка */
+  background: rgb(209, 209, 209);
+  border-radius: 5px;
 }
 
 .krig {
@@ -189,6 +184,18 @@ const formatLastMessage = (message) => {
   height: 45px;
   background-color: red;
   border-radius: 100px;
+}
+
+@media (max-width: 1200px) {
+  .chat-list {
+    width: 350px;
+  }
+}
+
+@media (max-width: 900px) {
+  .chat-list {
+    width: 300px;
+  }
 }
 
 @media (max-width: 768px) {

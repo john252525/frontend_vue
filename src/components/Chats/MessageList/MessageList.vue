@@ -2,54 +2,60 @@
   <section v-if="!chatInfo" class="no-message-section">
     <h2 class="change-message">Выберите чат для начала общения</h2>
   </section>
-  <section v-else class="message-section">
-    <header class="user-info-section">
-      <div @click="changeMessageListStation" class="phone-out">
-        <img src="/chats/out.svg" alt="" />
-        <span class="out-text">Назад</span>
-      </div>
-      <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
-      <div>
-        <h2 class="name-user">{{ chatInfo.name }}</h2>
-        <span class="status-user">Онлайн</span>
-      </div>
-    </header>
-    <div v-if="!loading" class="messages">
-      <div
-        v-for="message in messages"
-        :key="message.item"
-        :class="['message', message.outgoing ? 'outgoing' : 'incoming']"
-      >
-        <div class="message-content">
-          <p v-if="message.text" class="message-text">{{ message.text }}</p>
-          <img
-            v-if="
-              message.content &&
-              message.content.length > 0 &&
-              message.content[0].src &&
-              message.content[0].type === 'sticker'
-            "
-            :src="message.content[0].src"
-            alt="Sticker"
-            class="sticker"
-          />
-          <img
-            v-if="
-              message.content &&
-              message.content.length > 0 &&
-              message.content[0].src &&
-              message.content[0].type === 'image'
-            "
-            :src="message.content[0].src"
-            alt="Sticker"
-            class="img-message"
-          />
-          <div class="message-time">{{ formatTimestamp(message.time) }}</div>
+  <section v-else class="app-section">
+    <section class="chat-section">
+      <section class="message-section">
+        <header class="user-info-section">
+          <div @click="changeMessageListStation" class="phone-out">
+            <img src="/chats/out.svg" alt="" />
+            <span class="out-text">Назад</span>
+          </div>
+          <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
+          <div>
+            <h2 class="name-user">{{ chatInfo.name }}</h2>
+            <span class="status-user">Онлайн</span>
+          </div>
+        </header>
+        <div v-if="!loading" class="messages">
+          <div
+            v-for="message in messages"
+            :key="message.item"
+            :class="['message', message.outgoing ? 'outgoing' : 'incoming']"
+          >
+            <div class="message-content">
+              <p v-if="message.text" class="message-text">{{ message.text }}</p>
+              <img
+                v-if="
+                  message.content &&
+                  message.content.length > 0 &&
+                  message.content[0].src &&
+                  message.content[0].type === 'sticker'
+                "
+                :src="message.content[0].src"
+                alt="Sticker"
+                class="sticker"
+              />
+              <img
+                v-if="
+                  message.content &&
+                  message.content.length > 0 &&
+                  message.content[0].src &&
+                  message.content[0].type === 'image'
+                "
+                :src="message.content[0].src"
+                alt="Sticker"
+                class="img-message"
+              />
+              <div class="message-time">
+                {{ formatTimestamp(message.time) }}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <Loading v-if="loading" />
-    <SendMessage />
+        <Loading v-if="loading" />
+        <SendMessage />
+      </section>
+    </section>
   </section>
 </template>
 
@@ -107,9 +113,8 @@ const formatTimestamp = (timestamp) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-// Форматирование текста сообщения (обрезка длинных сообщений)
 const formatMessageText = (text) => {
-  const maxLength = 50; // Максимальная длина строки
+  const maxLength = 50;
   return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 };
 
@@ -127,7 +132,6 @@ watch(
   }
 );
 
-// onMounted(getMessage);
 if (chatInfo.value) {
   if (chatInfo.value.phone) {
     getMessage();
@@ -141,12 +145,12 @@ if (chatInfo.value) {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: 80vh;
+  flex: 1;
   margin-top: 60px;
 }
 
 .messages::-webkit-scrollbar {
-  width: 10px; /* Ширина скроллбара */
+  width: 10px;
 }
 
 .messages::-webkit-scrollbar-track {
@@ -154,8 +158,16 @@ if (chatInfo.value) {
 }
 
 .messages::-webkit-scrollbar-thumb {
-  background: rgb(209, 209, 209); /* Цвет ползунка */
-  border-radius: 5px; /* Закругление углов ползунка */
+  background: rgb(209, 209, 209);
+  border-radius: 5px;
+}
+
+.no-message-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
 .change-message {
@@ -166,12 +178,29 @@ if (chatInfo.value) {
   border-radius: 20px;
 }
 
-.message-section {
-  position: relative;
+.app-section {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chat-section {
   width: 100%;
-  height: 94vh;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.message-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  position: relative;
 }
 
 .user-info-section {
@@ -179,7 +208,7 @@ if (chatInfo.value) {
   position: absolute;
   margin-top: 10px;
   padding-left: 18px;
-  width: 100%;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -217,20 +246,20 @@ if (chatInfo.value) {
 
 .message {
   margin: 5px 15px;
-  max-width: 70%; /* Максимальная ширина сообщения */
-  border-radius: 10px; /* Закругление углов */
+  max-width: 70%;
+  border-radius: 10px;
   padding: 10px;
-  position: relative; /* Для абсолютного позиционирования времени */
+  position: relative;
 }
 
 .outgoing {
-  align-self: flex-end; /* Выравнивание вправо для исходящих сообщений */
-  background-color: #e1ffc7; /* Цвет фона для исходящих сообщений */
+  align-self: flex-end;
+  background-color: #e1ffc7;
 }
 
 .incoming {
-  align-self: flex-start; /* Выравнивание влево для входящих сообщений */
-  background-color: #f1f1f1; /* Цвет фона для входящих сообщений */
+  align-self: flex-start;
+  background-color: #f1f1f1;
 }
 
 .message-content {
@@ -239,9 +268,9 @@ if (chatInfo.value) {
 }
 
 .message-time {
-  font-size: 12px; /* Размер шрифта для времени */
-  color: #888; /* Цвет для времени */
-  margin-top: 5px; /* Отступ сверху */
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
 }
 
 .phone-out {
@@ -258,25 +287,11 @@ if (chatInfo.value) {
 }
 
 @media (max-width: 768px) {
-  .user-info-section {
-    position: absolute;
-    margin-top: -40px;
-    padding-left: 18px;
+  .chat-container {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    box-sizing: border-box;
   }
-
-  .messages {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    height: 60vh;
-    margin-top: 50px;
+  .chat-container {
+    height: calc(100vh - 40px);
   }
 }
 </style>

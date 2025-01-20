@@ -1,5 +1,5 @@
 <template>
-  <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" />
+  <!-- <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" /> -->
   <div class="page-container" v-if="!isAuthPage">
     <Navigation
       :phoneMenuStation="phoneMenuStation"
@@ -32,12 +32,10 @@ const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
 };
 
-// Check if the current route is the chat page
 const checkChatStation = () => {
-  chatStation.value = route.name === "Chats"; // Change "Chats" to the exact name used in your routes
+  chatStation.value = route.name === "Chats";
 };
 
-// Определяем, является ли текущая страница страницей аутентификации
 const isAuthPage = computed(() => {
   return ["Login", "Registration", "PasswordRecovery"].includes(route.name);
 });
@@ -67,7 +65,7 @@ main > section {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Полная высота для страниц аутентификации */
-  background-color: #f0f0f0; /* Фоновый цвет для аутентификации */
+  height: 100vh;
+  background-color: #f0f0f0;
 }
 </style>

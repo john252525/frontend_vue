@@ -21,10 +21,9 @@ import axios from "axios";
 const messageText = ref("dsds");
 
 const sendMessage = async () => {
-  const token = localStorage.getItem("accountToken"); // Получите токен из локального хранилища
-  const login = "helly"; // Замените на актуальный номер телефона
+  const token = localStorage.getItem("accountToken");
+  const login = "helly";
 
-  // Создание объекта сообщения
   const message = {
     to: "+227 94 59 19 01",
     text: messageText.value || null,
@@ -63,11 +62,8 @@ const sendMessage = async () => {
 
 <style scoped>
 .send-message {
-  position: absolute;
-  bottom: 0;
   width: 100%;
-  background-color: #f5f5f5;
-  height: 7.8vh;
+  padding: 10px 0px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,7 +74,7 @@ const sendMessage = async () => {
   display: flex;
   align-items: center;
   gap: 14px;
-  flex: 1; /* Позволяет .img-cont занимать оставшееся пространство */
+  flex: 1;
 }
 
 .smile-img-cont {

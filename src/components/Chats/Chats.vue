@@ -1,7 +1,8 @@
 <template>
   <section class="pc-version" v-if="userInfo">
-    <UserList :selectChat="selectChat" />
+    <UserList class="user-list" :selectChat="selectChat" />
     <MessageList
+      class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
     />
@@ -9,6 +10,7 @@
   <section class="phone-version" v-if="userInfo">
     <UserList :style="style.UserList" :selectChat="selectChat" />
     <MessageList
+      class="message-list"
       :style="style.MessageList"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
@@ -52,6 +54,11 @@ const selectChat = (chat) => {
 .pc-version {
   display: flex;
   align-items: flex-start;
+  width: 100%;
+}
+
+.message-list {
+  flex: 1;
 }
 
 .phone-version {
@@ -65,6 +72,7 @@ const selectChat = (chat) => {
 
   .phone-version {
     display: block;
+    width: 100%;
   }
 }
 </style>
