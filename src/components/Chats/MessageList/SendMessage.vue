@@ -40,10 +40,9 @@ const sendMessage = async () => {
 
   try {
     const response = await axios.post(
-      "https://cloud.controller.touch-api.com/api/sendMessage",
+      "https://b2288.apitter.com/instances/sendMessage",
       {
         source: "whatsapp",
-        token: `${localStorage.getItem("accountToken")}`,
         login: "helly",
         msg: message,
       },

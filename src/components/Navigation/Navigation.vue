@@ -27,7 +27,7 @@
           <p class="page">Аккаунты</p>
         </li>
         <li @click="navigateTo('Mailing')">
-          <img src="/navigation/accaunts.svg" alt="Аккаунты" />
+          <img src="/navigation/accounts.svg" alt="Аккаунты" />
           <p class="page">Рассылки</p>
         </li>
       </ul>
@@ -82,7 +82,7 @@
             <p class="page">Аккаунты</p>
           </li>
           <li @click="clickMenu('Mailing')">
-            <img src="/navigation/accaunts.svg" alt="Рассылки" />
+            <img src="/navigation/accounts.svg" alt="Рассылки" />
             <p class="page">Рассылки</p>
           </li>
         </ul>
