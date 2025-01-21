@@ -1,6 +1,6 @@
 <template>
-  <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" />
-  <div class="page-container" v-if="!isAuthPage">
+  <Header v-if="!isAuthPage && !isWidgetMode" :phoneMenuOn="phoneMenuOn" />
+  <div class="page-container" v-if="!isAuthPage && !isWidgetMode">
     <Navigation
       :phoneMenuStation="phoneMenuStation"
       :phoneMenuOn="phoneMenuOn"
@@ -24,7 +24,7 @@ import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 
-const chatStation = ref(false);
+const chatStation = ref(true);
 const phoneMenuStation = ref(false);
 const route = useRoute();
 
@@ -38,6 +38,10 @@ const checkChatStation = () => {
 
 const isAuthPage = computed(() => {
   return ["Login", "Registration", "PasswordRecovery"].includes(route.name);
+});
+
+const isWidgetMode = computed(() => {
+  return route.query.mode === "widget";
 });
 </script>
 

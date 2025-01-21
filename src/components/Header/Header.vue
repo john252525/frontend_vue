@@ -138,6 +138,7 @@ const isChatPage = computed(() => {
   .logo,
   .logo-header {
     display: none;
+    cursor: pointer;
   }
 }
 </style>

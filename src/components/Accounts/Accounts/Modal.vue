@@ -180,7 +180,7 @@ const errorStationOff = () => {
 };
 
 const navigateToChat = () => {
-  router.push("/Chats");
+  router.push({ name: "Chats", query: { mode: "widget" } });
 };
 
 const ChangeconfirmStation = () => {
