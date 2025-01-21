@@ -1,5 +1,5 @@
 <template>
-  <!-- <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" /> -->
+  <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" />
   <div class="page-container" v-if="!isAuthPage">
     <Navigation
       :phoneMenuStation="phoneMenuStation"

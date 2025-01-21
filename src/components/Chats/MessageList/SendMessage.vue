@@ -7,6 +7,7 @@
           class="send-message-input"
           placeholder="Введите сообщение"
           type="text"
+          v-model="messageText"
         />
         <img class="smile-img" src="/chats/smile.svg" alt="" />
       </article>
@@ -16,16 +17,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, toRefs } from "vue";
 import axios from "axios";
-const messageText = ref("dsds");
+const props = defineProps({
+  chatInfo: {
+    type: Object,
+  },
+});
+const { chatInfo } = toRefs(props);
+
+const messageText = ref("");
 
 const sendMessage = async () => {
-  const token = localStorage.getItem("accountToken");
-  const login = "helly";
-
+  console.log(chatInfo.value.name);
   const message = {
-    to: "+227 94 59 19 01",
+    to: `${chatInfo.value.name}`,
     text: messageText.value || null,
     content: messageText.value
       ? []
@@ -37,7 +43,7 @@ const sendMessage = async () => {
       "https://cloud.controller.touch-api.com/api/sendMessage",
       {
         source: "whatsapp",
-        token: token,
+        token: `${localStorage.getItem("accountToken")}`,
         login: "helly",
         msg: message,
       },
@@ -50,7 +56,7 @@ const sendMessage = async () => {
     );
 
     console.log("Сообщение отправлено:", response.data);
-    messageText.value = ""; // Очистить поле ввода после отправки
+    messageText.value = "";
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
     if (error.response) {

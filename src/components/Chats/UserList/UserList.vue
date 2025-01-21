@@ -105,9 +105,8 @@ const formatLastMessage = (message) => {
 .chat-item {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
   background-color: #f9f9f9;
   transition: background-color 0.3s ease;
 }
@@ -130,8 +129,8 @@ const formatLastMessage = (message) => {
 }
 
 .chat-name {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 400;
   margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
@@ -159,11 +158,13 @@ const formatLastMessage = (message) => {
 }
 
 .chat-unread {
+  position: absolute;
   background-color: #007bff;
   color: white;
   border-radius: 12px;
   padding: 2px 6px;
   font-size: 12px;
+  bottom: 0;
 }
 
 .chat-list::-webkit-scrollbar {

@@ -73,6 +73,12 @@ const selectChat = (chat) => {
   .phone-version {
     display: block;
     width: 100%;
+    height: 100vh; /* Ограничивает высоту до размера экрана */
+  }
+
+  .message-list {
+    flex: 1;
+    overflow-y: auto; /* Включает вертикальный скролл */
   }
 }
 </style>
