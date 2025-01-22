@@ -17,25 +17,33 @@
 </template>
 
 <script setup>
-import { ref, toRefs } from "vue";
+import { ref, toRefs, defineEmits } from "vue";
 import axios from "axios";
+
 const props = defineProps({
   chatInfo: {
     type: Object,
   },
+  messages: {
+    type: Array,
+    default: () => [],
+  },
 });
+
+const emit = defineEmits(["updateMessages"]);
 const { chatInfo } = toRefs(props);
 
 const messageText = ref("");
 
 const sendMessage = async () => {
-  console.log(chatInfo.value.name);
   const message = {
     to: `${chatInfo.value.name}`,
     text: messageText.value || null,
     content: messageText.value
       ? []
       : [{ type: "text", src: messageText.value }],
+    time: Date.now() / 1000, // Установка времени сообщения
+    outgoing: true, // Указывает, что это исходящее сообщение
   };
 
   try {
@@ -55,6 +63,7 @@ const sendMessage = async () => {
     );
 
     console.log("Сообщение отправлено:", response.data);
+    emit("updateMessages", message); // Обновляем список сообщений
     messageText.value = "";
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);

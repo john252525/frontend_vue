@@ -10,6 +10,7 @@
           id="name"
           v-model="formData.login"
           required
+          :class="{ error: error.login }"
           class="input-reg"
         />
       </div>
@@ -20,6 +21,7 @@
           type="password"
           id="email"
           v-model="formData.password"
+          :class="{ error: error.password }"
           required
           class="input-reg"
         />
@@ -30,24 +32,24 @@
           placeholder="Повторите пароль"
           type="password"
           id="email"
-          v-model="email"
+          v-model="formData.fogoutPassword"
           required
+          :class="{ error: error.fogoutPassword }"
           class="input-reg"
         />
       </div>
       <div class="checkbox-cont">
         <input
-          placeholder="Повторите пароль"
           type="checkbox"
           id="checkbox"
-          v-model="email"
+          v-model="formData.check"
           required
         />
-        <label class="name-checkbox" for="email"
+        <label class="name-checkbox" :class="{ error: error.check }" for="email"
           >Я принимаю Положения и условия</label
         >
       </div>
-      <button @click="loginAccount" class="registration-account-button">
+      <button @click="logAccoutn" class="registration-account-button">
         Зарегистрироваться
       </button>
       <p class="login-account-button">
@@ -65,6 +67,15 @@ const router = useRouter();
 const formData = reactive({
   login: "",
   password: "",
+  fogoutPassword: "",
+  check: false,
+});
+
+const error = reactive({
+  login: false,
+  password: false,
+  fogoutPassword: false,
+  check: false,
 });
 
 const navigateTo = (page) => {
@@ -95,6 +106,41 @@ const loginAccount = async () => {
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
+  }
+};
+
+const logAccoutn = () => {
+  if (!formData.login) {
+    error.login = true;
+  } else {
+    error.login = false;
+  }
+
+  if (!formData.password) {
+    error.password = true;
+  } else {
+    error.password = false;
+  }
+
+  if (formData.password != formData.fogoutPassword) {
+    error.fogoutPassword = true;
+  } else {
+    error.fogoutPassword = false;
+  }
+
+  if (!formData.check) {
+    error.check = true;
+  } else {
+    error.check = false;
+  }
+
+  if (
+    formData.password === formData.fogoutPassword &&
+    formData.password &&
+    formData.login &&
+    formData.check
+  ) {
+    loginAccount();
   }
 };
 </script>
@@ -130,6 +176,11 @@ const loginAccount = async () => {
   margin-bottom: 28px;
 }
 
+.error-mes {
+  color: rgb(233, 86, 86);
+  margin-bottom: -8px;
+}
+
 .checkbox-cont {
   display: flex;
   align-items: center;
@@ -149,6 +200,11 @@ const loginAccount = async () => {
   color: #5e5e5e;
 }
 
+.name-checkbox.error {
+  color: rgb(247, 150, 150);
+  font-weight: 400;
+}
+
 .input-reg {
   border: 0.5px solid #c1c1c1;
   border-radius: 5px;
@@ -159,6 +215,12 @@ const loginAccount = async () => {
   font-weight: 400;
   font-size: 14px;
   color: #000;
+}
+
+.input-reg.error {
+  border: 0.5px solid #be2424;
+  height: 45px;
+  background: #ffeaea;
 }
 
 .registration-account-button {

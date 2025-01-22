@@ -16,91 +16,99 @@
             <span class="status-user">Онлайн</span>
           </div>
         </header>
-        <div v-if="!loading" class="messages">
+        <div ref="scrollContainer" v-if="!loading" class="messages">
           <div
-            v-for="message in messages"
-            :key="message.item"
+            v-for="(message, index) in messages"
+            :key="message.time"
             :class="[
               'message',
               message.outgoing ? 'outgoing' : 'incoming',
-              { 'has-content': message.content && message.content.length > 0 },
+              {
+                'has-content': message.content && message.content.length > 0,
+                'last-sent-message': index === lastSentMessageIndex, // Применяем класс для последнего отправленного сообщения
+              },
             ]"
           >
             <div class="message-content">
-              <img
-                v-if="
-                  message.content &&
-                  message.content.length > 0 &&
-                  message.content[0].src &&
-                  message.content[0].type === 'sticker'
-                "
-                :src="message.content[0].src"
-                alt="Sticker"
-                class="sticker"
-              />
-              <img
-                v-if="
-                  message.content &&
-                  message.content.length > 0 &&
-                  message.content[0].src &&
-                  message.content[0].type === 'image'
-                "
-                :src="message.content[0].src"
-                alt="Image"
-                class="img-message"
-                @click="openPhotoMenu(message.content[0].src)"
-              />
-              <PhotoMenu
-                :changeMenuPhotoStation="changeMenuPhotoStation"
-                :img="selectedImage"
-                v-if="station.photoMenu"
-              />
-              <video
-                v-if="
-                  message.content &&
-                  message.content.length > 0 &&
-                  message.content[0].src &&
-                  message.content[0].type === 'video'
-                "
-                controls
-                :src="message.content[0].src"
-                class="video-message"
-                @click="openVideoMenu(message.content[0].src)"
-              >
-                Ваш браузер не поддерживает видео.
-              </video>
-              <audio
-                v-if="
-                  message.content &&
-                  message.content.length > 0 &&
-                  message.content[0].src &&
-                  message.content[0].type === 'audio'
-                "
-                controls
-                :src="message.content[0].src"
-                class="audio-message"
-              >
-                Ваш браузер не поддерживает аудио.
-              </audio>
-              <h2
-                v-if="
-                  message.content &&
-                  message.content.length > 0 &&
-                  message.content[0].type === 'geo'
-                "
-                class="geo-message"
-              >
-                Сообщение не поддерживается
-              </h2>
               <p v-if="message.text" class="message-text">{{ message.text }}</p>
-              <div class="message-time">
+              <div v-if="index === lastSentMessageIndex" class="icon-container">
+                <LoadingMessage />
+              </div>
+              <div class="message-content">
+                <img
+                  v-if="
+                    message.content &&
+                    message.content.length > 0 &&
+                    message.content[0].src &&
+                    message.content[0].type === 'sticker'
+                  "
+                  :src="message.content[0].src"
+                  alt="Sticker"
+                  class="sticker"
+                />
+                <img
+                  v-if="
+                    message.content &&
+                    message.content.length > 0 &&
+                    message.content[0].src &&
+                    message.content[0].type === 'image'
+                  "
+                  :src="message.content[0].src"
+                  alt="Image"
+                  class="img-message"
+                  @click="openPhotoMenu(message.content[0].src)"
+                />
+                <PhotoMenu
+                  :changeMenuPhotoStation="changeMenuPhotoStation"
+                  :img="selectedImage"
+                  v-if="station.photoMenu"
+                />
+                <video
+                  v-if="
+                    message.content &&
+                    message.content.length > 0 &&
+                    message.content[0].src &&
+                    message.content[0].type === 'video'
+                  "
+                  controls
+                  :src="message.content[0].src"
+                  class="video-message"
+                  @click="openVideoMenu(message.content[0].src)"
+                >
+                  Ваш браузер не поддерживает видео.
+                </video>
+                <audio
+                  v-if="
+                    message.content &&
+                    message.content.length > 0 &&
+                    message.content[0].src &&
+                    message.content[0].type === 'audio'
+                  "
+                  controls
+                  :src="message.content[0].src"
+                  class="audio-message"
+                >
+                  Ваш браузер не поддерживает аудио.
+                </audio>
+                <h2
+                  v-if="
+                    message.content &&
+                    message.content.length > 0 &&
+                    message.content[0].type === 'geo'
+                  "
+                  class="geo-message"
+                >
+                  Сообщение не поддерживается
+                </h2>
+              </div>
+              <div v-if="index !== lastSentMessageIndex" class="message-time">
                 {{ formatTimestamp(message.time) }}
               </div>
             </div>
           </div>
         </div>
         <Loading v-if="loading" />
-        <SendMessage :chatInfo="chatInfo" />
+        <SendMessage :chatInfo="chatInfo" @updateMessages="updateMessages" />
       </section>
     </section>
   </section>
@@ -111,8 +119,8 @@ import { ref, onMounted, watch, toRefs, reactive } from "vue";
 import axios from "axios";
 import SendMessage from "./SendMessage.vue";
 import Loading from "./Loading.vue";
+import LoadingMessage from "./Loading/LoadingMessage.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
-
 const loading = ref(false);
 const props = defineProps({
   chatInfo: {
@@ -122,13 +130,31 @@ const props = defineProps({
     type: Function,
   },
 });
+const lastSentMessageIndex = ref(-1);
+const messages = ref([]); // Инициализация массива сообщений
 
 const station = reactive({
   photoMenu: false,
   videoMenu: false,
 });
+
+const scrollContainer = ref(null);
+
+const scrollToBottom = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
+  }
+};
+
+const updateMessages = (newMessage) => {
+  messages.value.push(newMessage); // Добавляем новое сообщение в массив
+  lastSentMessageIndex.value = messages.value.length - 1; // Обновляем индекс последнего отправленного сообщения
+  setTimeout(() => {
+    scrollToBottom();
+  }, 500);
+};
+
 const { chatInfo } = toRefs(props);
-const messages = ref(null);
 const getMessage = async () => {
   try {
     const response = await axios.post(
@@ -145,51 +171,49 @@ const getMessage = async () => {
         },
       }
     );
-    console.log(response.data);
     if (response.data.ok === true) {
-      changeLoading();
+      loading.value = false;
       messages.value = response.data.data.messages;
-      console.log(messages.value);
-      console.log(response.data);
     } else {
       console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("Ошибка при получении сообщений:", error);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
   }
 };
-const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp / 1000); // Преобразуем миллисекунды в секунды
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
 
-const formatMessageText = (text) => {
-  const maxLength = 50;
-  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+const formatTimestamp = (timestamp) => {
+  const date = new Date(timestamp / 1000);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
 const changeLoading = () => {
   loading.value = !loading.value;
-  console.log(loading.value);
 };
 
 const changeMenuPhotoStation = () => {
   station.photoMenu = !station.photoMenu;
 };
 
-const changeMenuVideoStation = () => {
-  station.videoMenu = !station.videoMenu;
-};
-
 watch(
   () => chatInfo.value,
-  (newPhone) => {
-    console.log("новые");
-    changeLoading();
+  (newChatInfo) => {
+    loading.value = true;
     getMessage();
+  }
+);
+
+watch(
+  () => loading.value,
+  (newValue) => {
+    if (newValue === false) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 500);
+    }
   }
 );
 
@@ -205,6 +229,12 @@ if (chatInfo.value) {
     getMessage();
   }
 }
+
+onMounted(() => {
+  if (chatInfo.value) {
+    getMessage();
+  }
+});
 </script>
 
 <style scoped>
@@ -228,6 +258,22 @@ if (chatInfo.value) {
 .messages::-webkit-scrollbar-thumb {
   background: rgb(209, 209, 209);
   border-radius: 5px;
+}
+
+.last-sent-message {
+  background-color: #e1ffc7; /* Цвет фона для последнего отправленного сообщения */
+}
+
+/* Стили для иконки */
+.icon-container {
+  display: flex;
+  align-items: center;
+}
+
+.message-icon {
+  width: 20px; /* Ширина иконки */
+  height: 20px; /* Высота иконки */
+  margin-left: 5px; /* Отступ слева от текста сообщения */
 }
 
 .no-message-section {
@@ -273,7 +319,7 @@ if (chatInfo.value) {
   flex: 1; /* Позволяет занимать оставшееся пространство */
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Включает вертикальный скролл */
+  overflow-y: auto;
   background-color: #f9f9f9;
   position: relative;
   max-height: 100vh;

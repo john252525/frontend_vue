@@ -265,6 +265,7 @@ const getInfo = async () => {
         },
       }
     );
+
     if (response.data.data.step) {
       if (response.data.data.step.value === 5) {
         chatsStation.value = true;
@@ -273,9 +274,14 @@ const getInfo = async () => {
       console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      if (error.response.status === 401) {
+        console.log("no ke"); // Выводим сообщение "no ke" в консоль
+      } else {
+        console.error("Ошибка сервера:", error.response.data);
+      }
+    } else {
+      console.error("Ошибка при создании аккаунта:", error);
     }
   }
 };
