@@ -306,20 +306,13 @@ header {
   }
 
   .platform-list-telegram {
-    position: absolute;
-    z-index: 10;
-    right: 0px;
     left: 17px;
-    top: 170px;
-    border-radius: 10px;
-    width: 100px;
-    height: 70px;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 2px;
+    top: 160px;
+  }
+
+  .platform-list-whatsapp {
+    left: 16px;
+    top: 160px;
   }
 }
 </style>

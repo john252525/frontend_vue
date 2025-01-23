@@ -42,8 +42,9 @@ const chaneErrorBlock = () => {
 const messageText = ref("");
 
 const sendMessage = async () => {
+  console.log(22794591901);
   const message = {
-    to: `${chatInfo.value.name}`,
+    to: `${chatInfo.value.phone}`,
     text: messageText.value || null,
     content: messageText.value
       ? []
