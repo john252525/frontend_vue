@@ -45,7 +45,8 @@
 import { ref, reactive, onMounted, toRefs, provide } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-
+import { useRouter } from "vue-router";
+const router = useRouter();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;

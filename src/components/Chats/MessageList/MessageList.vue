@@ -123,6 +123,8 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const loading = ref(false);
 const props = defineProps({
   chatInfo: {

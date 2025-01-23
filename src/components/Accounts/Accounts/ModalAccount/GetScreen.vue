@@ -16,6 +16,8 @@
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import { ref, toRefs, inject, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import LoadingModal from "./Enable/LoadingModal.vue";
 const base64Image = ref("");
 const props = defineProps({

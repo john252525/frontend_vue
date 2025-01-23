@@ -33,6 +33,8 @@ import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ResultModal from "../ResultModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login } = selectedItem.value;

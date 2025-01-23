@@ -26,6 +26,8 @@
 <script setup>
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoadModal from "../LoadingMoadal/LoadingMoadal.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import { ref, toRefs, watch, reactive } from "vue";
 import axios from "axios";
 

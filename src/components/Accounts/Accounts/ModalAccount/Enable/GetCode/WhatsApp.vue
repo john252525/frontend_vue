@@ -16,6 +16,8 @@ import axios from "axios";
 import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const { changeEnableStation } = inject("changeEnableStation");
 const phone = ref("7 ");
 const station = reactive({

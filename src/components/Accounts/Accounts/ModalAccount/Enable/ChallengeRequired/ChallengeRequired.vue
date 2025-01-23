@@ -21,6 +21,8 @@ import ResultModal from "../ResultModal.vue";
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
 import { ref, inject, reactive } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const code = ref("");
 const { selectedItem, offQrQrStation, startFunc } = inject("accountItems");
 const { source, login } = selectedItem.value;

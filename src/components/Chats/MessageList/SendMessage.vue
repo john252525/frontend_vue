@@ -20,6 +20,8 @@
 <script setup>
 import { ref, toRefs, defineEmits } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   chatInfo: {

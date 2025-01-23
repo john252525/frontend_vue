@@ -27,6 +27,8 @@ import { toRefs, ref } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import LoadMoadal from "../LoadModal/LoadModal.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   selectedItem: {
     type: Object,

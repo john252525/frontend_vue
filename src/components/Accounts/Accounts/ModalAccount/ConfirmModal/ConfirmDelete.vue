@@ -20,6 +20,8 @@
 <script setup>
 import { toRefs } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import axios from "axios";
 const props = defineProps({
   loadingStart: {

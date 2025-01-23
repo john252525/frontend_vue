@@ -98,7 +98,7 @@ const loginAccount = async () => {
       }
     );
     if (response.data.ok === true) {
-      navigateTo("/Login");
+      navigateTo("/accounts");
       console.log(response.data);
     }
   } catch (error) {

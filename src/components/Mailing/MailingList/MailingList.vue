@@ -104,6 +104,8 @@ import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
 import LoadAccount from "./LoadAccount.vue";
 import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const station = reactive({
   isModalOpen: false,
   infoMailing: false,

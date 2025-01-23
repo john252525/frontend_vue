@@ -35,6 +35,8 @@ import axios from "axios";
 import { onMounted, ref } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   selectChat: {
     type: Function,

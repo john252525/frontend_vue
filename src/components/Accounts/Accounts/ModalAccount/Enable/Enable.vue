@@ -22,6 +22,8 @@ import ResultModal from "./ResultModal.vue";
 import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
 import LoadingModal from "./LoadingModal.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import { ref, toRefs, provide, onMounted, reactive } from "vue";
 import axios from "axios";
 const props = defineProps({

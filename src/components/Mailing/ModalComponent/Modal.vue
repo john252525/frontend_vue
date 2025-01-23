@@ -39,6 +39,8 @@ import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   modalPosition: {
     type: Object,

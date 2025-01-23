@@ -37,6 +37,8 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const stationLoading = ref(false);

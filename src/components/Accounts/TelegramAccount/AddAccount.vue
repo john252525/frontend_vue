@@ -181,6 +181,8 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   openAddAccountStation: {
     type: Function,
@@ -485,10 +487,12 @@ onMounted(() => {
   justify-content: center;
 }
 
-.add-account.fade-enter-active, .add-account.fade-leave-active {
+.add-account.fade-enter-active,
+.add-account.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.add-account.fade-enter, .add-account.fade-leave-to {
+.add-account.fade-enter,
+.add-account.fade-leave-to {
   opacity: 0;
 }
 
@@ -499,7 +503,7 @@ onMounted(() => {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%); 
+    transform: translate(-50%, -48%);
   }
   to {
     opacity: 1;

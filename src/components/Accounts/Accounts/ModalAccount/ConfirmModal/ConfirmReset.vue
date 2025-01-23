@@ -21,6 +21,8 @@
 import { toRefs } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   loadingStart: {
     type: Function,

@@ -15,6 +15,8 @@ import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const { startFunc, offQrCodeStation } = inject("accountItems");
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem } = inject("accountItems");
