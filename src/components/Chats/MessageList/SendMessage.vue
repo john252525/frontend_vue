@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="send-message">
     <div class="img-cont">
       <img class="file-img" src="/chats/file.svg" alt="" />
@@ -19,7 +20,7 @@
 <script setup>
 import { ref, toRefs, defineEmits } from "vue";
 import axios from "axios";
-
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   chatInfo: {
     type: Object,
@@ -32,7 +33,10 @@ const props = defineProps({
 
 const emit = defineEmits(["updateMessages"]);
 const { chatInfo } = toRefs(props);
-
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 const messageText = ref("");
 
 const sendMessage = async () => {
@@ -62,8 +66,11 @@ const sendMessage = async () => {
       }
     );
     if (response.data === 401) {
-      localStorage.removeItem("accountToken");
-      router.push("/login");
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     }
     console.log("Сообщение отправлено:", response.data);
     emit("updateMessages", message); // Обновляем список сообщений

@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section v-if="!chatInfo" class="no-message-section">
     <h2 class="change-message">Выберите чат для начала общения</h2>
   </section>
@@ -118,6 +119,7 @@
 import { ref, onMounted, watch, toRefs, reactive } from "vue";
 import axios from "axios";
 import SendMessage from "./SendMessage.vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
@@ -137,6 +139,11 @@ const station = reactive({
   photoMenu: false,
   videoMenu: false,
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const scrollContainer = ref(null);
 
@@ -175,8 +182,11 @@ const getMessage = async () => {
       loading.value = false;
       messages.value = response.data.data.messages;
     } else if (response.data === 401) {
-      localStorage.removeItem("accountToken");
-      router.push("/login");
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }

@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
     <section
       v-if="chats"
@@ -33,11 +34,17 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import Loading from "./Loading.vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   selectChat: {
     type: Function,
   },
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -57,8 +64,11 @@ const test = async () => {
       }
     );
     if (response.data === 401) {
-      localStorage.removeItem("accountToken");
-      router.push("/login");
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     }
     const messages = response.data.data.chats;
     console.log(messages);
