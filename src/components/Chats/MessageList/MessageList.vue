@@ -1,9 +1,9 @@
 <template>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section v-if="!chatInfo" class="no-message-section">
     <h2 class="change-message">Выберите чат для начала общения</h2>
   </section>
   <section v-else class="app-section">
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <section class="chat-section">
       <section class="message-section">
         <header class="user-info-section">
