@@ -1,5 +1,6 @@
 <template>
   <div @click="changeDeleteMailing" class="black-fon"></div>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <transition name="fade">
     <section class="confirm-modal">
       <LoadMoadal v-if="loadStation" :text="'Удаление рассылки'" />
@@ -23,6 +24,7 @@
 
 <script setup>
 import { toRefs, ref } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import LoadMoadal from "../LoadModal/LoadModal.vue";
 const props = defineProps({
@@ -36,6 +38,11 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const { selectedItem } = toRefs(props);
 const loadStation = ref(false);
@@ -57,6 +64,12 @@ const deleteMailing = async () => {
       props.refreshMailingLists();
       props.changeDeleteMailing();
       loadStation.value = false;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log("Ошибка при удалении рассылки:", response.data);
     }

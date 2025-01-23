@@ -1,5 +1,6 @@
 <template>
   <div @click="allStop" class="black-fon"></div>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
     <QrCode ref="subComponentRef" v-if="station.qrCode" />
     <GetCode ref="subComponent" v-if="station.getCode" />
@@ -14,6 +15,7 @@
 </template>
 
 <script setup>
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import QrCode from "./QrCode/QrCode.vue";
 import GetCode from "./GetCode/GetCode.vue";
 import ResultModal from "./ResultModal.vue";
@@ -33,6 +35,11 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 let isRunning = false; // Флаг для отслеживания выполнения функции
 
@@ -104,6 +111,12 @@ const forceStop = async () => {
     );
     if (response.data.ok === true) {
       console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -153,6 +166,12 @@ const setState = async (request) => {
         console.log(response.data);
         station.result = true;
       }
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);

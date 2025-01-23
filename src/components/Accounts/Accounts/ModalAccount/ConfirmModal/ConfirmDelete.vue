@@ -1,5 +1,6 @@
 <template>
   <div @click="ChangeconfirmStation" class="black-fon"></div>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <transition name="fade">
     <section class="confirm-modal">
       <article class="circle">
@@ -18,6 +19,7 @@
 
 <script setup>
 import { toRefs } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 const props = defineProps({
   loadingStart: {
@@ -45,6 +47,11 @@ const props = defineProps({
 
 const { selectedItem } = toRefs(props);
 
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
+
 const createRequest = async (request) => {
   const { source, login } = selectedItem.value;
   try {
@@ -71,6 +78,12 @@ const createRequest = async (request) => {
       } else {
         console.log(`${request} - Успешно`);
       }
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }

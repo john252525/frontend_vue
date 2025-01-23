@@ -1,4 +1,9 @@
 <template>
+  <ErrorBlock
+    v-if="inputStyle.incorrectPassword"
+    :errorMessage="inputStyle.incorrectPasswordMessage"
+    :changeIncorrectPassword="changeIncorrectPassword"
+  />
   <section class="login-section">
     <form>
       <h2 class="title">Авторизация</h2>
@@ -29,9 +34,6 @@
         <p v-if="inputStyle.passwordStation" class="error-message">
           Введите корректный Пароль
         </p>
-        <p v-if="inputStyle.incorrectPassword" class="error-message">
-          {{ inputStyle.incorrectPasswordMessage }}
-        </p>
         <p @click="navigateTo('/Forgot')" class="forgot-password-text">
           Забыли пароль?
         </p>
@@ -50,6 +52,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 const router = useRouter();
 const formData = reactive({
@@ -129,6 +132,10 @@ const loginAccount = async () => {
       console.error("Ошибка сервера:", error.response.data);
     }
   }
+};
+
+const changeIncorrectPassword = () => {
+  inputStyle.incorrectPassword = !inputStyle.incorrectPassword;
 };
 
 function login() {

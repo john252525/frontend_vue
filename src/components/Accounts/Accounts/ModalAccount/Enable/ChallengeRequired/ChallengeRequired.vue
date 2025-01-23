@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section v-if="station.code" class="auth-code">
     <div class="input-cont">
       <label for="code">Код Telegram</label>
@@ -15,6 +16,7 @@
 
 <script setup>
 import axios from "axios";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import ResultModal from "../ResultModal.vue";
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
@@ -29,6 +31,11 @@ const station = reactive({
   code: true,
   resultTrue: false,
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const solveChallenge = async () => {
   console.log(code.value);
@@ -52,6 +59,12 @@ const solveChallenge = async () => {
     if (response.data.data.status === "ok") {
       station.resultTrue = true;
       station.loading = false;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data);
       station.station = false;

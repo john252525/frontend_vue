@@ -1,6 +1,7 @@
 <template>
   <div v-if="settingsModalStation">
     <div @click="props.changeStationSettingsModal()" class="black-fon"></div>
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <LoadModal
       :changeStationLoadingModal="changeStationLoadingModal"
       :stationLoading="stationLoading"
@@ -23,6 +24,7 @@
 </template>
 
 <script setup>
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoadModal from "../LoadingMoadal/LoadingMoadal.vue";
 import { ref, toRefs, watch, reactive } from "vue";
 import axios from "axios";
@@ -45,6 +47,11 @@ const props = defineProps({
 const { selectedItems, settingsModalStation } = toRefs(props);
 const webhookUrlsText = ref(""); // Создаем реактивную переменную для текстового поля
 const loadingStatiom = ref(false);
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const stationLoading = reactive({
   loading: false,
@@ -93,6 +100,13 @@ const getInfoAccount = async () => {
     if (Array.isArray(webhookUrls)) {
       webhookUrlsText.value = webhookUrls.join("\n"); // Объединяем значения с новой строки
     }
+    if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    }
   } catch (error) {
     console.error("error", error);
     if (error.response) {
@@ -132,7 +146,13 @@ const addNewUrl = async () => {
         },
       }
     );
-
+    if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    }
     console.log("Информация о аккаунте", response.data);
   } catch (error) {
     console.error("error", error);

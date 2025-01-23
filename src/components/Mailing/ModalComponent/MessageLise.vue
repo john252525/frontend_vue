@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="account-list-section">
     <h2 class="title">
       <img @click="changeStationMessage" src="/millingInfo/out.svg" alt="" />
@@ -43,6 +44,12 @@
 <script setup>
 import { ref, reactive, onMounted, toRefs, provide } from "vue";
 import axios from "axios";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const props = defineProps({
   selectedItem: {
@@ -75,6 +82,15 @@ const getMessages = async () => {
     if (response.data.ok) {
       mailingLists.value = response.data.result.items;
       console.log(response.data);
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.error("Ошибка при получении данных:", response.data);
     }

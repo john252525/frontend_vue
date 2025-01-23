@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <LoadingModal
     :textLoadin="station.text"
     :stationLoading="station.stationLoading"
@@ -14,6 +15,7 @@ import { ref, toRefs, reactive, onMounted, inject } from "vue";
 import axios from "axios";
 import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const { changeEnableStation } = inject("changeEnableStation");
 const phone = ref("7 ");
 const station = reactive({
@@ -24,6 +26,11 @@ const station = reactive({
   error: false,
   text: "",
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 let authCodeInterval = null;
 const isRunning = ref(false);
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
@@ -67,6 +74,12 @@ const forceStop = async () => {
     );
     if (response.data.ok === true) {
       console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -97,6 +110,12 @@ const enablePhoneAuth = async () => {
     );
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -125,6 +144,12 @@ const disablePhoneAuth = async () => {
     );
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -154,6 +179,12 @@ const setState = async () => {
     );
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -197,6 +228,12 @@ const getAuthCode = async () => {
       station.stationLoading = false;
       station.code = true;
       userCode.value = response.data.data.authCode;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }

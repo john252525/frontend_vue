@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="telegram-code-section">
     <LoadingModal :stationLoading="station.loading" />
     <ResultModalTrue v-if="station.resultTrue" />
@@ -32,12 +33,18 @@
 <!-- :class="styleInput ? 'num-input-error' : 'num-input'" -->
 <script setup>
 import { inject, reactive, ref, onMounted } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const stationLoading = ref(false);
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const station = reactive({
   code: false,
@@ -71,6 +78,12 @@ const forceStop = async () => {
     if (response.data.ok === true) {
       console.log("stop", source);
       console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -117,6 +130,12 @@ const setStateTelegram = async () => {
       station.code = true;
       console.log(response.data);
       station.error.twoFactor = true;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log("другое");
     }
@@ -146,6 +165,12 @@ const solveChallenge = async () => {
     );
     if (response.data.ok === true) {
       station.resultTrue = true;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -176,6 +201,12 @@ const twoFactorAuth = async () => {
     );
     if (response.data.ok === true) {
       station.resultTrue = true;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }

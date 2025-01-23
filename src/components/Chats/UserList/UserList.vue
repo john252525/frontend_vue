@@ -56,7 +56,10 @@ const test = async () => {
         },
       }
     );
-
+    if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
+    }
     const messages = response.data.data.chats;
     console.log(messages);
     chats.value = response.data.data.chats;

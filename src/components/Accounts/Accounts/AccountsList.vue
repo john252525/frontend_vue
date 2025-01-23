@@ -104,6 +104,7 @@
       :selectedItem="selectedItem"
       :changeEnableStation="changeEnableStation"
     />
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   </section>
 </template>
 
@@ -111,6 +112,7 @@
 import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Modal from "./Modal.vue";
 import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
@@ -153,6 +155,11 @@ const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
 };
 
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
+
 const getAccounts = async () => {
   loadDataStation.value = true;
   try {
@@ -186,8 +193,11 @@ const getAccounts = async () => {
         dataStation.value = true;
       }
     } else if (response.data === 401) {
-      localStorage.removeItem("accountToken");
-      router.push("/login");
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     }
   } catch (error) {
     loadDataStation.value = false; // Устанавливаем значение false в случае ошибки
@@ -282,6 +292,12 @@ const getInfo = async () => {
       if (response.data.data.step.value === 5) {
         chatsStation.value = true;
       }
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -292,9 +308,7 @@ const getInfo = async () => {
     }
   }
 };
-
 onMounted(getAccounts);
-
 provide("selectedItems", { selectedItems });
 provide("changeEnableStation", { changeEnableStation });
 </script>

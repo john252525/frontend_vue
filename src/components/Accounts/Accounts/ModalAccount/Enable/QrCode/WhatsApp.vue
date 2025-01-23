@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section v-if="!station.phone" class="qr-whatsapp-section">
     <LoadingModal
       :textLoadin="station.text"
@@ -31,6 +32,7 @@ import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ResultModal from "../ResultModal.vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login } = selectedItem.value;
@@ -48,6 +50,11 @@ const qrCodeData = reactive({
   link: "",
   station: false,
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const stationLoading = ref(true);
 const intervalId = ref(null);
@@ -97,6 +104,12 @@ const enablePhoneAuth = async () => {
     );
     if (response.data.ok === true) {
       console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -129,6 +142,12 @@ const getQr = async () => {
       qrCodeData.link = response.data.data.value;
       qrCodeData.station = true;
       station.loading = false;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       // Если значение пустое, останавливаем запросы
       if (!response.data.data.value) {

@@ -1,5 +1,6 @@
 <template>
   <div @click="closeModal" v-if="isModalOpen" class="black-fon">
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <transition name="fade">
       <div
         class="action-list"
@@ -37,7 +38,7 @@
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import axios from "axios";
-
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   modalPosition: {
     type: Object,
@@ -76,6 +77,11 @@ const stationLoading = reactive({
 
 const { selectedItem } = toRefs(props);
 
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
+
 const updateStatus = async (state) => {
   const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/state/${selectedItem.value.id}/${state}/`;
   const params = {
@@ -95,6 +101,12 @@ const updateStatus = async (state) => {
       setTimeout(() => {
         offModalSuc();
       }, 5000);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log("Ошибка", response.data);
     }
@@ -129,6 +141,12 @@ const getMessages = async () => {
 
     if (response.data.ok) {
       console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.error("Ошибка при получении данных:", response.data);
     }

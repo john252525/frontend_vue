@@ -1,5 +1,6 @@
 <template>
   <div @click="openAddAccountStation" class="black-fon"></div>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="add-account-section">
     <div>
       <h2 class="title">Добавить аккаунты</h2>
@@ -134,10 +135,16 @@
 </template>
 
 <script setup>
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Whatsapp from "./Messenger/Whatsapp.vue";
 import Crm from "./Crm/Crm.vue";
 import axios from "axios";
 import { ref, reactive, watch, provide, computed } from "vue";
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const props = defineProps({
   openAddAccountStation: {
@@ -255,6 +262,12 @@ const addAccount = async () => {
 
     if ((response.data.ok = "true")) {
       location.reload();
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
     }
     // location.reload();

@@ -61,7 +61,10 @@ const sendMessage = async () => {
         },
       }
     );
-
+    if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
+    }
     console.log("Сообщение отправлено:", response.data);
     emit("updateMessages", message); // Обновляем список сообщений
     messageText.value = "";

@@ -1,5 +1,6 @@
 <template>
   <div v-if="isModalOpen" class="black-fon" @click="closeModal">
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <transition name="fade">
       <div
         class="action-list"
@@ -80,6 +81,7 @@ import {
   inject,
   watch,
 } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
@@ -171,6 +173,11 @@ const stationLoading = reactive({
   },
 });
 
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
+
 const errorStationOn = () => {
   stationLoading.account.error = true;
 };
@@ -256,6 +263,12 @@ const createRequest = async (request) => {
       } else {
         console.log(`${request} - Успешно`);
       }
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -297,6 +310,12 @@ const forceStop = async (request) => {
         stationLoading.modalStation = false;
         stationLoading.account.error = false;
       }, 5000);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -333,6 +352,12 @@ const disablePhoneAuth = async () => {
 
     if (response.data.ok === true) {
       console.log("Аунтефикация 0ff");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -364,6 +389,12 @@ const setState = async () => {
 
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -396,6 +427,12 @@ const setStateTelegram = async () => {
 
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }
@@ -454,38 +491,6 @@ const resetAccount = async () => {
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
-};
-
-const test = async () => {
-  console.log(localStorage.getItem("accountToken"));
-  const { source, login } = selectedItem.value;
-  try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getChatMessages",
-      {
-        source: source,
-        login: login,
-        to: "79608151077",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        },
-      }
-    );
-    console.log(response.data);
-    if (response.data.ok === true) {
-      console.log(response.data);
-    } else {
-      console.log(response.data.ok);
-    }
-  } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
 };
 </script>
 

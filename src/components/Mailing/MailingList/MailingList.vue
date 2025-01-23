@@ -1,5 +1,6 @@
 <template>
   <section class="account-list-section">
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <div class="table-container">
       <table class="table">
         <thead class="table-header">
@@ -94,6 +95,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, provide } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import Mailing from "@/components/Mailing/Mailing.vue";
 import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
@@ -109,6 +111,10 @@ const station = reactive({
   deleteMailing: false,
   editMailing: false,
 });
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const dataStationNone = ref(false);
 const dataStation = ref(false);
@@ -133,6 +139,12 @@ const getMailingLists = async () => {
       console.log("данных нет");
       loadDataStation.value = false;
       dataStationNone.value = true;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       loadDataStation.value = false;
       dataStation.value = true;

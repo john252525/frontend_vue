@@ -1,5 +1,6 @@
 <template>
   <div class="black-fon">
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <LoadingModal
       :textLoadin="station.textLoadin"
       :stationLoading="station.loading"
@@ -12,6 +13,7 @@
 </template>
 
 <script setup>
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import { ref, toRefs, inject, reactive, onMounted } from "vue";
 import LoadingModal from "./Enable/LoadingModal.vue";
@@ -33,6 +35,11 @@ const station = reactive({
   screen: false,
   textLoadin: "",
 });
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const { selectedItem, getScreenStation } = toRefs(props);
 const { source, login } = selectedItem.value;
@@ -58,6 +65,12 @@ const getScreen = async () => {
       station.loading = false;
       station.screen = true;
       base64Image.value = `data:image/png;base64,${response.data.value}`;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log(response.data.ok);
     }

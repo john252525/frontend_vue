@@ -1,5 +1,6 @@
 <template>
   <div @click="changeisEditMailing" class="black-fon"></div>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="file-section">
     <div class="cont" v-if="!load">
       <h2 class="main-title">Редактирование рассылки</h2>
@@ -135,7 +136,7 @@
 import { ref, toRefs, watch, computed, inject } from "vue";
 import axios from "axios";
 import LoadModal from "../LoadModal/LoadModal.vue";
-
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -147,6 +148,11 @@ const props = defineProps({
 });
 
 const load = ref(false);
+
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
 const { selectedItem } = toRefs(props);
 
@@ -180,6 +186,12 @@ async function editWhatsAppBroadcast() {
     });
     if (response.data.ok === true) {
       location.reload();
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log("Ошибка:", response.data);
     }

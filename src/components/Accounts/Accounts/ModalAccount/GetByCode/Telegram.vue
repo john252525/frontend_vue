@@ -56,6 +56,9 @@ const forceStop = async () => {
     if (response.data.ok === true) {
       console.log("stop", source);
       console.log(response.data);
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }
@@ -99,6 +102,11 @@ const setStateTelegram = async () => {
       console.log(response.data);
       console.log(response.data.ok);
     }
+
+    if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
+    }
   } catch (error) {
     console.error("Ошибка при создании аккаунта:", error);
     if (error.response) {
@@ -128,6 +136,9 @@ const solveChallenge = async () => {
     if (response.data.ok === true) {
       console.log("stop", source);
       console.log(response.data);
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }

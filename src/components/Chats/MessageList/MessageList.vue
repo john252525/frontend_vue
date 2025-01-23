@@ -174,6 +174,9 @@ const getMessage = async () => {
     if (response.data.ok === true) {
       loading.value = false;
       messages.value = response.data.data.messages;
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }

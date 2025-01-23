@@ -104,6 +104,9 @@ const createRequest = async (request) => {
       }
     );
     if (response.data.ok === true) {
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }
@@ -141,6 +144,9 @@ const enablePhoneAuth = async () => {
 
     if (response.data.ok === true) {
       console.log("Аунтефикация 0ff");
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }
@@ -177,6 +183,9 @@ const setState = async () => {
 
     if (response.data.ok === true) {
       console.log("Состояние установлено");
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }
@@ -230,6 +239,9 @@ const getAuthCode = async () => {
           changeStationLoadingModal();
         }, 5000);
       }
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     } else {
       console.log(response.data.ok);
     }

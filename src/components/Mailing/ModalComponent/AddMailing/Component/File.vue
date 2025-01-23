@@ -1,4 +1,5 @@
 <template>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="file-section">
     <section class="message-section">
       <article class="alphabet-comp">
@@ -194,6 +195,7 @@
 <script setup>
 import { ref, toRefs, computed, inject } from "vue";
 import axios from "axios";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   station: {
     type: Object,
@@ -276,6 +278,11 @@ const updateSelectedDays = () => {
   console.log("Выбранные дни:", selectedDays.value);
 };
 
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
+
 async function createWhatsAppBroadcast() {
   const url = "https://whatsapi.ru/ru/api/autosend/whatsapp/new/";
 
@@ -307,6 +314,12 @@ async function createWhatsAppBroadcast() {
       console.log(startNum.value);
       console.log("Ответ от API:", response.data);
       props.changeAddMailing();
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       console.log("ошибка");
     }
