@@ -29,6 +29,9 @@
         <p v-if="inputStyle.passwordStation" class="error-message">
           Введите корректный Пароль
         </p>
+        <p v-if="inputStyle.incorrectPassword" class="error-message">
+          {{ inputStyle.incorrectPasswordMessage }}
+        </p>
         <p @click="navigateTo('/Forgot')" class="forgot-password-text">
           Забыли пароль?
         </p>
@@ -65,6 +68,8 @@ const inputStyle = reactive({
   },
   passwordStation: false,
   loginStation: false,
+  incorrectPassword: false,
+  incorrectPasswordMessage: "",
 });
 
 function errorStyleStation(input, station) {
@@ -115,7 +120,8 @@ const loginAccount = async () => {
       router.push("/MainPage");
       location.reload();
     } else {
-      console.log("нет", response.data);
+      inputStyle.incorrectPassword = true;
+      inputStyle.incorrectPasswordMessage = response.data.error_message;
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);

@@ -110,6 +110,7 @@
 <script setup>
 import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
 import Modal from "./Modal.vue";
 import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
@@ -123,6 +124,8 @@ const dataAccount = reactive({
   source: "telegram",
   error: null,
 });
+
+const router = useRouter();
 
 const dataStationNone = ref(false);
 const dataStation = ref(false);
@@ -167,7 +170,8 @@ const getAccounts = async () => {
       }
     );
 
-    if ((response.data.ok = true)) {
+    if (response.data.ok === true) {
+      // Исправлено на сравнение
       accounts.value = response.data;
       instanceData.value = accounts.value.data.instances.map((instance) => ({
         ...instance,
@@ -181,14 +185,23 @@ const getAccounts = async () => {
         loadDataStation.value = false;
         dataStation.value = true;
       }
+    } else if (response.data === 401) {
+      localStorage.removeItem("accountToken");
+      router.push("/login");
     }
   } catch (error) {
-    error.value = error.message || "Произошла ошибка.";
-    console.error("Ошибка при получении списка аккаунтов:", error);
-    loadDataStation.value = false;
-    dataStationNone.value = true;
+    loadDataStation.value = false; // Устанавливаем значение false в случае ошибки
+    dataStationNone.value = true; // Показываем, что данные отсутствуют
     if (error.response) {
-      console.error("Ответ сервера:", error.response.data);
+      if (error.response.status === 401) {
+        console.log("no ke");
+      } else {
+        console.error("Ошибка при получении списка аккаунтов:", error);
+        console.error("Ответ сервера:", error.response.data);
+      }
+    } else {
+      error.value = error.message || "Произошла ошибка.";
+      console.error("Ошибка при получении списка аккаунтов:", error);
     }
   }
 };
@@ -265,7 +278,6 @@ const getInfo = async () => {
         },
       }
     );
-
     if (response.data.data.step) {
       if (response.data.data.step.value === 5) {
         chatsStation.value = true;
@@ -274,14 +286,9 @@ const getInfo = async () => {
       console.log(response.data.ok);
     }
   } catch (error) {
+    console.error("Ошибка при создании аккаунта:", error);
     if (error.response) {
-      if (error.response.status === 401) {
-        console.log("no ke"); // Выводим сообщение "no ke" в консоль
-      } else {
-        console.error("Ошибка сервера:", error.response.data);
-      }
-    } else {
-      console.error("Ошибка при создании аккаунта:", error);
+      console.error("Ошибка сервера:", error.response.data);
     }
   }
 };
