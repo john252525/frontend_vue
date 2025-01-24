@@ -10,6 +10,7 @@ import test from "./pages/test.vue";
 import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
 import Chats from "./pages/Chats.vue";
+import Payments from "./pages/Payments.vue";
 
 const routes = [
   { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
@@ -20,6 +21,7 @@ const routes = [
   { path: "/registration", name: "Registration", component: Registration },
   { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },
   { path: "/test", name: "test", component: test },
+  { path: "/payments", name: "payments", component: Payments },
 ];
 const router = createRouter({
   history: createWebHashHistory(),
