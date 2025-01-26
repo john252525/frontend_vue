@@ -13,9 +13,19 @@
         <tbody class="tbody">
           <tr v-for="(item, index) in payments" :key="index">
             <td class="table-text">YooKassa</td>
-            <td class="table-text">{{ item.amount.value }}</td>
-            <td class="table-text">{{ item.created_at }}</td>
-            <td class="table-text">{{ item.status }}</td>
+            <td class="table-text">
+              {{ removeDecimalZeros(item.amount.value) }}
+            </td>
+            <td class="table-text">{{ formatDate(item.created_at) }}</td>
+            <td class="table-text" v-if="item.status === 'canceled'">
+              Отменён
+            </td>
+            <td class="table-text" v-else-if="item.status === 'succeeded'">
+              Оплачен
+            </td>
+            <td class="table-text" v-else="item.status === 'pending'">
+              Ожидается
+            </td>
           </tr>
         </tbody>
       </table>
@@ -50,12 +60,32 @@ const fetchPayments = async () => {
   }
 };
 
+function removeDecimalZeros(value) {
+  return value.toString().replace(/\.00$/, "");
+}
+
+function formatDate(dateString) {
+  // Создаем объект Date из входной строки
+  const date = new Date(dateString);
+
+  // Получаем компоненты даты и времени
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  // Формируем строку в нужном формате
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 onMounted(fetchPayments);
 </script>
 
 <style scoped>
 .table-container {
-  overflow-x: auto;
+  /* overflow-x: auto; */
   overflow-y: auto;
   height: 83vh;
 }
@@ -68,8 +98,9 @@ onMounted(fetchPayments);
 }
 
 .table {
-  width: 100%;
-  min-width: 600px;
+  /* width: 100%; */
+  /* width: 700px; */
+  /* min-width: 600px; */
   border-collapse: collapse;
 }
 
