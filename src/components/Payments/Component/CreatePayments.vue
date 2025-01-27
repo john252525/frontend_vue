@@ -1,17 +1,21 @@
 <template>
+  <div @click="changeCreatePayments" class="black-fon"></div>
   <section class="create-payments-section">
     <h1 class="title">Пополнение баланса</h1>
-    <form @submit.prevent="createPayment">
+    <form @submit.prevent="checkPay">
       <input
-        v-model="amount"
+        v-model="payments.amount"
         type="number"
         placeholder="Введите сумму"
-        required
         min="0.01"
         step="0.01"
       />
       <section class="payments-list">
-        <article class="payments-card">
+        <article
+          :class="{ payclick: payments.value === 'YooKassa' }"
+          @click="changePaymentsValue('YooKassa')"
+          class="payments-card"
+        >
           <div>
             <h2>YooKassa</h2>
             <span>Комиссия от 0%</span>
@@ -52,54 +56,90 @@
           </svg>
         </article>
       </section>
-      <button class="create-payments" type="submit">Пополнить баланс</button>
+      <button class="create-payments" @click="checkPay">
+        Пополнить баланс
+      </button>
     </form>
-    <div v-if="paymentUrl">
-      <a :href="paymentUrl" target="_blank">Перейти к оплате</a>
-    </div>
-    <div v-if="errorMessage" style="color: red">
-      {{ errorMessage }}
-    </div>
+    <h2 v-if="payments.errorMessage" class="error-message">
+      {{ payments.errorMessage }}
+    </h2>
   </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import axios from "axios";
 
-const errorMessage = ref(null);
+const props = defineProps({
+  changeCreatePayments: {
+    type: Function,
+  },
+});
 
-const amount = ref("");
-const currency = ref("");
+const errorMessage = ref(true);
+const payments = reactive({
+  value: "",
+  errorMessage: "",
+  amount: null,
+});
+
 const paymentUrl = ref(null);
 
 const createPayment = async () => {
-  errorMessage.value = null; // Сброс сообщения об ошибке
+  payments.errorMessage = "";
   try {
     const response = await axios.post(
       "http://localhost:3000/api/create_payment",
       {
-        amount: amount.value,
+        amount: payments.amount,
         currency: "RUB",
       }
     );
     paymentUrl.value = response.data.confirmation.confirmation_url;
+
+    // Перенаправление на paymentUrl
+    window.location.href = paymentUrl.value;
   } catch (error) {
     console.error("Ошибка при создании платежа:", error);
-    errorMessage.value = error.response
+    payments.errorMessage = "Ошибка сервера!"
       ? error.response.data.message || "Неизвестная ошибка"
       : "Ошибка сети";
   }
+};
+
+const checkPay = () => {
+  payments.errorMessage = ""; // Сброс сообщения об ошибке
+
+  if (!payments.value) {
+    payments.errorMessage = "Ошибка! Выберите способ оплаты";
+  } else if (payments.amount < 10) {
+    payments.errorMessage = "Ошибка! Минимальная сумма оплаты - 10";
+  } else if (payments.amount > 50000) {
+    payments.errorMessage = "Ошибка! Максимальная сумма оплаты - 50.000";
+  } else {
+    createPayment(); // Если все проверки пройдены, вызываем функцию создания платежа
+  }
+};
+
+const changePaymentsValue = (pay) => {
+  payments.value = pay;
 };
 </script>
 
 <style scoped>
 .create-payments-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 30px;
+  border-radius: 10px;
+  background-color: white;
 }
 
 input {
@@ -120,6 +160,16 @@ input {
   font-size: 20px;
 }
 
+.error-message {
+  font-size: 14px;
+  font-weight: 400;
+  padding: 6px;
+  border-radius: 5px;
+  background-color: #fdf2f2;
+  width: 400px;
+  color: #9b1c1c;
+}
+
 .payments-card {
   display: flex;
   align-items: center;
@@ -129,6 +179,10 @@ input {
   width: 200px;
   border: 0.5px solid #c1c1c1;
   border-radius: 6px;
+}
+
+.payments-card.payclick {
+  border: 0.5px solid #4950ca;
 }
 
 .payments-card h2 {
@@ -141,6 +195,11 @@ input {
   font-size: 16px;
   font-weight: 400;
   color: #6b7280;
+}
+
+.payments-card:hover {
+  border: 0.5px solid #4950ca;
+  cursor: pointer;
 }
 
 .icon {
@@ -156,5 +215,83 @@ input {
   font-size: 14px;
   color: #fff;
   margin-top: 16px;
+}
+
+@media (max-width: 500px) {
+  input {
+    width: 300px;
+    height: 35px;
+  }
+
+  .error-message {
+    width: 300px;
+  }
+
+  .create-payments {
+    width: 313px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 400px) {
+  input {
+    width: 300px;
+    height: 35px;
+  }
+
+  .error-message {
+    width: 300px;
+  }
+
+  .create-payments {
+    width: 313px;
+    height: 35px;
+  }
+
+  .payments-card {
+    padding: 24px 16px;
+    width: 180px;
+    border: 0.5px solid #c1c1c1;
+    border-radius: 6px;
+  }
+
+  .payments-card h2 {
+    font-size: 14px;
+  }
+
+  .payments-card span {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  input {
+    width: 250px;
+    height: 35px;
+  }
+
+  .error-message {
+    width: 250px;
+  }
+
+  .create-payments {
+    width: 263px;
+    height: 35px;
+  }
+
+  .payments-card {
+    padding: 24px 16px;
+    width: 180px;
+    border: 0.5px solid #c1c1c1;
+    border-radius: 6px;
+  }
+
+  .payments-card h2 {
+    font-size: 14px;
+  }
+
+  .payments-card span {
+    font-size: 14px;
+  }
 }
 </style>

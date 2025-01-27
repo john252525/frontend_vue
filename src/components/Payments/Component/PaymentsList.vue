@@ -12,18 +12,27 @@
         </thead>
         <tbody class="tbody">
           <tr v-for="(item, index) in payments" :key="index">
-            <td class="table-text">YooKassa</td>
+            <td class="name-pay">YooKassa</td>
             <td class="table-text">
               {{ removeDecimalZeros(item.amount.value) }}
             </td>
             <td class="table-text">{{ formatDate(item.created_at) }}</td>
-            <td class="table-text" v-if="item.status === 'canceled'">
+            <td
+              class="table-status-text canceled"
+              v-if="item.status === 'canceled'"
+            >
               Отменён
             </td>
-            <td class="table-text" v-else-if="item.status === 'succeeded'">
+            <td
+              class="table-status-text succeeded"
+              v-else-if="item.status === 'succeeded'"
+            >
               Оплачен
             </td>
-            <td class="table-text" v-else="item.status === 'pending'">
+            <td
+              class="table-status-text pending"
+              v-else="item.status === 'pending'"
+            >
               Ожидается
             </td>
           </tr>
@@ -85,9 +94,10 @@ onMounted(fetchPayments);
 
 <style scoped>
 .table-container {
-  /* overflow-x: auto; */
+  overflow-x: auto;
   overflow-y: auto;
   height: 83vh;
+  /* width: 80%; */
 }
 
 .table-header {
@@ -98,9 +108,9 @@ onMounted(fetchPayments);
 }
 
 .table {
-  /* width: 100%; */
-  /* width: 700px; */
-  /* min-width: 600px; */
+  width: 100%;
+  /* min-width: 1200px;
+  max-width: 1000px; */
   border-collapse: collapse;
 }
 
@@ -171,10 +181,23 @@ onMounted(fetchPayments);
 .table-action {
   text-align: left;
   padding: 1rem;
+  padding-right: 15px;
+}
+
+.canceled {
+  color: rgb(253, 86, 86);
+}
+
+.succeeded {
+  color: rgb(39, 146, 39);
+}
+
+.pending {
+  color: gray;
 }
 
 .table-login {
-  width: 25%;
+  width: 30%;
 }
 
 .table-step {
@@ -182,7 +205,7 @@ onMounted(fetchPayments);
 }
 
 .table-status {
-  width: 25%;
+  width: 20%;
 }
 
 .table-action {
@@ -193,8 +216,17 @@ onMounted(fetchPayments);
   padding: 1rem;
 }
 
+.table-status-text {
+  text-align: left;
+}
+
 .table-text {
   padding: 1rem;
+}
+
+.name-pay {
+  padding: 1rem;
+  font-weight: 500;
 }
 
 .table-state {
@@ -210,6 +242,7 @@ onMounted(fetchPayments);
 }
 
 .table-action-text {
+  padding: 1rem;
   text-align: right;
 }
 
@@ -253,7 +286,7 @@ td {
 }
 
 td {
-  font-weight: 500;
+  font-weight: 400;
   font-size: 14px;
   color: #000;
   text-align: left;
@@ -283,11 +316,11 @@ tr:hover {
   }
 
   .table-step {
-    width: 45%;
+    width: 15%;
   }
 
   .table-status {
-    width: 10%;
+    width: 40%;
   }
 
   .table-action {

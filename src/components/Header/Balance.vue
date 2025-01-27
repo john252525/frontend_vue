@@ -5,7 +5,7 @@
       <h2 class="balance-text">Ваш баланс: 0 ₽</h2>
       <div class="line"></div>
     </article>
-    <article class="top-balance-cont" @click="handleTopUp">
+    <article class="top-balance-cont" @click="navigateTo('/payments')">
       <img src="/header/balance.svg" alt="Иконка пополнения баланса" />
       <h2 class="top-balance-title">Пополнить баланс</h2>
     </article>
@@ -13,14 +13,17 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+const router = useRouter();
 const props = defineProps({
   balanceStationOn: {
     type: Function,
   },
 });
 
-const handleTopUp = () => {
-  console.log("Пополнение баланса");
+const navigateTo = (page) => {
+  props.balanceStationOn();
+  router.push(page);
 };
 </script>
 
@@ -52,10 +55,12 @@ const handleTopUp = () => {
   padding: 12px;
 }
 
-.balance-user-section, .fade-leave-active {
+.balance-user-section,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.balance-user-section, .fade-leave-to {
+.balance-user-section,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -66,7 +71,7 @@ const handleTopUp = () => {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px); 
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -110,11 +115,10 @@ const handleTopUp = () => {
   text-align: center;
 }
 
-
 @media (max-width: 1000px) {
   .balance-user-section {
-  width: 150px;
-  height: 130px;
-}
+    width: 150px;
+    height: 130px;
+  }
 }
 </style>
