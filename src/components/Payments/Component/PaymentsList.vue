@@ -13,9 +13,7 @@
         <tbody class="tbody">
           <tr v-for="(item, index) in payments" :key="index">
             <td class="name-pay">YooKassa</td>
-            <td class="table-text">
-              {{ removeDecimalZeros(item.amount.value) }}
-            </td>
+            <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td class="table-text">{{ formatDate(item.created_at) }}</td>
             <td
               class="table-status-text canceled"
@@ -51,13 +49,21 @@ const fetchError = ref(null);
 
 const fetchPayments = async () => {
   fetchError.value = null; // Сброс сообщения об ошибке
+  console.log(localStorage.getItem("accountToken"));
   try {
-    const response = await axios.get("http://localhost:3000/api/payments");
-    console.log("Ответ от API:", response.data); // Выводим ответ в консоль для отладки
-
+    const response = await axios.get(
+      "http://213.159.208.139:3000/paymentsList",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+    console.log(response.data);
     // Извлекаем платежи из массива items
-    if (response.data.items) {
-      payments.value = response.data.items; // Получаем платежи
+    if (response.data) {
+      payments.value = response.data; // Получаем платежи
     } else {
       fetchError.value = "Нет доступных платежей.";
     }
@@ -66,6 +72,28 @@ const fetchPayments = async () => {
     fetchError.value = error.response
       ? error.response.data.message || "Неизвестная ошибка"
       : "Ошибка сети";
+  }
+};
+
+const createUser = async () => {
+  try {
+    const token = localStorage.getItem("accountToken");
+    const response = await axios.get(
+      "http://213.159.208.139:3000/paymentsList",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response.data);
+    if (response.data) {
+      payments.value = response.data; // Получаем платежи
+    } else {
+      fetchError.value = "Нет доступных платежей.";
+    }
+  } catch (error) {
+    console.error("Ошибка при создании платежа:", error);
   }
 };
 
@@ -89,7 +117,7 @@ function formatDate(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-onMounted(fetchPayments);
+onMounted(createUser);
 </script>
 
 <style scoped>

@@ -56,9 +56,7 @@
           </svg>
         </article>
       </section>
-      <button class="create-payments" @click="checkPay">
-        Пополнить баланс
-      </button>
+      <button class="create-payments">Пополнить баланс</button>
     </form>
     <h2 v-if="payments.errorMessage" class="error-message">
       {{ payments.errorMessage }}
@@ -89,19 +87,25 @@ const createPayment = async () => {
   payments.errorMessage = "";
   try {
     const response = await axios.post(
-      "http://localhost:3000/api/create_payment",
+      "http://213.159.208.139:3000/api/create_payment",
       {
         amount: payments.amount,
         currency: "RUB",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
       }
     );
-    paymentUrl.value = response.data.confirmation.confirmation_url;
+    paymentUrl.value = response.data.link;
 
-    // Перенаправление на paymentUrl
+    // Перенаправление пользователя на страницу платежа
     window.location.href = paymentUrl.value;
+    console.log(response.data);
   } catch (error) {
     console.error("Ошибка при создании платежа:", error);
-    payments.errorMessage = "Ошибка сервера!"
+    payments.errorMessage = error.response
       ? error.response.data.message || "Неизвестная ошибка"
       : "Ошибка сети";
   }

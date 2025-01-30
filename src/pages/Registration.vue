@@ -82,6 +82,26 @@ const navigateTo = (page) => {
   router.push(page);
 };
 
+const createUser = async () => {
+  try {
+    const response = await axios.post(
+      "http://localhost:3000/createUser",
+      {
+        userName: formData.login,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+    navigateTo("/accounts");
+    console.log(response.data);
+  } catch (error) {
+    console.error("Ошибка при создании платежа:", error);
+  }
+};
+
 const loginAccount = async () => {
   try {
     const response = await axios.post(
@@ -98,7 +118,11 @@ const loginAccount = async () => {
       }
     );
     if (response.data.ok === true) {
-      navigateTo("/accounts");
+      localStorage.setItem("accountToken", response.data.token);
+      localStorage.setItem("accountData", formData.login);
+      localStorage.setItem("accountStationText", "Telegram");
+      localStorage.setItem("accountStation", "telegram");
+      createUser();
       console.log(response.data);
     }
   } catch (error) {
