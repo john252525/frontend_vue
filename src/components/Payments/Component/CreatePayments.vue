@@ -87,7 +87,7 @@ const createPayment = async () => {
   payments.errorMessage = "";
   try {
     const response = await axios.post(
-      "https://hellylo.apitter.com/create_payment",
+      "https://hellylo.apitter.com/api/create_payment",
       {
         amount: payments.amount,
         currency: "RUB",
