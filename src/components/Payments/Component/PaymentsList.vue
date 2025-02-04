@@ -11,7 +11,11 @@
           </tr>
         </thead>
         <tbody class="tbody">
-          <tr v-for="(item, index) in payments" :key="index">
+          <tr
+            v-if="paymentsLoadingStation.dataStation"
+            v-for="(item, index) in payments"
+            :key="index"
+          >
             <td class="name-pay">YooKassa</td>
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td class="table-text">{{ formatDate(item.created_at) }}</td>
@@ -34,6 +38,21 @@
               Ожидается
             </td>
           </tr>
+          <tr v-else-if="paymentsLoadingStation.dataStationNone">
+            <td colspan="4">
+              <div class="none-account-cont">
+                <h2>Аккаунты отсутствуют.</h2>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="paymentsLoadingStation.loadDataStation">
+            <td colspan="4">
+              <div class="load-cont">
+                <LoadAccount />
+                sdsa
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -43,11 +62,18 @@
 <script setup>
 import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
-
+import LoadAccount from "/src/components/Accounts/Accounts/LoadAccount.vue";
 const payments = ref([]); // Массив для хранения платежей
 const fetchError = ref(null);
 
+const paymentsLoadingStation = reactive({
+  dataStationNone: false,
+  dataStation: false,
+  loadDataStation: false,
+});
+
 const fetchPayments = async () => {
+  paymentsLoadingStation.loadDataStation = true;
   fetchError.value = null; // Сброс сообщения об ошибке
   console.log(localStorage.getItem("accountToken"));
   try {
@@ -63,11 +89,22 @@ const fetchPayments = async () => {
     console.log(response.data);
     // Извлекаем платежи из массива items
     if (response.data) {
-      payments.value = response.data; // Получаем платежи
+      payments.value = response.data;
+      if (instanceData.value.length === 0) {
+        console.log("данных нет");
+        paymentsLoadingStation.loadDataStation = false;
+        paymentsLoadingStation.dataStationNone = true;
+      } else {
+        paymentsLoadingStation.loadDataStation = false;
+        paymentsLoadingStation.dataStation = true;
+      }
     } else {
-      fetchError.value = "Нет доступных платежей.";
+      paymentsLoadingStation.loadDataStation = false;
+      paymentsLoadingStation.dataStationNone = true;
     }
   } catch (error) {
+    paymentsLoadingStation.loadDataStation = false;
+    paymentsLoadingStation.dataStationNone = true;
     console.error("Ошибка при получении списка платежей:", error);
     fetchError.value = error.response
       ? error.response.data.message || "Неизвестная ошибка"
@@ -88,11 +125,22 @@ const createUser = async () => {
     );
     console.log(response.data);
     if (response.data) {
-      payments.value = response.data; // Получаем платежи
+      payments.value = response.data;
+      if (payments.value.length === 0) {
+        console.log("данных нет");
+        paymentsLoadingStation.loadDataStation = false;
+        paymentsLoadingStation.dataStationNone = true;
+      } else {
+        paymentsLoadingStation.loadDataStation = false;
+        paymentsLoadingStation.dataStation = true;
+      }
     } else {
-      fetchError.value = "Нет доступных платежей.";
+      paymentsLoadingStation.loadDataStation = false;
+      paymentsLoadingStation.dataStationNone = true;
     }
   } catch (error) {
+    paymentsLoadingStation.loadDataStation = false;
+    paymentsLoadingStation.dataStationNone = true;
     console.error("Ошибка при создании платежа:", error);
   }
 };
@@ -242,6 +290,32 @@ onMounted(createUser);
 
 .table-text-number {
   padding: 1rem;
+}
+
+.load-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -10px;
+}
+
+.none-account-cont {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 0px;
+  height: 50px;
+  width: 100%;
+  background-color: #ebf5ff;
+  border-radius: 5px;
+}
+
+.none-account-cont h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #17388d;
+  margin-left: 10px;
 }
 
 .table-status-text {

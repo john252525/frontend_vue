@@ -18,7 +18,12 @@
         </h2>
       </article>
       <article class="user-cont">
-        <h2 @click="toggleBalanceStation" class="balance-user">0.00 ₽</h2>
+        <h2 v-if="balance" @click="toggleBalanceStation" class="balance-user">
+          {{ removeDecimalZeros(balance) }} ₽
+        </h2>
+        <h2 v-else @click="toggleBalanceStation" class="balance-user">
+          0.00 ₽
+        </h2>
         <img
           @click="toggleAccountMenu"
           src="/header/user_img.svg"
@@ -37,7 +42,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import axios from "axios";
+import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
@@ -47,6 +53,10 @@ const props = defineProps({
     type: Function,
   },
 });
+
+function removeDecimalZeros(value) {
+  return value.toString().replace(/\.00$/, "");
+}
 
 const balanseStation = ref(false);
 const AccountMenuStation = ref(false);
@@ -59,10 +69,38 @@ function toggleAccountMenu() {
   AccountMenuStation.value = !AccountMenuStation.value;
 }
 
+const balance = ref("");
+
+const getBalance = async () => {
+  try {
+    const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
+
+    const response = await axios.post(
+      "https://hellylo.apitter.com/get-payment-sum", // URL вашего бэкенда
+      {}, // Тело запроса, если не нужно отправлять дополнительные данные
+      {
+        headers: {
+          "Content-Type": "application/json", // Убедитесь, что заголовок указан
+          Authorization: `Bearer ${token}`, // Заголовок авторизации с токеном
+        },
+      }
+    );
+    balance.value = response.data.totalAmount;
+    console.log("Платеж создан:", response.data);
+  } catch (err) {
+    console.error(
+      "Ошибка при создании платежа:",
+      err.response ? err.response.data : err.message
+    );
+  }
+};
+
 const route = useRoute();
 const isChatPage = computed(() => {
   return route.name === "Chats"; // Ensure "Chats" matches the route name for the chat page
 });
+
+onMounted(getBalance);
 </script>
 
 <style scoped>
