@@ -18,7 +18,13 @@
             <td class="table-text-number">
               {{ formatPhoneNumber(item.login) }}
             </td>
-            <td class="table-text">{{ item.step }}</td>
+            <td
+              class="table-text"
+              @mouseover="showMessage($event, item.step.message)"
+              @mouseleave="hideMessage"
+            >
+              {{ item.step.value }}
+            </td>
             <td class="table-action-text">
               <button
                 class="action-table-button"
@@ -57,6 +63,9 @@
           </tr>
         </tbody>
       </table>
+      <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">{{
+        tooltipMessage
+      }}</span>
     </div>
     <Modal
       :isModalOpen="isModalOpen"
@@ -273,6 +282,31 @@ const updateLoading = (newValue) => {
   loadingStation.value = newValue;
 };
 
+const messageVisible = ref(false);
+const tooltipMessage = ref("");
+const tooltipStyle = ref({});
+
+const showMessage = (event, step) => {
+  tooltipMessage.value = `Текущий шаг: ${step}`; // Замените на нужное сообщение
+  messageVisible.value = true;
+
+  // Позиционирование всплывающего сообщения
+  const tooltipWidth = 100; // Ширина всплывающего сообщения
+  const tooltipHeight = 30; // Высота всплывающего сообщения
+  const rect = event.currentTarget.getBoundingClientRect(); // Получаем размеры ячейки
+
+  tooltipStyle.value = {
+    top: `${rect.bottom + window.scrollY}px`, // Позиция сверху
+    left: `${rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2}px`, // Центруем по горизонтали
+    width: `${tooltipWidth}px`,
+    height: `${tooltipHeight}px`,
+  };
+};
+
+const hideMessage = () => {
+  messageVisible.value = false;
+};
+
 const getInfo = async () => {
   try {
     const response = await axios.post(
@@ -319,6 +353,17 @@ provide("changeEnableStation", { changeEnableStation });
   overflow-y: auto;
   max-width: 100%;
   height: 83vh;
+}
+
+.tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 10;
+  /* Можно добавить дополнительные стили */
 }
 
 .table-header {

@@ -110,7 +110,7 @@ onMounted(getBalance);
   justify-content: space-between;
   padding: 12px;
   box-sizing: border-box;
-  margin: 0px -18px 0px 4px;
+  margin: 0px 0px 0px 4px;
 }
 
 .logo-img {
@@ -137,6 +137,8 @@ onMounted(getBalance);
   border: 1px solid rgba(64, 71, 202, 0.2);
   border-radius: 5px;
   cursor: pointer;
+  width: 80px; /* Фиксированная ширина */
+  text-align: center; /* Центрирование текста */
 }
 
 .logo-header-cont {

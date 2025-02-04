@@ -30,10 +30,10 @@
           >Чат</span
         >
         <span class="action" @click="getNewProxy">Сменить прокси</span>
-        <span class="action" @click="startEnableByQR('whatsapp')"
+        <!-- <span class="action" @click="startEnableByQR('whatsapp')"
           >Связать через QR</span
-        >
-        <span class="action" @click="handleSubmitCode">Связать через код</span>
+        > -->
+        <!-- <span class="action" @click="handleSubmitCode">Связать через код</span> -->
         <span class="action action-delete" @click="ChangeconfirmStation"
           >Удалить аккаунт</span
         >

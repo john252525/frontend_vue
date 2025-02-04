@@ -24,7 +24,6 @@
         <span @click="changeInfoMailing" class="action">Информация</span>
         <span @click="changeisEditMailing" class="action">Редактировать</span>
         <span class="action" @click="changeDeleteMailing">Удалить</span>
-        <span @click="trst"> ntrc</span>
       </div>
     </transition>
   </div>
