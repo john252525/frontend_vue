@@ -1,7 +1,28 @@
 <template>
   <div>
-    <button @click="createYookassaWebhook">Создать YooKassa вебхук</button>
-    <div v-if="message">{{ message }}</div>
+    <h1>Chat Application</h1>
+    <button @click="getChats">Get Chats</button>
+    <button @click="getChatMessages">Get Chat Messages</button>
+    <button @click="sendMessage">Send Message</button>
+
+    <div v-if="chats.length">
+      <h2>Chats</h2>
+      <ul>
+        <li v-for="chat in chats" :key="chat.uniq">
+          {{ chat.uniq }} - {{ chat.timestamp }}
+        </li>
+      </ul>
+    </div>
+
+    <div v-if="messages.length">
+      <h2>Messages</h2>
+      <ul>
+        <li v-for="message in messages" :key="message.uniq">
+          {{ message.payload }}
+        </li>
+      </ul>
+    </div>
+
     <div v-if="error">{{ error }}</div>
   </div>
 </template>
@@ -12,36 +33,90 @@ import axios from "axios";
 export default {
   data() {
     return {
-      message: null,
+      source: "whatsapp",
+      token: "9bddaafd-2c8d-4840-96d5-1c19c0bb4bd5",
+      login: "helly",
+      chats: [],
+      messages: [],
       error: null,
     };
   },
   methods: {
-    async createYookassaWebhook() {
-      this.message = null;
-      this.error = null;
+    async getChats() {
       try {
         const response = await axios.post(
-          "http://213.159.208.139:3000/api/create_yookassa_webhook",
-          {}, // передайте тело запроса если требуется
+          `http://localhost:3000/api/getChats`,
           {
-            // передайте headers, если требуется
-            // headers: {
-            // 'Authorization': 'Bearer your_token',
-            // }
+            source: this.source,
+            token: this.token,
+            login: this.login,
           }
         );
-        this.message =
-          "Вебхук создан успешно: " + JSON.stringify(response.data);
-        console.log("Вебхук создан успешно:", response.data);
-      } catch (error) {
-        console.error("Ошибка при создании вебхука:", error.message, error);
-        this.error = `Ошибка при создании вебхука: ${
-          error.message
-        } ${JSON.stringify(error)}`;
-        // Обработайте ошибку.  Можете также добавить сообщение об ошибке
+        this.chats = response.data;
+        this.error = null; // Очистить ошибки
+      } catch (err) {
+        this.error =
+          "Error fetching chats: " + (err.response?.data || err.message);
+      }
+    },
+    async getChatMessages() {
+      try {
+        const response = await axios.post(
+          `http://localhost:3000/api/getChatMessages`,
+          {
+            source: this.source,
+            token: this.token,
+            login: this.login,
+          }
+        );
+        this.messages = response.data;
+        this.error = null; // Очистить ошибки
+      } catch (err) {
+        this.error =
+          "Error fetching chat messages: " +
+          (err.response?.data || err.message);
+      }
+    },
+    async sendMessage() {
+      const messageData = {
+        source: this.source,
+        token: this.token,
+        login: this.login,
+        message: "Hello, World!", // Здесь можно добавить динамическое сообщение
+      };
+      try {
+        const response = await axios.post(
+          `http://localhost:3000/api/sendMessage`,
+          messageData
+        );
+        if (response.data.status === "ok") {
+          this.error = null; // Очистить ошибки
+          this.messages.push({
+            payload: messageData.message,
+            uniq: Date.now(),
+          }); // Добавить сообщение в список
+        } else {
+          this.error = "Error sending message: " + response.data.message;
+        }
+      } catch (err) {
+        this.error =
+          "Error sending message: " + (err.response?.data || err.message);
       }
     },
   },
 };
 </script>
+
+<style scoped>
+/* Добавьте стили по необходимости */
+h1 {
+  color: #333;
+}
+button {
+  margin: 5px;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+</style>

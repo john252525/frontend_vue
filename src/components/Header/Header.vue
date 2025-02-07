@@ -76,7 +76,7 @@ const getBalance = async () => {
     const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
 
     const response = await axios.post(
-      "https://hellylo.apitter.com/get-payment-sum", // URL вашего бэкенда
+      "https://hellylo.apitter.com/api/get-payment-sum", // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
       {
         headers: {

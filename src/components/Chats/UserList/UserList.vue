@@ -13,7 +13,7 @@
         <div class="chat-info">
           <div class="chat-name">{{ chat.name }}</div>
           <div class="chat-last-message">
-            {{ formatLastMessage(chat.lastMessage?.body) }}
+            {{ formatLastMessage(chat.lastMessage) }}
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@ const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const test = async () => {
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getChats",
+      "http://localhost:3000/api/getChats",
       {
         source: userInfo.source,
         login: userInfo.login,
@@ -72,9 +72,10 @@ const test = async () => {
         router.push("/login");
       }, 2000);
     }
-    const messages = response.data.data.chats;
+    const messages = response.data;
     console.log(messages);
-    chats.value = response.data.data.chats;
+    chats.value = response.data;
+    console.log(response.data);
     console.log(chats.value);
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
@@ -83,10 +84,16 @@ const test = async () => {
     }
   }
 };
-
 const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // Преобразуем строку в объект Date
+  const date = new Date(timestamp);
+
+  // Получаем часы и минуты
+  const hours = String(date.getUTCHours()).padStart(2, "0"); // Приводим к формату 2 цифры
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0"); // Приводим к формату 2 цифры
+
+  // Возвращаем время в формате "HH:MM"
+  return `${hours}:${minutes}`;
 };
 
 onMounted(test);

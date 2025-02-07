@@ -78,7 +78,7 @@ const fetchPayments = async () => {
   console.log(localStorage.getItem("accountToken"));
   try {
     const response = await axios.get(
-      "https://hellylo.apitter.com/paymentsList",
+      "https://hellylo.apitter.com/api/paymentsList",
       {},
       {
         headers: {
@@ -116,7 +116,7 @@ const createUser = async () => {
   try {
     const token = localStorage.getItem("accountToken");
     const response = await axios.get(
-      "https://hellylo.apitter.com/paymentsList",
+      "https://hellylo.apitter.com/api/paymentsList",
       {
         headers: {
           Authorization: `Bearer ${token}`,
