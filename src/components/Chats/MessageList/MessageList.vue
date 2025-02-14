@@ -26,12 +26,14 @@
               message.outgoing ? 'outgoing' : 'incoming',
               {
                 'has-content': message.content && message.content.length > 0,
-                'last-sent-message': index === lastSentMessageIndex, // Применяем класс для последнего отправленного сообщения
+                'last-sent-message': index === lastSentMessageIndex,
               },
             ]"
           >
             <div class="message-content">
-              <p v-if="message.text" class="message-text">{{ message.text }}</p>
+              <p v-if="message.text" class="message-text">
+                {{ message.text }}
+              </p>
               <div v-if="index === lastSentMessageIndex" class="icon-container">
                 <LoadingMessage />
               </div>
@@ -114,9 +116,9 @@
     </section>
   </section>
 </template>
-
+<!-- slice().reverse() -->
 <script setup>
-import { ref, onMounted, watch, toRefs, reactive } from "vue";
+import { ref, onMounted, computed, watch, toRefs, reactive } from "vue";
 import axios from "axios";
 import SendMessage from "./SendMessage.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -134,6 +136,7 @@ const props = defineProps({
     type: Function,
   },
 });
+const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
 const messages = ref([]); // Инициализация массива сообщений
 
@@ -164,33 +167,64 @@ const updateMessages = (newMessage) => {
 };
 
 const { chatInfo } = toRefs(props);
+
 const getMessage = async () => {
+  console.log("chatInfo.value.unid:", chatInfo.value.unid);
+  console.log("getMessage вызван в", new Date().toISOString());
   try {
+    const token = localStorage.getItem("accountToken");
+    console.log("Token:", token);
+
+    // Функция для парсинга chatInfo.value.data
+    const parsedChatInfo = computed(() => {
+      try {
+        return JSON.parse(chatInfo.value.data);
+      } catch (error) {
+        console.error("Ошибка при парсинге JSON:", error);
+        return {}; // Возвращаем пустой объект в случае ошибки
+      }
+    });
+
+    console.log("parsedChatInfo.value:", parsedChatInfo.value); // Проверяем распарсенные данные
+    // "http://localhost:4000/api/getChatMessages",
+    // "https://hellychat.apitter.com/api/getChatMessages",
+    console.log(chatInfo.value.lastMessage.id.remote);
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getChatMessages",
+      `${apiUrl}/getChatMessages`,
       {
         source: "whatsapp",
         login: "helly",
         to: chatInfo.value.phone,
+        uniq: chatInfo.value.lastMessage.id.remote,
       },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
+
+    console.log("Response status:", response.status);
+    console.log("Response data:", response.data);
+
     if (response.data.ok === true) {
       loading.value = false;
+
+      // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
-    } else if (response.data === 401) {
+      console.log(messages);
+
+      console.log("Messages:", messages.value);
+    } else if (response.status === 401 || response.data.errorMessage === 401) {
+      console.log("Ошибка авторизации");
       errorBlock.value = true;
       setTimeout(() => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
+      console.log("Response ok:", response.data.ok);
     }
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
@@ -212,22 +246,26 @@ const changeLoading = () => {
 const changeMenuPhotoStation = () => {
   station.photoMenu = !station.photoMenu;
 };
+let previousChatInfo = null;
+// watch(
+//   () => chatInfo.value,
+//   (newChatInfo) => {
+//     if (JSON.stringify(newChatInfo) !== JSON.stringify(previousChatInfo)) {
+//       loading.value = true;
+//       getMessage();
+//       previousChatInfo = newChatInfo; // Сохраняем текущее состояние
+//     }
+//   }
+// );
 
 watch(
   () => chatInfo.value,
   (newChatInfo) => {
-    loading.value = true;
-    getMessage();
-  }
-);
-
-watch(
-  () => loading.value,
-  (newValue) => {
-    if (newValue === false) {
-      setTimeout(() => {
-        scrollToBottom();
-      }, 500);
+    if (!loading.value) {
+      console.log("вывы");
+      // Проверка состояния загрузки
+      loading.value = true;
+      getMessage();
     }
   }
 );
@@ -239,17 +277,17 @@ const openPhotoMenu = (src) => {
   station.photoMenu = true;
 };
 
-if (chatInfo.value) {
-  if (chatInfo.value.phone) {
-    getMessage();
-  }
-}
+// if (chatInfo.value) {
+//   if (chatInfo.value.phone) {
+//     getMessage();
+//   }
+// }
 
-onMounted(() => {
-  if (chatInfo.value) {
-    getMessage();
-  }
-});
+// onMounted(() => {
+//   if (chatInfo.value) {
+//     getMessage();
+//   }
+// });
 </script>
 
 <style scoped>

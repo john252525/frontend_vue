@@ -4,7 +4,7 @@
     <section
       v-if="chats"
       v-for="chat in chats"
-      :key="chat.phone"
+      :key="chat.unid"
       class="chat-item"
       @click="selectChat(chat)"
     >
@@ -12,13 +12,17 @@
         <img class="user-chat-icon" src="/chats/user-chat-icon.svg" alt="" />
         <div class="chat-info">
           <div class="chat-name">{{ chat.name }}</div>
+          <!-- Отображаем имя -->
           <div class="chat-last-message">
-            {{ formatLastMessage(chat.lastMessage) }}
+            {{ formatLastMessage(chat.lastMessage?.body) }}
+            <!-- Отображаем сообщение -->
           </div>
         </div>
       </div>
       <div class="chat-meta">
-        <div class="chat-timestamp">{{ formatTimestamp(chat.timestamp) }}</div>
+        <div class="chat-timestamp">
+          {{ formatTimestamp(chat.timestamp) }}
+        </div>
         <div class="chat-unread" v-if="chat.unreadCount > 0">
           {{ chat.unreadCount }}
         </div>
@@ -36,6 +40,7 @@ import { onMounted, ref } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 const props = defineProps({
   selectChat: {
@@ -47,36 +52,44 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
-
+// let isTestCalled = false;
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const test = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  console.log("userInfo:", userInfo); // Проверяем userInfo
+
   try {
+    const token = localStorage.getItem("accountToken");
+    console.log("Token:", token); // Проверяем token
+    console.log("test() called");
+    // https://hellychat.apitter.com/api/getChats
     const response = await axios.post(
-      "http://localhost:3000/api/getChats",
+      `${apiUrl}/getChats`,
       {
-        source: userInfo.source,
-        login: userInfo.login,
+        source: userInfo?.source, // Используем optional chaining
+        login: userInfo?.login, // Используем optional chaining
       },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
-    if (response.data === 401) {
+
+    if (response.status === 401) {
       errorBlock.value = true;
       setTimeout(() => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
+      return; // Важно выйти из функции после перенаправления
     }
-    const messages = response.data;
-    console.log(messages);
-    chats.value = response.data;
-    console.log(response.data);
-    console.log(chats.value);
+
+    console.log("Response data:", response.data); // Смотрим, что приходит с сервера
+    chats.value = response.data.data.chats;
+    console.log("Chats:", chats.value);
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
     if (error.response) {
@@ -84,6 +97,7 @@ const test = async () => {
     }
   }
 };
+
 const formatTimestamp = (timestamp) => {
   // Преобразуем строку в объект Date
   const date = new Date(timestamp);
@@ -97,6 +111,15 @@ const formatTimestamp = (timestamp) => {
 };
 
 onMounted(test);
+
+const parsedChatData = (chat) => {
+  try {
+    return JSON.parse(chat.data);
+  } catch (error) {
+    console.error("Ошибка при парсинге JSON:", error);
+    return {}; // Возвращаем пустой объект в случае ошибки
+  }
+};
 
 const formatLastMessage = (message) => {
   const maxLength = 20;

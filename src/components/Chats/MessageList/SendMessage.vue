@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { ref, toRefs, defineEmits } from "vue";
+import { ref, toRefs, computed, defineEmits } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -42,6 +42,15 @@ const chaneErrorBlock = () => {
 const messageText = ref("");
 
 const sendMessage = async () => {
+  const parsedChatInfo = computed(() => {
+    try {
+      return JSON.parse(chatInfo.value.data);
+    } catch (error) {
+      console.error("Ошибка при парсинге JSON:", error);
+      return {}; // Возвращаем пустой объект в случае ошибки
+    }
+  });
+  const apiUrl = import.meta.env.VITE_API_URL;
   console.log(22794591901);
   const message = {
     to: `${chatInfo.value.phone}`,
@@ -49,13 +58,14 @@ const sendMessage = async () => {
     content: messageText.value
       ? []
       : [{ type: "text", src: messageText.value }],
-    time: Date.now() / 1000, // Установка времени сообщения
-    outgoing: true, // Указывает, что это исходящее сообщение
+    time: Date.now() / 1000,
+    outgoing: true,
   };
+  console.log(chatInfo.value);
 
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/sendMessage",
+      `${apiUrl}/sendMessage`,
       {
         source: "whatsapp",
         login: "helly",

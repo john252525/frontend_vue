@@ -7,7 +7,7 @@
       :chatInfo="chatInfo"
     />
   </section>
-  <section class="phone-version" v-if="userInfo">
+  <!-- <section class="phone-version" v-if="userInfo">
     <UserList :style="style.UserList" :selectChat="selectChat" />
     <MessageList
       class="message-list"
@@ -15,7 +15,7 @@
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
     />
-  </section>
+  </section> -->
 </template>
 
 <script setup>

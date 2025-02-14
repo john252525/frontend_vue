@@ -1,122 +1,113 @@
 <template>
-  <div>
-    <h1>Chat Application</h1>
-    <button @click="getChats">Get Chats</button>
-    <button @click="getChatMessages">Get Chat Messages</button>
-    <button @click="sendMessage">Send Message</button>
-
-    <div v-if="chats.length">
-      <h2>Chats</h2>
-      <ul>
-        <li v-for="chat in chats" :key="chat.uniq">
-          {{ chat.uniq }} - {{ chat.timestamp }}
-        </li>
-      </ul>
+  <section class="account-list-section">
+    <div class="table-container">
+      <table class="table">
+        <thead class="table-header">
+          <tr>
+            <th class="table-name">uniq</th>
+            <th class="table-name">timestamp</th>
+            <th class="table-data">data</th>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          <tr v-for="(item, index) in instanceData" :key="index">
+            <td class="table-text-name">{{ item.uniq }}</td>
+            <td class="table-text-phone">{{ item.timestamp }}</td>
+            <td class="table-action-text">
+              <div class="data-scroll-container">
+                {{ item.data }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <div v-if="messages.length">
-      <h2>Messages</h2>
-      <ul>
-        <li v-for="message in messages" :key="message.uniq">
-          {{ message.payload }}
-        </li>
-      </ul>
-    </div>
-
-    <div v-if="error">{{ error }}</div>
-  </div>
+  </section>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
+import { ref, onMounted } from "vue";
+import axios from "axios"; // Импортируем axios
 
-export default {
-  data() {
-    return {
-      source: "whatsapp",
-      token: "9bddaafd-2c8d-4840-96d5-1c19c0bb4bd5",
-      login: "helly",
-      chats: [],
-      messages: [],
-      error: null,
-    };
-  },
-  methods: {
-    async getChats() {
-      try {
-        const response = await axios.post(
-          `http://localhost:3000/api/getChats`,
-          {
-            source: this.source,
-            token: this.token,
-            login: this.login,
-          }
-        );
-        this.chats = response.data;
-        this.error = null; // Очистить ошибки
-      } catch (err) {
-        this.error =
-          "Error fetching chats: " + (err.response?.data || err.message);
-      }
-    },
-    async getChatMessages() {
-      try {
-        const response = await axios.post(
-          `http://localhost:3000/api/getChatMessages`,
-          {
-            source: this.source,
-            token: this.token,
-            login: this.login,
-          }
-        );
-        this.messages = response.data;
-        this.error = null; // Очистить ошибки
-      } catch (err) {
-        this.error =
-          "Error fetching chat messages: " +
-          (err.response?.data || err.message);
-      }
-    },
-    async sendMessage() {
-      const messageData = {
-        source: this.source,
-        token: this.token,
-        login: this.login,
-        message: "Hello, World!", // Здесь можно добавить динамическое сообщение
-      };
-      try {
-        const response = await axios.post(
-          `http://localhost:3000/api/sendMessage`,
-          messageData
-        );
-        if (response.data.status === "ok") {
-          this.error = null; // Очистить ошибки
-          this.messages.push({
-            payload: messageData.message,
-            uniq: Date.now(),
-          }); // Добавить сообщение в список
-        } else {
-          this.error = "Error sending message: " + response.data.message;
-        }
-      } catch (err) {
-        this.error =
-          "Error sending message: " + (err.response?.data || err.message);
-      }
-    },
-  },
+// Данные для таблицы
+const instanceData = ref([]); // Изначально пустой массив
+
+// Функция для получения данных из API
+const fetchChats = async () => {
+  try {
+    const response = await axios.get("http://localhost:4000/api/getAllChats"); // Запрос к вашему API
+    instanceData.value = response.data.data; // Записываем данные в instanceData
+    console.log("Данные чатов получены:", instanceData.value); // Логирование полученных данных
+  } catch (error) {
+    console.error("Ошибка при получении данных:", error.message); // Логирование ошибок
+  }
 };
+
+// Функция для обработки клика по кнопке
+const openModal = (event, item) => {
+  console.log("Открыть модальное окно для:", item);
+  // Здесь можно добавить логику для открытия модального окна с информацией о чате
+};
+
+// Используем onMounted для получения данных при монтировании компонента
+onMounted(() => {
+  fetchChats(); // Вызываем функцию для получения данных
+});
 </script>
 
 <style scoped>
-/* Добавьте стили по необходимости */
-h1 {
-  color: #333;
+.table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+  height: 83vh;
 }
-button {
-  margin: 5px;
+
+.data-scroll-container {
+  max-height: 100px; /* Установите максимальную высоту для контейнера */
+  overflow-y: auto; /* Включаем вертикальную прокрутку */
+  border: 1px solid #ddd; /* Добавляем границу для отделения */
+  border-radius: 5px; /* Закругленные углы */
+  padding: 5px; /* Отступы внутри контейнера */
+  width: 700px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.table-name {
+  text-align: left;
+}
+
+.table-data {
+  text-align: left;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgb(243, 244, 246);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 1rem;
+  font-weight: 500;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+td {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  text-align: left;
+}
+
+tr:hover {
+  background: rgb(243 244 246);
 }
 </style>
