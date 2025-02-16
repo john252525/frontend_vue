@@ -7,22 +7,39 @@
       :chatInfo="chatInfo"
     />
   </section>
-  <!-- <section class="phone-version" v-if="userInfo">
-    <UserList :style="style.UserList" :selectChat="selectChat" />
+  <section class="phone-version" v-if="userInfo">
+    <UserList
+      v-if="isMobile"
+      :class="{ 'phone-user-list': isMobile }"
+      :selectChat="selectChat"
+    />
     <MessageList
+      v-if="isMobile"
       class="message-list"
-      :style="style.MessageList"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
     />
-  </section> -->
+  </section>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
+
+const isMobile = ref(false); // Определяем состояние: мобильное устройство или нет
+
+onMounted(() => {
+  // Определяем, является ли устройство мобильным при монтировании компонента
+  isMobile.value = window.innerWidth <= 768;
+
+  // Слушаем изменение размера окна
+  window.addEventListener("resize", () => {
+    isMobile.value = window.innerWidth <= 768;
+  });
+});
+
 const messageListStation = ref(false);
 
 const style = reactive({

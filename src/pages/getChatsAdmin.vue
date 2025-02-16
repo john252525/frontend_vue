@@ -39,14 +39,20 @@ const instanceData = ref([]); // Изначально пустой массив
 // Функция для получения данных из API
 const fetchChats = async () => {
   try {
-    const response = await axios.get("https://hellychat.apitter.com/api/data", {
-      params: { name: "79198670001@c.us" }, // Укажите название вашей базы данных
-    });
-    instanceData.value = response.data; // Записываем данные в instanceData
+    const response = await axios.get(
+      "https://hellychat.apitter.com/api/getAllChats"
+    ); // Запрос к вашему API
+    instanceData.value = response.data.data; // Записываем данные в instanceData
     console.log("Данные чатов получены:", instanceData.value); // Логирование полученных данных
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message); // Логирование ошибок
   }
+};
+
+// Функция для обработки клика по кнопке
+const openModal = (event, item) => {
+  console.log("Открыть модальное окно для:", item);
+  // Здесь можно добавить логику для открытия модального окна с информацией о чате
 };
 
 // Используем onMounted для получения данных при монтировании компонента

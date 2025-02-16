@@ -87,7 +87,7 @@ const test = async () => {
       return; // Важно выйти из функции после перенаправления
     }
 
-    console.log("Response data:", response.data); // Смотрим, что приходит с сервера
+    console.log("Response data:", response); // Смотрим, что приходит с сервера
     chats.value = response.data.data.chats;
     console.log("Chats:", chats.value);
   } catch (error) {
