@@ -1,5 +1,5 @@
 <template>
-  <section class="pc-version" v-if="userInfo">
+  <section class="pc-version" v-if="!isMobile && userInfo">
     <UserList class="user-list" :selectChat="selectChat" />
     <MessageList
       class="message-list"
@@ -7,15 +7,15 @@
       :chatInfo="chatInfo"
     />
   </section>
-  <section class="phone-version" v-if="userInfo">
+  <section class="phone-version" v-if="isMobile && userInfo">
     <UserList
-      v-if="isMobile"
-      :class="{ 'phone-user-list': isMobile }"
+      class="phone-user-list"
+      :style="style.userList"
       :selectChat="selectChat"
     />
     <MessageList
-      v-if="isMobile"
       class="message-list"
+      :style="{ display: showMessageList ? 'block' : 'none' }"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
     />
@@ -24,11 +24,39 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import axios from "axios";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 
+const style = reactive({
+  userList: {
+    display: "none",
+  },
+
+  messageList: {
+    display: "none",
+  },
+});
+
 const isMobile = ref(false); // Определяем состояние: мобильное устройство или нет
+const showMessageList = ref(false); // Добавляем состояние для отображения MessageList
+
+const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const chatInfo = ref(null);
+
+const changeMessageListStation = () => {
+  showMessageList.value = false; // Скрываем MessageList при вызове changeMessageListStation
+};
+
+const selectChat = (chat) => {
+  chatInfo.value = chat;
+  showMessageList.value = true;
+  console.log(chat.phone);
+  style.userList.display = "none";
+};
+
+const clickChat = () => {
+  station.userList.display = "none";
+};
 
 onMounted(() => {
   // Определяем, является ли устройство мобильным при монтировании компонента
@@ -39,32 +67,6 @@ onMounted(() => {
     isMobile.value = window.innerWidth <= 768;
   });
 });
-
-const messageListStation = ref(false);
-
-const style = reactive({
-  MessageList: {
-    display: "none",
-  },
-
-  UserList: {
-    display: "block",
-  },
-});
-
-const changeMessageListStation = () => {
-  style.UserList.display = "block";
-  style.MessageList.display = "none";
-};
-
-const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-const chatInfo = ref(null);
-const selectChat = (chat) => {
-  style.UserList.display = "none";
-  style.MessageList.display = "block";
-  chatInfo.value = chat;
-  console.log(chat.phone);
-};
 </script>
 
 <style scoped>
@@ -79,7 +81,12 @@ const selectChat = (chat) => {
 }
 
 .phone-version {
-  display: none;
+  width: 100%;
+  height: 100vh;
+}
+
+.phone-user-list {
+  /* Стиль для UserList в мобильной версии, если нужен */
 }
 
 @media (max-width: 768px) {
@@ -91,11 +98,6 @@ const selectChat = (chat) => {
     display: block;
     width: 100%;
     height: 100vh; /* Ограничивает высоту до размера экрана */
-  }
-
-  .message-list {
-    flex: 1;
-    overflow-y: auto; /* Включает вертикальный скролл */
   }
 }
 </style>

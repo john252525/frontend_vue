@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <section class="account-list-section">
     <div class="table-container">
       <table class="table">
@@ -110,4 +110,32 @@ td {
 tr:hover {
   background: rgb(243 244 246);
 }
+</style> -->
+
+<template>
+  <div ref="jsonContainer"></div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import JSONFormatter from "json-formatter-js";
+
+const jsonData = {
+  name: "Alice",
+  age: 25,
+  skills: ["HTML", "CSS", "JavaScript"],
+};
+
+const jsonContainer = ref(null);
+
+onMounted(() => {
+  const formatter = new JSONFormatter(jsonData);
+  jsonContainer.value.appendChild(formatter.render());
+});
+</script>
+
+<style scoped>
+/* Дополнительные стили, если нужно */
 </style>
+
+Найти еще

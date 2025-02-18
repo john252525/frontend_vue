@@ -11,12 +11,18 @@ import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
 import Chats from "./pages/Chats.vue";
 import Payments from "./pages/Payments.vue";
-import GetUser from "./pages/getChatsAdmin.vue";
+import ChatsDataBase from "./pages/ChatsDataBase.vue";
+import MessagesDataBase from "./pages/MessagesDataBase.vue";
 
 const routes = [
   { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
   { path: "/", name: "MainPage", component: MainPage },
-  { path: "/getUserAdmin", name: "GetUser", component: GetUser },
+  { path: "/ChatsDataBase", name: "ChatsDataBase", component: ChatsDataBase },
+  {
+    path: "/MessagesDataBase",
+    name: "MessagesDataBase",
+    component: MessagesDataBase,
+  },
   { path: "/chats", name: "Chats", component: Chats },
   { path: "/Mailing", name: "Mailing", component: Mailing },
   { path: "/login", name: "Login", component: Login },
