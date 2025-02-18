@@ -1,8 +1,14 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+  <MessageContent v-if="station.messageContent" />
   <section class="send-message">
     <div class="img-cont">
-      <img class="file-img" src="/chats/file.svg" alt="" />
+      <img
+        @click="openMessageContent"
+        class="file-img"
+        src="/chats/file.svg"
+        alt=""
+      />
       <article class="smile-img-cont">
         <input
           class="send-message-input"
@@ -18,10 +24,11 @@
 </template>
 
 <script setup>
-import { ref, toRefs, computed, defineEmits } from "vue";
+import { ref, toRefs, computed, defineEmits, reactive } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 const router = useRouter();
+import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const props = defineProps({
   chatInfo: {
@@ -39,7 +46,17 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
 const messageText = ref("");
+const contentText = ref("привет");
+
+const station = reactive({
+  messageContent: false,
+});
+
+const openMessageContent = () => {
+  station.messageContent = !station.messageContent;
+};
 
 const sendMessage = async () => {
   const parsedChatInfo = computed(() => {
@@ -54,14 +71,19 @@ const sendMessage = async () => {
   console.log(22794591901);
   const message = {
     to: `${chatInfo.value.phone}`,
-    text: messageText.value || null,
-    content: messageText.value
-      ? []
-      : [{ type: "text", src: messageText.value }],
+    text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
+    content: contentText.value
+      ? [
+          {
+            type: "image",
+            src: "https://touchapi-whats.s3.amazonaws.com/79228059886-79228556998-1A619D5426FF09D9E0F5233B7C6DF795.jpeg",
+          },
+        ] // Если contentText есть, то content пустой
+      : [],
     time: Date.now() / 1000,
     outgoing: true,
   };
-  console.log(chatInfo.value);
+  console.log(message);
 
   try {
     const response = await axios.post(

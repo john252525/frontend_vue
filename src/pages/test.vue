@@ -1,141 +1,59 @@
-<!-- <template>
-  <section class="account-list-section">
-    <div class="table-container">
-      <table class="table">
-        <thead class="table-header">
-          <tr>
-            <th class="table-name">uniq</th>
-            <th class="table-name">timestamp</th>
-            <th class="table-name">w</th>
-            <th class="table-name">u</th>
-            <th class="table-data">data</th>
-          </tr>
-        </thead>
-        <tbody class="tbody">
-          <tr v-for="(item, index) in instanceData" :key="index">
-            <td class="table-text-name">{{ item.uniq }}</td>
-            <td class="table-text-phone">{{ item.timestamp }}</td>
-            <td class="table-text-phone">{{ item.w }}</td>
-            <td class="table-text-phone">{{ item.u }}</td>
-            <td class="table-action-text">
-              <div class="data-scroll-container">
-                {{ item.data }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<template>
+  <div class="upload-container">
+    <input type="file" @change="handleFileChange" accept="image/*, video/*" />
+    <div v-if="fileURL">
+      <img
+        v-if="isVideo === false"
+        :src="fileURL"
+        alt="Uploaded File"
+        class="uploaded-preview"
+      />
+      <video
+        v-if="isVideo === true"
+        :src="fileURL"
+        controls
+        class="uploaded-preview"
+      ></video>
+      <p>File Source: {{ fileURL }}</p>
     </div>
-  </section>
+    <p v-else>No file selected yet.</p>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios"; // Импортируем axios
+import { ref } from "vue";
 
-// Данные для таблицы
-const instanceData = ref([]); // Изначально пустой массив
+const fileURL = ref(null);
+const isVideo = ref(false);
 
-// Функция для получения данных из API
-const fetchChats = async () => {
-  try {
-    const response = await axios.get("https://hellychat.apitter.com/api/data", {
-      params: { name: "79198670001@c.us" }, // Укажите название вашей базы данных
-    });
-    instanceData.value = response.data; // Записываем данные в instanceData
-    console.log("Данные чатов получены:", instanceData.value); // Логирование полученных данных
-  } catch (error) {
-    console.error("Ошибка при получении данных:", error.message); // Логирование ошибок
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+
+  if (file) {
+    fileURL.value = URL.createObjectURL(file);
+    isVideo.value = file.type.startsWith("video/");
+  } else {
+    fileURL.value = null;
+    isVideo.value = false;
   }
 };
-
-// Используем onMounted для получения данных при монтировании компонента
-onMounted(() => {
-  fetchChats(); // Вызываем функцию для получения данных
-});
 </script>
 
 <style scoped>
-.table-container {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-width: 100%;
-  height: 83vh;
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
 }
 
-.data-scroll-container {
-  max-height: 100px; /* Установите максимальную высоту для контейнера */
-  overflow-y: auto; /* Включаем вертикальную прокрутку */
-  border: 1px solid #ddd; /* Добавляем границу для отделения */
-  border-radius: 5px; /* Закругленные углы */
-  padding: 5px; /* Отступы внутри контейнера */
-  width: 700px;
+input[type="file"] {
+  margin-bottom: 10px;
 }
 
-.table-name {
-  text-align: left;
+.uploaded-preview {
+  max-width: 400px;
+  max-height: 300px;
+  border: 1px solid #ccc;
 }
-
-.table-data {
-  text-align: left;
-}
-
-.table-header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: rgb(243, 244, 246);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 1rem;
-  font-weight: 500;
-  font-size: 11px;
-  color: #6b7280;
-}
-
-td {
-  font-weight: 500;
-  font-size: 14px;
-  color: #000;
-  text-align: left;
-}
-
-tr:hover {
-  background: rgb(243 244 246);
-}
-</style> -->
-
-<template>
-  <div ref="jsonContainer"></div>
-</template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import JSONFormatter from "json-formatter-js";
-
-const jsonData = {
-  name: "Alice",
-  age: 25,
-  skills: ["HTML", "CSS", "JavaScript"],
-};
-
-const jsonContainer = ref(null);
-
-onMounted(() => {
-  const formatter = new JSONFormatter(jsonData);
-  jsonContainer.value.appendChild(formatter.render());
-});
-</script>
-
-<style scoped>
-/* Дополнительные стили, если нужно */
 </style>
-
-Найти еще

@@ -26,7 +26,7 @@
         <div class="chat-unread" v-if="chat.unreadCount > 0">
           {{ chat.unreadCount }}
         </div>
-      </div>
+      </div>  
     </section>
     <section class="loading-chat-list" v-else>
       <Loading />
