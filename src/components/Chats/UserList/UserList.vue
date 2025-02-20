@@ -2,8 +2,8 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
     <section
-      v-if="chats"
-      v-for="chat in chats"
+      v-if="sortedChats"
+      v-for="chat in sortedChats"
       :key="chat.unid"
       class="chat-item"
       @click="selectChat(chat)"
@@ -12,10 +12,8 @@
         <img class="user-chat-icon" src="/chats/user-chat-icon.svg" alt="" />
         <div class="chat-info">
           <div class="chat-name">{{ chat.name }}</div>
-          <!-- Отображаем имя -->
           <div class="chat-last-message">
             {{ formatLastMessage(chat.lastMessage?.body) }}
-            <!-- Отображаем сообщение -->
           </div>
         </div>
       </div>
@@ -26,7 +24,7 @@
         <div class="chat-unread" v-if="chat.unreadCount > 0">
           {{ chat.unreadCount }}
         </div>
-      </div>  
+      </div>
     </section>
     <section class="loading-chat-list" v-else>
       <Loading />
@@ -36,7 +34,7 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
@@ -49,26 +47,51 @@ const props = defineProps({
 });
 
 const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
-};
-// let isTestCalled = false;
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+const updateChatTimestamp = (thread, newTimestamp) => {
+  // Преобразуем новый временной штамп из наносекунд в секунды
+  const newTimestampInSeconds = Math.floor(newTimestamp / 1000000); // Делим на 1 миллион, чтобы получить секунды
+
+  const chat = chats.value.find(
+    (chat) => chat.lastMessage.id?.remote === thread
+  );
+
+  if (chat) {
+    console.log("Новое", newTimestampInSeconds);
+    console.log("Старое", chat.timestamp);
+    chat.timestamp = newTimestampInSeconds;
+    console.log(`Timestamp для ${thread} обновлён на ${newTimestampInSeconds}`);
+  } else {
+    console.log(`Чат с thread ${thread} не найден`);
+  }
+};
+
+const updateLastMessage = (thread, newLastMessage) => {
+  const chat = chats.value.find(
+    (chat) => chat.lastMessage.id?.remote === thread
+  );
+  if (chat) {
+    chat.lastMessage.body = newLastMessage; // Обновляем lastMessage
+    console.log(`Последнее сообщение для ${thread} обновлено`);
+  } else {
+    console.log(`Чат с thread ${thread} не найден`);
+  }
+};
+
 const test = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
-  console.log("userInfo:", userInfo); // Проверяем userInfo
+  console.log("userInfo:", userInfo);
 
   try {
     const token = localStorage.getItem("accountToken");
-    console.log("Token:", token); // Проверяем token
-    console.log("test() called");
-    // https://hellychat.apitter.com/api/getChats
+    console.log("Token:", token);
     const response = await axios.post(
       `${apiUrl}/getChats`,
       {
-        source: userInfo?.source, // Используем optional chaining
-        login: userInfo?.login, // Используем optional chaining
+        source: userInfo?.source,
+        login: userInfo?.login,
       },
       {
         headers: {
@@ -84,10 +107,10 @@ const test = async () => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
-      return; // Важно выйти из функции после перенаправления
+      return;
     }
 
-    console.log("Response data:", response); // Смотрим, что приходит с сервера
+    console.log("Response data:", response);
     chats.value = response.data.data.chats;
     console.log("Chats:", chats.value);
   } catch (error) {
@@ -99,27 +122,18 @@ const test = async () => {
 };
 
 const formatTimestamp = (timestamp) => {
-  // Преобразуем строку в объект Date
-  const date = new Date(timestamp);
-
-  // Получаем часы и минуты
-  const hours = String(date.getUTCHours()).padStart(2, "0"); // Приводим к формату 2 цифры
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0"); // Приводим к формату 2 цифры
-
-  // Возвращаем время в формате "HH:MM"
+  const date = new Date(timestamp * 1000); // Убедитесь, что timestamp в секундах
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
   return `${hours}:${minutes}`;
 };
 
-onMounted(test);
+const sortedChats = computed(() => {
+  if (!chats.value) return [];
+  return chats.value.sort((a, b) => b.timestamp - a.timestamp);
+});
 
-const parsedChatData = (chat) => {
-  try {
-    return JSON.parse(chat.data);
-  } catch (error) {
-    console.error("Ошибка при парсинге JSON:", error);
-    return {}; // Возвращаем пустой объект в случае ошибки
-  }
-};
+onMounted(test);
 
 const formatLastMessage = (message) => {
   const maxLength = 20;
@@ -127,6 +141,73 @@ const formatLastMessage = (message) => {
     return message.slice(0, maxLength) + "...";
   }
   return message || "Нет сообщений";
+};
+
+const audio = ref(null);
+
+onMounted(() => {
+  // Создаем аудио объект при монтировании компонента
+  audio.value = new Audio("/chats/newMessage.mp3");
+
+  const connectEventSource = () => {
+    const eventSource = new EventSource(
+      "https://hellychat.apitter.com/api/events"
+    );
+
+    // Получаем массив идентификаторов из localStorage или создаем новый
+    const receivedMessageIds =
+      JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
+
+    eventSource.onmessage = (event) => {
+      const eventData = JSON.parse(event.data);
+
+      console.log(eventData);
+
+      // Проверяем тип события
+      if (eventData.hook_type === "message") {
+        // Проверка на уникальность сообщения
+        if (!receivedMessageIds.includes(eventData.item)) {
+          // Сохраняем идентификатор в localStorage
+          receivedMessageIds.push(eventData.item);
+          localStorage.setItem(
+            "receivedMessageIds",
+            JSON.stringify(receivedMessageIds)
+          );
+          updateLastMessage(eventData.thread, eventData.text);
+          updateChatTimestamp(eventData.thread, eventData.time);
+
+          // Проигрываем звук
+          playSound();
+        }
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("Ошибка соединения:", error);
+      eventSource.close(); // Закрываем текущее соединение
+      // Пытаемся переподключиться через 3 секунды
+      setTimeout(() => {
+        console.log("Попытка переподключения...");
+        connectEventSource();
+      }, 3000);
+    };
+
+    eventSource.onopen = () => {
+      console.log("Соединение установлено");
+    };
+  };
+
+  // Инициализация соединения
+  connectEventSource();
+});
+
+// Функция для проигрывания звука
+const playSound = () => {
+  if (audio.value) {
+    audio.value.play().catch((error) => {
+      console.error("Ошибка при проигрывании звука:", error);
+    });
+  }
 };
 </script>
 

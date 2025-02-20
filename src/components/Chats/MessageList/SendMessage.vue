@@ -71,7 +71,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["updateMessages"]);
+// const emit = defineEmits(["updateMessages"]);
 const { chatInfo } = toRefs(props);
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -102,15 +102,19 @@ const changeImgUrl = (url, type) => {
   console.log(typeUrl.value);
 };
 
+const generateItem = () => {
+  // Генерируем случайный 16-значный шестнадцатеричный код
+  return (
+    "sendM-" +
+    [...Array(16)]
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join("")
+      .toUpperCase()
+  );
+};
+
 const sendMessage = async () => {
-  const parsedChatInfo = computed(() => {
-    try {
-      return JSON.parse(chatInfo.value.data);
-    } catch (error) {
-      console.error("Ошибка при парсинге JSON:", error);
-      return {}; // Возвращаем пустой объект в случае ошибки
-    }
-  });
+  // console.log(generateItem());
   const apiUrl = import.meta.env.VITE_API_URL;
   console.log(22794591901);
   const message = {
@@ -127,8 +131,23 @@ const sendMessage = async () => {
     time: Date.now() / 1000,
     outgoing: true,
   };
+  const front_message = {
+    to: `${chatInfo.value.phone}`,
+    text: "сила в жизни", // Используем contentText, если он есть, иначе messageText
+    item: generateItem(),
+    content: contentText.value
+      ? [
+          {
+            type: "video",
+            src: urlImg.value,
+          },
+        ]
+      : [],
+    time: Date.now() / 1000,
+    outgoing: true,
+  };
   console.log(message);
-
+  // emit("updateMessages", messages);
   try {
     const response = await axios.post(
       `${apiUrl}/sendMessage`,

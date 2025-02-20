@@ -15,21 +15,62 @@ import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 
 const routes = [
-  { path: "/Accounts", name: "PersonalAccount", component: PersonalAccount },
-  { path: "/", name: "MainPage", component: MainPage },
-  { path: "/ChatsDataBase", name: "ChatsDataBase", component: ChatsDataBase },
+  {
+    path: "/Accounts",
+    name: "PersonalAccount",
+    component: PersonalAccount,
+    meta: { title: "Аккаунты" },
+  },
+  {
+    path: "/",
+    name: "MainPage",
+    component: MainPage,
+    meta: { title: "Главная страница" },
+  },
+  {
+    path: "/ChatsDataBase",
+    name: "ChatsDataBase",
+    component: ChatsDataBase,
+    meta: { title: "База данных чатов" },
+  },
   {
     path: "/MessagesDataBase",
     name: "MessagesDataBase",
     component: MessagesDataBase,
+    meta: { title: "База данных сообщений" },
   },
-  { path: "/chats", name: "Chats", component: Chats },
-  { path: "/Mailing", name: "Mailing", component: Mailing },
-  { path: "/login", name: "Login", component: Login },
-  { path: "/registration", name: "Registration", component: Registration },
-  { path: "/forgot", name: "PasswordRecovery", component: PasswordRecovery },
-  { path: "/test", name: "test", component: test },
-  { path: "/payments", name: "payments", component: Payments },
+  { path: "/chats", name: "Chats", component: Chats, meta: { title: "Чаты" } },
+  {
+    path: "/Mailing",
+    name: "Mailing",
+    component: Mailing,
+    meta: { title: "Рассылки" },
+  },
+  { path: "/login", name: "Login", component: Login, meta: { title: "Вход" } },
+  {
+    path: "/registration",
+    name: "Registration",
+    component: Registration,
+    meta: { title: "Регистрация" },
+  },
+  {
+    path: "/forgot",
+    name: "PasswordRecovery",
+    component: PasswordRecovery,
+    meta: { title: "Восстановление пароля" },
+  },
+  {
+    path: "/test",
+    name: "test",
+    component: test,
+    meta: { title: "Тестовая страница" },
+  },
+  {
+    path: "/payments",
+    name: "payments",
+    component: Payments,
+    meta: { title: "Платежи" },
+  },
 ];
 
 const router = createRouter({
@@ -45,6 +86,9 @@ router.beforeEach((to, from, next) => {
 
   console.log(`Navigating to: ${to.name}`);
   console.log(`Is Auth Page: ${isAuthPage}, Token: ${token}`);
+
+  // Устанавливаем заголовок страницы
+  document.title = to.meta.title || "Ваше приложение";
 
   if (token) {
     if (isAuthPage) {
