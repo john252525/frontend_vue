@@ -1,6 +1,27 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <MessageContent v-if="station.messageContent" />
+  <MessageContent
+    :openMessageContent="openMessageContent"
+    :changeImgUrl="changeImgUrl"
+    :openCameraStation="openCameraStation"
+    v-if="station.messageContent"
+  />
+  <checkImg
+    :changeImgUrl="changeImgUrl"
+    v-if="urlImg"
+    @messages="messages"
+    :chatInfo="chatInfo"
+    :urlImg="urlImg"
+    :typeUrl="typeUrl"
+  />
+  <Camera
+    v-if="station.cameraStation"
+    :changeImgUrl="changeImgUrl"
+    :openCameraStation="openCameraStation"
+  />
+  <section class="send-photo">
+    <img class="send" :src="urlImg" alt="" />
+  </section>
   <section class="send-message">
     <div class="img-cont">
       <img
@@ -11,6 +32,14 @@
       />
       <article class="smile-img-cont">
         <input
+          v-if="urlImg"
+          class="send-message-input"
+          placeholder="Добавить подпись"
+          type="text"
+          v-model="contentText"
+        />
+        <input
+          v-else
           class="send-message-input"
           placeholder="Введите сообщение"
           type="text"
@@ -27,6 +56,8 @@
 import { ref, toRefs, computed, defineEmits, reactive } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import checkImg from "./MessageContent/checkContent/CheckImg.vue";
+import Camera from "./MessageContent/checkContent/Camera.vue";
 const router = useRouter();
 import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -48,14 +79,27 @@ const chaneErrorBlock = () => {
 };
 
 const messageText = ref("");
-const contentText = ref("привет");
+const contentText = ref("");
+const urlImg = ref("");
+const typeUrl = ref(false);
 
 const station = reactive({
   messageContent: false,
+  cameraStation: false,
 });
+
+const openCameraStation = () => {
+  station.cameraStation = !station.cameraStation;
+};
 
 const openMessageContent = () => {
   station.messageContent = !station.messageContent;
+};
+
+const changeImgUrl = (url, type) => {
+  urlImg.value = url;
+  typeUrl.value = type;
+  console.log(typeUrl.value);
 };
 
 const sendMessage = async () => {
@@ -75,8 +119,8 @@ const sendMessage = async () => {
     content: contentText.value
       ? [
           {
-            type: "image",
-            src: "https://touchapi-whats.s3.amazonaws.com/79228059886-79228556998-1A619D5426FF09D9E0F5233B7C6DF795.jpeg",
+            type: "video",
+            src: urlImg.value,
           },
         ] // Если contentText есть, то content пустой
       : [],
@@ -107,8 +151,9 @@ const sendMessage = async () => {
         router.push("/login");
       }, 2000);
     }
+    urlImg.value = "";
     console.log("Сообщение отправлено:", response.data);
-    emit("updateMessages", message); // Обновляем список сообщений
+
     messageText.value = "";
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
@@ -146,6 +191,14 @@ const sendMessage = async () => {
 .smile-img,
 .send-img {
   cursor: pointer;
+}
+
+.send {
+  width: 10%;
+  position: absolute;
+  bottom: 60px;
+  left: 23px;
+  border-radius: 5px;
 }
 
 .send-img {

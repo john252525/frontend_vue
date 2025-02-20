@@ -1,7 +1,7 @@
 <template>
   <section class="list-content-section">
     <ul>
-      <li>
+      <li @click="openFileExplorer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="svg-icon file"
@@ -13,7 +13,7 @@
         </svg>
         Документ
       </li>
-      <li>
+      <li @click="openFileExplorer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="svg-icon img"
@@ -25,7 +25,7 @@
         </svg>
         Фото или видео
       </li>
-      <li>
+      <li @click="openCameraStation">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="svg-icon camera"
@@ -38,10 +38,93 @@
         Камера
       </li>
     </ul>
+    <input
+      type="file"
+      @change="handleFileChange"
+      accept="image/*, video/*"
+      style="display: none"
+      ref="fileInput"
+    />
+    <input
+      type="file"
+      style="display: none"
+      ref="fileInput"
+      @change="handleFileChange"
+      accept="*/*"
+    />
   </section>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import axios from "axios";
+
+const props = defineProps({
+  changeImgUrl: {
+    type: Function,
+  },
+  openMessageContent: {
+    type: Function,
+  },
+  openCameraStation: {
+    type: Function,
+  },
+});
+
+const fileInput = ref(null);
+const fileURL = ref(null);
+const fileType = ref(null);
+
+const openFileExplorer = () => {
+  fileInput.value.click();
+};
+
+const handleFileChange = async (event) => {
+  console.log("handleFileChange called");
+
+  const file = event.target.files[0];
+  console.log("File:", file);
+
+  if (file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post(
+        "https://hellychat.apitter.com/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      props.openMessageContent();
+      fileURL.value = response.data.fileUrl;
+
+      // Determine if it's a video or an image
+      if (file.type.startsWith("video/")) {
+        props.changeImgUrl(fileURL.value, "video");
+      } else if (file.type.startsWith("image/")) {
+        props.changeImgUrl(fileURL.value, "image");
+      } else {
+        props.changeImgUrl(fileURL.value, "file");
+      }
+
+      // Pass fileURL and fileType to the parent
+    } catch (error) {
+      console.error("Ошибка при загрузке файла:", error);
+      console.error("Error response:", error.response);
+      console.error("Error message:", error.message);
+      alert("Ошибка при загрузке файла.");
+    }
+  } else {
+    fileURL.value = null;
+    fileType.value = null;
+  }
+};
+</script>
 
 <style scoped>
 .list-content-section {

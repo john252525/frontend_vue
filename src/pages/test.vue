@@ -1,59 +1,37 @@
 <template>
-  <div class="upload-container">
-    <input type="file" @change="handleFileChange" accept="image/*, video/*" />
-    <div v-if="fileURL">
-      <img
-        v-if="isVideo === false"
-        :src="fileURL"
-        alt="Uploaded File"
-        class="uploaded-preview"
-      />
-      <video
-        v-if="isVideo === true"
-        :src="fileURL"
-        controls
-        class="uploaded-preview"
-      ></video>
-      <p>File Source: {{ fileURL }}</p>
+  <div>
+    <h1>События в реальном времени</h1>
+    <div v-for="(event, index) in events" :key="index">
+      Новое событие: {{ event }}
     </div>
-    <p v-else>No file selected yet.</p>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
-const fileURL = ref(null);
-const isVideo = ref(false);
+const events = ref([]); // Массив для хранения событий
 
-const handleFileChange = (event) => {
-  const file = event.target.files[0];
+onMounted(() => {
+  // Создаем новый объект EventSource и указываем URL для подключения
+  const eventSource = new EventSource(
+    "https://hellychat.apitter.com/api/events"
+  );
 
-  if (file) {
-    fileURL.value = URL.createObjectURL(file);
-    isVideo.value = file.type.startsWith("video/");
-  } else {
-    fileURL.value = null;
-    isVideo.value = false;
-  }
-};
+  // Обработчик для получения событий
+  eventSource.onmessage = (event) => {
+    // Добавляем полученные события в массив
+    events.value.push(event.data);
+  };
+
+  // Обработчик ошибок
+  eventSource.onerror = (error) => {
+    console.error("Ошибка SSE:", error);
+    eventSource.close(); // Закрываем соединение при ошибке
+  };
+});
 </script>
 
 <style scoped>
-.upload-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px;
-}
-
-input[type="file"] {
-  margin-bottom: 10px;
-}
-
-.uploaded-preview {
-  max-width: 400px;
-  max-height: 300px;
-  border: 1px solid #ccc;
-}
+/* Добавьте стили по вашему усмотрению */
 </style>

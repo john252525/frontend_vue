@@ -34,7 +34,10 @@
               <p v-if="message.text" class="message-text">
                 {{ message.text }}
               </p>
-              <div v-if="index === lastSentMessageIndex" class="icon-container">
+              <div
+                v-if="!message.send && message.outgoing"
+                class="icon-container"
+              >
                 <LoadingMessage />
               </div>
               <div class="message-content">
@@ -104,12 +107,27 @@
                   Сообщение не поддерживается
                 </h2>
               </div>
-              <div v-if="index !== lastSentMessageIndex" class="message-time">
-                {{ formatTimestamp(message.time) }}
-              </div>
+              <footer>
+                <div class="message-time">
+                  {{ formatTimestamp(message.time) }}
+                </div>
+                <img
+                  class="state-img"
+                  v-if="(message.send && !message.state) || !message.outgoing"
+                  src="/chats/read_it.svg"
+                  alt=""
+                />
+                <img
+                  class="state-img"
+                  v-if="message.send && message.state"
+                  src="/chats/not_read_it.svg"
+                  alt=""
+                />
+              </footer>
             </div>
           </div>
         </div>
+
         <Loading v-if="loading" />
         <SendMessage :chatInfo="chatInfo" @updateMessages="updateMessages" />
       </section>
@@ -125,6 +143,7 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
+
 import { useRouter } from "vue-router";
 const router = useRouter();
 const loading = ref(false);
@@ -136,6 +155,8 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const loadingMessageIndex = ref(-1);
 const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
 const messages = ref([]); // Инициализация массива сообщений
@@ -144,6 +165,22 @@ const station = reactive({
   photoMenu: false,
   videoMenu: false,
 });
+
+const testMsg = {
+  to: "79198670001",
+  from: "79228556998",
+  item: "3A24BA98AB791BCAAE9F",
+  text: "А кто ты такой?",
+  time: 1739979536000000,
+  state: true,
+  source: "whatsapp",
+  thread: "79198670001@c.us",
+  content: [],
+  replyTo: null,
+  outgoing: true,
+  reaction: "",
+  send: true,
+};
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -159,12 +196,24 @@ const scrollToBottom = () => {
 };
 
 const updateMessages = (newMessage) => {
-  messages.value.push(newMessage); // Добавляем новое сообщение в массив
+  // Если у нас есть последнее сообщение, устанавливаем его send в true
+  if (lastSentMessageIndex.value !== -1) {
+    messages.value[lastSentMessageIndex.value].send = true; // Сообщение завершено
+  }
+
+  // Добавляем новое сообщение в массив
+  messages.value.push(newMessage);
   lastSentMessageIndex.value = messages.value.length - 1; // Обновляем индекс последнего отправленного сообщения
+
+  // Устанавливаем новое сообщение в состояние отправки
+  messages.value[lastSentMessageIndex.value].send = false;
+
   setTimeout(() => {
     scrollToBottom();
   }, 500);
 };
+
+// Функция для обновления состояния сообщения
 
 const { chatInfo } = toRefs(props);
 
@@ -176,16 +225,7 @@ const getMessage = async () => {
     console.log("Token:", token);
 
     // Функция для парсинга chatInfo.value.data
-    const parsedChatInfo = computed(() => {
-      try {
-        return JSON.parse(chatInfo.value.data);
-      } catch (error) {
-        console.error("Ошибка при парсинге JSON:", error);
-        return {}; // Возвращаем пустой объект в случае ошибки
-      }
-    });
 
-    console.log("parsedChatInfo.value:", parsedChatInfo.value); // Проверяем распарсенные данные
     // "http://localhost:4000/api/getChatMessages",
     // "https://hellychat.apitter.com/api/getChatMessages",
     console.log(chatInfo.value.lastMessage.id.remote);
@@ -288,6 +328,70 @@ const openPhotoMenu = (src) => {
 //     getMessage();
 //   }
 // });
+const updateMessageState = (item) => {
+  const messageToUpdate = messages.value.find(
+    (message) => message.item === item
+  );
+
+  if (messageToUpdate) {
+    messageToUpdate.state = true; // Обновляем поле state
+  } else {
+    console.log("Сообщение с таким thread не найдено");
+  }
+};
+onMounted(() => {
+  const eventSource = new EventSource(
+    "https://hellychat.apitter.com/api/events"
+  );
+
+  eventSource.onmessage = (event) => {
+    const eventData = JSON.parse(event.data);
+
+    console.log(eventData);
+
+    if (eventData.hook_type === "message") {
+      const newMessage = {
+        ...eventData,
+        state: false,
+        reaction: "",
+        send: false,
+      };
+      updateMessages(newMessage);
+    }
+
+    if (eventData.content && eventData.hook_type === "message_status") {
+      if (eventData.content[0].type === "delivered") {
+        console.log("доставдено");
+        const messageToUpdate = messages.value.find(
+          (message) => message.item === eventData.item
+        );
+
+        if (messageToUpdate) {
+          messageToUpdate.send = true;
+        } else {
+          console.log("Сообщение с таким thread не найдено");
+        }
+      } else if (eventData.content[0].type === "has_seen") {
+        const messageToUpdate = messages.value.find(
+          (message) => message.item === eventData.item
+        );
+
+        if (messageToUpdate) {
+          messageToUpdate.state = true;
+        } else {
+          console.log("Сообщение с таким thread не найдено");
+        }
+      }
+    } else {
+      console.log("Content не найден");
+    }
+  };
+
+  eventSource.onerror = (error) => {
+    console.error("Ошибка SSE:", error);
+    eventSource.close(); // Закрываем соединение при ошибке
+  };
+});
 </script>
 
 <style scoped>
@@ -321,6 +425,10 @@ const openPhotoMenu = (src) => {
 .icon-container {
   display: flex;
   align-items: center;
+}
+
+.state-img {
+  width: 14px;
 }
 
 .message-icon {
@@ -516,7 +624,6 @@ const openPhotoMenu = (src) => {
 .message-time {
   font-size: 12px;
   color: #888;
-  margin-top: 5px;
 }
 
 .phone-out {
@@ -527,6 +634,13 @@ const openPhotoMenu = (src) => {
   margin-top: -2px;
   color: #bcbcbc;
   font-weight: 400;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
 }
 
 @media (max-width: 520px) {

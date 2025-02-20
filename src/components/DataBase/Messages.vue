@@ -79,7 +79,7 @@ const fetchChats = async () => {
 
 const openModal = (item) => {
   station.chatsModal = !station.chatsModal;
-  data.value = JSON.parse(item);
+  data.value = item;
 };
 
 // Используем onMounted для получения данных при монтировании компонента
