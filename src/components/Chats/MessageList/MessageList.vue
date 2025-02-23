@@ -11,7 +11,7 @@
             <img src="/chats/out.svg" alt="" />
             <span class="out-text">Назад</span>
           </div>
-          <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
+          <img class="user-img" :src="chatInfo.avatar" alt="" />
           <div>
             <h2 class="name-user">{{ chatInfo.name }}</h2>
           </div>
@@ -25,7 +25,6 @@
               message.outgoing ? 'outgoing' : 'incoming',
               {
                 'has-content': message.content && message.content.length > 0,
-                'last-sent-message': index === lastSentMessageIndex,
               },
             ]"
           >
@@ -35,7 +34,7 @@
               </p>
               <div
                 v-if="
-                  !message.send &&
+                  message.state === 'send' &&
                   message.outgoing &&
                   apiUrl != 'https://b2288.apitter.com/instances'
                 "
@@ -138,14 +137,26 @@
                 </div>
                 <img
                   class="state-img"
-                  v-if="message.send && !message.state"
+                  v-if="message.state === 'delivered'"
                   src="/chats/read_it.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.send && message.state"
+                  v-if="message.state === 'has_seen'"
                   src="/chats/not_read_it.svg"
+                  alt=""
+                />
+                <img
+                  class="state-img"
+                  v-if="message.state === 'sendMessage'"
+                  src="/chats/sned_message_state.svg"
+                  alt=""
+                />
+                <img
+                  class="state-img"
+                  v-if="message.state === 'error'"
+                  src="/chats/send_message_error.svg"
                   alt=""
                 />
               </footer>
@@ -154,7 +165,11 @@
         </div>
 
         <Loading v-if="loading" />
-        <SendMessage :chatInfo="chatInfo" @updateMessages="updateMessages" />
+        <SendMessage
+          :changeMessageState="changeMessageState"
+          :chatInfo="chatInfo"
+          @updateMessages="updateMessages"
+        />
       </section>
     </section>
   </section>
@@ -207,18 +222,12 @@ const testMsg = {
   send: true,
 };
 
-const addMessageAndReset = (newMessage) => {
-  // Добавляем сообщение в массив messages
-  messages.value.push(newMessage);
-
-  // Логируем добавление сообщения
-  console.log("Сообщение добавлено:", newMessage);
-
-  // Функция для отслеживания и удаления сообщения по item
-  const trackAndRemoveMessage = (item) => {
-    // Ищем индекс сообщения по item
+const changeMessageState = (newMessage, tempId) => {
+  console.log("вгеме77ше 1в", tempId);
+  const trackAndRemoveAndAddMessage = (tempId) => {
+    // Ищем индекс сообщения по тексту
     const messageIndex = messages.value.findIndex(
-      (message) => message.item === item
+      (message) => message.tempId === tempId
     );
 
     if (messageIndex !== -1) {
@@ -226,20 +235,23 @@ const addMessageAndReset = (newMessage) => {
       const removedMessage = messages.value.splice(messageIndex, 1)[0];
       console.log("Сообщение удалено:", removedMessage);
 
-      // Добавляем такое же сообщение заново
-      messages.value.push({
-        ...removedMessage, // Копируем все свойства
-      });
-      console.log("Сообщение добавлено заново:", removedMessage);
+      // Добавляем новое сообщение
+      messages.value.push(newMessage);
+      console.log("Добавлено новое сообщение:", newMessage);
     } else {
-      console.log("Сообщение с таким item не найдено:", item);
+      console.log("Сообщение с таким текстом не найдено:", newMessage);
+      // Если сообщение не найдено, просто добавляем новое
+      messages.value.push(newMessage);
+      console.log("Добавлено новое сообщение:", newMessage);
     }
   };
+
   setTimeout(() => {
     scrollToBottom();
   }, 500);
-  // Вызов функции для отслеживания и удаления
-  trackAndRemoveMessage(newMessage.item);
+
+  // Вызов функции для отслеживания, удаления и добавления
+  trackAndRemoveAndAddMessage(tempId);
 };
 
 const errorBlock = ref(false);
@@ -257,16 +269,16 @@ const scrollToBottom = () => {
 
 const updateMessages = (newMessage) => {
   // Если у нас есть последнее сообщение, устанавливаем его send в true
-  if (lastSentMessageIndex.value !== -1) {
-    messages.value[lastSentMessageIndex.value].send = true; // Сообщение завершено
-  }
+  // if (lastSentMessageIndex.value !== -1) {
+  //   messages.value[lastSentMessageIndex.value].send = true;
+  // }
 
   // Добавляем новое сообщение в массив
   messages.value.push(newMessage);
-  lastSentMessageIndex.value = messages.value.length - 1; // Обновляем индекс последнего отправленного сообщения
+  // Обновляем индекс последнего отправленного сообщения
 
   // Устанавливаем новое сообщение в состояние отправки
-  messages.value[lastSentMessageIndex.value].send = false;
+  // messages.value[lastSentMessageIndex.value].send = false;
 
   setTimeout(() => {
     scrollToBottom();
@@ -287,6 +299,7 @@ watch(pageTitle, (newTitle) => {
 });
 
 const getMessage = async () => {
+  console.log(chatInfo.value);
   console.log("chatInfo.value.unid:", chatInfo.value.unid);
   console.log("getMessage вызван в", new Date().toISOString());
   try {
@@ -389,9 +402,9 @@ const updateMessageState = (item) => {
   const messageToUpdate = messages.value.find(
     (message) => message.item === item
   );
-
+  console.log(messages.value);
   if (messageToUpdate) {
-    messageToUpdate.state = true; // Обновляем поле state
+    messageToUpdate.state = true;
   } else {
     console.log("Сообщение с таким thread не найдено");
   }
@@ -415,23 +428,24 @@ onMounted(() => {
       // Проверяем тип события
       if (eventData.hook_type === "message") {
         // Проверка на уникальность сообщения
-        if (!receivedMessageIds.includes(eventData.item)) {
-          const newMessage = {
-            ...eventData,
-            state: false,
-            reaction: "",
-            send: false,
-          };
+        if (!eventData.outgoing) {
+          if (!receivedMessageIds.includes(eventData.item)) {
+            const newMessage = {
+              ...eventData,
+              state: false,
+              reaction: "",
+            };
 
-          // Сохраняем идентификатор в localStorage
-          receivedMessageIds.push(eventData.item);
-          localStorage.setItem(
-            "receivedMessageIds",
-            JSON.stringify(receivedMessageIds)
-          );
+            // Сохраняем идентификатор в localStorage
+            receivedMessageIds.push(eventData.item);
+            localStorage.setItem(
+              "receivedMessageIds",
+              JSON.stringify(receivedMessageIds)
+            );
 
-          // Обновляем сообщения
-          updateMessages(newMessage);
+            // Обновляем сообщения
+            updateMessages(newMessage);
+          }
         }
       }
 
@@ -444,7 +458,7 @@ onMounted(() => {
           );
 
           if (messageToUpdate) {
-            messageToUpdate.send = true;
+            messageToUpdate.state = "delivered";
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
@@ -454,7 +468,7 @@ onMounted(() => {
           );
 
           if (messageToUpdate) {
-            messageToUpdate.state = true;
+            messageToUpdate.state = "has_seen";
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
@@ -637,6 +651,7 @@ onMounted(() => {
 .user-img {
   width: 35px;
   height: 35px;
+  border-radius: 100px;
 }
 
 .message {

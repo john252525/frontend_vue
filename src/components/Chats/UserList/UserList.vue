@@ -9,7 +9,18 @@
       @click="selectChat(chat)"
     >
       <div class="chat-user-cont">
-        <img class="user-chat-icon" src="/chats/user-chat-icon.svg" alt="" />
+        <img
+          v-if="chat.avatar"
+          class="user-chat-avatar"
+          :src="chat.avatar"
+          alt=""
+        />
+        <img
+          v-else
+          class="user-chat-icon"
+          src="/chats/user-chat-icon.svg"
+          alt=""
+        />
         <div class="chat-info">
           <div class="chat-name">{{ chat.name }}</div>
           <div class="chat-last-message">
@@ -299,6 +310,11 @@ const playSound = () => {
 
 .chat-list::-webkit-scrollbar-track {
   background-color: #f9f9f9;
+}
+
+.user-chat-avatar {
+  width: 44px;
+  border-radius: 100px;
 }
 
 .chat-list::-webkit-scrollbar-thumb {

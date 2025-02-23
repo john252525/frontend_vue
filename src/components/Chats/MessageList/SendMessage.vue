@@ -69,6 +69,9 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  changeMessageState: {
+    type: Function,
+  },
 });
 
 // const emit = defineEmits(["updateMessages"]);
@@ -113,11 +116,38 @@ const generateItem = () => {
   );
 };
 
+const generateItemNew = () => {
+  // Генерируем случайный 16-значный шестнадцатеричный код
+  return [...Array(16)]
+    .map(() => Math.floor(Math.random() * 16).toString(16))
+    .join("")
+    .toUpperCase();
+};
+const date = new Date();
+function convertToMicroseconds(date) {
+  if (!(date instanceof Date)) {
+    // Если передан некорректный объект, используем текущее время
+    date = new Date();
+  }
+  return Math.floor(date.getTime() * 1000); // Преобразуем миллисекунды в микросекунды
+}
+
+// Пример использования
+const microseconds = convertToMicroseconds(); // Вызываем без аргументов
+console.log(microseconds); // Выводит текущее время в формате, подобном 1740179062715000
+
+// Или можно передать конкретную дату
+
+const specificMicroseconds = convertToMicroseconds(date);
+
+const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
-  // console.log(generateItem());
+  console.log(generateItem());
+  console.log(chatInfo.value.lastMessage.id.remote);
   const apiUrl = import.meta.env.VITE_API_URL;
   console.log(22794591901);
   const message = {
+    tempId: generateItemNew(),
     to: `${chatInfo.value.phone}`,
     text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
     content: contentText.value
@@ -130,11 +160,13 @@ const sendMessage = async () => {
       : [],
     time: Date.now() / 1000,
     outgoing: true,
+    state: "send",
   };
   const front_message = {
     to: `${chatInfo.value.phone}`,
-    text: "сила в жизни", // Используем contentText, если он есть, иначе messageText
+    text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
     item: generateItem(),
+    timestamp: specificMicroseconds,
     content: contentText.value
       ? [
           {
@@ -143,11 +175,13 @@ const sendMessage = async () => {
           },
         ]
       : [],
+    state: "error",
+    tempId: generateItemNew(),
     time: Date.now() / 1000,
     outgoing: true,
   };
   console.log(message);
-  // emit("updateMessages", messages);
+  emit("updateMessages", message);
   try {
     const response = await axios.post(
       `${apiUrl}/sendMessage`,
@@ -155,6 +189,8 @@ const sendMessage = async () => {
         source: "whatsapp",
         login: "helly",
         msg: message,
+        errorMessage: front_message,
+        mUniq: chatInfo.value.lastMessage.id.remote,
       },
       {
         headers: {
@@ -170,10 +206,17 @@ const sendMessage = async () => {
         router.push("/login");
       }, 2000);
     }
-    urlImg.value = "";
-    console.log("Сообщение отправлено:", response.data);
-
-    messageText.value = "";
+    if (response.data.ok) {
+      urlImg.value = "";
+      console.log("Сообщение отправлено:", response.data);
+      console.log(message.tempId);
+      props.changeMessageState(response.data.messsage, message.tempId);
+      messageText.value = "";
+    } else {
+      console.log("Сообщение ne отправлено:", response.data);
+      props.changeMessageState(response.data.messsage, message.tempId);
+      messageText.value = "";
+    }
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
     if (error.response) {
