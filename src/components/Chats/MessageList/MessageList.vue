@@ -11,7 +11,13 @@
             <img src="/chats/out.svg" alt="" />
             <span class="out-text">Назад</span>
           </div>
-          <img class="user-img" :src="chatInfo.avatar" alt="" />
+          <img
+            v-if="chatInfo.avatar"
+            class="user-img"
+            :src="chatInfo.avatar"
+            alt=""
+          />
+          <img v-else class="user-img" src="/chats/user-chat-icon.svg" alt="" />
           <div>
             <h2 class="name-user">{{ chatInfo.name }}</h2>
           </div>
@@ -137,25 +143,25 @@
                 </div>
                 <img
                   class="state-img"
-                  v-if="message.state === 'delivered'"
+                  v-if="message.state === 'delivered' && message.outgoing"
                   src="/chats/read_it.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'has_seen'"
+                  v-if="message.state === 'has_seen' && message.outgoing"
                   src="/chats/not_read_it.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'sendMessage'"
+                  v-if="message.state === 'sendMessage' && message.outgoing"
                   src="/chats/sned_message_state.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'error'"
+                  v-if="message.state === 'error' && message.outgoing"
                   src="/chats/send_message_error.svg"
                   alt=""
                 />
@@ -252,6 +258,7 @@ const changeMessageState = (newMessage, tempId) => {
 
   // Вызов функции для отслеживания, удаления и добавления
   trackAndRemoveAndAddMessage(tempId);
+  console.log(messages);
 };
 
 const errorBlock = ref(false);
@@ -268,17 +275,7 @@ const scrollToBottom = () => {
 };
 
 const updateMessages = (newMessage) => {
-  // Если у нас есть последнее сообщение, устанавливаем его send в true
-  // if (lastSentMessageIndex.value !== -1) {
-  //   messages.value[lastSentMessageIndex.value].send = true;
-  // }
-
-  // Добавляем новое сообщение в массив
   messages.value.push(newMessage);
-  // Обновляем индекс последнего отправленного сообщения
-
-  // Устанавливаем новое сообщение в состояние отправки
-  // messages.value[lastSentMessageIndex.value].send = false;
 
   setTimeout(() => {
     scrollToBottom();
@@ -336,7 +333,9 @@ const getMessage = async () => {
       // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
       console.log(messages);
-
+      setTimeout(() => {
+        scrollToBottom();
+      }, 200);
       console.log("Messages:", messages.value);
     } else if (response.status === 401 || response.data.errorMessage === 401) {
       console.log("Ошибка авторизации");
@@ -366,7 +365,17 @@ const downloadFile = (url) => {
 };
 
 const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp / 1000);
+  let seconds;
+
+  // Проверяем, в каком формате передан timestamp
+  if (timestamp > 1_000_000_000) {
+    // Если больше 1 миллиарда, значит это микросекунды
+    seconds = timestamp / 1_000_000; // Переводим в секунды
+  } else {
+    seconds = timestamp; // Значит это уже в секундах
+  }
+
+  const date = new Date(seconds * 1000); // Умножаем на 1000 для перевода в миллисекунды
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
@@ -449,7 +458,6 @@ onMounted(() => {
         }
       }
 
-      // Обработка статуса сообщений
       if (eventData.content && eventData.hook_type === "message_status") {
         if (eventData.content[0].type === "delivered") {
           console.log("доставлено");
@@ -459,6 +467,7 @@ onMounted(() => {
 
           if (messageToUpdate) {
             messageToUpdate.state = "delivered";
+            console.log(messages);
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
@@ -469,6 +478,7 @@ onMounted(() => {
 
           if (messageToUpdate) {
             messageToUpdate.state = "has_seen";
+            console.log(messages);
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
@@ -493,7 +503,6 @@ onMounted(() => {
     };
   };
 
-  // Инициализация соединения
   connectEventSource();
 });
 </script>

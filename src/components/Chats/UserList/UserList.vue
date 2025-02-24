@@ -2,7 +2,7 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
     <section
-      v-if="sortedChats"
+      v-if="chats"
       v-for="chat in sortedChats"
       :key="chat.unid"
       class="chat-item"
@@ -133,9 +133,13 @@ const test = async () => {
 };
 
 const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp * 1000); // Убедитесь, что timestamp в секундах
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  // Создаем объект Date, передавая timestamp как миллисекунды
+  const date = new Date(timestamp * 1000); // Умножаем на 1000, чтобы получить миллисекунды
+
+  // Получаем часы и минуты в локальном времени
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
   return `${hours}:${minutes}`;
 };
 
@@ -185,7 +189,7 @@ onMounted(() => {
             JSON.stringify(receivedMessageIds)
           );
           updateLastMessage(eventData.thread, eventData.text);
-          updateChatTimestamp(eventData.thread, eventData.time);
+          updateChatTimestamp(eventData.thread, eventData.time / 1000);
 
           // Проигрываем звук
           playSound();
