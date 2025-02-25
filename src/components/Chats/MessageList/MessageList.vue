@@ -25,23 +25,37 @@
         <div ref="scrollContainer" v-if="!loading" class="messages">
           <div
             v-for="(message, index) in messages"
-            :key="message.time"
+            :key="message.timestamp"
             :class="[
               'message',
-              message.outgoing ? 'outgoing' : 'incoming',
+              message.data.outgoing ? 'outgoing' : 'incoming',
               {
-                'has-content': message.content && message.content.length > 0,
+                'has-content':
+                  message.data.content && message.data.content.length > 0,
               },
             ]"
           >
+            <div class="send-reaction-icon-cont">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 1024 1024"
+                class="send-reaction-icon"
+              >
+                <path
+                  d="M288 421a48 48 0 1 0 96 0a48 48 0 1 0-96 0m352 0a48 48 0 1 0 96 0a48 48 0 1 0-96 0M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448s448-200.6 448-448S759.4 64 512 64m263 711c-34.2 34.2-74 61-118.3 79.8C611 874.2 562.3 884 512 884c-50.3 0-99-9.8-144.8-29.2A370.4 370.4 0 0 1 248.9 775c-34.2-34.2-61-74-79.8-118.3C149.8 611 140 562.3 140 512s9.8-99 29.2-144.8A370.4 370.4 0 0 1 249 248.9c34.2-34.2 74-61 118.3-79.8C413 149.8 461.7 140 512 140c50.3 0 99 9.8 144.8 29.2A370.4 370.4 0 0 1 775.1 249c34.2 34.2 61 74 79.8 118.3C874.2 413 884 461.7 884 512s-9.8 99-29.2 144.8A368.89 368.89 0 0 1 775 775M664 533h-48.1c-4.2 0-7.8 3.2-8.1 7.4C604 589.9 562.5 629 512 629s-92.1-39.1-95.8-88.6c-.3-4.2-3.9-7.4-8.1-7.4H360a8 8 0 0 0-8 8.4c4.4 84.3 74.5 151.6 160 151.6s155.6-67.3 160-151.6a8 8 0 0 0-8-8.4"
+                />
+              </svg>
+            </div>
             <div class="message-content">
-              <p v-if="message.text" class="message-text">
-                {{ message.text }}
+              <p v-if="message.data.text" class="message-text">
+                {{ message.data.text }}
               </p>
               <div
                 v-if="
-                  message.state === 'send' &&
-                  message.outgoing &&
+                  message.data.state === 'send' &&
+                  message.data.outgoing &&
                   apiUrl != 'https://b2288.apitter.com/instances'
                 "
                 class="icon-container"
@@ -51,26 +65,26 @@
               <div class="message-content">
                 <img
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].src &&
-                    message.content[0].type === 'sticker'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].src &&
+                    message.data.content[0].type === 'sticker'
                   "
-                  :src="message.content[0].src"
+                  :src="message.data.content[0].src"
                   alt="Sticker"
                   class="sticker"
                 />
                 <img
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].src &&
-                    message.content[0].type === 'image'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].src &&
+                    message.data.content[0].type === 'image'
                   "
-                  :src="message.content[0].src"
+                  :src="message.data.content[0].src"
                   alt="Image"
                   class="img-message"
-                  @click="openPhotoMenu(message.content[0].src)"
+                  @click="openPhotoMenu(message.data.content[0].src)"
                 />
                 <PhotoMenu
                   :changeMenuPhotoStation="changeMenuPhotoStation"
@@ -79,24 +93,24 @@
                 />
                 <video
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].src &&
-                    message.content[0].type === 'video'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].src &&
+                    message.data.content[0].type === 'video'
                   "
                   controls
                   :src="message.content[0].src"
                   class="video-message"
-                  @click="openVideoMenu(message.content[0].src)"
+                  @click="openVideoMenu(message.data.content[0].src)"
                 >
                   Ваш браузер не поддерживает видео.
                 </video>
                 <audio
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].src &&
-                    message.content[0].type === 'audio'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].src &&
+                    message.data.content[0].type === 'audio'
                   "
                   controls
                   :src="message.content[0].src"
@@ -106,9 +120,9 @@
                 </audio>
                 <h2
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].type === 'geo'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].type === 'geo'
                   "
                   class="geo-message"
                 >
@@ -117,12 +131,12 @@
                 <div
                   class="content-file"
                   v-if="
-                    message.content &&
-                    message.content.length > 0 &&
-                    message.content[0].src &&
-                    message.content[0].type === 'file'
+                    message.data.content &&
+                    message.data.content.length > 0 &&
+                    message.data.content[0].src &&
+                    message.data.content[0].type === 'file'
                   "
-                  @click="downloadFile(message.content[0].src)"
+                  @click="downloadFile(message.data.content[0].src)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -138,30 +152,38 @@
                 </div>
               </div>
               <footer>
+                <h2 class="reaction">{{ message.reaction }}</h2>
                 <div class="message-time">
-                  {{ formatTimestamp(message.time) }}
+                  {{ formatTimestamp(message.data.time) }}
                 </div>
                 <img
                   class="state-img"
-                  v-if="message.state === 'delivered' && message.outgoing"
+                  v-if="
+                    message.data.state === 'delivered' && message.data.outgoing
+                  "
                   src="/chats/read_it.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'has_seen' && message.outgoing"
+                  v-if="
+                    message.data.state === 'has_seen' && message.data.outgoing
+                  "
                   src="/chats/not_read_it.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'sendMessage' && message.outgoing"
+                  v-if="
+                    message.data.state === 'sendMessage' &&
+                    message.data.outgoing
+                  "
                   src="/chats/sned_message_state.svg"
                   alt=""
                 />
                 <img
                   class="state-img"
-                  v-if="message.state === 'error' && message.outgoing"
+                  v-if="message.data.state === 'error' && message.data.outgoing"
                   src="/chats/send_message_error.svg"
                   alt=""
                 />
@@ -205,7 +227,8 @@ const props = defineProps({
 const loadingMessageIndex = ref(-1);
 const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
-const messages = ref([]); // Инициализация массива сообщений
+const messages = ref([]);
+const messagesData = ref([]);
 
 const station = reactive({
   photoMenu: false,
@@ -230,8 +253,26 @@ const testMsg = {
 
 const changeMessageState = (newMessage, tempId) => {
   console.log("вгеме77ше 1в", tempId);
+  console.log(newMessage);
+
+  const newMessages = {
+    uniq: newMessage.item,
+    timestamp: newMessage.time,
+    data: {
+      content: newMessage.content,
+      item: newMessage.item,
+      outgoing: true,
+      text: newMessage.text,
+      time: newMessage.time,
+      state: newMessage.state,
+    },
+    reaction: null,
+    state: 0,
+  };
+
   const trackAndRemoveAndAddMessage = (tempId) => {
-    // Ищем индекс сообщения по тексту
+    // Ищем индекс сообщения по tempId
+    console.log(messages.value);
     const messageIndex = messages.value.findIndex(
       (message) => message.tempId === tempId
     );
@@ -241,14 +282,14 @@ const changeMessageState = (newMessage, tempId) => {
       const removedMessage = messages.value.splice(messageIndex, 1)[0];
       console.log("Сообщение удалено:", removedMessage);
 
-      // Добавляем новое сообщение
-      messages.value.push(newMessage);
-      console.log("Добавлено новое сообщение:", newMessage);
+      console.log(messages.value);
+      messages.value.push(newMessages);
+      console.log("Добавлено новое сообщение:", newMessages);
     } else {
-      console.log("Сообщение с таким текстом не найдено:", newMessage);
+      console.log("Сообщение с таким tempId не найдено:", tempId);
       // Если сообщение не найдено, просто добавляем новое
-      messages.value.push(newMessage);
-      console.log("Добавлено новое сообщение:", newMessage);
+      messages.value.push(newMessages);
+      console.log("Добавлено новое сообщение:", newMessages);
     }
   };
 
@@ -258,7 +299,7 @@ const changeMessageState = (newMessage, tempId) => {
 
   // Вызов функции для отслеживания, удаления и добавления
   trackAndRemoveAndAddMessage(tempId);
-  console.log(messages);
+  console.log(messages.data); // Не забудьте использовать .value здесь тоже
 };
 
 const errorBlock = ref(false);
@@ -275,10 +316,17 @@ const scrollToBottom = () => {
 };
 
 const updateMessages = (newMessage) => {
-  messages.value.push(newMessage);
+  // if (!Array.isArray(messages)) {
+  //   console.error("messages не является массивом");
+  //   return; // Выход из функции, если messages не является массивом
+  // }
+
+  messages.value.push(newMessage); // Добавление нового сообщения
+  console.log("Новое сообщение", newMessage);
+  console.log(messages.value); // Логируем текущее состояние массива
 
   setTimeout(() => {
-    scrollToBottom();
+    scrollToBottom(); // Прокрутка вниз
   }, 500);
 };
 
@@ -302,8 +350,6 @@ const getMessage = async () => {
   try {
     const token = localStorage.getItem("accountToken");
     console.log("Token:", token);
-
-    // Функция для парсинга chatInfo.value.data
 
     // "http://localhost:4000/api/getChatMessages",
     // "https://hellychat.apitter.com/api/getChatMessages",
@@ -332,11 +378,15 @@ const getMessage = async () => {
 
       // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
+      messagesData.value = response.data.data.messages.map(
+        (message) => message.data
+      );
+
       console.log(messages);
       setTimeout(() => {
         scrollToBottom();
       }, 200);
-      console.log("Messages:", messages.value);
+      console.log("Messages:", messages.data.value);
     } else if (response.status === 401 || response.data.errorMessage === 401) {
       console.log("Ошибка авторизации");
       errorBlock.value = true;
@@ -408,14 +458,31 @@ const openPhotoMenu = (src) => {
 };
 
 const updateMessageState = (item) => {
-  const messageToUpdate = messages.value.find(
+  const messageToUpdate = messages.data.data.find(
     (message) => message.item === item
   );
-  console.log(messages.value);
+  console.log(messages.data.data.value);
   if (messageToUpdate) {
     messageToUpdate.state = true;
   } else {
     console.log("Сообщение с таким thread не найдено");
+  }
+};
+
+const updateReactionState = (item, reaction) => {
+  console.log(item);
+
+  // Находим сообщение, где uniq соответствует item
+  const messageToUpdate = messages.value.find(
+    (message) => message.uniq === item
+  );
+
+  // Проверяем, найдено ли сообщение
+  if (messageToUpdate) {
+    messageToUpdate.reaction = reaction; // Обновляем поле reaction
+    console.log("Обновленное сообщение:", messageToUpdate);
+  } else {
+    console.log("Сообщение с таким uniq не найдено");
   }
 };
 
@@ -436,53 +503,61 @@ onMounted(() => {
 
       // Проверяем тип события
       if (eventData.hook_type === "message") {
-        // Проверка на уникальность сообщения
         if (!eventData.outgoing) {
           if (!receivedMessageIds.includes(eventData.item)) {
             const newMessage = {
-              ...eventData,
-              state: false,
-              reaction: "",
+              uniq: eventData.item,
+              timestamp: eventData.time,
+              data: eventData,
+              reaction: null,
+              state: 0,
             };
+            console.log("новое сообщение ", newMessage);
 
-            // Сохраняем идентификатор в localStorage
             receivedMessageIds.push(eventData.item);
             localStorage.setItem(
               "receivedMessageIds",
               JSON.stringify(receivedMessageIds)
             );
 
-            // Обновляем сообщения
             updateMessages(newMessage);
           }
         }
+        console.log("новое сообщение");
       }
 
       if (eventData.content && eventData.hook_type === "message_status") {
         if (eventData.content[0].type === "delivered") {
           console.log("доставлено");
           const messageToUpdate = messages.value.find(
-            (message) => message.item === eventData.item
+            (message) => message.data.item === eventData.item
           );
 
           if (messageToUpdate) {
-            messageToUpdate.state = "delivered";
-            console.log(messages);
+            messageToUpdate.data.state = "delivered";
+            console.log(messageToUpdate);
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
         } else if (eventData.content[0].type === "has_seen") {
           const messageToUpdate = messages.value.find(
-            (message) => message.item === eventData.item
+            (message) => message.data.item === eventData.item
           );
-
           if (messageToUpdate) {
-            messageToUpdate.state = "has_seen";
-            console.log(messages);
+            messageToUpdate.data.state = "has_seen";
+            console.log(messages.data);
           } else {
             console.log("Сообщение с таким thread не найдено");
           }
         }
+      } else {
+        console.log("Content не найден");
+      }
+
+      if (eventData.content && eventData.hook_type === "add_message_reaction") {
+        setTimeout(() => {
+          updateReactionState(eventData.replyTo, eventData.content[0].src);
+        }, 1000);
       } else {
         console.log("Content не найден");
       }
@@ -530,8 +605,29 @@ onMounted(() => {
   border-radius: 5px;
 }
 
+.reaction {
+  font-size: 12px;
+}
+
 .last-sent-message {
   background-color: #e1ffc7; /* Цвет фона для последнего отправленного сообщения */
+}
+
+.send-reaction-icon-cont {
+  position: absolute;
+  right: 80px;
+  top: 20px;
+  background-color: rgb(216, 216, 216);
+  display: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 100px;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-reaction-icon {
+  fill: white;
 }
 
 /* Стили для иконки */
@@ -691,6 +787,14 @@ onMounted(() => {
   align-self: flex-end;
   background-color: #e1ffc7;
   box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02);
+}
+
+.outgoing:hover .send-reaction-icon-cont {
+  display: flex;
+}
+
+.send-reaction-icon:hover {
+  display: flex;
 }
 
 .incoming {

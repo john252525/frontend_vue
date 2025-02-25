@@ -48,10 +48,25 @@ const changeMessageListStation = () => {
 };
 
 const selectChat = (chat) => {
-  chatInfo.value = chat;
+  console.log(chat);
+  chatInfo.value = chat.data;
   showMessageList.value = true;
   console.log(chat.phone);
   style.userList.display = "none";
+  clearCountNewMessage(chat.uniq, chat);
+};
+
+const clearCountNewMessage = (thread, chat) => {
+  if (chat) {
+    if (chat.newMessage) {
+      chat.newMessage = 0;
+      console.log(`Последнее сообщение для ${thread} обновлено`);
+    } else {
+      console.log(`lastMessage для чата с thread ${thread} не найден`);
+    }
+  } else {
+    console.log(`Чат с thread ${thread} не найден`);
+  }
 };
 
 const clickChat = () => {

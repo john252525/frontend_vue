@@ -10,9 +10,9 @@
     >
       <div class="chat-user-cont">
         <img
-          v-if="chat.avatar"
+          v-if="chat.data.avatar"
           class="user-chat-avatar"
-          :src="chat.avatar"
+          :src="chat.data.avatar"
           alt=""
         />
         <img
@@ -22,18 +22,18 @@
           alt=""
         />
         <div class="chat-info">
-          <div class="chat-name">{{ chat.name }}</div>
+          <div class="chat-name">{{ chat.data.name }}</div>
           <div class="chat-last-message">
-            {{ formatLastMessage(chat.lastMessage?.body) }}
+            {{ formatLastMessage(chat.data.lastMessage?.body) }}
           </div>
         </div>
       </div>
       <div class="chat-meta">
         <div class="chat-timestamp">
-          {{ formatTimestamp(chat.timestamp) }}
+          {{ formatTimestamp(chat.data.timestamp) }}
         </div>
-        <div class="chat-unread" v-if="chat.unreadCount > 0">
-          {{ chat.unreadCount }}
+        <div class="chat-unread" v-if="chat.newMessage > 0">
+          {{ chat.newMessage }}
         </div>
       </div>
     </section>
@@ -65,13 +65,14 @@ const updateChatTimestamp = (thread, newTimestamp) => {
   // Преобразуем новый временной штамп из наносекунд в секунды
   const newTimestampInSeconds = Math.floor(newTimestamp / 1000000); // Делим на 1 миллион, чтобы получить секунды
 
-  const chat = chats.value.find(
-    (chat) => chat.lastMessage.id?.remote === thread
-  );
+  // Ищем чат, где uniq соответствует thread
+  const chat = chats.value.find((chat) => chat.uniq === thread);
 
   if (chat) {
     console.log("Новое", newTimestampInSeconds);
     console.log("Старое", chat.timestamp);
+
+    // Обновляем timestamp внутри lastMessage
     chat.timestamp = newTimestampInSeconds;
     console.log(`Timestamp для ${thread} обновлён на ${newTimestampInSeconds}`);
   } else {
@@ -80,12 +81,49 @@ const updateChatTimestamp = (thread, newTimestamp) => {
 };
 
 const updateLastMessage = (thread, newLastMessage) => {
-  const chat = chats.value.find(
-    (chat) => chat.lastMessage.id?.remote === thread
-  );
+  console.log(newLastMessage);
+  const chat = chats.value.find((chat) => chat.uniq === thread);
+
+  // Проверяем, найден ли чат
   if (chat) {
-    chat.lastMessage.body = newLastMessage; // Обновляем lastMessage
-    console.log(`Последнее сообщение для ${thread} обновлено`);
+    // Проверяем, существует ли lastMessage
+    console.log();
+    if (chat.data.lastMessage) {
+      chat.data.lastMessage.body = newLastMessage;
+      console.log(`Последнее сообщение для ${thread} обновлено`);
+    } else {
+      console.log(`lastMessage для чата с thread ${thread} не найден`);
+    }
+  } else {
+    console.log(`Чат с thread ${thread} не найден`);
+  }
+};
+
+const updateCountNewMessage = (thread, newLastMessage) => {
+  const chat = chats.value.find((chat) => chat.uniq === thread);
+
+  if (chat) {
+    if (chat.newMessage) {
+      chat.newMessage++;
+      console.log(`Последнее сообщение для ${thread} обновлено`);
+    } else {
+      console.log(`lastMessage для чата с thread ${thread} не найден`);
+    }
+  } else {
+    console.log(`Чат с thread ${thread} не найден`);
+  }
+};
+
+const clearCountNewMessage = (thread) => {
+  const chat = chats.value.find((chat) => chat.uniq === thread);
+
+  if (chat) {
+    if (chat.newMessage) {
+      chat.newMessage++;
+      console.log(`Последнее сообщение для ${thread} обновлено`);
+    } else {
+      console.log(`lastMessage для чата с thread ${thread} не найден`);
+    }
   } else {
     console.log(`Чат с thread ${thread} не найден`);
   }
@@ -188,10 +226,13 @@ onMounted(() => {
             "receivedMessageIds",
             JSON.stringify(receivedMessageIds)
           );
-          updateLastMessage(eventData.thread, eventData.text);
-          updateChatTimestamp(eventData.thread, eventData.time / 1000);
 
-          // Проигрываем звук
+          updateLastMessage(eventData.thread, eventData.text);
+          updateChatTimestamp(eventData.thread, eventData.time);
+          if (!eventData.outgoing) {
+            updateCountNewMessage(eventData.thread);
+          }
+
           playSound();
         }
       }

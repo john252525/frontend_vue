@@ -156,12 +156,35 @@ const sendMessage = async () => {
             type: "video",
             src: urlImg.value,
           },
-        ] // Если contentText есть, то content пустой
+        ]
       : [],
     time: Date.now() / 1000,
     outgoing: true,
     state: "send",
   };
+  const newMessage = {
+    tempId: generateItemNew(),
+    uniq: "3EB0NEWUNIQUEID",
+    timestamp: Date.now() / 1000,
+    data: {
+      content: contentText.value
+        ? [
+            {
+              type: "video",
+              src: urlImg.value,
+            },
+          ]
+        : [],
+      item: "3EB0NEWUNIQUEID",
+      outgoing: true,
+      text: contentText.value ? contentText.value : messageText.value || null,
+      time: Date.now() / 1000,
+      state: "send",
+    },
+    reaction: null,
+    state: 0,
+  };
+
   const front_message = {
     to: `${chatInfo.value.phone}`,
     text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
@@ -181,7 +204,7 @@ const sendMessage = async () => {
     outgoing: true,
   };
   console.log(message);
-  emit("updateMessages", message);
+  emit("updateMessages", newMessage);
   try {
     const response = await axios.post(
       `${apiUrl}/sendMessage`,
@@ -210,11 +233,11 @@ const sendMessage = async () => {
       urlImg.value = "";
       console.log("Сообщение отправлено:", response.data);
       console.log(message.tempId);
-      props.changeMessageState(response.data.messsage, message.tempId);
+      props.changeMessageState(response.data.messsage, newMessage.tempId);
       messageText.value = "";
     } else {
       console.log("Сообщение ne отправлено:", response.data);
-      props.changeMessageState(response.data.messsage, message.tempId);
+      props.changeMessageState(response.data.messsage, newMessage.tempId);
       messageText.value = "";
     }
   } catch (error) {

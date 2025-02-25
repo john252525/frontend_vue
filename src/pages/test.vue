@@ -43,10 +43,10 @@ export default {
         thread: "79198670001@c.us",
         outgoing: true,
         replyTo: null,
-        text: "куыыss1hjbvыыsss",
-        content: [{ type: "server", src: "" }],
-        hook_type: "message",
-        item: "3sEB09C8Ess089ss0C2s684C28C0",
+        text: "куыыss1hjbvыыssss",
+        content: [{ type: "reaction", src: "😀" }],
+        hook_type: "add_message_reaction",
+        item: "3EB009238C051FCF60849A",
       };
 
       try {
@@ -70,3 +70,77 @@ export default {
 </style>
 
 Найти еще
+<!-- <template>
+  <div class="modal">
+    <div class="modal-content">
+      <span class="close" @click="$emit('close')">&times;</span>
+      <h2>Эмодзи по категориям</h2>
+      <div v-for="(items, category) in emojis" :key="category">
+        <h3>{{ category.charAt(0).toUpperCase() + category.slice(1) }}</h3>
+        <div>
+          <span v-for="item in items" :key="item.name">
+            {{ item.emoji }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      emojis: {}, // Начальное значение для эмодзи
+    };
+  },
+  async mounted() {
+    try {
+      const response = await fetch("/emojis.json"); // Загружаем JSON файл
+      if (!response.ok) {
+        throw new Error("Сеть не отвечает");
+      }
+      const data = await response.json();
+      this.emojis = data.emojis; // Сохраняем все категории эмодзи в состоянии компонента
+    } catch (error) {
+      console.error("Ошибка при загрузке эмодзи:", error);
+    }
+  },
+};
+</script>
+
+<style>
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style> -->
