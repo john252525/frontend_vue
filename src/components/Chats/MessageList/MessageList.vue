@@ -579,6 +579,22 @@ const updateMessageState = (item) => {
   }
 };
 
+const updateReactionState = (item, reaction) => {
+  console.log(item);
+
+  const messageToUpdate = messages.value.find(
+    (message) => message.uniq === item
+  );
+
+  // Проверяем, найдено ли сообщение
+  if (messageToUpdate) {
+    messageToUpdate.reaction = reaction;
+    console.log("Обновленное сообщение:", messageToUpdate);
+  } else {
+    console.log("Сообщение с таким uniq не найдено");
+  }
+};
+
 const updateDeleteMessage = (item) => {
   console.log(item);
 
