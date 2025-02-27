@@ -42,7 +42,8 @@
                 <!-- {{ formatPhoneNumber(message.data.replyTo.name) }} -->
               </h2>
               <h2 class="reply-text">
-                {{ truncateString(message.data.replyTo.text) }}
+                <!-- {{ message.data.replyTo.text }} -->
+                // {{ truncateString(message.data.replyTo.text) }}
               </h2>
             </div>
             <div class="send-reaction-icon-cont">
@@ -658,6 +659,15 @@ function formatPhoneNumber(phoneNumber) {
 }
 
 function truncateString(str, maxLength) {
+  // Проверяем, если str не является строкой или maxLength не является положительным числом
+  if (typeof str !== "string") {
+    return "Данных нет";
+  }
+
+  if (typeof maxLength !== "number" || maxLength < 0) {
+    // return "Данных нет";
+  }
+
   // Проверяем, если длина строки меньше или равна максимальной, возвращаем ее как есть
   if (str.length <= maxLength) {
     return str;
