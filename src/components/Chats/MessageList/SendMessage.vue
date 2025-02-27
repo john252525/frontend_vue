@@ -109,7 +109,7 @@ const props = defineProps({
 });
 
 // const emit = defineEmits(["updateMessages"]);
-const { chatInfo, replyToData } = toRefs(props);
+const { chatInfo, replyToData, replyToDataBolean } = toRefs(props);
 console.log(replyToData.value);
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -289,21 +289,20 @@ const sendMessage = async () => {
       }, 2000);
     }
     if (response.data.ok) {
-      props.offReplyToDataBolean();
       urlImg.value = "";
       console.log("Сообщение отправлено:", response.data);
       console.log(message.tempId);
-      if (replyToData) {
-        props.changeMessageState(response.data.messsage, newMessage.tempId);
+      props.changeMessageState(response.data.messsage, newMessage.tempId);
+      if (replyToDataBolean.value) {
+        props.offReplyToDataBolean();
       }
 
       messageText.value = "";
     } else {
-      props.offReplyToDataBolean();
-
       console.log("Сообщение ne отправлено:", response.data);
-      if (replyToData) {
-        props.changeMessageState(response.data.messsage, newMessage.tempId);
+      props.changeMessageState(response.data.messsage, newMessage.tempId);
+      if (replyToDataBolean.value) {
+        props.offReplyToDataBolean();
       }
       messageText.value = "";
     }
