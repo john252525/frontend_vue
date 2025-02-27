@@ -23,15 +23,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 import axios from "axios";
+
 const style = reactive({
   userList: {
     display: "none",
   },
-
   messageList: {
     display: "none",
   },
@@ -42,6 +42,11 @@ const showMessageList = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
+
+// Функция для проверки мобильного устройства
+const checkIfMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 const changeMessageListStation = () => {
   showMessageList.value = false;
@@ -83,24 +88,17 @@ const clearNewMessages = async (uniq) => {
   }
 };
 
-const clickChat = () => {
-  station.userList.display = "none";
-};
-
 onMounted(() => {
-  // isMobile.value = window.innerWidth <= 768;
+  // Проверяем мобильное устройство при монтировании
+  checkIfMobile();
 
-  window.addEventListener("resize", () => {
-    if (window.innerWidth <= 768 && showMessageList.value === false) {
-      isMobile.value = true;
-      console.log(showMessageList.value, "list");
-    } else if (window.innerWidth <= 768 && showMessageList.value === true) {
-      // isMobile.value = true;
-      style.messageList.display = "block";
-      style.userList.display = "none";
-      console.log(showMessageList.value, "ytr");
-    }
-  });
+  // Добавляем обработчик события изменения размера окна
+  window.addEventListener("resize", checkIfMobile);
+});
+
+onBeforeUnmount(() => {
+  // Удаляем обработчик события при размонтировании
+  window.removeEventListener("resize", checkIfMobile);
 });
 </script>
 
@@ -136,3 +134,5 @@ onMounted(() => {
   }
 }
 </style>
+
+Найти еще
