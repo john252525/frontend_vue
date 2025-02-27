@@ -8,7 +8,9 @@
     class="action-menu"
   >
     <ul>
-      <li><p class="option" @click="addDataToReply(message)">Ответить</p></li>
+      <li>
+        <p class="option" @click="addDataToReplyMessage(message)">Ответить</p>
+      </li>
       <li><p class="option">Копировать</p></li>
       <li><p class="option">Отреагировать</p></li>
       <li>
@@ -19,7 +21,7 @@
 </template>
 
 <script setup>
-import { defineProps, toRefs } from "vue";
+import { defineProps, toRefs, defineEmits } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -39,7 +41,7 @@ const props = defineProps({
     type: Object,
   },
 });
-
+const emit = defineEmits();
 const { chatInfo, message } = toRefs(props);
 const apiUrl = import.meta.env.VITE_API_URL;
 const deleteMessage = () => {
@@ -47,6 +49,11 @@ const deleteMessage = () => {
   console.log(message.value.uniq);
   deleteMessageAxios(chatInfo.value.lastMessage.id.remote, message.value.uniq);
   props.updateDeleteMessage(message.value.uniq);
+};
+
+const addDataToReplyMessage = (message) => {
+  props.addDataToReply(message);
+  emit("close");
 };
 
 const deleteMessageAxios = async (uniq, item) => {
@@ -62,6 +69,7 @@ const deleteMessageAxios = async (uniq, item) => {
       error.response ? error.response.data : error.message
     );
   }
+  emit("close");
 };
 </script>
 

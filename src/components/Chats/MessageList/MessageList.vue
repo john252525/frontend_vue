@@ -212,6 +212,7 @@
           @updateMessages="updateMessages"
           :replyToData="replyToData"
           :replyToDataBolean="replyToDataBolean"
+          :offReplyToDataBolean="offReplyToDataBolean"
         />
       </section>
     </section>
@@ -285,10 +286,15 @@ const addDataToReply = (data) => {
   console.log(replyToData.value);
 };
 
+const offReplyToDataBolean = () => {
+  replyToDataBolean.value = !replyToDataBolean.value;
+};
+
 const changeMessageState = (newMessage, tempId) => {
   console.log("вгеме77ше 1в", tempId);
   console.log(newMessage);
 
+  // Создаем новый объект сообщения
   const newMessages = {
     uniq: newMessage.item,
     timestamp: newMessage.time,
@@ -296,6 +302,7 @@ const changeMessageState = (newMessage, tempId) => {
       content: newMessage.content,
       item: newMessage.item,
       outgoing: true,
+      replyTo: newMessage.replyTo,
       text: newMessage.text,
       time: newMessage.time,
       state: newMessage.state,
@@ -315,16 +322,32 @@ const changeMessageState = (newMessage, tempId) => {
       // Удаляем сообщение из массива
       const removedMessage = messages.value.splice(messageIndex, 1)[0];
       console.log("Сообщение удалено:", removedMessage);
-
-      console.log(messages.value);
-      messages.value.push(newMessages);
-      console.log("Добавлено новое сообщение:", newMessages);
     } else {
       console.log("Сообщение с таким tempId не найдено:", tempId);
-      // Если сообщение не найдено, просто добавляем новое
-      messages.value.push(newMessages);
-      console.log("Добавлено новое сообщение:", newMessages);
     }
+
+    // Если replyTo не null, обновляем replyTo для всех сообщений
+    if (newMessage.replyTo !== null) {
+      console.log("newMessage.replyTo !== null");
+      messages.value.forEach((message) => {
+        if (message.data.item !== null) {
+          const replyToMessage = messages.value.find(
+            (msg) => msg.data.item === newMessage.replyTo
+          );
+          console.log(replyToMessage);
+          if (replyToMessage) {
+            newMessages.data.replyTo = {
+              name: message.data.from,
+              text: message.data.text,
+            };
+          }
+        }
+      });
+    }
+
+    console.log("новое сообщение newMess", newMessages);
+    messages.value.push(newMessages);
+    console.log("Добавлено новое сообщение:", newMessages);
   };
 
   setTimeout(() => {
@@ -333,7 +356,7 @@ const changeMessageState = (newMessage, tempId) => {
 
   // Вызов функции для отслеживания, удаления и добавления
   trackAndRemoveAndAddMessage(tempId);
-  console.log(messages.data); // Не забудьте использовать .value здесь тоже
+  console.log(messages.value); // Исправлено на .value
 };
 
 const modalPosition = ref({ top: 0, left: 0 });
@@ -480,7 +503,6 @@ const getMessage = async () => {
           );
           console.log(replyToMessage);
           if (replyToMessage) {
-            // Записываем данные в replyTo текущего сообщения
             message.data.replyTo = {
               name: replyToMessage.data.from,
               text: replyToMessage.data.text,

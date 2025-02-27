@@ -103,6 +103,9 @@ const props = defineProps({
   replyToDataBolean: {
     type: Boolean,
   },
+  offReplyToDataBolean: {
+    type: Function,
+  },
 });
 
 // const emit = defineEmits(["updateMessages"]);
@@ -286,12 +289,15 @@ const sendMessage = async () => {
       }, 2000);
     }
     if (response.data.ok) {
+      props.offReplyToDataBolean();
       urlImg.value = "";
       console.log("Сообщение отправлено:", response.data);
       console.log(message.tempId);
       props.changeMessageState(response.data.messsage, newMessage.tempId);
       messageText.value = "";
     } else {
+      props.offReplyToDataBolean();
+
       console.log("Сообщение ne отправлено:", response.data);
       props.changeMessageState(response.data.messsage, newMessage.tempId);
       messageText.value = "";
