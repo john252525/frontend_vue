@@ -9,13 +9,13 @@
   </section>
   <section class="phone-version" v-if="isMobile && userInfo">
     <UserList
+      v-if="!showMessageList"
       class="phone-user-list"
-      :style="style.userList"
       :selectChat="selectChat"
     />
     <MessageList
+      :style="style.messageList"
       class="message-list"
-      :style="{ display: showMessageList ? 'block' : 'none' }"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
     />
@@ -26,7 +26,7 @@
 import { ref, reactive, onMounted } from "vue";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
-
+import axios from "axios";
 const style = reactive({
   userList: {
     display: "none",
@@ -38,22 +38,26 @@ const style = reactive({
 });
 
 const isMobile = ref(false); // Определяем состояние: мобильное устройство или нет
-const showMessageList = ref(false); // Добавляем состояние для отображения MessageList
-
+const showMessageList = ref(false);
+const apiUrl = import.meta.env.VITE_API_URL;
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 
 const changeMessageListStation = () => {
-  showMessageList.value = false; // Скрываем MessageList при вызове changeMessageListStation
+  showMessageList.value = false;
+  style.userList.display = "block";
+  style.messageList.display = "none";
 };
 
 const selectChat = (chat) => {
   console.log(chat);
   chatInfo.value = chat.data;
+  style.messageList.display = "block";
+  style.userList.display = "none";
   showMessageList.value = true;
   console.log(chat.phone);
-  style.userList.display = "none";
   clearCountNewMessage(chat.uniq, chat);
+  clearNewMessages(chat.uniq);
 };
 
 const clearCountNewMessage = (thread, chat) => {
@@ -69,17 +73,33 @@ const clearCountNewMessage = (thread, chat) => {
   }
 };
 
+const clearNewMessages = async (uniq) => {
+  try {
+    const response = await axios.post(`${apiUrl}/clear-new-messages`, {
+      uniq: uniq,
+    });
+  } catch (error) {
+    console.error("Ошибка при очистке новых сообщений:", error);
+  }
+};
+
 const clickChat = () => {
   station.userList.display = "none";
 };
 
 onMounted(() => {
-  // Определяем, является ли устройство мобильным при монтировании компонента
-  isMobile.value = window.innerWidth <= 768;
+  // isMobile.value = window.innerWidth <= 768;
 
-  // Слушаем изменение размера окна
   window.addEventListener("resize", () => {
-    isMobile.value = window.innerWidth <= 768;
+    if (window.innerWidth <= 768 && showMessageList.value === false) {
+      isMobile.value = true;
+      console.log(showMessageList.value, "list");
+    } else if (window.innerWidth <= 768 && showMessageList.value === true) {
+      // isMobile.value = true;
+      style.messageList.display = "block";
+      style.userList.display = "none";
+      console.log(showMessageList.value, "ytr");
+    }
   });
 });
 </script>

@@ -34,7 +34,16 @@
                   message.data.content && message.data.content.length > 0,
               },
             ]"
+            @click="openModal($event, message)"
           >
+            <div v-if="message.data.replyTo != null" class="reply-content">
+              <h2 class="reply-name">
+                {{ formatPhoneNumber(message.data.replyTo.name) }}
+              </h2>
+              <h2 class="reply-text">
+                {{ truncateString(message.data.replyTo.text, 15) }}
+              </h2>
+            </div>
             <div class="send-reaction-icon-cont">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -49,9 +58,13 @@
               </svg>
             </div>
             <div class="message-content">
-              <p v-if="message.data.text" class="message-text">
+              <p
+                v-if="message.data.text && !message.delete"
+                class="message-text"
+              >
                 {{ message.data.text }}
               </p>
+              <p v-else class="message-text-delete">Сообщение удалено</p>
               <div
                 v-if="
                   message.data.state === 'send' &&
@@ -113,7 +126,7 @@
                     message.data.content[0].type === 'audio'
                   "
                   controls
-                  :src="message.content[0].src"
+                  :src="message.data.content[0].src"
                   class="audio-message"
                 >
                   Ваш браузер не поддерживает аудио.
@@ -151,6 +164,7 @@
                   </svg>
                 </div>
               </div>
+
               <footer>
                 <h2 class="reaction">{{ message.reaction }}</h2>
                 <div class="message-time">
@@ -191,15 +205,25 @@
             </div>
           </div>
         </div>
-
         <Loading v-if="loading" />
         <SendMessage
           :changeMessageState="changeMessageState"
           :chatInfo="chatInfo"
           @updateMessages="updateMessages"
+          :replyToData="replyToData"
+          :replyToDataBolean="replyToDataBolean"
         />
       </section>
     </section>
+    <ActionModal
+      v-if="activeMessage"
+      :message="activeMessage"
+      :modalPosition="modalPosition"
+      @close="activeMessage = null"
+      :addDataToReply="addDataToReply"
+      :updateDeleteMessage="updateDeleteMessage"
+      :chatInfo="chatInfo"
+    />
   </section>
 </template>
 <!-- slice().reverse() -->
@@ -211,7 +235,7 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
-
+import ActionModal from "./ActionModal/ActionModal.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const loading = ref(false);
@@ -224,6 +248,8 @@ const props = defineProps({
   },
 });
 
+const replyToData = ref([]);
+const replyToDataBolean = ref(false);
 const loadingMessageIndex = ref(-1);
 const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
@@ -233,7 +259,9 @@ const messagesData = ref([]);
 const station = reactive({
   photoMenu: false,
   videoMenu: false,
+  acionMenu: false,
 });
+const activeMessage = ref(null);
 
 const testMsg = {
   to: "79198670001",
@@ -249,6 +277,12 @@ const testMsg = {
   outgoing: true,
   reaction: "",
   send: true,
+};
+
+const addDataToReply = (data) => {
+  replyToData.value = data;
+  replyToDataBolean.value = true;
+  console.log(replyToData.value);
 };
 
 const changeMessageState = (newMessage, tempId) => {
@@ -302,6 +336,67 @@ const changeMessageState = (newMessage, tempId) => {
   console.log(messages.data); // Не забудьте использовать .value здесь тоже
 };
 
+const modalPosition = ref({ top: 0, left: 0 });
+
+const openModal = (event, item) => {
+  if (activeMessage.value !== item) {
+    activeMessage.value = item;
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    // Определяем максимальную ширину сообщения
+    const messageWidth = rect.width; // Ширина сообщения
+    const maxWidth = 400; // Задайте максимальную ширину, при которой модальное окно будет отображаться сверху
+
+    // Определяем максимальную высоту сообщения
+    const messageHeight = rect.height; // Высота сообщения
+    const maxHeight = 100; // Задайте максимальную высоту, при которой модальное окно будет отображаться над сообщением
+
+    // Для входящих сообщений
+    if (!item.data.outgoing) {
+      if (messageWidth > maxWidth) {
+        // Если ширина сообщения слишком большая, отображаем модальное окно сверху
+        modalPosition.value = {
+          top: rect.top + window.scrollY - 50, // Позиция над сообщением
+          left: rect.left + window.scrollX + 10, // Позиция справа от сообщения с отступом
+        };
+      } else if (messageHeight > maxHeight) {
+        // Если сообщение слишком длинное, отображаем модальное окно выше
+        modalPosition.value = {
+          top: rect.top + window.scrollY - 50, // Позиция над сообщением
+          left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
+        };
+      } else {
+        // Если сообщение не слишком длинное
+        modalPosition.value = {
+          top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
+          left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
+        };
+      }
+    } else {
+      // Для исходящих сообщений
+      if (messageWidth > maxWidth) {
+        // Если ширина сообщения слишком большая, отображаем модальное окно сверху
+        modalPosition.value = {
+          top: rect.top + window.scrollY - 120, // Позиция над сообщением
+          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
+        };
+      } else if (messageHeight > maxHeight) {
+        // Если сообщение слишком длинное, отображаем модальное окно выше
+        modalPosition.value = {
+          top: rect.top + window.scrollY - 50, // Позиция над сообщением
+          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
+        };
+      } else {
+        // Если сообщение не слишком длинное
+        modalPosition.value = {
+          top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
+          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
+        };
+      }
+    }
+  }
+};
+
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -351,8 +446,6 @@ const getMessage = async () => {
     const token = localStorage.getItem("accountToken");
     console.log("Token:", token);
 
-    // "http://localhost:4000/api/getChatMessages",
-    // "https://hellychat.apitter.com/api/getChatMessages",
     console.log(chatInfo.value.lastMessage.id.remote);
     const response = await axios.post(
       `${apiUrl}/getChatMessages`,
@@ -378,15 +471,32 @@ const getMessage = async () => {
 
       // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
-      messagesData.value = response.data.data.messages.map(
-        (message) => message.data
-      );
+
+      // Обработка replyTo
+      messages.value.forEach((message) => {
+        if (message.data.replyTo !== null) {
+          const replyToMessage = messages.value.find(
+            (msg) => msg.data.item === message.data.replyTo
+          );
+          console.log(replyToMessage);
+          if (replyToMessage) {
+            // Записываем данные в replyTo текущего сообщения
+            message.data.replyTo = {
+              name: replyToMessage.data.from,
+              text: replyToMessage.data.text,
+            };
+          }
+        }
+      });
+
+      // Обновляем messagesData
+      messagesData.value = messages.value.map((message) => message.data);
 
       console.log(messages);
       setTimeout(() => {
         scrollToBottom();
       }, 200);
-      console.log("Messages:", messages.data.value);
+      console.log("Messages:", messages.value);
     } else if (response.status === 401 || response.data.errorMessage === 401) {
       console.log("Ошибка авторизации");
       errorBlock.value = true;
@@ -469,22 +579,52 @@ const updateMessageState = (item) => {
   }
 };
 
-const updateReactionState = (item, reaction) => {
+const updateDeleteMessage = (item) => {
   console.log(item);
 
-  // Находим сообщение, где uniq соответствует item
   const messageToUpdate = messages.value.find(
     (message) => message.uniq === item
   );
 
   // Проверяем, найдено ли сообщение
   if (messageToUpdate) {
-    messageToUpdate.reaction = reaction; // Обновляем поле reaction
+    messageToUpdate.data.text = "Сообщение удалено";
+    messageToUpdate.delete = true;
     console.log("Обновленное сообщение:", messageToUpdate);
   } else {
     console.log("Сообщение с таким uniq не найдено");
   }
 };
+
+function formatPhoneNumber(phoneNumber) {
+  // Удаляем все нецифровые символы
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  // Проверяем, что номер состоит из 11 цифр (для России)
+  if (cleaned.length !== 11) {
+    throw new Error("Неверный формат номера. Должно быть 11 цифр.");
+  }
+
+  // Форматируем номер
+  const countryCode = cleaned[0]; // Код страны (7 для России)
+  const areaCode = cleaned.slice(1, 4); // Код региона (902)
+  const firstPart = cleaned.slice(4, 7); // Первая часть номера (894)
+  const secondPart = cleaned.slice(7, 9); // Вторая часть номера (13)
+  const thirdPart = cleaned.slice(9, 11); // Третья часть номера (42)
+
+  // Собираем номер в нужном формате
+  return `+${countryCode} ${areaCode} ${firstPart}-${secondPart}-${thirdPart}`;
+}
+
+function truncateString(str, maxLength) {
+  // Проверяем, если длина строки меньше или равна максимальной, возвращаем ее как есть
+  if (str.length <= maxLength) {
+    return str;
+  }
+
+  // Обрезаем строку и добавляем многоточие
+  return str.slice(0, maxLength - 3) + "..."; // -3 для учета многоточия
+}
 
 onMounted(() => {
   const connectEventSource = () => {
@@ -777,6 +917,40 @@ onMounted(() => {
 /* Уменьшенный паддинг для входящих сообщений с контентом */
 .incoming.has-content {
   padding: 6px; /* Уменьшенный паддинг для входящих сообщений с контентом */
+}
+
+.message-text-delete {
+  font-style: italic;
+}
+
+.reply-content {
+  height: 40px;
+  background-color: #c6e2ad;
+  width: 98%;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #06cf9c;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reply-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #06cf9c;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.reply-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #636363;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .outgoing {

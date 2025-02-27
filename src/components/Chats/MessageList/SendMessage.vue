@@ -23,6 +23,30 @@
     <img class="send" :src="urlImg" alt="" />
   </section>
   <section class="send-message">
+    <section v-if="replyToDataBolean" class="reply-section">
+      <section class="content">
+        <h2 class="number-user">
+          {{ formatPhoneNumber(replyToData.data.from) }}
+        </h2>
+        <h2 class="message-user">
+          {{ replyToData.data.text }}
+        </h2>
+      </section>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        class="close-img"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="m16 16l-4-4m0 0L8 8m4 4l4-4m-4 4l-4 4"
+        />
+      </svg>
+    </section>
     <div class="img-cont">
       <img
         @click="openMessageContent"
@@ -45,6 +69,7 @@
           type="text"
           v-model="messageText"
         />
+
         <img class="smile-img" src="/chats/smile.svg" alt="" />
       </article>
       <img @click="sendMessage" class="send-img" src="/chats/send.svg" alt="" />
@@ -72,10 +97,17 @@ const props = defineProps({
   changeMessageState: {
     type: Function,
   },
+  replyToData: {
+    type: Object,
+  },
+  replyToDataBolean: {
+    type: Boolean,
+  },
 });
 
 // const emit = defineEmits(["updateMessages"]);
-const { chatInfo } = toRefs(props);
+const { chatInfo, replyToData } = toRefs(props);
+console.log(replyToData.value);
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -98,6 +130,26 @@ const openCameraStation = () => {
 const openMessageContent = () => {
   station.messageContent = !station.messageContent;
 };
+
+function formatPhoneNumber(phoneNumber) {
+  // Удаляем все нецифровые символы
+  const cleaned = phoneNumber.replace(/\D/g, "");
+
+  // Проверяем, что номер состоит из 11 цифр (для России)
+  if (cleaned.length !== 11) {
+    throw new Error("Неверный формат номера. Должно быть 11 цифр.");
+  }
+
+  // Форматируем номер
+  const countryCode = cleaned[0]; // Код страны (7 для России)
+  const areaCode = cleaned.slice(1, 4); // Код региона (902)
+  const firstPart = cleaned.slice(4, 7); // Первая часть номера (894)
+  const secondPart = cleaned.slice(7, 9); // Вторая часть номера (13)
+  const thirdPart = cleaned.slice(9, 11); // Третья часть номера (42)
+
+  // Собираем номер в нужном формате
+  return `+${countryCode} ${areaCode} ${firstPart}-${secondPart}-${thirdPart}`;
+}
 
 const changeImgUrl = (url, type) => {
   urlImg.value = url;
@@ -136,12 +188,12 @@ function convertToMicroseconds(date) {
 const microseconds = convertToMicroseconds(); // Вызываем без аргументов
 console.log(microseconds); // Выводит текущее время в формате, подобном 1740179062715000
 
-// Или можно передать конкретную дату
-
 const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
+  console.log("eplyToData.uniq");
+  const replyToUniq = replyToData.value.uniq;
   console.log(generateItem());
   console.log(chatInfo.value.lastMessage.id.remote);
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -159,6 +211,7 @@ const sendMessage = async () => {
         ]
       : [],
     time: Date.now() / 1000,
+    replyTo: replyToUniq,
     outgoing: true,
     state: "send",
   };
@@ -180,6 +233,7 @@ const sendMessage = async () => {
       text: contentText.value ? contentText.value : messageText.value || null,
       time: Date.now() / 1000,
       state: "send",
+      replyTo: replyToUniq,
     },
     reaction: null,
     state: 0,
@@ -202,6 +256,7 @@ const sendMessage = async () => {
     tempId: generateItemNew(),
     time: Date.now() / 1000,
     outgoing: true,
+    replyTo: replyToUniq,
   };
   console.log(message);
   emit("updateMessages", newMessage);
@@ -214,6 +269,7 @@ const sendMessage = async () => {
         msg: message,
         errorMessage: front_message,
         mUniq: chatInfo.value.lastMessage.id.remote,
+        replyTo: replyToUniq,
       },
       {
         headers: {
@@ -253,9 +309,9 @@ const sendMessage = async () => {
 .send-message {
   width: 100%;
   padding: 10px 0px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
   gap: 11px;
 }
 
@@ -307,5 +363,45 @@ const sendMessage = async () => {
   border: 1px solid #d4d4d4;
   padding-left: 10px;
   box-sizing: border-box;
+}
+
+.reply-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  height: 60px;
+  background-color: rgb(236, 236, 236);
+  width: 85%;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border-left: 6px solid #06cf9c;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.number-user {
+  font-size: 14px;
+  font-weight: 500;
+  color: #06cf9c;
+  margin-left: 10px;
+}
+
+.message-user {
+  font-size: 14px;
+  font-weight: 500;
+  color: #636363;
+  margin-left: 10px;
+}
+
+.close-img {
+  width: 35px;
+  height: 35px;
+  stroke: gray;
 }
 </style>

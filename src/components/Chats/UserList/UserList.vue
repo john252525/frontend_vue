@@ -99,12 +99,12 @@ const updateLastMessage = (thread, newLastMessage) => {
   }
 };
 
-const updateCountNewMessage = (thread, newLastMessage) => {
+const updateCountNewMessage = (thread) => {
   const chat = chats.value.find((chat) => chat.uniq === thread);
-
+  console.log(chat.newMessage);
   if (chat) {
-    if (chat.newMessage) {
-      chat.newMessage++;
+    if (chat) {
+      chat.newMessage = chat.newMessage + 1;
       console.log(`Последнее сообщение для ${thread} обновлено`);
     } else {
       console.log(`lastMessage для чата с thread ${thread} не найден`);
