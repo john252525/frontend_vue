@@ -38,10 +38,11 @@
           >
             <div v-if="message.data.replyTo != null" class="reply-content">
               <h2 class="reply-name">
-                {{ formatPhoneNumber(message.data.replyTo.name) }}
+                {{ message.data.replyTo.name }}
+                <!-- {{ formatPhoneNumber(message.data.replyTo.name) }} -->
               </h2>
               <h2 class="reply-text">
-                {{ truncateString(message.data.replyTo.text, 15) }}
+                {{ truncateString(message.data.replyTo.text) }}
               </h2>
             </div>
             <div class="send-reaction-icon-cont">
@@ -327,23 +328,25 @@ const changeMessageState = (newMessage, tempId) => {
     }
 
     // Если replyTo не null, обновляем replyTo для всех сообщений
-    if (newMessage.replyTo !== null) {
-      console.log("newMessage.replyTo !== null");
-      messages.value.forEach((message) => {
-        if (message.data.item !== null) {
-          const replyToMessage = messages.value.find(
-            (msg) => msg.data.item === newMessage.replyTo
-          );
-          console.log(replyToMessage);
-          if (replyToMessage) {
-            newMessages.data.replyTo = {
-              name: message.data.from,
-              text: message.data.text,
-            };
-          }
-        }
-      });
-    }
+    // if (newMessage.replyTo !== null) {
+    //   console.log("newMessage.replyTo !== null");
+    //   messages.value.forEach((message) => {
+    //     if (message.data.item !== null) {
+    //       const replyToMessage = messages.value.find(
+    //         (msg) => msg.data.item === newMessage.replyTo
+    //       );
+
+    //       if (replyToMessage) {
+    //         console.log(message.data.from, message.data.text);
+    //         newMessages.data.replyTo = {
+    //           name: message.data.from,
+    //           text: message.data.text,
+    //           value: true,
+    //         };
+    //       }
+    //     }
+    //   });
+    // }
 
     console.log("новое сообщение newMess", newMessages);
     messages.value.push(newMessages);

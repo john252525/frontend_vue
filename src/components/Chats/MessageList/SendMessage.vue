@@ -214,7 +214,7 @@ const sendMessage = async () => {
         ]
       : [],
     time: Date.now() / 1000,
-    replyTo: replyToUniq,
+    replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
     state: "send",
   };
@@ -236,7 +236,7 @@ const sendMessage = async () => {
       text: contentText.value ? contentText.value : messageText.value || null,
       time: Date.now() / 1000,
       state: "send",
-      replyTo: replyToUniq,
+      replyTo: replyToDataBolean ? replyToUniq : null,
     },
     reaction: null,
     state: 0,
@@ -259,7 +259,7 @@ const sendMessage = async () => {
     tempId: generateItemNew(),
     time: Date.now() / 1000,
     outgoing: true,
-    replyTo: replyToUniq,
+    replyTo: replyToDataBolean ? replyToUniq : null,
   };
   console.log(message);
   emit("updateMessages", newMessage);
@@ -272,7 +272,7 @@ const sendMessage = async () => {
         msg: message,
         errorMessage: front_message,
         mUniq: chatInfo.value.lastMessage.id.remote,
-        replyTo: replyToUniq,
+        replyTo: replyToDataBolean ? replyToUniq : null,
       },
       {
         headers: {
