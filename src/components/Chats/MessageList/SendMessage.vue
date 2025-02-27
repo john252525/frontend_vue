@@ -293,13 +293,18 @@ const sendMessage = async () => {
       urlImg.value = "";
       console.log("Сообщение отправлено:", response.data);
       console.log(message.tempId);
-      props.changeMessageState(response.data.messsage, newMessage.tempId);
+      if (replyToData) {
+        props.changeMessageState(response.data.messsage, newMessage.tempId);
+      }
+
       messageText.value = "";
     } else {
       props.offReplyToDataBolean();
 
       console.log("Сообщение ne отправлено:", response.data);
-      props.changeMessageState(response.data.messsage, newMessage.tempId);
+      if (replyToData) {
+        props.changeMessageState(response.data.messsage, newMessage.tempId);
+      }
       messageText.value = "";
     }
   } catch (error) {
