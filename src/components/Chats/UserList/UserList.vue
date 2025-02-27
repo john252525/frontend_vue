@@ -6,7 +6,8 @@
       v-for="chat in sortedChats"
       :key="chat.unid"
       class="chat-item"
-      @click="selectChat(chat)"
+      :class="{ 'disabled-chat': !isChatClickable }"
+      @click="isChatClickable ? selectChat(chat) : null"
     >
       <div class="chat-user-cont">
         <img
@@ -45,18 +46,27 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, defineProps, toRefs } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+
 const props = defineProps({
+  isChatClickable: {
+    type: Boolean,
+  },
+  blockChat: {
+    type: Function,
+  },
   selectChat: {
     type: Function,
   },
 });
 
+const { isChatClickable } = toRefs(props);
+console.log(isChatClickable.value);
 const errorBlock = ref(false);
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -293,8 +303,32 @@ const playSound = () => {
   transition: background-color 0.3s ease;
 }
 
+.disabled-chat {
+  background-color: #f1f1f1; /* Светло-серый цвет для отключенных чатов */
+  cursor: not-allowed; /* Изменяем курсор на "не разрешен" */
+  opacity: 0.6; /* Уменьшаем непрозрачность, чтобы показать, что элемент отключен */
+  transition: background-color 0.3s ease, opacity 0.3s ease; /* Плавный переход */
+}
+
+.chat-item {
+  transition: background-color 0.3s ease, opacity 0.3s ease; /* Плавный переход для обычного состояния */
+}
+
+/* Добавим эффект при наведении на отключенный чат */
+.disabled-chat:hover {
+  background-color: #e0e0e0; /* Немного темнее при наведении */
+  opacity: 0.7; /* Увеличиваем непрозрачность при наведении */
+}
+
+.disabled-chat {
+  background-color: #f1f1f1;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .chat-item:hover {
   background-color: #f0f0f0;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 .chat-info {

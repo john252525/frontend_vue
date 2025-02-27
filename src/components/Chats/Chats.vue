@@ -1,10 +1,16 @@
 <template>
   <section class="pc-version" v-if="!isMobile && userInfo">
-    <UserList class="user-list" :selectChat="selectChat" />
+    <UserList
+      class="user-list"
+      :selectChat="selectChat"
+      :isChatClickable="isChatClickable"
+      :blockChat="blockChat"
+    />
     <MessageList
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
+      :blockChat="blockChat"
     />
   </section>
   <section class="phone-version" v-if="isMobile && userInfo">
@@ -12,12 +18,15 @@
       v-if="!showMessageList"
       class="phone-user-list"
       :selectChat="selectChat"
+      :isChatClickable="isChatClickable"
+      :blockChat="blockChat"
     />
     <MessageList
       :style="style.messageList"
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
+      :blockChat="blockChat"
     />
   </section>
 </template>
@@ -37,7 +46,8 @@ const style = reactive({
   },
 });
 
-const isMobile = ref(false); // Определяем состояние: мобильное устройство или нет
+const isChatClickable = ref(true);
+const isMobile = ref(false);
 const showMessageList = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -46,6 +56,10 @@ const chatInfo = ref(null);
 // Функция для проверки мобильного устройства
 const checkIfMobile = () => {
   isMobile.value = window.innerWidth <= 768;
+};
+
+const blockChat = () => {
+  isChatClickable.value = !isChatClickable.value;
 };
 
 const changeMessageListStation = () => {

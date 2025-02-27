@@ -38,12 +38,12 @@
           >
             <div v-if="message.data.replyTo != null" class="reply-content">
               <h2 class="reply-name">
-                {{ message.data.replyTo.name }}
-                <!-- {{ formatPhoneNumber(message.data.replyTo.name) }} -->
+                <!-- {{ message.data.replyTo.name }} -->
+                {{ formatPhoneNumber(message.data.replyTo.name) }}
               </h2>
               <h2 class="reply-text">
                 <!-- {{ message.data.replyTo.text }} -->
-                // {{ truncateString(message.data.replyTo.text) }}
+                {{ truncateString(message.data.replyTo.text) }}
               </h2>
             </div>
             <div class="send-reaction-icon-cont">
@@ -61,7 +61,9 @@
             </div>
             <div class="message-content">
               <p
-                v-if="message.data.text && !message.delete"
+                v-if="
+                  (message.data.text && !message.delete) || message.data.content
+                "
                 class="message-text"
               >
                 {{ message.data.text }}
@@ -114,7 +116,7 @@
                     message.data.content[0].type === 'video'
                   "
                   controls
-                  :src="message.content[0].src"
+                  :src="message.data.content[0].src"
                   class="video-message"
                   @click="openVideoMenu(message.data.content[0].src)"
                 >
@@ -166,7 +168,6 @@
                   </svg>
                 </div>
               </div>
-
               <footer>
                 <h2 class="reaction">{{ message.reaction }}</h2>
                 <div class="message-time">
@@ -249,6 +250,9 @@ const props = defineProps({
   changeMessageListStation: {
     type: Function,
   },
+  blockChat: {
+    type: Function,
+  },
 });
 
 const replyToData = ref([]);
@@ -328,26 +332,25 @@ const changeMessageState = (newMessage, tempId) => {
       console.log("Сообщение с таким tempId не найдено:", tempId);
     }
 
-    // Если replyTo не null, обновляем replyTo для всех сообщений
-    // if (newMessage.replyTo !== null) {
-    //   console.log("newMessage.replyTo !== null");
-    //   messages.value.forEach((message) => {
-    //     if (message.data.item !== null) {
-    //       const replyToMessage = messages.value.find(
-    //         (msg) => msg.data.item === newMessage.replyTo
-    //       );
-
-    //       if (replyToMessage) {
-    //         console.log(message.data.from, message.data.text);
-    //         newMessages.data.replyTo = {
-    //           name: message.data.from,
-    //           text: message.data.text,
-    //           value: true,
-    //         };
-    //       }
-    //     }
-    //   });
-    // }
+    if (newMessage.replyTo !== null) {
+      console.log("newMessage.replyTo !== null", newMessage.replyTo);
+      messages.value.forEach((message) => {
+        if (message.data.item !== null) {
+          const replyToMessage = messages.value.find(
+            (msg) => msg.data.item === newMessage.replyTo
+          );
+          console.log(replyToMessage);
+          if (replyToMessage) {
+            console.log(message.data.from, message.data.text);
+            newMessages.data.replyTo = {
+              name: message.data.from,
+              text: message.data.text,
+              value: true,
+            };
+          }
+        }
+      });
+    }
 
     console.log("новое сообщение newMess", newMessages);
     messages.value.push(newMessages);
@@ -469,6 +472,7 @@ const getMessage = async () => {
   console.log(chatInfo.value);
   console.log("chatInfo.value.unid:", chatInfo.value.unid);
   console.log("getMessage вызван в", new Date().toISOString());
+  props.blockChat();
   try {
     const token = localStorage.getItem("accountToken");
     console.log("Token:", token);
@@ -495,7 +499,7 @@ const getMessage = async () => {
 
     if (response.data.ok === true) {
       loading.value = false;
-
+      props.blockChat();
       // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
 
@@ -639,12 +643,26 @@ const updateDeleteMessage = (item) => {
 };
 
 function formatPhoneNumber(phoneNumber) {
-  // Удаляем все нецифровые символы
+  // Проверяем, что phoneNumber является строкой
+  if (typeof phoneNumber !== "string") {
+    console.warn("Предупреждение: phoneNumber должен быть строкой.", {
+      originalInput: phoneNumber,
+    });
+    return "Некорректный формат номера"; // Или можно вернуть null
+  }
+
   const cleaned = phoneNumber.replace(/\D/g, "");
 
   // Проверяем, что номер состоит из 11 цифр (для России)
   if (cleaned.length !== 11) {
-    throw new Error("Неверный формат номера. Должно быть 11 цифр.");
+    console.warn(
+      "Предупреждение: Неверный формат номера. Должно быть 11 цифр.",
+      {
+        originalInput: phoneNumber,
+        cleanedInput: cleaned,
+      }
+    );
+    return "Некорректный формат номера"; // Или можно вернуть null
   }
 
   // Форматируем номер
@@ -659,22 +677,20 @@ function formatPhoneNumber(phoneNumber) {
 }
 
 function truncateString(str, maxLength) {
-  // Проверяем, если str не является строкой или maxLength не является положительным числом
+  // Проверяем, что str является строкой
   if (typeof str !== "string") {
-    return "Данных нет";
+    console.warn("Предупреждение: str должен быть строкой.", {
+      originalInput: str,
+    });
+    return "Некорректный ввод"; // Или можно вернуть пустую строку
   }
 
-  if (typeof maxLength !== "number" || maxLength < 0) {
-    // return "Данных нет";
-  }
-
-  // Проверяем, если длина строки меньше или равна максимальной, возвращаем ее как есть
-  if (str.length <= maxLength) {
+  // Ограничиваем длину строки
+  if (str.length <= 15) {
     return str;
   }
 
-  // Обрезаем строку и добавляем многоточие
-  return str.slice(0, maxLength - 3) + "..."; // -3 для учета многоточия
+  return str.slice(0, 15 - 3) + "...";
 }
 
 onMounted(() => {
