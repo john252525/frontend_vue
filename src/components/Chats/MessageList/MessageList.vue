@@ -334,22 +334,21 @@ const changeMessageState = (newMessage, tempId) => {
 
     if (newMessage.replyTo !== null) {
       console.log("newMessage.replyTo !== null", newMessage.replyTo);
-      messages.value.forEach((message) => {
-        if (message.data.item !== null) {
-          const replyToMessage = messages.value.find(
-            (msg) => msg.data.item === newMessage.replyTo
-          );
-          console.log(replyToMessage);
-          if (replyToMessage) {
-            console.log(message.data.from, message.data.text);
-            newMessages.data.replyTo = {
-              name: message.data.from,
-              text: message.data.text,
-              value: true,
-            };
-          }
-        }
-      });
+
+      // Найти первое сообщение, которое соответствует replyTo
+      const replyToMessage = messages.value.find(
+        (message) =>
+          message.data.item !== null && message.data.item === newMessage.replyTo
+      );
+
+      if (replyToMessage) {
+        console.log(replyToMessage.data.from, replyToMessage.data.text);
+        newMessages.data.replyTo = {
+          name: replyToMessage.data.from,
+          text: replyToMessage.data.text,
+          value: true,
+        };
+      }
     }
 
     console.log("новое сообщение newMess", newMessages);
@@ -364,6 +363,36 @@ const changeMessageState = (newMessage, tempId) => {
   // Вызов функции для отслеживания, удаления и добавления
   trackAndRemoveAndAddMessage(tempId);
   console.log(messages.value); // Исправлено на .value
+};
+
+const updateMessages = (newMessage) => {
+  if (newMessage.replyTo !== null) {
+    console.log("newMessage.replyTo !== null", newMessage.data.replyTo);
+
+    // Найти первое сообщение, которое соответствует replyTo
+    const replyToMessage = messages.value.find(
+      (message) =>
+        message.data.item !== null &&
+        message.data.item === newMessage.data.replyTo
+    );
+
+    if (replyToMessage) {
+      console.log(replyToMessage.data.from, replyToMessage.data.text);
+      newMessage.data.replyTo = {
+        name: replyToMessage.data.from,
+        text: replyToMessage.data.text,
+        value: true,
+      };
+    }
+  }
+
+  messages.value.push(newMessage); // Добавление нового сообщения
+  console.log("Новое сообщение", newMessage);
+  console.log(messages.value); // Логируем текущее состояние массива
+
+  setTimeout(() => {
+    scrollToBottom(); // Прокрутка вниз
+  }, 500);
 };
 
 const modalPosition = ref({ top: 0, left: 0 });
@@ -438,21 +467,6 @@ const scrollToBottom = () => {
   if (scrollContainer.value) {
     scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
   }
-};
-
-const updateMessages = (newMessage) => {
-  // if (!Array.isArray(messages)) {
-  //   console.error("messages не является массивом");
-  //   return; // Выход из функции, если messages не является массивом
-  // }
-
-  messages.value.push(newMessage); // Добавление нового сообщения
-  console.log("Новое сообщение", newMessage);
-  console.log(messages.value); // Логируем текущее состояние массива
-
-  setTimeout(() => {
-    scrollToBottom(); // Прокрутка вниз
-  }, 500);
 };
 
 // Функция для обновления состояния сообщения
