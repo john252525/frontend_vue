@@ -31,7 +31,7 @@
       </div>
       <div class="chat-meta">
         <div class="chat-timestamp">
-          {{ formatTimestamp(chat.timestamp) }}
+          {{ formatTimestamp(chat.data.timestamp) }}
         </div>
         <div class="chat-unread" v-if="chat.newMessage > 0">
           {{ chat.newMessage }}
@@ -193,14 +193,25 @@ const formatTimestamp = (timestamp) => {
     return "Некорректный ввод"; // Или можно вернуть пустую строку
   }
 
-  // Создаем объект Date, передавая timestamp как секунды
-  const date = new Date(timestamp * 1000); // Умножаем на 1000, чтобы получить миллисекунды
+  // Создаем объект Date, передавая timestamp как миллисекунды
+  const date = new Date(timestamp); // Здесь не нужно умножение
 
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
 
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+  const year = date.getFullYear();
+
+  // Возвращаем форматированное время и дату
   return `${hours}:${minutes}`;
 };
+
+// Пример использования
+const timestampMilliseconds = "1740994136000";
+const formattedTime = formatTimestamp(timestampMilliseconds);
+console.log(formattedTime); // Выведет дату и время в формате "DD.MM.YYYY HH:mm:ss"
 
 const sortedChats = computed(() => {
   if (!chats.value) return [];
