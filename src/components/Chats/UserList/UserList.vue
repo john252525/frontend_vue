@@ -31,7 +31,7 @@
       </div>
       <div class="chat-meta">
         <div class="chat-timestamp">
-          {{ formatTimestamp(chat.data.timestamp) }}
+          {{ formatTimestamp(chat.timestamp) }}
         </div>
         <div class="chat-unread" v-if="chat.newMessage > 0">
           {{ chat.newMessage }}
@@ -179,12 +179,23 @@ const test = async () => {
     }
   }
 };
-
 const formatTimestamp = (timestamp) => {
-  // Создаем объект Date, передавая timestamp как миллисекунды
+  // Проверяем, что timestamp является строкой или числом
+  if (typeof timestamp === "string") {
+    // Преобразуем строку в число
+    timestamp = parseFloat(timestamp);
+  }
+
+  if (typeof timestamp !== "number" || isNaN(timestamp)) {
+    console.warn("Предупреждение: timestamp должен быть числом.", {
+      originalInput: timestamp,
+    });
+    return "Некорректный ввод"; // Или можно вернуть пустую строку
+  }
+
+  // Создаем объект Date, передавая timestamp как секунды
   const date = new Date(timestamp * 1000); // Умножаем на 1000, чтобы получить миллисекунды
 
-  // Получаем часы и минуты в локальном времени
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
 
