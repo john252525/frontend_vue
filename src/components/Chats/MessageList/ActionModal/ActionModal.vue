@@ -11,7 +11,9 @@
       <li>
         <p class="option" @click="addDataToReplyMessage(message)">Ответить</p>
       </li>
-      <li><p class="option">Копировать</p></li>
+      <li>
+        <p class="option" @click="copyMessage">Копировать</p>
+      </li>
       <li><p class="option">Отреагировать</p></li>
       <li>
         <p @click="deleteMessage" class="option delete">Удалить</p>
@@ -44,6 +46,7 @@ const props = defineProps({
 const emit = defineEmits();
 const { chatInfo, message } = toRefs(props);
 const apiUrl = import.meta.env.VITE_API_URL;
+
 const deleteMessage = () => {
   console.log(chatInfo.value.lastMessage.id.remote);
   console.log(message.value.uniq);
@@ -70,6 +73,21 @@ const deleteMessageAxios = async (uniq, item) => {
     );
   }
   emit("close");
+};
+
+const copyMessage = () => {
+  const textToCopy = message.value.data.text;
+  console.log(message.value.data.text);
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      console.log("Текст скопирован в буфер обмена");
+      emit("close"); // Закрыть модалку после копирования
+    })
+    .catch((err) => {
+      console.error("Не удалось скопировать текст: ", err);
+      // Здесь можно добавить обработку ошибки, например, показать сообщение пользователю
+    });
 };
 </script>
 

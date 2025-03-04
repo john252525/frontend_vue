@@ -38,6 +38,7 @@
         height="24"
         viewBox="0 0 24 24"
         class="close-img"
+        @click="offReplyToDataBoleanFalse"
       >
         <path
           stroke-linecap="round"
@@ -78,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, toRefs, computed, defineEmits, reactive } from "vue";
+import { ref, toRefs, computed, watch, defineEmits, reactive } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
@@ -104,6 +105,12 @@ const props = defineProps({
     type: Boolean,
   },
   offReplyToDataBolean: {
+    type: Function,
+  },
+  offReplyToDataBoleanFalse: {
+    type: Function,
+  },
+  clearDataToReply: {
     type: Function,
   },
 });
@@ -144,11 +151,11 @@ function formatPhoneNumber(phoneNumber) {
   }
 
   // Форматируем номер
-  const countryCode = cleaned[0]; // Код страны (7 для России)
-  const areaCode = cleaned.slice(1, 4); // Код региона (902)
-  const firstPart = cleaned.slice(4, 7); // Первая часть номера (894)
-  const secondPart = cleaned.slice(7, 9); // Вторая часть номера (13)
-  const thirdPart = cleaned.slice(9, 11); // Третья часть номера (42)
+  const countryCode = cleaned[0];
+  const areaCode = cleaned.slice(1, 4);
+  const firstPart = cleaned.slice(4, 7);
+  const secondPart = cleaned.slice(7, 9);
+  const thirdPart = cleaned.slice(9, 11);
 
   // Собираем номер в нужном формате
   return `+${countryCode} ${areaCode} ${firstPart}-${secondPart}-${thirdPart}`;
@@ -308,11 +315,27 @@ const sendMessage = async () => {
     }
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
+
+    props.changeMessageState(response.data.messsage, newMessage.tempId);
+    if (replyToDataBolean.value) {
+      props.offReplyToDataBolean();
+    }
+    messageText.value = "";
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
   }
 };
+
+watch(
+  chatInfo,
+  (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      props.offReplyToDataBoleanFalse(); // Вызываем функцию при изменении chatInfo
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

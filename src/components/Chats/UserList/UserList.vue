@@ -72,18 +72,18 @@ const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
 const updateChatTimestamp = (thread, newTimestamp) => {
-  // Преобразуем новый временной штамп из наносекунд в секунды
-  const newTimestampInSeconds = Math.floor(newTimestamp / 1000000); // Делим на 1 миллион, чтобы получить секунды
+  // Преобразуем новый timestamp из миллисекунд (предположительно) в секунды
+  const newTimestampInSeconds = Math.floor(newTimestamp / 1000000); // Делим на 1000
 
   // Ищем чат, где uniq соответствует thread
   const chat = chats.value.find((chat) => chat.uniq === thread);
 
   if (chat) {
-    console.log("Новое", newTimestampInSeconds);
-    console.log("Старое", chat.timestamp);
+    console.log("Новое (в секундах):", newTimestampInSeconds);
+    console.log("Старое:", chat.data.timestamp);
 
     // Обновляем timestamp внутри lastMessage
-    chat.timestamp = newTimestampInSeconds;
+    chat.data.timestamp = newTimestampInSeconds;
     console.log(`Timestamp для ${thread} обновлён на ${newTimestampInSeconds}`);
   } else {
     console.log(`Чат с thread ${thread} не найден`);
@@ -182,7 +182,6 @@ const test = async () => {
 const formatTimestamp = (timestamp) => {
   // Проверяем, что timestamp является строкой или числом
   if (typeof timestamp === "string") {
-    // Преобразуем строку в число
     timestamp = parseFloat(timestamp);
   }
 
@@ -193,29 +192,76 @@ const formatTimestamp = (timestamp) => {
     return "Некорректный ввод"; // Или можно вернуть пустую строку
   }
 
-  // Создаем объект Date, передавая timestamp как миллисекунды
-  const date = new Date(timestamp); // Здесь не нужно умножение
+  console.log("Timestamp:", timestamp); // Проверка значения timestamp
 
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
+  // Создаем объект Date, передавая timestamp как секунды
+  const date = new Date(timestamp * 1000); // <---  Умножаем на 1000 (были секунды)
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
-  const year = date.getFullYear();
+  // Проверка, если дата некорректна
+  if (isNaN(date.getTime())) {
+    console.warn("Некорректная дата:", date);
+    return "Некорректная дата"; // Возвращаем сообщение об ошибке
+  }
 
-  // Возвращаем форматированное время и дату
-  return `${hours}:${minutes}`;
+  // Получаем текущую дату
+  const now = new Date();
+
+  // Создаем копию даты "сегодня", чтобы установить время на полночь для сравнения
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+
+  // Создаем дату "вчера"
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  // Получаем дату начала текущей недели (считая с понедельника)
+  const startOfWeek = new Date(today);
+  const dayOfWeek = today.getDay(); // 0 (воскресенье) - 6 (суббота)
+  const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Если воскресенье, вычитаем 6 дней, иначе вычитаем dayOfWeek - 1
+  startOfWeek.setDate(today.getDate() - daysToSubtract);
+
+  // Форматируем дату
+  if (date >= today) {
+    // Если дата сегодня
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  } else if (date >= yesterday && date < today) {
+    // Если дата вчера
+    return "Вчера";
+  } else if (date >= startOfWeek && date < yesterday) {
+    // Если дата на этой неделе
+    const daysOfWeek = [
+      "Воскресенье",
+      "Понедельник",
+      "Вторник",
+      "Среда",
+      "Четверг",
+      "Пятница",
+      "Суббота",
+    ];
+    return daysOfWeek[date.getDay()]; // Возвращаем день недели
+  } else {
+    // Если другая дата
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`; // Возвращаем формат дд.мм.гггг
+  }
 };
 
-// Пример использования
 const timestampMilliseconds = "1740994136000";
 const formattedTime = formatTimestamp(timestampMilliseconds);
 console.log(formattedTime); // Выведет дату и время в формате "DD.MM.YYYY HH:mm:ss"
 
 const sortedChats = computed(() => {
   if (!chats.value) return [];
-  return chats.value.sort((a, b) => b.timestamp - a.timestamp);
+  return [...chats.value].sort((a, b) => {
+    // Создаем копию массива
+    const timestampA = a.data?.timestamp || 0; // Безопасный доступ к вложенному свойству и обработка undefined
+    const timestampB = b.data?.timestamp || 0; // Безопасный доступ к вложенному свойству и обработка undefined
+    return timestampB - timestampA; // Сортируем по убыванию
+  });
 });
 
 onMounted(test);

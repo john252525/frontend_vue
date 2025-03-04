@@ -61,14 +61,34 @@
             </div>
             <div class="message-content">
               <p
-                v-if="
-                  (message.data.text && !message.delete) || message.data.content
+                v-if="message.delete && message.data.text"
+                class="message-text-delete"
+              >
+                Сообщение удалено
+              </p>
+              <p
+                v-else-if="!message.delete && message.data.text"
+                class="message-text"
+              >
+                {{ message.data.text }}
+              </p>
+              <p
+                v-else-if="
+                  (!message.delete && message.data.content.length > 0) ||
+                  message.data.text
                 "
                 class="message-text"
               >
                 {{ message.data.text }}
               </p>
+              <p
+                v-else-if="message.delete && message.data.content.length > 0"
+                class="message-text-delete"
+              >
+                Сообщение удалено
+              </p>
               <p v-else class="message-text-delete">Сообщение удалено</p>
+
               <div
                 v-if="
                   message.data.state === 'send' &&
@@ -216,6 +236,8 @@
           :replyToData="replyToData"
           :replyToDataBolean="replyToDataBolean"
           :offReplyToDataBolean="offReplyToDataBolean"
+          :offReplyToDataBoleanFalse="offReplyToDataBoleanFalse"
+          :clearDataToReply="clearDataToReply"
         />
       </section>
     </section>
@@ -292,8 +314,18 @@ const addDataToReply = (data) => {
   console.log(replyToData.value);
 };
 
+const clearDataToReply = () => {
+  replyToData.value = [];
+  console.log("данныз нет");
+};
+
 const offReplyToDataBolean = () => {
   replyToDataBolean.value = !replyToDataBolean.value;
+};
+
+const offReplyToDataBoleanFalse = () => {
+  replyToDataBolean.value = false;
+  clearDataToReply();
 };
 
 const changeMessageState = (newMessage, tempId) => {
@@ -1044,13 +1076,13 @@ onMounted(() => {
   box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02);
 }
 
-.outgoing:hover .send-reaction-icon-cont {
+/* .outgoing:hover .send-reaction-icon-cont {
   display: flex;
-}
+} */
 
-.send-reaction-icon:hover {
+/* .send-reaction-icon:hover {
   display: flex;
-}
+} */
 
 .incoming {
   margin: 5px 30px;
