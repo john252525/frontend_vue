@@ -22,9 +22,11 @@
               class="table-text"
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
+              v-if="item.step.value"
             >
               {{ item.step.value }}
             </td>
+            <td class="table-text" v-else>Пусто</td>
             <td class="table-action-text">
               <button
                 class="action-table-button"

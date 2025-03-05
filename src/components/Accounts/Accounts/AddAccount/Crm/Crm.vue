@@ -46,6 +46,9 @@ const props = defineProps({
   selectType: {
     type: Function,
   },
+  changeAcooundDataButton: {
+    type: Function,
+  },
 });
 const emit = defineEmits();
 const isDropdownOpen = ref(false);
@@ -85,7 +88,13 @@ const filterOptions = () => {
 const selectOption = (option) => {
   props.selectType(option);
   searchQuery.value = option;
-  showOptions.value = false; // Скрыть список
+  showOptions.value = false;
+  if (option === "Bitrix24") {
+    props.changeAcooundDataButton();
+  }
+  if (option === "AmoCRM") {
+    props.changeAcooundDataButton();
+  }
 };
 
 watch(searchQuery, filterOptions);

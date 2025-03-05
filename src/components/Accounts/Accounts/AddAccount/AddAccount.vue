@@ -48,6 +48,7 @@
       @update-login="updateLogin"
       @update-token="updateToken"
       :selectType="selectType"
+      :changeAcooundDataButton="changeAcooundDataButton"
       v-if="accountData.category === 'CRM'"
     />
     <section v-else>
@@ -281,6 +282,11 @@ const addAccount = async () => {
   }
 };
 
+const changeAcooundDataButton = () => {
+  accountData.button = true;
+  console.log(true);
+};
+
 const checkInputTelegram = () => {
   accountData.button = accountData.tgLogin.trim() !== "";
 };
@@ -318,7 +324,13 @@ const AddAccount = () => {
     if (accountData.category === "Messenger") {
       console.log("category: Messenger");
     } else if (accountData.category === "CRM") {
-      console.log("category: CRM");
+      if (accountData.type === "Bitrix24") {
+        addAccount();
+        return;
+      } else if (accountData.type === "AmoCRM") {
+        addAccount();
+        return;
+      }
     }
   }
   if (!accountData.messenger) {
