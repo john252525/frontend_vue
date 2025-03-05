@@ -14,7 +14,7 @@
       <li>
         <p class="option" @click="copyMessage">Копировать</p>
       </li>
-      <li><p class="option">Отреагировать</p></li>
+      <!-- <li><p class="option">Отреагировать</p></li> -->
       <li>
         <p @click="deleteMessage" class="option delete">Удалить</p>
       </li>

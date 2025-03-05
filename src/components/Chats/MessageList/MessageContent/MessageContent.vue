@@ -1,4 +1,5 @@
 <template>
+  <div @click="openMessageContent" class="cont"></div>
   <section class="list-content-section">
     <ul>
       <li @click="openFileExplorer">
@@ -180,6 +181,15 @@ ul {
 
 .camera {
   fill: #f13333;
+}
+
+.cont {
+  position: fixed;
+  z-index: 0;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
 }
 
 .list-content-section.fade-enter-active,

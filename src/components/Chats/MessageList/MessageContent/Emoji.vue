@@ -1,75 +1,5 @@
-<!-- <template>
-  <div>
-    <h1>Отправка вебхука</h1>
-    <button @click="sendWebhook">Отправить вебхук</button>
-    <p v-if="responseMessage">{{ responseMessage }}</p>
-    <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
-  </div>
-</template>
-
-<script>
-import axios from "axios";
-const timestampInMicroseconds = 1740396250000000;
-const timestampInSeconds = timestampInMicroseconds / 1000000;
-console.log(timestampInSeconds);
-
-const formatTimestamp = (timestamp) => {
-  let seconds;
-
-  // Проверяем, в каком формате передан timestamp
-  if (timestamp > 1_000_000_000) {
-    // Если больше 1 миллиарда, значит это микросекунды
-    seconds = timestamp / 1_000_000; // Переводим в секунды
-  } else {
-    seconds = timestamp;
-  }
-
-  const date = new Date(seconds * 1000); // Умножаем на 1000 для перевода в миллисекунды
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
-
-console.log(formatTimestamp(1740425496));
-export default {
-  data() {
-    return {
-      responseMessage: "",
-      errorMessage: "",
-    };
-  },
-  methods: {
-    async sendWebhook() {
-      const message = {
-        time: 1740422296000000,
-        thread: "79198670001@c.us",
-        outgoing: true,
-        replyTo: null,
-        text: "куыыss1hjbvыыssss",
-        content: [{ type: "reaction", src: "😀" }],
-        hook_type: "add_message_reaction",
-        item: "3EB009238C051FCF60849A",
-      };
-
-      try {
-        const response = await axios.post(
-          "http://localhost:4000/api/webhook",
-          message
-        );
-        this.responseMessage = "Вебхук успешно отправлен: " + response.data;
-        this.errorMessage = ""; // очищаем сообщение об ошибке
-      } catch (error) {
-        this.errorMessage = "Ошибка при отправке вебхука: " + error.message;
-        this.responseMessage = ""; // очищаем сообщение об успехе
-      }
-    },
-  },
-};
-</script>
-
-<style scoped>
-/* Добавьте стили, если необходимо */
-</style> -->
-
 <template>
+  <div @click="closeEmojiModal" class="cont"></div>
   <section class="modal">
     <section class="modal-content">
       <!-- <span class="close" @click="$emit('close')">&times;</span> -->
@@ -182,22 +112,22 @@ export default {
           </svg>
         </div>
         <!-- <div class="svg-icon-cont">
-          <svg
-            @click="setCategory('symbols')"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            class="svg-icon"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 3C4.239 3 2 5.216 2 7.95c0 2.207.875 7.445 9.488 12.74a.985.985 0 0 0 1.024 0C21.126 15.395 22 10.157 22 7.95C22 5.216 19.761 3 17 3s-5 3-5 3s-2.239-3-5-3"
-            />
-          </svg>
-        </div> -->
+            <svg
+              @click="setCategory('symbols')"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              class="svg-icon"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 3C4.239 3 2 5.216 2 7.95c0 2.207.875 7.445 9.488 12.74a.985.985 0 0 0 1.024 0C21.126 15.395 22 10.157 22 7.95C22 5.216 19.761 3 17 3s-5 3-5 3s-2.239-3-5-3"
+              />
+            </svg>
+          </div> -->
       </article>
       <div v-if="currentCategory">
         <div>
@@ -219,10 +149,12 @@ export default {
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
-const emojis = ref({}); // Начальное значение для эмодзи
-const currentCategory = ref(null); // Текущая категория
+const emit = defineEmits();
+const emojiModal = ref(null);
+const emojis = ref({});
+const currentCategory = ref("faces");
 const categoryIcons = [
   { label: "Faces", category: "faces" },
   { label: "Animals", category: "animals" },
@@ -235,38 +167,62 @@ const categoryIcons = [
 ];
 
 const setCategory = (category) => {
-  currentCategory.value = category; // Устанавливаем текущую категорию
+  currentCategory.value = category;
 };
 
 const addEmoji = (emoji) => {
-  console.log(emoji);
+  emit("addEmoji", emoji);
 };
 
-onMounted(async () => {
+const closeEmojiModal = () => {
+  emit("closeEmoji");
+};
+
+const handleClickOutside = (event) => {
+  if (emojiModal.value && !emojiModal.value.contains(event.target)) {
+    closeEmojiModal();
+  }
+};
+document.addEventListener("click", handleClickOutside);
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  fetchEmojis();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+
+const fetchEmojis = async () => {
   try {
-    const response = await fetch("/emojis.json"); // Загружаем JSON файл
+    const response = await fetch("/emojis.json");
     if (!response.ok) {
       throw new Error("Сеть не отвечает");
     }
     const data = await response.json();
-    emojis.value = data.emojis; // Сохраняем все категории эмодзи в состоянии компонента
+    emojis.value = data.emojis;
   } catch (error) {
     console.error("Ошибка при загрузке эмодзи:", error);
   }
-});
+};
 </script>
-
 <style scoped>
 .modal {
   display: block;
   position: fixed;
   z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  right: 20px;
+  bottom: 70px;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.cont {
+  position: fixed;
+  z-index: 0;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
 }
 
 .title {
@@ -280,9 +236,7 @@ onMounted(async () => {
 
 .modal-content {
   background-color: #fefefe;
-  margin: 15% auto;
   padding: 20px;
-  border: 1px solid #888;
   width: 300px;
   display: flex;
   align-items: center;

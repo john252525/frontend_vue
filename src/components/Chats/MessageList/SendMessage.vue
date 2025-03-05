@@ -56,6 +56,11 @@
         alt=""
       />
       <article class="smile-img-cont">
+        <Emoji
+          v-if="station.emoji"
+          @closeEmoji="closeEmojiModal"
+          @addEmoji="insertEmoji"
+        />
         <input
           v-if="urlImg"
           class="send-message-input"
@@ -70,8 +75,12 @@
           type="text"
           v-model="messageText"
         />
-
-        <img class="smile-img" src="/chats/smile.svg" alt="" />
+        <img
+          @click="changeStatinonEmoji"
+          class="smile-img"
+          src="/chats/smile.svg"
+          alt=""
+        />
       </article>
       <img @click="sendMessage" class="send-img" src="/chats/send.svg" alt="" />
     </div>
@@ -84,6 +93,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
 import Camera from "./MessageContent/checkContent/Camera.vue";
+import Emoji from "./MessageContent/Emoji.vue";
 const router = useRouter();
 import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -131,7 +141,16 @@ const typeUrl = ref(false);
 const station = reactive({
   messageContent: false,
   cameraStation: false,
+  emoji: false,
 });
+
+const changeStatinonEmoji = () => {
+  station.emoji = !station.emoji;
+};
+
+const closeEmojiModal = () => {
+  station.emoji = false;
+};
 
 const openCameraStation = () => {
   station.cameraStation = !station.cameraStation;
@@ -160,6 +179,14 @@ function formatPhoneNumber(phoneNumber) {
   // Собираем номер в нужном формате
   return `+${countryCode} ${areaCode} ${firstPart}-${secondPart}-${thirdPart}`;
 }
+
+const insertEmoji = (emoji) => {
+  if (contentText.value) {
+    contentText.value += emoji; // Добавляем эмодзи в contentText
+  } else {
+    messageText.value += emoji; // Добавляем эмодзи в messageText
+  }
+};
 
 const changeImgUrl = (url, type) => {
   urlImg.value = url;
@@ -202,6 +229,7 @@ const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
+  changeStatinonEmoji();
   console.log("eplyToData.uniq");
   const replyToUniq = replyToData.value.uniq;
   console.log(generateItem());

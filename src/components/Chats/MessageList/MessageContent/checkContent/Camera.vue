@@ -1,5 +1,5 @@
 <template>
-  <div class="black-fon"></div>
+  <div @click="openCameraStation" class="black-fon"></div>
   <section class="camera-container">
     <video
       ref="videoElement"

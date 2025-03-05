@@ -434,55 +434,58 @@ const openModal = (event, item) => {
     activeMessage.value = item;
     const rect = event.currentTarget.getBoundingClientRect();
 
-    // Определяем максимальную ширину сообщения
+    // Определяем максимальную ширину и высоту сообщения
     const messageWidth = rect.width; // Ширина сообщения
-    const maxWidth = 400; // Задайте максимальную ширину, при которой модальное окно будет отображаться сверху
-
-    // Определяем максимальную высоту сообщения
+    const maxWidth = 400; // Максимальная ширина
     const messageHeight = rect.height; // Высота сообщения
-    const maxHeight = 100; // Задайте максимальную высоту, при которой модальное окно будет отображаться над сообщением
+    const maxHeight = 100; // Максимальная высота
 
-    // Для входящих сообщений
-    if (!item.data.outgoing) {
-      if (messageWidth > maxWidth) {
-        // Если ширина сообщения слишком большая, отображаем модальное окно сверху
-        modalPosition.value = {
-          top: rect.top + window.scrollY - 50, // Позиция над сообщением
-          left: rect.left + window.scrollX + 10, // Позиция справа от сообщения с отступом
-        };
-      } else if (messageHeight > maxHeight) {
-        // Если сообщение слишком длинное, отображаем модальное окно выше
-        modalPosition.value = {
-          top: rect.top + window.scrollY - 50, // Позиция над сообщением
-          left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
-        };
-      } else {
-        // Если сообщение не слишком длинное
-        modalPosition.value = {
-          top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
-          left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
-        };
-      }
+    // Проверяем, является ли сообщение последним
+    const isLastMessage = item === messages.value[messages.value.length - 1];
+    console.log(messages.value[messages.value.length - 1]);
+    if (isLastMessage) {
+      // Если сообщение последнее, отображаем меню над ним
+      modalPosition.value = {
+        top: rect.top + window.scrollY - 120,
+        left: rect.left + window.scrollX - 150, // Позиция справа от сообщения с отступом
+      };
     } else {
-      // Для исходящих сообщений
-      if (messageWidth > maxWidth) {
-        // Если ширина сообщения слишком большая, отображаем модальное окно сверху
-        modalPosition.value = {
-          top: rect.top + window.scrollY - 120, // Позиция над сообщением
-          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
-        };
-      } else if (messageHeight > maxHeight) {
-        // Если сообщение слишком длинное, отображаем модальное окно выше
-        modalPosition.value = {
-          top: rect.top + window.scrollY - 50, // Позиция над сообщением
-          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
-        };
+      // Для входящих сообщений
+      if (!item.data.outgoing) {
+        if (messageWidth > maxWidth) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50, // Позиция над сообщением
+            left: rect.left + window.scrollX + 10, // Позиция справа от сообщения с отступом
+          };
+        } else if (messageHeight > maxHeight) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50, // Позиция над сообщением
+            left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
+          };
+        } else {
+          modalPosition.value = {
+            top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
+            left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
+          };
+        }
       } else {
-        // Если сообщение не слишком длинное
-        modalPosition.value = {
-          top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
-          left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
-        };
+        // Для исходящих сообщений
+        if (messageWidth > maxWidth) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 120,
+            left: rect.left + window.scrollX - 150,
+          };
+        } else if (messageHeight > maxHeight) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50, // Позиция над сообщением
+            left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
+          };
+        } else {
+          modalPosition.value = {
+            top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
+            left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
+          };
+        }
       }
     }
   }
