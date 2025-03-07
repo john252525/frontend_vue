@@ -95,7 +95,7 @@ const createUser = async () => {
         },
       }
     );
-    navigateTo("/accounts");
+
     console.log(response.data);
   } catch (error) {
     console.error("Ошибка при создании платежа:", error);
@@ -122,8 +122,9 @@ const loginAccount = async () => {
       localStorage.setItem("accountData", formData.login);
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
-      createUser();
+      await createUser();
       console.log(response.data);
+      navigateTo("/accounts");
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);

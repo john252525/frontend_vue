@@ -24,7 +24,7 @@ const routes = [
   {
     path: "/",
     name: "MainPage",
-    component: MainPage,
+    component: PersonalAccount,
     meta: { title: "Главная страница" },
   },
   {

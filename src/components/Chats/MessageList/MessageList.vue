@@ -531,7 +531,7 @@ const getMessage = async () => {
       `${apiUrl}/getChatMessages`,
       {
         source: "whatsapp",
-        login: "helly",
+        login: chatInfo.value.loginUser,
         to: chatInfo.value.phone,
         uniq: chatInfo.value.lastMessage.id.remote,
       },

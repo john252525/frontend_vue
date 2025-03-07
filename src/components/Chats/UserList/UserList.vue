@@ -49,9 +49,10 @@ import axios from "axios";
 import { onMounted, ref, computed, defineProps, toRefs } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 
 const props = defineProps({
   isChatClickable: {
@@ -143,14 +144,29 @@ const test = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   console.log("userInfo:", userInfo);
 
+  const isMulti = computed(() => {
+    return route.query.multi === "true"; // Проверяем значение multi
+  });
+
+  console.log("Значение multi:", route.query.multi);
+  console.log("isMulti:", isMulti.value);
+
   try {
     const token = localStorage.getItem("accountToken");
     console.log("Token:", token);
+
+    // Получаем логин в зависимости от значения multi
+    const logins = isMulti.value
+      ? JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []
+      : userInfo?.login;
+
+    console.log("Используемый логин:", logins);
+
     const response = await axios.post(
       `${apiUrl}/getChats`,
       {
         source: userInfo?.source,
-        login: userInfo?.login,
+        login: logins, // Используем определенный логин
       },
       {
         headers: {
@@ -179,6 +195,7 @@ const test = async () => {
     }
   }
 };
+
 const formatTimestamp = (timestamp) => {
   // Проверяем, что timestamp является строкой или числом
   if (typeof timestamp === "string") {

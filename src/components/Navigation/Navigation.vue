@@ -38,7 +38,7 @@
           </svg>
           <p class="page">Рассылки</p>
         </li>
-        <li class="list">
+        <li @click="navigateToChats" class="list">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="svg-icon"
@@ -156,7 +156,7 @@
             </svg>
             <p class="page">Рассылки</p>
           </li>
-          <li class="list">
+          <li @click="navigateToChats" class="list">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="svg-icon"
@@ -233,6 +233,10 @@ const isOpen = ref(false);
 
 const openList = () => {
   isOpen.value = !isOpen.value;
+};
+
+const navigateToChats = () => {
+  router.push({ name: "Chats", query: { mode: "widget", multi: true } });
 };
 
 const clickMenu = (page) => {

@@ -189,12 +189,12 @@ const getAccounts = async () => {
     );
 
     if (response.data.ok === true) {
-      // Исправлено на сравнение
       accounts.value = response.data;
       instanceData.value = accounts.value.data.instances.map((instance) => ({
         ...instance,
         step: instance.step === null ? "Н/Д" : instance.step,
       }));
+
       if (instanceData.value.length === 0) {
         console.log("данных нет");
         loadDataStation.value = false;
@@ -202,6 +202,46 @@ const getAccounts = async () => {
       } else {
         loadDataStation.value = false;
         dataStation.value = true;
+
+        // Проверяем, если source равен "whatsapp"
+        if (localStorage.getItem("accountStation") === "whatsapp") {
+          // Цикл по всем экземплярам
+          for (const instance of instanceData.value) {
+            const login = instance.login; // Извлекаем логин
+
+            // Запрос для каждого логина
+            const infoResponse = await getInfoWhats(instance.source, login);
+            if (
+              infoResponse &&
+              infoResponse.data &&
+              infoResponse.data.data.step &&
+              infoResponse.data.data.step.value === 5
+            ) {
+              // Получаем существующие логины из localStorage
+              const existingLogins =
+                JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) ||
+                [];
+
+              // Проверяем, есть ли логин в существующих
+              if (!existingLogins.includes(login)) {
+                existingLogins.push(login); // Добавляем логин, если его нет в массиве
+                localStorage.setItem(
+                  "loginWhatsAppChatsStep",
+                  JSON.stringify(existingLogins)
+                );
+                console.log(
+                  "Логины в localStorage:",
+                  localStorage.getItem("loginWhatsAppChatsStep")
+                );
+              } else {
+                console.log(`Логин "${login}" уже существует в localStorage.`);
+                console.log(
+                  JSON.parse(localStorage.getItem("loginWhatsAppChatsStep"))
+                );
+              }
+            }
+          }
+        }
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -224,6 +264,30 @@ const getAccounts = async () => {
       error.value = error.message || "Произошла ошибка.";
       console.error("Ошибка при получении списка аккаунтов:", error);
     }
+  }
+};
+
+// Функция getInfo
+const getInfoWhats = async (source, login) => {
+  try {
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/getInfo",
+      {
+        source: source,
+        login: login,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
+    console.log(response.data);
+    return response;
+  } catch (error) {
+    console.error("Ошибка при получении информации:", error);
+    return null; // Возвращаем null в случае ошибки
   }
 };
 

@@ -26,7 +26,7 @@
         <span
           class="action"
           v-if="chatsStation === true"
-          @click="navigateToChat"
+          @click="connectToDatabaseAndNavigate"
           >Чат</span
         >
         <span class="action" @click="getNewProxy">Сменить прокси</span>
@@ -138,6 +138,7 @@ const props = defineProps({
 const emit = defineEmits();
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);
 import { useRouter } from "vue-router";
+import WhatsApp from "./ModalAccount/GetByCode/WhatsApp.vue";
 const updateLoadingStation = ref(false);
 const qrData = ref([]);
 const accountStationText = localStorage.getItem("accountStation");
@@ -186,6 +187,22 @@ const errorStationOff = () => {
   stationLoading.account.error = true;
 };
 
+const connectToDatabaseAndNavigate = async () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  console.log(localStorage.getItem("accountData"));
+  try {
+    const response = await axios.post(`${apiUrl}/connect`, {
+      source: "whatsapp",
+      login: selectedItem.value.login,
+      token: `token`,
+    });
+
+    router.push({ name: "Chats", query: { mode: "widget" } });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const navigateToChat = () => {
   router.push({ name: "Chats", query: { mode: "widget" } });
 };
@@ -196,6 +213,7 @@ const ChangeconfirmStation = () => {
 
 const ChangeconfirmStationReset = () => {
   confirmStation.reset = !confirmStation.reset;
+  console.log(selectedItem.value);
 };
 
 const loadingStart = (value) => {
