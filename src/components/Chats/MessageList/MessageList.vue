@@ -332,7 +332,6 @@ const changeMessageState = (newMessage, tempId) => {
   console.log("вгеме77ше 1в", tempId);
   console.log(newMessage);
 
-  // Создаем новый объект сообщения
   const newMessages = {
     uniq: newMessage.item,
     timestamp: newMessage.time,

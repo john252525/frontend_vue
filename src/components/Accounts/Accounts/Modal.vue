@@ -23,9 +23,10 @@
         <span class="action action-throw" @click="ChangeconfirmStationReset"
           >Сбросить</span
         >
+        <span class="action-loading" v-if="chatsStation === false">Чат</span>
         <span
           class="action"
-          v-if="chatsStation === true"
+          v-else="chatsStation === true"
           @click="connectToDatabaseAndNavigate"
           >Чат</span
         >
@@ -566,6 +567,32 @@ const resetAccount = async () => {
   color: #000;
   cursor: pointer;
   padding: 4px;
+}
+
+.action-loading {
+  font-weight: 400;
+  font-size: 14px;
+  color: #5f5f5f;
+  cursor: pointer;
+  animation: shimmer 1s infinite;
+  padding: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.action-loading:hover {
+  background-color: #eeeeee;
+  border-radius: 5px 0px 0px 5px;
 }
 
 .action:hover {
