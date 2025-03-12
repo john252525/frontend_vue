@@ -49,6 +49,9 @@ const props = defineProps({
   changeAcooundDataButton: {
     type: Function,
   },
+  selectCrmType: {
+    type: Function,
+  },
 });
 const emit = defineEmits();
 const isDropdownOpen = ref(false);
@@ -85,10 +88,28 @@ const filterOptions = () => {
   });
 };
 
+const isValidUrl = (string) => {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
 const selectOption = (option) => {
   props.selectType(option);
   searchQuery.value = option;
   showOptions.value = false;
+
+  // Проверяем, является ли option валидной ссылкой
+  const isLink = isValidUrl(option);
+
+  if (isLink) {
+    props.selectCrmType(option); // Выполняем функцию, только если это ссылка
+    props.changeAcooundDataButton();
+  }
+
   if (option === "Bitrix24") {
     props.changeAcooundDataButton();
   }

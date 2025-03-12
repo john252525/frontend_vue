@@ -230,7 +230,8 @@ const specificMicroseconds = convertToMicroseconds(date);
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
   changeStatinonEmoji();
-  console.log("eplyToData.uniq");
+  console.log("ВАЫАЫВВЫЫАВАЫАВЫВ", chatInfo.value.loginUser);
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;
   console.log(generateItem());
   console.log(chatInfo.value.lastMessage.id.remote);
@@ -248,6 +249,8 @@ const sendMessage = async () => {
           },
         ]
       : [],
+    from: "79027631667",
+    // from: chatInfo.value.lastMessage?.from,
     time: Date.now() / 1000,
     replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
@@ -267,6 +270,7 @@ const sendMessage = async () => {
           ]
         : [],
       item: "3EB0NEWUNIQUEID",
+      from: "79027631667",
       outgoing: true,
       text: contentText.value ? contentText.value : messageText.value || null,
       time: Date.now() / 1000,
@@ -293,6 +297,7 @@ const sendMessage = async () => {
     state: "error",
     tempId: generateItemNew(),
     time: Date.now() / 1000,
+    from: "79027631667",
     outgoing: true,
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
@@ -303,7 +308,7 @@ const sendMessage = async () => {
       `${apiUrl}/sendMessage`,
       {
         source: "whatsapp",
-        login: "helly",
+        login: chatInfo.value.loginUser,
         msg: message,
         errorMessage: front_message,
         mUniq: chatInfo.value.lastMessage.id.remote,

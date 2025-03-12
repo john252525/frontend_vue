@@ -5,12 +5,14 @@
       :selectChat="selectChat"
       :isChatClickable="isChatClickable"
       :blockChat="blockChat"
+      :webhookEventData="webhookEventData"
     />
     <MessageList
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
       :blockChat="blockChat"
+      :changeWebhookEventData="changeWebhookEventData"
     />
   </section>
   <section class="phone-version" v-if="isMobile && userInfo">
@@ -20,13 +22,17 @@
       :selectChat="selectChat"
       :isChatClickable="isChatClickable"
       :blockChat="blockChat"
+      :chatInfo="chatInfo"
+      :webhookEventData="webhookEventData"
+      :chats="chats"
+      :getChats="getChats"
     />
     <MessageList
-      :style="style.messageList"
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
       :blockChat="blockChat"
+      :changeWebhookEventData="changeWebhookEventData"
     />
   </section>
 </template>
@@ -46,6 +52,12 @@ const style = reactive({
   },
 });
 
+const webhookEventData = ref({
+  hook_type: null,
+  // ... другие свойства с начальными значениями
+});
+
+const chats = ref(null);
 const isChatClickable = ref(true);
 const isMobile = ref(false);
 const showMessageList = ref(false);
@@ -53,9 +65,15 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 
-// Функция для проверки мобильного устройства
 const checkIfMobile = () => {
   isMobile.value = window.innerWidth <= 768;
+};
+
+const changeWebhookEventData = (data) => {
+  const transformedData = {
+    hook_type: data.hook_type,
+  };
+  webhookEventData.value = data;
 };
 
 const blockChat = () => {
@@ -101,6 +119,47 @@ const clearNewMessages = async (uniq) => {
     console.error("Ошибка при очистке новых сообщений:", error);
   }
 };
+
+onMounted(() => {
+  const connectEventSource = () => {
+    const eventSource = new EventSource(
+      "https://hellychat.apitter.com/api/events"
+    );
+
+    const receivedMessageIds =
+      JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
+
+    eventSource.onmessage = (event) => {
+      const eventData = JSON.parse(event.data);
+
+      console.log(eventData);
+
+      // Проверяем тип события
+      if (eventData.hook_type === "message") {
+        changeWebhookEventData(eventData);
+        console.log(
+          "новое сообщения для чата от ивана кикунаныыыыыыыыыыыыыыыыыыыыыыыыыан"
+        );
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("Ошибка соединения:", error);
+      eventSource.close(); // Закрываем текущее соединение
+      // Пытаемся переподключиться через 3 секунды
+      setTimeout(() => {
+        console.log("Попытка переподключения...");
+        connectEventSource();
+      }, 3000);
+    };
+
+    eventSource.onopen = () => {
+      console.log("Соединение установлено");
+    };
+  };
+
+  connectEventSource();
+});
 
 onMounted(() => {
   // Проверяем мобильное устройство при монтировании

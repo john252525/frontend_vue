@@ -7,7 +7,7 @@
       :key="chat.unid"
       class="chat-item"
       :class="{ 'disabled-chat': !isChatClickable }"
-      @click="isChatClickable ? selectChat(chat) : null"
+      @click="isChatClickable ? selectChatClick(chat) : null"
     >
       <div class="chat-user-cont">
         <img
@@ -46,7 +46,7 @@
 
 <script setup>
 import axios from "axios";
-import { onMounted, ref, computed, defineProps, toRefs } from "vue";
+import { onMounted, ref, watch, computed, defineProps, toRefs } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter, useRoute } from "vue-router";
@@ -64,13 +64,22 @@ const props = defineProps({
   selectChat: {
     type: Function,
   },
+  webhookEventData: {
+    type: Object,
+  },
 });
 
-const { isChatClickable } = toRefs(props);
+const { isChatClickable, webhookEventData } = toRefs(props);
 console.log(isChatClickable.value);
 const errorBlock = ref(false);
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const chatInfo = ref(null);
+
+const selectChatClick = (chat) => {
+  props.selectChat(chat);
+  chatInfo.value = chat;
+};
 
 const updateChatTimestamp = (thread, newTimestamp) => {
   // Преобразуем новый timestamp из миллисекунд (предположительно) в секунды
@@ -92,13 +101,14 @@ const updateChatTimestamp = (thread, newTimestamp) => {
 };
 
 const updateLastMessage = (thread, newLastMessage) => {
-  console.log(newLastMessage);
+  // console.log(
+  //   "СОООООООООООООООООООООБЩЕНИЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ",
+  //   newLastMessage
+  // );
   const chat = chats.value.find((chat) => chat.uniq === thread);
-
-  // Проверяем, найден ли чат
+  console.log(thread, "чат thread message");
   if (chat) {
-    // Проверяем, существует ли lastMessage
-    console.log();
+    console.log(chat);
     if (chat.data.lastMessage) {
       chat.data.lastMessage.body = newLastMessage;
       console.log(`Последнее сообщение для ${thread} обновлено`);
@@ -206,21 +216,18 @@ const formatTimestamp = (timestamp) => {
     console.warn("Предупреждение: timestamp должен быть числом.", {
       originalInput: timestamp,
     });
-    return "Некорректный ввод"; // Или можно вернуть пустую строку
+    return "Некорректный ввод";
   }
-
-  console.log("Timestamp:", timestamp); // Проверка значения timestamp
 
   // Создаем объект Date, передавая timestamp как секунды
   const date = new Date(timestamp * 1000); // <---  Умножаем на 1000 (были секунды)
-
+  console.log(date, "ДАААААААТАААААААААААААААААААААААААААА");
   // Проверка, если дата некорректна
   if (isNaN(date.getTime())) {
     console.warn("Некорректная дата:", date);
     return "Некорректная дата"; // Возвращаем сообщение об ошибке
   }
 
-  // Получаем текущую дату
   const now = new Date();
 
   // Создаем копию даты "сегодня", чтобы установить время на полночь для сравнения
@@ -293,64 +300,81 @@ const formatLastMessage = (message) => {
 
 const audio = ref(null);
 
-onMounted(() => {
-  // Создаем аудио объект при монтировании компонента
-  audio.value = new Audio("/chats/newMessage.mp3");
+// onMounted(() => {
+//   audio.value = new Audio("/chats/newMessage.mp3");
 
-  const connectEventSource = () => {
-    const eventSource = new EventSource(
-      "https://hellychat.apitter.com/api/events"
-    );
+//   const connectEventSource = () => {
+//     const eventSource = new EventSource(
+//       "https://hellychat.apitter.com/api/events"
+//     );
 
-    // Получаем массив идентификаторов из localStorage или создаем новый
-    const receivedMessageIds =
-      JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
+//     // Получаем массив идентификаторов из localStorage или создаем новый
+//     const receivedMessageIds =
+//       JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
 
-    eventSource.onmessage = (event) => {
-      const eventData = JSON.parse(event.data);
+//     eventSource.onmessage = (event) => {
+//       const eventData = JSON.parse(event.data);
 
-      console.log(eventData);
+//       console.log(eventData);
 
-      // Проверяем тип события
-      if (eventData.hook_type === "message") {
-        // Проверка на уникальность сообщения
-        if (!receivedMessageIds.includes(eventData.item)) {
-          // Сохраняем идентификатор в localStorage
-          receivedMessageIds.push(eventData.item);
-          localStorage.setItem(
-            "receivedMessageIds",
-            JSON.stringify(receivedMessageIds)
-          );
+//       if (eventData.hook_type === "message") {
+//         if (!receivedMessageIds.includes(eventData.item)) {
+//           // Сохраняем идентификатор в localStorage
+//           receivedMessageIds.push(eventData.item);
+//           localStorage.setItem(
+//             "receivedMessageIds",
+//             JSON.stringify(receivedMessageIds)
+//           );
+//           console.log(chatInfo.value);
+//           console.log(
+//             "СОООООООООООООООООООООБЩЕНИЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ",
+//             eventData
+//           );
+//           updateLastMessage(eventData.thread, eventData.text);
+//           updateChatTimestamp(eventData.thread, eventData.time);
 
-          updateLastMessage(eventData.thread, eventData.text);
-          updateChatTimestamp(eventData.thread, eventData.time);
-          if (!eventData.outgoing) {
-            updateCountNewMessage(eventData.thread);
-          }
+//           if (!eventData.outgoing) {
+//             updateCountNewMessage(eventData.thread);
+//           }
 
-          playSound();
-        }
+//           playSound();
+//         }
+//       }
+//     };
+
+//     eventSource.onerror = (error) => {
+//       console.error("Ошибка соединения:", error);
+//       eventSource.close(); // Закрываем текущее соединение
+//       // Пытаемся переподключиться через 3 секунды
+//       setTimeout(() => {
+//         console.log("Попытка переподключения...");
+//         connectEventSource();
+//       }, 3000);
+//     };
+
+//     eventSource.onopen = () => {
+//       console.log("Соединение установлено");
+//     };
+//   };
+
+//   // Инициализация соединения
+//   connectEventSource();
+// });
+
+watch(
+  webhookEventData,
+  (newValue, oldValue) => {
+    if (newValue) {
+      updateLastMessage(newValue.thread, newValue.text);
+      updateChatTimestamp(newValue.thread, newValue.time);
+
+      if (!newValue.outgoing) {
+        updateCountNewMessage(newValue.thread);
       }
-    };
-
-    eventSource.onerror = (error) => {
-      console.error("Ошибка соединения:", error);
-      eventSource.close(); // Закрываем текущее соединение
-      // Пытаемся переподключиться через 3 секунды
-      setTimeout(() => {
-        console.log("Попытка переподключения...");
-        connectEventSource();
-      }, 3000);
-    };
-
-    eventSource.onopen = () => {
-      console.log("Соединение установлено");
-    };
-  };
-
-  // Инициализация соединения
-  connectEventSource();
-});
+    }
+  },
+  { deep: true }
+);
 
 // Функция для проигрывания звука
 const playSound = () => {

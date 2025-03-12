@@ -275,6 +275,9 @@ const props = defineProps({
   blockChat: {
     type: Function,
   },
+  changeWebhookEventData: {
+    type: Function,
+  },
 });
 
 const replyToData = ref([]);
@@ -397,10 +400,12 @@ const changeMessageState = (newMessage, tempId) => {
 };
 
 const updateMessages = (newMessage) => {
+  console.log("newMessage in updateMessages", newMessage); //  Для отладки
+  console.log("chatInfo in updateMessages", props.chatInfo);
+
   if (newMessage.replyTo !== null) {
     console.log("newMessage.replyTo !== null", newMessage.data.replyTo);
 
-    // Найти первое сообщение, которое соответствует replyTo
     const replyToMessage = messages.value.find(
       (message) =>
         message.data.item !== null &&
@@ -419,7 +424,7 @@ const updateMessages = (newMessage) => {
 
   messages.value.push(newMessage); // Добавление нового сообщения
   console.log("Новое сообщение", newMessage);
-  console.log(messages.value); // Логируем текущее состояние массива
+  console.log("messages.value", messages.value); // Логируем текущее состояние массива
 
   setTimeout(() => {
     scrollToBottom(); // Прокрутка вниз
@@ -747,7 +752,6 @@ onMounted(() => {
       "https://hellychat.apitter.com/api/events"
     );
 
-    // Получаем массив идентификаторов из localStorage или создаем новый
     const receivedMessageIds =
       JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
 
@@ -758,6 +762,7 @@ onMounted(() => {
 
       // Проверяем тип события
       if (eventData.hook_type === "message") {
+        // props.changeWebhookEventData(eventData);
         if (!eventData.outgoing) {
           if (!receivedMessageIds.includes(eventData.item)) {
             const newMessage = {
@@ -767,17 +772,66 @@ onMounted(() => {
               reaction: null,
               state: 0,
             };
-            console.log("новое сообщение ", newMessage);
+            console.log("новое сообщение ", event.data);
 
             receivedMessageIds.push(eventData.item);
             localStorage.setItem(
               "receivedMessageIds",
               JSON.stringify(receivedMessageIds)
             );
+            if (chatInfo.value) {
+              //  Проверяем, является ли сообщение частью текущего чата
+              let isCurrentChat = false;
 
-            updateMessages(newMessage);
+              if (eventData.outgoing) {
+                // Если сообщение исходящее
+                isCurrentChat =
+                  eventData.thread === chatInfo.value.phone + "@c.us"; // Сравниваем с номером телефона получателя в chatInfo
+              } else {
+                //  Если сообщение входящее
+                isCurrentChat =
+                  eventData.thread === chatInfo.value.phone + "@c.us"; // Сравниваем с номером телефона получателя в chatInfo
+              }
+
+              if (isCurrentChat) {
+                //  Проверяем, есть ли уже такое сообщение (по item - уникальному id)
+                if (!receivedMessageIds.includes(eventData.item)) {
+                  // <--- Добавлено
+                  const newMessage = {
+                    uniq: eventData.item,
+                    timestamp: eventData.time,
+                    eventData,
+                    reaction: null,
+                    state: 0,
+                  };
+                  console.log("новое сообщение ", eventData);
+
+                  receivedMessageIds.push(eventData.item); // Добавлено item в receivedMessageIds
+                  localStorage.setItem(
+                    "receivedMessageIds",
+                    JSON.stringify(receivedMessageIds)
+                  );
+                  updateMessages(newMessage);
+                } else {
+                  console.log(
+                    "Сообщение уже есть в списке, не добавляем:",
+                    eventData.item
+                  );
+                }
+              } else {
+                console.log(
+                  "Сообщение не относится к текущему чату (thread не совпадает):",
+                  eventData.thread,
+                  "vs",
+                  chatInfo.value.phone + "@c.us"
+                );
+              }
+            } else {
+              console.log("нету чататаатааттататататататаата");
+            }
           }
         }
+
         console.log("новое сообщение");
       }
 

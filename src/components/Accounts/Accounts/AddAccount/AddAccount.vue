@@ -49,6 +49,7 @@
       @update-token="updateToken"
       :selectType="selectType"
       :changeAcooundDataButton="changeAcooundDataButton"
+      :selectCrmType="selectCrmType"
       v-if="accountData.category === 'CRM'"
     />
     <section v-else>
@@ -162,6 +163,7 @@ const accountData = reactive({
   tgLogin: "",
   token: "",
   button: false,
+  crmType: "",
 });
 
 const data = reactive({
@@ -195,6 +197,11 @@ const selectType = (value) => {
   } else {
     accountData.button = false;
   }
+};
+
+const selectCrmType = (type) => {
+  accountData.crmType = type;
+  console.log(type);
 };
 
 const selectCategory = (value) => {
@@ -253,6 +260,7 @@ const addAccount = async () => {
         proxyString: "",
         webhookUrls: "",
         source: data.messenger,
+        crmType: accountData.crmType,
       },
       {
         headers: {
