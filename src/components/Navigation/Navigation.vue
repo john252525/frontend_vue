@@ -38,7 +38,12 @@
           </svg>
           <p class="page">Рассылки</p>
         </li>
-        <li @click="navigateToChats" class="list">
+        <li
+          @click="navigateToChats"
+          class="list-chats-loading"
+          :class="{ disabled: chatsLoading }"
+          :disabled="chatsLoading"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="svg-icon"
@@ -49,6 +54,7 @@
             />
           </svg>
           <p class="page">Чаты</p>
+          <Spinner v-if="chatsLoading" />
         </li>
         <li class="list" @click="openList">
           <svg
@@ -220,11 +226,12 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import Spinner from "./Spinner.vue";
 const props = defineProps({
   phoneMenuOn: Function,
   phoneMenuStation: Boolean,
   chatStation: Boolean,
+  chatsLoading: Boolean,
 });
 
 const route = useRoute();
@@ -293,6 +300,31 @@ nav {
 
 .logo-img {
   height: 2rem;
+}
+
+.list-chats-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 8px 0px 8px 8px;
+  cursor: pointer;
+}
+
+.list-chats-loading.disabled {
+  opacity: 0.5; /* Делаем элемент полупрозрачным */
+  pointer-events: none; /* Отключаем возможность клика */
+  cursor: not-allowed; /* Меняем курсор на "запрещено" */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    /* transform: translate(-50%, -48%); */
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .list {

@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide } from "vue";
+import { ref, reactive, onMounted, provide, inject } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -140,6 +140,7 @@ const dataAccount = reactive({
 
 const router = useRouter();
 
+const chatsLoadingChange = inject("chatsLoadingChange");
 const dataStationNone = ref(false);
 const dataStation = ref(false);
 const loadDataStation = ref(false);
@@ -241,6 +242,8 @@ const getAccounts = async () => {
               }
             }
           }
+          // Выводим сообщение о завершении проверки всех аккаунтов
+          chatsLoadingChange();
         }
       }
     } else if (response.data === 401) {

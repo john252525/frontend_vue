@@ -38,8 +38,11 @@
         </div>
       </div>
     </section>
-    <section class="loading-chat-list" v-else>
+    <section class="loading-chat-list" v-if="!chats && !errorStation">
       <Loading />
+    </section>
+    <section class="error-section" v-if="!chats && errorStation">
+      <Error />
     </section>
   </aside>
 </template>
@@ -50,6 +53,7 @@ import { onMounted, ref, watch, computed, defineProps, toRefs } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter, useRoute } from "vue-router";
+import Error from "./Error.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -75,6 +79,7 @@ const errorBlock = ref(false);
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
+const errorStation = ref(false);
 
 const selectChatClick = (chat) => {
   props.selectChat(chat);
@@ -199,8 +204,15 @@ const test = async () => {
     chats.value = response.data.data.chats;
     console.log("Chats:", chats.value);
   } catch (error) {
+    errorStation.value = true;
+
+    setTimeout(() => {
+      localStorage.removeItem("loginWhatsAppChatsStep");
+      router.push("/accounts");
+    }, 2000);
     console.error("Ошибка при получении сообщений:", error);
     if (error.response) {
+      errorStation.value = true;
       console.error("Ошибка сервера:", error.response.data);
     }
   }
@@ -401,6 +413,26 @@ const playSound = () => {
   align-items: center;
   justify-content: center;
   height: 94vh;
+}
+
+.error-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 94vh;
+  gap: 10px;
+}
+.error-section h2 {
+  color: rgb(219, 57, 57);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.error-section p {
+  color: black;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .chat-item {

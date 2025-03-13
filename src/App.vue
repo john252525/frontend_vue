@@ -5,6 +5,7 @@
       :phoneMenuStation="phoneMenuStation"
       :phoneMenuOn="phoneMenuOn"
       :chatStation="chatStation"
+      :chatsLoading="chatsLoading"
       class="navigation"
     />
     <main>
@@ -19,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, provide } from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -27,6 +28,11 @@ import Navigation from "./components/Navigation/Navigation.vue";
 const chatStation = ref(true);
 const phoneMenuStation = ref(false);
 const route = useRoute();
+const chatsLoading = ref(true);
+
+const chatsLoadingChange = () => {
+  chatsLoading.value = !chatsLoading.value;
+};
 
 const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
@@ -43,6 +49,8 @@ const isAuthPage = computed(() => {
 const isWidgetMode = computed(() => {
   return route.query.mode === "widget";
 });
+
+provide("chatsLoadingChange", chatsLoadingChange);
 </script>
 
 <style scoped>
