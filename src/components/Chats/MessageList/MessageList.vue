@@ -34,7 +34,9 @@
                   message.data.content && message.data.content.length > 0,
               },
             ]"
-            @click="openModal($event, message)"
+            @click="
+              shouldOpenModal(message) ? openModal($event, message) : null
+            "
           >
             <div v-if="message.data.replyTo != null" class="reply-content">
               <h2 class="reply-name">
@@ -348,6 +350,14 @@ const offReplyToDataBolean = () => {
   replyToDataBolean.value = !replyToDataBolean.value;
 };
 
+const shouldOpenModal = (message) => {
+  if (message.data.content && message.data.content.length > 0) {
+    const contentType = message.data.content[0].type;
+    return !(contentType === "image" || contentType === "video");
+  }
+  return true; // Открывать модальное окно, если нет контента
+};
+
 const offReplyToDataBoleanFalse = () => {
   replyToDataBolean.value = false;
   clearDataToReply();
@@ -458,87 +468,70 @@ const updateMessages = (newMessage) => {
 const modalPosition = ref({ top: 0, left: 0 });
 
 const openModal = (event, item) => {
-  if (item.data.content.length > 0) {
-    if (
-      item.data.content[0].type === "image" ||
-      item.data.content[0].type === "video"
-    ) {
-      return;
-    }
-  }
-
   if (activeMessage.value !== item) {
     activeMessage.value = item;
     const rect = event.currentTarget.getBoundingClientRect();
+
+    // Проверяем, является ли контент изображением или видео
+    if (item.data.content && item.data.content.length > 0) {
+      const contentType = item.data.content[0].type;
+      if (contentType === "image" || contentType === "video") {
+        return; // Прерываем выполнение функции
+      }
+    }
+
+    // Если контент не изображение и не видео, продолжаем открытие модального окна
+    // Определяем максимальную ширину и высоту сообщения
     const messageWidth = rect.width;
     const maxWidth = 400;
     const messageHeight = rect.height;
     const maxHeight = 100;
 
-    if (item.data.content.length > 0) {
-      if (item.data.content[0].type === "video") {
-        // Позиционирование для видео-сообщений
-        modalPosition.value = {
-          top: rect.bottom + window.scrollY - rect.height, // Нижняя часть модалки на одном уровне с нижней частью сообщения
-          left: rect.right + window.scrollX + 10,
-        };
-      }
+    // Проверяем, является ли сообщение последним
+    const isLastMessage = item === messages.value[messages.value.length - 1];
+
+    if (isLastMessage) {
+      // Если сообщение последнее, отображаем меню над ним
+      modalPosition.value = {
+        top: rect.top + window.scrollY - 120,
+        left: rect.left + window.scrollX - 150,
+      };
     } else {
-      // Остальная логика позиционирования для не-видео сообщений
-      const isLastMessage = item === messages.value[messages.value.length - 1];
-
-      if (isLastMessage) {
-        modalPosition.value = {
-          top: rect.top + window.scrollY - 120,
-          left: rect.left + window.scrollX - 150,
-        };
-      } else {
-        if (!item.data.outgoing) {
-          if (item.data.content.length > 0) {
-            if (item.data.content[0].type === "video") {
-              const modalHeight = 200; // Замените на реальную высоту модалки, если знаете ее
-
-              // Позиционирование для видео-сообщений
-              modalPosition.value = {
-                top: rect.bottom + window.scrollY - rect.height, // Нижняя часть модалки на одном уровне с нижней частью сообщения
-                left: rect.right + window.scrollX + 10,
-              };
-            }
-            // Получаем высоту модального окна (примерно)
-          }
-          if (messageWidth > maxWidth) {
-            modalPosition.value = {
-              top: rect.top + window.scrollY - 50,
-              left: rect.left + window.scrollX + 10,
-            };
-          } else if (messageHeight > maxHeight) {
-            modalPosition.value = {
-              top: rect.top + window.scrollY - 50,
-              left: rect.right + window.scrollX + 10,
-            };
-          } else {
-            modalPosition.value = {
-              top: rect.top + window.scrollY,
-              left: rect.right + window.scrollX + 10,
-            };
-          }
+      // Для входящих сообщений
+      if (!item.data.outgoing) {
+        if (messageWidth > maxWidth) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50,
+            left: rect.left + window.scrollX + 10,
+          };
+        } else if (messageHeight > maxHeight) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50,
+            left: rect.right + window.scrollX + 10,
+          };
         } else {
-          if (messageWidth > maxWidth) {
-            modalPosition.value = {
-              top: rect.top + window.scrollY - 120,
-              left: rect.left + window.scrollX - 150,
-            };
-          } else if (messageHeight > maxHeight) {
-            modalPosition.value = {
-              top: rect.top + window.scrollY - 50,
-              left: rect.left + window.scrollX - 150,
-            };
-          } else {
-            modalPosition.value = {
-              top: rect.top + window.scrollY,
-              left: rect.left + window.scrollX - 150,
-            };
-          }
+          modalPosition.value = {
+            top: rect.top + window.scrollY,
+            left: rect.right + window.scrollX + 10,
+          };
+        }
+      } else {
+        // Для исходящих сообщений
+        if (messageWidth > maxWidth) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 120,
+            left: rect.left + window.scrollX - 150,
+          };
+        } else if (messageHeight > maxHeight) {
+          modalPosition.value = {
+            top: rect.top + window.scrollY - 50,
+            left: rect.left + window.scrollX - 150,
+          };
+        } else {
+          modalPosition.value = {
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX - 150,
+          };
         }
       }
     }
@@ -572,24 +565,25 @@ watch(pageTitle, (newTitle) => {
 });
 
 const getMessage = async () => {
-  messages.value = [];
-  console.log(chatInfo.value);
-  console.log("chatInfo.value.unid:", chatInfo.value.unid);
-  console.log("getMessage вызван в", new Date().toISOString());
   props.blockChat();
   try {
     const token = localStorage.getItem("accountToken");
-    console.log("Token:", token);
 
-    console.log(chatInfo.value.lastMessage.id.remote);
+    const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+    let requestData = {
+      source: "whatsapp",
+      login: userLogin.login,
+      to: chatInfo.value.phone,
+    };
+
+    if (apiUrl === "https://hellychat.apitter.com/api") {
+      requestData.to = chatInfo.value.phone;
+      requestData.uniq = chatInfo.value.lastMessage.id.remote;
+    }
+
     const response = await axios.post(
       `${apiUrl}/getChatMessages`,
-      {
-        source: "whatsapp",
-        login: chatInfo.value.loginUser,
-        to: chatInfo.value.phone,
-        uniq: chatInfo.value.lastMessage.id.remote,
-      },
+      requestData,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -597,30 +591,27 @@ const getMessage = async () => {
         },
       }
     );
-    // props.blockChatOff();
-    console.log("Response status:", response.status);
-    console.log("Response data:", response.data);
-
-    if (response.data) {
-      props.blockChatOff();
-    }
 
     if (response.data.ok === true) {
       loading.value = false;
-      props.blockChatOff();
-      // Распарсить каждое сообщение
-      messages.value = response.data.data.messages;
-      if (messages.value.length === 0) {
-        console.log("Нет сообщений");
-        station.messageNull = true;
+      props.blockChat();
+
+      if (apiUrl === "https://hellychat.apitter.com/api") {
+        messages.value = response.data.data.messages;
+      } else {
+        messages.value = response.data.data.messages.map((message) => ({
+          data: message,
+          uniq: message.item,
+        }));
       }
+
       // Обработка replyTo
       messages.value.forEach((message) => {
         if (message.data.replyTo !== null) {
           const replyToMessage = messages.value.find(
             (msg) => msg.data.item === message.data.replyTo
           );
-          console.log(replyToMessage);
+
           if (replyToMessage) {
             message.data.replyTo = {
               name: replyToMessage.data.from,
@@ -637,7 +628,6 @@ const getMessage = async () => {
       setTimeout(() => {
         scrollToBottom();
       }, 200);
-      console.log("Messages:", messages.value);
     } else if (response.status === 401 || response.data.errorMessage === 401) {
       console.log("Ошибка авторизации");
       errorBlock.value = true;
@@ -650,15 +640,8 @@ const getMessage = async () => {
     }
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
-    props.blockChatOff();
-    station.messageNull = true;
-    loading.value = false;
-
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
-      props.blockChatOff();
-      station.messageNull = true;
-      loading.value = false;
     }
   }
 };

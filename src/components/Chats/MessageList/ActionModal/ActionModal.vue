@@ -18,7 +18,11 @@
       </li>
       <!-- <li><p class="option">Отреагировать</p></li> -->
       <li>
-        <p v-if="!message.delete" @click="deleteMessage" class="option delete">
+        <p
+          v-if="!message.delete && apiUrl === 'https://hellylo.apitter.com/api'"
+          @click="deleteMessage"
+          class="option delete"
+        >
           Удалить
         </p>
       </li>

@@ -127,7 +127,7 @@ const props = defineProps({
 
 // const emit = defineEmits(["updateMessages"]);
 const { chatInfo, replyToData, replyToDataBolean } = toRefs(props);
-console.log(replyToData.value);
+
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -191,7 +191,6 @@ const insertEmoji = (emoji) => {
 const changeImgUrl = (url, type) => {
   urlImg.value = url;
   typeUrl.value = type;
-  console.log(typeUrl.value);
 };
 
 const generateItem = () => {
@@ -223,24 +222,18 @@ function convertToMicroseconds(date) {
 
 // Пример использования
 const microseconds = convertToMicroseconds(); // Вызываем без аргументов
-console.log(microseconds); // Выводит текущее время в формате, подобном 1740179062715000
 
 const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
-  if (!messageText.value) {
-    return;
-  }
   // changeStatinonEmoji();
-  station.emit = false;
-  console.log("ВАЫАЫВВЫЫАВАЫАВЫВ", chatInfo.value.loginUser);
+  closeEmojiModal();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;
-  console.log(generateItem());
-  console.log(chatInfo.value.lastMessage.id.remote);
+
   const apiUrl = import.meta.env.VITE_API_URL;
-  console.log(22794591901);
+
   const message = {
     tempId: generateItemNew(),
     to: `${chatInfo.value.phone}`,
@@ -255,7 +248,7 @@ const sendMessage = async () => {
       : [],
     from: "79027631667",
     // from: chatInfo.value.lastMessage?.from,
-    time: Date.now() / 1000,
+    time: Date.now(),
     replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
     state: "send",
@@ -263,7 +256,7 @@ const sendMessage = async () => {
   const newMessage = {
     tempId: generateItemNew(),
     uniq: "3EB0NEWUNIQUEID",
-    timestamp: Date.now() / 1000,
+    timestamp: Date.now(),
     data: {
       content: contentText.value
         ? [
@@ -277,7 +270,7 @@ const sendMessage = async () => {
       from: "79027631667",
       outgoing: true,
       text: contentText.value ? contentText.value : messageText.value || null,
-      time: Date.now() / 1000,
+      time: Date.now(),
       state: "send",
       replyTo: replyToDataBolean ? replyToUniq : null,
     },
@@ -300,31 +293,34 @@ const sendMessage = async () => {
       : [],
     state: "error",
     tempId: generateItemNew(),
-    time: Date.now() / 1000,
+    time: Date.now(),
     from: "79027631667",
     outgoing: true,
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
-  console.log(message);
+
   emit("updateMessages", newMessage);
+  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  let messageDataRes = {
+    source: "whatsapp",
+    login: chatInfo.value.loginUser,
+    msg: message,
+    errorMessage: front_message,
+    mUniq: chatInfo.value.lastMessage.id.remote,
+    replyTo: replyToDataBolean ? replyToUniq : null,
+  };
+  if (apiUrl === "https://hellychat.apitter.com/api") {
+    messageDataRes.login = chatInfo.value.loginUser;
+  } else {
+    messageDataRes.login = userLogin.login;
+  }
   try {
-    const response = await axios.post(
-      `${apiUrl}/sendMessage`,
-      {
-        source: "whatsapp",
-        login: chatInfo.value.loginUser,
-        msg: message,
-        errorMessage: front_message,
-        mUniq: chatInfo.value.lastMessage.id.remote,
-        replyTo: replyToDataBolean ? replyToUniq : null,
+    const response = await axios.post(`${apiUrl}/sendMessage`, messageDataRes, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        },
-      }
-    );
+    });
     if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -334,8 +330,7 @@ const sendMessage = async () => {
     }
     if (response.data.ok) {
       urlImg.value = "";
-      console.log("Сообщение отправлено:", response.data);
-      console.log(message.tempId);
+
       props.changeMessageState(response.data.messsage, newMessage.tempId);
       if (replyToDataBolean.value) {
         props.offReplyToDataBolean();
@@ -343,7 +338,6 @@ const sendMessage = async () => {
 
       messageText.value = "";
     } else {
-      console.log("Сообщение ne отправлено:", response.data);
       props.changeMessageState(response.data.messsage, newMessage.tempId);
       if (replyToDataBolean.value) {
         props.offReplyToDataBolean();

@@ -67,6 +67,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import axios from "axios";
+const apiUrl = import.meta.env.VITE_PAY_URL;
 
 const props = defineProps({
   changeCreatePayments: {
@@ -87,7 +88,7 @@ const createPayment = async () => {
   payments.errorMessage = "";
   try {
     const response = await axios.post(
-      "https://hellylo.apitter.com/api/create_payment",
+      `${apiUrl}/create_payment`,
       {
         amount: payments.amount,
         currency: "RUB",

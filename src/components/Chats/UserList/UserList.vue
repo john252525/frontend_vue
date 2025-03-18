@@ -1,7 +1,10 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
-    <section class="setting-chats">
+    <section
+      v-if="apiUrl === 'https://hellychat.apitter.com/api'"
+      class="setting-chats"
+    >
       <button class="setting-chats-button" @click="toggleAccountList">
         {{ showAccountList ? "Скрыть аккаунты" : "Настроить чаты" }}
       </button>
@@ -37,7 +40,9 @@
     >
       <div class="chat-user-cont">
         <img
-          v-if="chat.data.avatar"
+          v-if="
+            apiUrl === 'https://hellychat.apitter.com/api' && chat.data.avatar
+          "
           class="user-chat-avatar"
           :src="chat.data.avatar"
           alt=""
@@ -80,7 +85,7 @@ import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter, useRoute } from "vue-router";
 import Error from "./Error.vue";
-
+const apiUrl = import.meta.env.VITE_API_URL;
 const router = useRouter();
 const route = useRoute();
 
@@ -213,26 +218,17 @@ const clearCountNewMessage = (thread) => {
 };
 
 const test = async () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  console.log("userInfo:", userInfo);
-
   const isMulti = computed(() => {
     return route.query.multi === "true"; // Проверяем значение multi
   });
 
-  console.log("Значение multi:", route.query.multi);
-  console.log("isMulti:", isMulti.value);
-
   try {
     const token = localStorage.getItem("accountToken");
-    console.log("Token:", token);
 
     // Получаем логин в зависимости от значения multi
     const logins = isMulti.value
       ? JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []
       : userInfo?.login;
-
-    console.log("Используемый логин:", logins);
 
     const response = await axios.post(
       `${apiUrl}/getChats`,
@@ -257,9 +253,16 @@ const test = async () => {
       return;
     }
 
-    console.log("Response data:", response);
-    chats.value = response.data.data.chats;
-    console.log("Chats:", chats.value);
+    if (apiUrl === "https://hellychat.apitter.com/api") {
+      chats.value = response.data.data.chats;
+    } else {
+      chats.value = response.data.data.chats.map((chat) => ({
+        newMessage: chat.unreadCount,
+        timestamp: chat.timestamp,
+        uniq: chat.lastMessage.to,
+        data: chat,
+      }));
+    }
   } catch (error) {
     errorStation.value = true;
 

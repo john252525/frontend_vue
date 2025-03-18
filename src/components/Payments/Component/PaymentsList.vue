@@ -65,6 +65,7 @@ import axios from "axios";
 import LoadAccount from "/src/components/Accounts/Accounts/LoadAccount.vue";
 const payments = ref([]); // Массив для хранения платежей
 const fetchError = ref(null);
+const apiUrl = import.meta.env.VITE_PAY_URL;
 
 const paymentsLoadingStation = reactive({
   dataStationNone: false,
@@ -78,7 +79,7 @@ const fetchPayments = async () => {
   console.log(localStorage.getItem("accountToken"));
   try {
     const response = await axios.get(
-      "https://hellylo.apitter.com/api/paymentsList",
+      `${apiUrl}/paymentsList`,
       {},
       {
         headers: {
@@ -115,14 +116,11 @@ const fetchPayments = async () => {
 const createUser = async () => {
   try {
     const token = localStorage.getItem("accountToken");
-    const response = await axios.get(
-      "https://hellylo.apitter.com/api/paymentsList",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${apiUrl}/paymentsList`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     console.log(response.data);
     if (response.data) {
       payments.value = response.data;
