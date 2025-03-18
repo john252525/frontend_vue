@@ -238,7 +238,7 @@ const props = defineProps({
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
-
+const apiUrl = import.meta.env.VITE_API_URL;
 const route = useRoute();
 const router = useRouter();
 const isOpen = ref(false);
