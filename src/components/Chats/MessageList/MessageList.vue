@@ -60,8 +60,18 @@
               </svg>
             </div>
             <div class="message-content">
-              <p
+              <!-- <p
                 v-if="message.delete && message.data.text"
+                class="message-text-delete"
+              >
+                Сообщение удалено
+              </p>
+              <p
+                v-if="
+                  !message.data.text &&
+                  message.data.content.length > 0 &&
+                  message.data.content[0].type === 'deleted'
+                "
                 class="message-text-delete"
               >
                 Сообщение удалено
@@ -87,8 +97,8 @@
               >
                 Сообщение удалено
               </p>
-              <p v-else class="message-text-delete">Сообщение удалено</p>
-
+              <p v-else class="message-text-delete">Сообщение удалено</p> -->
+              {{ message.data.text }}
               <div
                 v-if="
                   message.data.state === 'send' &&
@@ -229,6 +239,12 @@
           </div>
         </div>
         <Loading v-if="loading" />
+        <section class="error-section" v-if="!loading && station.messageNull">
+          <article class="cont">
+            <h2>Собщения не были загружены или вовсе отсутсвуют.</h2>
+            <h2>Самое время начать ощаться!</h2>
+          </article>
+        </section>
         <SendMessage
           :changeMessageState="changeMessageState"
           :chatInfo="chatInfo"
@@ -260,6 +276,7 @@ import SendMessage from "./SendMessage.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
+import Error from "../UserList/Error.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
 import ActionModal from "./ActionModal/ActionModal.vue";
 import { useRouter } from "vue-router";
@@ -273,6 +290,9 @@ const props = defineProps({
     type: Function,
   },
   blockChat: {
+    type: Function,
+  },
+  blockChatOff: {
     type: Function,
   },
   changeWebhookEventData: {
@@ -292,6 +312,8 @@ const station = reactive({
   photoMenu: false,
   videoMenu: false,
   acionMenu: false,
+  errorStation: false,
+  messageNull: false,
 });
 const activeMessage = ref(null);
 
@@ -402,7 +424,9 @@ const changeMessageState = (newMessage, tempId) => {
 const updateMessages = (newMessage) => {
   console.log("newMessage in updateMessages", newMessage); //  Для отладки
   console.log("chatInfo in updateMessages", props.chatInfo);
-
+  if (station.messageNull) {
+    station.messageNull = false;
+  }
   if (newMessage.replyTo !== null) {
     console.log("newMessage.replyTo !== null", newMessage.data.replyTo);
 
@@ -434,61 +458,87 @@ const updateMessages = (newMessage) => {
 const modalPosition = ref({ top: 0, left: 0 });
 
 const openModal = (event, item) => {
+  if (item.data.content.length > 0) {
+    if (
+      item.data.content[0].type === "image" ||
+      item.data.content[0].type === "video"
+    ) {
+      return;
+    }
+  }
+
   if (activeMessage.value !== item) {
     activeMessage.value = item;
     const rect = event.currentTarget.getBoundingClientRect();
+    const messageWidth = rect.width;
+    const maxWidth = 400;
+    const messageHeight = rect.height;
+    const maxHeight = 100;
 
-    // Определяем максимальную ширину и высоту сообщения
-    const messageWidth = rect.width; // Ширина сообщения
-    const maxWidth = 400; // Максимальная ширина
-    const messageHeight = rect.height; // Высота сообщения
-    const maxHeight = 100; // Максимальная высота
-
-    // Проверяем, является ли сообщение последним
-    const isLastMessage = item === messages.value[messages.value.length - 1];
-    console.log(messages.value[messages.value.length - 1]);
-    if (isLastMessage) {
-      // Если сообщение последнее, отображаем меню над ним
-      modalPosition.value = {
-        top: rect.top + window.scrollY - 120,
-        left: rect.left + window.scrollX - 150, // Позиция справа от сообщения с отступом
-      };
+    if (item.data.content.length > 0) {
+      if (item.data.content[0].type === "video") {
+        // Позиционирование для видео-сообщений
+        modalPosition.value = {
+          top: rect.bottom + window.scrollY - rect.height, // Нижняя часть модалки на одном уровне с нижней частью сообщения
+          left: rect.right + window.scrollX + 10,
+        };
+      }
     } else {
-      // Для входящих сообщений
-      if (!item.data.outgoing) {
-        if (messageWidth > maxWidth) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50, // Позиция над сообщением
-            left: rect.left + window.scrollX + 10, // Позиция справа от сообщения с отступом
-          };
-        } else if (messageHeight > maxHeight) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50, // Позиция над сообщением
-            left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
-          };
-        } else {
-          modalPosition.value = {
-            top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
-            left: rect.right + window.scrollX + 10, // Позиция справа от сообщения с отступом
-          };
-        }
+      // Остальная логика позиционирования для не-видео сообщений
+      const isLastMessage = item === messages.value[messages.value.length - 1];
+
+      if (isLastMessage) {
+        modalPosition.value = {
+          top: rect.top + window.scrollY - 120,
+          left: rect.left + window.scrollX - 150,
+        };
       } else {
-        // Для исходящих сообщений
-        if (messageWidth > maxWidth) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 120,
-            left: rect.left + window.scrollX - 150,
-          };
-        } else if (messageHeight > maxHeight) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50, // Позиция над сообщением
-            left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
-          };
+        if (!item.data.outgoing) {
+          if (item.data.content.length > 0) {
+            if (item.data.content[0].type === "video") {
+              const modalHeight = 200; // Замените на реальную высоту модалки, если знаете ее
+
+              // Позиционирование для видео-сообщений
+              modalPosition.value = {
+                top: rect.bottom + window.scrollY - rect.height, // Нижняя часть модалки на одном уровне с нижней частью сообщения
+                left: rect.right + window.scrollX + 10,
+              };
+            }
+            // Получаем высоту модального окна (примерно)
+          }
+          if (messageWidth > maxWidth) {
+            modalPosition.value = {
+              top: rect.top + window.scrollY - 50,
+              left: rect.left + window.scrollX + 10,
+            };
+          } else if (messageHeight > maxHeight) {
+            modalPosition.value = {
+              top: rect.top + window.scrollY - 50,
+              left: rect.right + window.scrollX + 10,
+            };
+          } else {
+            modalPosition.value = {
+              top: rect.top + window.scrollY,
+              left: rect.right + window.scrollX + 10,
+            };
+          }
         } else {
-          modalPosition.value = {
-            top: rect.top + window.scrollY, // Устанавливаем позицию на уровне сообщения
-            left: rect.left + window.scrollX - 150, // Позиция слева от сообщения с отступом
-          };
+          if (messageWidth > maxWidth) {
+            modalPosition.value = {
+              top: rect.top + window.scrollY - 120,
+              left: rect.left + window.scrollX - 150,
+            };
+          } else if (messageHeight > maxHeight) {
+            modalPosition.value = {
+              top: rect.top + window.scrollY - 50,
+              left: rect.left + window.scrollX - 150,
+            };
+          } else {
+            modalPosition.value = {
+              top: rect.top + window.scrollY,
+              left: rect.left + window.scrollX - 150,
+            };
+          }
         }
       }
     }
@@ -522,6 +572,7 @@ watch(pageTitle, (newTitle) => {
 });
 
 const getMessage = async () => {
+  messages.value = [];
   console.log(chatInfo.value);
   console.log("chatInfo.value.unid:", chatInfo.value.unid);
   console.log("getMessage вызван в", new Date().toISOString());
@@ -546,16 +597,23 @@ const getMessage = async () => {
         },
       }
     );
-
+    // props.blockChatOff();
     console.log("Response status:", response.status);
     console.log("Response data:", response.data);
 
+    if (response.data) {
+      props.blockChatOff();
+    }
+
     if (response.data.ok === true) {
       loading.value = false;
-      props.blockChat();
+      props.blockChatOff();
       // Распарсить каждое сообщение
       messages.value = response.data.data.messages;
-
+      if (messages.value.length === 0) {
+        console.log("Нет сообщений");
+        station.messageNull = true;
+      }
       // Обработка replyTo
       messages.value.forEach((message) => {
         if (message.data.replyTo !== null) {
@@ -592,8 +650,15 @@ const getMessage = async () => {
     }
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
+    props.blockChatOff();
+    station.messageNull = true;
+    loading.value = false;
+
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
+      props.blockChatOff();
+      station.messageNull = true;
+      loading.value = false;
     }
   }
 };
@@ -643,6 +708,15 @@ watch(
   }
 );
 
+// watch(
+//   () => messages.value,
+//   (newMessages) => {
+//     if (station.messageNull) {
+//       station.messageNull = false;
+//     }
+//   }
+// );
+
 const selectedImage = ref(null);
 
 const openPhotoMenu = (src) => {
@@ -688,6 +762,7 @@ const updateDeleteMessage = (item) => {
   // Проверяем, найдено ли сообщение
   if (messageToUpdate) {
     messageToUpdate.data.text = "Сообщение удалено";
+
     messageToUpdate.delete = true;
     console.log("Обновленное сообщение:", messageToUpdate);
   } else {
@@ -1062,6 +1137,19 @@ onMounted(() => {
   color: #969696;
 }
 
+.error-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 94vh;
+}
+
+.error-section h2 {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .user-img {
   width: 35px;
   height: 35px;
@@ -1224,6 +1312,13 @@ footer {
   .chat-container {
     width: 100%;
   }
+  .error-section {
+    flex-direction: column;
+  }
+
+  .error-section h2 {
+    font-size: 14px;
+  }
   .chat-container {
     height: calc(100vh - 40px);
   }
@@ -1233,6 +1328,16 @@ footer {
     align-items: center;
     gap: 4px;
     margin-right: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .cont {
+    align-items: flex-start;
+  }
+
+  .error-section h2 {
+    font-size: 12px;
   }
 }
 </style>

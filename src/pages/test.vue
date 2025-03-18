@@ -1,52 +1,99 @@
 <template>
-  <div>
-    <h1>Подключение к базе данных</h1>
-    <form @submit.prevent="connectToDatabase">
-      <div>
-        <label for="source">Source:</label>
-        <input v-model="source" id="source" required />
-      </div>
-      <div>
-        <label for="login">Login:</label>
-        <input v-model="login" id="login" required />
-      </div>
-      <div>
-        <label for="token">Token:</label>
-        <input v-model="token" id="token" type="password" required />
-      </div>
-      <button type="submit">Подключиться</button>
-    </form>
-    <div v-if="message">{{ message }}</div>
-    <div v-if="error" style="color: red">{{ error }}</div>
+  <div class="voice-recorder">
+    <button @click="startRecording" :disabled="isRecording">
+      Начать запись
+    </button>
+    <button @click="stopRecording" :disabled="!isRecording">
+      Остановить запись
+    </button>
+    <p v-if="transcript">Распознанный текст: {{ transcript }}</p>
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
-import axios from "axios";
+<script>
+export default {
+  data() {
+    return {
+      isRecording: false,
+      transcript: "",
+      recognition: null,
+    };
+  },
+  mounted() {
+    // Проверяем поддержку Web Speech API
+    if ("webkitSpeechRecognition" in window) {
+      this.recognition = new webkitSpeechRecognition();
+      this.recognition.continuous = false; // Останавливаем запись после первого результата
+      this.recognition.interimResults = false; // Не показываем промежуточные результаты
 
-const source = ref("");
-const login = ref("");
-const token = ref("");
-const message = ref("");
-const error = ref("");
+      this.recognition.onresult = (event) => {
+        this.transcript = event.results[0][0].transcript; // Получаем текст
+        this.handleResponse(this.transcript); // Обрабатываем ответ
+      };
 
-const connectToDatabase = async () => {
-  try {
-    const response = await axios.post("http://localhost:4000/connect", {
-      source: source.value,
-      login: login.value,
-      token: token.value,
-    });
-    message.value = response.data.message;
-    error.value = "";
-  } catch (err) {
-    message.value = "";
-    error.value = err.response.data.error || "Произошла ошибка при подключении";
-  }
+      this.recognition.onerror = (event) => {
+        console.error("Ошибка распознавания:", event.error);
+      };
+    } else {
+      alert("Ваш браузер не поддерживает распознавание речи.");
+    }
+  },
+  methods: {
+    startRecording() {
+      if (this.recognition) {
+        this.isRecording = true;
+        this.recognition.start(); // Запускаем распознавание
+      }
+    },
+    stopRecording() {
+      if (this.recognition) {
+        this.isRecording = false;
+        this.recognition.stop(); // Останавливаем распознавание
+      }
+    },
+    handleResponse(transcript) {
+      if (transcript.toLowerCase() === "привет") {
+        this.speakResponse("Привет! Как дела?"); // Воспроизводим ответ
+      }
+      if (transcript.toLowerCase() === "все хорошо") {
+        this.speakResponse("Я рада! Что ты делаешь"); // Воспроизводим ответ
+      }
+      if (transcript.toLowerCase() === "серега гей") {
+        this.speakResponse("можно с тобой"); // Воспроизводим ответ
+      }
+    },
+    speakResponse(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = this.getVoice(); // Устанавливаем голос
+      window.speechSynthesis.speak(utterance); // Воспроизводим текст
+    },
+    getVoice() {
+      const voices = window.speechSynthesis.getVoices();
+      // Выбираем другой голос (можно изменить индекс в зависимости от доступных голосов)
+      return voices.length > 1 ? voices[1] : null; // Возвращаем второй доступный голос
+    },
+  },
 };
 </script>
 
 <style scoped>
-/* Здесь вы можете добавить стили для вашего компонента */
+.voice-recorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+p {
+  margin-top: 10px;
+  font-size: 18px;
+}
 </style>
+
+Найти еще

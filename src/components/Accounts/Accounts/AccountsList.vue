@@ -179,7 +179,7 @@ const getAccounts = async () => {
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
         source: localStorage.getItem("accountStation"),
-        skipDetails: true,
+        skipDetails: false,
       },
       {
         headers: {
@@ -210,15 +210,11 @@ const getAccounts = async () => {
           for (const instance of instanceData.value) {
             const login = instance.login; // Извлекаем логин
 
+            // console.log(instance);
             // Запрос для каждого логина
-            const infoResponse = await getInfoWhats(instance.source, login);
-            if (
-              infoResponse &&
-              infoResponse.data &&
-              infoResponse.data.data.step &&
-              infoResponse.data.data.step.value === 5
-            ) {
-              // Получаем существующие логины из localStorage
+
+            if (instance.step && instance.step.value === 5) {
+              console.log(instance);
               const existingLogins =
                 JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) ||
                 [];

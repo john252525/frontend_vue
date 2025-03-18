@@ -1,6 +1,32 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
+    <section class="setting-chats">
+      <button class="setting-chats-button" @click="toggleAccountList">
+        {{ showAccountList ? "Скрыть аккаунты" : "Настроить чаты" }}
+      </button>
+      <div v-if="showAccountList" class="account-list">
+        <div
+          v-for="(account, index) in accounts"
+          :key="index"
+          class="account-item"
+        >
+          <span>{{ account }}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 1024 1024"
+            class="svg-icon"
+            @click="removeAccount(account)"
+          >
+            <path
+              d="M360 184h-8c4.4 0 8-3.6 8-8zh304v-8c0 4.4 3.6 8 8 8h-8v72h72v-80c0-35.3-28.7-64-64-64H352c-35.3 0-64 28.7-64 64v80h72zm504 72H160c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h60.4l24.7 523c1.6 34.1 29.8 61 63.9 61h454c34.2 0 62.3-26.8 63.9-61l24.7-523H888c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32M731.3 840H292.7l-24.2-512h487z"
+            />
+          </svg>
+        </div>
+      </div>
+    </section>
     <section
       v-if="chats"
       v-for="chat in sortedChats"
@@ -80,6 +106,37 @@ const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
+
+// Новые переменные для управления списком аккаунтов
+const accounts = ref([]);
+const showAccountList = ref(false);
+
+// Функция для получения аккаунтов из localStorage
+const getAccounts = () => {
+  const storedAccounts =
+    JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+  accounts.value = storedAccounts;
+};
+
+// Функция для удаления аккаунта
+const removeAccount = (account) => {
+  accounts.value = accounts.value.filter((acc) => acc !== account);
+  localStorage.setItem(
+    "loginWhatsAppChatsStep",
+    JSON.stringify(accounts.value)
+  );
+  test();
+};
+
+// Функция для переключения видимости списка аккаунтов
+const toggleAccountList = () => {
+  showAccountList.value = !showAccountList.value;
+};
+
+// Получаем аккаунты при монтировании компонента
+onMounted(() => {
+  getAccounts();
+});
 
 const selectChatClick = (chat) => {
   props.selectChat(chat);
@@ -413,6 +470,36 @@ const playSound = () => {
   align-items: center;
   justify-content: center;
   height: 94vh;
+}
+
+.account-list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #f9f9f9;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  margin-top: 4px;
+  margin-left: 14px;
+  margin-bottom: 4px;
+}
+
+.svg-icon {
+  fill: rgb(248, 82, 82);
+  cursor: pointer;
+}
+
+.setting-chats-button {
+  height: 40px;
+  width: 100%;
+  background-color: #f9f9f9;
+  font-size: 14px;
 }
 
 .error-section {

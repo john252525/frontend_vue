@@ -11,6 +11,7 @@
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
+      :blockChatOff="blockChatOff"
       :blockChat="blockChat"
       :changeWebhookEventData="changeWebhookEventData"
     />
@@ -32,6 +33,7 @@
       :changeMessageListStation="changeMessageListStation"
       :chatInfo="chatInfo"
       :blockChat="blockChat"
+      :blockChatOff="blockChatOff"
       :changeWebhookEventData="changeWebhookEventData"
     />
   </section>
@@ -78,6 +80,9 @@ const changeWebhookEventData = (data) => {
 
 const blockChat = () => {
   isChatClickable.value = !isChatClickable.value;
+};
+const blockChatOff = () => {
+  isChatClickable.value = true;
 };
 
 const changeMessageListStation = () => {

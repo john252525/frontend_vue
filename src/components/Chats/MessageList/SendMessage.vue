@@ -229,7 +229,11 @@ const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
-  changeStatinonEmoji();
+  if (!messageText.value) {
+    return;
+  }
+  // changeStatinonEmoji();
+  station.emit = false;
   console.log("ВАЫАЫВВЫЫАВАЫАВЫВ", chatInfo.value.loginUser);
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;

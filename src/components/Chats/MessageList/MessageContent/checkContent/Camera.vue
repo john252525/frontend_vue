@@ -39,6 +39,8 @@ const props = defineProps({
   },
 });
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const videoElement = ref(null);
 const photoURL = ref(null);
 const errorMessage = ref(null);
@@ -75,15 +77,11 @@ const takePhoto = async () => {
     const formData = new FormData();
     formData.append("file", dataURLtoFile(photoDataURL, "photo.png"));
 
-    const response = await axios.post(
-      "https://hellychat.apitter.com/upload",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axios.post(`${apiUrl}/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     photoURL.value = response.data.fileUrl;
     props.changeImgUrl(photoURL, "image");

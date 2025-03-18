@@ -12,11 +12,15 @@
         <p class="option" @click="addDataToReplyMessage(message)">Ответить</p>
       </li>
       <li>
-        <p class="option" @click="copyMessage">Копировать</p>
+        <p v-if="!message.delete" class="option" @click="copyMessage">
+          Копировать
+        </p>
       </li>
       <!-- <li><p class="option">Отреагировать</p></li> -->
       <li>
-        <p @click="deleteMessage" class="option delete">Удалить</p>
+        <p v-if="!message.delete" @click="deleteMessage" class="option delete">
+          Удалить
+        </p>
       </li>
     </ul>
   </div>
@@ -60,10 +64,12 @@ const addDataToReplyMessage = (message) => {
 };
 
 const deleteMessageAxios = async (uniq, item) => {
+  console.log(chatInfo);
   try {
     const response = await axios.post(`${apiUrl}/delete-messages`, {
       uniq: uniq,
       item: item,
+      login: chatInfo.value.loginUser,
     });
     console.log("Response:", response.data); // Логируем ответ сервера
   } catch (error) {
