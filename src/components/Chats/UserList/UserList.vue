@@ -2,7 +2,7 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <aside class="chat-list">
     <section
-      v-if="apiUrl === 'https://hellychat.apitter.com/api'"
+      v-if="apiUrl === 'https://hellychat.apitter.com/api' && isMulti"
       class="setting-chats"
     >
       <button class="setting-chats-button" @click="toggleAccountList">
@@ -16,6 +16,7 @@
         >
           <span>{{ account }}</span>
           <svg
+            v-if="accounts.length > 1"
             xmlns="http://www.w3.org/2000/svg"
             width="18"
             height="18"
@@ -111,8 +112,6 @@ const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
-
-// Новые переменные для управления списком аккаунтов
 const accounts = ref([]);
 const showAccountList = ref(false);
 
@@ -130,6 +129,8 @@ const removeAccount = (account) => {
     "loginWhatsAppChatsStep",
     JSON.stringify(accounts.value)
   );
+  // test();  // Предполагаю, что test() - это какая-то функция, которую ты хочешь вызвать
+  getAccounts(); // Обновляем список аккаунтов после удаления
   test();
 };
 
@@ -142,7 +143,6 @@ const toggleAccountList = () => {
 onMounted(() => {
   getAccounts();
 });
-
 const selectChatClick = (chat) => {
   props.selectChat(chat);
   chatInfo.value = chat;
@@ -216,6 +216,18 @@ const clearCountNewMessage = (thread) => {
     console.log(`Чат с thread ${thread} не найден`);
   }
 };
+
+const settingsChat = ref(false);
+
+const isMulti = computed(() => {
+  if (route.query.multi === "true") {
+    settingsChat.value = true;
+  } else {
+    settingsChat.value = false;
+  }
+  console.log(settingsChat);
+  return route.query.multi === "true"; // Проверяем значение multi
+});
 
 const test = async () => {
   const isMulti = computed(() => {
