@@ -1,82 +1,81 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <aside class="chat-list">
-    <section
-      v-if="apiUrl === 'https://hellychat.apitter.com/api' && isMulti"
-      class="setting-chats"
-    >
-      <button class="setting-chats-button" @click="toggleAccountList">
-        {{ showAccountList ? "Скрыть аккаунты" : "Настроить чаты" }}
-      </button>
-      <div v-if="showAccountList" class="account-list">
-        <div
-          v-for="(account, index) in accounts"
-          :key="index"
-          class="account-item"
-        >
-          <span>{{ account }}</span>
-          <svg
-            v-if="accounts.length > 1"
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 1024 1024"
-            class="svg-icon"
-            @click="removeAccount(account)"
+  <div class="chat-container">
+    <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
+      <section
+        v-if="apiUrl === 'https://hellychat.apitter.com/api' && isMulti"
+        class="setting-chats"
+      >
+        <button class="setting-chats-button" @click="toggleAccountList">
+          {{ showAccountList ? "Скрыть аккаунты" : "Настроить чаты" }}
+        </button>
+        <div v-if="showAccountList" class="account-list">
+          <div
+            v-for="(account, index) in accounts"
+            :key="index"
+            class="account-item"
           >
-            <path
-              d="M360 184h-8c4.4 0 8-3.6 8-8zh304v-8c0 4.4 3.6 8 8 8h-8v72h72v-80c0-35.3-28.7-64-64-64H352c-35.3 0-64 28.7-64 64v80h72zm504 72H160c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h60.4l24.7 523c1.6 34.1 29.8 61 63.9 61h454c34.2 0 62.3-26.8 63.9-61l24.7-523H888c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32M731.3 840H292.7l-24.2-512h487z"
-            />
-          </svg>
-        </div>
-      </div>
-    </section>
-    <section
-      v-if="chats"
-      v-for="chat in sortedChats"
-      :key="chat.unid"
-      class="chat-item"
-      :class="{ 'disabled-chat': !isChatClickable }"
-      @click="isChatClickable ? selectChatClick(chat) : null"
-    >
-      <div class="chat-user-cont">
-        <img
-          v-if="
-            apiUrl === 'https://hellychat.apitter.com/api' && chat.data.avatar
-          "
-          class="user-chat-avatar"
-          :src="chat.data.avatar"
-          alt=""
-        />
-        <img
-          v-else
-          class="user-chat-icon"
-          src="/chats/user-chat-icon.svg"
-          alt=""
-        />
-        <div class="chat-info">
-          <div class="chat-name">{{ chat.data.name }}</div>
-          <div class="chat-last-message">
-            {{ formatLastMessage(chat.data.lastMessage?.body) }}
+            <span class="text-account-item">{{ account.name }} </span>
+            <div class="checkbox-input">
+              <input
+                type="checkbox"
+                :id="'account-' + index"
+                :checked="account.active"
+                @change="toggleAccount(account)"
+              />
+              <label :for="'account-' + index"></label>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="chat-meta">
-        <div class="chat-timestamp">
-          {{ formatTimestamp(chat.data.timestamp) }}
+      </section>
+      <section
+        v-if="chats"
+        v-for="chat in sortedChats"
+        :key="chat.unid"
+        class="chat-item"
+        :class="{ 'disabled-chat': !isChatClickable }"
+        @click="isChatClickable ? selectChatClick(chat) : null"
+      >
+        <div class="chat-user-cont">
+          <img
+            v-if="
+              apiUrl === 'https://hellychat.apitter.com/api' && chat.data.avatar
+            "
+            class="user-chat-avatar"
+            :src="chat.data.avatar"
+            alt=""
+          />
+          <img
+            v-else
+            class="user-chat-icon"
+            src="/chats/user-chat-icon.svg"
+            alt=""
+          />
+          <div class="chat-info">
+            <div class="chat-name">{{ chat.data.name }}</div>
+            <div class="chat-last-message">
+              {{ formatLastMessage(chat.data.lastMessage?.body) }}
+            </div>
+          </div>
         </div>
-        <div class="chat-unread" v-if="chat.newMessage > 0">
-          {{ chat.newMessage }}
+        <div class="chat-meta">
+          <div class="chat-timestamp">
+            {{ formatTimestamp(chat.data.timestamp) }}
+          </div>
+          <div class="chat-unread" v-if="chat.newMessage > 0">
+            {{ chat.newMessage }}
+          </div>
         </div>
-      </div>
-    </section>
-    <section class="loading-chat-list" v-if="!chats && !errorStation">
-      <Loading />
-    </section>
-    <section class="error-section" v-if="!chats && errorStation">
-      <Error />
-    </section>
-  </aside>
+      </section>
+      <section class="loading-chat-list" v-if="!chats && !errorStation">
+        <Loading />
+      </section>
+      <section class="error-section" v-if="!chats && errorStation">
+        <Error />
+      </section>
+    </aside>
+    <div class="resizer" @mousedown="startResize"></div>
+  </div>
 </template>
 
 <script setup>
@@ -87,6 +86,7 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter, useRoute } from "vue-router";
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
+
 const router = useRouter();
 const route = useRoute();
 
@@ -106,43 +106,13 @@ const props = defineProps({
 });
 
 const { isChatClickable, webhookEventData } = toRefs(props);
-console.log(isChatClickable.value);
+
 const errorBlock = ref(false);
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
-const accounts = ref([]);
-const showAccountList = ref(false);
 
-// Функция для получения аккаунтов из localStorage
-const getAccounts = () => {
-  const storedAccounts =
-    JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
-  accounts.value = storedAccounts;
-};
-
-// Функция для удаления аккаунта
-const removeAccount = (account) => {
-  accounts.value = accounts.value.filter((acc) => acc !== account);
-  localStorage.setItem(
-    "loginWhatsAppChatsStep",
-    JSON.stringify(accounts.value)
-  );
-  // test();  // Предполагаю, что test() - это какая-то функция, которую ты хочешь вызвать
-  getAccounts(); // Обновляем список аккаунтов после удаления
-  test();
-};
-
-// Функция для переключения видимости списка аккаунтов
-const toggleAccountList = () => {
-  showAccountList.value = !showAccountList.value;
-};
-
-// Получаем аккаунты при монтировании компонента
-onMounted(() => {
-  getAccounts();
-});
 const selectChatClick = (chat) => {
   props.selectChat(chat);
   chatInfo.value = chat;
@@ -156,14 +126,9 @@ const updateChatTimestamp = (thread, newTimestamp) => {
   const chat = chats.value.find((chat) => chat.uniq === thread);
 
   if (chat) {
-    console.log("Новое (в секундах):", newTimestampInSeconds);
-    console.log("Старое:", chat.data.timestamp);
-
     // Обновляем timestamp внутри lastMessage
     chat.data.timestamp = newTimestampInSeconds;
-    console.log(`Timestamp для ${thread} обновлён на ${newTimestampInSeconds}`);
   } else {
-    console.log(`Чат с thread ${thread} не найден`);
   }
 };
 
@@ -173,32 +138,25 @@ const updateLastMessage = (thread, newLastMessage) => {
   //   newLastMessage
   // );
   const chat = chats.value.find((chat) => chat.uniq === thread);
-  console.log(thread, "чат thread message");
+
   if (chat) {
-    console.log(chat);
     if (chat.data.lastMessage) {
       chat.data.lastMessage.body = newLastMessage;
-      console.log(`Последнее сообщение для ${thread} обновлено`);
     } else {
-      console.log(`lastMessage для чата с thread ${thread} не найден`);
     }
   } else {
-    console.log(`Чат с thread ${thread} не найден`);
   }
 };
 
 const updateCountNewMessage = (thread) => {
   const chat = chats.value.find((chat) => chat.uniq === thread);
-  console.log(chat.newMessage);
+
   if (chat) {
     if (chat) {
       chat.newMessage = chat.newMessage + 1;
-      console.log(`Последнее сообщение для ${thread} обновлено`);
     } else {
-      console.log(`lastMessage для чата с thread ${thread} не найден`);
     }
   } else {
-    console.log(`Чат с thread ${thread} не найден`);
   }
 };
 
@@ -208,24 +166,42 @@ const clearCountNewMessage = (thread) => {
   if (chat) {
     if (chat.newMessage) {
       chat.newMessage++;
-      console.log(`Последнее сообщение для ${thread} обновлено`);
     } else {
-      console.log(`lastMessage для чата с thread ${thread} не найден`);
     }
   } else {
-    console.log(`Чат с thread ${thread} не найден`);
+  }
+};
+const chatListWidth = ref(450); // Начальная ширина списка чатов
+const isResizing = ref(false);
+const MIN_WIDTH = 300; // Минимальная ширина
+const MAX_WIDTH = 500; // Максимальная ширина
+
+const startResize = (event) => {
+  isResizing.value = true;
+  document.addEventListener("mousemove", resizeChatList);
+  document.addEventListener("mouseup", stopResize);
+};
+
+const resizeChatList = (event) => {
+  if (isResizing.value) {
+    let newWidth = event.clientX; // Получаем текущую позицию мыши по оси X
+    // Устанавливаем ограничения на ширину
+    if (newWidth < MIN_WIDTH) {
+      newWidth = MIN_WIDTH; // Устанавливаем минимальную ширину
+    } else if (newWidth > MAX_WIDTH) {
+      newWidth = MAX_WIDTH; // Устанавливаем максимальную ширину
+    }
+    chatListWidth.value = newWidth; // Применяем новую ширину
   }
 };
 
-const settingsChat = ref(false);
+const stopResize = () => {
+  isResizing.value = false;
+  document.removeEventListener("mousemove", resizeChatList);
+  document.removeEventListener("mouseup", stopResize);
+};
 
 const isMulti = computed(() => {
-  if (route.query.multi === "true") {
-    settingsChat.value = true;
-  } else {
-    settingsChat.value = false;
-  }
-  console.log(settingsChat);
   return route.query.multi === "true"; // Проверяем значение multi
 });
 
@@ -291,7 +267,6 @@ const test = async () => {
 };
 
 const formatTimestamp = (timestamp) => {
-  // Проверяем, что timestamp является строкой или числом
   if (typeof timestamp === "string") {
     timestamp = parseFloat(timestamp);
   }
@@ -303,9 +278,8 @@ const formatTimestamp = (timestamp) => {
     return "Некорректный ввод";
   }
 
-  // Создаем объект Date, передавая timestamp как секунды
   const date = new Date(timestamp * 1000); // <---  Умножаем на 1000 (были секунды)
-  console.log(date, "ДАААААААТАААААААААААААААААААААААААААА");
+
   // Проверка, если дата некорректна
   if (isNaN(date.getTime())) {
     console.warn("Некорректная дата:", date);
@@ -360,7 +334,6 @@ const formatTimestamp = (timestamp) => {
 
 const timestampMilliseconds = "1740994136000";
 const formattedTime = formatTimestamp(timestampMilliseconds);
-console.log(formattedTime); // Выведет дату и время в формате "DD.MM.YYYY HH:mm:ss"
 
 const sortedChats = computed(() => {
   if (!chats.value) return [];
@@ -383,6 +356,49 @@ const formatLastMessage = (message) => {
 };
 
 const audio = ref(null);
+
+const accounts = ref([]);
+const showAccountList = ref(false);
+
+// Функция для получения аккаунтов из localStorage
+const getAccounts = () => {
+  const storedAccounts =
+    JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+
+  // Преобразуем массив строк в массив объектов с флагом active
+  accounts.value = storedAccounts.map((account) => ({
+    name: account,
+    active: true, // По умолчанию аккаунт активен
+  }));
+};
+
+// Функция для переключения активности аккаунта
+const toggleAccount = (account) => {
+  account.active = !account.active;
+  updateLocalStorage();
+};
+
+// Функция для обновления localStorage на основе текущего состояния аккаунтов
+const updateLocalStorage = () => {
+  const activeAccounts = accounts.value
+    .filter((account) => account.active)
+    .map((account) => account.name); // Сохраняем только имена активных аккаунтов
+  localStorage.setItem(
+    "loginWhatsAppChatsStep",
+    JSON.stringify(activeAccounts)
+  );
+  test(); // Вызываем test() после каждого изменения
+};
+
+// Функция для переключения видимости списка аккаунтов
+const toggleAccountList = () => {
+  showAccountList.value = !showAccountList.value;
+};
+
+// Получаем аккаунты при монтировании компонента
+onMounted(() => {
+  getAccounts();
+});
 
 // onMounted(() => {
 //   audio.value = new Audio("/chats/newMessage.mp3");
@@ -471,15 +487,11 @@ const playSound = () => {
 </script>
 
 <style scoped>
-.chat-list {
-  width: 450px;
-  border-right: 1px solid #eaeaea;
-  overflow-y: auto;
-  overflow-x: hidden;
+.chat-container {
+  display: flex;
   height: 100vh;
-  position: relative;
+  position: relative; /* Для правильного позиционирования элемента изменения размера */
 }
-
 .loading-chat-list {
   display: flex;
   align-items: center;
@@ -487,34 +499,23 @@ const playSound = () => {
   height: 94vh;
 }
 
-.account-list {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  background-color: #f9f9f9;
+.chat-list {
+  border-right: 1px solid #eaeaea;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  position: relative;
 }
 
-.account-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 16px;
-  margin-top: 4px;
-  margin-left: 14px;
-  margin-bottom: 4px;
-}
-
-.svg-icon {
-  fill: rgb(248, 82, 82);
-  cursor: pointer;
-}
-
-.setting-chats-button {
-  height: 40px;
-  width: 100%;
-  background-color: #f9f9f9;
-  font-size: 14px;
+.resizer {
+  width: 10px; /* Ширина элемента изменения размера */
+  cursor: ew-resize; /* Курсор при наведении на элемент изменения размера */
+  background-color: transparent; /* Сделать его прозрачным */
+  position: absolute; /* Позволяет позиционировать его рядом со списком */
+  right: 0; /* Позиционирование справа от списка */
+  top: 0; /* Позиционирование сверху */
+  height: 100%; /* Высота на 100% от контейнера */
+  z-index: 1; /* Убедиться, что элемент изменения размера выше других элементов */
 }
 
 .error-section {
@@ -529,6 +530,11 @@ const playSound = () => {
   color: rgb(219, 57, 57);
   font-size: 18px;
   font-weight: 600;
+}
+
+.chat-container {
+  display: flex;
+  height: 100vh;
 }
 
 .error-section p {
@@ -567,6 +573,43 @@ const playSound = () => {
   background-color: #f1f1f1;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.account-list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #f9f9f9;
+}
+
+.account-item {
+  display: flex;
+  font-size: 16px;
+  margin-top: 4px;
+  margin-left: 14px;
+  margin-bottom: 4px;
+}
+
+.text-account-item {
+  display: flex;
+}
+
+.checkbox-input {
+  position: absolute;
+  right: 0;
+}
+
+.svg-icon {
+  fill: rgb(248, 82, 82);
+  cursor: pointer;
+}
+
+.setting-chats-button {
+  height: 40px;
+  width: 100%;
+  background-color: #f9f9f9;
+  font-size: 14px;
 }
 
 .chat-item:hover {
@@ -649,6 +692,58 @@ const playSound = () => {
   height: 45px;
   background-color: red;
   border-radius: 100px;
+}
+
+input[type="checkbox"] {
+  /* Скрываем стандартный чекбокс */
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+label {
+  position: relative;
+  cursor: pointer;
+  padding-left: 30px;
+}
+
+/* Создаем стилизованный чекбокс */
+label:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+/* Стиль, когда чекбокс отмечен */
+input[type="checkbox"]:checked + label:before {
+  background-color: #2196f3;
+  border: 1px solid #2196f3;
+}
+
+/* Иконка "галочка" */
+label:after {
+  content: "";
+  position: absolute;
+  display: none;
+  top: 5px;
+  left: 7px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"]:checked + label:after {
+  display: block;
 }
 
 @media (max-width: 1200px) {

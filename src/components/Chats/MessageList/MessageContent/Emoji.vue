@@ -209,10 +209,10 @@ const fetchEmojis = async () => {
 <style scoped>
 .modal {
   display: block;
-  position: fixed;
+  position: absolute;
   z-index: 1;
-  right: 20px;
-  bottom: 70px;
+  left: 0;
+  bottom: 64px;
   overflow: auto;
 }
 

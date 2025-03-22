@@ -98,3 +98,7 @@ td {
   top: 0;
   left: 0;
 }
+
+.pointer {
+  cursor: pointer;
+}

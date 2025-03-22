@@ -49,54 +49,108 @@
       </svg>
     </section>
     <div class="img-cont">
-      <img
+      <!-- <img
         @click="openMessageContent"
         class="file-img"
         src="/chats/file.svg"
         alt=""
-      />
+      /> -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 1024 1024"
+        class="pointer file-icon"
+        @click="openMessageContent"
+      >
+        <path
+          fill="#54656F"
+          d="M128 192v640h768V320H485.76L357.504 192zm-32-64h287.872l128.384 128H928a32 32 0 0 1 32 32v576a32 32 0 0 1-32 32H96a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32m384 416V416h64v128h128v64H544v128h-64V608H352v-64z"
+        />
+      </svg>
       <article class="smile-img-cont">
         <Emoji
           v-if="station.emoji"
           @closeEmoji="closeEmojiModal"
           @addEmoji="insertEmoji"
         />
-        <input
+        <textarea
           v-if="urlImg"
           class="send-message-input"
           placeholder="Добавить подпись"
-          type="text"
           v-model="contentText"
-        />
-        <input
+          @keydown="handleKeyDown"
+          @input="adjustHeight"
+          rows="1"
+          :style="{ height: inputHeight }"
+        ></textarea>
+        <textarea
           v-else
           class="send-message-input"
           placeholder="Введите сообщение"
-          type="text"
           v-model="messageText"
-        />
-        <img
+          @keydown="handleKeyDown"
+          @input="adjustHeight"
+          rows="1"
+          :style="{ height: inputHeight }"
+        ></textarea>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          class="emoji-icon pointer"
+          @click="changeStatinonEmoji"
+        >
+          <path
+            fill="#54656F"
+            d="M32.39 11.609a5.36 5.36 0 0 1 1.295 2.105l.846 2.6a1.027 1.027 0 0 0 1.938 0l.846-2.6a5.36 5.36 0 0 1 3.397-3.394l2.602-.845a1.028 1.028 0 0 0 0-1.937l-.052-.013l-2.602-.845a5.36 5.36 0 0 1-3.397-3.394l-.846-2.6a1.027 1.027 0 0 0-1.939 0l-.845 2.6l-.022.064a5.36 5.36 0 0 1-3.322 3.33l-2.603.845a1.028 1.028 0 0 0 0 1.937l2.602.845a5.36 5.36 0 0 1 2.103 1.301m13.841 6.927l1.378.448l.028.007a.544.544 0 0 1 0 1.025l-1.378.448a2.84 2.84 0 0 0-1.798 1.796l-.448 1.377l-.016.04v.009a.544.544 0 0 1-1.01-.039l-.448-1.377a2.84 2.84 0 0 0-1.357-1.61l-.003-.015a3 3 0 0 0-.438-.188l-1.378-.448a.544.544 0 0 1 0-1.025l1.378-.448a2.84 2.84 0 0 0 1.77-1.796l.448-1.377a.544.544 0 0 1 1.027 0l.448 1.377a2.83 2.83 0 0 0 1.797 1.796M25.682 6.58A18 18 0 0 0 24 6.5C14.335 6.5 6.5 14.335 6.5 24S14.335 41.5 24 41.5c9.332 0 16.957-7.304 17.472-16.507q.236.313.56.544a2.54 2.54 0 0 0 1.872.434C42.914 36.09 34.381 44 24 44C12.954 44 4 35.046 4 24S12.954 4 24 4c1.948 0 3.83.278 5.61.797l-2.542.826a3.05 3.05 0 0 0-1.386.957M20 19.5a2.5 2.5 0 1 1-5 0a2.5 2.5 0 0 1 5 0M30.5 22a2.5 2.5 0 1 0 0-5a2.5 2.5 0 0 0 0 5M18.452 34.681A11.7 11.7 0 0 0 24 36a11.72 11.72 0 0 0 9.816-5.1a1.249 1.249 0 1 0-2.13-1.307A9.21 9.21 0 0 1 24 33.5a9.22 9.22 0 0 1-7.687-3.907a1.248 1.248 0 1 0-2.13 1.307a11.7 11.7 0 0 0 4.269 3.781"
+          />
+        </svg>
+        <!-- <img
           @click="changeStatinonEmoji"
           class="smile-img"
           src="/chats/smile.svg"
           alt=""
-        />
+        /> -->
       </article>
-      <img @click="sendMessage" class="send-img" src="/chats/send.svg" alt="" />
+      <!-- <img @click="sendMessage" class="send-img" src="/chats/send.svg" alt="" /> -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        class="pointer send-icon"
+        @click="sendMessage"
+      >
+        <path
+          d="M21.426 11.095l-17-8A1 1 0 0 0 3.03 4.242l1.212 4.849L12 12l-7.758 2.909l-1.212 4.849a.998.998 0 0 0 1.396 1.147l17-8a1 1 0 0 0 0-1.81z"
+          fill="#54656F"
+        />
+      </svg>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, toRefs, computed, watch, defineEmits, reactive } from "vue";
+import {
+  ref,
+  toRefs,
+  reactive,
+  provide,
+  onBeforeUnmount,
+  onMounted,
+  watch,
+} from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
 import Camera from "./MessageContent/checkContent/Camera.vue";
 import Emoji from "./MessageContent/Emoji.vue";
-const router = useRouter();
 import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+
+const router = useRouter();
 const props = defineProps({
   chatInfo: {
     type: Object,
@@ -125,7 +179,6 @@ const props = defineProps({
   },
 });
 
-// const emit = defineEmits(["updateMessages"]);
 const { chatInfo, replyToData, replyToDataBolean } = toRefs(props);
 
 const errorBlock = ref(false);
@@ -137,12 +190,55 @@ const messageText = ref("");
 const contentText = ref("");
 const urlImg = ref("");
 const typeUrl = ref(false);
+const cameraContainerStyle = ref({});
 
 const station = reactive({
   messageContent: false,
   cameraStation: false,
   emoji: false,
 });
+
+// Переменная для хранения высоты текстового поля
+const inputHeight = ref("auto");
+
+// Функция для настройки высоты текстового поля
+const adjustHeight = (event) => {
+  const textarea = event.target;
+  textarea.style.height = "auto"; // Сбрасываем высоту
+  textarea.style.height = textarea.scrollHeight + "px"; // Устанавливаем новую высоту
+};
+
+// Обработчик нажатий клавиш
+const handleKeyDown = (event) => {
+  if (event.key === "Enter") {
+    if (event.shiftKey) {
+      // Если нажата клавиша Shift + Enter, добавляем новую строку
+      event.preventDefault(); // Предотвращаем стандартное поведение
+      const textarea = event.target;
+      textarea.value += "\n"; // Добавляем новую строку
+      adjustHeight(event); // Обновляем высоту текстового поля
+    } else {
+      // Если просто нажата клавиша Enter, отправляем сообщение
+      event.preventDefault(); // Предотвращаем стандартное поведение
+      sendMessage(); // Вызываем функцию отправки сообщения
+    }
+  }
+};
+
+const updateCameraPosition = () => {
+  // Получаем координаты контейнера сообщений (замени '.messages-container' на свой класс)
+  const messagesContainer = document.querySelector(".send-message"); // Найди свой контейнер
+  if (messagesContainer) {
+    const rect = messagesContainer.getBoundingClientRect();
+    // Устанавливаем стили для camera-container
+    cameraContainerStyle.value = {
+      top: `${rect.top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+    };
+  }
+};
 
 const changeStatinonEmoji = () => {
   station.emoji = !station.emoji;
@@ -154,6 +250,7 @@ const closeEmojiModal = () => {
 
 const openCameraStation = () => {
   station.cameraStation = !station.cameraStation;
+  updateCameraPosition();
 };
 
 const openMessageContent = () => {
@@ -227,7 +324,6 @@ const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
-  // changeStatinonEmoji();
   closeEmojiModal();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;
@@ -237,7 +333,7 @@ const sendMessage = async () => {
   const message = {
     tempId: generateItemNew(),
     to: `${chatInfo.value.phone}`,
-    text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
+    text: contentText.value ? contentText.value : messageText.value || null,
     content: contentText.value
       ? [
           {
@@ -247,7 +343,6 @@ const sendMessage = async () => {
         ]
       : [],
     from: "79027631667",
-    // from: chatInfo.value.lastMessage?.from,
     time: Date.now(),
     replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
@@ -343,6 +438,11 @@ const sendMessage = async () => {
         props.offReplyToDataBolean();
       }
       messageText.value = "";
+      contentText.value = "";
+      urlImg.value = "";
+
+      // Сбрасываем высоту текстового поля
+      inputHeight.value = "auto"; // Устанавливаем в дефолтное значение
     }
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
@@ -367,21 +467,32 @@ watch(
   },
   { deep: true }
 );
-</script>
 
+onMounted(() => {
+  // Вызываем функцию для установки позиции камеры после монтирования компонента
+  updateCameraPosition();
+  // Также можно добавить listener на изменение размера окна, чтобы обновлять позицию
+  window.addEventListener("resize", updateCameraPosition);
+
+  // Удаляем listener при размонтировании компонента
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", updateCameraPosition);
+  });
+});
+
+provide(cameraContainerStyle, "cameraContainerStyle");
+</script>
 <style scoped>
 .send-message {
   width: 100%;
-  padding: 10px 0px;
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: center; */
+  padding: 10px 36px; /* Отступы сверху и снизу 10px, слева и справа 20px */
   gap: 11px;
+  box-sizing: border-box; /* Включаем отступы в ширину элемента */
 }
 
 .img-cont {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 14px;
   flex: 1;
 }
@@ -392,41 +503,33 @@ watch(
   flex: 1;
 }
 
+.file-icon {
+  margin-bottom: 10px;
+}
+
+.send-icon {
+  margin-bottom: 10px;
+}
+
 .file-img,
 .smile-img,
 .send-img {
   cursor: pointer;
 }
 
-.send {
-  width: 10%;
-  position: absolute;
-  bottom: 60px;
-  left: 23px;
-  border-radius: 5px;
-}
-
-.send-img {
-  margin-right: 20px;
-}
-
-.file-img {
-  margin-left: 20px;
-}
-
-.smile-img {
-  position: absolute;
-  top: 11px;
-  right: 12px;
-}
-
 .send-message-input {
-  border-radius: 233px;
+  font-family: system-ui;
+  border-radius: 5px;
   width: 100%;
-  height: 36px;
-  border: 1px solid #d4d4d4;
-  padding-left: 10px;
-  box-sizing: border-box;
+  height: auto; /* Убираем фиксированную высоту */
+  min-height: 50px; /* Минимальная высота */
+  border: none;
+  outline: none;
+  overflow: hidden; /* Скрываем переполнение */
+  padding: 16px 16px 16px 40px;
+  box-sizing: border-box; /* Включаем отступы в ширину элемента */
+  resize: none; /* Запрещаем изменение размера вручную */
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02);
 }
 
 .reply-section {
@@ -435,37 +538,32 @@ watch(
   justify-content: center;
 }
 
+.emoji-icon {
+  position: absolute;
+  bottom: 12px;
+  left: 8px;
+}
+
 .content {
   height: 60px;
   background-color: rgb(236, 236, 236);
   width: 85%;
   margin-bottom: 10px;
   border-radius: 5px;
-  border-left: 6px solid #06cf9c;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  gap: 6px;
+  border-left: 6px solid #007bff; /* Цвет левой границы */
 }
 
 .number-user {
-  font-size: 14px;
-  font-weight: 500;
-  color: #06cf9c;
-  margin-left: 10px;
+  font-weight: bold;
+  margin: 0;
 }
 
 .message-user {
-  font-size: 14px;
-  font-weight: 500;
-  color: #636363;
-  margin-left: 10px;
+  margin: 0;
 }
 
 .close-img {
-  width: 35px;
-  height: 35px;
-  stroke: gray;
+  cursor: pointer;
+  margin-left: 10px;
 }
 </style>

@@ -1,6 +1,27 @@
 <template>
-  <div @click="openCameraStation" class="black-fon"></div>
-  <section class="camera-container">
+  <!-- <div @click="openCameraStation" class="black-fon"></div> -->
+
+  <section :style="cameraContainerStyle" class="camera-container">
+    <section @click="openCameraStation" class="navigate">
+      <h2 class="navigate-title">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m18 18l-6-6m0 0L6 6m6 6l6-6m-6 6l-6 6"
+          />
+        </svg>
+        Сделать снимок
+      </h2>
+    </section>
     <video
       ref="videoElement"
       autoplay
@@ -27,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, inject, onMounted } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -38,7 +59,7 @@ const props = defineProps({
     type: Function,
   },
 });
-
+const cameraContainerStyle = inject("cameraContainerStyle");
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const videoElement = ref(null);
@@ -77,11 +98,15 @@ const takePhoto = async () => {
     const formData = new FormData();
     formData.append("file", dataURLtoFile(photoDataURL, "photo.png"));
 
-    const response = await axios.post(`${apiUrl}/upload`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post(
+      `https://hellychat.apitter.com/upload`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
     photoURL.value = response.data.fileUrl;
     props.changeImgUrl(photoURL, "image");
@@ -109,24 +134,71 @@ function dataURLtoFile(dataurl, filename) {
 
 <style scoped>
 .camera-container {
-  position: fixed;
+  position: fixed; /* Важно */
   z-index: 10;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 10px;
-  width: 650px;
-  height: 625px;
-  background: #fff;
+  background: #f0f2f5;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   overflow: hidden;
+  /* position: fixed больше не определяет положение, используем JS */
+  top: 0; /* Избыточно */
+  left: 0; /* Избыточно */
+  right: 0; /* Избыточно */
+  bottom: 0; /* Избыточно */
+}
+
+.camera-container .fade-enter-active,
+.camera-container .fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.camera-container .fade-enter,
+.camera-container .fade-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.camera-container {
+  animation: fadeIn 0.5s forwards;
+  transform-origin: bottom;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navigate {
+  width: 100%;
+  height: 50px;
+  position: fixed;
+  top: 0;
+  background-color: #4950ca;
+  display: flex;
+  align-items: center;
+}
+
+.navigate-title {
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  gap: 4px;
+  border-radius: 5px;
+  margin-left: 20px;
 }
 
 .camera-preview {
-  width: 520px;
   height: 340px;
   border: 1px solid #ccc;
   margin-bottom: 10px;
@@ -154,5 +226,17 @@ function dataURLtoFile(dataurl, filename) {
   height: 40px; /* 24px */
   transition: all 75ms; /* Переход для всех свойств за 75 мс */
   fill: white;
+}
+
+@media (max-width: 650px) {
+  .camera-preview {
+    height: 240px;
+  }
+}
+
+@media (max-width: 450px) {
+  .camera-preview {
+    height: 200px;
+  }
 }
 </style>

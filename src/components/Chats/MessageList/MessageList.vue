@@ -34,10 +34,42 @@
                   message.data.content && message.data.content.length > 0,
               },
             ]"
-            @click="
-              shouldOpenModal(message) ? openModal($event, message) : null
-            "
+            @mousedown="handleMouseDown($event, message)"
           >
+            <div
+              v-if="message.data.outgoing"
+              class="dropdown-message-message"
+            ></div>
+            <svg
+              v-if="message.data.outgoing"
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 1024 1024"
+              class="dropdown-message"
+            >
+              <path
+                fill="currentColor"
+                d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
+              />
+            </svg>
+            <div
+              v-if="!message.data.outgoing"
+              class="dropdown-message-message-incoming"
+            ></div>
+            <svg
+              v-if="!message.data.outgoing"
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 1024 1024"
+              class="dropdown-message-incoming"
+            >
+              <path
+                fill="currentColor"
+                d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
+              />
+            </svg>
             <div v-if="message.data.replyTo != null" class="reply-content">
               <h2 class="reply-name">
                 <!-- {{ message.data.replyTo.name }} -->
@@ -429,6 +461,18 @@ const changeMessageState = (newMessage, tempId) => {
   // Вызов функции для отслеживания, удаления и добавления
   trackAndRemoveAndAddMessage(tempId);
   console.log(messages.value); // Исправлено на .value
+};
+
+const handleMouseDown = (event, message) => {
+  // event.button показывает, какая кнопка мыши была нажата:
+  // 0: Левая кнопка
+  // 1: Колесико мыши
+  // 2: Правая кнопка
+
+  // Вызываем openModal, если нужно открывать модальное окно
+  if (shouldOpenModal(message)) {
+    openModal(event, message);
+  }
 };
 
 const updateMessages = (newMessage) => {
@@ -997,7 +1041,70 @@ onMounted(() => {
   fill: white;
 }
 
-/* Стили для иконки */
+.message:hover .dropdown-message {
+  display: block;
+  transition: all 0.25s;
+}
+
+.message:hover .dropdown-message-message {
+  display: flex;
+  transition: all 0.25s;
+}
+
+.message:hover .dropdown-message-incoming {
+  display: block;
+  transition: all 0.25s;
+}
+
+.message:hover .dropdown-message-message-incoming {
+  display: flex;
+  transition: all 0.25s;
+}
+
+.dropdown-message-incoming {
+  display: none;
+  position: absolute;
+  right: 6px;
+  top: 8px;
+  transition: all 0.25s;
+}
+
+.dropdown-message-message-incoming {
+  position: absolute;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #f1f1f1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  filter: blur(2px); /* Применяем размытие к этому элементу */
+  transition: all 0.25s;
+}
+
+.dropdown-message {
+  display: none;
+  position: absolute;
+  right: 6px;
+  top: 8px;
+  transition: all 0.25s;
+}
+
+.dropdown-message-message {
+  position: absolute;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #e1ffc7;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  filter: blur(2px); /* Применяем размытие к этому элементу */
+  transition: all 0.25s;
+}
+
 .icon-container {
   display: flex;
   align-items: center;
@@ -1142,6 +1249,8 @@ onMounted(() => {
 .message {
   position: relative;
   padding: 10px;
+  transition: all 0.25s;
+  cursor: pointer;
 }
 
 /* Уменьшенный паддинг для сообщений с контентом */

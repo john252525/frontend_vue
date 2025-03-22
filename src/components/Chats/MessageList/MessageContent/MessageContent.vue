@@ -138,10 +138,9 @@ const handleFileChange = async (event) => {
   display: flex;
   align-items: center;
   justify-content: center;
-
   position: absolute;
-  bottom: 60px;
-  left: 20px;
+  bottom: 74px;
+  left: 36px;
 }
 
 li {
