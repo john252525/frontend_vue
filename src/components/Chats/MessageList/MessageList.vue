@@ -608,7 +608,7 @@ watch(pageTitle, (newTitle) => {
   document.title = newTitle;
 });
 
-const messagesBolean = ref(false)
+const messagesBolean = ref(false);
 
 const getMessage = async () => {
   props.blockChat();
@@ -627,13 +627,13 @@ const getMessage = async () => {
       apiUrl === "http://localhost:4000/api"
     ) {
       requestData.to = chatInfo.value.phone;
-      requestData.login = chatInfo.value.loginUser
+      requestData.login = chatInfo.value.loginUser;
       requestData.uniq = chatInfo.value.lastMessage.id.remote;
     }
 
     const response = await axios.post(
-      `http://localhost:4000/api/getChatMessages`,
-      // `${apiUrl}/getChatMessages`,
+      // `http://localhost:4000/api/getChatMessages`,
+      `${apiUrl}/getChatMessages`,
       requestData,
       {
         headers: {
@@ -642,7 +642,7 @@ const getMessage = async () => {
         },
       }
     );
-    messagesBolean.value = true
+    messagesBolean.value = true;
     if (response.data.ok === true) {
       loading.value = false;
       props.blockChat();
@@ -652,7 +652,7 @@ const getMessage = async () => {
         apiUrl === "http://localhost:4000/api"
       ) {
         messages.value = response.data.data.messages;
-        console.log(messages.value)
+        console.log(messages.value);
       } else {
         messages.value = response.data.data.messages.map((message) => ({
           data: message,
@@ -696,13 +696,13 @@ const getMessage = async () => {
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
     loading.value = false;
-    messages.value = []
+    messages.value = [];
     props.blockChatOff();
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
       loading.value = false;
-    messages.value = []
-    props.blockChatOff();
+      messages.value = [];
+      props.blockChatOff();
     }
   }
 };
