@@ -22,7 +22,7 @@
           {{ removeDecimalZeros(balance) }} ₽
         </h2>
         <h2 v-else @click="toggleBalanceStation" class="balance-user">
-          0.00 ₽
+          <LoadingBalance />
         </h2>
         <img
           @click="toggleAccountMenu"
@@ -45,6 +45,7 @@
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
 
@@ -130,6 +131,9 @@ onMounted(getBalance);
 }
 
 .balance-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
   font-size: 12px;
   color: #4047ca;

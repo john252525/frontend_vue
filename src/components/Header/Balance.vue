@@ -2,7 +2,11 @@
   <div @click="balanceStationOn" class="black-fon"></div>
   <section class="balance-user-section">
     <article class="balance-info">
-      <h2 class="balance-text">Ваш баланс: 0 ₽</h2>
+      <h2 class="balance-text">
+        Ваш баланс:
+        <span v-if="balance">{{ removeDecimalZeros(balance) }}</span>
+        <LoadingBalance v-else /> ₽
+      </h2>
       <div class="line"></div>
     </article>
     <article class="top-balance-cont" @click="navigateTo('/payments')">
@@ -14,6 +18,9 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import axios from "axios";
+import LoadingBalance from "./Loading/LoadingBalance.vue";
+import { ref, onMounted } from "vue";
 const router = useRouter();
 const props = defineProps({
   balanceStationOn: {
@@ -21,10 +28,42 @@ const props = defineProps({
   },
 });
 
+function removeDecimalZeros(value) {
+  return value.toString().replace(/\.00$/, "");
+}
+
+const balance = ref("");
+
+const getBalance = async () => {
+  try {
+    const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
+
+    const response = await axios.post(
+      "https://hellylo.apitter.com/api/get-payment-sum", // URL вашего бэкенда
+      {}, // Тело запроса, если не нужно отправлять дополнительные данные
+      {
+        headers: {
+          "Content-Type": "application/json", // Убедитесь, что заголовок указан
+          Authorization: `Bearer ${token}`, // Заголовок авторизации с токеном
+        },
+      }
+    );
+    balance.value = response.data.totalAmount;
+    console.log("Платеж создан:", response.data);
+  } catch (err) {
+    console.error(
+      "Ошибка при создании платежа:",
+      err.response ? err.response.data : err.message
+    );
+  }
+};
+
 const navigateTo = (page) => {
   props.balanceStationOn();
   router.push(page);
 };
+
+onMounted(getBalance);
 </script>
 
 <style scoped>
@@ -80,6 +119,9 @@ const navigateTo = (page) => {
 }
 
 .balance-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 700;
   font-size: 16px;
   color: #535353;
