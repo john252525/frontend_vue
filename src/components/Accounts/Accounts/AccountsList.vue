@@ -26,6 +26,9 @@
             >
               {{ item.step.value }}
             </td>
+            <td class="table-text" v-else-if="item.loading">
+              <LoadingAccount />
+            </td>
             <td class="table-text" v-else>Пусто</td>
             <td class="table-action-text">
               <button
@@ -123,6 +126,7 @@
 import { ref, reactive, onMounted, provide, inject } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import LoadingAccount from "./LoadingMoadal/LoadingAccount.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Modal from "./Modal.vue";
 import Enable from "./ModalAccount/Enable/Enable.vue";
@@ -173,13 +177,13 @@ const chaneErrorBlock = () => {
 };
 
 const getAccounts = async () => {
-  loadDataStation.value = true;
+  loadDataStation.value = true; // Устанавливаем флаг загрузки
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
         source: localStorage.getItem("accountStation"),
-        skipDetails: false,
+        skipDetails: true,
       },
       {
         headers: {
@@ -190,14 +194,17 @@ const getAccounts = async () => {
     );
 
     if (response.data.ok === true) {
+      // Инициализируем accounts с loading: true
       accounts.value = response.data;
       instanceData.value = accounts.value.data.instances.map((instance) => ({
         ...instance,
         step: instance.step === null ? "Н/Д" : instance.step,
+        loading: true, // Добавляем поле loading
       }));
+      console.log(instanceData.value);
 
       if (instanceData.value.length === 0) {
-        console.log("данных нет");
+        console.log("Данных нет");
         loadDataStation.value = false;
         dataStationNone.value = true;
       } else {
@@ -206,14 +213,33 @@ const getAccounts = async () => {
 
         // Проверяем, если source равен "whatsapp"
         if (localStorage.getItem("accountStation") === "whatsapp") {
-          // Цикл по всем экземплярам
-          for (const instance of instanceData.value) {
+          // Создаем массив промисов для обработки каждого экземпляра
+          const promises = instanceData.value.map(async (instance) => {
             const login = instance.login; // Извлекаем логин
 
-            // console.log(instance);
-            // Запрос для каждого логина
+            try {
+              // Запрос для получения информации о каждом логине
+              const infoResponse = await getInfoWhats(instance.source, login);
+              if (
+                infoResponse &&
+                infoResponse.data &&
+                infoResponse.data.data.step
+              ) {
+                // Обновляем step
+                instance.step = infoResponse.data.data.step;
+              }
+            } catch (error) {
+              console.error(
+                `Ошибка при получении информации для логина ${login}:`,
+                error
+              );
+            } finally {
+              // Устанавливаем loading в false в любом случае
+              instance.loading = false;
+            }
 
-            if (instance.step && instance.step.value === 5) {
+            // Проверяем, если step равен 5
+            if (instance.step.value === 5) {
               console.log(instance);
               const existingLogins =
                 JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) ||
@@ -237,9 +263,13 @@ const getAccounts = async () => {
                 );
               }
             }
-          }
+          });
+
+          // Ждем завершения всех запросов
+          await Promise.all(promises);
           // Выводим сообщение о завершении проверки всех аккаунтов
           chatsLoadingChange();
+          console.log(accounts.value);
         }
       }
     } else if (response.data === 401) {
@@ -254,7 +284,7 @@ const getAccounts = async () => {
     dataStationNone.value = true; // Показываем, что данные отсутствуют
     if (error.response) {
       if (error.response.status === 401) {
-        console.log("no ke");
+        console.log("Нет доступа");
       } else {
         console.error("Ошибка при получении списка аккаунтов:", error);
         console.error("Ответ сервера:", error.response.data);

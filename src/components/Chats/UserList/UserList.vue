@@ -3,7 +3,11 @@
   <div class="chat-container">
     <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
       <section
-        v-if="apiUrl === 'https://hellychat.apitter.com/api' && isMulti"
+        v-if="
+          (apiUrl === 'https://hellychat.apitter.com/api' ||
+            apiUrl === 'http://localhost:4000/api') &&
+          isMulti
+        "
         class="setting-chats"
       >
         <button class="setting-chats-button" @click="toggleAccountList">
@@ -212,17 +216,17 @@ const test = async () => {
 
   try {
     const token = localStorage.getItem("accountToken");
-
+    console.log(JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")));
     // Получаем логин в зависимости от значения multi
     const logins = isMulti.value
       ? JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []
       : userInfo?.login;
-
+    const userInfoLS = JSON.parse(localStorage.getItem("userInfo"));
     const response = await axios.post(
       `${apiUrl}/getChats`,
       {
-        source: userInfo?.source,
-        login: logins, // Используем определенный логин
+        source: localStorage.getItem("accountStation"),
+        login: logins,
       },
       {
         headers: {
@@ -241,7 +245,10 @@ const test = async () => {
       return;
     }
 
-    if (apiUrl === "https://hellychat.apitter.com/api") {
+    if (
+      apiUrl === "https://hellychat.apitter.com/api" ||
+      apiUrl === "http://localhost:4000/api"
+    ) {
       chats.value = response.data.data.chats;
     } else {
       chats.value = response.data.data.chats.map((chat) => ({
@@ -256,7 +263,7 @@ const test = async () => {
 
     setTimeout(() => {
       localStorage.removeItem("loginWhatsAppChatsStep");
-      router.push("/accounts");
+      // router.push("/accounts");
     }, 2000);
     console.error("Ошибка при получении сообщений:", error);
     if (error.response) {

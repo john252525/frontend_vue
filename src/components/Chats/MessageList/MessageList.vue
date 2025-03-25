@@ -11,13 +11,13 @@
             <img src="/chats/out.svg" alt="" />
             <span class="out-text">Назад</span>
           </div>
-          <img
+          <!-- <img
             v-if="chatInfo.avatar"
             class="user-img"
             :src="chatInfo.avatar"
             alt=""
-          />
-          <img v-else class="user-img" src="/chats/user-chat-icon.svg" alt="" />
+          /> -->
+          <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
           <div>
             <h2 class="name-user">{{ chatInfo.name }}</h2>
           </div>
@@ -620,13 +620,17 @@ const getMessage = async () => {
       to: chatInfo.value.phone,
     };
 
-    if (apiUrl === "https://hellychat.apitter.com/api") {
+    if (
+      apiUrl === "https://hellychat.apitter.com/api" ||
+      apiUrl === "http://localhost:4000/api"
+    ) {
       requestData.to = chatInfo.value.phone;
       requestData.uniq = chatInfo.value.lastMessage.id.remote;
     }
 
     const response = await axios.post(
-      `${apiUrl}/getChatMessages`,
+      `http://localhost:4000/api/getChatMessages`,
+      // `${apiUrl}/getChatMessages`,
       requestData,
       {
         headers: {
@@ -640,7 +644,10 @@ const getMessage = async () => {
       loading.value = false;
       props.blockChat();
 
-      if (apiUrl === "https://hellychat.apitter.com/api") {
+      if (
+        apiUrl === "https://hellychat.apitter.com/api" ||
+        apiUrl === "http://localhost:4000/api"
+      ) {
         messages.value = response.data.data.messages;
       } else {
         messages.value = response.data.data.messages.map((message) => ({

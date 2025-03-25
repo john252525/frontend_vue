@@ -39,11 +39,12 @@
           <p class="page">Рассылки</p>
         </li>
         <li
-          v-if="apiUrl === 'https://hellychat.apitter.com/api'"
+          v-if="
+            apiUrl === 'https://hellychat.apitter.com/api' ||
+            apiUrl === 'http://localhost:4000/api'
+          "
           @click="navigateToChats"
-          class="list-chats-loading"
-          :class="{ disabled: chatsLoading }"
-          :disabled="chatsLoading"
+          class="list"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +56,6 @@
             />
           </svg>
           <p class="page">Чаты</p>
-          <Spinner v-if="chatsLoading" />
         </li>
         <li class="list" @click="openList">
           <svg
@@ -164,7 +164,10 @@
             <p class="page">Рассылки</p>
           </li>
           <li
-            v-if="apiUrl === 'https://hellychat.apitter.com/api'"
+            v-if="
+              apiUrl === 'https://hellychat.apitter.com/api' ||
+              apiUrl === 'http://localhost:4000/api'
+            "
             @click="navigateToChats"
             class="list"
           >
