@@ -19,7 +19,7 @@
       <!-- <li><p class="option">Отреагировать</p></li> -->
       <li>
         <p
-          v-if="!message.delete && apiUrl === 'https://hellylo.apitter.com/api'"
+          v-if="deleteMessageBolean && (apiUrl === 'https://hellylo.apitter.com/api' || apiUrl === 'http://localhost:4000/api')"
           @click="deleteMessage"
           class="option delete"
         >
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { defineProps, toRefs, defineEmits } from "vue";
+import { defineProps, ref, toRefs, defineEmits } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -55,6 +55,8 @@ const emit = defineEmits();
 const { chatInfo, message } = toRefs(props);
 const apiUrl = import.meta.env.VITE_API_URL;
 
+const deleteMessageBolean = ref(false)
+
 const deleteMessage = () => {
   console.log(chatInfo.value.lastMessage.id.remote);
   console.log(message.value.uniq);
@@ -66,6 +68,13 @@ const addDataToReplyMessage = (message) => {
   props.addDataToReply(message);
   emit("close");
 };
+
+if (message.value.delete) {
+
+  deleteMessageBolean.value = false
+} else {
+  deleteMessageBolean.value = true
+}
 
 const deleteMessageAxios = async (uniq, item) => {
   console.log(chatInfo);

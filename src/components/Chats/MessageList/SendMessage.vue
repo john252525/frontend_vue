@@ -324,6 +324,9 @@ const specificMicroseconds = convertToMicroseconds(date);
 
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
+  if (!messageText.value) {
+    return
+  }
   closeEmojiModal();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;

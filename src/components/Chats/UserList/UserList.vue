@@ -249,7 +249,8 @@ const test = async () => {
       apiUrl === "https://hellychat.apitter.com/api" ||
       apiUrl === "http://localhost:4000/api"
     ) {
-      chats.value = response.data.data.chats;
+      chats.value = response.data.data.chats
+      console.log(chats.value)
     } else {
       chats.value = response.data.data.chats.map((chat) => ({
         newMessage: chat.unreadCount,
