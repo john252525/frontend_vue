@@ -15,9 +15,15 @@
             v-if="chatInfo.avatar"
             class="user-img"
             :src="chatInfo.avatar"
+               @click="changeImageStation"
             alt=""
           /> -->
-          <img class="user-img" src="/chats/user-chat-icon.svg" alt="" />
+          <img
+            class="user-img"
+            @click="changeImageStation"
+            src="/chats/user-chat-icon.svg"
+            alt=""
+          />
           <div>
             <h2 class="name-user">{{ chatInfo.name }}</h2>
           </div>
@@ -321,6 +327,9 @@ const props = defineProps({
     type: Object,
   },
   changeMessageListStation: {
+    type: Function,
+  },
+  changeImageStation: {
     type: Function,
   },
   blockChat: {

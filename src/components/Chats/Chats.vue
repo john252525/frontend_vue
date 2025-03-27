@@ -1,11 +1,17 @@
 <template>
   <section class="pc-version" v-if="!isMobile && userInfo">
+    <CheckUserImage
+      :changeImageStation="changeImageStation"
+      :userImageUrl="userImageUrl"
+      v-if="imgageStation"
+    />
     <UserList
       class="user-list"
       :selectChat="selectChat"
       :isChatClickable="isChatClickable"
       :blockChat="blockChat"
       :webhookEventData="webhookEventData"
+      :changeImageStation="changeImageStation"
     />
     <MessageList
       class="message-list"
@@ -14,12 +20,19 @@
       :blockChatOff="blockChatOff"
       :blockChat="blockChat"
       :changeWebhookEventData="changeWebhookEventData"
+      :changeImageStation="changeImageStation"
     />
   </section>
   <section class="phone-version" v-if="isMobile && userInfo">
+    <CheckUserImage
+      :changeImageStation="changeImageStation"
+      :userImageUrl="userImageUrl"
+      v-if="imgageStation"
+    />
     <UserList
       v-if="!showMessageList"
       class="phone-user-list"
+      :changeImageStation="changeImageStation"
       :selectChat="selectChat"
       :isChatClickable="isChatClickable"
       :blockChat="blockChat"
@@ -34,6 +47,7 @@
       :chatInfo="chatInfo"
       :blockChat="blockChat"
       :blockChatOff="blockChatOff"
+      :changeImageStation="changeImageStation"
       :changeWebhookEventData="changeWebhookEventData"
     />
   </section>
@@ -44,6 +58,7 @@ import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 import axios from "axios";
+import CheckUserImage from "./CheckUserImage.vue";
 
 const style = reactive({
   userList: {
@@ -66,6 +81,18 @@ const showMessageList = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
+const imgageStation = ref(false);
+const userImageUrl = ref(null);
+
+const changeImageStation = (chat) => {
+  imgageStation.value = !imgageStation.value;
+  console.log(chat.data);
+  if (chat.data.avatar) {
+    userImageUrl.value = chat.data.avatar;
+  } else {
+    userImageUrl.value = null;
+  }
+};
 
 const checkIfMobile = () => {
   isMobile.value = window.innerWidth <= 768;

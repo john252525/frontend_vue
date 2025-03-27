@@ -1,6 +1,7 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <div class="chat-container">
+    <!-- <CheckUserImage /> -->
     <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
       <section
         v-if="
@@ -47,10 +48,12 @@
             "
             class="user-chat-avatar"
             :src="chat.data.avatar"
+            @click="changeImageStation"
             alt=""
           />
           <img
             v-else
+            @click="changeImageStation(chat)"
             class="user-chat-icon"
             src="/chats/user-chat-icon.svg"
             alt=""
@@ -87,6 +90,7 @@ import axios from "axios";
 import { onMounted, ref, watch, computed, defineProps, toRefs } from "vue";
 import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import CheckUserImage from "../CheckUserImage.vue";
 import { useRouter, useRoute } from "vue-router";
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -106,6 +110,9 @@ const props = defineProps({
   },
   webhookEventData: {
     type: Object,
+  },
+  changeImageStation: {
+    type: Function,
   },
 });
 
@@ -249,8 +256,8 @@ const test = async () => {
       apiUrl === "https://hellychat.apitter.com/api" ||
       apiUrl === "http://localhost:4000/api"
     ) {
-      chats.value = response.data.data.chats
-      console.log(chats.value)
+      chats.value = response.data.data.chats;
+      console.log(chats.value);
     } else {
       chats.value = response.data.data.chats.map((chat) => ({
         newMessage: chat.unreadCount,
@@ -524,6 +531,11 @@ const playSound = () => {
   top: 0; /* Позиционирование сверху */
   height: 100%; /* Высота на 100% от контейнера */
   z-index: 1; /* Убедиться, что элемент изменения размера выше других элементов */
+  user-select: none; /* Отключаем выделение текста */
+}
+
+.chat-list {
+  user-select: none; /* Отключаем выделение текста для списка чатов */
 }
 
 .error-section {
