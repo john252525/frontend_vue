@@ -48,7 +48,7 @@
             "
             class="user-chat-avatar"
             :src="chat.data.avatar"
-            @click="changeImageStation"
+            @click="changeImageStation(chat)"
             alt=""
           />
           <img

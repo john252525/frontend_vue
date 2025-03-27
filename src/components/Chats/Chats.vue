@@ -84,13 +84,19 @@ const chatInfo = ref(null);
 const imgageStation = ref(false);
 const userImageUrl = ref(null);
 
-const changeImageStation = (chat) => {
+const changeImageStation = (chat, value) => {
   imgageStation.value = !imgageStation.value;
-  console.log(chat.data);
-  if (chat.data.avatar) {
-    userImageUrl.value = chat.data.avatar;
+  console.log(chat);
+  if (value) {
+    userImageUrl.value = chat.avatar;
   } else {
-    userImageUrl.value = null;
+    if (chat.data) {
+      if (chat.data.avatar) {
+        userImageUrl.value = chat.data.avatar;
+      }
+    } else {
+      userImageUrl.value = null;
+    }
   }
 };
 

@@ -11,16 +11,17 @@
             <img src="/chats/out.svg" alt="" />
             <span class="out-text">Назад</span>
           </div>
-          <!-- <img
+          <img
             v-if="chatInfo.avatar"
             class="user-img"
             :src="chatInfo.avatar"
-               @click="changeImageStation"
+            @click="changeImageStation(chatInfo, true)"
             alt=""
-          /> -->
+          />
           <img
+            v-else
             class="user-img"
-            @click="changeImageStation"
+            @click="changeImageStation(chatInfo, true)"
             src="/chats/user-chat-icon.svg"
             alt=""
           />
