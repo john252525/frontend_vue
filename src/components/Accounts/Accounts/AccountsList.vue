@@ -212,7 +212,10 @@ const getAccounts = async () => {
         dataStation.value = true;
 
         // Проверяем, если source равен "whatsapp"
-        if (localStorage.getItem("accountStation") === "whatsapp") {
+        if (
+          localStorage.getItem("accountStation") === "whatsapp" ||
+          localStorage.getItem("accountStation") === "telegram"
+        ) {
           // Создаем массив промисов для обработки каждого экземпляра
           const promises = instanceData.value.map(async (instance) => {
             const login = instance.login; // Извлекаем логин

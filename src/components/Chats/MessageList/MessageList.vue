@@ -319,6 +319,7 @@ import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
 import Error from "../UserList/Error.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
+import NewMessageForUser from "../UserList/newMessageForUser.vue";
 import ActionModal from "./ActionModal/ActionModal.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -627,7 +628,7 @@ const getMessage = async () => {
 
     const userLogin = JSON.parse(localStorage.getItem("userInfo"));
     let requestData = {
-      source: "whatsapp",
+      source: localStorage.getItem("accountStation"),
       login: userLogin.login,
       to: chatInfo.value.phone,
     };
@@ -648,7 +649,7 @@ const getMessage = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );

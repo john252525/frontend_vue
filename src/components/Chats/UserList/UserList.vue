@@ -1,7 +1,12 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+  <NewMessageSend
+    :changeAddAccountStation="changeAddAccountStation"
+    v-if="addAccountStation"
+  />
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
+
     <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
       <section
         v-if="
@@ -33,6 +38,9 @@
           </div>
         </div>
       </section>
+      <div @click="changeAddAccountStation" class="add-contact">
+        <h2>Добавить контакт</h2>
+      </div>
       <section
         v-if="chats"
         v-for="chat in sortedChats"
@@ -92,6 +100,7 @@ import Loading from "./Loading.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import CheckUserImage from "../CheckUserImage.vue";
 import { useRouter, useRoute } from "vue-router";
+import NewMessageSend from "./newMessageForUser.vue";
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -117,7 +126,7 @@ const props = defineProps({
 });
 
 const { isChatClickable, webhookEventData } = toRefs(props);
-
+const addAccountStation = ref(false);
 const errorBlock = ref(false);
 const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -127,6 +136,10 @@ const errorStation = ref(false);
 const selectChatClick = (chat) => {
   props.selectChat(chat);
   chatInfo.value = chat;
+};
+
+const changeAddAccountStation = () => {
+  addAccountStation.value = !addAccountStation.value;
 };
 
 const updateChatTimestamp = (thread, newTimestamp) => {
@@ -570,6 +583,21 @@ const playSound = () => {
   cursor: pointer;
   background-color: #f9f9f9;
   transition: background-color 0.3s ease;
+}
+
+.add-contact {
+  padding: 12px;
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: center;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.add-contact h2 {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .disabled-chat {

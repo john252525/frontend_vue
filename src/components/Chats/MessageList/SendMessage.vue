@@ -320,17 +320,25 @@ function convertToMicroseconds(date) {
 // Пример использования
 const microseconds = convertToMicroseconds(); // Вызываем без аргументов
 
-const specificMicroseconds = convertToMicroseconds(date);
+const extractPhoneNumber = (fullId) => {
+  const atIndex = fullId.indexOf("@");
+  if (atIndex !== -1) {
+    return fullId.substring(0, atIndex);
+  }
+  return fullId; // Вернуть исходную строку, если '@' не найдено
+};
 
+const specificMicroseconds = convertToMicroseconds(date);
+console.log(chatInfo.value);
 const emit = defineEmits(["updateMessages"]);
 const sendMessage = async () => {
   if (!messageText.value) {
-    return
+    return;
   }
   closeEmojiModal();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;
-
+  const sourceUser = localStorage.getItem("accountStation");
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const message = {
@@ -345,7 +353,10 @@ const sendMessage = async () => {
           },
         ]
       : [],
-    from: "79027631667",
+    from:
+      sourceUser === "whatsapp"
+        ? extractPhoneNumber(chatInfo.value.lastMessage.from)
+        : chatInfo.value.lastMessage.from,
     time: Date.now(),
     replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
@@ -400,7 +411,7 @@ const sendMessage = async () => {
   emit("updateMessages", newMessage);
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   let messageDataRes = {
-    source: "whatsapp",
+    source: localStorage.getItem("accountStation"),
     login: chatInfo.value.loginUser,
     msg: message,
     errorMessage: front_message,
