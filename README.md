@@ -10,6 +10,8 @@ nvm use --lts
 3. Установка git
 sudo apt install git -y
 
+///// sudo apt install npm -y
+
 4. Установка pm2 
 sudo npm install -g pm2
 
@@ -20,14 +22,16 @@ sudo apt install nginx -y
 sudo systemctl start nginx
 sudo systemctl enable nginx
 
+///// /usr/lib/systemd/systemd-sysv-install enable nginx
+
+///// mkdir /var/www
+
 7. Переходим в cd /var/www
 
-
-
 8. Клонируем репозитории
-git clone https://github.com/john252525/be_chat.git
-git clone https://github.com/john252525/be_pay.git
-git clone https://github.com/john252525/frontend_vue.git
+git clone git@github.com:john252525/be_pay.git
+git clone git@github.com:john252525/be_chat.git
+git clone git@github.com:john252525/frontend_vue.git
 
 9. Настройка .env
 
@@ -60,20 +64,23 @@ VITE_API_URL=https://hellychat.apitter.com/api #ссылка для прокла
 VITE_PAY_URL=https://hellylo.apitter.com/api #ссылка для платежей
 
 10.Установка зависимостей 
-cd be_pay
-sudo npm install
-cd be_chat
+
+cd /var/www/be_pay
 sudo npm install
 
-cd frontend_vue 
+cd /var/www/be_chat
+sudo npm install
+
+cd /var/www/frontend_vue
 sudo npm install
 npm run build
 
 11. Настройка запуска приложений через PM2
 
-cd be_pay
+cd /var/www/be_pay
 pm2 start server.js --name "be_pay" 
-cd ../be_chat
+
+cd /var/www/be_chat
 pm2 start server.js --name "be_chat" 
 
 12. Сохраняем процессы 
