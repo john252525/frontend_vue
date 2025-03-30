@@ -38,6 +38,8 @@ MYSQL_USER=root #вашe имя пользователя db
 MYSQL_PASSWORD=68b329da9893e34099c7 #ваш пароль db
 MYSQL_PORT=3306 #ваш порт db
 
+API_URL=https://b2288.apitter.com/instances #ваш url api
+
 be_pay:
 
 MYSQL_HOST=localhost   #ваш хост db
