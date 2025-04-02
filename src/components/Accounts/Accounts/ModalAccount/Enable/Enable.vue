@@ -149,9 +149,12 @@ const setState = async (request) => {
     );
     if (response.data.data.status === "ok") {
       station.stationLoading = false;
+
       station.resultTrue = true;
     } else if (response.data.data.error) {
-      station.stationLoading = false;
+      setTimeout(() => {
+        station.stationLoading = false;
+      }, 1000);
       if (response.data.data.error.message === "QR received") {
         console.log("QR modal open");
         station.qrCode = true;

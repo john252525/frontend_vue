@@ -29,7 +29,7 @@
             <td class="table-text" v-else-if="item.loading">
               <LoadingAccount />
             </td>
-            <td class="table-text" v-else>Пусто</td>
+            <td class="table-text" v-else>-</td>
             <td class="table-action-text">
               <button
                 class="action-table-button"

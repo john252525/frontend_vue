@@ -1,53 +1,66 @@
 <template>
   <div @click="changeAddAccountStation" class="black-fon"></div>
   <div class="create-new-user">
-    <div class="img-cont">
-      <img class="user-icon" src="/chats/user-chat-icon.svg" alt="" />
-      <input
-        class="send-message-input-to"
-        placeholder="Номер телефона"
-        @input="formatPhoneNumber"
-        maxlength="18"
-        :value="formattedNumber"
-        :class="{ error: error.number }"
-      />
-    </div>
-    <div class="cont">
-      <textarea
-        class="send-message-input"
-        placeholder="Введите сообщение"
-        v-model="messageText"
-        @keydown="handleKeyDown"
-        @input="adjustHeight"
-        rows="1"
-        :class="{ error: error.message }"
-        :style="{ height: inputHeight }"
-      ></textarea>
+    <div v-if="!loading && result === null">
+      <div class="img-cont">
+        <img class="user-icon" src="/chats/user-chat-icon.svg" alt="" />
+        <input
+          class="send-message-input-to"
+          placeholder="Номер телефона"
+          @input="formatPhoneNumber"
+          maxlength="18"
+          :value="formattedNumber"
+          :class="{ error: error.number }"
+        />
+      </div>
+      <div class="cont">
+        <textarea
+          class="send-message-input"
+          placeholder="Введите сообщение"
+          v-model="messageText"
+          @keydown="handleKeyDown"
+          @input="adjustHeight"
+          rows="1"
+          :class="{ error: error.message }"
+          :style="{ height: inputHeight }"
+        ></textarea>
 
-      <div @click="sendMessage" class="send-icon-cont">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="30"
-          height="30"
-          viewBox="0 0 24 24"
-          class="pointer send-icon"
-        >
-          <path
-            d="M21.426 11.095l-17-8A1 1 0 0 0 3.03 4.242l1.212 4.849L12 12l-7.758 2.909l-1.212 4.849a.998.998 0 0 0 1.396 1.147l17-8a1 1 0 0 0 0-1.81z"
-            fill="#54656F"
-          />
-        </svg>
+        <!-- <div @click="sendMessage" class="send-icon-cont">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            class="pointer send-icon"
+          >
+            <path
+              d="M21.426 11.095l-17-8A1 1 0 0 0 3.03 4.242l1.212 4.849L12 12l-7.758 2.909l-1.212 4.849a.998.998 0 0 0 1.396 1.147l17-8a1 1 0 0 0 0-1.81z"
+              fill="#54656F"
+            />
+          </svg>
+        </div> -->
+        <button @click="sendMessage" class="send-message">Отправить</button>
       </div>
     </div>
+    <True v-if="result" />
+    <False :message="errorMesssage" v-if="result === false" />
+    <Loading v-if="loading" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch, reactive, computed } from "vue";
 import axios from "axios";
+import Loading from "./Loading.vue";
+import True from "./ResultModal/True.vue";
+import False from "./ResultModal/False.vue";
+
 const messageText = ref("");
 const contentText = ref(null);
 const replyToDataBolean = false;
+const loading = ref(false);
+const result = ref(null);
+const errorMesssage = ref("");
 
 const props = defineProps({
   changeAddAccountStation: {
@@ -90,6 +103,7 @@ const handleKeyDown = (event) => {
 };
 
 const sendMessage = async () => {
+  loading.value = true;
   error.number = false;
   error.message = false;
 
@@ -199,16 +213,26 @@ const sendMessage = async () => {
       }, 2000);
     }
     if (response.data.ok === true) {
-      location.reload();
+      loading.value = false;
+      result.value = true;
+      // location.reload();
+    } else {
+      loading.value = false;
     }
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
-
+    errorMesssage.value = error.error;
+    result.value = false;
+    loading.value = false;
     if (replyToDataBolean.value) {
     }
+
     messageText.value = "";
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
+      errorMesssage.value = error.response.data.error;
+      result.value = false;
+      loading.value = false;
     }
   }
 };
@@ -246,8 +270,7 @@ const formatPhoneNumber = (event) => {
 
 <style scoped>
 .create-new-user {
-  width: 350px;
-  height: 450px;
+  padding: 20px;
   background-color: white;
   position: absolute;
   top: 50%;
@@ -295,7 +318,7 @@ const formatPhoneNumber = (event) => {
 .send-message-input-to {
   font-family: system-ui;
   border-radius: 5px;
-  width: 100%;
+  width: 300px;
   height: 40px; /* Убираем фиксированную высоту */
   min-height: 20px; /* Минимальная высота */
   border: none;
@@ -304,6 +327,7 @@ const formatPhoneNumber = (event) => {
   box-sizing: border-box;
   border: 0.5px solid rgb(209, 209, 209);
   /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
+  margin-bottom: 36px;
 }
 
 .send-message-input-to.error {
@@ -316,7 +340,7 @@ const formatPhoneNumber = (event) => {
   border-radius: 5px;
   width: 300px;
   height: auto; /* Убираем фиксированную высоту */
-  min-height: 20px; /* Минимальная высота */
+  min-height: 160px; /* Минимальная высота */
   border: none;
   outline: none;
   overflow: hidden; /* Скрываем переполнение */
@@ -325,6 +349,17 @@ const formatPhoneNumber = (event) => {
   resize: none; /* Запрещаем изменение размера вручную */
   border: 0.5px solid rgb(209, 209, 209);
   /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
+}
+
+.send-message {
+  border-radius: 5px;
+  width: 300px;
+  height: 34px;
+  background: #4950ca;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  transition: all 0.25s;
 }
 
 .send-message-input.error {

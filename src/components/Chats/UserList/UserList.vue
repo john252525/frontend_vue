@@ -6,7 +6,7 @@
   />
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
-
+    <button @click="changeAddAccountStation" class="add-new-chat">+</button>
     <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
       <section
         v-if="
@@ -38,9 +38,7 @@
           </div>
         </div>
       </section>
-      <div @click="changeAddAccountStation" class="add-contact">
-        <h2>Добавить контакт</h2>
-      </div>
+
       <section
         v-if="chats"
         v-for="chat in sortedChats"
@@ -740,6 +738,19 @@ const playSound = () => {
   height: 45px;
   background-color: red;
   border-radius: 100px;
+}
+
+.add-new-chat {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  color: white;
+  font-size: 20px;
+  background: #4950ca;
+  z-index: 2;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 100%;
 }
 
 input[type="checkbox"] {

@@ -492,22 +492,24 @@ const updateMessages = (newMessage) => {
   if (station.messageNull) {
     station.messageNull = false;
   }
-  if (newMessage.replyTo !== null) {
-    console.log("newMessage.replyTo !== null", newMessage.data.replyTo);
+  if (newMessage.replyTo) {
+    if (newMessage.replyTo !== null) {
+      // console.log("newMessage.replyTo !== null", newMessage.data.replyTo);
 
-    const replyToMessage = messages.value.find(
-      (message) =>
-        message.data.item !== null &&
-        message.data.item === newMessage.data.replyTo
-    );
+      const replyToMessage = messages.value.find(
+        (message) =>
+          message.data.item !== null &&
+          message.data.item === newMessage.data.replyTo
+      );
 
-    if (replyToMessage) {
-      console.log(replyToMessage.data.from, replyToMessage.data.text);
-      newMessage.data.replyTo = {
-        name: replyToMessage.data.from,
-        text: replyToMessage.data.text,
-        value: true,
-      };
+      if (replyToMessage) {
+        console.log(replyToMessage.data.from, replyToMessage.data.text);
+        newMessage.data.replyTo = {
+          name: replyToMessage.data.from,
+          text: replyToMessage.data.text,
+          value: true,
+        };
+      }
     }
   }
 
@@ -916,21 +918,21 @@ onMounted(() => {
               if (eventData.outgoing) {
                 // Если сообщение исходящее
                 isCurrentChat =
-                  eventData.thread === chatInfo.value.phone + "@c.us"; // Сравниваем с номером телефона получателя в chatInfo
+                  eventData.thread === chatInfo.value.lastMessage.id.remote; // Сравниваем с номером телефона получателя в chatInfo
               } else {
                 //  Если сообщение входящее
                 isCurrentChat =
-                  eventData.thread === chatInfo.value.phone + "@c.us"; // Сравниваем с номером телефона получателя в chatInfo
+                  eventData.thread === chatInfo.value.lastMessage.id.remote; // Сравниваем с номером телефона получателя в chatInfo
               }
 
               if (isCurrentChat) {
                 //  Проверяем, есть ли уже такое сообщение (по item - уникальному id)
-                if (!receivedMessageIds.includes(eventData.item)) {
+                if (receivedMessageIds.includes(eventData.item)) {
                   // <--- Добавлено
                   const newMessage = {
                     uniq: eventData.item,
                     timestamp: eventData.time,
-                    eventData,
+                    data: eventData,
                     reaction: null,
                     state: 0,
                   };
