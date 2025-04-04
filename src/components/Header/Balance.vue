@@ -31,7 +31,7 @@ const props = defineProps({
 function removeDecimalZeros(value) {
   return value.toString().replace(/\.00$/, "");
 }
-
+const apiUrl = import.meta.env.VITE_PAY_URL;
 const balance = ref("");
 
 const getBalance = async () => {
@@ -39,7 +39,7 @@ const getBalance = async () => {
     const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
 
     const response = await axios.post(
-      "https://hellylo.apitter.com/api/get-payment-sum", // URL вашего бэкенда
+      `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
       {
         headers: {

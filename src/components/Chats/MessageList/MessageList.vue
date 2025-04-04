@@ -512,7 +512,7 @@ const updateMessages = (newMessage) => {
       }
     }
   }
-
+  
   messages.value.push(newMessage); // Добавление нового сообщения
   console.log("Новое сообщение", newMessage);
   console.log("messages.value", messages.value); // Логируем текущее состояние массива
@@ -630,7 +630,7 @@ const getMessage = async () => {
 
     const userLogin = JSON.parse(localStorage.getItem("userInfo"));
     let requestData = {
-      source: localStorage.getItem("accountStation"),
+      source: chatInfo.value.sourceUser,
       login: userLogin.login,
       to: chatInfo.value.phone,
     };

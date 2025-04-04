@@ -411,14 +411,14 @@ const sendMessage = async () => {
   emit("updateMessages", newMessage);
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   let messageDataRes = {
-    source: localStorage.getItem("accountStation"),
+    source: chatInfo.value.sourceUser,
     login: chatInfo.value.loginUser,
     msg: message,
     errorMessage: front_message,
     mUniq: chatInfo.value.lastMessage.id.remote,
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
-  if (apiUrl === "https://hellychat.apitter.com/api") {
+  if (apiUrl === "https://hellychat.apitter.com/api" || apiUrl === "http://localhost:4000/api" ) {
     messageDataRes.login = chatInfo.value.loginUser;
   } else {
     messageDataRes.login = userLogin.login;

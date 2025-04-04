@@ -236,14 +236,30 @@ const test = async () => {
     const token = localStorage.getItem("accountToken");
     console.log(JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")));
     // Получаем логин в зависимости от значения multi
-    const logins = isMulti.value
-      ? JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []
-      : userInfo?.login;
-    const userInfoLS = JSON.parse(localStorage.getItem("userInfo"));
+    const logsingFromAccount = JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []; // Получаем массив объектов из localStorag
+    console.log(logsingFromAccount)
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+let logins;
+
+if (isMulti.value) {
+  logins = logsingFromAccount.map(item => item.login) || []; // Извлекаем массив логинов из массива объектов
+} else {
+  logins = userInfo?.login; // Если isMulti не true, просто используем login из userInfo
+}
+
+let sourse;
+
+if (isMulti.value) {
+  sourse = logsingFromAccount.map(item => item.source) || []; // Извлекаем массив логинов из массива объектов
+} else {
+  sourse = localStorage.getItem("accountStation")// Если isMulti не true, просто используем login из userInfo
+}
+console.log(logins)
+    
     const response = await axios.post(
       `${apiUrl}/getChats`,
       {
-        source: localStorage.getItem("accountStation"),
+        source: sourse,
         login: logins,
       },
       {
@@ -393,7 +409,7 @@ const getAccounts = () => {
 
   // Преобразуем массив строк в массив объектов с флагом active
   accounts.value = storedAccounts.map((account) => ({
-    name: account,
+    name: account.login,
     active: true, // По умолчанию аккаунт активен
   }));
 };

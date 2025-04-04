@@ -215,7 +215,10 @@ const sendMessage = async () => {
     if (response.data.ok === true) {
       loading.value = false;
       result.value = true;
-      // location.reload();
+      setTimeout(() => {
+         location.reload();
+      }, 3000);
+    
     } else {
       loading.value = false;
     }
