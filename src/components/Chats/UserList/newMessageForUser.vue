@@ -4,15 +4,57 @@
     <div v-if="!loading && result === null">
       <div class="img-cont">
         <img class="user-icon" src="/chats/user-chat-icon.svg" alt="" />
-        <input
-          class="send-message-input-to"
-          placeholder="Номер телефона"
-          @input="formatPhoneNumber"
-          maxlength="18"
-          :value="formattedNumber"
-          :class="{ error: error.number }"
-        />
+        <div class="username-cont">
+          <input
+            class="send-message-input-to"
+            placeholder="Номер телефона"
+            @input="formatPhoneNumber"
+            maxlength="18"
+            :value="formattedNumber"
+            :class="{ error: error.number }"
+            v-if="
+              stationMess.loginType === 'number' ||
+              stationMess.source === 'whatsapp'
+            "
+          />
+          <input
+            class="send-message-input-to"
+            placeholder="@Имя пользователя"
+            :class="{ error: error.number }"
+            v-model="userLoginVal"
+            v-if="
+              stationMess.source === 'telegram' &&
+              stationMess.loginType === 'username'
+            "
+          />
+          <Checbox
+            v-if="route.query.multi === 'true'"
+            :source="stationMess.source"
+            :updateSource="updateSource"
+          />
+          <p
+            v-if="
+              stationMess.loginType === 'number' &&
+              stationMess.source === 'telegram'
+            "
+            @click="changeUserloginStation"
+            class="select-username"
+          >
+            Указать @имя
+          </p>
+          <p
+            v-if="
+              stationMess.loginType === 'username' &&
+              stationMess.source === 'telegram'
+            "
+            @click="changeUserloginStation"
+            class="select-username"
+          >
+            Указать номер
+          </p>
+        </div>
       </div>
+
       <div class="cont">
         <textarea
           class="send-message-input"
@@ -24,21 +66,6 @@
           :class="{ error: error.message }"
           :style="{ height: inputHeight }"
         ></textarea>
-
-        <!-- <div @click="sendMessage" class="send-icon-cont">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            class="pointer send-icon"
-          >
-            <path
-              d="M21.426 11.095l-17-8A1 1 0 0 0 3.03 4.242l1.212 4.849L12 12l-7.758 2.909l-1.212 4.849a.998.998 0 0 0 1.396 1.147l17-8a1 1 0 0 0 0-1.81z"
-              fill="#54656F"
-            />
-          </svg>
-        </div> -->
         <button @click="sendMessage" class="send-message">Отправить</button>
       </div>
     </div>
@@ -49,18 +76,31 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed } from "vue";
+import { ref, watch, reactive, computed, onMounted } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import True from "./ResultModal/True.vue";
 import False from "./ResultModal/False.vue";
+import Checbox from "./newMessageComponent/Checbox.vue";
+import { useRouter, useRoute } from "vue-router";
 
+const route = useRoute();
 const messageText = ref("");
 const contentText = ref(null);
 const replyToDataBolean = false;
 const loading = ref(false);
 const result = ref(null);
 const errorMesssage = ref("");
+const userLoginVal = ref("");
+
+const stationMess = reactive({
+  source: "",
+  loginType: "number",
+  isMuilti: {
+    source: "",
+    isMulti: false,
+  },
+});
 
 const props = defineProps({
   changeAddAccountStation: {
@@ -84,6 +124,11 @@ const adjustHeight = (event) => {
   textarea.style.height = textarea.scrollHeight + "px"; // Устанавливаем новую высоту
 };
 
+const updateSource = (platform) => {
+  stationMess.source = platform;
+  console.log("Selected platform:", platform);
+};
+
 const rawNumber = ref("");
 
 const handleKeyDown = (event) => {
@@ -102,28 +147,71 @@ const handleKeyDown = (event) => {
   }
 };
 
-const sendMessage = async () => {
-  loading.value = true;
-  error.number = false;
-  error.message = false;
+function isMultiLogic() {
+  if (route.query.multi === "true") {
+    console.log(true);
+  } else {
+    console.log(false);
+    if (localStorage.getItem("accountStation") === "telegram") {
+      stationMess.source = "telegram";
+    } else {
+      stationMess.source = "whatsapp";
+    }
+  }
+}
 
-  if (!formattedNumber.value) {
-    error.number = true;
-    return;
+function changeUserloginStation() {
+  if (stationMess.loginType === "number") {
+    stationMess.loginType = "username";
+    console.log("номер");
+  } else {
+    stationMess.loginType = "number";
+    console.log("текст");
+  }
+}
+let userMessageLogin = ref("");
+const sendMessage = async () => {
+  if (stationMess.loginType === "number") {
+    if (!rawNumber.value) {
+      error.number = true;
+      return;
+    } else {
+      userMessageLogin.value = rawNumber.value;
+      console.log(rawNumber.value);
+      error.number = false;
+    }
+  } else {
+    if (!userLoginVal.value) {
+      error.number = true;
+      return;
+    } else {
+      userMessageLogin.value = userLoginVal.value;
+      error.number = false;
+    }
   }
 
   if (!messageText.value) {
     error.message = true;
     return;
+  } else {
+    error.message = false;
   }
 
+  const source = ref("");
+
+  if (stationMess.isMuilti.isMulti) {
+    source.value = stationMess.isMuilti.source;
+  } else {
+    source.value = localStorage.getItem("accountStation");
+  }
+
+  loading.value = true;
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const message = {
-    to: rawNumber.value,
-
+    to: userMessageLogin.value,
     text: messageText.value,
     content: contentText.value
       ? [
@@ -186,7 +274,7 @@ const sendMessage = async () => {
   //   emit("updateMessages", newMessage);
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   let messageDataRes = {
-    source: "telegram",
+    source: source.value,
     login: "79228933680",
     msg: message,
     errorMessage: front_message,
@@ -194,7 +282,7 @@ const sendMessage = async () => {
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
   if (apiUrl === "https://hellychat.apitter.com/api") {
-    // messageDataRes.login = chatInfo.value.loginUser;
+    messageDataRes.login = chatInfo.value.loginUser;
   } else {
     messageDataRes.login = userLogin.login;
   }
@@ -216,9 +304,8 @@ const sendMessage = async () => {
       loading.value = false;
       result.value = true;
       setTimeout(() => {
-         location.reload();
+        location.reload();
       }, 3000);
-    
     } else {
       loading.value = false;
     }
@@ -239,6 +326,8 @@ const sendMessage = async () => {
     }
   }
 };
+
+const username = ref("");
 
 const formatPhoneNumber = (event) => {
   let input = event.target;
@@ -269,6 +358,8 @@ const formatPhoneNumber = (event) => {
   input.value = formattedValue;
   rawNumber.value = value; // Update rawNumber directly
 };
+
+onMounted(isMultiLogic);
 </script>
 
 <style scoped>
@@ -318,6 +409,26 @@ const formatPhoneNumber = (event) => {
   gap: 16px;
 }
 
+.username-cont {
+  margin-bottom: 36px;
+}
+
+.select-username {
+  font-size: 12px;
+  color: rgb(172, 172, 172);
+  margin-top: 4px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.select-username:hover {
+  font-size: 12px;
+  color: rgb(126, 126, 126);
+  margin-top: 4px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
 .send-message-input-to {
   font-family: system-ui;
   border-radius: 5px;
@@ -330,7 +441,6 @@ const formatPhoneNumber = (event) => {
   box-sizing: border-box;
   border: 0.5px solid rgb(209, 209, 209);
   /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
-  margin-bottom: 36px;
 }
 
 .send-message-input-to.error {

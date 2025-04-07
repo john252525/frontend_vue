@@ -7,7 +7,7 @@
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
     <button @click="changeAddAccountStation" class="add-new-chat">+</button>
-    <aside class="chat-list" :style="{ width: chatListWidth + 'px' }">
+    <aside class="chat-list" :style="{ width: computedChatListWidth }">
       <section
         v-if="
           (apiUrl === 'https://hellychat.apitter.com/api' ||
@@ -25,6 +25,8 @@
             :key="index"
             class="account-item"
           >
+            <img class="icon-chat-list" v-if="account.source==='telegram'" src="/chats/telegram.svg" alt="">
+            <img class="icon-chat-list"  v-if="account.source==='whatsapp'" src="/chats/whatsapp.svg" alt="">
             <span class="text-account-item">{{ account.name }} </span>
             <div class="checkbox-input">
               <input
@@ -57,6 +59,7 @@
             @click="changeImageStation(chat)"
             alt=""
           />
+
           <img
             v-else
             @click="changeImageStation(chat)"
@@ -64,6 +67,20 @@
             src="/chats/user-chat-icon.svg"
             alt=""
           />
+          <div v-if="isMulti" class="chat-logo">
+            <img
+              v-if="chat.data.sourceUser === 'whatsapp'"
+              class="whatsapp-img"
+              src="/chats/whatsapp.svg"
+              alt=""
+            />
+            <img
+              v-if="chat.data.sourceUser === 'telegram'"
+              class="telegram-img"
+              src="/chats/telegram.svg"
+              alt=""
+            />
+          </div>
           <div class="chat-info">
             <div class="chat-name">{{ chat.data.name }}</div>
             <div class="chat-last-message">
@@ -195,33 +212,59 @@ const clearCountNewMessage = (thread) => {
 };
 const chatListWidth = ref(450); // Начальная ширина списка чатов
 const isResizing = ref(false);
-const MIN_WIDTH = 300; // Минимальная ширина
-const MAX_WIDTH = 500; // Максимальная ширина
 
+const MIN_WIDTH = 300; // Минимальная ширина
+const MAX_WIDTH = 600; // Максимальная ширина
+
+const computedChatListWidth = computed(() => {
+  return window.innerWidth <= 768 ? "100%" : chatListWidth.value + "px";
+});
+
+// Функция для начала изменения размера
 const startResize = (event) => {
   isResizing.value = true;
   document.addEventListener("mousemove", resizeChatList);
   document.addEventListener("mouseup", stopResize);
 };
 
+// Функция для изменения ширины
 const resizeChatList = (event) => {
   if (isResizing.value) {
-    let newWidth = event.clientX; // Получаем текущую позицию мыши по оси X
+    let newWidth = event.clientX; // Получаем положение мыши по оси X
     // Устанавливаем ограничения на ширину
     if (newWidth < MIN_WIDTH) {
-      newWidth = MIN_WIDTH; // Устанавливаем минимальную ширину
-    } else if (newWidth > MAX_WIDTH) {
-      newWidth = MAX_WIDTH; // Устанавливаем максимальную ширину
+      newWidth = MIN_WIDTH; // Минимальная ширина
+    } else if (newWidth > window.innerWidth - 50) {
+      newWidth = window.innerWidth - 50; // Максимальная ширина
     }
-    chatListWidth.value = newWidth; // Применяем новую ширину
+    chatListWidth.value = Math.min(Math.max(newWidth, MIN_WIDTH), MAX_WIDTH); // Ограничиваем ширину
   }
 };
 
+// Функция для остановки изменения размера
 const stopResize = () => {
   isResizing.value = false;
   document.removeEventListener("mousemove", resizeChatList);
   document.removeEventListener("mouseup", stopResize);
 };
+
+// Обработчик изменения размера окна
+window.addEventListener("resize", () => {
+  if (window.innerWidth <= 768) {
+    chatListWidth.value = 100; // Устанавливаем ширину на 100% для мобильных устройств
+  } else {
+    chatListWidth.value = Math.min(
+      Math.max(chatListWidth.value, MIN_WIDTH),
+      MAX_WIDTH
+    ); // Устанавливаем ширину в пределах допустимых значений
+  }
+});
+
+// Добавляем обработчик события mousedown
+onMounted(() => {
+  const chatListElement = document.querySelector(".chat-list");
+  chatListElement.addEventListener("mousedown", startResize);
+});
 
 const isMulti = computed(() => {
   return route.query.multi === "true"; // Проверяем значение multi
@@ -236,26 +279,27 @@ const test = async () => {
     const token = localStorage.getItem("accountToken");
     console.log(JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")));
     // Получаем логин в зависимости от значения multi
-    const logsingFromAccount = JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []; // Получаем массив объектов из localStorag
-    console.log(logsingFromAccount)
+    const logsingFromAccount =
+      JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []; // Получаем массив объектов из localStorag
+    console.log(logsingFromAccount);
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-let logins;
+    let logins;
 
-if (isMulti.value) {
-  logins = logsingFromAccount.map(item => item.login) || []; // Извлекаем массив логинов из массива объектов
-} else {
-  logins = userInfo?.login; // Если isMulti не true, просто используем login из userInfo
-}
+    if (isMulti.value) {
+      logins = logsingFromAccount.map((item) => item.login) || []; // Извлекаем массив логинов из массива объектов
+    } else {
+      logins = userInfo?.login; // Если isMulti не true, просто используем login из userInfo
+    }
 
-let sourse;
+    let sourse;
 
-if (isMulti.value) {
-  sourse = logsingFromAccount.map(item => item.source) || []; // Извлекаем массив логинов из массива объектов
-} else {
-  sourse = localStorage.getItem("accountStation")// Если isMulti не true, просто используем login из userInfo
-}
-console.log(logins)
-    
+    if (isMulti.value) {
+      sourse = logsingFromAccount.map((item) => item.source) || []; // Извлекаем массив логинов из массива объектов
+    } else {
+      sourse = localStorage.getItem("accountStation"); // Если isMulti не true, просто используем login из userInfo
+    }
+    console.log(logins);
+
     const response = await axios.post(
       `${apiUrl}/getChats`,
       {
@@ -406,10 +450,10 @@ const showAccountList = ref(false);
 const getAccounts = () => {
   const storedAccounts =
     JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
-
-  // Преобразуем массив строк в массив объектов с флагом active
+  // Преобразуем массив объектов из localStorage в массив объектов Vue с флагом active
   accounts.value = storedAccounts.map((account) => ({
     name: account.login,
+    source: account.source,
     active: true, // По умолчанию аккаунт активен
   }));
 };
@@ -422,9 +466,11 @@ const toggleAccount = (account) => {
 
 // Функция для обновления localStorage на основе текущего состояния аккаунтов
 const updateLocalStorage = () => {
+  // Сохраняем массив объектов, но только активные
   const activeAccounts = accounts.value
     .filter((account) => account.active)
-    .map((account) => account.name); // Сохраняем только имена активных аккаунтов
+    .map((account) => ({ login: account.name, source: account.source })); // Сохраняем только логин и source
+
   localStorage.setItem(
     "loginWhatsAppChatsStep",
     JSON.stringify(activeAccounts)
@@ -577,6 +623,19 @@ const playSound = () => {
   color: rgb(219, 57, 57);
   font-size: 18px;
   font-weight: 600;
+}
+
+.chat-logo {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  left: 42px;
+  margin-top: 26px;
 }
 
 .chat-container {
@@ -756,6 +815,10 @@ const playSound = () => {
   border-radius: 100px;
 }
 
+.icon-chat-list {
+  margin-right: 4px;
+}
+
 .add-new-chat {
   position: absolute;
   width: 45px;
@@ -835,6 +898,13 @@ input[type="checkbox"]:checked + label:after {
 
 @media (max-width: 768px) {
   .chat-list {
+    width: 100%;
+  }
+  .chat-list {
+    width: 100%; /* Устанавливаем ширину списка чатов на 100% */
+  }
+
+  .chat-container {
     width: 100%;
   }
 }

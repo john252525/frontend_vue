@@ -1434,6 +1434,10 @@ footer {
   .chat-container {
     width: 100%;
   }
+
+  .no-message-section  {
+    display: none;
+  }
   .error-section {
     flex-direction: column;
   }
