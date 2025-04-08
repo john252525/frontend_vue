@@ -2,6 +2,7 @@
   <div @click="changeAddAccountStation" class="black-fon"></div>
   <div class="create-new-user">
     <div v-if="!loading && result === null">
+      
       <div class="img-cont">
         <img class="user-icon" src="/chats/user-chat-icon.svg" alt="" />
         <div class="username-cont">
@@ -19,7 +20,7 @@
           />
           <input
             class="send-message-input-to"
-            placeholder="@Имя пользователя"
+            placeholder="@username"
             :class="{ error: error.number }"
             v-model="userLoginVal"
             v-if="
@@ -27,11 +28,7 @@
               stationMess.loginType === 'username'
             "
           />
-          <Checbox
-            v-if="route.query.multi === 'true'"
-            :source="stationMess.source"
-            :updateSource="updateSource"
-          />
+         
           <p
             v-if="
               stationMess.loginType === 'number' &&
@@ -54,7 +51,7 @@
           </p>
         </div>
       </div>
-
+      <Checbox :accounts="accounts" :selectedAccount="selectedAccount" @update:selectedAccount="updateSelectedAccount" />
       <div class="cont">
         <textarea
           class="send-message-input"
@@ -81,9 +78,10 @@ import axios from "axios";
 import Loading from "./Loading.vue";
 import True from "./ResultModal/True.vue";
 import False from "./ResultModal/False.vue";
-import Checbox from "./newMessageComponent/Checbox.vue";
 import { useRouter, useRoute } from "vue-router";
-
+import Checbox from "./newMessageComponent/Checbox.vue";
+const apiUrl = import.meta.env.VITE_API_URL;
+const selectedAccount = ref('')
 const route = useRoute();
 const messageText = ref("");
 const contentText = ref(null);
@@ -92,12 +90,13 @@ const loading = ref(false);
 const result = ref(null);
 const errorMesssage = ref("");
 const userLoginVal = ref("");
-
+const accounts = ref('')
 const stationMess = reactive({
   source: "",
   loginType: "number",
   isMuilti: {
     source: "",
+    login: '',
     isMulti: false,
   },
 });
@@ -107,6 +106,33 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const getAccounts = () => {
+  const storedAccounts =
+    JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+  accounts.value = storedAccounts;
+  console.log(accounts.value)
+};
+
+// Функция для обновления selectedAccount
+const updateSelectedAccount = (account) => {
+  selectedAccount.value = account;
+  stationMess.isMuilti.source = account.source
+  stationMess.isMuilti.login = account.login
+  stationMess.source = account.source
+  console.log(account)
+};
+
+onMounted(() => {
+  getAccounts();
+});
+
+const processLogin = () => {
+  if (userMessageLogin.value && userMessageLogin.value.includes('@')) {
+    userMessageLogin.value = userMessageLogin.value.replace('@', ''); 
+  }
+  console.log("Отправляем логин:", userMessageLogin.value);
+};
 
 const formattedNumber = ref("");
 
@@ -126,6 +152,7 @@ const adjustHeight = (event) => {
 
 const updateSource = (platform) => {
   stationMess.source = platform;
+
   console.log("Selected platform:", platform);
 };
 
@@ -150,6 +177,7 @@ const handleKeyDown = (event) => {
 function isMultiLogic() {
   if (route.query.multi === "true") {
     console.log(true);
+    stationMess.isMuilti.isMulti = true
   } else {
     console.log(false);
     if (localStorage.getItem("accountStation") === "telegram") {
@@ -169,6 +197,7 @@ function changeUserloginStation() {
     console.log("текст");
   }
 }
+
 let userMessageLogin = ref("");
 const sendMessage = async () => {
   if (stationMess.loginType === "number") {
@@ -198,17 +227,31 @@ const sendMessage = async () => {
   }
 
   const source = ref("");
+  const login = ref("");
 
   if (stationMess.isMuilti.isMulti) {
+    console.log(stationMess.isMuilti.isMulti, 'stationMess.isMuilti.isMulti')
     source.value = stationMess.isMuilti.source;
   } else {
     source.value = localStorage.getItem("accountStation");
   }
 
+  // if (apiUrl === "https://hellychat.apitter.com/api") {
+  //   if(stationMess.isMuilti.isMuilti) {
+  //     login.value = stationMess.isMuilti.login;
+  //   } else {
+  //     login.value = userLogin.login;
+  //   }
+  // } else {
+  //   login.value = userLogin.login;
+  // }
+
+  await processLogin()
+
   loading.value = true;
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
-  const apiUrl = import.meta.env.VITE_API_URL;
+
 
   const message = {
     to: userMessageLogin.value,
@@ -227,33 +270,8 @@ const sendMessage = async () => {
     outgoing: true,
     state: "send",
   };
-  const newMessage = {
-    uniq: "3EB0NEWUNIQUEID",
-    timestamp: Date.now(),
-    data: {
-      content: contentText.value
-        ? [
-            {
-              type: "video",
-              src: urlImg.value,
-            },
-          ]
-        : [],
-      item: "3EB0NEWUNIQUEID",
-      from: "79027631667",
-      outgoing: true,
-      text: contentText.value ? contentText.value : messageText.value || null,
-      time: Date.now(),
-      state: "send",
-      replyTo: replyToDataBolean ? replyToUniq : null,
-    },
-    reaction: null,
-    state: 0,
-  };
-
   const front_message = {
-    // to: `${chatInfo.value.phone}`,
-    text: contentText.value ? contentText.value : messageText.value || null, // Используем contentText, если он есть, иначе messageText
+    text: contentText.value ? contentText.value : messageText.value || null, 
 
     content: contentText.value
       ? [
@@ -271,18 +289,21 @@ const sendMessage = async () => {
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
 
-  //   emit("updateMessages", newMessage);
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   let messageDataRes = {
     source: source.value,
-    login: "79228933680",
+    login: "",
     msg: message,
     errorMessage: front_message,
     mUniq: "79228556998@.us",
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
   if (apiUrl === "https://hellychat.apitter.com/api") {
-    messageDataRes.login = chatInfo.value.loginUser;
+    if(stationMess.isMuilti.isMulti) {
+      messageDataRes.login = stationMess.isMuilti.login;
+    } else {
+      messageDataRes.login = userLogin.login;
+    }
   } else {
     messageDataRes.login = userLogin.login;
   }

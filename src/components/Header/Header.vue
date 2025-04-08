@@ -18,7 +18,7 @@
         </h2>
       </article>
       <article class="user-cont">
-        <h2 v-if="balance" @click="toggleBalanceStation" class="balance-user">
+        <h2 v-if="balance || balance === 0" @click="toggleBalanceStation" class="balance-user">
           {{ removeDecimalZeros(balance) }} ₽
         </h2>
         <h2 v-else @click="toggleBalanceStation" class="balance-user">

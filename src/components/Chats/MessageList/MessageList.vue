@@ -881,7 +881,7 @@ function truncateString(str, maxLength) {
 onMounted(() => {
   const connectEventSource = () => {
     const eventSource = new EventSource(
-      "https://hellychat.apitter.com/api/events"
+      `${apiUrl}/events`
     );
 
     const receivedMessageIds =
@@ -963,7 +963,6 @@ onMounted(() => {
             }
           }
         }
-
         console.log("новое сообщение");
       }
 

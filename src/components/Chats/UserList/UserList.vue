@@ -6,7 +6,8 @@
   />
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
-    <button @click="changeAddAccountStation" class="add-new-chat">+</button>
+    <button v-if="!chatsNull" @click="changeAddAccountStation" class="add-new-chat">+</button>
+    <button v-if="chatsNull" @click="changeAddAccountStation" class="add-new-chat-animation">+</button>
     <aside class="chat-list" :style="{ width: computedChatListWidth }">
       <section
         v-if="
@@ -49,6 +50,7 @@
         :class="{ 'disabled-chat': !isChatClickable }"
         @click="isChatClickable ? selectChatClick(chat) : null"
       >
+      
         <div class="chat-user-cont">
           <img
             v-if="
@@ -96,6 +98,10 @@
             {{ chat.newMessage }}
           </div>
         </div>
+        
+      </section>
+      <section class="loading-chat-list" v-if="chatsNull">
+        <h2 class="chat-null-text">Чаты не найдены</h2>
       </section>
       <section class="loading-chat-list" v-if="!chats && !errorStation">
         <Loading />
@@ -147,6 +153,7 @@ const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
+const chatsNull = ref(false)
 
 const selectChatClick = (chat) => {
   props.selectChat(chat);
@@ -337,9 +344,13 @@ const test = async () => {
         data: chat,
       }));
     }
+    if(chats.value.length === 0) {
+      chatsNull.value = true
+      console.log('dssd')
+    }
   } catch (error) {
     errorStation.value = true;
-
+    
     setTimeout(() => {
       localStorage.removeItem("loginWhatsAppChatsStep");
       // router.push("/accounts");
@@ -808,6 +819,11 @@ const playSound = () => {
   border-radius: 5px;
 }
 
+.chat-null-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
 .krig {
   width: 45px;
   height: 45px;
@@ -830,6 +846,36 @@ const playSound = () => {
   bottom: 20px;
   right: 20px;
   border-radius: 100%;
+
+}
+
+.add-new-chat-animation {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  color: white;
+  font-size: 20px;
+  background: #4950ca;
+  z-index: 2;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 100%;
+  animation: pulse-circle 2s infinite; /* Добавляем анимацию */
+}
+
+@keyframes pulse-circle {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(73, 80, 202, 0.7); /* Цвет тени соответствует background */
+  }
+  70% {
+    transform: scale(1.2); /* Увеличиваем немного больше, чем в предыдущем примере */
+    box-shadow: 0 0 0 10px rgba(73, 80, 202, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(73, 80, 202, 0);
+  }
 }
 
 input[type="checkbox"] {

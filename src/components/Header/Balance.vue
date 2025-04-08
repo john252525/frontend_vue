@@ -4,7 +4,7 @@
     <article class="balance-info">
       <h2 class="balance-text">
         Ваш баланс:
-        <span v-if="balance">{{ removeDecimalZeros(balance) }}</span>
+        <span v-if="balance || balance === 0">{{ removeDecimalZeros(balance) }}</span>
         <LoadingBalance v-else /> ₽
       </h2>
       <div class="line"></div>

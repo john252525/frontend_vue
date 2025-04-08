@@ -1,113 +1,159 @@
 <template>
-  <div class="checkbox-container">
-    <label @click="updateSource('whatsapp')" class="checkbox-label">
-      <input type="radio" value="whatsapp" :checked="source === 'whatsapp'" />
-      <span class="checkbox-text">WhatsApp</span>
-      <span class="checkbox-custom"></span>
-    </label>
+  <div class="dropdown">
+    <div @click="toggleDropdown" class="dropdown-select">
+      <h2
+        v-if="!selectedAccount"
+        class="selected"
+        :class="{ active: isOpen }"
+      >
+        Выберите аккаунт
+      </h2>
+      <h2
+        v-else
+        class="item-selected"
+      >
+      
+       <img v-if="selectedAccount.source === 'whatsapp'"  src="/chats/whatsapp.svg" alt="">  <img v-else  src="/chats/telegram.svg" alt="">  {{ selectedAccount.login }} 
+      </h2>
+      <h2
+        v-if="selectedAccount && !isOpen"
+        class="selected"
+        :class="{ active: isOpen }"
+      >
+        Выберите аккаунт
+      </h2>
+      <img
+        class="arrow"
+        :class="{ up: isOpen }"
+        src="/account/arrow.svg"
+        alt=""
+      />
+    </div>
 
-    <label @click="updateSource('telegram')" class="checkbox-label">
-      <input type="radio" value="telegram" :checked="source === 'telegram'" />
-      <span class="checkbox-text">Telegram</span>
-      <span class="checkbox-custom"></span>
-    </label>
+    <ul v-if="isOpen" class="dropdown-list">
+      <li
+        v-for="account in accounts"
+        :key="account.login"
+        @click="selectAccount(account)"
+        class="dropdown-item"
+      >
+      <img v-if="account.source === 'whatsapp'"  src="/chats/whatsapp.svg" alt="">  <img v-else  src="/chats/telegram.svg" alt="">  {{ account.login }} 
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
-  source: {
-    type: String,
-    default: "whatsapp", // Добавляем default, чтобы работал первый выбор
+  accounts: {
+    type: Array,
+    required: true,
   },
-  updateSource: {
-    type: Function,
-  },
+  selectedAccount: {
+    type: Object,
+    default: null
+  }
 });
+
+const emit = defineEmits(['update:selectedAccount']);
+
+const isOpen = ref(false);
+
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value;
+};
+
+const selectAccount = (account) => {
+  emit('update:selectedAccount', account);
+  isOpen.value = false;
+};
 </script>
 
 <style scoped>
-/* Общий контейнер */
-.checkbox-container {
-  display: flex;
-  gap: 16px;
+.dropdown {
+  position: relative;
+  width: 298px;
+  margin-bottom: 24px;
+  font-family: sans-serif;
 }
 
-/* Label */
-.checkbox-label {
+.dropdown-select {
+  position: relative;
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  width: 100%;
+  height: 36px;
+  background: #fcfcfc;
   display: flex;
   align-items: center;
-  position: relative;
-  padding-left: 24px;
-  margin-top: 12px;
-  cursor: pointer;
+  font-weight: 500;
   font-size: 16px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  color: #343434;
+  cursor: pointer; /* Добавляем курсор */
 }
 
-/* Скрываем стандартный радио */
-.checkbox-label input {
+.selected {
   position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 12px;
+  background-color: white;
+  padding: 0px 6px;
+  top: -7px;
+  transition: all 0.15s;
 }
 
-/* Текст */
-.checkbox-text {
-  position: relative;
-  z-index: 1;
+.selected.active {
+  top: -20px;
 }
 
-/* Круг */
-.checkbox-custom {
+.item-selected {
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+.arrow {
   position: absolute;
+  right: 12px;
   top: 50%;
-  left: 0;
   transform: translateY(-50%);
-  height: 16px;
-  width: 16px;
-  background-color: #eee;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
+  width: 14px; /* Примерная ширина стрелки */
+  height: auto;
+  
+  transition: transform 0.2s; /* Плавный поворот */
 }
 
-/* Hover */
-.checkbox-label:hover input ~ .checkbox-custom {
-  background-color: #ccc;
+.arrow.up {
+  transform: translateY(-50%) rotate(180deg); /* Поворачиваем стрелку */
 }
 
-/* Выбран */
-.checkbox-label input:checked ~ .checkbox-custom {
-  background-color: #4950ca;
-}
-
-/* Внутренний кружок */
-.checkbox-custom:after {
-  content: "";
+.dropdown-list {
   position: absolute;
-  display: none;
+  top: 100%; /* Позиционируем под dropdown-select */
+  left: 0;
+  width: 100%;
+  background-color: #fcfcfc;
+  border: 0.5px solid #c1c1c1;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
+  z-index: 10; /* Чтобы список был над другими элементами */
+  list-style: none; /* Убираем точки у списка */
+  padding: 0;
+  margin: 0;
 }
 
-/* Показываем внутренний */
-.checkbox-label input:checked ~ .checkbox-custom:after {
-  display: block;
+.dropdown-item {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #343434;
+  cursor: pointer;
+  transition: background-color 0.2s; /* Плавное изменение фона */
 }
 
-/* Стили внутреннего кружка */
-.checkbox-label .checkbox-custom:after {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: white;
+.dropdown-item:hover {
+  background-color: #f0f0f0;
 }
 </style>

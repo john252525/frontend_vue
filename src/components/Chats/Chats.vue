@@ -161,7 +161,7 @@ const clearNewMessages = async (uniq) => {
 onMounted(() => {
   const connectEventSource = () => {
     const eventSource = new EventSource(
-      "https://hellychat.apitter.com/api/events"
+      `${apiUrl}/events`
     );
 
     const receivedMessageIds =
