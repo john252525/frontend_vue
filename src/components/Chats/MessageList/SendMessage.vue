@@ -149,6 +149,7 @@ import Camera from "./MessageContent/checkContent/Camera.vue";
 import Emoji from "./MessageContent/Emoji.vue";
 import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 
 const router = useRouter();
 const props = defineProps({
@@ -418,7 +419,7 @@ const sendMessage = async () => {
     mUniq: chatInfo.value.lastMessage.id.remote,
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
-  if (apiUrl === "https://hellychat.apitter.com/api" || apiUrl === "http://localhost:4000/api" ) {
+  if (apiUrl === apiCheckUrl) {
     messageDataRes.login = chatInfo.value.loginUser;
   } else {
     messageDataRes.login = userLogin.login;

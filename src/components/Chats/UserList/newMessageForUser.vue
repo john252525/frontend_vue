@@ -106,6 +106,7 @@ const props = defineProps({
     type: Function,
   },
 });
+const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 
 const getAccounts = () => {
   const storedAccounts =
@@ -298,7 +299,7 @@ const sendMessage = async () => {
     mUniq: "79228556998@.us",
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
-  if (apiUrl === "https://hellychat.apitter.com/api") {
+  if (apiUrl === apiCheckUrl) {
     if(stationMess.isMuilti.isMulti) {
       messageDataRes.login = stationMess.isMuilti.login;
     } else {

@@ -40,8 +40,8 @@
         </li>
         <li
           v-if="
-            apiUrl === 'https://hellychat.apitter.com/api' ||
-            apiUrl === 'http://localhost:4000/api'
+            apiUrl === apiCheckUrl
+        
           "
           @click="navigateToChats"
           class="list"
@@ -165,8 +165,8 @@
           </li>
           <li
             v-if="
-              apiUrl === 'https://hellychat.apitter.com/api' ||
-              apiUrl === 'http://localhost:4000/api'
+              apiUrl ===apiCheckUrl
+             
             "
             @click="navigateToChats"
             class="list"
@@ -241,6 +241,7 @@ const props = defineProps({
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
+const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 const apiUrl = import.meta.env.VITE_API_URL;
 const route = useRoute();
 const router = useRouter();

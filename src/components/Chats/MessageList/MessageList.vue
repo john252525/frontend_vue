@@ -344,7 +344,7 @@ const props = defineProps({
     type: Function,
   },
 });
-
+const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 const replyToData = ref([]);
 const replyToDataBolean = ref(false);
 const loadingMessageIndex = ref(-1);
@@ -636,8 +636,8 @@ const getMessage = async () => {
     };
 
     if (
-      apiUrl === "https://hellychat.apitter.com/api" ||
-      apiUrl === "http://localhost:4000/api"
+      apiUrl === apiCheckUrl 
+      
     ) {
       requestData.to = chatInfo.value.phone;
       requestData.login = chatInfo.value.loginUser;
@@ -661,8 +661,8 @@ const getMessage = async () => {
       props.blockChat();
 
       if (
-        apiUrl === "https://hellychat.apitter.com/api" ||
-        apiUrl === "http://localhost:4000/api"
+        apiUrl === apiCheckUrl
+       
       ) {
         messages.value = response.data.data.messages;
         console.log(messages.value);

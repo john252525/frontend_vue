@@ -11,8 +11,8 @@
     <aside class="chat-list" :style="{ width: computedChatListWidth }">
       <section
         v-if="
-          (apiUrl === 'https://hellychat.apitter.com/api' ||
-            apiUrl === 'http://localhost:4000/api') &&
+  apiUrl === apiCheckUrl
+        &&
           isMulti
         "
         class="setting-chats"
@@ -54,7 +54,7 @@
         <div class="chat-user-cont">
           <img
             v-if="
-              apiUrl === 'https://hellychat.apitter.com/api' && chat.data.avatar
+              apiUrl === apiCheckUrl && chat.data.avatar
             "
             class="user-chat-avatar"
             :src="chat.data.avatar"
@@ -124,6 +124,7 @@ import { useRouter, useRoute } from "vue-router";
 import NewMessageSend from "./newMessageForUser.vue";
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
+const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 
 const router = useRouter();
 const route = useRoute();
@@ -331,8 +332,7 @@ const test = async () => {
     }
 
     if (
-      apiUrl === "https://hellychat.apitter.com/api" ||
-      apiUrl === "http://localhost:4000/api"
+      apiUrl === apiCheckUrl 
     ) {
       chats.value = response.data.data.chats;
       console.log(chats.value);
