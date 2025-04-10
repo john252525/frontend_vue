@@ -46,6 +46,7 @@
         <span @click="navigateTo('/Registration')">Создать аккаунт</span>
       </p>
     </form>
+    <LoginForGoogle class="login-for-google"/>
   </section>
 </template>
 
@@ -53,6 +54,8 @@
 import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+
 import axios from "axios";
 const router = useRouter();
 const formData = reactive({
@@ -192,6 +195,13 @@ const navigateTo = (page) => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+.login-for-google {
+  position: absolute;
+  top: 108%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .title {
