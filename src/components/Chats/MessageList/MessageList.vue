@@ -30,254 +30,219 @@
           </div>
         </header>
         <div ref="scrollContainer" v-if="!loading" class="messages">
-          <div
-            v-for="(message, index) in messages"
-            :key="message.timestamp"
-            :class="[
-              'message',
-              message.data.outgoing ? 'outgoing' : 'incoming',
-              {
-                'has-content':
-                  message.data.content && message.data.content.length > 0,
-              },
-            ]"
-            @mousedown="handleMouseDown($event, message)"
-          >
-            <div
-              v-if="message.data.outgoing"
-              class="dropdown-message-message"
-            ></div>
-            <svg
-              v-if="message.data.outgoing"
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 1024 1024"
-              class="dropdown-message"
-            >
-              <path
-                fill="currentColor"
-                d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
-              />
-            </svg>
-            <div
-              v-if="!message.data.outgoing"
-              class="dropdown-message-message-incoming"
-            ></div>
-            <svg
-              v-if="!message.data.outgoing"
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 1024 1024"
-              class="dropdown-message-incoming"
-            >
-              <path
-                fill="currentColor"
-                d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
-              />
-            </svg>
-            <div v-if="message.data.replyTo != null" class="reply-content">
-              <h2 class="reply-name">
-                <!-- {{ message.data.replyTo.name }} -->
-                {{ formatPhoneNumber(message.data.replyTo.name) }}
-              </h2>
-              <h2 class="reply-text">
-                <!-- {{ message.data.replyTo.text }} -->
-                {{ truncateString(message.data.replyTo.text) }}
-              </h2>
+          <template v-for="(message, index) in messages" :key="message.timestamp">
+            <!-- Плашка с датой -->
+            <div v-if="shouldShowDateSeparator(index)" class="date-separator">
+              {{ formatDateSeparator(message.data.time) }}
             </div>
-            <div class="send-reaction-icon-cont">
+            
+            <div
+              :class="[
+                'message',
+                message.data.outgoing ? 'outgoing' : 'incoming',
+                {
+                  'has-content':
+                    message.data.content && message.data.content.length > 0,
+                },
+              ]"
+              @mousedown="handleMouseDown($event, message)"
+            >
+              <div
+                v-if="message.data.outgoing"
+                class="dropdown-message-message"
+              ></div>
               <svg
+                v-if="message.data.outgoing"
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="12"
+                height="12"
                 viewBox="0 0 1024 1024"
-                class="send-reaction-icon"
+                class="dropdown-message"
               >
                 <path
-                  d="M288 421a48 48 0 1 0 96 0a48 48 0 1 0-96 0m352 0a48 48 0 1 0 96 0a48 48 0 1 0-96 0M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448s448-200.6 448-448S759.4 64 512 64m263 711c-34.2 34.2-74 61-118.3 79.8C611 874.2 562.3 884 512 884c-50.3 0-99-9.8-144.8-29.2A370.4 370.4 0 0 1 248.9 775c-34.2-34.2-61-74-79.8-118.3C149.8 611 140 562.3 140 512s9.8-99 29.2-144.8A370.4 370.4 0 0 1 249 248.9c34.2-34.2 74-61 118.3-79.8C413 149.8 461.7 140 512 140c50.3 0 99 9.8 144.8 29.2A370.4 370.4 0 0 1 775.1 249c34.2 34.2 61 74 79.8 118.3C874.2 413 884 461.7 884 512s-9.8 99-29.2 144.8A368.89 368.89 0 0 1 775 775M664 533h-48.1c-4.2 0-7.8 3.2-8.1 7.4C604 589.9 562.5 629 512 629s-92.1-39.1-95.8-88.6c-.3-4.2-3.9-7.4-8.1-7.4H360a8 8 0 0 0-8 8.4c4.4 84.3 74.5 151.6 160 151.6s155.6-67.3 160-151.6a8 8 0 0 0-8-8.4"
+                  fill="currentColor"
+                  d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
                 />
               </svg>
-            </div>
-            <div class="message-content">
-              <!-- <p
-                v-if="message.delete && message.data.text"
-                class="message-text-delete"
-              >
-                Сообщение удалено
-              </p>
-              <p
-                v-if="
-                  !message.data.text &&
-                  message.data.content.length > 0 &&
-                  message.data.content[0].type === 'deleted'
-                "
-                class="message-text-delete"
-              >
-                Сообщение удалено
-              </p>
-              <p
-                v-else-if="!message.delete && message.data.text"
-                class="message-text"
-              >
-                {{ message.data.text }}
-              </p>
-              <p
-                v-else-if="
-                  (!message.delete && message.data.content.length > 0) ||
-                  message.data.text
-                "
-                class="message-text"
-              >
-                {{ message.data.text }}
-              </p>
-              <p
-                v-else-if="message.delete && message.data.content.length > 0"
-                class="message-text-delete"
-              >
-                Сообщение удалено
-              </p>
-              <p v-else class="message-text-delete">Сообщение удалено</p> -->
-              {{ message.data.text }}
               <div
-                v-if="
-                  message.data.state === 'send' &&
-                  message.data.outgoing &&
-                  apiUrl != 'https://b2288.apitter.com/instances'
-                "
-                class="icon-container"
+                v-if="!message.data.outgoing"
+                class="dropdown-message-message-incoming"
+              ></div>
+              <svg
+                v-if="!message.data.outgoing"
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 1024 1024"
+                class="dropdown-message-incoming"
               >
-                <LoadingMessage />
+                <path
+                  fill="currentColor"
+                  d="M104.704 338.752a64 64 0 0 1 90.496 0l316.8 316.8l316.8-316.8a64 64 0 0 1 90.496 90.496L557.248 791.296a64 64 0 0 1-90.496 0L104.704 429.248a64 64 0 0 1 0-90.496"
+                />
+              </svg>
+              <div v-if="message.data.replyTo != null" class="reply-content">
+                <h2 class="reply-name">
+                  {{ formatPhoneNumber(message.data.replyTo.name) }}
+                </h2>
+                <h2 class="reply-text">
+                  {{ truncateString(message.data.replyTo.text) }}
+                </h2>
+              </div>
+              <div class="send-reaction-icon-cont">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 1024 1024"
+                  class="send-reaction-icon"
+                >
+                  <path
+                    d="M288 421a48 48 0 1 0 96 0a48 48 0 1 0-96 0m352 0a48 48 0 1 0 96 0a48 48 0 1 0-96 0M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448s448-200.6 448-448S759.4 64 512 64m263 711c-34.2 34.2-74 61-118.3 79.8C611 874.2 562.3 884 512 884c-50.3 0-99-9.8-144.8-29.2A370.4 370.4 0 0 1 248.9 775c-34.2-34.2-61-74-79.8-118.3C149.8 611 140 562.3 140 512s9.8-99 29.2-144.8A370.4 370.4 0 0 1 249 248.9c34.2-34.2 74-61 118.3-79.8C413 149.8 461.7 140 512 140c50.3 0 99 9.8 144.8 29.2A370.4 370.4 0 0 1 775.1 249c34.2 34.2 61 74 79.8 118.3C874.2 413 884 461.7 884 512s-9.8 99-29.2 144.8A368.89 368.89 0 0 1 775 775M664 533h-48.1c-4.2 0-7.8 3.2-8.1 7.4C604 589.9 562.5 629 512 629s-92.1-39.1-95.8-88.6c-.3-4.2-3.9-7.4-8.1-7.4H360a8 8 0 0 0-8 8.4c4.4 84.3 74.5 151.6 160 151.6s155.6-67.3 160-151.6a8 8 0 0 0-8-8.4"
+                  />
+                </svg>
               </div>
               <div class="message-content">
-                <img
-                  v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].src &&
-                    message.data.content[0].type === 'sticker'
-                  "
-                  :src="message.data.content[0].src"
-                  alt="Sticker"
-                  class="sticker"
-                />
-                <img
-                  v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].src &&
-                    message.data.content[0].type === 'image'
-                  "
-                  :src="message.data.content[0].src"
-                  alt="Image"
-                  class="img-message"
-                  @click="openPhotoMenu(message.data.content[0].src)"
-                />
-                <PhotoMenu
-                  :changeMenuPhotoStation="changeMenuPhotoStation"
-                  :img="selectedImage"
-                  v-if="station.photoMenu"
-                />
-                <video
-                  v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].src &&
-                    message.data.content[0].type === 'video'
-                  "
-                  controls
-                  :src="message.data.content[0].src"
-                  class="video-message"
-                  @click="openVideoMenu(message.data.content[0].src)"
-                >
-                  Ваш браузер не поддерживает видео.
-                </video>
-                <audio
-                  v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].src &&
-                    message.data.content[0].type === 'audio'
-                  "
-                  controls
-                  :src="message.data.content[0].src"
-                  class="audio-message"
-                >
-                  Ваш браузер не поддерживает аудио.
-                </audio>
-                <h2
-                  v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].type === 'geo'
-                  "
-                  class="geo-message"
-                >
-                  Сообщение не поддерживается
-                </h2>
+                {{ message.data.text }}
                 <div
-                  class="content-file"
                   v-if="
-                    message.data.content &&
-                    message.data.content.length > 0 &&
-                    message.data.content[0].src &&
-                    message.data.content[0].type === 'file'
+                    message.data.state === 'send' &&
+                    message.data.outgoing &&
+                    apiUrl != 'https://b2288.apitter.com/instances'
                   "
-                  @click="downloadFile(message.data.content[0].src)"
+                  class="icon-container"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="100"
-                    height="100"
-                    viewBox="0 0 1024 1024"
-                    class="svg-icon"
+                  <LoadingMessage />
+                </div>
+                <div class="message-content">
+                  <img
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].src &&
+                      message.data.content[0].type === 'sticker'
+                    "
+                    :src="message.data.content[0].src"
+                    alt="Sticker"
+                    class="sticker"
+                  />
+                  <img
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].src &&
+                      message.data.content[0].type === 'image'
+                    "
+                    :src="message.data.content[0].src"
+                    alt="Image"
+                    class="img-message"
+                    @click="openPhotoMenu(message.data.content[0].src)"
+                  />
+                  <PhotoMenu
+                    :changeMenuPhotoStation="changeMenuPhotoStation"
+                    :img="selectedImage"
+                    v-if="station.photoMenu"
+                  />
+                  <video
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].src &&
+                      message.data.content[0].type === 'video'
+                    "
+                    controls
+                    :src="message.data.content[0].src"
+                    class="video-message"
+                    @click="openVideoMenu(message.data.content[0].src)"
                   >
-                    <path
-                      d="M854.6 288.7c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4zM790.2 326L602 137.8V326zM633.22 637.26c-15.18-.5-31.32.67-49.65 2.96c-24.3-14.99-40.66-35.58-52.28-65.83l1.07-4.38l1.24-5.18c4.3-18.13 6.61-31.36 7.3-44.7c.52-10.07-.04-19.36-1.83-27.97c-3.3-18.59-16.45-29.46-33.02-30.13c-15.45-.63-29.65 8-33.28 21.37c-5.91 21.62-2.45 50.07 10.08 98.59c-15.96 38.05-37.05 82.66-51.2 107.54c-18.89 9.74-33.6 18.6-45.96 28.42c-16.3 12.97-26.48 26.3-29.28 40.3c-1.36 6.49.69 14.97 5.36 21.92c5.3 7.88 13.28 13 22.85 13.74c24.15 1.87 53.83-23.03 86.6-79.26c3.29-1.1 6.77-2.26 11.02-3.7l11.9-4.02c7.53-2.54 12.99-4.36 18.39-6.11c23.4-7.62 41.1-12.43 57.2-15.17c27.98 14.98 60.32 24.8 82.1 24.8c17.98 0 30.13-9.32 34.52-23.99c3.85-12.88.8-27.82-7.48-36.08c-8.56-8.41-24.3-12.43-45.65-13.12M385.23 765.68v-.36l.13-.34a54.86 54.86 0 0 1 5.6-10.76c4.28-6.58 10.17-13.5 17.47-20.87c3.92-3.95 8-7.8 12.79-12.12c1.07-.96 7.91-7.05 9.19-8.25l11.17-10.4l-8.12 12.93c-12.32 19.64-23.46 33.78-33 43c-3.51 3.4-6.6 5.9-9.1 7.51a16.43 16.43 0 0 1-2.61 1.42c-.41.17-.77.27-1.13.3a2.2 2.2 0 0 1-1.12-.15a2.07 2.07 0 0 1-1.27-1.91M511.17 547.4l-2.26 4l-1.4-4.38c-3.1-9.83-5.38-24.64-6.01-38c-.72-15.2.49-24.32 5.29-24.32c6.74 0 9.83 10.8 10.07 27.05c.22 14.28-2.03 29.14-5.7 35.65zm-5.81 58.46l1.53-4.05l2.09 3.8c11.69 21.24 26.86 38.96 43.54 51.31l3.6 2.66l-4.39.9c-16.33 3.38-31.54 8.46-52.34 16.85c2.17-.88-21.62 8.86-27.64 11.17l-5.25 2.01l2.8-4.88c12.35-21.5 23.76-47.32 36.05-79.77zm157.62 76.26c-7.86 3.1-24.78.33-54.57-12.39l-7.56-3.22l8.2-.6c23.3-1.73 39.8-.45 49.42 3.07c4.1 1.5 6.83 3.39 8.04 5.55a4.64 4.64 0 0 1-1.36 6.31a6.7 6.7 0 0 1-2.17 1.28"
-                    />
-                  </svg>
+                    Ваш браузер не поддерживает видео.
+                  </video>
+                  <audio
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].src &&
+                      message.data.content[0].type === 'audio'
+                    "
+                    controls
+                    :src="message.data.content[0].src"
+                    class="audio-message"
+                  >
+                    Ваш браузер не поддерживает аудио.
+                  </audio>
+                  <h2
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].type === 'geo'
+                    "
+                    class="geo-message"
+                  >
+                    Сообщение не поддерживается
+                  </h2>
+                  <div
+                    class="content-file"
+                    v-if="
+                      message.data.content &&
+                      message.data.content.length > 0 &&
+                      message.data.content[0].src &&
+                      message.data.content[0].type === 'file'
+                    "
+                    @click="downloadFile(message.data.content[0].src)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="100"
+                      height="100"
+                      viewBox="0 0 1024 1024"
+                      class="svg-icon"
+                    >
+                      <path
+                        d="M854.6 288.7c6 6 9.4 14.1 9.4 22.6V928c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32h424.7c8.5 0 16.7 3.4 22.7 9.4zM790.2 326L602 137.8V326zM633.22 637.26c-15.18-.5-31.32.67-49.65 2.96c-24.3-14.99-40.66-35.58-52.28-65.83l1.07-4.38l1.24-5.18c4.3-18.13 6.61-31.36 7.3-44.7c.52-10.07-.04-19.36-1.83-27.97c-3.3-18.59-16.45-29.46-33.02-30.13c-15.45-.63-29.65 8-33.28 21.37c-5.91 21.62-2.45 50.07 10.08 98.59c-15.96 38.05-37.05 82.66-51.2 107.54c-18.89 9.74-33.6 18.6-45.96 28.42c-16.3 12.97-26.48 26.3-29.28 40.3c-1.36 6.49.69 14.97 5.36 21.92c5.3 7.88 13.28 13 22.85 13.74c24.15 1.87 53.83-23.03 86.6-79.26c3.29-1.1 6.77-2.26 11.02-3.7l11.9-4.02c7.53-2.54 12.99-4.36 18.39-6.11c23.4-7.62 41.1-12.43 57.2-15.17c27.98 14.98 60.32 24.8 82.1 24.8c17.98 0 30.13-9.32 34.52-23.99c3.85-12.88.8-27.82-7.48-36.08c-8.56-8.41-24.3-12.43-45.65-13.12M385.23 765.68v-.36l.13-.34a54.86 54.86 0 0 1 5.6-10.76c4.28-6.58 10.17-13.5 17.47-20.87c3.92-3.95 8-7.8 12.79-12.12c1.07-.96 7.91-7.05 9.19-8.25l11.17-10.4l-8.12 12.93c-12.32 19.64-23.46 33.78-33 43c-3.51 3.4-6.6 5.9-9.1 7.51a16.43 16.43 0 0 1-2.61 1.42c-.41.17-.77.27-1.13.3a2.2 2.2 0 0 1-1.12-.15a2.07 2.07 0 0 1-1.27-1.91M511.17 547.4l-2.26 4l-1.4-4.38c-3.1-9.83-5.38-24.64-6.01-38c-.72-15.2.49-24.32 5.29-24.32c6.74 0 9.83 10.8 10.07 27.05c.22 14.28-2.03 29.14-5.7 35.65zm-5.81 58.46l1.53-4.05l2.09 3.8c11.69 21.24 26.86 38.96 43.54 51.31l3.6 2.66l-4.39.9c-16.33 3.38-31.54 8.46-52.34 16.85c2.17-.88-21.62 8.86-27.64 11.17l-5.25 2.01l2.8-4.88c12.35-21.5 23.76-47.32 36.05-79.77zm157.62 76.26c-7.86 3.1-24.78.33-54.57-12.39l-7.56-3.22l8.2-.6c23.3-1.73 39.8-.45 49.42 3.07c4.1 1.5 6.83 3.39 8.04 5.55a4.64 4.64 0 0 1-1.36 6.31a6.7 6.7 0 0 1-2.17 1.28"
+                      />
+                    </svg>
+                  </div>
                 </div>
+                <footer>
+                  <h2 class="reaction">{{ message.reaction }}</h2>
+                  <div class="message-time">
+                    {{ formatTimestamp(message.data.time) }}
+                  </div>
+                  <img
+                    class="state-img"
+                    v-if="
+                      message.data.state === 'delivered' && message.data.outgoing
+                    "
+                    src="/chats/read_it.svg"
+                    alt=""
+                  />
+                  <img
+                    class="state-img"
+                    v-if="
+                      message.data.state === 'has_seen' && message.data.outgoing
+                    "
+                    src="/chats/not_read_it.svg"
+                    alt=""
+                  />
+                  <img
+                    class="state-img"
+                    v-if="
+                      message.data.state === 'sendMessage' &&
+                      message.data.outgoing
+                    "
+                    src="/chats/sned_message_state.svg"
+                    alt=""
+                  />
+                  <img
+                    class="state-img"
+                    v-if="message.data.state === 'error' && message.data.outgoing"
+                    src="/chats/send_message_error.svg"
+                    alt=""
+                  />
+                </footer>
               </div>
-              <footer>
-                <h2 class="reaction">{{ message.reaction }}</h2>
-                <div class="message-time">
-                  {{ formatTimestamp(message.data.time) }}
-                </div>
-                <img
-                  class="state-img"
-                  v-if="
-                    message.data.state === 'delivered' && message.data.outgoing
-                  "
-                  src="/chats/read_it.svg"
-                  alt=""
-                />
-                <img
-                  class="state-img"
-                  v-if="
-                    message.data.state === 'has_seen' && message.data.outgoing
-                  "
-                  src="/chats/not_read_it.svg"
-                  alt=""
-                />
-                <img
-                  class="state-img"
-                  v-if="
-                    message.data.state === 'sendMessage' &&
-                    message.data.outgoing
-                  "
-                  src="/chats/sned_message_state.svg"
-                  alt=""
-                />
-                <img
-                  class="state-img"
-                  v-if="message.data.state === 'error' && message.data.outgoing"
-                  src="/chats/send_message_error.svg"
-                  alt=""
-                />
-              </footer>
             </div>
-          </div>
+          </template>
         </div>
         <Loading v-if="loading" />
         <section class="error-section" v-if="!loading && station.messageNull">
@@ -753,6 +718,51 @@ const changeMenuPhotoStation = () => {
 };
 let previousChatInfo = null;
 
+const formatDateSeparator = (timestamp) => {
+  const now = new Date();
+  const messageDate = new Date(timestamp / 1000); // Убедитесь, что timestamp правильно конвертируется
+  
+  // Проверяем, сегодня ли было сообщение
+  if (isSameDay(now, messageDate)) {
+    return 'Сегодня';
+  }
+  
+  // Проверяем, было ли сообщение вчера
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (isSameDay(yesterday, messageDate)) {
+    return 'Вчера';
+  }
+  
+  // Для более старых сообщений возвращаем дату в формате "5 апреля"
+  const options = { day: 'numeric', month: 'long' };
+  return messageDate.toLocaleDateString('ru-RU', options);
+};
+
+// Вспомогательная функция для проверки, один ли это день
+const isSameDay = (date1, date2) => {
+  return (
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getFullYear() === date2.getFullYear()
+  );
+};
+
+// Функция для определения, нужно ли показывать плашку даты
+const shouldShowDateSeparator = (index) => {
+  if (index === 0) return true; // Всегда показываем для первого сообщения
+  
+  const currentMessage = messages.value[index];
+  const previousMessage = messages.value[index - 1];
+  
+  if (!currentMessage || !previousMessage) return false;
+  
+  const currentDate = new Date(currentMessage.data.time / 1000);
+  const previousDate = new Date(previousMessage.data.time / 1000);
+  
+  return !isSameDay(currentDate, previousDate);
+};
+
 watch(
   () => chatInfo.value,
   (newChatInfo) => {
@@ -1207,6 +1217,20 @@ onMounted(() => {
   min-height: 100vh;
 }
 
+/* Добавляем стили для плашки даты */
+.date-separator {
+  position: relative;
+  margin: 15px auto;
+  padding: 5px 12px;
+  background-color: #e1f3fb;
+  color: #555;
+  border-radius: 20px;
+  font-size: 12px;
+  width: fit-content;
+  z-index: 1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
 .user-info-section {
   z-index: 5;
   position: absolute;
@@ -1338,7 +1362,7 @@ onMounted(() => {
   padding: 10px;
   align-self: flex-end;
   background-color: #e1ffc7;
-  box-shadow: -2px 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 /* .outgoing:hover .send-reaction-icon-cont {
@@ -1355,7 +1379,7 @@ onMounted(() => {
   border-radius: 10px;
   padding: 10px;
   align-self: flex-start;
-  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   background: #f1f1f1;
 }
 
