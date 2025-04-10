@@ -32,13 +32,15 @@
 
 <script setup>
 import { onMounted } from "vue";
+const router = useRouter();
+import { useRouter } from "vue-router";
 
 const handleCredentialResponse = async (response) => {
   console.log("Google token:", response.credential);
 
   try {
     const res = await fetch(
-      "http://be-auth.developtech.ru/api/auth/google/callback",
+      "https://be-auth.developtech.ru/api/auth/google/callback",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +50,15 @@ const handleCredentialResponse = async (response) => {
 
     const data = await res.json();
     console.log("Auth result:", data);
-
+    if (data.apiResponce.ok === true || data.apiResponce.ok === "true") {
+      localStorage.setItem("accountToken", data.apiResponce.token);
+      localStorage.setItem("accountData", data.email);
+      localStorage.setItem("accountStationText", "Telegram");
+      localStorage.setItem("accountStation", "telegram");
+      console.log(response.data);
+      router.push("/MainPage");
+      location.reload();
+    }
     if (res.ok) {
       localStorage.setItem("auth_token", data.token);
       // Редирект или обновление состояния
