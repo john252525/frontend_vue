@@ -56,6 +56,7 @@
         Есть аккаунт? <span @click="navigateTo('/Login')">Войти</span>
       </p>
     </form>
+    <LoginForGoogle class="login-for-google"/>
   </section>
 </template>
 
@@ -63,6 +64,7 @@
 import axios from "axios";
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
+import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 const router = useRouter();
 const formData = reactive({
   login: "",
@@ -184,6 +186,14 @@ const logAccoutn = () => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+
+.login-for-google {
+  position: absolute;
+  top: 108%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .title {
