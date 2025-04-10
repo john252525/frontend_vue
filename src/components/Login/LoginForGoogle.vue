@@ -50,8 +50,8 @@ const handleCredentialResponse = async (response) => {
 
     const data = await res.json();
     console.log("Auth result:", data);
-    if (data.apiResponce.ok === true || data.apiResponce.ok === "true") {
-      localStorage.setItem("accountToken", data.apiResponce.token);
+    if (data.apiResponse.ok === true || data.apiResponse.ok === "true") {
+      localStorage.setItem("accountToken", data.apiResponse.token);
       localStorage.setItem("accountData", data.email);
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
