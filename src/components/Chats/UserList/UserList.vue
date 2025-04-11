@@ -6,17 +6,22 @@
   />
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
-    <button v-if="!chatsNull" @click="changeAddAccountStation" class="add-new-chat">+</button>
-    <button v-if="chatsNull" @click="changeAddAccountStation" class="add-new-chat-animation">+</button>
+    <button
+      v-if="!chatsNull"
+      @click="changeAddAccountStation"
+      class="add-new-chat"
+    >
+      +
+    </button>
+    <button
+      v-if="chatsNull"
+      @click="changeAddAccountStation"
+      class="add-new-chat-animation"
+    >
+      +
+    </button>
     <aside class="chat-list" :style="{ width: computedChatListWidth }">
-      <section
-        v-if="
-  apiUrl === apiCheckUrl
-        &&
-          isMulti
-        "
-        class="setting-chats"
-      >
+      <section v-if="apiUrl === apiCheckUrl && isMulti" class="setting-chats">
         <button class="setting-chats-button" @click="toggleAccountList">
           {{ showAccountList ? "Скрыть аккаунты" : "Настроить чаты" }}
         </button>
@@ -26,8 +31,18 @@
             :key="index"
             class="account-item"
           >
-            <img class="icon-chat-list" v-if="account.source==='telegram'" src="/chats/telegram.svg" alt="">
-            <img class="icon-chat-list"  v-if="account.source==='whatsapp'" src="/chats/whatsapp.svg" alt="">
+            <img
+              class="icon-chat-list"
+              v-if="account.source === 'telegram'"
+              src="/chats/telegram.svg"
+              alt=""
+            />
+            <img
+              class="icon-chat-list"
+              v-if="account.source === 'whatsapp'"
+              src="/chats/whatsapp.svg"
+              alt=""
+            />
             <span class="text-account-item">{{ account.name }} </span>
             <div class="checkbox-input">
               <input
@@ -50,12 +65,9 @@
         :class="{ 'disabled-chat': !isChatClickable }"
         @click="isChatClickable ? selectChatClick(chat) : null"
       >
-      
         <div class="chat-user-cont">
           <img
-            v-if="
-              apiUrl === apiCheckUrl && chat.data.avatar
-            "
+            v-if="apiUrl === apiCheckUrl && chat.data.avatar"
             class="user-chat-avatar"
             :src="chat.data.avatar"
             @click="changeImageStation(chat)"
@@ -86,10 +98,57 @@
           <div class="chat-info">
             <div class="chat-name">{{ chat.data.name }}</div>
             <div class="chat-last-message">
-              <svg v-if="chat.data.lastMessageType === 'audio'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 1024 1024"><path fill="#4fa3f1" d="M512 624c93.9 0 170-75.2 170-168V232c0-92.8-76.1-168-170-168s-170 75.2-170 168v224c0 92.8 76.1 168 170 168m330-170c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8c0 140.3-113.7 254-254 254S258 594.3 258 454c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8c0 168.7 126.6 307.9 290 327.6V884H326.7c-13.7 0-24.7 14.3-24.7 32v36c0 4.4 2.8 8 6.2 8h407.6c3.4 0 6.2-3.6 6.2-8v-36c0-17.7-11-32-24.7-32H548V782.1c165.3-18 294-158 294-328.1"/></svg>
-              <svg v-if="chat.data.lastMessageType === 'video'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#4fa3f1" fill-rule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/></svg>
-              <svg v-if="chat.data.lastMessageType === 'image'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><g fill="#4fa3f1"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0"/><path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71l-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54L1 12.5v-9a.5.5 0 0 1 .5-.5z"/></g></svg>
-              <svg v-if="chat.data.lastMessageType === 'file'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 1024 1024"><path fill="#4fa3f1" d="M854.6 288.7L639.4 73.4c-6-6-14.2-9.4-22.7-9.4H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V311.3c0-8.5-3.4-16.6-9.4-22.6M400 402c22.1 0 40 17.9 40 40s-17.9 40-40 40s-40-17.9-40-40s17.9-40 40-40m296 294H328c-6.7 0-10.4-7.7-6.3-12.9l99.8-127.2a8 8 0 0 1 12.6 0l41.1 52.4l77.8-99.2a8 8 0 0 1 12.6 0l136.5 174c4.3 5.2.5 12.9-6.1 12.9m-94-370V137.8L790.2 326z"/></svg>
+              <svg
+                v-if="chat.data.lastMessageType === 'audio'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 1024 1024"
+              >
+                <path
+                  fill="#4fa3f1"
+                  d="M512 624c93.9 0 170-75.2 170-168V232c0-92.8-76.1-168-170-168s-170 75.2-170 168v224c0 92.8 76.1 168 170 168m330-170c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8c0 140.3-113.7 254-254 254S258 594.3 258 454c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8c0 168.7 126.6 307.9 290 327.6V884H326.7c-13.7 0-24.7 14.3-24.7 32v36c0 4.4 2.8 8 6.2 8h407.6c3.4 0 6.2-3.6 6.2-8v-36c0-17.7-11-32-24.7-32H548V782.1c165.3-18 294-158 294-328.1"
+                />
+              </svg>
+              <svg
+                v-if="chat.data.lastMessageType === 'video'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill="#4fa3f1"
+                  fill-rule="evenodd"
+                  d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"
+                />
+              </svg>
+              <svg
+                v-if="chat.data.lastMessageType === 'image'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+              >
+                <g fill="#4fa3f1">
+                  <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0" />
+                  <path
+                    d="M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2zm13 1a.5.5 0 0 1 .5.5v6l-3.775-1.947a.5.5 0 0 0-.577.093l-3.71 3.71l-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12v.54L1 12.5v-9a.5.5 0 0 1 .5-.5z"
+                  />
+                </g>
+              </svg>
+              <svg
+                v-if="chat.data.lastMessageType === 'file'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 1024 1024"
+              >
+                <path
+                  fill="#4fa3f1"
+                  d="M854.6 288.7L639.4 73.4c-6-6-14.2-9.4-22.7-9.4H192c-17.7 0-32 14.3-32 32v832c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V311.3c0-8.5-3.4-16.6-9.4-22.6M400 402c22.1 0 40 17.9 40 40s-17.9 40-40 40s-40-17.9-40-40s17.9-40 40-40m296 294H328c-6.7 0-10.4-7.7-6.3-12.9l99.8-127.2a8 8 0 0 1 12.6 0l41.1 52.4l77.8-99.2a8 8 0 0 1 12.6 0l136.5 174c4.3 5.2.5 12.9-6.1 12.9m-94-370V137.8L790.2 326z"
+                />
+              </svg>
               {{ formatLastMessage(chat.data.lastMessage?.body, chat.data) }}
             </div>
           </div>
@@ -102,7 +161,6 @@
             {{ chat.newMessage }}
           </div>
         </div>
-        
       </section>
       <section class="loading-chat-list" v-if="chatsNull">
         <h2 class="chat-null-text">Чаты не найдены</h2>
@@ -158,7 +216,7 @@ const chats = ref(null);
 const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
-const chatsNull = ref(false)
+const chatsNull = ref(false);
 
 const selectChatClick = (chat) => {
   props.selectChat(chat);
@@ -193,6 +251,31 @@ const updateLastMessage = (thread, newLastMessage) => {
   if (chat) {
     if (chat.data.lastMessage) {
       chat.data.lastMessage.body = newLastMessage;
+    } else {
+    }
+  } else {
+  }
+};
+
+const updateContentType = (thread, content, text) => {
+  // console.log(
+  //   "СОООООООООООООООООООООБЩЕНИЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ",
+  //   newLastMessage
+  // );
+
+  const chat = chats.value.find((chat) => chat.uniq === thread);
+  console.log("work");
+  if (content.length > 0) {
+    if (content[0].type) {
+      chat.data.lastMessageType = content[0].type;
+      console.log("конт обновлен");
+    }
+  } else {
+    chat.data.lastMessageType = "text";
+  }
+  if (chat) {
+    if (chat.data.lastMessageType) {
+      // chat.data.lastMessageType = newLastMessage;
     } else {
     }
   } else {
@@ -335,9 +418,7 @@ const test = async () => {
       return;
     }
 
-    if (
-      apiUrl === apiCheckUrl 
-    ) {
+    if (apiUrl === apiCheckUrl) {
       chats.value = response.data.data.chats;
       console.log(chats.value);
     } else {
@@ -348,13 +429,13 @@ const test = async () => {
         data: chat,
       }));
     }
-    if(chats.value.length === 0) {
-      chatsNull.value = true
-      console.log('dssd')
+    if (chats.value.length === 0) {
+      chatsNull.value = true;
+      console.log("dssd");
     }
   } catch (error) {
     errorStation.value = true;
-    
+
     setTimeout(() => {
       localStorage.removeItem("loginWhatsAppChatsStep");
       // router.push("/accounts");
@@ -453,20 +534,20 @@ const formatLastMessage = (message, chat) => {
   if (message && message.length > maxLength) {
     return message.slice(0, maxLength) + "...";
   }
-  console.log(chat)
- if(chat.lastMessageType === 'audio') {
-    return 'Голосовое сообщение'
- } else if (chat.lastMessageType === 'video') {
-  return 'Видео'
- } else if (chat.lastMessageType === 'image') {
-  return 'Изображение'
- } else if (chat.lastMessageType === 'file') {
-  return 'Файл'
- }  else if (chat.lastMessageType === 'text') {
-  return message
- } else {
-  return 'Медиа' 
- }
+  console.log(chat);
+  if (chat.lastMessageType === "audio") {
+    return "Голосовое сообщение";
+  } else if (chat.lastMessageType === "video") {
+    return "Видео";
+  } else if (chat.lastMessageType === "image") {
+    return "Изображение";
+  } else if (chat.lastMessageType === "file") {
+    return "Файл";
+  } else if (chat.lastMessageType === "text") {
+    return message;
+  } else {
+    return "Медиа";
+  }
 };
 
 const audio = ref(null);
@@ -583,6 +664,7 @@ watch(
     if (newValue) {
       updateLastMessage(newValue.thread, newValue.text);
       updateChatTimestamp(newValue.thread, newValue.time);
+      updateContentType(newValue.thread, newValue.content, newValue.text);
 
       if (!newValue.outgoing) {
         updateCountNewMessage(newValue.thread);
@@ -866,7 +948,6 @@ const playSound = () => {
   bottom: 20px;
   right: 20px;
   border-radius: 100%;
-
 }
 
 .add-new-chat-animation {
@@ -889,7 +970,9 @@ const playSound = () => {
     box-shadow: 0 0 0 0 rgba(73, 80, 202, 0.7); /* Цвет тени соответствует background */
   }
   70% {
-    transform: scale(1.2); /* Увеличиваем немного больше, чем в предыдущем примере */
+    transform: scale(
+      1.2
+    ); /* Увеличиваем немного больше, чем в предыдущем примере */
     box-shadow: 0 0 0 10px rgba(73, 80, 202, 0);
   }
   100% {
