@@ -83,13 +83,15 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
+
 const updateStatus = async (state) => {
-  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/state/${selectedItem.value.id}/${state}/`;
+  const apiUrlMethod = `${apiUrl}/state/${selectedItem.value.id}/${state}/`;
   const params = {
     token: "d7039fe337873da68d28945cd6e5c61d",
   };
   try {
-    const response = await axios.post(apiUrl, params, {
+    const response = await axios.post(apiUrlMethod, params, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -128,10 +130,10 @@ const offModalSuc = () => {
 };
 
 const getMessages = async () => {
-  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/view/${1}/`;
+  const apiUrlMethod = `${apiUrl}/view/${1}/`;
 
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(apiUrlMethod, {
       params: {
         token: "d7039fe337873da68d28945cd6e5c61d",
         limit: 10,

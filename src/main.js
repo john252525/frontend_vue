@@ -13,6 +13,7 @@ import Chats from "./pages/Chats.vue";
 import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
+import Setings from "./pages/Setings.vue";
 
 const routes = [
   {
@@ -20,6 +21,12 @@ const routes = [
     name: "PersonalAccount",
     component: PersonalAccount,
     meta: { title: "Аккаунты" },
+  },
+  {
+    path: "/setings",
+    name: "Setings",
+    component: Setings,
+    meta: { title: "Настройки" },
   },
   {
     path: "/",

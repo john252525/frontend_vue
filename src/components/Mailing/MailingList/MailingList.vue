@@ -105,6 +105,7 @@ import InfoMailing from "../ModalComponent/InfoMailing.vue";
 import LoadAccount from "./LoadAccount.vue";
 import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
 import { useRouter } from "vue-router";
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const router = useRouter();
 const station = reactive({
   isModalOpen: false,
@@ -129,9 +130,9 @@ const modalPosition = ref({ top: 0, left: 0 });
 const getMailingLists = async () => {
   loadDataStation.value = true;
   const token = "d7039fe337873da68d28945cd6e5c61d";
-  const apiUrl = "https://whatsapi.ru/ru/api/autosend/whatsapp/list/";
+  const apiUrlMethod = `${apiUrl}/list/`;
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(apiUrlMethod, {
       params: {
         token,
       },

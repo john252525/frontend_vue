@@ -66,12 +66,13 @@ const props = defineProps({
 const { selectedItem } = toRefs(props);
 
 const mailingLists = ref([]);
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const getMessages = async () => {
-  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/view/${selectedItem.value.id}/`;
+  const apiUrlMethod = `${apiUrl}/${selectedItem.value.id}/`;
 
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(apiUrlMethod, {
       params: {
         token: "d7039fe337873da68d28945cd6e5c61d",
         limit: 10,

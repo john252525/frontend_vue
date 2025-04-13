@@ -45,17 +45,18 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const { selectedItem } = toRefs(props);
 const loadStation = ref(false);
 const deleteMailing = async () => {
   loadStation.value = true;
-  const apiUrl = `https://whatsapi.ru/ru/api/autosend/whatsapp/delete/${selectedItem.value.id}/`;
+  const apiUrlMethod = `${apiUrl}/delete/${selectedItem.value.id}/`;
   const params = {
     token: "d7039fe337873da68d28945cd6e5c61d",
   };
   try {
-    const response = await axios.post(apiUrl, params, {
+    const response = await axios.post(apiUrlMethod, params, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },

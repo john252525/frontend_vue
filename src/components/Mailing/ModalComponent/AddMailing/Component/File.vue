@@ -282,9 +282,10 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function createWhatsAppBroadcast() {
-  const url = "https://whatsapi.ru/ru/api/autosend/whatsapp/new/";
+  const url = `${apiUrl}/new/`;
 
   // Параметры запроса
   const params = {

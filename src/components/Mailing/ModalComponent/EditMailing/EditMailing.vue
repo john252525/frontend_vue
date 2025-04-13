@@ -163,9 +163,10 @@ const days = ref(["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]);
 const items = ref("");
 
 const minutes = Array.from({ length: 1440 }, (_, index) => index + 1);
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function editWhatsAppBroadcast() {
-  const url = `https://whatsapi.ru/ru/api/autosend/whatsapp/edit/${items.value.id}/`;
+  const url = `${apiUrl}/edit/${items.value.id}/`;
 
   const params = {
     token: "d7039fe337873da68d28945cd6e5c61d",

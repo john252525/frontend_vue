@@ -34,19 +34,17 @@
 import { onMounted } from "vue";
 const router = useRouter();
 import { useRouter } from "vue-router";
+const apiUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
 const handleCredentialResponse = async (response) => {
   console.log("Google token:", response.credential);
 
   try {
-    const res = await fetch(
-      "https://be-auth.developtech.ru/api/auth/google/callback",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: response.credential }),
-      }
-    );
+    const res = await fetch(`${apiUrl}/api/auth/google/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: response.credential }),
+    });
 
     const data = await res.json();
     console.log("Auth result:", data);

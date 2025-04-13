@@ -24,16 +24,6 @@ const leaveAccount = () => {
 </script>
 
 <style scoped>
-.black-fon {
-  position: fixed;
-  z-index: 5;
-  width: 100%;
-  height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
-  top: 0;
-  left: 0;
-}
-
 .account-menu-section {
   position: absolute;
   z-index: 10;

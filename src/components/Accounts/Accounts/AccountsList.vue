@@ -243,45 +243,53 @@ const getAccounts = async () => {
 
             // Проверяем, если step равен 5
             if (instance.step.value === 5) {
-    console.log(instance);
-    let existingLogins;
+              console.log(instance);
+              let existingLogins;
 
-    const storedData = localStorage.getItem("loginWhatsAppChatsStep");
+              const storedData = localStorage.getItem("loginWhatsAppChatsStep");
 
-    if (storedData) {
-        try {
-            existingLogins = JSON.parse(storedData) || [];  // Получаем существующий массив объектов
-        } catch (error) {
-            console.error("Ошибка при парсинге JSON из localStorage:", error);
-            existingLogins = []; // Если парсинг не удался, создаем пустой массив
-        }
-    } else {
-        existingLogins = []; // Инициализируем пустой массив объектов
-    }
+              if (storedData) {
+                try {
+                  existingLogins = JSON.parse(storedData) || []; // Получаем существующий массив объектов
+                } catch (error) {
+                  console.error(
+                    "Ошибка при парсинге JSON из localStorage:",
+                    error
+                  );
+                  existingLogins = []; // Если парсинг не удался, создаем пустой массив
+                }
+              } else {
+                existingLogins = []; // Инициализируем пустой массив объектов
+              }
 
-    // Создаем объект для нового логина
-    const newLoginObject = { login: login, source: localStorage.getItem("accountStation") };
+              // Создаем объект для нового логина
+              const newLoginObject = {
+                login: login,
+                source: localStorage.getItem("accountStation"),
+              };
 
-    // Проверяем, есть ли уже логин в массиве объектов (сравниваем объекты)
-    const loginExists = existingLogins.some(item => item.login === login);
+              // Проверяем, есть ли уже логин в массиве объектов (сравниваем объекты)
+              const loginExists = existingLogins.some(
+                (item) => item.login === login
+              );
 
-    if (!loginExists) {
-        existingLogins.push(newLoginObject); // Добавляем новый объект в массив
-        localStorage.setItem(
-            "loginWhatsAppChatsStep",
-            JSON.stringify(existingLogins) // Сохраняем массив объектов
-        );
-        console.log(
-            "Логины в localStorage:",
-            localStorage.getItem("loginWhatsAppChatsStep")
-        );
-    } else {
-        console.log(`Логин "${login}" уже существует в localStorage.`);
-        console.log(
-            JSON.parse(localStorage.getItem("loginWhatsAppChatsStep"))
-        );
-    }
-}
+              if (!loginExists) {
+                existingLogins.push(newLoginObject); // Добавляем новый объект в массив
+                localStorage.setItem(
+                  "loginWhatsAppChatsStep",
+                  JSON.stringify(existingLogins) // Сохраняем массив объектов
+                );
+                console.log(
+                  "Логины в localStorage:",
+                  localStorage.getItem("loginWhatsAppChatsStep")
+                );
+              } else {
+                console.log(`Логин "${login}" уже существует в localStorage.`);
+                console.log(
+                  JSON.parse(localStorage.getItem("loginWhatsAppChatsStep"))
+                );
+              }
+            }
           });
 
           // Ждем завершения всех запросов
