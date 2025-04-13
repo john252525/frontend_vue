@@ -2,7 +2,6 @@
 <html lang="">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="public/favicon.ico" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,10 +25,22 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
     />
-    <title>Touch-API</title>
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      // Устанавливаем favicon из переменной окружения
+      const logoUrl = '%VITE_URL_LOGO%';
+      const faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      faviconLink.href = logoUrl;
+      faviconLink.type = 'image/x-icon';
+      document.head.appendChild(faviconLink);
+      
+      // Устанавливаем title из переменной окружения
+      const pageTitle = '%VITE_TITLE%' || 'Touch-API'; // Fallback значение
+      document.title = pageTitle;
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

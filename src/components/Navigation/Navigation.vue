@@ -114,11 +114,11 @@
       <div class="logo-header-cont">
         <h2 class="logo-header">
           <img
-            src="https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico"
+            :src="logoUrl"
             class="logo-img"
             alt="Logo"
           />
-          Touch-API
+          {{ logo }}
         </h2>
       </div>
       <div class="line-menu"></div>
@@ -241,6 +241,10 @@ const props = defineProps({
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
+
+const logo = import.meta.env.VITE_TITLE_LOGO;
+const logoUrl = import.meta.env.VITE_URL_LOGO;
+
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 const apiUrl = import.meta.env.VITE_API_URL;
 const route = useRoute();

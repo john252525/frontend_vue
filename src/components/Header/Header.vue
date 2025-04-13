@@ -10,11 +10,11 @@
         />
         <h2 class="logo-header">
           <img
-            src="https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico"
+            :src="logoUrl"
             class="logo-img"
             alt="Logo"
           />
-          Touch-API
+          {{ logo }}
         </h2>
       </article>
       <article class="user-cont">
@@ -48,6 +48,9 @@ import { useRoute } from "vue-router";
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
+
+const logo = import.meta.env.VITE_TITLE_LOGO;
+const logoUrl = import.meta.env.VITE_URL_LOGO;
 
 const props = defineProps({
   phoneMenuOn: {
