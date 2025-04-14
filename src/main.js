@@ -23,7 +23,7 @@ const routes = [
     meta: { title: "Аккаунты" },
   },
   {
-    path: "/setings",
+    path: "/settings",
     name: "Setings",
     component: Setings,
     meta: { title: "Настройки" },

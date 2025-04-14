@@ -1,6 +1,10 @@
 <template>
   <div class="text-editor">
-    <textarea v-model="textContent" placeholder="Загрузка текста..."></textarea>
+    <textarea 
+      v-model="textContent" 
+      placeholder="Загрузка текста..."
+      :style="textareaStyle"
+    ></textarea>
     <button @click="saveText" :disabled="isLoading || !isReady">
       {{ isLoading ? "Сохранение..." : "Сохранить" }}
     </button>
@@ -11,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed,onUnmounted  } from "vue";
 import axios from "axios";
 
 // Реактивные переменные
@@ -22,6 +26,18 @@ const message = ref("");
 const messageType = ref("");
 const userId = ref(null);
 const token = ref(localStorage.getItem("accountToken"));
+const windowWidth = ref(window.innerWidth);
+
+// Вычисляем стили для textarea
+const textareaStyle = computed(() => ({
+  minHeight: windowWidth.value < 400 ? '200px' : '300px',
+  minWidth: windowWidth.value < 400 ? '100%' : '600px'
+}));
+
+// Обновляем ширину окна при ресайзе
+const updateWindowWidth = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 // Методы
 const getUserIdByToken = async () => {
@@ -66,7 +82,6 @@ const loadText = async () => {
       `https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}`
     );
     textContent.value = response.data.components[0].value;
-    console.log(response.data.components[0].value);
   } catch (error) {
     showMessage("Ошибка при загрузке текста", "error");
     console.error("Ошибка загрузки:", error);
@@ -80,10 +95,11 @@ const saveText = async () => {
 
   isLoading.value = true;
   try {
-    const response = await axios.post(
+    await axios.post(
       `https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}`,
       { text: textContent.value }
     );
+    showMessage("Текст успешно сохранен", "success");
   } catch (error) {
     showMessage(error.message, "error");
     console.error("Ошибка сохранения:", error);
@@ -103,8 +119,13 @@ const showMessage = (text, type) => {
 
 // Хуки жизненного цикла
 onMounted(async () => {
+  window.addEventListener('resize', updateWindowWidth);
   await initialize();
   loadText();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateWindowWidth);
 });
 </script>
 
@@ -113,73 +134,46 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   padding: 0;
-  margin: 20px; /* Отступы со всех сторон */
+  margin: 10px;
   box-sizing: border-box;
+  width: calc(100% - 20px);
+  max-width: 100%;
 }
 
 textarea {
   width: 100%;
-  min-height: 300px;
+  height: 100%;
+  min-height: 200px;
   max-height: 75vh;
-  max-width: 100%; /* Максимальная ширина - 100% контейнера */
-  padding: 15px;
-  font-size: 16px;
-  line-height: 1.5;
+  min-width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.4;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  resize: both; /* Разрешаем растягивание и по ширине и по высоте */
-  overflow: auto; /* Добавляем скролл при необходимости */
+  border-radius: 6px;
+  resize: vertical;
+  overflow: auto;
   box-sizing: border-box;
-  transition: all 0.08s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  min-width: 100%; /* Минимальная ширина - 100% контейнера */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Ограничиваем максимальную ширину для очень широких экранов */
-@media (min-width: 1600px) {
-  .text-editor {
-    max-width: calc(1600px - 40px); /* 1600px минус отступы */
-    margin: 20px auto; /* Центрируем на широких экранах */
-  }
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-  .text-editor {
-    margin: 15px;
-  }
-
-  textarea {
-    min-height: 200px;
-    resize: vertical; /* На мобильных оставляем только вертикальный ресайз */
-  }
-}
-
-/* Состояния при взаимодействии */
-textarea:focus {
-  border-color: #2742d9;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(66, 185, 131, 0.2);
-}
-
-textarea:hover {
-  border-color: #2742d9;
-}
 button {
-  margin-top: 14px;
-  padding: 10px 20px;
+  margin-top: 12px;
+  padding: 8px 16px;
   background: oklch(0.541 0.198 267);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.25s;
+  font-size: 14px;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 200px;
+  align-self: center;
 }
 
 button:hover {
   background-color: #2742d9;
-  transition: all 0.25s;
 }
 
 button:disabled {
@@ -188,9 +182,11 @@ button:disabled {
 }
 
 .message {
-  margin-top: 15px;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 8px 12px;
   border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
 }
 
 .success {
@@ -201,5 +197,41 @@ button:disabled {
 .error {
   background-color: #f2dede;
   color: #a94442;
+}
+
+/* Адаптация для очень маленьких экранов (300-400px) */
+@media (max-width: 400px) {
+  .text-editor {
+    margin: 8px;
+    width: calc(100% - 16px);
+  }
+
+  textarea {
+    padding: 10px;
+    font-size: 13px;
+    min-height: 180px;
+  }
+
+  button {
+    padding: 7px 14px;
+    font-size: 13px;
+    max-width: 100%;
+  }
+}
+
+/* Адаптация для средних экранов (400-600px) */
+@media (min-width: 401px) and (max-width: 600px) {
+  textarea {
+    min-height: 250px;
+    font-size: 15px;
+  }
+}
+
+/* Адаптация для широких экранов */
+@media (min-width: 1600px) {
+  .text-editor {
+    max-width: 1600px;
+    margin: 20px auto;
+  }
 }
 </style>
