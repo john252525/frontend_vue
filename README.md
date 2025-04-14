@@ -60,8 +60,16 @@ RETURN_URL=https://your-return-url.com # ссылка редирект посл�
 
 frontend_vue
 
-VITE_API_URL=https://hellychat.apitter.com/api #ссылка для прокладки
-VITE_PAY_URL=https://hellylo.apitter.com/api #ссылка для платежей
+VITE_API_URL=https://api28.developtech.ru/api #Ссылка api чатов 
+VITE_PAY_URL=https://api22.developtech.ru/api #Ссылка api платежей 
+VITE_API_CHECK_BE_CHAT = https://api28.developtech.ru/api #Ссылка для проверки api чатов  
+VITE_WHATSAPI_URL = https://whatsapi.ru/ru/api/autosend/whatsapp #Ссылка api рассылок
+VITE_GOOGLE_AUTH_URL = https://api28.be-auth.developtech.ru #Ссылка api google auth
+
+
+VITE_TITLE = WhatsApi #Заголовок страницы
+VITE_TITLE_LOGO = WhatsApi #Заголовок навигации
+VITE_URL_LOGO = /whats_api.svg #Ссылка на лого
 
 10.Установка зависимостей 
 
