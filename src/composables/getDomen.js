@@ -16,8 +16,8 @@ const stationDomen = reactive({
 export function useDomain() {
   onMounted(() => {
     currentDomain.value = window.location.hostname;
-
-    if (currentDomain.value === "app4.developtech.ru") {
+    // app4.developtech.ru
+    if (currentDomain.value === "localhost") {
       stationDomen.navigate.value = "settings";
       stationDomen.cosmetics.logo = "Crypto";
       stationDomen.cosmetics.titleLogo = "Crypto";

@@ -10,11 +10,11 @@
         />
         <h2 class="logo-header">
           <img
-            :src="stationDomen.сosmetics.urlLogo"
+            :src="stationDomen.cosmetics.urlLogo"
             class="logo-img"
             alt="Logo"
           />
-          {{ stationDomen.сosmetics.titleLogo }}
+          {{ stationDomen.cosmetics.titleLogo }}
         </h2>
       </article>
       <article class="user-cont">
