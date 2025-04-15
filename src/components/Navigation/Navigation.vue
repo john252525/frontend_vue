@@ -25,6 +25,7 @@
             ></path>
           </svg>
           <p class="page">Аккаунты</p>
+          <p>{{currentDomain}}</p>
         </li>
         <li class="list" @click="navigateTo('Mailing')">
           <svg
@@ -232,8 +233,10 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useDomain } from '@/composables/getDomen'
+const { currentDomain } = useDomain()
 import Spinner from "./Spinner.vue";
 const props = defineProps({
   phoneMenuOn: Function,
@@ -241,7 +244,6 @@ const props = defineProps({
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
-
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
 
