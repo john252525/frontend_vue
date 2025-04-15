@@ -30,7 +30,7 @@ export function useDomain() {
       stationDomen.сosmetics.titleLogo = "WhatsApi";
       stationDomen.сosmetics.urlLogo = "/whats_api.svg";
     }
-
+    
     if (currentDomain.value === "app1.developtech.ru") {
       stationDomen.navigate.value = "touchapi";
       stationDomen.сosmetics.logo = "TouchApi";
