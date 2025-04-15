@@ -28,18 +28,54 @@
   </head>
   <body>
     <div id="app"></div>
-    <script>
-      // Устанавливаем favicon из переменной окружения
-      const logoUrl = '%VITE_URL_LOGO%';
-      const faviconLink = document.createElement('link');
-      faviconLink.rel = 'icon';
-      faviconLink.href = logoUrl;
-      faviconLink.type = 'image/x-icon';
-      document.head.appendChild(faviconLink);
-      
-      // Устанавливаем title из переменной окружения
-      const pageTitle = '%VITE_TITLE%' || 'Touch-API'; // Fallback значение
-      document.title = pageTitle;
+    <script type="module">
+      import { createApp, reactive } from "vue";
+      import App from "/src/App.vue";
+      import { useDomain } from "/src/composables/getDomen";
+
+      const app = createApp(App);
+
+      // Инициализация перед монтированием приложения
+      app.mount("#app");
+
+      // Получаем данные о домене
+      const { stationDomen } = useDomain();
+
+      // Функция для обновления favicon и title
+      function updatePageMetadata() {
+        // Favicon
+        const faviconLink = document.createElement("link");
+        faviconLink.rel = "icon";
+        faviconLink.href = stationDomen.cosmetics.urlLogo || "/favicon.ico";
+        faviconLink.type = "image/x-icon";
+
+        // Удаляем старый favicon, если есть
+        const oldFavicon = document.querySelector('link[rel="icon"]');
+        if (oldFavicon) {
+          document.head.removeChild(oldFavicon);
+        }
+        document.head.appendChild(faviconLink);
+
+        // Title
+        document.title = stationDomen.cosmetics.titleLogo || "Touch-API";
+      }
+
+      // Вызываем после загрузки данных
+      if (stationDomen) {
+        updatePageMetadata();
+      } else {
+        // Подписываемся на изменения, если данные загружаются асинхронно
+        const unwatch = app.config.globalProperties.$watch(
+          () => stationDomen,
+          (newVal) => {
+            if (newVal) {
+              updatePageMetadata();
+              unwatch();
+            }
+          },
+          { deep: true }
+        );
+      }
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

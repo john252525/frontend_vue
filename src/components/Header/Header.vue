@@ -10,15 +10,19 @@
         />
         <h2 class="logo-header">
           <img
-            :src="logoUrl"
+            :src="stationDomen.сosmetics.urlLogo"
             class="logo-img"
             alt="Logo"
           />
-          {{ logo }}
+          {{ stationDomen.сosmetics.titleLogo }}
         </h2>
       </article>
       <article class="user-cont">
-        <h2 v-if="balance || balance === 0" @click="toggleBalanceStation" class="balance-user">
+        <h2
+          v-if="balance || balance === 0"
+          @click="toggleBalanceStation"
+          class="balance-user"
+        >
           {{ removeDecimalZeros(balance) }} ₽
         </h2>
         <h2 v-else @click="toggleBalanceStation" class="balance-user">
@@ -48,6 +52,8 @@ import { useRoute } from "vue-router";
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
