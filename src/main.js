@@ -14,6 +14,7 @@ import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import Setings from "./pages/Setings.vue";
+import { useDomain } from "@/composables/getDomen";
 
 const routes = [
   {
@@ -85,28 +86,49 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+// Функция для обновления метаданных страницы
+const updatePageMetadata = (title, logoUrl) => {
+  document.title = title || "Ваше приложение";
+
+  // Обновляем favicon
+  let favicon = document.querySelector('link[rel="icon"]');
+  if (!favicon) {
+    favicon = document.createElement("link");
+    favicon.rel = "icon";
+    document.head.appendChild(favicon);
+  }
+  favicon.href = logoUrl || "/favicon.ico";
+};
+
+router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem("accountToken");
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );
 
-  console.log(`Navigating to: ${to.name}`);
-  console.log(`Is Auth Page: ${isAuthPage}, Token: ${token}`);
+  // Получаем данные домена
+  const { stationDomen } = useDomain();
 
-  // Устанавливаем заголовок страницы
-  document.title = to.meta.title || "Ваше приложение";
+  try {
+    // Устанавливаем заголовок страницы с учетом доменных данных
+    const pageTitle = stationDomen?.cosmetics?.titleLogo
+      ? `${to.meta.title} | ${stationDomen.cosmetics.titleLogo}`
+      : to.meta.title || "Ваше приложение";
+
+    updatePageMetadata(pageTitle, stationDomen?.cosmetics?.urlLogo);
+  } catch (error) {
+    console.error("Ошибка при обновлении метаданных:", error);
+    updatePageMetadata(to.meta.title);
+  }
 
   if (token) {
     if (isAuthPage) {
-      console.log("Redirecting to PersonalAccount");
       next({ name: "PersonalAccount" });
     } else {
       next();
     }
   } else {
     if (!isAuthPage) {
-      console.log("Redirecting to Login");
       next({ name: "Login" });
     } else {
       next();
@@ -115,5 +137,15 @@ router.beforeEach((to, from, next) => {
 });
 
 const app = createApp(App);
+
+// Глобальная обработка ошибок
+app.config.errorHandler = (err) => {
+  console.error("Глобальная ошибка Vue:", err);
+};
+
 app.use(router);
-app.mount("#app");
+
+// Отложенное монтирование для инициализации данных
+app.mount("#app").then(() => {
+  console.log("Приложение успешно монтировано");
+});
