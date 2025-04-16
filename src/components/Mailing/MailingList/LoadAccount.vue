@@ -1,14 +1,17 @@
 <template>
   <div class="cont">
-    <h3>Загрузка...</h3>
+    <h3>{{ t("globalLoading.loading") }}</h3>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+</script>
 
 <style scoped>
 .cont {
-  background-color: #f9fafb;
+  background-color: var(--tableAccountBg);
   width: 100%;
   height: 50px;
   border-radius: 5px;

@@ -4,9 +4,9 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">ЛОГИН</th>
-            <th class="table-step">ШАГ</th>
-            <th class="table-action">ДЕЙСТВИЕ</th>
+            <th class="table-login">{{ t("accountList.login") }}</th>
+            <th class="table-step">{{ t("accountList.step") }}</th>
+            <th class="table-action">{{ t("accountList.action") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -48,14 +48,14 @@
                     d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
                   ></path>
                 </svg>
-                Действие
+                {{ t("accountList.actionButton") }}
               </button>
             </td>
           </tr>
           <tr v-else-if="dataStationNone">
             <td colspan="3">
               <div class="none-account-cont">
-                <h2>Аккаунты отсутствуют.</h2>
+                <h2>{{ t("accountList.accountNone") }}</h2>
               </div>
             </td>
           </tr>
@@ -141,6 +141,9 @@ const dataAccount = reactive({
   source: "telegram",
   error: null,
 });
+
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const router = useRouter();
 
@@ -489,10 +492,9 @@ provide("changeEnableStation", { changeEnableStation });
 }
 
 .table-header {
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: 1;
-  background: rgb(243, 244, 246);
 }
 
 .table {
@@ -516,7 +518,7 @@ provide("changeEnableStation", { changeEnableStation });
 .bi-list {
   width: 16px; /* Ширина и высота иконки */
   height: 16px;
-  fill: currentColor; /* Использует текущий цвет текста */
+  fill: currentColor;
   margin-bottom: -4px;
   margin-right: 6px;
 }
@@ -536,14 +538,14 @@ provide("changeEnableStation", { changeEnableStation });
   margin-top: 0px;
   height: 50px;
   width: 100%;
-  background-color: #ebf5ff;
+  background-color: var(--noAccountTableBg);
   border-radius: 5px;
 }
 
 .none-account-cont h2 {
   font-size: 14px;
   font-weight: 500;
-  color: #17388d;
+  color: var(--noAccountTableText);
   margin-left: 10px;
 }
 
@@ -637,7 +639,7 @@ tr {
 
 tr:not(:last-child):after {
   content: ""; /* Создает пустой контент для псевдоэлемента */
-  position: absolute; /* Абсолютное позиционирование относительно строки */
+  position: absolute;
   left: 0;
   right: 0;
   bottom: 0; /* Позиционируем линию внизу строки */
@@ -646,6 +648,6 @@ tr:not(:last-child):after {
 }
 
 tr:hover {
-  background: rgb(243 244 246);
+  position: static;
 }
 </style>

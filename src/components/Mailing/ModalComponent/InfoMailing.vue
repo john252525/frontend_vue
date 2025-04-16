@@ -3,23 +3,28 @@
   <section class="info-mailing-section">
     <div v-if="!station.message">
       <h2 class="title">
-        Информация
+        {{ t("information.title") }}
         <img @click="changeInfoMailing" src="/millingInfo/close.svg" alt="" />
       </h2>
       <section>
         <h3>
-          Статус:
-          <span class="active" v-if="selectedItem.state === 1">Активен</span>
-          <span class="no-active" v-else>Неактивен</span>
+          {{ t("information.status.title") }}
+          <span class="active" v-if="selectedItem.state === 1">
+            {{ t("information.status.active") }}</span
+          >
+          <span class="no-active" v-else>{{
+            t("information.status.noActive")
+          }}</span>
         </h3>
         <h3>
-          Название: <span>{{ selectedItem.name }}</span>
+          {{ t("information.name") }} <span>{{ selectedItem.name }}</span>
         </h3>
         <h3>
-          Дни недели: <span> {{ weekDaysList.join(", ") }}</span>
+          {{ t("information.weekDay") }}
+          <span> {{ weekDaysList.join(", ") }}</span>
         </h3>
         <h3>
-          Время:
+          {{ t("information.time") }}
           <span
             >{{ selectedItem.options.hours.min }}-{{
               selectedItem.options.hours.max
@@ -28,18 +33,21 @@
         </h3>
 
         <h3>
-          Задержка:
-          <span>{{ delayInMinutes.min }} - {{ delayInMinutes.max }} мин</span>
+          {{ t("information.timeout.title") }}
+          <span
+            >{{ delayInMinutes.min }} - {{ delayInMinutes.max }}
+            {{ t("information.timeout.min") }}</span
+          >
         </h3>
         <h3>
-          Сообщения:
+          {{ t("information.message") }}
           <span class="message-text" @click="changeStationMessage">
             {{ selectedItem.recipients }}</span
           >
         </h3>
       </section>
       <button class="edit-maling" @click="changeisEditMailing">
-        Редактировать
+        {{ t("information.button") }}
       </button>
     </div>
     <MessageLise
@@ -53,6 +61,8 @@
 <script setup>
 import { inject, reactive, ref, toRefs, watch } from "vue";
 import MessageLise from "./MessageLise.vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const props = defineProps({
   selectedItem: {
     type: Object,

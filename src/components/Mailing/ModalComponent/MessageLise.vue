@@ -3,16 +3,16 @@
   <section class="account-list-section">
     <h2 class="title">
       <img @click="changeStationMessage" src="/millingInfo/out.svg" alt="" />
-      Список Сообщений
+      {{ t("messageList.title") }}
     </h2>
     <div class="table-container">
       <table class="table">
         <thead class="table-header">
           <tr>
             <th class="table-login">ID</th>
-            <th class="table-num">Телефон</th>
-            <th class="table-text">Текст</th>
-            <th class="table-status">Статус</th>
+            <th class="table-num">{{ t("messageList.table.number") }}</th>
+            <th class="table-text">{{ t("messageList.table.text") }}</th>
+            <th class="table-status">{{ t("messageList.table.status") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -27,12 +27,12 @@
             <td class="table-text">{{ item.to }}</td>
             <td class="table-text">{{ item.text }}</td>
             <td v-if="item.state === 0" class="table-text state">
-              Ожидание отправки
+              {{ t("messageList.waitingSend") }}
             </td>
           </tr>
           <tr v-else>
-            <td colspan="3">
-              <h2 class="loading-data-text">Загрузка данных...</h2>
+            <td colspan="4">
+              <h2 class="loading-data-text">{{ t("messageList.loading") }}</h2>
             </td>
           </tr>
         </tbody>
@@ -46,6 +46,8 @@ import { ref, reactive, onMounted, toRefs, provide } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -156,6 +158,7 @@ table {
 }
 
 .loading-data-text {
+  text-align: center;
   font-weight: 600;
   font-size: 14px;
   color: #000000;

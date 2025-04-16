@@ -479,6 +479,9 @@ const EnablebyQR = async (value) => {
   await qrCodeDataSubmit();
 };
 
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 const startEnableByQR = async (value) => {
   await EnablebyQR(value);
 
@@ -495,14 +498,14 @@ const startEnableByQR = async (value) => {
 
 const forceStopActive = async () => {
   stationLoading.loading = true;
-  stationLoading.text = "Выключение аккаунта...";
+  stationLoading.text = t("globalLoading.offAccount");
   forceStop();
 };
 
 const getNewProxy = async () => {
   createRequest("getNewProxy");
   stationLoading.loading = true;
-  stationLoading.text = "Генерируем прокси...";
+  stationLoading.text = t("globalLoading.proxy");
 };
 
 const resetAccount = async () => {

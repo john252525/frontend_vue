@@ -3,18 +3,21 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <transition name="fade">
     <section class="confirm-modal">
-      <LoadMoadal v-if="loadStation" :text="'Удаление рассылки'" />
+      <LoadMoadal
+        v-if="loadStation"
+        :text="t('mailingList.deleteMessageConfirm')"
+      />
       <section class="cont" v-else>
         <article class="circle">
           <span>!</span>
         </article>
-        <h2 class="title">Вы подтверждаете удаление рассылки?</h2>
+        <h2 class="title">{{ t("confirmDeleteMailing.title") }}</h2>
         <article class="button-cont">
           <button @click="deleteMailing" class="confirm-button">
-            Продолжить
+            {{ t("confirmDeleteMailing.next") }}
           </button>
           <button @click="changeDeleteMailing" class="cansel-button">
-            Отмена
+            {{ t("confirmDeleteMailing.cansel") }}
           </button>
         </article>
       </section>
@@ -24,6 +27,8 @@
 
 <script setup>
 import { toRefs, ref } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import LoadMoadal from "../LoadModal/LoadModal.vue";

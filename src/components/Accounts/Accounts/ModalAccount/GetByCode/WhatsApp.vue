@@ -4,7 +4,7 @@
       <section class="number-section" v-if="!codeStation">
         <input
           :class="styleInput ? 'num-input-error' : 'num-input'"
-          placeholder="Логин"
+          :placeholder="t('getByCode.login')"
           @input="formatPhone"
           type="text"
           id="phone"
@@ -16,14 +16,16 @@
           class="next-button"
           @click="enableByCode"
         >
-          Загрузка...
+          {{ t("getByCode.loading") }}
         </button>
-        <button v-else class="next-button" @click="enableByCode">Далее</button>
+        <button v-else class="next-button" @click="enableByCode">
+          {{ t("getByCode.nextButton") }}
+        </button>
       </section>
       <section v-else>
         <h2 class="code-text">{{ userCode }}</h2>
         <button class="close-button" @click="props.changeStationGetByCode">
-          Закрыть
+          {{ t("getByCode.close") }}
         </button>
       </section>
     </section>
@@ -33,7 +35,8 @@
 <script setup>
 import { ref, toRefs, reactive, inject } from "vue";
 import axios from "axios";
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import LoadingMoadal from "../../LoadingMoadal/LoadingMoadal.vue";
 
 const props = defineProps({

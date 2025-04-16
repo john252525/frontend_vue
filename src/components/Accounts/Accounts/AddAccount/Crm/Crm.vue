@@ -4,7 +4,7 @@
       class="input-data"
       v-model="searchQuery"
       @focus="showOptions = true"
-      placeholder="Введите адрес вашей CRM или выберите из списка"
+      :placeholder="t('addAccount.crm.takeAdres')"
     />
     <ul class="dropdown-options" v-if="showOptions && filteredOptions.length">
       <li
@@ -20,7 +20,7 @@
         <input
           v-model="formData.token"
           @input="updateToken"
-          placeholder="Токен"
+          :placeholder="t('addAccount.token')"
           type="text"
           class="input-data"
         />
@@ -29,7 +29,7 @@
         <input
           v-model="formData.login"
           @input="updateLogin"
-          placeholder="Введите URL-адрес вашего аккаунта Megaplan"
+          :placeholder="t('addAccount.crm.takeUrl')"
           type="text"
           class="input-data"
         />
@@ -41,6 +41,8 @@
 <script setup>
 import { ref, inject, reactive, watch, defineEmits } from "vue";
 const { accountData } = inject("accountData");
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = defineProps({
   selectType: {

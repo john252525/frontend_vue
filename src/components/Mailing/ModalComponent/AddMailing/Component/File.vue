@@ -3,7 +3,7 @@
   <section class="file-section">
     <section class="message-section">
       <article class="alphabet-comp">
-        <h2 class="title">Столбец с номером телефона:</h2>
+        <h2 class="title">{{ t("addMailing.poleNumber") }}:</h2>
         <select v-model="selectedLetter" class="alphabet-select">
           <option v-for="letter in alphabet" :key="letter" :value="letter">
             {{ letter }}
@@ -13,8 +13,7 @@
       <article class="textarea-comp">
         <div class="textextarea-cont">
           <textarea
-            placeholder="79111111111;ольга
-79111111111;иван          "
+            :placeholder="t('addMailing.placeContact')"
             :class="{ error: messageContactError }"
             v-model="inputText"
             @input="updateArray"
@@ -24,12 +23,12 @@
           ></textarea>
           <div class="file-upload-container">
             <div class="file-cont">
-              <h2 class="title">Номера телефонов:</h2>
+              <h2 class="title">{{ t("addMailing.number") }}:</h2>
               <label
                 for="other-upload"
                 class="file-upload-label"
                 :class="{ error: errorFile }"
-                >Загрузить файл</label
+                >{{ t("addMailing.loadFile") }}</label
               >
               <input
                 type="file"
@@ -47,18 +46,17 @@
           <textarea
             v-model="messageText"
             class="message-text"
-            placeholder="В тексте можно использовать данные из загружаемой базы.
-Пример: %G% (где G - другой столбец)"
+            :placeholder="t('addMailing.placeMessage')"
             :class="{ error: messageError }"
             name="text"
             id="text"
           ></textarea>
           <div class="file-upload-container">
             <div class="file-cont">
-              <h2 class="title">Вложение:</h2>
-              <label for="image-upload" class="file-upload-label"
-                >Загрузить файл</label
-              >
+              <h2 class="title">{{ t("addMailing.investment") }}:</h2>
+              <label for="image-upload" class="file-upload-label">{{
+                t("addMailing.loadFile")
+              }}</label>
               <input
                 type="file"
                 id="image-upload"
@@ -76,12 +74,12 @@
     </section>
     <section class="info-section">
       <article class="name-comp">
-        <h2 class="title">Название:</h2>
+        <h2 class="title">{{ t("addMailing.name") }}:</h2>
         <input v-model="nameMailing" type="text" class="name-input" />
       </article>
 
       <article class="days-comp">
-        <h2 class="title">Дни недели:</h2>
+        <h2 class="title">{{ t("addMailing.weekDay") }}:</h2>
         <div class="checkbox-group">
           <div
             v-for="(day, index) in days"
@@ -104,10 +102,12 @@
       </article>
 
       <article class="title-comp">
-        <h2 class="title">Время (по МСК):</h2>
+        <h2 class="title">{{ t("addMailing.time") }}:</h2>
         <div class="time-cont">
           <div class="time-selection">
-            <label class="label-time" for="start-time">c</label>
+            <label class="label-time" for="start-time">{{
+              t("addMailing.c")
+            }}</label>
             <input
               type="time"
               id="start-time"
@@ -116,7 +116,9 @@
             />
           </div>
           <div class="time-selection">
-            <label class="label-time" for="end-time">по</label>
+            <label class="label-time" for="end-time">{{
+              t("addMailing.po")
+            }}</label>
             <input
               type="time"
               id="end-time"
@@ -127,10 +129,12 @@
         </div>
       </article>
       <article class="time-comp">
-        <h2 class="title-mess">Задержка между сообщениями:</h2>
+        <h2 class="title-mess">{{ t("addMailing.timeout") }}:</h2>
         <div class="time-cont">
           <div class="time-selection">
-            <label class="label-time" for="start-num">от</label>
+            <label class="label-time" for="start-num">{{
+              t("addMailing.ot")
+            }}</label>
             <select class="time-select" id="start-num" v-model="startNum">
               <option v-for="minute in minutes" :key="minute" :value="minute">
                 {{ minute }}
@@ -138,13 +142,15 @@
             </select>
           </div>
           <div class="time-selection">
-            <label class="label-time" for="end-num">до</label>
+            <label class="label-time" for="end-num">{{
+              t("addMailing.do")
+            }}</label>
             <select class="time-select" id="end-num" v-model="endNum">
               <option v-for="minute in minutes" :key="minute" :value="minute">
                 {{ minute }}
               </option>
             </select>
-            <p class="min">мин.</p>
+            <p class="min">{{ t("addMailing.min") }}.</p>
           </div>
         </div>
       </article>
@@ -159,7 +165,7 @@
           />
           <label class="settings-text" for="remove-duplicates">
             <span class="custom-checkbox"></span>
-            Удалить дубликаты контактов
+            {{ t("addMailing.checkbox.one") }}
           </label>
         </div>
 
@@ -171,7 +177,7 @@
           />
           <label class="settings-text" for="existing-dialogs">
             <span class="custom-checkbox"></span>
-            Отправка только по уже существующим диалогам
+            {{ t("addMailing.checkbox.two") }}
           </label>
         </div>
 
@@ -183,12 +189,14 @@
           />
           <label class="settings-text" for="random-order">
             <span class="custom-checkbox"></span>
-            Отправлять сообщения в случайном порядке
+            {{ t("addMailing.checkbox.three") }}
           </label>
         </div>
       </article>
     </section>
-    <button @click="createMailing" class="create">Создать</button>
+    <button @click="createMailing" class="create">
+      {{ t("addMailing.button") }}
+    </button>
   </section>
 </template>
 
@@ -196,6 +204,8 @@
 import { ref, toRefs, computed, inject } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const props = defineProps({
   station: {
     type: Object,

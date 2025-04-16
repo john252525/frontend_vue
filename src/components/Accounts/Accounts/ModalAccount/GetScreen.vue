@@ -7,7 +7,9 @@
     />
     <section v-if="station.screen" class="screen-section">
       <img class="screen-img" :src="base64Image" alt="screenshot" />
-      <button @click="changeGetScreenStation" class="close">Закрыть</button>
+      <button @click="changeGetScreenStation" class="close">
+        {{ t("GetScreen.close") }}
+      </button>
     </section>
   </div>
 </template>
@@ -17,6 +19,8 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import { ref, toRefs, inject, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 import LoadingModal from "./Enable/LoadingModal.vue";
 const base64Image = ref("");

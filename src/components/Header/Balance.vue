@@ -3,15 +3,19 @@
   <section class="balance-user-section">
     <article class="balance-info">
       <h2 class="balance-text">
-        Ваш баланс:
-        <span v-if="balance || balance === 0">{{ removeDecimalZeros(balance) }}</span>
+        {{ t("personalAccount.balance") }}:
+        <span v-if="balance || balance === 0">{{
+          removeDecimalZeros(balance)
+        }}</span>
         <LoadingBalance v-else /> ₽
       </h2>
       <div class="line"></div>
     </article>
     <article class="top-balance-cont" @click="navigateTo('/payments')">
       <img src="/header/balance.svg" alt="Иконка пополнения баланса" />
-      <h2 class="top-balance-title">Пополнить баланс</h2>
+      <h2 class="top-balance-title">
+        {{ t("personalAccount.depositBalance") }}
+      </h2>
     </article>
   </section>
 </template>
@@ -19,6 +23,8 @@
 <script setup>
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import { ref, onMounted } from "vue";
 const router = useRouter();

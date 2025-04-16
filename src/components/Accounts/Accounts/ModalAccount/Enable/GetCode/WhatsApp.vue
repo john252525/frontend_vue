@@ -7,10 +7,12 @@
   <section v-if="userCode != null">
     <h2 class="code-text">{{ userCode }}</h2>
   </section>
-  <h2 @click="getQr" class="title">Связать через сканирование QR</h2>
+  <h2 @click="getQr" class="title">{{ t("enable.qrTitle") }}</h2>
   <ResultModal v-if="station.error" />
 </template>
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, toRefs, reactive, onMounted, inject } from "vue";
 import axios from "axios";
 import ResultModal from "../ResultModal.vue";
@@ -266,7 +268,7 @@ const nextButton = () => {
 };
 
 const sendCode = async () => {
-  station.text = "Генерируем код...";
+  station.text = "t('globalLoading.generateCode')";
   await getAuthCode();
 };
 

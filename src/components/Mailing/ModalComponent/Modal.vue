@@ -13,17 +13,23 @@
           @click="updateStatus(1)"
           v-if="selectedItem.state === 0"
           class="action"
-          >Включить</span
+          >{{ t("modalMailing.on") }}</span
         >
         <span
           @click="updateStatus(0)"
           v-if="selectedItem.state === 1"
           class="action"
-          >Выключить</span
+          >{{ t("modalMailing.off") }}</span
         >
-        <span @click="changeInfoMailing" class="action">Информация</span>
-        <span @click="changeisEditMailing" class="action">Редактировать</span>
-        <span class="action" @click="changeDeleteMailing">Удалить</span>
+        <span @click="changeInfoMailing" class="action">{{
+          t("modalMailing.info")
+        }}</span>
+        <span @click="changeisEditMailing" class="action">{{
+          t("modalMailing.edit")
+        }}</span>
+        <span class="action" @click="changeDeleteMailing">{{
+          t("modalMailing.delete")
+        }}</span>
       </div>
     </transition>
   </div>
@@ -37,6 +43,8 @@
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import axios from "axios";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -163,16 +171,6 @@ const getMessages = async () => {
 </script>
 
 <style scoped>
-.black-fon {
-  position: fixed;
-  z-index: 5;
-  width: 100%;
-  height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
-  top: 0;
-  left: 0;
-}
-
 .action-list {
   border-radius: 10px;
   width: 150px;

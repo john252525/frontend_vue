@@ -4,17 +4,19 @@
     <section v-if="station.challengeRequired" class="auth-code">
       <input
         :class="styleInput ? 'num-input-error' : 'num-input'"
-        placeholder="Код"
+        :placeholder="t('getByCode.place')"
         type="text"
         v-model="formData.code"
         required
       />
-      <button class="next-button">Далее</button>
+      <button class="next-button">{{ t("getByCode.nextButton") }}</button>
     </section>
   </section>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { inject, reactive } from "vue";
 import axios from "axios";
 import LoadModal from "../../LoadingMoadal/LoadModal.vue";

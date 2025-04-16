@@ -43,7 +43,7 @@
       <input
         v-model="formData.login"
         @input="updateLogin"
-        placeholder="Логин"
+        :placeholder="t('addAccount.login')"
         type="text"
         class="input-data"
       />
@@ -53,7 +53,7 @@
         <input
           v-model="formData.token"
           @input="updateToken"
-          placeholder="Токен"
+          :placeholder="t('addAccount.token')"
           type="text"
           class="input-data"
         />
@@ -62,7 +62,7 @@
         <input
           v-model="formData.login"
           @input="updateLogin"
-          placeholder="Логин"
+          :placeholder="t('addAccount.login')"
           type="text"
           class="input-data"
         />
@@ -74,7 +74,8 @@
 <script setup>
 import { ref, inject, reactive, watch, defineEmits } from "vue";
 const { accountData } = inject("accountData");
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const props = defineProps({
   selectType: {
     type: Function,

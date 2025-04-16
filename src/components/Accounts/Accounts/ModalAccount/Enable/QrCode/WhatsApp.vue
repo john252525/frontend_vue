@@ -8,7 +8,7 @@
     <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
-      <h2 @click="stopEnableByQR" class="title">Связать через ввод кода</h2>
+      <h2 @click="stopEnableByQR" class="title">{{ t("enable.codeTitle") }}</h2>
     </article>
   </section>
   <section v-if="station.phone" class="number-section">
@@ -22,11 +22,13 @@
       v-model="phone"
       required
     />
-    <button @click="getCode" class="next-button">Далее</button>
+    <button @click="getCode" class="next-button">{{ t("enable.next") }}</button>
   </section>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { inject, ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import QrcodeVue from "qrcode.vue";

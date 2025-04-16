@@ -5,7 +5,7 @@
     <ResultModalTrue v-if="station.resultTrue" />
     <section v-if="station.code" class="auth-code">
       <div class="input-cont">
-        <label for="code">Код Telegram</label>
+        <label for="code"> {{ t("enable.ChallengeRequired.code") }}</label>
         <input
           class="num-input"
           type="number"
@@ -18,21 +18,23 @@
         v-if="station.error.challengeRequired"
         class="next-button"
       >
-        Далее
+        {{ t("enable.ChallengeRequired.next") }}
       </button>
       <button
         @click="twoFactorAuth"
         v-if="station.error.twoFactor"
         class="next-button"
       >
-        Далее
+        {{ t("enable.ChallengeRequired.next") }}
       </button>
     </section>
   </section>
 </template>
-<!-- :class="styleInput ? 'num-input-error' : 'num-input'" -->
+<!--   {{ t("personalAccount.out") }} -->
 <script setup>
 import { inject, reactive, ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ResultModalTrue from "../ResultModalTrue.vue";

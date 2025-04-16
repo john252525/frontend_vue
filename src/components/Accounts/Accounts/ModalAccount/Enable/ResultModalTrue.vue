@@ -4,13 +4,15 @@
       <div class="circle">
         <img src="/loadModal/checkmark.svg" alt="" />
       </div>
-      <p class="error-message">Успешная авторизация</p>
+      <p class="error-message">{{ t("result.true") }}</p>
     </section>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 </script>
 
 <style scoped>

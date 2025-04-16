@@ -188,12 +188,13 @@ const setState = async (request) => {
     }
   }
 };
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const startFunc = async () => {
   isRunning = true; // Устанавливаем флаг, что функция запущена
   station.stationLoading = true;
   station.result = false;
-  station.text = "Проверяем аккаунт...";
+  station.text = t("globalLoading.checkAccoutn");
 
   await forceStop();
   if (isRunning) {

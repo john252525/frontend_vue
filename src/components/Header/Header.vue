@@ -117,12 +117,13 @@ onMounted(getBalance);
 
 <style scoped>
 .header-content {
+  background-color: var(--bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px;
   box-sizing: border-box;
-  margin: 0px 0px 0px 4px;
+  /* margin: 0px 0px 0px 0px; */
 }
 
 .logo-img {
@@ -167,13 +168,14 @@ onMounted(getBalance);
   font-family: system-ui;
   font-weight: 500;
   font-size: 24px;
-  color: #000;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .line {
+  margin: 0;
   width: 100%;
   height: 0.5px;
   background-color: #ebebeb;

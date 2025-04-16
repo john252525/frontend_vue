@@ -25,7 +25,6 @@ import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 
-
 const chatStation = ref(true);
 const phoneMenuStation = ref(false);
 const route = useRoute();
@@ -51,36 +50,35 @@ const isWidgetMode = computed(() => {
   return route.query.mode === "widget";
 });
 
-
-const currentDomain = ref('')
+const currentDomain = ref("");
 
 onMounted(() => {
   // Получаем текущий домен
-  currentDomain.value = window.location.hostname
-  
+  currentDomain.value = window.location.hostname;
+
   // Выводим в консоль
-  console.log('Текущий домен:', currentDomain.value)
-  
+  console.log("Текущий домен:", currentDomain.value);
+
   // Дополнительно можно проверить, какой это домен из ваших 4 вариантов
   const myDomains = [
-    'app1.developtech.ru',
-    'app2.developtech.ru', 
-    'app3.developtech.ru',
-    'app4.developtech.ru'
-  ]
-  
+    "app1.developtech.ru",
+    "app2.developtech.ru",
+    "app3.developtech.ru",
+    "app4.developtech.ru",
+  ];
+
   if (myDomains.includes(currentDomain.value)) {
-    console.log('Это один из моих доменов')
+    console.log("Это один из моих доменов");
   } else {
-    console.log('Это неизвестный домен')
+    console.log("Это неизвестный домен");
   }
-})
+});
 
 function getDomen() {
-  return currentDomain.value
+  return currentDomain.value;
 }
 
-provide('domen', currentDomain)
+provide("domen", currentDomain);
 provide("chatsLoadingChange", chatsLoadingChange);
 </script>
 

@@ -9,7 +9,7 @@
   />
   <header>
     <section class="account-section">
-      <h2 class="title">Аккаунты</h2>
+      <h2 class="title">{{ t("account.accounts") }}</h2>
       <h2 class="account">{{ platformStationText }}</h2>
     </section>
     <section class="account-section">
@@ -60,7 +60,7 @@
           ></path>
         </svg>
 
-        Добавить
+        {{ t("account.addButton") }}
       </button>
     </section>
   </header>
@@ -76,6 +76,8 @@ const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = localStorage.getItem("accountStationText");
 const platformStation = ref(false);
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 function openPlatformChoice() {
   platformStation.value = !platformStation.value;
@@ -110,7 +112,7 @@ header {
 .title {
   font-weight: 500;
   font-size: 22px;
-  color: #000;
+  color: var(--text);
   flex: 1;
   margin-right: 8px;
 }
@@ -118,8 +120,8 @@ header {
 .account {
   font-weight: 700;
   font-size: 18px;
-  color: #6b7280;
-  background: #f9f9f9;
+  color: var(--headerAccountText);
+  background: var(--headerAccount);
   border-radius: 5px;
   padding: 5px 10px;
   display: flex;
@@ -149,7 +151,7 @@ header {
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: var(--headerAccountButtonColor);
   margin-right: 10px;
   display: flex;
   align-items: center;

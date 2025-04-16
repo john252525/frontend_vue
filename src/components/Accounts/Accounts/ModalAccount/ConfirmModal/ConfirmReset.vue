@@ -6,11 +6,13 @@
       <article class="circle">
         <span>!</span>
       </article>
-      <h2 class="title">Вы подтверждаете cброс аккаунта?</h2>
+      <h2 class="title">{{ t("confirmMoadal.reset.message") }}</h2>
       <article class="button-cont">
-        <button class="confirm-button" @click="confirm">Продолжить</button>
+        <button class="confirm-button" @click="confirm">
+          {{ t("confirmMoadal.reset.continue") }}
+        </button>
         <button class="cansel-button" @click="ChangeconfirmStationReset">
-          Отмена
+          {{ t("confirmMoadal.reset.cancel") }}
         </button>
       </article>
     </section>
@@ -22,6 +24,8 @@ import { toRefs, ref } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 const props = defineProps({
   loadingStart: {
@@ -105,7 +109,7 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStationReset();
-  await props.loadingStart("Сброс аккаунта...");
+  await props.loadingStart(t("globalLoading.reset"));
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");

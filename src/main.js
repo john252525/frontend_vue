@@ -15,6 +15,10 @@ import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import Setings from "./pages/Setings.vue";
 import { useDomain } from "@/composables/getDomen";
+import i18n from "./i18n";
+import { createPinia } from "pinia";
+import { useThemeStore } from "@/stores/theme";
+const pinia = createPinia();
 
 const routes = [
   {
@@ -143,7 +147,15 @@ app.config.errorHandler = (err) => {
   console.error("Глобальная ошибка Vue:", err);
 };
 
+app.use(pinia);
 app.use(router);
+app.use(i18n);
+
+const theme = useThemeStore();
+document.documentElement.setAttribute(
+  "data-theme",
+  theme.isDark ? "dark" : "light"
+);
 
 // Отложенное монтирование для инициализации данных
 app.mount("#app").then(() => {

@@ -3,12 +3,16 @@
   <section class="account-menu-section">
     <h2 class="email-user">{{ storedData }}</h2>
     <div class="line"></div>
-    <h2 class="out-account-button" @click="leaveAccount">Выйти</h2>
+    <h2 class="out-account-button" @click="leaveAccount">
+      {{ t("personalAccount.out") }}
+    </h2>
   </section>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const props = defineProps({
   AccountMenuStationOn: {
     type: Function,

@@ -2,12 +2,14 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section v-if="station.code" class="auth-code">
     <div class="input-cont">
-      <label for="code">Код Telegram</label>
+      <label for="code">{{ t("enable.code") }}</label>
       <input class="num-input" type="number" v-model="code" required />
     </div>
 
     <button @click="solveChallenge" class="next-button">Далее</button>
-    <h2 @click="getQr" class="title">Связать через сканирование QR</h2>
+    <h2 @click="getQr" class="title">
+      {{ t("enable.ChallengeRequired.title") }}
+    </h2>
   </section>
   <ResultModal v-if="station.station === false" />
   <LoadingModal :station-loading="station.loading" />
@@ -15,6 +17,8 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import ResultModal from "../ResultModal.vue";

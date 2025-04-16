@@ -7,9 +7,9 @@
       :stationLoading="stationLoading"
     />
     <form @submit.prevent="submitForm">
-      <h2 class="title">Настройки аккаунта</h2>
+      <h2 class="title">{{ t("settings.title") }}</h2>
       <h2 @click="changeStationSettingsModal" class="subtitle">
-        Webhook URLs (указывать с новой строки)
+        {{ t("settings.subtitle") }}
       </h2>
       <textarea id="messageTextarea" v-model="webhookUrlsText"></textarea>
       <button
@@ -17,7 +17,11 @@
         @click="addNewUrl"
         :disabled="loadingStatiom"
       >
-        {{ loadingStatiom ? "Загрузка..." : "Сохранить" }}
+        {{
+          loadingStatiom
+            ? t("settings.button.loading")
+            : t("settings.button.save")
+        }}
       </button>
     </form>
   </div>
@@ -30,7 +34,8 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 import { ref, toRefs, watch, reactive } from "vue";
 import axios from "axios";
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const props = defineProps({
   closeModal: {
     type: Function,

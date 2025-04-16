@@ -5,10 +5,12 @@
         <img src="/loadModal/close.svg" alt="" />
       </div>
       <p class="error-message">
-        Неизвестная ошибка, <br />
-        пожалуйста, попробуйте еще раз
+        {{ t("result.false.message.one") }} <br />
+        {{ t("result.false.message.two") }}
       </p>
-      <button @click="startFunc" class="reload-button">Повторить</button>
+      <button @click="startFunc" class="reload-button">
+        {{ t("result.false.button") }}
+      </button>
     </section>
   </div>
 </template>
@@ -16,6 +18,8 @@
 <script setup>
 import { ref, watch, inject } from "vue";
 const { startFunc } = inject("accountItems");
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 </script>
 
 <style scoped>

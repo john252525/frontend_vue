@@ -4,7 +4,9 @@
     <LoadingModal :stationLoading="stationLoading" />
     <article v-if="qrCodeData.station">
       <qrcode-vue :value="qrCodeData.link" :size="256" />
-      <h2 @click="getCode" class="title">Связать через ввод кода</h2>
+      <h2 @click="getCode" class="title">
+        {{ t("enable.codeTitle") }}
+      </h2>
     </article>
   </section>
 </template>
@@ -21,7 +23,8 @@ const { startFunc, offQrCodeStation } = inject("accountItems");
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;

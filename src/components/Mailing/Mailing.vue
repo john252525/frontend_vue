@@ -1,7 +1,7 @@
 <template>
   <header v-if="!addMailing">
     <section class="account-section">
-      <h2 class="title">Рассылки</h2>
+      <h2 class="title">{{ t("mailing.title") }}</h2>
     </section>
     <section class="account-section">
       <button @click="changeAddMailing" class="add-account-button">
@@ -16,7 +16,7 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        Добавить
+        {{ t("mailing.button") }}
       </button>
     </section>
   </header>
@@ -28,6 +28,9 @@
 import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
 import { ref } from "vue";
+
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const addMailing = ref(false);
 
@@ -53,7 +56,7 @@ header {
 .title {
   font-weight: 500;
   font-size: 22px;
-  color: #000;
+  color: var(--text);
   flex: 1;
   margin-right: 8px;
 }

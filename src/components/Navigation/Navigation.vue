@@ -4,6 +4,8 @@
     v-if="!isChatPage && stationDomen.navigate.value === 'whatsapi'"
   >
     <nav>
+      <ThemeTogle />
+      <LangSwither />
       <ul>
         <!-- <li class="list" @click="navigateTo('/')">
           <svg
@@ -327,7 +329,9 @@
 import { computed, ref, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDomain } from "@/composables/getDomen";
+import ThemeTogle from "../ThemeTogle.vue";
 const { stationDomen } = useDomain();
+import LangSwither from "../LangSwither.vue";
 import Spinner from "./Spinner.vue";
 const props = defineProps({
   phoneMenuOn: Function,
@@ -370,7 +374,9 @@ const isChatPage = computed(() => {
 .pc-menu {
   display: flex;
   width: 230px;
+  height: calc(100vh - 57px);
   box-sizing: border-box;
+  background: var(--bg);
 }
 
 nav {
@@ -391,15 +397,16 @@ nav {
 .svg-icon {
   width: 22px; /* 24px */
   height: 22px; /* 24px */
-  fill: #6b7280; /* Tailwind gray-500 */
+  fill: var(--svgColor); /* Tailwind gray-500 */
   transition: all 75ms; /* Переход для всех свойств за 75 мс */
 }
 
 .line {
   width: 0.5px;
-  background-color: #ebebeb;
+  background-color: var(--line);
   position: absolute;
-  top: 56px;
+  z-index: 2;
+  top: 45px;
   height: calc(100% - 57px);
   left: 230px;
 }
@@ -466,7 +473,7 @@ nav {
   font-family: system-ui;
   font-size: 16px;
   font-weight: 400;
-  color: black;
+  color: var(--text);
 }
 
 .page-drop {
@@ -477,13 +484,13 @@ nav {
 }
 
 .list:hover {
-  background-color: #eeeeee;
+  background-color: var(--textNavHover);
   border-radius: 10px;
   width: 200px;
 }
 
 .list:hover .svg-icon path {
-  fill: #111827;
+  fill: var(--iconNavHover);
 }
 
 .black-fon {

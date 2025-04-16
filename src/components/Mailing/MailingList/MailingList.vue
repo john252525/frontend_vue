@@ -5,10 +5,10 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">НАЗВАНИЕ</th>
-            <th class="table-step">ДАТА СОЗДАНИЯ</th>
-            <th class="table-status">СТАТУС</th>
-            <th class="table-action">ДЕЙСТВИЕ</th>
+            <th class="table-login">{{ t("mailingList.table.name") }}</th>
+            <th class="table-step">{{ t("mailingList.table.data") }}</th>
+            <th class="table-status">{{ t("mailingList.table.status") }}</th>
+            <th class="table-action">{{ t("mailingList.table.action") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -19,11 +19,15 @@
           >
             <td class="table-text-number">
               <span v-if="item.name.length > 0">{{ item.name }}</span>
-              <span v-else>Рассылка</span>
+              <span v-else>{{ t("mailingList.name") }}</span>
             </td>
             <td class="table-text">{{ item.dt_create }}</td>
-            <td class="table-state-active" v-if="item.state === 1">Активен</td>
-            <td class="table-state" v-if="item.state === 0">Неактивен</td>
+            <td class="table-state-active" v-if="item.state === 1">
+              {{ t("mailingList.status.active") }}
+            </td>
+            <td class="table-state" v-if="item.state === 0">
+              {{ t("mailingList.status.noActive") }}
+            </td>
             <td class="table-action-text">
               <button
                 class="action-table-button"
@@ -33,7 +37,7 @@
                   src="/telegramAccount/menu_table_button.svg"
                   alt="Меню действий"
                 />
-                Действие
+                {{ t("mailingList.buttonActive") }}
               </button>
               <button
                 class="action-table-button-phone"
@@ -49,7 +53,7 @@
           <tr v-else-if="dataStationNone">
             <td colspan="3">
               <div class="none-account-cont">
-                <h2>Аккаунтов не найдено</h2>
+                <h2>{{ t("mailingList.noneMailing") }}</h2>
               </div>
             </td>
           </tr>
@@ -105,6 +109,8 @@ import InfoMailing from "../ModalComponent/InfoMailing.vue";
 import LoadAccount from "./LoadAccount.vue";
 import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const router = useRouter();
 const station = reactive({
@@ -208,7 +214,6 @@ provide("selectedItem", { selectedItem });
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgb(243, 244, 246);
 }
 
 .table {
@@ -329,11 +334,11 @@ provide("selectedItem", { selectedItem });
 }
 
 .action-table-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: var(--tableActiveButton);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: var(--tableActiveButtonColor);
   margin-right: 10px;
   gap: 6px;
   transition: all 0.25s;
@@ -370,26 +375,29 @@ td {
 td {
   font-weight: 500;
   font-size: 14px;
-  color: #000;
+  color: var(--tabletextcolor);
   text-align: left;
+  position: static;
+  z-index: 0;
+  background-color: var(--bg);
 }
 
 tr {
-  position: relative; /* Позволяет псевдоэлементу позиционироваться относительно строки */
+  position: relative;
 }
 
 tr:not(:last-child):after {
-  content: ""; /* Создает пустой контент для псевдоэлемента */
-  position: absolute; /* Абсолютное позиционирование относительно строки */
+  content: "";
+  position: absolute;
   left: 0;
   right: 0;
-  bottom: 0; /* Позиционируем линию внизу строки */
-  height: 1px; /* Высота линии */
-  background-color: #ebebeb;
+  bottom: 0;
+  height: 1px;
+  background-color: var(--line);
 }
 
-tr:hover {
-  background: rgb(243 244 246);
+.tbody tr:hover td {
+  background-color: var(--tableHover);
 }
 
 @media (max-width: 700px) {

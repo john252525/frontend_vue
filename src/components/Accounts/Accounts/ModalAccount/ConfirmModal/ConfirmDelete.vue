@@ -6,11 +6,13 @@
       <article class="circle">
         <span>!</span>
       </article>
-      <h2 class="title">Вы подтверждаете удаление аккаунта?</h2>
+      <h2 class="title">{{ t("confirmMoadal.delete.message") }}</h2>
       <article class="button-cont">
-        <button class="confirm-button" @click="confirm">Продолжить</button>
+        <button class="confirm-button" @click="confirm">
+          {{ t("confirmMoadal.delete.continue") }}
+        </button>
         <button class="cansel-button" @click="ChangeconfirmStation">
-          Отмена
+          {{ t("confirmMoadal.delete.cancel") }}
         </button>
       </article>
     </section>
@@ -21,6 +23,9 @@
 import { toRefs, ref } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 import axios from "axios";
 const props = defineProps({
@@ -105,7 +110,7 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStation();
-  await props.loadingStart("Удаление аккаунта...");
+  await props.loadingStart(t("globalLoading.delete"));
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };

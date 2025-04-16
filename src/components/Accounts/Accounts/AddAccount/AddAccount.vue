@@ -3,14 +3,14 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="add-account-section">
     <div>
-      <h2 class="title">Добавить аккаунты</h2>
+      <h2 class="title">{{ t("addAccount.title") }}</h2>
       <div @click="dropdownOpen('category')" class="dropdown-select">
         <h2
           v-if="!accountData.category"
           class="selected"
           :class="{ active: isOpen.category }"
         >
-          Выберите категорию
+          {{ t("addAccount.typeCategory") }}
         </h2>
         <h2
           :class="{ unactive: !isOpen.category }"
@@ -24,7 +24,7 @@
           class="selected"
           :class="{ active: isOpen.category }"
         >
-          Выберите категорию
+          {{ t("addAccount.typeCategory") }}
         </h2>
         <img
           class="arrow"
@@ -64,7 +64,7 @@
             class="selected"
             :class="{ active: isOpen.messenger }"
           >
-            Выберите мессенджер
+            {{ t("addAccount.typeMessanger") }}
           </h2>
           <h2
             :class="{ unactive: !isOpen.messenger }"
@@ -78,7 +78,7 @@
             class="selected"
             :class="{ active: isOpen.messenger }"
           >
-            Выберите мессенджер
+            {{ t("addAccount.typeMessanger") }}
           </h2>
           <img
             class="arrow"
@@ -111,7 +111,7 @@
           "
           @input="checkInputTelegram"
           v-model="accountData.tgLogin"
-          placeholder="Логин"
+          :placeholder="t('addAccount.login')"
           type="text"
           class="input-data"
         />
@@ -131,7 +131,7 @@
       @click="AddAccount"
       class="create-account-button"
     >
-      Добавить
+      {{ t("addAccount.addButton") }}
     </button>
   </section>
 </template>
@@ -145,6 +145,8 @@ import { ref, reactive, watch, provide, computed } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const errorBlock = ref(false);
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };

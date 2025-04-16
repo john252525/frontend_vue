@@ -3,7 +3,7 @@
     <section v-if="!stationLoading.account.error" class="loading-section-true">
       <h2 class="title-true">
         <img src="/account/gal.svg" alt="" />
-        Операция успешно выполнена
+        {{ t("resultModal.messageTrue") }}
         <img
           @click="changeStationLoadingModal"
           src="/account/close-true.svg"
@@ -13,7 +13,8 @@
     </section>
     <section v-else class="loading-section-error">
       <h2 class="title-error">
-        <img src="/account/error.svg" alt="" /> Ошибка! Операция прервана
+        <img src="/account/error.svg" alt="" />
+        {{ t("resultModal.messageFalse") }}
         <img
           @click="changeStationLoadingModal"
           src="/account/close-error.svg"
@@ -26,6 +27,8 @@
 
 <script setup>
 import { toRefs, ref, defineProps, onMounted, watch, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = defineProps({
   stationLoading: {

@@ -3,7 +3,7 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="file-section">
     <div class="cont" v-if="!load">
-      <h2 class="main-title">Редактирование рассылки</h2>
+      <h2 class="main-title">{{ t("editMailing.title") }}</h2>
       <img
         @click="changeisEditMailing"
         class="close"
@@ -12,7 +12,7 @@
       />
       <section class="info-section">
         <article class="days-comp">
-          <h2 class="title">Дни недели:</h2>
+          <h2 class="title">{{ t("editMailing.weekDay") }}:</h2>
           <div class="checkbox-group">
             <div
               v-for="(day, index) in days"
@@ -34,10 +34,12 @@
         </article>
 
         <article class="title-comp">
-          <h2 class="title">Время (по МСК):</h2>
+          <h2 class="title">{{ t("editMailing.time.title") }}:</h2>
           <div class="time-cont">
             <div class="time-selection">
-              <label class="label-time" for="start-time">c</label>
+              <label class="label-time" for="start-time">{{
+                t("editMailing.time.c")
+              }}</label>
               <input
                 type="time"
                 id="start-time"
@@ -46,7 +48,9 @@
               />
             </div>
             <div class="time-selection">
-              <label class="label-time" for="end-time">по</label>
+              <label class="label-time" for="end-time">{{
+                t("editMailing.time.po")
+              }}</label>
               <input
                 type="time"
                 id="end-time"
@@ -57,10 +61,12 @@
           </div>
         </article>
         <article class="title-comp">
-          <h2 class="title-mess">Задержка между сообщениями:</h2>
+          <h2 class="title-mess">{{ t("editMailing.timeout.title") }}:</h2>
           <div class="time-cont">
             <div class="time-selection">
-              <label class="label-time" for="start-num">от</label>
+              <label class="label-time" for="start-num">{{
+                t("editMailing.timeout.ot")
+              }}</label>
               <select
                 class="time-select"
                 id="start-num"
@@ -72,7 +78,9 @@
               </select>
             </div>
             <div class="time-selection">
-              <label class="label-time" for="end-num">до</label>
+              <label class="label-time" for="end-num">{{
+                t("editMailing.timeout.do")
+              }}</label>
               <select
                 class="time-select"
                 id="end-num"
@@ -82,7 +90,7 @@
                   {{ minute }}
                 </option>
               </select>
-              <p class="min">мин.</p>
+              <p class="min">{{ t("editMailing.timeout.min") }}.</p>
             </div>
           </div>
         </article>
@@ -97,7 +105,7 @@
             />
             <label class="settings-text" for="remove-duplicates">
               <span class="custom-checkbox"></span>
-              Удалить дубликаты контактов
+              {{ t("editMailing.checbox.one") }}
             </label>
           </div>
 
@@ -109,7 +117,7 @@
             />
             <label class="settings-text" for="existing-dialogs">
               <span class="custom-checkbox"></span>
-              Отправка только по уже существующим диалогам
+              {{ t("editMailing.checbox.two") }}
             </label>
           </div>
 
@@ -121,12 +129,14 @@
             />
             <label class="settings-text" for="random-order">
               <span class="custom-checkbox"></span>
-              Отправлять сообщения в случайном порядке
+              {{ t("editMailing.checbox.three") }}
             </label>
           </div>
         </article>
       </section>
-      <button @click="editWhatsAppBroadcast" class="create">Сохранить</button>
+      <button @click="editWhatsAppBroadcast" class="create">
+        {{ t("editMailing.button") }}
+      </button>
     </div>
     <LoadModal :text="'Сохраняем данные'" v-else />
   </section>
@@ -135,6 +145,8 @@
 <script setup>
 import { ref, toRefs, watch, computed, inject } from "vue";
 import axios from "axios";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import LoadModal from "../LoadModal/LoadModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
