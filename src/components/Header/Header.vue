@@ -18,6 +18,7 @@
         </h2>
       </article>
       <article class="user-cont">
+        <TogleTheme />
         <h2
           v-if="balance || balance === 0"
           @click="toggleBalanceStation"
@@ -28,6 +29,7 @@
         <h2 v-else @click="toggleBalanceStation" class="balance-user">
           <LoadingBalance />
         </h2>
+
         <img
           @click="toggleAccountMenu"
           src="/header/user_img.svg"
@@ -52,6 +54,7 @@ import { useRoute } from "vue-router";
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
+import TogleTheme from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 
@@ -139,7 +142,7 @@ onMounted(getBalance);
   display: flex;
   align-items: center;
   gap: 16px;
-  width: 121px;
+  width: 170px;
 }
 
 .balance-user {
@@ -178,7 +181,7 @@ onMounted(getBalance);
   margin: 0;
   width: 100%;
   height: 0.5px;
-  background-color: #ebebeb;
+  background-color: var(--line);
 }
 
 .phone-menu {

@@ -1,29 +1,66 @@
 <script setup>
 import { useI18n } from "vue-i18n";
+import { onMounted, ref, onUnmounted } from "vue";
 
 const { locale } = useI18n();
+const listOpen = ref(false);
+const lang = ref("");
+const dropdownRef = ref(null);
 
-const switchLanguage = (lang) => {
-  locale.value = lang;
-  localStorage.setItem("lang", lang);
+const changeListOpen = () => {
+  listOpen.value = !listOpen.value;
 };
+
+const switchLanguage = (language) => {
+  locale.value = language;
+  localStorage.setItem("lang", language);
+  lang.value = language === "ru" ? "Русский" : "Англиский";
+  listOpen.value = false;
+};
+
+const selectLeng = () => {
+  const savedLang = localStorage.getItem("lang") || "ru";
+  lang.value = savedLang === "ru" ? "Русский" : "Англиский";
+};
+
+const handleClickOutside = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    listOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  selectLeng();
+  document.addEventListener("click", handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <template>
-  <div class="cont">
-    <div class="list-cont">
+  <div class="cont" ref="dropdownRef">
+    <div v-if="listOpen" class="list-cont">
       <ul class="list">
-        <li class="list-text">Русский</li>
-        <li class="list-text">Англиский</li>
+        <li
+          :class="{ active: locale === 'ru' }"
+          @click="switchLanguage('ru')"
+          class="list-text"
+        >
+          <img class="svg-icon" src="/flag/russia.svg" alt="" />
+          Русский
+        </li>
+        <li
+          :class="{ active: locale === 'en' }"
+          @click="switchLanguage('en')"
+          class="list-text"
+        >
+          <img class="svg-icon" src="/flag/america.svg" alt="" /> Англиский
+        </li>
       </ul>
     </div>
-    <!-- <button @click="switchLanguage('ru')" :class="{ active: locale === 'ru' }">
-      RU
-    </button>
-    <button @click="switchLanguage('en')" :class="{ active: locale === 'en' }">
-      EN
-    </button> -->
-    <h2 class="title">Русский</h2>
+    <h2 @click.stop="changeListOpen" class="title">{{ lang }}</h2>
   </div>
 </template>
 
@@ -31,6 +68,10 @@ const switchLanguage = (lang) => {
 .active {
   font-weight: bold;
   color: var(--primary-color);
+}
+
+.svg-icon {
+  width: 14px;
 }
 
 .cont {
@@ -46,7 +87,7 @@ const switchLanguage = (lang) => {
 .list-cont {
   width: 120px;
   height: 70px;
-  background-color: #2d3a4c;
+  background-color: var(--changeLantBg);
   position: absolute;
   border-radius: 5px;
   bottom: 70px;
@@ -71,10 +112,13 @@ const switchLanguage = (lang) => {
   cursor: pointer;
   width: 90px;
   transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .list-text:hover {
-  background-color: #334053;
+  background-color: var(--changeLantTextActive);
   border-radius: 5px;
   transition: all 0.25s;
 }
@@ -82,19 +126,45 @@ const switchLanguage = (lang) => {
 .title {
   font-size: 16px;
   font-weight: 400;
-  color: rgb(195, 195, 195);
+  color: var(--changeLantText);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .title:hover {
-  background-color: #2d3a4c;
-  color: white;
+  background-color: var(--changeLantTextHoverBg);
+  color: var(--changeLantTextHover);
   padding: 8px;
   border-radius: 5px;
   transition: all 0.15s;
 }
 
-.lang {
+.list-text.active {
+  background-color: var(--changeLantTextActive);
+  border-radius: 5px;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.list-cont,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.list-cont,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.list-cont {
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

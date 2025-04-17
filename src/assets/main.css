@@ -23,7 +23,7 @@ body {
   --noAccountTableText: #17388d;
   --noAccountTableHover: rgb(243 244 246);
   --tabletextcolor: #000;
-  --line: white;
+  --line: #d9d9d9;
   --tableHover: #ebebeb;
   --tableActiveButton: oklch(0.65 0.22 267 / 0.16);
   --tableActiveButtonColor: oklch(0.4 0.18 267 / 0.86);
@@ -32,6 +32,16 @@ body {
   --modalBg: white;
   --scrolBg: #e1e1e1;
   --scrolColor: rgb(180, 180, 180);
+  --changeLantText: rgb(37, 37, 37);
+  --changeLantTextHoverBg: rgb(243 244 246);
+  --changeLantTextHover: black;
+  --changeLantBg: rgb(243 244 246);
+  --changeLantTextActive: rgb(232, 234, 236);
+  --input: #fcfcfc;
+  --authBg: #f0f0f0;
+  --googleAuthButton: white;
+  --googleAuthButtonText: #5f6368;
+  --googleAuthButtonTextHover: #f8f9fa;
 }
 
 [data-theme="dark"] {
@@ -60,6 +70,16 @@ body {
   --modalBg: #1a1a1a;
   --scrolBg: #242f3e;
   --scrolColor: #1b222c;
+  --changeLantText: rgb(195, 195, 195);
+  --changeLantTextHoverBg: #2d3a4c;
+  --changeLantTextHover: #ffffff;
+  --changeLantBg: #2d3a4c;
+  --changeLantTextActive: #334053;
+  --input: #1f2937;
+  --authBg: oklch(0.17 0.001 267);
+  --googleAuthButton: #1f2937;
+  --googleAuthButtonText: #ffffff;
+  --googleAuthButtonTextHover: #2d3746;
 }
 
 thead {

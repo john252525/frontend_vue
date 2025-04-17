@@ -144,7 +144,8 @@ const changePaymentsValue = (pay) => {
   z-index: 10;
   padding: 30px;
   border-radius: 10px;
-  background-color: white;
+  background-color: var(--bg);
+  border: 1px solid var(--line);
 }
 
 input {
@@ -153,10 +154,10 @@ input {
   padding-left: 10px;
   width: 400px;
   height: 35px;
-  background: #fcfcfc;
+  background: var(--input);
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
   margin-bottom: 16px;
 }
 

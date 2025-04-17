@@ -46,7 +46,7 @@
         <span @click="navigateTo('/Registration')">Создать аккаунт</span>
       </p>
     </form>
-    <LoginForGoogle class="login-for-google"/>
+    <LoginForGoogle class="login-for-google" />
   </section>
 </template>
 
@@ -55,6 +55,9 @@ import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+
+import { useThemeStore } from "@/stores/theme";
+const theme = useThemeStore();
 
 import axios from "axios";
 const router = useRouter();
@@ -77,6 +80,11 @@ const inputStyle = reactive({
   incorrectPassword: false,
   incorrectPasswordMessage: "",
 });
+
+if (theme.isDark) {
+  inputStyle.password.background = "#1f2937";
+  inputStyle.login.background = "#1f2937";
+}
 
 function errorStyleStation(input, station) {
   if (input === "login") {
@@ -118,13 +126,13 @@ const loginAccount = async () => {
       }
     );
     if (response.data.ok === true) {
+      console.log(response.data.token);
       localStorage.setItem("accountToken", response.data.token);
       localStorage.setItem("accountData", formData.login);
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
       console.log(response.data);
-      router.push("/MainPage");
-      location.reload();
+      // location.reload();
     } else {
       inputStyle.incorrectPassword = true;
       inputStyle.incorrectPasswordMessage = response.data.error_message;
@@ -186,7 +194,8 @@ const navigateTo = (page) => {
   width: 685px;
   height: 504px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
-  background: #fff;
+  background: var(--bg);
+  border: 1px solid var(--line);
   position: absolute;
   top: 50%;
   left: 50%;
@@ -207,7 +216,7 @@ const navigateTo = (page) => {
 .title {
   font-weight: 600;
   font-size: 28px;
-  color: #000;
+  color: var(--text);
   text-align: left;
   margin-bottom: 44px;
 }
@@ -222,7 +231,7 @@ const navigateTo = (page) => {
 .name-input {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--text);
 }
 
 input {
@@ -245,7 +254,7 @@ input {
   font-weight: 500;
   font-size: 14px;
   text-align: right;
-  color: #5e5e5e;
+  color: var(--text);
   margin-top: 10px;
   cursor: pointer;
 }
@@ -273,7 +282,7 @@ input {
 .create-account-button {
   font-weight: 600;
   font-size: 14px;
-  color: #5e5e5e;
+  color: var(--text);
   text-align: left;
   margin-top: 24px;
 }

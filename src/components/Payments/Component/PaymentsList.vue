@@ -178,7 +178,6 @@ onMounted(createUser);
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgb(243, 244, 246);
 }
 
 .table {
@@ -215,14 +214,14 @@ onMounted(createUser);
   margin-top: 0px;
   height: 50px;
   width: 100%;
-  background-color: #ebf5ff;
+  background-color: var(--noAccountTableBg);
   border-radius: 5px;
 }
 
 .none-account-cont h2 {
   font-size: 14px;
   font-weight: 500;
-  color: #17388d;
+  color: #ffffff;
   margin-left: 10px;
 }
 
@@ -305,14 +304,14 @@ onMounted(createUser);
   margin-top: 0px;
   height: 50px;
   width: 100%;
-  background-color: #ebf5ff;
+  background-color: var(--noAccountTableBg);
   border-radius: 5px;
 }
 
 .none-account-cont h2 {
   font-size: 14px;
   font-weight: 500;
-  color: #17388d;
+  color: var(--noAccountTableText);
   margin-left: 10px;
 }
 
@@ -407,7 +406,7 @@ tr:not(:last-child):after {
 }
 
 tr:hover {
-  background: rgb(243 244 246);
+  background-color: var(--tableHover);
 }
 
 @media (max-width: 700px) {

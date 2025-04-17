@@ -304,10 +304,10 @@ const getAccounts = async () => {
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
+      // setTimeout(() => {
+      //   localStorage.removeItem("accountToken");
+      //   router.push("/login");
+      // }, 2000);
     }
   } catch (error) {
     loadDataStation.value = false; // Устанавливаем значение false в случае ошибки

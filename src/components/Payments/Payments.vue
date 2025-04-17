@@ -44,7 +44,7 @@ const changeCreatePayments = () => {
 .title {
   font-weight: 500;
   font-size: 22px;
-  color: #000;
+  color: var(--text);
   flex: 1;
   margin-right: 8px;
 }

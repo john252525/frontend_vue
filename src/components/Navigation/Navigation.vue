@@ -4,7 +4,7 @@
     v-if="!isChatPage && stationDomen.navigate.value === 'whatsapi'"
   >
     <nav>
-      <ThemeTogle />
+      <!-- <ThemeTogle /> -->
       <LangSwither class="theme-block" />
       <ul>
         <!-- <li class="list" @click="navigateTo('/')">
@@ -329,7 +329,7 @@
 import { computed, ref, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDomain } from "@/composables/getDomen";
-import ThemeTogle from "../ThemeTogle.vue";
+// import ThemeTogle from "../ThemeTogle.vue";
 const { stationDomen } = useDomain();
 import LangSwither from "../LangSwither.vue";
 import Spinner from "./Spinner.vue";

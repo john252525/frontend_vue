@@ -105,8 +105,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  color: #5f6368;
+  background: var(--googleAuthButton);
+  color: var(--googleAuthButtonText);
   border-radius: 6px;
   padding: 10px 18px;
   font-size: 16px;
@@ -118,12 +118,8 @@ onMounted(() => {
 }
 
 .custom-google-btn:hover {
-  background: #f8f9fa;
+  background: var(--googleAuthButtonTextHover);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.custom-google-btn:active {
-  background: #e8e8e8;
 }
 
 .google-icon {

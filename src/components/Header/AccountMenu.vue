@@ -35,7 +35,7 @@ const leaveAccount = () => {
   top: 65px;
   border-radius: 5px 0 0 5px;
   width: 260px;
-  background: #fff;
+  background: var(--bg);
   padding: 12px 0;
 }
 
@@ -64,7 +64,7 @@ const leaveAccount = () => {
 }
 
 .line {
-  background-color: #d9d9d9;
+  background-color: var(--line);
   height: 1px;
   margin: 12px 0 16px;
 }
@@ -72,14 +72,14 @@ const leaveAccount = () => {
 .email-user {
   font-weight: 600;
   font-size: 18px;
-  color: #535353;
+  color: var(--text);
   text-align: center;
 }
 
 .out-account-button {
   font-weight: 500;
   font-size: 18px;
-  color: #000;
+  color: var(--text);
   margin-left: 35px;
   cursor: pointer;
   transition: color 0.15s;

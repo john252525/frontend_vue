@@ -52,7 +52,7 @@ export default {
   width: 650px;
   height: 420px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
-  background: #fff;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,14 +62,14 @@ export default {
 .title {
   font-weight: 600;
   font-size: 28px;
-  color: #000;
+  color: var(--text);
   margin-bottom: 24px;
 }
 
 .subtitle {
   font-weight: 400;
   font-size: 18px;
-  color: #6d6d6d;
+  color: var(--text);
   margin-bottom: 38px;
   width: 500px;
 }
@@ -84,7 +84,7 @@ export default {
 .name-input {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--text);
 }
 
 input {
@@ -93,10 +93,10 @@ input {
   padding-left: 10px;
   width: 550px;
   height: 45px;
-  background: #fcfcfc;
+  background: var(--input);
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
 }
 
 .send-сode-button {
@@ -106,7 +106,7 @@ input {
   background: #4950ca;
   font-weight: 600;
   font-size: 14px;
-  color: #fff;
+  color: white;
 }
 
 .send-сode-button:hover {
@@ -121,7 +121,7 @@ input {
 .login-account-button {
   font-weight: 600;
   font-size: 14px;
-  color: #5e5e5e;
+  color: var(--text);
   text-align: left;
   margin-top: 24px;
 }

@@ -73,22 +73,12 @@ onMounted(getBalance);
 </script>
 
 <style scoped>
-.black-fon {
-  position: fixed;
-  z-index: 5;
-  width: 100%;
-  height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
-  top: 0;
-  left: 0;
-}
-
 .balance-user-section {
   position: absolute;
   z-index: 10;
   right: 71px;
   top: 65px;
-  background: #fff;
+  background: var(--bg);
   border-radius: 3px;
   width: 195px;
   height: 130px;
@@ -130,14 +120,14 @@ onMounted(getBalance);
   gap: 6px;
   font-weight: 700;
   font-size: 16px;
-  color: #535353;
+  color: var(--text);
   text-align: center;
 }
 
 .line {
   width: 100%;
   height: 1px;
-  background-color: #d9d9d9;
+  background-color: var(--line);
   margin: 8px 0 10px;
 }
 
@@ -152,14 +142,14 @@ onMounted(getBalance);
 }
 
 .top-balance-cont:hover {
-  background-color: rgb(236, 236, 236);
+  background-color: var(--changeLantTextHoverBg);
   border-radius: 5px;
 }
 
 .top-balance-title {
   font-weight: 600;
   font-size: 14px;
-  color: #535353;
+  color: var(--text);
   text-align: center;
 }
 

@@ -56,7 +56,7 @@
         Есть аккаунт? <span @click="navigateTo('/Login')">Войти</span>
       </p>
     </form>
-    <LoginForGoogle class="login-for-google"/>
+    <LoginForGoogle class="login-for-google" />
   </section>
 </template>
 
@@ -177,7 +177,8 @@ const logAccoutn = () => {
   width: 685px;
   height: 600px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
-  background: #fff;
+  background: var(--bg);
+  border: 1px solid var(--line);
   position: absolute;
   top: 50%;
   left: 50%;
@@ -187,7 +188,6 @@ const logAccoutn = () => {
   justify-content: center;
   flex-direction: column;
 }
-
 
 .login-for-google {
   position: absolute;
@@ -199,7 +199,7 @@ const logAccoutn = () => {
 .title {
   font-weight: 600;
   font-size: 28px;
-  color: #000;
+  color: var(--text);
   text-align: left;
   margin-bottom: 44px;
 }
@@ -226,13 +226,13 @@ const logAccoutn = () => {
 .name-input {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--text);
 }
 
 .name-checkbox {
   font-weight: 500;
   font-size: 16px;
-  color: #5e5e5e;
+  color: var(--text);
 }
 
 .name-checkbox.error {
@@ -246,10 +246,10 @@ const logAccoutn = () => {
   padding-left: 10px;
   width: 550px;
   height: 45px;
-  background: #fcfcfc;
+  background: var(--input);
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
 }
 
 .input-reg.error {
@@ -281,7 +281,7 @@ const logAccoutn = () => {
 .login-account-button {
   font-weight: 600;
   font-size: 14px;
-  color: #5e5e5e;
+  color: var(--text);
   text-align: left;
   margin-top: 24px;
 }
