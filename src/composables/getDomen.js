@@ -16,12 +16,20 @@ const stationDomen = reactive({
 export function useDomain() {
   onMounted(() => {
     currentDomain.value = window.location.hostname;
+    // app4.developtech.ru
+    if (currentDomain.value === "app4.developtech.ru") {
+      stationDomen.navigate.value = "settings";
+      stationDomen.cosmetics.logo = "Crypto";
+      stationDomen.cosmetics.titleLogo = "Crypto";
+      stationDomen.cosmetics.urlLogo = "/crypto.svg";
+    }
 
-    if (currentDomain.value === import.meta.env.VITE_DOMEN_APP4) {
-      stationDomen.navigate.value = import.meta.env.VITE_DOMEN_APP4_NAVIGATE;
-      stationDomen.cosmetics.logo = import.meta.env.VITE_DOMEN_APP4_LOFO;
-      stationDomen.cosmetics.titleLogo = import.meta.env.VITE_DOMEN_APP4_LOFO;
-      stationDomen.cosmetics.urlLogo = import.meta.env.VITE_DOMEN_APP4_LOFO_URL;
+    if (currentDomain.value === "localhost") {
+      stationDomen.navigate.value = "whatsapi";
+      stationDomen.cosmetics.logo = "WhatsApi";
+      stationDomen.cosmetics.titleLogo = "WhatsApi";
+      stationDomen.cosmetics.urlLogo =
+        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
     }
 
     if (currentDomain.value === "helly.apitter.com") {
@@ -32,18 +40,12 @@ export function useDomain() {
         "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
     }
 
-    if (currentDomain.value === import.meta.env.VITE_DOMEN_APP2) {
-      stationDomen.navigate.value = import.meta.env.VITE_DOMEN_APP2_NAVIGATE;
-      stationDomen.cosmetics.logo = import.meta.env.VITE_DOMEN_APP2_LOFO;
-      stationDomen.cosmetics.titleLogo = import.meta.env.VITE_DOMEN_APP2_LOFO;
-      stationDomen.cosmetics.urlLogo = import.meta.env.VITE_DOMEN_APP2_LOFO_URL;
-    }
-
-    if (currentDomain.value === import.meta.env.VITE_DOMEN_APP1) {
-      stationDomen.navigate.value = import.meta.env.VITE_DOMEN_APP1_NAVIGATE;
-      stationDomen.cosmetics.logo = import.meta.env.VITE_DOMEN_APP1_LOFO;
-      stationDomen.cosmetics.titleLogo = import.meta.env.VITE_DOMEN_APP1_LOFO;
-      stationDomen.cosmetics.urlLogo = import.meta.env.VITE_DOMEN_APP1_LOFO_URL;
+    if (currentDomain.value === "app1.developtech.ru") {
+      stationDomen.navigate.value = "touchapi";
+      stationDomen.cosmetics.logo = "TouchApi";
+      stationDomen.cosmetics.titleLogo = "Touch-Api";
+      stationDomen.cosmetics.urlLogo =
+        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
     }
     console.log("Текущий домен:", stationDomen);
   });
