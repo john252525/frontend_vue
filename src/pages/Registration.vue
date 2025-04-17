@@ -1,9 +1,11 @@
 <template>
   <section class="registration-section">
     <form>
-      <h2 class="title">Регистрация</h2>
+      <h2 class="title">{{ t("registration.title") }}</h2>
       <div class="input-cont">
-        <label class="name-input" for="name">Почта</label>
+        <label class="name-input" for="name">{{
+          t("registration.mail")
+        }}</label>
         <input
           type="email"
           placeholder="name@company.com"
@@ -15,9 +17,11 @@
         />
       </div>
       <div class="input-cont">
-        <label class="name-input" for="email">Пароль</label>
+        <label class="name-input" for="email">{{
+          t("registration.password")
+        }}</label>
         <input
-          placeholder="Введите пароль"
+          placeholder="••••••••••••"
           type="password"
           id="email"
           v-model="formData.password"
@@ -27,9 +31,11 @@
         />
       </div>
       <div class="input-cont">
-        <label class="name-input" for="email">Повторите пароль</label>
+        <label class="name-input" for="email">{{
+          t("registration.passwordTwo")
+        }}</label>
         <input
-          placeholder="Повторите пароль"
+          placeholder="••••••••••••"
           type="password"
           id="email"
           v-model="formData.fogoutPassword"
@@ -45,15 +51,19 @@
           v-model="formData.check"
           required
         />
-        <label class="name-checkbox" :class="{ error: error.check }" for="email"
-          >Я принимаю Положения и условия</label
+        <label
+          class="name-checkbox"
+          :class="{ error: error.check }"
+          for="email"
+          >{{ t("registration.checkbox") }}</label
         >
       </div>
       <button @click="logAccoutn" class="registration-account-button">
-        Зарегистрироваться
+        {{ t("registration.button") }}
       </button>
       <p class="login-account-button">
-        Есть аккаунт? <span @click="navigateTo('/Login')">Войти</span>
+        {{ t("registration.haveAccount") }}
+        <span @click="navigateTo('/Login')">{{ t("registration.login") }}</span>
       </p>
     </form>
     <LoginForGoogle class="login-for-google" />
@@ -65,6 +75,8 @@ import axios from "axios";
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 const formData = reactive({
   login: "",

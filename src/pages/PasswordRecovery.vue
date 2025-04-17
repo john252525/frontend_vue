@@ -1,13 +1,14 @@
 <template>
   <section class="password-recovery-section">
     <form>
-      <h2 class="title">Восстановление пароля</h2>
+      <h2 class="title">{{ t("fogoutPassword.title") }}</h2>
       <p class="subtitle">
-        Введите свою электронную почту, и мы пришлем вам код для сброса вашего
-        пароля!
+        {{ t("fogoutPassword.subtitle") }}
       </p>
       <div class="input-cont">
-        <label class="name-input" for="name">Почта</label>
+        <label class="name-input" for="name">{{
+          t("fogoutPassword.mail")
+        }}</label>
         <input
           type="email"
           placeholder="name@company.com"
@@ -16,15 +17,30 @@
           required
         />
       </div>
-      <button class="send-сode-button">Отправить</button>
+      <button class="send-сode-button">
+        {{ t("fogoutPassword.send") }}
+      </button>
       <p class="login-account-button">
-        Вспомнили пароль? <span @click="navigateToLogin">Войти</span>
+        {{ t("fogoutPassword.pas") }}
+        <span @click="navigateToLogin"> {{ t("fogoutPassword.login") }}</span>
       </p>
     </form>
   </section>
 </template>
 
-<script>
+<script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
+
+const navigateToLogin = (page) => {
+  router.push("/Login");
+};
+</script>
+
+<!-- <script>
 export default {
   data() {
     return {
@@ -40,7 +56,7 @@ export default {
     },
   },
 };
-</script>
+</script> -->
 
 <style scoped>
 .password-recovery-section {

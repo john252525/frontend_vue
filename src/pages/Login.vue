@@ -6,9 +6,9 @@
   />
   <section class="login-section">
     <form>
-      <h2 class="title">Авторизация</h2>
+      <h2 class="title">{{ t("login.title") }}</h2>
       <div class="input-cont">
-        <label class="name-input" for="name">Почта</label>
+        <label class="name-input" for="name">{{ t("login.mail") }}</label>
         <input
           :style="inputStyle.login"
           type="email"
@@ -18,32 +18,34 @@
           required
         />
         <p v-if="inputStyle.loginStation" class="error-message">
-          Введите корректный E-mail
+          {{ t("login.errorMail") }}
         </p>
       </div>
       <div class="input-cont">
-        <label class="name-input" for="email">Пароль</label>
+        <label class="name-input" for="email">{{ t("login.password") }}</label>
         <input
           :style="inputStyle.password"
-          placeholder="Введите пароль"
+          placeholder="••••••••••••"
           type="password"
           id="password"
           v-model="formData.password"
           required
         />
         <p v-if="inputStyle.passwordStation" class="error-message">
-          Введите корректный Пароль
+          {{ t("login.errorPassword") }}
         </p>
         <p @click="navigateTo('/Forgot')" class="forgot-password-text">
-          Забыли пароль?
+          {{ t("login.fogoutPassword") }}
         </p>
       </div>
       <button @click="login" type="button" class="login-account-button">
-        Войти
+        {{ t("login.button") }}
       </button>
       <p class="create-account-button">
-        Нет аккаунта?
-        <span @click="navigateTo('/Registration')">Создать аккаунт</span>
+        {{ t("login.noAccaunt") }}
+        <span @click="navigateTo('/Registration')">{{
+          t("login.createAccount")
+        }}</span>
       </p>
     </form>
     <LoginForGoogle class="login-for-google" />
@@ -55,6 +57,9 @@ import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 import { useThemeStore } from "@/stores/theme";
 const theme = useThemeStore();

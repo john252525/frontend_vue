@@ -22,7 +22,7 @@
           />
         </svg>
       </div>
-      <span class="btn-text">Войти через Google</span>
+      <span class="btn-text">{{ t("google.text") }}</span>
     </div>
 
     <!-- Скрытый оригинальный контейнер -->
@@ -35,6 +35,8 @@ import { onMounted } from "vue";
 const router = useRouter();
 import { useRouter } from "vue-router";
 const apiUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const handleCredentialResponse = async (response) => {
   console.log("Google token:", response.credential);

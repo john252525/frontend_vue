@@ -24,7 +24,7 @@ export function useDomain() {
       stationDomen.cosmetics.urlLogo = "/crypto.svg";
     }
 
-    if (currentDomain.value === "app2.developtech.ru") {
+    if (currentDomain.value === "localhost") {
       stationDomen.navigate.value = "whatsapi";
       stationDomen.cosmetics.logo = "WhatsApi";
       stationDomen.cosmetics.titleLogo = "WhatsApi";

@@ -120,6 +120,7 @@ const messages = {
       buttonActive: "Action",
       deleteMessageConfirm: "Deleting mailing lists",
     },
+
     information: {
       title: "Information",
       status: {
@@ -234,6 +235,39 @@ const messages = {
       account: "Accounts",
       mailing: "Mailing lists",
       chats: "Chats",
+    },
+    login: {
+      title: "Authorization",
+      mail: "Mail",
+      password: "Password",
+      errorPassword: "Enter the correct Password",
+      errorMail: "Enter the correct E-mail",
+      fogoutPassword: "Forgot your password?",
+      button: "Log in",
+      noAccaunt: "No account?",
+      createAccount: "Create an account",
+    },
+    registration: {
+      title: "Registration",
+      mail: "Mail",
+      password: "Password",
+      passwordTwo: "Repeat password",
+      checkbox: "I accept the Terms and Conditions",
+      button: "Register",
+      haveAccount: "Do you have an account?",
+      login: "Log in",
+    },
+    fogoutPassword: {
+      title: "Password Recovery",
+      subtitle: `Enter your email address and we will send you a code to reset your
+       password!`,
+      mail: "Mail",
+      send: "Send",
+      pas: "Have you remembered your password? ",
+      login: "Log in",
+    },
+    google: {
+      text: "Log in Google",
     },
   },
   ru: {
@@ -463,6 +497,39 @@ const messages = {
       account: "Аккаунты",
       mailing: "Рассылки",
       chats: "Чаты",
+    },
+    login: {
+      title: "Авторизация",
+      mail: "Почта",
+      password: "Пароль",
+      errorPassword: "Введите корректный Пароль",
+      errorMail: "Введите корректный E-mail",
+      fogoutPassword: "Забыли пароль?",
+      button: "Войти",
+      noAccaunt: "Нет аккаунта?",
+      createAccount: "Создать аккаунт",
+    },
+    registation: {
+      title: "Регистрация",
+      mail: "Почта",
+      password: "Пароль",
+      passwordTwo: "Повторите пароль",
+      checkbox: "Я принимаю Положения и условия",
+      button: "Зарегистрироваться",
+      haveAccount: "Есть аккаунт?",
+      login: "Войти",
+    },
+    fogoutPassword: {
+      title: "Восстановление пароля",
+      subtitle: `Введите свою электронную почту, и мы пришлем вам код для сброса вашего
+        пароля!`,
+      mail: "Почта",
+      send: "Отправить",
+      pas: "Вспомнили пароль? ",
+      login: "Войти",
+    },
+    google: {
+      text: "Войти через Google",
     },
   },
 };
