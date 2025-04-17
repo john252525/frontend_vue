@@ -210,6 +210,19 @@ provide("selectedItem", { selectedItem });
   height: 83vh;
 }
 
+.table-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background-color: var(--scrolBg);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--scrolColor);
+  border-radius: 5px;
+}
+
 .table-header {
   position: sticky;
   top: 0;

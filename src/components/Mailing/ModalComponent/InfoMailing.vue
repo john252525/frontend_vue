@@ -134,14 +134,15 @@ watch(
   transform: translate(-50%, -50%);
   border-radius: 10px;
   padding: 25px 40px;
-  background: #ffffff;
+  background: var(--modalBg);
+  border: 0.5px solid rgb(144, 144, 144);
   z-index: 10;
 }
 
 .title {
   font-weight: 500;
   font-size: 24px;
-  color: #000;
+  color: var(--modalColor);
   margin-bottom: 34px;
   display: flex;
   align-items: center;
@@ -163,7 +164,7 @@ watch(
 h3 {
   font-weight: 500;
   font-size: 20px;
-  color: #000;
+  color: var(--modalColor);
   margin-right: 8px;
   margin-top: 16px;
 }

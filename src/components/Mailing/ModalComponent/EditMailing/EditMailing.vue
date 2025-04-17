@@ -240,7 +240,8 @@ if (selectedItem.value) {
   transform: translate(-50%, -50%);
   border-radius: 10px;
   padding: 25px 40px;
-  background: #ffffff;
+  background: var(--modalBg);
+  border: 0.5px solid rgb(144, 144, 144);
   z-index: 10;
 }
 
@@ -293,13 +294,13 @@ if (selectedItem.value) {
 .title {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--modalColor);
 }
 
 .title-mess {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--modalColor);
 }
 
 .checkbox-group {

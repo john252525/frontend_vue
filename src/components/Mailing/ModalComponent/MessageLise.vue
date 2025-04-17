@@ -119,7 +119,7 @@ onMounted(getMessages);
 .title {
   font-weight: 500;
   font-size: 24px;
-  color: #000;
+  color: var(--modalColor);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -141,7 +141,7 @@ onMounted(getMessages);
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgb(243 244 246);
+  /* background: rgb(243 244 246); */
 }
 
 table {
@@ -161,7 +161,7 @@ table {
   text-align: center;
   font-weight: 600;
   font-size: 14px;
-  color: #000000;
+  color: var(--modalColor);
   /* text-align: center; */
   /* padding: 10px; */
   border-radius: 6px;
@@ -272,7 +272,7 @@ tr:not(:last-child):after {
 }
 
 tr:hover {
-  background: rgb(243 244 246);
+  background: var(--noAccountTableHover);
 }
 
 @media (max-width: 400px) {

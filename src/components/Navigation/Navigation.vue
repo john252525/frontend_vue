@@ -5,7 +5,7 @@
   >
     <nav>
       <ThemeTogle />
-      <LangSwither />
+      <LangSwither class="theme-block" />
       <ul>
         <!-- <li class="list" @click="navigateTo('/')">
           <svg
@@ -333,12 +333,14 @@ import ThemeTogle from "../ThemeTogle.vue";
 const { stationDomen } = useDomain();
 import LangSwither from "../LangSwither.vue";
 import Spinner from "./Spinner.vue";
+
 const props = defineProps({
   phoneMenuOn: Function,
   phoneMenuStation: Boolean,
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
+
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
 
@@ -467,6 +469,12 @@ nav {
 
 .drop-item:hover .svg-icon path {
   fill: #111827;
+}
+
+.theme-block {
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 
 .page {
