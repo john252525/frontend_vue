@@ -1,7 +1,7 @@
 <template>
   <section class="container">
     <header>
-      <h2 class="title">Пополение баланса</h2>
+      <h2 class="title">{{ t("payment.title") }}</h2>
       <button @click="changeCreatePayments" class="add-account-button">
         <svg
           class="svg-icon"
@@ -14,7 +14,7 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        Пополнить
+        {{ t("payment.button") }}
       </button>
     </header>
     <PaymentsList />
@@ -29,6 +29,8 @@
 import PaymentsList from "./Component/PaymentsList.vue";
 import CreatePayments from "./Component/CreatePayments.vue";
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const createPayments = ref(false);
 

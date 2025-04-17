@@ -370,19 +370,20 @@ const createMailing = () => {
 
 <style scoped>
 .message-text {
-  border: 1px solid #e6e6e6;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #f6f6f6;
+  background: var(--input);
   padding-left: 10px;
   padding-top: 10px;
   max-width: 574px;
   min-width: 574px;
   max-height: 80px;
   min-height: 80px;
+  color: var(--text);
 }
 
 .message-text.error {
-  border: 1px solid #e6e6e6;
+  border: 1px solid var(--line);
   border-radius: 10px;
   background: #f6f6f6;
   padding-left: 10px;
@@ -443,13 +444,13 @@ const createMailing = () => {
 .title {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--text);
 }
 
 .title-mess {
   font-weight: 500;
   font-size: 16px;
-  color: #000;
+  color: var(--text);
 }
 
 .checkbox-group {
@@ -597,7 +598,7 @@ input[type="time"]:focus {
   display: inline-block;
   padding: 4px 8px;
   background: oklch(0.541 0.198 267);
-  color: white;
+  color: var(--text);
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -632,7 +633,7 @@ input[type="time"]:focus {
 
 .file-name {
   font-size: 14px;
-  color: #333;
+  color: var(--text);
 }
 
 .alphabet-comp {
@@ -662,7 +663,7 @@ input[type="time"]:focus {
   background: oklch(0.541 0.198 267);
   font-weight: 600;
   font-size: 12px;
-  color: #fff;
+  color: var(--text);
   transition: all 0.25s;
   margin-bottom: 36px;
 }

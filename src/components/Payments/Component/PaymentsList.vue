@@ -4,10 +4,12 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">ПЛАТЕЖНАЯ СИСТЕМА</th>
-            <th class="table-step">СУММА</th>
-            <th class="table-status">ДАТА</th>
-            <th class="table-action">СТАТУС</th>
+            <th class="table-login">
+              {{ t("paymentList.paySistem") }}
+            </th>
+            <th class="table-step">{{ t("paymentList.sum") }}</th>
+            <th class="table-status">{{ t("paymentList.date") }}</th>
+            <th class="table-action">{{ t("paymentList.status.table") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -23,25 +25,25 @@
               class="table-status-text canceled"
               v-if="item.status === 'canceled'"
             >
-              Отменён
+              {{ t("paymentList.status.canceled") }}
             </td>
             <td
               class="table-status-text succeeded"
               v-else-if="item.status === 'succeeded'"
             >
-              Оплачен
+              {{ t("paymentList.status.succeeded") }}
             </td>
             <td
               class="table-status-text pending"
               v-else="item.status === 'pending'"
             >
-              Ожидается
+              {{ t("paymentList.status.pending") }}
             </td>
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
             <td colspan="4">
               <div class="none-account-cont">
-                <h2>Аккаунты отсутствуют.</h2>
+                <h2>{{ t("paymentList.accountNone") }}</h2>
               </div>
             </td>
           </tr>
@@ -49,7 +51,6 @@
             <td colspan="4">
               <div class="load-cont">
                 <LoadAccount />
-                sdsa
               </div>
             </td>
           </tr>
@@ -62,6 +63,8 @@
 <script setup>
 import { ref, reactive, onMounted, provide } from "vue";
 import axios from "axios";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import LoadAccount from "/src/components/Accounts/Accounts/LoadAccount.vue";
 const payments = ref([]); // Массив для хранения платежей
 const fetchError = ref(null);

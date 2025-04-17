@@ -192,10 +192,12 @@ const getAccounts = async () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );
-
+    // 9bddaafd-2c8d-4840-96d5-1c19c0bb4bd5
+    console.log(localStorage.getItem("accountToken"));
     if (response.data.ok === true) {
       // Инициализируем accounts с loading: true
       accounts.value = response.data;

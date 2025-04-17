@@ -207,6 +207,34 @@ const messages = {
       },
       button: "Create",
     },
+    paymentList: {
+      paySistem: "PAYMENT SYSTEM",
+      sum: "AMOUNT",
+      date: "DATE",
+      status: {
+        table: "STATUS",
+        cancelled: "Canceled",
+        succeeded: "Paid",
+        pending: "Pending",
+      },
+      accountNone: "No accounts available.",
+    },
+    depositPay: {
+      title: "Top up the balance",
+      placeSum: "Enter the amount",
+      com: "Commission from 0%",
+      button: "Top up the balance",
+    },
+
+    payment: {
+      title: "Balance replenishment",
+      button: "Top up",
+    },
+    nav: {
+      account: "Accounts",
+      mailing: "Mailing lists",
+      chats: "Chats",
+    },
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -408,6 +436,33 @@ const messages = {
         three: "Отправлять сообщения в случайном порядке",
       },
       button: "Создать",
+    },
+    paymentList: {
+      paySistem: "ПЛАТЕЖНАЯ СИСТЕМА",
+      sum: "СУММА",
+      date: "ДАТА",
+      status: {
+        table: "СТАТУС",
+        canceled: "Отменён",
+        succeeded: "Оплачен",
+        pending: "Ожидается",
+      },
+      accountNone: "Аккаунты отсутствуют.",
+    },
+    depositPay: {
+      title: "Пополнение баланса",
+      placeSum: "Введите сумму",
+      com: "Комиссия от 0%",
+      button: "Пополнить баланс",
+    },
+    payment: {
+      title: "Пополение баланса",
+      button: "Пополнить",
+    },
+    nav: {
+      account: "Аккаунты",
+      mailing: "Рассылки",
+      chats: "Чаты",
     },
   },
 };

@@ -1,12 +1,12 @@
 <template>
   <div @click="changeCreatePayments" class="black-fon"></div>
   <section class="create-payments-section">
-    <h1 class="title">Пополнение баланса</h1>
+    <h1 class="title">{{ t("depositPay.title") }}</h1>
     <form @submit.prevent="checkPay">
       <input
         v-model="payments.amount"
         type="number"
-        placeholder="Введите сумму"
+        :placeholder="t('depositPay.placeSum')"
         min="0.01"
         step="0.01"
       />
@@ -18,7 +18,7 @@
         >
           <div>
             <h2>YooKassa</h2>
-            <span>Комиссия от 0%</span>
+            <span>{{ t("depositPay.com") }}</span>
           </div>
           <svg
             class="icon"
@@ -56,7 +56,7 @@
           </svg>
         </article>
       </section>
-      <button class="create-payments">Пополнить баланс</button>
+      <button class="create-payments">{{ t("depositPay.button") }}</button>
     </form>
     <h2 v-if="payments.errorMessage" class="error-message">
       {{ payments.errorMessage }}
@@ -68,6 +68,8 @@
 import { reactive, ref } from "vue";
 import axios from "axios";
 const apiUrl = import.meta.env.VITE_PAY_URL;
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = defineProps({
   changeCreatePayments: {

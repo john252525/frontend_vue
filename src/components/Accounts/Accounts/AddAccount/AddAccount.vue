@@ -268,6 +268,7 @@ const addAccount = async () => {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );
