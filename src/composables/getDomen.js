@@ -28,24 +28,21 @@ export function useDomain() {
       stationDomen.navigate.value = "whatsapi";
       stationDomen.cosmetics.logo = "WhatsApi";
       stationDomen.cosmetics.titleLogo = "WhatsApi";
-      stationDomen.cosmetics.urlLogo =
-        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+      stationDomen.cosmetics.urlLogo = "/whatsApi_logo.svg";
     }
 
     if (currentDomain.value === "helly.apitter.com") {
       stationDomen.navigate.value = "whatsapi";
       stationDomen.cosmetics.logo = "WhatsApi";
       stationDomen.cosmetics.titleLogo = "WhatsApi";
-      stationDomen.cosmetics.urlLogo =
-        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+      stationDomen.cosmetics.urlLogo = "/whatsApi_logo.svg";
     }
 
     if (currentDomain.value === "app2.developtech.ru") {
       stationDomen.navigate.value = "whatsapi";
       stationDomen.cosmetics.logo = "WhatsApi";
       stationDomen.cosmetics.titleLogo = "WhatsApi";
-      stationDomen.cosmetics.urlLogo =
-        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+      stationDomen.cosmetics.urlLogo = "/whatsApi_logo.svg";
     }
 
     if (currentDomain.value === "app1.developtech.ru") {
