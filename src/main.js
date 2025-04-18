@@ -98,7 +98,7 @@ const router = createRouter({
   routes,
 });
 
-// Точная конфигурация ограничений по доменам
+// Обновленная конфигурация ограничений по доменам
 const DOMAIN_CONFIG = {
   "app1.developtech.ru": {
     allowedRoutes: [
@@ -118,7 +118,7 @@ const DOMAIN_CONFIG = {
     redirectRoute: "/Accounts",
   },
   "app4.developtech.ru": {
-    allowedRoutes: ["Setings", "Login", "Registration", "PasswordRecovery"], // Только эти 4 маршрута разрешены
+    allowedRoutes: ["Setings", "Login", "Registration", "PasswordRecovery"],
     defaultRoute: "/settings",
     redirectRoute: "/settings",
   },
@@ -128,16 +128,26 @@ const checkRouteAccess = (to, domain) => {
   const config = DOMAIN_CONFIG[domain];
   if (!config) return { allowed: true };
 
-  if (config.allowedRoutes) {
+  // Для app1 разрешаем только указанные маршруты
+  if (domain === "app1.developtech.ru") {
     return {
       allowed: config.allowedRoutes.includes(to.name),
       redirect: config.redirectRoute,
     };
   }
 
-  if (config.blockedRoutes) {
+  // Для app2 запрещаем только указанные маршруты
+  if (domain === "app2.developtech.ru") {
     return {
       allowed: !config.blockedRoutes.includes(to.name),
+      redirect: config.redirectRoute,
+    };
+  }
+
+  // Для app4 разрешаем только указанные маршруты
+  if (domain === "app4.developtech.ru") {
+    return {
+      allowed: config.allowedRoutes.includes(to.name),
       redirect: config.redirectRoute,
     };
   }
@@ -161,14 +171,19 @@ router.beforeEach(async (to, from, next) => {
   const currentDomain = window.location.hostname;
   const token = localStorage.getItem("accountToken");
 
-  if (to.name && to.name !== "NotFound") {
-    const access = checkRouteAccess(to, currentDomain);
-    if (!access.allowed) {
-      console.warn(`Доступ запрещен для ${to.path} на домене ${currentDomain}`);
-      return next(access.redirect || "/");
-    }
+  // Пропускаем проверку для NotFound
+  if (to.name === "NotFound") {
+    return next();
   }
 
+  // Проверка ограничений доступа по домену
+  const access = checkRouteAccess(to, currentDomain);
+  if (!access.allowed) {
+    console.warn(`Доступ запрещен для ${to.path} на домене ${currentDomain}`);
+    return next(access.redirect || "/");
+  }
+
+  // Проверка авторизации
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );
@@ -183,6 +198,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // Обновление метаданных страницы
   try {
     const { stationDomen } = useDomain();
     const pageTitle = stationDomen?.cosmetics?.titleLogo
