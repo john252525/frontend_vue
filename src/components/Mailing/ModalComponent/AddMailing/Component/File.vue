@@ -299,7 +299,7 @@ async function createWhatsAppBroadcast() {
 
   // Параметры запроса
   const params = {
-    token: "d7039fe337873da68d28945cd6e5c61d",
+    token: localStorage.getItem("accountToken"),
     name: nameMailing.value,
     base: inputText.value,
     file_base: otherFile.value,

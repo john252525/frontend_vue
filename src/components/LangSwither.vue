@@ -14,13 +14,13 @@ const changeListOpen = () => {
 const switchLanguage = (language) => {
   locale.value = language;
   localStorage.setItem("lang", language);
-  lang.value = language === "ru" ? "Русский" : "Англиский";
+  lang.value = language === "ru" ? "Русский" : "English";
   listOpen.value = false;
 };
 
 const selectLeng = () => {
-  const savedLang = localStorage.getItem("lang") || "ru";
-  lang.value = savedLang === "ru" ? "Русский" : "Англиский";
+  const savedLang = localStorage.getItem("lang");
+  lang.value = savedLang === "ru" ? "Русский" : "English";
 };
 
 const handleClickOutside = (event) => {
@@ -56,7 +56,7 @@ onUnmounted(() => {
           @click="switchLanguage('en')"
           class="list-text"
         >
-          <img class="svg-icon" src="/flag/america.svg" alt="" /> Англиский
+          <img class="svg-icon" src="/flag/america.svg" alt="" /> English
         </li>
       </ul>
     </div>

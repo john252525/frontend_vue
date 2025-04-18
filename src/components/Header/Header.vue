@@ -18,7 +18,7 @@
         </h2>
       </article>
       <article class="user-cont">
-        <TogleTheme />
+        <!-- <TogleTheme /> -->
         <h2
           v-if="balance || balance === 0"
           @click="toggleBalanceStation"
@@ -142,7 +142,7 @@ onMounted(getBalance);
   display: flex;
   align-items: center;
   gap: 16px;
-  width: 170px;
+  width: 120px;
 }
 
 .balance-user {

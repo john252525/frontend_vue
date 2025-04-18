@@ -58,7 +58,7 @@ const deleteMailing = async () => {
   loadStation.value = true;
   const apiUrlMethod = `${apiUrl}/delete/${selectedItem.value.id}/`;
   const params = {
-    token: "d7039fe337873da68d28945cd6e5c61d",
+    token: localStorage.getItem("accountToken"),
   };
   try {
     const response = await axios.post(apiUrlMethod, params, {

@@ -90,6 +90,19 @@ const router = createRouter({
   routes,
 });
 
+const getDefaultPath = () => {
+  return window.location.hostname === "app4.developtech.ru"
+    ? "/settings"
+    : "/Accounts";
+};
+
+// Модифицируем маршрут для главной страницы
+const mainRouteIndex = routes.findIndex((r) => r.path === "/");
+if (mainRouteIndex !== -1) {
+  routes[mainRouteIndex].component =
+    getDefaultPath() === "/settings" ? Setings : PersonalAccount;
+}
+
 // Функция для обновления метаданных страницы
 const updatePageMetadata = (title, logoUrl) => {
   document.title = title || "Ваше приложение";
@@ -106,6 +119,9 @@ const updatePageMetadata = (title, logoUrl) => {
 
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem("accountToken");
+  if (to.path === "/") {
+    return next(getDefaultPath());
+  }
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );

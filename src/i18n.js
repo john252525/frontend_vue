@@ -6,6 +6,8 @@ import GetByCode from "./components/Accounts/Accounts/ModalAccount/GetByCode/Get
 import EditMailing from "./components/Mailing/ModalComponent/EditMailing/EditMailing.vue";
 import { min } from "lodash";
 import Checbox from "./components/Chats/UserList/newMessageComponent/Checbox.vue";
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 
 const messages = {
   en: {
@@ -536,7 +538,10 @@ const messages = {
 
 const i18n = createI18n({
   legacy: false, // для Composition API
-  locale: localStorage.getItem("lang") || "ru", // язык по умолчанию
+  locale:
+    window.location.hostname === "app1.developtech.ru"
+      ? "en"
+      : localStorage.getItem("lang") || "ru",
   fallbackLocale: "en",
   messages,
 });

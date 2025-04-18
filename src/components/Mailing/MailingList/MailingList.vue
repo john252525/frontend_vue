@@ -135,7 +135,7 @@ const modalPosition = ref({ top: 0, left: 0 });
 
 const getMailingLists = async () => {
   loadDataStation.value = true;
-  const token = "d7039fe337873da68d28945cd6e5c61d";
+  const token = localStorage.getItem("accountToken");
   const apiUrlMethod = `${apiUrl}/list/`;
   try {
     const response = await axios.get(apiUrlMethod, {

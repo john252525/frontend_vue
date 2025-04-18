@@ -76,7 +76,7 @@ const getMessages = async () => {
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
-        token: "d7039fe337873da68d28945cd6e5c61d",
+        token: localStorage.getItem("accountToken"),
         limit: 10,
         offset: 0,
         sort: "asc",

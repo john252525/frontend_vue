@@ -181,7 +181,7 @@ async function editWhatsAppBroadcast() {
   const url = `${apiUrl}/edit/${items.value.id}/`;
 
   const params = {
-    token: "d7039fe337873da68d28945cd6e5c61d",
+    token: localStorage.getItem("accountToken"),
     days: items.value.options.days,
     time_from: items.value.options.hours.min,
     time_to: items.value.options.hours.max,
