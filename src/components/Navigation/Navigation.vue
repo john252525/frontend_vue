@@ -116,6 +116,7 @@
     class="pc-menu"
     v-if="!isChatPage && stationDomen.navigate.value === 'touchapi'"
   >
+    <LangSwither class="theme-block" />
     <nav>
       <ul>
         <!-- <li class="list" @click="navigateTo('/')">
