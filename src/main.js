@@ -14,10 +14,12 @@ import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import Setings from "./pages/Setings.vue";
+import NotFound from "./pages/NotFound.vue";
 import { useDomain } from "@/composables/getDomen";
 import i18n from "./i18n";
 import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
+
 const pinia = createPinia();
 
 const routes = [
@@ -36,7 +38,7 @@ const routes = [
   {
     path: "/",
     name: "MainPage",
-    component: PersonalAccount,
+    component: () => import("./pages/Redirect.vue"),
     meta: { title: "Главная страница" },
   },
   {
@@ -83,6 +85,12 @@ const routes = [
     component: Payments,
     meta: { title: "Платежи" },
   },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: NotFound,
+    meta: { title: "Страница не найдена" },
+  },
 ];
 
 const router = createRouter({
@@ -90,24 +98,56 @@ const router = createRouter({
   routes,
 });
 
-const getDefaultPath = () => {
-  return window.location.hostname === "app4.developtech.ru"
-    ? "/settings"
-    : "/Accounts";
+// Точная конфигурация ограничений по доменам
+const DOMAIN_CONFIG = {
+  "app1.developtech.ru": {
+    allowedRoutes: [
+      "PersonalAccount",
+      "Login",
+      "Registration",
+      "PasswordRecovery",
+      "payments",
+    ],
+    defaultRoute: "/Accounts",
+    redirectRoute: "/Accounts",
+  },
+  "app2.developtech.ru": {
+    allowedRoutes: null,
+    blockedRoutes: ["Setings"],
+    defaultRoute: "/Accounts",
+    redirectRoute: "/Accounts",
+  },
+  "app4.developtech.ru": {
+    allowedRoutes: ["Setings", "Login", "Registration", "PasswordRecovery"], // Только эти 4 маршрута разрешены
+    defaultRoute: "/settings",
+    redirectRoute: "/settings",
+  },
 };
 
-// Модифицируем маршрут для главной страницы
-const mainRouteIndex = routes.findIndex((r) => r.path === "/");
-if (mainRouteIndex !== -1) {
-  routes[mainRouteIndex].component =
-    getDefaultPath() === "/settings" ? Setings : PersonalAccount;
-}
+const checkRouteAccess = (to, domain) => {
+  const config = DOMAIN_CONFIG[domain];
+  if (!config) return { allowed: true };
 
-// Функция для обновления метаданных страницы
+  if (config.allowedRoutes) {
+    return {
+      allowed: config.allowedRoutes.includes(to.name),
+      redirect: config.redirectRoute,
+    };
+  }
+
+  if (config.blockedRoutes) {
+    return {
+      allowed: !config.blockedRoutes.includes(to.name),
+      redirect: config.redirectRoute,
+    };
+  }
+
+  return { allowed: true };
+};
+
 const updatePageMetadata = (title, logoUrl) => {
-  document.title = title || "Ваше приложение";
+  document.title = title || "Touch-API";
 
-  // Обновляем favicon
   let favicon = document.querySelector('link[rel="icon"]');
   if (!favicon) {
     favicon = document.createElement("link");
@@ -118,22 +158,36 @@ const updatePageMetadata = (title, logoUrl) => {
 };
 
 router.beforeEach(async (to, from, next) => {
+  const currentDomain = window.location.hostname;
   const token = localStorage.getItem("accountToken");
-  if (to.path === "/") {
-    return next(getDefaultPath());
+
+  if (to.name && to.name !== "NotFound") {
+    const access = checkRouteAccess(to, currentDomain);
+    if (!access.allowed) {
+      console.warn(`Доступ запрещен для ${to.path} на домене ${currentDomain}`);
+      return next(access.redirect || "/");
+    }
   }
+
   const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
     to.name
   );
 
-  // Получаем данные домена
-  const { stationDomen } = useDomain();
+  if (token) {
+    if (isAuthPage) {
+      return next({ name: "PersonalAccount" });
+    }
+  } else {
+    if (!isAuthPage) {
+      return next({ name: "Login" });
+    }
+  }
 
   try {
-    // Устанавливаем заголовок страницы с учетом доменных данных
+    const { stationDomen } = useDomain();
     const pageTitle = stationDomen?.cosmetics?.titleLogo
       ? `${to.meta.title} | ${stationDomen.cosmetics.titleLogo}`
-      : to.meta.title || "Ваше приложение";
+      : to.meta.title || "Touch-API";
 
     updatePageMetadata(pageTitle, stationDomen?.cosmetics?.urlLogo);
   } catch (error) {
@@ -141,24 +195,11 @@ router.beforeEach(async (to, from, next) => {
     updatePageMetadata(to.meta.title);
   }
 
-  if (token) {
-    if (isAuthPage) {
-      next({ name: "PersonalAccount" });
-    } else {
-      next();
-    }
-  } else {
-    if (!isAuthPage) {
-      next({ name: "Login" });
-    } else {
-      next();
-    }
-  }
+  next();
 });
 
 const app = createApp(App);
 
-// Глобальная обработка ошибок
 app.config.errorHandler = (err) => {
   console.error("Глобальная ошибка Vue:", err);
 };
@@ -167,13 +208,10 @@ app.use(pinia);
 app.use(router);
 app.use(i18n);
 
-const theme = useThemeStore();
+const themeStore = useThemeStore();
 document.documentElement.setAttribute(
   "data-theme",
-  theme.isDark ? "dark" : "light"
+  themeStore.isDark ? "dark" : "light"
 );
 
-// Отложенное монтирование для инициализации данных
-app.mount("#app").then(() => {
-  console.log("Приложение успешно монтировано");
-});
+app.mount("#app");
