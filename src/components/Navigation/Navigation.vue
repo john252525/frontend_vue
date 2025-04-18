@@ -143,7 +143,7 @@
           </svg>
           <p class="page">{{ t("nav.account") }}</p>
         </li>
-        <li class="list" @click="openList">
+        <!-- <li class="list" @click="openList">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="svg-icon"
@@ -159,7 +159,7 @@
             </g>
           </svg>
           <p class="page">База данных</p>
-        </li>
+        </li> -->
       </ul>
       <ul v-if="isOpen">
         <li @click="navigateTo('/chatsdatabase')" class="drop-item">
