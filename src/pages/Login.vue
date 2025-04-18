@@ -137,7 +137,7 @@ const loginAccount = async () => {
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
       console.log(response.data);
-      // location.reload();
+      location.reload();
     } else {
       inputStyle.incorrectPassword = true;
       inputStyle.incorrectPasswordMessage = response.data.error_message;
