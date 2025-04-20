@@ -4,6 +4,7 @@
     :changeAddAccountStation="changeAddAccountStation"
     v-if="addAccountStation"
   />
+
   <div class="chat-container">
     <!-- <CheckUserImage /> -->
     <button
@@ -184,6 +185,7 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import CheckUserImage from "../CheckUserImage.vue";
 import { useRouter, useRoute } from "vue-router";
 import NewMessageSend from "./newMessageForUser.vue";
+
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;

@@ -1,5 +1,9 @@
 <template>
-  <section class="pc-version" v-if="!isMobile && userInfo">
+  <LoadingMultiChat
+    :changeLoadChatMulti="changeLoadChatMulti"
+    v-if="loadChatMulti"
+  />
+  <section class="pc-version" v-if="!isMobile && userInfo && !loadChatMulti">
     <CheckUserImage
       :changeImageStation="changeImageStation"
       :userImageUrl="userImageUrl"
@@ -59,6 +63,7 @@ import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 import axios from "axios";
 import CheckUserImage from "./CheckUserImage.vue";
+import LoadingMultiChat from "./LoadingMultiChat.vue";
 
 const style = reactive({
   userList: {
@@ -83,6 +88,11 @@ const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const imgageStation = ref(false);
 const userImageUrl = ref(null);
+const loadChatMulti = ref(true);
+
+const changeLoadChatMulti = () => {
+  loadChatMulti.value = false;
+};
 
 const changeImageStation = (chat, value) => {
   imgageStation.value = !imgageStation.value;
@@ -160,9 +170,7 @@ const clearNewMessages = async (uniq) => {
 
 onMounted(() => {
   const connectEventSource = () => {
-    const eventSource = new EventSource(
-      `${apiUrl}/events`
-    );
+    const eventSource = new EventSource(`${apiUrl}/events`);
 
     const receivedMessageIds =
       JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
