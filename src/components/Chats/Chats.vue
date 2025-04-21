@@ -58,12 +58,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, computed, onBeforeUnmount } from "vue";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 import axios from "axios";
 import CheckUserImage from "./CheckUserImage.vue";
 import LoadingMultiChat from "./LoadingMultiChat.vue";
+import { useRouter, useRoute } from "vue-router";
+const route = useRoute();
 
 const style = reactive({
   userList: {
@@ -77,6 +79,10 @@ const style = reactive({
 const webhookEventData = ref({
   hook_type: null,
   // ... другие свойства с начальными значениями
+});
+
+const isMulti = computed(() => {
+  return route.query.multi === "true"; // Проверяем значение multi
 });
 
 const chats = ref(null);
@@ -208,7 +214,11 @@ onMounted(() => {
 });
 
 onMounted(() => {
-  // Проверяем мобильное устройство при монтировании
+  if (isMulti.value) {
+    loadChatMulti.value = true;
+  } else {
+    loadChatMulti.value = false;
+  }
   checkIfMobile();
 
   // Добавляем обработчик события изменения размера окна

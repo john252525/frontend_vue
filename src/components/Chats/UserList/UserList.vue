@@ -548,7 +548,7 @@ const formatLastMessage = (message, chat) => {
   } else if (chat.lastMessageType === "text") {
     return message;
   } else {
-    return "Медиа";
+    return "  ";
   }
 };
 

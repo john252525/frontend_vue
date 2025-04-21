@@ -8,11 +8,9 @@
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-        >
-          <!-- SVG иконка -->
-        </svg>
+        ></svg>
       </div>
-      <div class="loading-text">{{ currentStatus }}</div>
+      <div class="loading-text">Загрузка общих чатов</div>
       <div class="loading-progress">
         <div class="progress-bar"></div>
       </div>
@@ -30,30 +28,17 @@ const props = defineProps({
   },
 });
 
-const loading = ref({
-  telegram: false,
-  whatsapp: false,
-});
-const completed = ref(false);
-const telegramCompleted = ref(false);
-const whatsappCompleted = ref(false);
 const currentStatus = ref("Загрузка общих чатов...");
-const premiumAccounts = ref([]);
-
-const progress = computed(() => {
-  if (completed.value) return 100;
-  if (loading.value.whatsapp) return 66;
-  if (loading.value.telegram) return 33;
-  return 0;
-});
+const progress = ref(0);
+const completed = ref(false);
 
 const getAccountInfo = async (source, login) => {
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfo",
       {
-        source: source,
-        login: login,
+        source,
+        login,
       },
       {
         headers: {
@@ -71,13 +56,11 @@ const getAccountInfo = async (source, login) => {
 
 const fetchAccounts = async (source) => {
   try {
-    loading.value[source] = true;
     currentStatus.value = `Загрузка ${source} аккаунтов...`;
-
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
-        source: source,
+        source,
         skipDetails: true,
       },
       {
@@ -91,110 +74,98 @@ const fetchAccounts = async (source) => {
   } catch (error) {
     console.error(`Ошибка при получении ${source} аккаунтов:`, error);
     return [];
-  } finally {
-    loading.value[source] = false;
-    if (source === "telegram") telegramCompleted.value = true;
-    if (source === "whatsapp") whatsappCompleted.value = true;
-  }
-};
-
-const saveToLocalStorage = (accounts) => {
-  try {
-    // Получаем текущие данные из localStorage
-    const storedData = localStorage.getItem("loginWhatsAppChatsStep");
-    let existingLogins = [];
-
-    // Проверяем, есть ли данные и они являются валидным JSON
-    if (storedData && storedData !== "[object Object]") {
-      try {
-        existingLogins = JSON.parse(storedData);
-        // Дополнительная проверка, что это массив
-        if (!Array.isArray(existingLogins)) {
-          console.warn(
-            "Данные в localStorage не являются массивом, создаем новый массив"
-          );
-          existingLogins = [];
-        }
-      } catch (e) {
-        console.error("Ошибка парсинга данных из localStorage:", e);
-        existingLogins = [];
-      }
-    }
-
-    // Создаем Set для быстрой проверки уникальности
-    const existingSet = new Set(
-      existingLogins.map((item) => `${item.login}|${item.source}`)
-    );
-
-    // Добавляем только новые уникальные аккаунты
-    const newAccounts = accounts.filter(
-      (account) => !existingSet.has(`${account.login}|${account.source}`)
-    );
-
-    if (newAccounts.length > 0) {
-      const updatedLogins = [...existingLogins, ...newAccounts];
-      localStorage.setItem(
-        "loginWhatsAppChatsStep",
-        JSON.stringify(updatedLogins)
-      );
-      console.log("Данные успешно сохранены в localStorage");
-    } else {
-      console.log("Нет новых аккаунтов для сохранения");
-      console.log(localStorage.getItem("loginWhatsAppChatsStep"));
-    }
-
-    props.changeLoadChatMulti();
-  } catch (error) {
-    console.error("Критическая ошибка при сохранении в localStorage:", error);
-    // В случае критической ошибки сохраняем только новые аккаунты
-    localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
   }
 };
 
 const processAccounts = async (accounts, source) => {
+  const BATCH_SIZE = 5; // Обрабатываем по 5 аккаунтов одновременно
   const resultAccounts = [];
 
-  for (const account of accounts) {
-    try {
-      currentStatus.value = `Проверка ${source}: ${account.login}`;
-      const info = await getAccountInfo(source, account.login);
+  for (let i = 0; i < accounts.length; i += BATCH_SIZE) {
+    const batch = accounts.slice(i, i + BATCH_SIZE);
+    currentStatus.value = `Проверка ${source} (${Math.min(
+      i + BATCH_SIZE,
+      accounts.length
+    )}/${accounts.length})`;
 
-      if (info?.data?.step?.value === 5) {
-        resultAccounts.push({
-          login: account.login,
-          source: source,
-        });
-      }
-    } catch (error) {
-      console.error(`Ошибка при обработке аккаунта ${account.login}:`, error);
-    }
+    const batchPromises = batch.map((account) =>
+      getAccountInfo(source, account.login)
+        .then((info) => {
+          if (info?.data?.step?.value === 5) {
+            resultAccounts.push({
+              login: account.login,
+              source,
+            });
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.error(
+            `Ошибка при обработке аккаунта ${account.login}:`,
+            error
+          );
+          return null;
+        })
+    );
+
+    await Promise.all(batchPromises);
+    progress.value =
+      Math.floor(((i + BATCH_SIZE) / accounts.length) * 50) +
+      (source === "telegram" ? 0 : 50);
   }
 
   return resultAccounts;
 };
 
+const saveToLocalStorage = (accounts) => {
+  try {
+    const storedData = localStorage.getItem("loginWhatsAppChatsStep");
+    const existingLogins = storedData ? JSON.parse(storedData) : [];
+
+    if (!Array.isArray(existingLogins)) {
+      console.warn("Некорректные данные в localStorage, создаем новый массив");
+      existingLogins = [];
+    }
+
+    const existingSet = new Set(
+      existingLogins.map((item) => `${item.login}|${item.source}`)
+    );
+
+    const newAccounts = accounts.filter(
+      (account) => !existingSet.has(`${account.login}|${account.source}`)
+    );
+
+    if (newAccounts.length > 0) {
+      localStorage.setItem(
+        "loginWhatsAppChatsStep",
+        JSON.stringify([...existingLogins, ...newAccounts])
+      );
+    }
+  } catch (error) {
+    console.error("Ошибка при сохранении в localStorage:", error);
+    localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
+  }
+};
+
 const processAllAccounts = async () => {
   try {
-    // Сброс состояния
+    progress.value = 0;
     completed.value = false;
-    telegramCompleted.value = false;
-    whatsappCompleted.value = false;
-    premiumAccounts.value = [];
-    currentStatus.value = "Загрузка общих чатов...";
 
-    // Обработка Telegram
-    const telegramAccounts = await fetchAccounts("telegram");
-    const telegramPremium = await processAccounts(telegramAccounts, "telegram");
+    // Параллельная загрузка аккаунтов из обоих источников
+    const [telegramAccounts, whatsappAccounts] = await Promise.all([
+      fetchAccounts("telegram"),
+      fetchAccounts("whatsapp"),
+    ]);
 
-    // Обработка WhatsApp
-    const whatsappAccounts = await fetchAccounts("whatsapp");
-    const whatsappPremium = await processAccounts(whatsappAccounts, "whatsapp");
+    // Параллельная обработка аккаунтов
+    const [telegramPremium, whatsappPremium] = await Promise.all([
+      processAccounts(telegramAccounts, "telegram"),
+      processAccounts(whatsappAccounts, "whatsapp"),
+    ]);
 
-    // Объединяем результаты
     const resultAccounts = [...telegramPremium, ...whatsappPremium];
-    premiumAccounts.value = resultAccounts;
 
-    // Сохраняем результат
     if (resultAccounts.length > 0) {
       saveToLocalStorage(resultAccounts);
     } else {
@@ -203,6 +174,8 @@ const processAllAccounts = async () => {
 
     completed.value = true;
     currentStatus.value = "Проверка завершена";
+    progress.value = 100;
+    props.changeLoadChatMulti?.();
   } catch (error) {
     console.error("Ошибка в основном потоке:", error);
     currentStatus.value = "Ошибка при проверке";
