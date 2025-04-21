@@ -27,7 +27,11 @@
       :changeImageStation="changeImageStation"
     />
   </section>
-  <section class="phone-version" v-if="isMobile && userInfo">
+  <section class="phone-version" v-if="isMobile && userInfo && !loadChatMulti">
+    <LoadingMultiChat
+      :changeLoadChatMulti="changeLoadChatMulti"
+      v-if="loadChatMulti"
+    />
     <CheckUserImage
       :changeImageStation="changeImageStation"
       :userImageUrl="userImageUrl"
