@@ -139,8 +139,10 @@ const getMailingLists = async () => {
   const apiUrlMethod = `${apiUrl}/list/`;
   try {
     const response = await axios.get(apiUrlMethod, {
-      params: {
-        token,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
     mailingLists.value = response.data.result.items;

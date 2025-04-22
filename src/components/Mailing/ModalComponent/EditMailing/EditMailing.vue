@@ -181,7 +181,6 @@ async function editWhatsAppBroadcast() {
   const url = `${apiUrl}/edit/${items.value.id}/`;
 
   const params = {
-    token: localStorage.getItem("accountToken"),
     days: items.value.options.days,
     time_from: items.value.options.hours.min,
     time_to: items.value.options.hours.max,
@@ -196,7 +195,9 @@ async function editWhatsAppBroadcast() {
   try {
     const response = await axios.post(url, params, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
     if (response.data.ok === true) {

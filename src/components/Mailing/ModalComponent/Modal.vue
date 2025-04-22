@@ -99,9 +99,11 @@ const updateStatus = async (state) => {
     token: localStorage.getItem("accountToken"),
   };
   try {
-    const response = await axios.post(apiUrlMethod, params, {
+    const response = await axios.post(apiUrlMethod, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
 
@@ -143,10 +145,14 @@ const getMessages = async () => {
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
-        token: localStorage.getItem("accountToken"),
         limit: 10,
         offset: 0,
         sort: "asc",
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
 

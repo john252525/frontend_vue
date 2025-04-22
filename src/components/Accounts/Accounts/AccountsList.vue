@@ -22,7 +22,7 @@
               class="table-text"
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
-              v-if="item.step.value"
+              v-if="item.step"
             >
               {{ item.step.value }}
             </td>
@@ -247,7 +247,7 @@ const getAccounts = async () => {
             }
 
             // Проверяем, если step равен 5
-            if (instance.step.value === 5) {
+            if (instance.step[0].value === 5) {
               console.log(instance);
               let existingLogins;
 

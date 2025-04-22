@@ -299,7 +299,6 @@ async function createWhatsAppBroadcast() {
 
   // Параметры запроса
   const params = {
-    token: localStorage.getItem("accountToken"),
     name: nameMailing.value,
     base: inputText.value,
     file_base: otherFile.value,
@@ -318,7 +317,9 @@ async function createWhatsAppBroadcast() {
   try {
     const response = await axios.post(url, params, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
     if (response.data.ok === true) {

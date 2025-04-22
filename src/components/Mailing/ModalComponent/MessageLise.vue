@@ -76,10 +76,14 @@ const getMessages = async () => {
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
-        token: localStorage.getItem("accountToken"),
         limit: 10,
         offset: 0,
         sort: "asc",
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
 

@@ -61,9 +61,11 @@ const deleteMailing = async () => {
     token: localStorage.getItem("accountToken"),
   };
   try {
-    const response = await axios.post(apiUrlMethod, params, {
+    const response = await axios.post(apiUrlMethod, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
 
