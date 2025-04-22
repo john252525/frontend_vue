@@ -13,19 +13,25 @@ export default defineConfig({
   server: {
     port: 5000,
     host: "0.0.0.0",
-  },
-  // Добавьте эти настройки:
-  build: {
-    outDir: "../frontend_vue/dist", // Явно указываем путь
-    assetsDir: "assets", // Все ассеты в папку assets
-    rollupOptions: {
-      output: {
-        assetFileNames: "assets/[name].[ext]", // Формат имен файлов
-        chunkFileNames: "assets/[name].js",
-        entryFileNames: "assets/[name].js",
-      },
+    // Добавляем заголовки для dev-сервера
+    headers: {
+      "Content-Type": "application/javascript",
     },
   },
-  // Для корректных MIME-типов в dev-режиме
-  base: "./",
+  build: {
+    outDir: "../frontend_vue/dist",
+    assetsDir: "assets",
+    rollupOptions: {
+      output: {
+        // Улучшенный формат имен файлов
+        assetFileNames: "assets/[name]-[hash].[ext]",
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+      },
+    },
+    // Включаем минификацию
+    minify: "terser",
+  },
+  // Критически важное изменение:
+  base: "/", // Убираем точку (используем абсолютные пути)
 });
