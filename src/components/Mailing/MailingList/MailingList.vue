@@ -140,7 +140,7 @@ const getMailingLists = async () => {
   try {
     const response = await axios.get(apiUrlMethod, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
