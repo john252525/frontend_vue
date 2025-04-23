@@ -28,7 +28,7 @@ export function useDomain() {
       stationDomen.navigate.value = "whatsapi";
       stationDomen.cosmetics.logo = "WhatsApi";
       stationDomen.cosmetics.titleLogo = "WhatsApi";
-      stationDomen.cosmetics.urlLogo = "/whatsApi_logo.svg";
+      stationDomen.cosmetics.urlLogo = "https://sendeyo.com/en/89a797b1b6";
     }
 
     if (currentDomain.value === "helly.apitter.com") {

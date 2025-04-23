@@ -46,20 +46,33 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const { selectedItem, getScreenStation } = toRefs(props);
-const { source, login } = selectedItem.value;
+const { source, login, storage } = selectedItem.value;
 
 const getScreen = async () => {
   //   const { source, login } = selectedItems.value;
-
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/screenshot`,
-      {
-        source: "whatsapp",
-        login: "helly",
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

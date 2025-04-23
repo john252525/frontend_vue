@@ -22,13 +22,16 @@ const router = useRouter();
 const { startFunc, offQrCodeStation } = inject("accountItems");
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem } = inject("accountItems");
-const { source, login } = selectedItem.value;
+const { source, login, storage } = selectedItem.value;
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 
 const stationLoading = ref(false);
 const qrCodeData = reactive({
@@ -40,13 +43,26 @@ let intervalId = null; // Для хранения идентификатора �
 let previousLink = ""; // Для хранения предыдущей ссылки
 
 const getQr = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getQr",
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -84,13 +100,26 @@ const getQr = async () => {
 
 const enablePhoneAuth = async () => {
   stationLoading.value = true;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/enablePhoneAuth`,
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

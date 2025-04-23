@@ -195,7 +195,7 @@
     class="black-fon"
     @click="phoneMenuOn"
   >
-    <aside class="phone-menu" @click.stop>
+    <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
       <div class="logo-header-cont">
         <h2 class="logo-header">
           <img
@@ -320,7 +320,7 @@
     class="black-fon"
     @click="phoneMenuOn"
   >
-    <aside class="phone-menu" @click.stop>
+    <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
       <LangSwither class="theme-block" />
       <div class="logo-header-cont">
         <h2 class="logo-header">
@@ -403,7 +403,7 @@
     class="black-fon"
     @click="phoneMenuOn"
   >
-    <aside class="phone-menu" @click.stop>
+    <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
       <LangSwither class="theme-block" />
       <div class="logo-header-cont">
         <h2 class="logo-header">
@@ -458,7 +458,7 @@
     class="black-fon"
     @click="phoneMenuOn"
   >
-    <aside class="phone-menu" @click.stop>
+    <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
       <LangSwither class="theme-block" />
       <div class="logo-header-cont">
         <h2 class="logo-header">
@@ -607,7 +607,6 @@ nav {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    /* transform: translate(-50%, -48%); */
   }
   to {
     opacity: 1;
@@ -673,6 +672,15 @@ nav {
   fill: var(--iconNavHover);
 }
 
+.phone-menu nav ul {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out 0.1s;
+}
+
+.phone-menu.active nav ul {
+  opacity: 1;
+}
+
 .phone-menu-chat {
   width: 260px;
   height: 100vh;
@@ -683,12 +691,23 @@ nav {
 }
 
 .phone-menu {
+  position: fixed;
+  top: 0;
+  left: -230px; /* Скрыто за пределами экрана */
   width: 230px;
   height: 100vh;
-  box-sizing: border-box;
-  position: fixed;
-  z-index: 10;
   background: var(--bg);
+  /* transition: all 0.3s ease; */
+  z-index: 1000; /* Должен быть выше оверлея */
+}
+
+.phone-menu.active {
+  left: 0;
+  /* transition: all 0.3s ease; */
+}
+
+.phone-menu {
+  will-change: transform, left;
 }
 
 .logo-phone-cont {

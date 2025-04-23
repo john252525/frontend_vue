@@ -10,10 +10,16 @@
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("account.accounts") }}</h2>
-      <h2 class="account">{{ platformStationText }}</h2>
+      <h2 v-if="stationDomen.navigate.value != 'whatsapi'" class="account">
+        {{ platformStationText }}
+      </h2>
     </section>
     <section class="account-section">
-      <button @click="openPlatformChoice" class="account-list-button">
+      <button
+        v-if="stationDomen.navigate.value != 'whatsapi'"
+        @click="openPlatformChoice"
+        class="account-list-button"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="bi bi-view-list"
@@ -78,6 +84,9 @@ const platformStationText = localStorage.getItem("accountStationText");
 const platformStation = ref(false);
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 
 function openPlatformChoice() {
   platformStation.value = !platformStation.value;

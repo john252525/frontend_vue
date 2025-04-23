@@ -29,7 +29,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const code = ref("");
 const { selectedItem, offQrQrStation, startFunc } = inject("accountItems");
-const { source, login } = selectedItem.value;
+const { source, login, storage } = selectedItem.value;
 const { changeEnableStation } = inject("changeEnableStation");
 const station = reactive({
   station: undefined,
@@ -37,7 +37,8 @@ const station = reactive({
   code: true,
   resultTrue: false,
 });
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -47,14 +48,28 @@ const solveChallenge = async () => {
   console.log(code.value);
   station.loading = true;
   station.code = false;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      code: `{{ ${code.value} }}`,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      code: `{{ ${code.value} }}`,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/solveChallenge`,
-      {
-        source: source,
-        login: login,
-        code: `{{ ${code.value} }}`,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

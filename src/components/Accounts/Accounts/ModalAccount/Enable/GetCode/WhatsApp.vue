@@ -30,7 +30,8 @@ const station = reactive({
   error: false,
   text: "",
 });
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -38,7 +39,7 @@ const chaneErrorBlock = () => {
 let authCodeInterval = null;
 const isRunning = ref(false);
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
-const { source, login } = selectedItem.value;
+const { source, login, storage } = selectedItem.value;
 const userCode = ref(null);
 const formatPhone = () => {
   const cleaned = phone.value.replace(/\D/g, "");
@@ -132,13 +133,26 @@ const enablePhoneAuth = async () => {
 };
 
 const disablePhoneAuth = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/disablePhoneAuth",
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -201,13 +215,26 @@ const setState = async () => {
 };
 
 const getAuthCode = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getAuthCode",
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

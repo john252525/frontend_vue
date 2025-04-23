@@ -2,7 +2,17 @@
   <div class="error-container">
     <section class="result-section">
       <div class="circle">
-        <img src="/loadModal/close.svg" alt="" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#b73131"
+            d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+          />
+        </svg>
       </div>
       <p class="error-message">
         {{ t("result.false.message.one") }} <br />

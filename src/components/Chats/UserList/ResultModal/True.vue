@@ -2,7 +2,21 @@
   <div class="error-container">
     <section class="result-section">
       <div class="circle">
-        <img src="/loadModal/checkmark.svg" alt="" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="none"
+            stroke="#1b632b"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m4 12l6 6L20 6"
+          />
+        </svg>
       </div>
       <p class="error-message">Сообщение отправленно</p>
     </section>

@@ -16,6 +16,10 @@
             :key="index"
           >
             <td class="table-text-number">
+              <AccountIcon
+                v-if="stationDomen.navigate.value === 'whatsapi'"
+                :item="item"
+              />
               {{ formatPhoneNumber(item.login) }}
             </td>
             <td
@@ -32,6 +36,11 @@
             <td class="table-text" v-else>-</td>
             <td class="table-action-text">
               <button
+                v-if="
+                  (item.storage === 'local' && item.type === 'undefined') ||
+                  (item.storage === 'binder' && item.type === 'touchapi') ||
+                  (item.storage === 'undefined' && item.type === 'whatsapi')
+                "
                 class="action-table-button"
                 @click="openModal($event, item)"
               >
@@ -136,11 +145,15 @@ import QrModal from "./ModalAccount/qrModal.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadAccount from "./LoadAccount.vue";
+import AccountIcon from "../AccountIcon.vue";
 const dataAccount = reactive({
   token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
   source: "telegram",
   error: null,
 });
+
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -180,14 +193,26 @@ const chaneErrorBlock = () => {
 };
 
 const getAccounts = async () => {
+  let params = {
+    source: localStorage.getItem("accountStation"),
+    skipDetails: true,
+  };
+
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: localStorage.getItem("accountStation"),
+      skipDetails: true,
+    };
+  } else {
+    params = {
+      skipDetails: true,
+    };
+  }
   loadDataStation.value = true; // Устанавливаем флаг загрузки
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
-      {
-        source: localStorage.getItem("accountStation"),
-        skipDetails: true,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json",
@@ -306,10 +331,10 @@ const getAccounts = async () => {
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
+      // setTimeout(() => {
+      //   localStorage.removeItem("accountToken");
+      //   router.push("/login");
+      // }, 2000);
     }
   } catch (error) {
     loadDataStation.value = false; // Устанавливаем значение false в случае ошибки
@@ -581,7 +606,11 @@ provide("changeEnableStation", { changeEnableStation });
 }
 
 .table-text-number {
-  padding: 1rem;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
 }
 
 .table-text {

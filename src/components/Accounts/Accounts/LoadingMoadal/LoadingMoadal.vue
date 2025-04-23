@@ -2,18 +2,50 @@
   <section v-if="stationLoading.modalStation">
     <section v-if="!stationLoading.account.error" class="loading-section-true">
       <h2 class="title-true">
-        <img src="/account/gal.svg" alt="" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <g fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m8 12.5l3 3l5-6"
+            />
+            <circle cx="12" cy="12" r="10" />
+          </g>
+        </svg>
+
         {{ t("resultModal.messageTrue") }}
-        <img
+        <svg
           @click="changeStationLoadingModal"
-          src="/account/close-true.svg"
-          alt=""
-        />
+          xmlns="http://www.w3.org/2000/svg"
+          width="26"
+          height="26"
+          viewBox="0 0 32 32"
+        >
+          <path
+            fill="currentColor"
+            d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
+          />
+        </svg>
       </h2>
     </section>
     <section v-else class="loading-section-error">
       <h2 class="title-error">
-        <img src="/account/error.svg" alt="" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="currentColor"
+            d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+          />
+        </svg>
         {{ t("resultModal.messageFalse") }}
         <img
           @click="changeStationLoadingModal"
@@ -51,7 +83,7 @@ const { stationLoading } = toRefs(props);
   height: 60px;
   box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
     0 0 4px 0 rgba(85, 255, 195, 0.04);
-  background: #deecd2;
+  background: #fafdf7;
   position: fixed;
   z-index: 100;
   top: 5px;
@@ -59,6 +91,8 @@ const { stationLoading } = toRefs(props);
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(1px); /* Добавляем размытие */
+  -webkit-backdrop-filter: blur(1px); /* Для поддержки в Safari */
 }
 
 .title-true {
@@ -67,7 +101,7 @@ const { stationLoading } = toRefs(props);
   color: #1b632b;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0px;
 }
 
 .loading-section-error {

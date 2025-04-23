@@ -8,7 +8,21 @@
       <section class="message-section">
         <header class="user-info-section">
           <div @click="changeMessageListStation" class="phone-out">
-            <img src="/chats/out.svg" alt="" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="none"
+                stroke="#bcbcbc"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m14 6l-6 6l6 6"
+              />
+            </svg>
             <span class="out-text">Назад</span>
           </div>
           <img
@@ -18,24 +32,39 @@
             @click="changeImageStation(chatInfo, true)"
             alt=""
           />
-          <img
-            v-else
-            class="user-img"
+
+          <svg
+            viewBox="0 0 152 152"
             @click="changeImageStation(chatInfo, true)"
-            src="/chats/user-chat-icon.svg"
-            alt=""
-          />
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            class="user-chat-icon-svg"
+            v-else
+          >
+            <g id="Layer_2" data-name="Layer 2">
+              <g id="_18.Avatar" data-name="18.Avatar">
+                <path
+                  id="icon"
+                  d="m76 0a76 76 0 0 0 0 152h2a76 76 0 0 0 -2-152zm-15.89 37.35a20.94 20.94 0 0 1 15.32-6.35 5.43 5.43 0 0 1 .57 0 20.76 20.76 0 0 1 14.76 6.33 21 21 0 0 1 6.35 15.32 20.91 20.91 0 0 1 -6.35 15.35 20.76 20.76 0 0 1 -14.76 6.33 5.43 5.43 0 0 1 -.57 0 21.68 21.68 0 0 1 -21.67-21.66 21 21 0 0 1 6.35-15.32zm49 79.48c-2.92 2.78-6.76 4.17-11.44 4.17h-43.34c-4.68 0-8.52-1.39-11.44-4.17s-4.44-6.6-4.44-11.3c0-1.82.06-3.6.18-5.32a53.31 53.31 0 0 1 .74-5.69 43.4 43.4 0 0 1 1.39-5.71 28.71 28.71 0 0 1 2.35-5.34 20.32 20.32 0 0 1 3.54-4.63 15.66 15.66 0 0 1 5.11-3.19 17.27 17.27 0 0 1 6.49-1.17c.92 0 1.8.36 3.53 1.48 1.06.7 2.29 1.51 3.67 2.37a20.23 20.23 0 0 0 4.73 2.09 18.43 18.43 0 0 0 11.62 0 20.9 20.9 0 0 0 4.75-2.09c1.38-.88 2.63-1.67 3.67-2.37 1.73-1.12 2.61-1.48 3.53-1.48a17.27 17.27 0 0 1 6.49 1.17 15.66 15.66 0 0 1 5.11 3.19 20.32 20.32 0 0 1 3.54 4.63 28.71 28.71 0 0 1 2.35 5.34 43.4 43.4 0 0 1 1.39 5.71 53.31 53.31 0 0 1 .74 5.69c.11 1.7.18 3.5.18 5.32 0 4.7-1.55 8.47-4.44 11.3z"
+                />
+              </g>
+            </g>
+          </svg>
           <div>
             <h2 class="name-user">{{ chatInfo.name }}</h2>
           </div>
         </header>
         <div ref="scrollContainer" v-if="!loading" class="messages">
-          <template v-for="(message, index) in messages" :key="message.timestamp">
+          <template
+            v-for="(message, index) in messages"
+            :key="message.timestamp"
+          >
             <!-- Плашка с датой -->
             <div v-if="shouldShowDateSeparator(index)" class="date-separator">
               {{ formatDateSeparator(message.data.time) }}
             </div>
-            
+
             <div
               :class="[
                 'message',
@@ -208,37 +237,79 @@
                   <div class="message-time">
                     {{ formatTimestamp(message.data.time) }}
                   </div>
-                  <img
-                    class="state-img"
+
+                  <svg
                     v-if="
-                      message.data.state === 'delivered' && message.data.outgoing
+                      message.data.state === 'delivered' &&
+                      message.data.outgoing
                     "
-                    src="/chats/read_it.svg"
-                    alt=""
-                  />
-                  <img
-                    class="state-img"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                  >
+                    <g fill="#B5B8B1">
+                      <path
+                        d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293L1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0zm-4.208 7l-.896-.897l.707-.707l.543.543l6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0"
+                      />
+                      <path
+                        d="m5.354 7.146l.896.897l-.707.707l-.897-.896a.5.5 0 1 1 .708-.708"
+                      />
+                    </g>
+                  </svg>
+                  <svg
                     v-if="
                       message.data.state === 'has_seen' && message.data.outgoing
                     "
-                    src="/chats/not_read_it.svg"
-                    alt=""
-                  />
-                  <img
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                  >
+                    <g fill="#42AAFF">
+                      <path
+                        d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293L1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0zm-4.208 7l-.896-.897l.707-.707l.543.543l6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0"
+                      />
+                      <path
+                        d="m5.354 7.146l.896.897l-.707.707l-.897-.896a.5.5 0 1 1 .708-.708"
+                      />
+                    </g>
+                  </svg>
+                  <svg
                     class="state-img"
                     v-if="
                       message.data.state === 'sendMessage' &&
                       message.data.outgoing
                     "
-                    src="/chats/sned_message_state.svg"
-                    alt=""
-                  />
-                  <img
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="none"
+                      stroke="#B5B8B1"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m4 12l6 6L20 6"
+                    />
+                  </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
                     class="state-img"
-                    v-if="message.data.state === 'error' && message.data.outgoing"
-                    src="/chats/send_message_error.svg"
-                    alt=""
-                  />
+                    v-if="
+                      message.data.state === 'error' && message.data.outgoing
+                    "
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+                    />
+                  </svg>
                 </footer>
               </div>
             </div>
@@ -477,7 +548,7 @@ const updateMessages = (newMessage) => {
       }
     }
   }
-  
+
   messages.value.push(newMessage); // Добавление нового сообщения
   console.log("Новое сообщение", newMessage);
   console.log("messages.value", messages.value); // Логируем текущее состояние массива
@@ -600,10 +671,7 @@ const getMessage = async () => {
       to: chatInfo.value.phone,
     };
 
-    if (
-      apiUrl === apiCheckUrl 
-      
-    ) {
+    if (apiUrl === apiCheckUrl) {
       requestData.to = chatInfo.value.phone;
       requestData.login = chatInfo.value.loginUser;
       requestData.uniq = chatInfo.value.lastMessage.id.remote;
@@ -625,10 +693,7 @@ const getMessage = async () => {
       loading.value = false;
       props.blockChat();
 
-      if (
-        apiUrl === apiCheckUrl
-       
-      ) {
+      if (apiUrl === apiCheckUrl) {
         messages.value = response.data.data.messages;
         console.log(messages.value);
       } else {
@@ -721,22 +786,22 @@ let previousChatInfo = null;
 const formatDateSeparator = (timestamp) => {
   const now = new Date();
   const messageDate = new Date(timestamp / 1000); // Убедитесь, что timestamp правильно конвертируется
-  
+
   // Проверяем, сегодня ли было сообщение
   if (isSameDay(now, messageDate)) {
-    return 'Сегодня';
+    return "Сегодня";
   }
-  
+
   // Проверяем, было ли сообщение вчера
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   if (isSameDay(yesterday, messageDate)) {
-    return 'Вчера';
+    return "Вчера";
   }
-  
+
   // Для более старых сообщений возвращаем дату в формате "5 апреля"
-  const options = { day: 'numeric', month: 'long' };
-  return messageDate.toLocaleDateString('ru-RU', options);
+  const options = { day: "numeric", month: "long" };
+  return messageDate.toLocaleDateString("ru-RU", options);
 };
 
 // Вспомогательная функция для проверки, один ли это день
@@ -751,15 +816,15 @@ const isSameDay = (date1, date2) => {
 // Функция для определения, нужно ли показывать плашку даты
 const shouldShowDateSeparator = (index) => {
   if (index === 0) return true; // Всегда показываем для первого сообщения
-  
+
   const currentMessage = messages.value[index];
   const previousMessage = messages.value[index - 1];
-  
+
   if (!currentMessage || !previousMessage) return false;
-  
+
   const currentDate = new Date(currentMessage.data.time / 1000);
   const previousDate = new Date(previousMessage.data.time / 1000);
-  
+
   return !isSameDay(currentDate, previousDate);
 };
 
@@ -890,9 +955,7 @@ function truncateString(str, maxLength) {
 
 onMounted(() => {
   const connectEventSource = () => {
-    const eventSource = new EventSource(
-      `${apiUrl}/events`
-    );
+    const eventSource = new EventSource(`${apiUrl}/events`);
 
     const receivedMessageIds =
       JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
@@ -1231,6 +1294,10 @@ onMounted(() => {
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+.user-chat-icon-svg path#icon {
+  fill: #808080; /* Серый цвет для всей иконки */
+}
+
 .user-info-section {
   z-index: 5;
   position: absolute;
@@ -1458,7 +1525,7 @@ footer {
     width: 100%;
   }
 
-  .no-message-section  {
+  .no-message-section {
     display: none;
   }
   .error-section {
@@ -1475,7 +1542,6 @@ footer {
   .phone-out {
     display: flex;
     align-items: center;
-    gap: 4px;
     margin-right: 10px;
   }
 }

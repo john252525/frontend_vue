@@ -92,18 +92,32 @@ const offQrQrStation = () => {
 };
 
 const code = ref(null);
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const { selectedItem, enableStation } = toRefs(props);
 
 const forceStop = async () => {
-  const { source, login } = selectedItem.value;
+  const { source, login, storage } = selectedItem.value;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/forceStop`,
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -131,15 +145,29 @@ const forceStop = async () => {
 };
 
 const setState = async (request) => {
-  const { source, login } = selectedItem.value;
+  const { source, login, storage } = selectedItem.value;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      setState: true,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      setState: true,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/setState`,
-      {
-        source: source,
-        login: login,
-        setState: true,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

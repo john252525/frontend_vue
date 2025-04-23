@@ -78,7 +78,8 @@ const stationLoading = reactive({
 const changeStationLoadingModal = () => {
   stationLoading.modalStation = !stationLoading.modalStation;
 };
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const getInfoAccount = async () => {
   try {
     loadingStatiom.value = true; // Устанавливаем состояние загрузки
@@ -86,14 +87,26 @@ const getInfoAccount = async () => {
       console.error("selectedItems не определен");
       return;
     }
-    const { source, login } = selectedItems.value;
-
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getInfo",
-      {
+    const { source, login, storage } = selectedItem.value;
+    let params = {
+      source: source,
+      login: login,
+    };
+    if (stationDomen.navigate.value != "whatsapi") {
+      params = {
         source: source,
         login: login,
-      },
+      };
+    } else {
+      params = {
+        source: source,
+        login: login,
+        storage: storage,
+      };
+    }
+    const response = await axios.post(
+      "https://b2288.apitter.com/instances/getInfo",
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -125,6 +138,25 @@ const getInfoAccount = async () => {
 };
 
 const addNewUrl = async () => {
+  const { source, login, storage } = selectedItem.value;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      webhookUrls: webhookUrlsArray,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      webhookUrls: webhookUrlsArray,
+    };
+  }
   try {
     loadingStatiom.value = true; // Устанавливаем состояние загрузки
     if (!selectedItems.value) {
@@ -141,11 +173,7 @@ const addNewUrl = async () => {
 
     const response = await axios.post(
       "https://b2288.apitter.com/instances/updateAccount",
-      {
-        source: source,
-        login: login,
-        webhookUrls: webhookUrlsArray, // Передаем массив URL
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

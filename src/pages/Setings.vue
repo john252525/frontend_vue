@@ -1,7 +1,7 @@
 <template>
   <div class="text-editor">
-    <textarea 
-      v-model="textContent" 
+    <textarea
+      v-model="textContent"
       placeholder="Загрузка текста..."
       :style="textareaStyle"
     ></textarea>
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed,onUnmounted  } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import axios from "axios";
 
 // Реактивные переменные
@@ -25,13 +25,13 @@ const isReady = ref(false);
 const message = ref("");
 const messageType = ref("");
 const userId = ref(null);
-const token = ref(localStorage.getItem("accountToken"));
+const token = ref(localStorage.getItem("acconutToken"));
 const windowWidth = ref(window.innerWidth);
 
 // Вычисляем стили для textarea
 const textareaStyle = computed(() => ({
-  minHeight: windowWidth.value < 400 ? '200px' : '300px',
-  minWidth: windowWidth.value < 400 ? '100%' : '600px'
+  minHeight: windowWidth.value < 400 ? "200px" : "300px",
+  minWidth: windowWidth.value < 400 ? "100%" : "600px",
 }));
 
 // Обновляем ширину окна при ресайзе
@@ -119,13 +119,13 @@ const showMessage = (text, type) => {
 
 // Хуки жизненного цикла
 onMounted(async () => {
-  window.addEventListener('resize', updateWindowWidth);
+  window.addEventListener("resize", updateWindowWidth);
   await initialize();
   loadText();
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateWindowWidth);
+  window.removeEventListener("resize", updateWindowWidth);
 });
 </script>
 

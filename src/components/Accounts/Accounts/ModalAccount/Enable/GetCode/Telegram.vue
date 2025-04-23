@@ -42,9 +42,10 @@ import LoadingModal from "../LoadingModal.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const { selectedItem } = inject("accountItems");
-const { source, login } = selectedItem.value;
+const { source, login, storage } = selectedItem.value;
 const stationLoading = ref(false);
-
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -65,13 +66,26 @@ const formData = reactive({
 });
 
 const forceStop = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/forceStop`,
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -101,14 +115,28 @@ const forceStop = async () => {
 };
 
 const setStateTelegram = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      setState: true,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      setState: true,
+    };
+  }
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/setState",
-      {
-        source: source,
-        login: login,
-        setState: true,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -152,14 +180,28 @@ const setStateTelegram = async () => {
 };
 
 const solveChallenge = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      code: `{{ ${formData.code} }}`,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      code: `{{ ${formData.code} }}`,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/solveChallenge`,
-      {
-        source: source,
-        login: login,
-        code: `{{ ${formData.code} }}`,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -188,14 +230,28 @@ const solveChallenge = async () => {
 };
 
 const twoFactorAuth = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      code: `{{ ${formData.code} }}`,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      code: `{{ ${formData.code} }}`,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/twoFactorAuth`,
-      {
-        source: source,
-        login: login,
-        code: `{{ ${formData.code} }}`,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

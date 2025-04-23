@@ -241,15 +241,31 @@ const qrCodeDataSubmit = async () => {
   props.closeModal();
 };
 
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
+
 const createRequest = async (request) => {
-  const { source, login } = selectedItem.value;
+  const { source, login, storage } = selectedItem.value;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/${request}`,
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",

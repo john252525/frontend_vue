@@ -39,8 +39,9 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
-const { source, login } = selectedItem.value;
-
+const { source, login, storage } = selectedItem.value;
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
 const station = reactive({
   phone: false,
   error: false,
@@ -91,14 +92,28 @@ const getInternationalFormat = () => {
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
   station.loading = true;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      phone: internationalPhone,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      phone: internationalPhone,
+    };
+  }
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/enablePhoneAuth`,
-      {
-        source: source,
-        login: login,
-        phone: internationalPhone,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -126,13 +141,26 @@ const enablePhoneAuth = async () => {
 };
 
 const getQr = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomen.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getQr",
-      {
-        source: source,
-        login: login,
-      },
+      params,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
