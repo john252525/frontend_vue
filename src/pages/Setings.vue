@@ -1,22 +1,33 @@
 <template>
   <div class="text-editor">
-    <textarea
-      v-model="textContent"
-      placeholder="Загрузка текста..."
-      :style="textareaStyle"
-    ></textarea>
-    <button @click="saveText" :disabled="isLoading || !isReady">
-      {{ isLoading ? "Сохранение..." : "Сохранить" }}
-    </button>
-    <div v-if="message" :class="['message', messageType]">
-      {{ message }}
+    <div v-if="!isAuthenticated" class="auth-message">
+      <p>Для работы с редактором необходимо авторизоваться</p>
+      <button @click="redirectToLogin">Войти</button>
     </div>
+
+    <template v-else>
+      <textarea
+        v-model="textContent"
+        placeholder="Загрузка текста..."
+        :style="textareaStyle"
+        :disabled="!isReady"
+      ></textarea>
+      <button @click="saveText" :disabled="isLoading || !isReady">
+        {{ isLoading ? "Сохранение..." : "Сохранить" }}
+      </button>
+      <div v-if="message" :class="['message', messageType]">
+        {{ message }}
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
+
+const router = useRouter();
 
 // Реактивные переменные
 const textContent = ref("");
@@ -25,8 +36,15 @@ const isReady = ref(false);
 const message = ref("");
 const messageType = ref("");
 const userId = ref(null);
-const token = ref(localStorage.getItem("acconutToken"));
+const isAuthenticated = ref(false);
 const windowWidth = ref(window.innerWidth);
+
+// Проверяем авторизацию при инициализации
+const checkAuth = () => {
+  const token = localStorage.getItem("accountToken"); // Исправлено: "acconutToken" → "accountToken"
+  isAuthenticated.value = !!token;
+  return token;
+};
 
 // Вычисляем стили для textarea
 const textareaStyle = computed(() => ({
@@ -40,14 +58,14 @@ const updateWindowWidth = () => {
 };
 
 // Методы
-const getUserIdByToken = async () => {
+const getUserIdByToken = async (token) => {
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getUserUuid",
       {},
       {
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -61,12 +79,15 @@ const getUserIdByToken = async () => {
 
 const initialize = async () => {
   try {
-    if (!token.value) {
-      throw new Error("Токен не найден в localStorage");
+    const token = checkAuth();
+    if (!token) {
+      showMessage("Требуется авторизация", "error");
+      return;
     }
 
-    await getUserIdByToken();
+    await getUserIdByToken(token);
     isReady.value = true;
+    loadText();
   } catch (error) {
     showMessage("Ошибка инициализации: " + error.message, "error");
     console.error("Ошибка инициализации:", error);
@@ -81,7 +102,7 @@ const loadText = async () => {
     const response = await axios.get(
       `https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}`
     );
-    textContent.value = response.data.components[0].value;
+    textContent.value = response.data.components[0]?.value || "";
   } catch (error) {
     showMessage("Ошибка при загрузке текста", "error");
     console.error("Ошибка загрузки:", error);
@@ -117,11 +138,14 @@ const showMessage = (text, type) => {
   }, 3000);
 };
 
+const redirectToLogin = () => {
+  router.push("/login");
+};
+
 // Хуки жизненного цикла
 onMounted(async () => {
   window.addEventListener("resize", updateWindowWidth);
   await initialize();
-  loadText();
 });
 
 onUnmounted(() => {
