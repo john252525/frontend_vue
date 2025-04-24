@@ -378,6 +378,8 @@ const getInfoWhats = async (source, login) => {
 };
 
 const openModal = (event, item) => {
+  localStorage.setItem("accauntSourse", item.source);
+  console.log(localStorage.getItem("accauntSourse"));
   selectedItem.value = item;
   isModalOpen.value = true;
   localStorage.setItem("userInfo", JSON.stringify(selectedItem.value));

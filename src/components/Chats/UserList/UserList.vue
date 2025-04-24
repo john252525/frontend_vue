@@ -292,6 +292,9 @@ const chatInfo = ref(null);
 const errorStation = ref(false);
 const chatsNull = ref(false);
 
+import { useDomain } from "@/composables/getDomen";
+const { stationDomen } = useDomain();
+
 const selectChatClick = (chat) => {
   props.selectChat(chat);
   chatInfo.value = chat;
@@ -465,7 +468,11 @@ const test = async () => {
     if (isMulti.value) {
       sourse = logsingFromAccount.map((item) => item.source) || []; // Извлекаем массив логинов из массива объектов
     } else {
-      sourse = localStorage.getItem("accountStation"); // Если isMulti не true, просто используем login из userInfo
+      if (stationDomen.navigate.value != "whatsapi") {
+        sourse = localStorage.getItem("accountStation");
+      } else {
+        sourse = localStorage.getItem("accauntSourse");
+      }
     }
     console.log(logins);
 

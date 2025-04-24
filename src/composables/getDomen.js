@@ -17,19 +17,19 @@ export function useDomain() {
   onMounted(() => {
     currentDomain.value = window.location.hostname;
     // app4.developtech.ru
-    if (currentDomain.value === "localhost") {
+    if (currentDomain.value === "app4.developtech.ru") {
       stationDomen.navigate.value = "settings";
       stationDomen.cosmetics.logo = "Crypto";
       stationDomen.cosmetics.titleLogo = "Crypto";
       stationDomen.cosmetics.urlLogo = "/crypto.svg";
     }
 
-    // if (currentDomain.value === "localhost") {
-    //   stationDomen.navigate.value = "whatsapi";
-    //   stationDomen.cosmetics.logo = "WhatsApi";
-    //   stationDomen.cosmetics.titleLogo = "WhatsApi";
-    //   stationDomen.cosmetics.urlLogo = "https://sendeyo.com/en/89a797b1b6";
-    // }
+    if (currentDomain.value === "localhost") {
+      stationDomen.navigate.value = "whatsapi";
+      stationDomen.cosmetics.logo = "WhatsApi";
+      stationDomen.cosmetics.titleLogo = "WhatsApi";
+      stationDomen.cosmetics.urlLogo = "https://sendeyo.com/en/89a797b1b6";
+    }
 
     if (currentDomain.value === "helly.apitter.com") {
       stationDomen.navigate.value = "whatsapi";
