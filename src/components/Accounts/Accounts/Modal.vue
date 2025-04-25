@@ -39,10 +39,14 @@
           class="action action-delete"
           @click="ChangeconfirmStation"
           v-if="
-            (selectedItem.storage != 'binder' &&
-              selectedItem.type != 'touchapi') ||
-            (selectedItem.storage != 'whatsapi' &&
-              selectedItem.type != 'undefined')
+            !(
+              selectedItem.storage === 'binder' &&
+              selectedItem.type === 'touchapi'
+            ) &&
+            !(
+              selectedItem.storage === 'whatsapi' &&
+              selectedItem.type === 'undefined'
+            )
           "
           >Удалить аккаунт</span
         >

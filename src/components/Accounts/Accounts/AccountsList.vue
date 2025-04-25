@@ -39,7 +39,8 @@
                 v-if="
                   (item.storage === 'local' && item.type === 'undefined') ||
                   (item.storage === 'binder' && item.type === 'touchapi') ||
-                  (item.storage === 'undefined' && item.type === 'whatsapi')
+                  (item.storage === 'undefined' && item.type === 'whatsapi') ||
+                  (item.storage === 'whatsapi' && item.type === 'undefined')
                 "
                 class="action-table-button"
                 @click="openModal($event, item)"
@@ -251,12 +252,11 @@ const getAccounts = async () => {
             const login = instance.login; // Извлекаем логин
 
             if (
-              instance.storage === "binder" &&
-              instance.type != "touchapi" &&
-              instance.storage === "whatsapi" &&
-              instance.type === "whatsapi"
+              (instance.storage === "binder" && instance.type !== "touchapi") ||
+              (instance.storage === "whatsapi" && instance.type === "whatsapi")
             ) {
-              return;
+              instance.loading = false;
+              return; // Пропускаем запрос
             }
             try {
               // Запрос для получения информации о каждом логине
