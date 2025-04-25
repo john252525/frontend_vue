@@ -28,6 +28,15 @@
             <td class="table-state" v-if="item.state === 0">
               {{ t("mailingList.status.noActive") }}
             </td>
+            <td class="table-state-active" v-if="item.state === 2">
+              {{ t("mailingList.status.completed") }}
+            </td>
+            <td
+              class="table-state"
+              v-if="item.state != 2 && item.state != 1 && item.state != 0"
+            >
+              -
+            </td>
             <td class="table-action-text">
               <button
                 class="action-table-button"
@@ -82,6 +91,13 @@
               </div>
             </td>
           </tr>
+          <tr v-if="errorMailing">
+            <td class="accout-load-cont" colspan="4">
+              <div class="load-cont">
+                <ErrorAccount />
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -126,6 +142,7 @@ import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
 import LoadAccount from "./LoadAccount.vue";
 import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
+import ErrorAccount from "./errorAccount.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -143,6 +160,7 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+const errorMailing = ref(false);
 const dataStationNone = ref(false);
 const dataStation = ref(false);
 const loadDataStation = ref(false);
@@ -181,6 +199,9 @@ const getMailingLists = async () => {
     console.log(response.data);
   } catch (error) {
     console.error("Ошибка при получении данных:", error.message);
+    errorMailing.value = true;
+    loadDataStation.value = false;
+    dataStationNone.value = false;
   }
 };
 
@@ -227,7 +248,7 @@ provide("selectedItem", { selectedItem });
 .table-container {
   overflow-x: auto;
   overflow-y: auto;
-  height: 83vh;
+  height: 82vh;
 }
 
 .table-container::-webkit-scrollbar {

@@ -236,7 +236,7 @@
             </svg>
             <p class="page">{{ t("nav.account") }}</p>
           </li>
-          <li class="list">
+          <li @click="clickMenu('mailing')" class="list">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 32 32"
@@ -362,7 +362,7 @@
             </svg>
             <p class="page">{{ t("nav.account") }}</p>
           </li>
-          <li class="list">
+          <li class="list" @click="clickMenu('mailing')">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 32 32"
@@ -548,7 +548,7 @@ const isChatPage = computed(() => {
 .pc-menu {
   display: flex;
   width: 230px;
-  height: calc(100vh - 57px);
+  /* height: calc(100vh - 57  px); */
   box-sizing: border-box;
   background: var(--bg);
 }

@@ -250,6 +250,14 @@ const getAccounts = async () => {
           const promises = instanceData.value.map(async (instance) => {
             const login = instance.login; // Извлекаем логин
 
+            if (
+              instance.storage === "binder" &&
+              instance.type != "touchapi" &&
+              instance.storage === "whatsapi" &&
+              instance.type === "whatsapi"
+            ) {
+              return;
+            }
             try {
               // Запрос для получения информации о каждом логине
               const infoResponse = await getInfoWhats(instance.source, login);
@@ -506,7 +514,20 @@ provide("changeEnableStation", { changeEnableStation });
   overflow-x: auto;
   overflow-y: auto;
   max-width: 100%;
-  height: 83vh;
+  height: 82vh;
+}
+
+.table-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background-color: var(--scrolBg);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--scrolColor);
+  border-radius: 5px;
 }
 
 .tooltip {

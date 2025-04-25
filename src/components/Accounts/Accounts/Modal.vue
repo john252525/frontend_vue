@@ -35,7 +35,15 @@
           >Связать через QR</span
         > -->
         <!-- <span class="action" @click="handleSubmitCode">Связать через код</span> -->
-        <span class="action action-delete" @click="ChangeconfirmStation"
+        <span
+          class="action action-delete"
+          @click="ChangeconfirmStation"
+          v-if="
+            (selectedItem.storage != 'binder' &&
+              selectedItem.type != 'touchapi') ||
+            (selectedItem.storage != 'whatsapi' &&
+              selectedItem.type != 'undefined')
+          "
           >Удалить аккаунт</span
         >
       </div>

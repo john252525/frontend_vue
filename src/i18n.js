@@ -117,6 +117,7 @@ const messages = {
       status: {
         active: "Active",
         noActive: "Inactive",
+        completed: "completed",
       },
       noneMailing: "No accounts found",
       buttonActive: "Action",
@@ -379,6 +380,7 @@ const messages = {
       status: {
         active: "Активен",
         noActive: "Неактивен",
+        completed: "Завершена",
       },
       noneMailing: "Аккаунтов не найдено",
       buttonActive: "Действие",
