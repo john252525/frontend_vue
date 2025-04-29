@@ -23,7 +23,13 @@
         <span class="action action-throw" @click="ChangeconfirmStationReset"
           >Сбросить</span
         >
-        <span class="action-loading" v-if="chatsStation === false">Чат</span>
+        <span
+          class="action-loading"
+          :class="{ 'flash-red': isFlashing }"
+          v-if="!chatsStation"
+          @click.stop="handleDisabledChat"
+          >Чат</span
+        >
         <span
           class="action"
           v-else="chatsStation === true"
@@ -161,11 +167,22 @@ const handleSubmit = () => {
   props.changeStationSettingsModal();
   props.closeModal();
 };
+const isFlashing = ref(false);
 
 const changeLadingStation = () => {
   emit("update:loadingStation", updateLoadingStation.value);
 };
+const handleDisabledChat = (event) => {
+  event.stopPropagation();
 
+  // Активируем мигание
+  isFlashing.value = true;
+
+  // Отключаем мигание через 500мс
+  setTimeout(() => {
+    isFlashing.value = false;
+  }, 500);
+};
 const confirmStation = reactive({
   delete: false,
   reset: false,
@@ -527,7 +544,7 @@ const startEnableByQR = async (value) => {
 const forceStopActive = async () => {
   stationLoading.loading = true;
   stationLoading.text = t("globalLoading.offAccount");
-  forceStop();
+  forceStop("forceStop");
 };
 
 const getNewProxy = async () => {
@@ -607,6 +624,29 @@ const resetAccount = async () => {
   cursor: pointer;
   animation: shimmer 1s infinite;
   padding: 4px;
+}
+
+.action-loading {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transition: background-color 0.3s;
+}
+
+.flash-red {
+  background-color: rgba(255, 0, 0, 0.3);
+  animation: flash 0.5s;
+}
+
+@keyframes flash {
+  0% {
+    background-color: rgba(255, 0, 0, 0);
+  }
+  50% {
+    background-color: rgba(255, 0, 0, 0.5);
+  }
+  100% {
+    background-color: rgba(255, 0, 0, 0);
+  }
 }
 
 @keyframes shimmer {

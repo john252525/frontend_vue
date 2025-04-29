@@ -99,13 +99,16 @@ const updateStatus = async (state) => {
     token: localStorage.getItem("accountToken"),
   };
   try {
-    const response = await axios.post(apiUrlMethod, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-      },
-    });
+    const response = await axios.post(
+      apiUrlMethod,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
 
     if (response.data.ok === true) {
       stationLoading.modalStation = true;

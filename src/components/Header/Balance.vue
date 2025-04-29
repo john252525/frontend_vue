@@ -163,11 +163,4 @@ onMounted(getBalance);
   color: var(--text);
   text-align: center;
 }
-
-@media (max-width: 1000px) {
-  .balance-user-section {
-    width: 150px;
-    height: 130px;
-  }
-}
 </style>

@@ -87,7 +87,7 @@ const getInfoAccount = async () => {
       console.error("selectedItems не определен");
       return;
     }
-    const { source, login, storage } = selectedItem.value;
+    const { source, login, storage } = selectedItems.value;
     let params = {
       source: source,
       login: login,
@@ -138,7 +138,11 @@ const getInfoAccount = async () => {
 };
 
 const addNewUrl = async () => {
-  const { source, login, storage } = selectedItem.value;
+  const webhookUrlsArray = webhookUrlsText.value
+    .split("\n")
+    .map((url) => url.trim())
+    .filter((url) => url);
+  const { source, login, storage } = selectedItems.value;
   let params = {
     source: source,
     login: login,
@@ -166,10 +170,6 @@ const addNewUrl = async () => {
     const { source, login } = selectedItems.value;
 
     // Разделяем строки в textarea на массив
-    const webhookUrlsArray = webhookUrlsText.value
-      .split("\n")
-      .map((url) => url.trim())
-      .filter((url) => url);
 
     const response = await axios.post(
       "https://b2288.apitter.com/instances/updateAccount",

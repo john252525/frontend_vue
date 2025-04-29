@@ -1,4 +1,8 @@
 <template>
+  <LoadingMoadal
+    :changeStationLoadingModal="closeResultModal"
+    :stationLoading="stationLoading"
+  />
   <header v-if="!addMailing">
     <section class="account-section">
       <h2 class="title">{{ t("mailing.title") }}</h2>
@@ -20,17 +24,50 @@
       </button>
     </section>
   </header>
-  <MailingList v-if="!addMailing" />
+  <MailingList :changeResultModal="changeResultModal" v-if="!addMailing" />
   <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
 </template>
 
 <script setup>
 import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
-import { ref } from "vue";
+import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
+import { ref, reactive } from "vue";
 
 import { useI18n } from "vue-i18n";
+
 const { t } = useI18n();
+
+const stationLoading = reactive({
+  modalStation: false,
+  account: {
+    error: false,
+  },
+});
+
+const closeResultModal = () => {
+  stationLoading.modalStation = false;
+};
+
+const changeResultModal = (change, value) => {
+  console.log("work");
+  if (change === "true") {
+    stationLoading.modalStation = !stationLoading.modalStation;
+  } else {
+    stationLoading.modalStation = true;
+    if (value === "error") {
+      stationLoading.account.error = true;
+      setTimeout(() => {
+        stationLoading.modalStation = false;
+      }, 5000);
+    } else {
+      stationLoading.account.error = false;
+      setTimeout(() => {
+        stationLoading.modalStation = false;
+      }, 5000);
+    }
+  }
+};
 
 const addMailing = ref(false);
 

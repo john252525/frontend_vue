@@ -123,6 +123,7 @@
     :selectedItem="selectedItem"
     :changeDeleteMailing="changeDeleteMailing"
     :refreshMailingLists="getMailingLists"
+    :changeResultModal="changeResultModal"
   />
   <EditMailing
     v-if="station.editMailing"
@@ -159,6 +160,12 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
+const props = defineProps({
+  changeResultModal: {
+    type: Function,
+  },
+});
 
 const errorMailing = ref(false);
 const dataStationNone = ref(false);

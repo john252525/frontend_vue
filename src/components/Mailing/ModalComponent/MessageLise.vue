@@ -1,12 +1,14 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section class="account-list-section">
+  <section>
     <h2 class="title">
+      {{ t("messageList.title") }}
       <svg
+        class="close"
         @click="changeStationMessage"
         xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
+        width="24"
+        height="24"
         viewBox="0 0 32 32"
       >
         <path
@@ -14,7 +16,6 @@
           d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
         />
       </svg>
-      {{ t("messageList.title") }}
     </h2>
     <div class="table-container">
       <table class="table">
@@ -28,7 +29,7 @@
         </thead>
         <tbody class="tbody">
           <tr
-            v-if="mailingLists.length > 0"
+            v-if="countMessage"
             v-for="(item, index) in mailingLists"
             :key="index"
           >
@@ -41,9 +42,21 @@
               {{ t("messageList.waitingSend") }}
             </td>
           </tr>
-          <tr v-else>
+          <tr v-if="!errorMessage && mailingLists.length < 0">
             <td colspan="4">
-              <h2 class="loading-data-text">{{ t("messageList.loading") }}</h2>
+              <div class="none-message-cont">
+                <h2>{{ t("accountList.accountNone") }}</h2>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="errorMessage">
+            <td colspan="4">
+              <errorAccount />
+            </td>
+          </tr>
+          <tr v-if="loadingMessge">
+            <td colspan="4">
+              <LoadAccount />
             </td>
           </tr>
         </tbody>
@@ -56,8 +69,11 @@
 import { ref, reactive, onMounted, toRefs, provide } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import errorAccount from "../MailingList/errorAccount.vue";
+import LoadAccount from "../MailingList/LoadAccount.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import MessageContent from "@/components/Chats/MessageList/MessageContent/MessageContent.vue";
 const { t } = useI18n();
 const router = useRouter();
 const errorBlock = ref(false);
@@ -80,10 +96,13 @@ const { selectedItem } = toRefs(props);
 
 const mailingLists = ref([]);
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
+const errorMessage = ref(false);
+const loadingMessge = ref(true);
+const countMessage = ref(false);
 
 const getMessages = async () => {
   const apiUrlMethod = `${apiUrl}/${selectedItem.value.id}/`;
-
+  loadingMessge.value = true;
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
@@ -94,17 +113,17 @@ const getMessages = async () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
 
     if (response.data.ok) {
+      loadingMessge.value = false;
+      countMessage.value = true;
       mailingLists.value = response.data.result.items;
       console.log(response.data);
     } else if (response.data === 401) {
-      localStorage.removeItem("accountToken");
-      router.push("/login");
-    } else if (response.data === 401) {
+      loadingMessge.value = false;
+      errorMessage.value = true;
       errorBlock.value = true;
       setTimeout(() => {
         localStorage.removeItem("accountToken");
@@ -112,8 +131,12 @@ const getMessages = async () => {
       }, 2000);
     } else {
       console.error("Ошибка при получении данных:", response.data);
+      loadingMessge.value = false;
+      errorMessage.value = true;
     }
   } catch (error) {
+    loadingMessge.value = false;
+    errorMessage.value = true;
     console.error(
       "Ошибка при отправке запроса:",
       error.response ? error.response.data : error.message
@@ -127,7 +150,9 @@ onMounted(getMessages);
 <style scoped>
 .table-container {
   max-width: 100%;
+  min-width: 1200px;
   overflow-x: auto;
+  min-height: 50vh;
   height: auto;
 }
 
@@ -162,6 +187,26 @@ onMounted(getMessages);
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.none-message-cont {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  /* margin-top: 0px; */
+  height: 50px;
+  width: 100%;
+  padding: 0px 10px;
+  box-sizing: border-box;
+  background-color: var(--noAccountTableBg);
+  border-radius: 5px;
+}
+
+.none-message-cont h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--noAccountTableText);
 }
 
 .bi-list {
@@ -288,6 +333,41 @@ tr:not(:last-child):after {
 
 tr:hover {
   background: var(--noAccountTableHover);
+}
+
+.close {
+  position: absolute;
+  right: 37px;
+}
+
+@media (max-width: 1300px) {
+  .table-container {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .table-container {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 900px) {
+  .table-container {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 700px) {
+  .table-container {
+    min-width: 400px;
+  }
+}
+
+@media (max-width: 500px) {
+  .table-container {
+    min-width: 300px;
+  }
 }
 
 @media (max-width: 400px) {

@@ -6,10 +6,11 @@
         {{ t("information.title") }}
 
         <svg
+          class="close"
           @click="changeInfoMailing"
           xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
+          width="24"
+          height="24"
           viewBox="0 0 32 32"
         >
           <path
@@ -24,7 +25,10 @@
           <span class="active" v-if="selectedItem.state === 1">
             {{ t("information.status.active") }}</span
           >
-          <span class="no-active" v-else>{{
+          <span class="active" v-if="selectedItem.state === 2">
+            {{ t("mailingList.status.completed") }}</span
+          >
+          <span class="no-active" v-if="selectedItem.state === 0">{{
             t("information.status.noActive")
           }}</span>
         </h3>
@@ -201,6 +205,11 @@ span {
 img {
   position: absolute;
   right: 45px;
+}
+
+.close {
+  position: absolute;
+  right: 44px;
 }
 
 @media (max-width: 600px) {

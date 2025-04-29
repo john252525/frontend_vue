@@ -44,6 +44,9 @@ const props = defineProps({
   refreshMailingLists: {
     type: Function,
   },
+  changeResultModal: {
+    type: Function,
+  },
 });
 
 const errorBlock = ref(false);
@@ -54,25 +57,28 @@ const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const { selectedItem } = toRefs(props);
 const loadStation = ref(false);
+
 const deleteMailing = async () => {
   loadStation.value = true;
   const apiUrlMethod = `${apiUrl}/delete/${selectedItem.value.id}/`;
-  const params = {
-    token: localStorage.getItem("accountToken"),
-  };
+
   try {
-    const response = await axios.post(apiUrlMethod, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-      },
-    });
+    const response = await axios.post(
+      apiUrlMethod,
+      {}, // пустое тело запроса, если нужно
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+      }
+    );
 
     if (response.data.ok === true) {
       console.log("Рассылка успешно удалена:", response.data);
       props.refreshMailingLists();
       props.changeDeleteMailing();
+      props.changeResultModal("false", "true");
       loadStation.value = false;
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -81,13 +87,16 @@ const deleteMailing = async () => {
         router.push("/login");
       }, 2000);
     } else {
+      errorBlock.value = true;
       console.log("Ошибка при удалении рассылки:", response.data);
     }
   } catch (error) {
+    errorBlock.value = true;
     console.error(
       "Ошибка при отправке запроса:",
       error.response ? error.response.data : error.message
     );
+    loadStation.value = false;
   }
 };
 </script>
