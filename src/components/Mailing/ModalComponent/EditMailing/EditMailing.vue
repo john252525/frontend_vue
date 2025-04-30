@@ -47,24 +47,24 @@
           <h2 class="title">{{ t("editMailing.time.title") }}:</h2>
           <div class="time-cont">
             <div class="time-selection">
-              <label class="label-time" for="start-time">{{
-                t("editMailing.time.c")
-              }}</label>
-              <input
-                type="time"
-                id="start-time"
-                v-model="items.options.hours.max"
-                @change="updateTimes"
-              />
-            </div>
-            <div class="time-selection">
               <label class="label-time" for="end-time">{{
-                t("editMailing.time.po")
+                t("editMailing.time.c")
               }}</label>
               <input
                 type="time"
                 id="end-time"
                 v-model="items.options.hours.min"
+                @change="updateTimes"
+              />
+            </div>
+            <div class="time-selection">
+              <label class="label-time" for="start-time">{{
+                t("editMailing.time.po")
+              }}</label>
+              <input
+                type="time"
+                id="start-time"
+                v-model="items.options.hours.max"
                 @change="updateTimes"
               />
             </div>
@@ -169,6 +169,9 @@ const props = defineProps({
   changeisEditMailing: {
     type: Function,
   },
+  changeResultModal: {
+    type: Function,
+  },
 });
 
 const load = ref(false);
@@ -211,7 +214,11 @@ async function editWhatsAppBroadcast() {
       },
     });
     if (response.data.ok === true) {
-      location.reload();
+      props.changeResultModal("true");
+      load.value = false;
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -219,7 +226,8 @@ async function editWhatsAppBroadcast() {
         router.push("/login");
       }, 2000);
     } else {
-      console.log("Ошибка:", response.data);
+      load.value = false;
+      props.changeResultModal(false, "error");
     }
   } catch (error) {
     console.error(

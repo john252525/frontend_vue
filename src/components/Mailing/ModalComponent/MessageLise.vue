@@ -101,7 +101,7 @@ const loadingMessge = ref(true);
 const countMessage = ref(false);
 
 const getMessages = async () => {
-  const apiUrlMethod = `${apiUrl}/${selectedItem.value.id}/`;
+  const apiUrlMethod = `${apiUrl}/view/${selectedItem.value.id}/`;
   loadingMessge.value = true;
   try {
     const response = await axios.get(apiUrlMethod, {

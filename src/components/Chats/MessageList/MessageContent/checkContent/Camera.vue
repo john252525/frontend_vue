@@ -1,6 +1,4 @@
 <template>
-  <!-- <div @click="openCameraStation" class="black-fon"></div> -->
-
   <section :style="cameraContainerStyle" class="camera-container">
     <section @click="openCameraStation" class="navigate">
       <h2 class="navigate-title">
@@ -22,17 +20,26 @@
         Сделать снимок
       </h2>
     </section>
+
+    <!-- Минимальное уведомление об ошибке -->
+    <div v-if="errorMessage" class="error-notice">
+      {{ errorMessage }}
+      <button @click="dismissError" class="dismiss-button">×</button>
+    </div>
+
     <video
       ref="videoElement"
       autoplay
       playsinline
       class="camera-preview"
+      :class="{ 'camera-disabled': !hasCameraPermission }"
     ></video>
 
     <div
       class="create-photo"
       @click="takePhoto"
       :disabled="!hasCameraPermission"
+      :class="{ disabled: !hasCameraPermission }"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -44,11 +51,14 @@
         />
       </svg>
     </div>
+
+    <!-- Минимальное уведомление о загрузке -->
+    <div v-if="isUploading" class="upload-notice">Загрузка...</div>
   </section>
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount, inject } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -59,6 +69,7 @@ const props = defineProps({
     type: Function,
   },
 });
+
 const cameraContainerStyle = inject("cameraContainerStyle");
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -66,37 +77,66 @@ const videoElement = ref(null);
 const photoURL = ref(null);
 const errorMessage = ref(null);
 const hasCameraPermission = ref(false);
+const isUploading = ref(false);
+let stream = null;
 
 onMounted(async () => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+    });
     videoElement.value.srcObject = stream;
     hasCameraPermission.value = true;
   } catch (error) {
     console.error("Ошибка доступа к камере:", error);
-    errorMessage.value = "Не удалось получить доступ к камере.";
-    hasCameraPermission.value = false;
+    setErrorMessage("Не удалось получить доступ к камере");
   }
 });
 
+const setErrorMessage = (message) => {
+  errorMessage.value = message;
+  setTimeout(() => {
+    errorMessage.value = null;
+  }, 5000);
+};
+
+const dismissError = () => {
+  errorMessage.value = null;
+};
+
 const takePhoto = async () => {
   if (!hasCameraPermission.value) {
-    errorMessage.value = "Нет доступа к камере.";
+    setErrorMessage("Нет доступа к камере");
     return;
   }
 
-  const video = videoElement.value;
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  try {
+    const video = videoElement.value;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  const photoDataURL = canvas.toDataURL("image/png");
+    const photoDataURL = canvas.toDataURL("image/jpeg", 0.8);
+    await uploadPhoto(photoDataURL);
+  } catch (error) {
+    console.error("Ошибка при создании фото:", error);
+    setErrorMessage("Ошибка при создании снимка");
+  }
+};
+
+const uploadPhoto = async (photoDataURL) => {
+  isUploading.value = true;
+  errorMessage.value = null;
 
   try {
     const formData = new FormData();
-    formData.append("file", dataURLtoFile(photoDataURL, "photo.png"));
+    formData.append("file", dataURLtoFile(photoDataURL, "photo.jpg"));
 
     const response = await axios.post(
       `https://hellychat.apitter.com/upload`,
@@ -105,20 +145,21 @@ const takePhoto = async () => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        timeout: 10000,
       }
     );
 
     photoURL.value = response.data.fileUrl;
     props.changeImgUrl(photoURL, "image");
     props.openCameraStation();
-    console.log("Фото успешно загружено:", photoURL.value);
   } catch (error) {
     console.error("Ошибка при загрузке фото:", error);
-    errorMessage.value = "Ошибка при загрузке фото.";
+    setErrorMessage("Ошибка при загрузке фото");
+  } finally {
+    isUploading.value = false;
   }
 };
 
-// Helper function to convert dataURL to File object
 function dataURLtoFile(dataurl, filename) {
   const arr = dataurl.split(",");
   const mime = arr[0].match(/:(.*?);/)[1];
@@ -130,11 +171,18 @@ function dataURLtoFile(dataurl, filename) {
   }
   return new File([u8arr], filename, { type: mime });
 }
+
+onBeforeUnmount(() => {
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+  }
+});
 </script>
 
 <style scoped>
+/* Ваши оригинальные стили */
 .camera-container {
-  position: fixed; /* Важно */
+  position: fixed;
   z-index: 10;
   background: #f0f2f5;
   display: flex;
@@ -142,11 +190,10 @@ function dataURLtoFile(dataurl, filename) {
   justify-content: center;
   flex-direction: column;
   overflow: hidden;
-  /* position: fixed больше не определяет положение, используем JS */
-  top: 0; /* Избыточно */
-  left: 0; /* Избыточно */
-  right: 0; /* Избыточно */
-  bottom: 0; /* Избыточно */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .camera-container .fade-enter-active,
@@ -204,10 +251,9 @@ function dataURLtoFile(dataurl, filename) {
   margin-bottom: 10px;
 }
 
-.photo-preview {
-  max-width: 320px;
-  max-height: 240px;
-  margin-top: 10px;
+.camera-preview.camera-disabled {
+  opacity: 0.5;
+  filter: grayscale(80%);
 }
 
 .create-photo {
@@ -221,10 +267,15 @@ function dataURLtoFile(dataurl, filename) {
   cursor: pointer;
 }
 
+.create-photo.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .svg-icon {
-  width: 40px; /* 24px */
-  height: 40px; /* 24px */
-  transition: all 75ms; /* Переход для всех свойств за 75 мс */
+  width: 40px;
+  height: 40px;
+  transition: all 75ms;
   fill: white;
 }
 
@@ -238,5 +289,47 @@ function dataURLtoFile(dataurl, filename) {
   .camera-preview {
     height: 200px;
   }
+}
+
+/* Минимальные стили для уведомлений */
+.error-notice {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 11;
+  animation: fadeIn 0.3s;
+}
+
+.dismiss-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 0 0 8px;
+  line-height: 1;
+}
+
+.upload-notice {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 11;
+  animation: fadeIn 0.3s;
 }
 </style>

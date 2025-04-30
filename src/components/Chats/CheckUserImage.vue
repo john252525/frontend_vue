@@ -1,19 +1,17 @@
 <template>
   <div @click="changeImageStation" class="black-fon"></div>
-  <div class="cont">
+  <div class="image-container">
     <img
       v-if="userImageUrl"
       class="user-image"
       :src="userImageUrl"
       alt="user-image"
     />
-    <!-- icon666.com - MILLIONS OF FREE VECTOR ICONS --><svg
+    <svg
+      v-else
       viewBox="0 0 152 152"
       xmlns="http://www.w3.org/2000/svg"
-      width="190"
-      height="190"
       class="user-chat-icon-svg"
-      v-else
     >
       <g id="Layer_2" data-name="Layer 2">
         <g id="_18.Avatar" data-name="18.Avatar">
@@ -42,51 +40,59 @@ const { userImageUrl } = toRefs(props);
 
 <style scoped>
 .black-fon {
-  /* Этот элемент не влияет на центровку картинки */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9;
 }
 
-.cont {
-  position: absolute;
+.image-container {
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  display: flex; /* Используем flexbox для центровки */
-  justify-content: center; /* Центрируем по горизонтали */
-  align-items: center; /* Центрируем по вертикали */
-  width: 500px; /* задайте ширину контейнера */
-  height: 500px; /* задайте высоту контейнера */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  aspect-ratio: 1/1;
 }
 
-.user-chat-icon-svg path#icon {
-  fill: #808080; /* Серый цвет для всей иконки */
+.user-chat-icon-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  max-height: 500px;
+  fill: #808080;
 }
 
 .user-image {
+  max-width: 100%;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
   border-radius: 5px;
-  /* width: auto; 
-  /* height: auto; */
+  object-fit: contain;
 }
 
-.user-chat-icon {
-  width: 100%;
-}
-@media (max-width: 800px) {
-  .user-image {
-    width: 80%;
-  }
-}
 @media (max-width: 768px) {
-  .user-chat-icon {
-    width: 70%;
+  .image-container {
+    width: 80vw;
+    height: 80vw;
   }
 }
+
 @media (max-width: 500px) {
-  .user-chat-icon {
-    width: 50%;
-  }
-  .user-image {
-    width: 50%;
+  .image-container {
+    width: 90vw;
+    height: 90vw;
   }
 }
 </style>

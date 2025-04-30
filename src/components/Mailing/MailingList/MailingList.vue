@@ -129,6 +129,7 @@
     v-if="station.editMailing"
     :changeisEditMailing="changeisEditMailing"
     :selectedItem="selectedItem"
+    :changeResultModal="changeResultModal"
   />
 </template>
 

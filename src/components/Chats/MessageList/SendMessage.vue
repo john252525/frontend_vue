@@ -366,7 +366,7 @@ const sendMessage = async () => {
   const newMessage = {
     tempId: generateItemNew(),
     uniq: "3EB0NEWUNIQUEID",
-    timestamp: Date.now(),
+    timestamp: getHighPrecisionTimestamp(), // Используем высокоточную временную метку
     data: {
       content: contentText.value
         ? [
@@ -380,13 +380,17 @@ const sendMessage = async () => {
       from: "79027631667",
       outgoing: true,
       text: contentText.value ? contentText.value : messageText.value || null,
-      time: Date.now(),
+      time: getHighPrecisionTimestamp(), // Та же метка времени
       state: "send",
       replyTo: replyToDataBolean ? replyToUniq : null,
     },
     reaction: null,
     state: 0,
   };
+
+  function getHighPrecisionTimestamp() {
+    return Math.floor(performance.timeOrigin * 1000 + performance.now() * 1000);
+  }
 
   const front_message = {
     to: `${chatInfo.value.phone}`,
