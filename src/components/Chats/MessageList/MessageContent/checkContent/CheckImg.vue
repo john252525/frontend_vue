@@ -81,7 +81,7 @@ const { urlImg, chatInfo, typeUrl } = toRefs(props);
 const emit = defineEmits(["updateMessages", "messages"]);
 
 const messageText = ref("");
-
+const userLogin = JSON.parse(localStorage.getItem("userInfo"));
 const sendMessage = async () => {
   console.log(typeUrl.value);
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -100,12 +100,20 @@ const sendMessage = async () => {
   };
   console.log(message);
 
+  const login = ref("");
+  const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
+  if (apiUrl === apiCheckUrl) {
+    login.value = chatInfo.value.loginUser;
+  } else {
+    login.value = userLogin.login;
+  }
+
   try {
     const response = await axios.post(
       `${apiUrl}/sendMessage`,
       {
-        source: "whatsapp",
-        login: "helly",
+        source: chatInfo.value.sourceUser,
+        login: login.value,
         msg: message,
       },
       {

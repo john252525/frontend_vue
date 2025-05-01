@@ -371,7 +371,7 @@ const sendMessage = async () => {
       content: contentText.value
         ? [
             {
-              type: "video",
+              type: "image",
               src: urlImg.value,
             },
           ]

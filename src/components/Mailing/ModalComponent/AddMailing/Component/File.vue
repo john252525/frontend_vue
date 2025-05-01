@@ -4,7 +4,11 @@
     <section class="message-section">
       <article class="alphabet-comp">
         <h2 class="title">{{ t("addMailing.poleNumber") }}:</h2>
-        <select v-model="selectedLetter" class="alphabet-select">
+        <select
+          v-model="selectedLetter"
+          class="alphabet-select"
+          @change="selectAlphavit(selectedLetter)"
+        >
           <option v-for="letter in alphabet" :key="letter" :value="letter">
             {{ letter }}
           </option>
@@ -246,7 +250,13 @@ const resultString = computed(() => {
 const alphabet = ref(
   Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
 );
-const selectedLetter = ref(alphabet.value[0]);
+const selectedLetter = ref(alphabet.value[0]); // По умолчанию первая буква алфавита
+const letter = ref(selectedLetter.value); // Инициализируем текущей выбранной буквой
+
+const selectAlphavit = (item) => {
+  letter.value = item;
+  console.log("Выбрана буква:", letter.value); // Для отладки
+};
 
 // Обработчик загрузки картинки
 const handleImageUpload = (event) => {
@@ -312,6 +322,7 @@ async function createWhatsAppBroadcast() {
     exist: sendOnlyExistingDialogs.value, // Необязательно, по умолчанию true
     random: sendMessagesRandomOrder.value, // Необязательно, по умолчанию false
     cascade: "whatsapp", // Необязательно, по умолчанию whatsapp
+    ph_col: letter.value,
   };
 
   try {

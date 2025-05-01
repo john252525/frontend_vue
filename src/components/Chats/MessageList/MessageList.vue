@@ -525,6 +525,7 @@ const handleMouseDown = (event, message) => {
 const updateMessages = (newMessage) => {
   console.log("newMessage in updateMessages", newMessage); //  Для отладки
   console.log("chatInfo in updateMessages", props.chatInfo);
+  console.log("updateMessages updateMessages updateMessages");
   if (station.messageNull) {
     station.messageNull = false;
   }
@@ -551,7 +552,7 @@ const updateMessages = (newMessage) => {
 
   messages.value.push(newMessage); // Добавление нового сообщения
   console.log("Новое сообщение", newMessage);
-  console.log("messages.value", messages.value); // Логируем текущее состояние массива
+  console.log("messages.value", messages.value);
 
   setTimeout(() => {
     scrollToBottom(); // Прокрутка вниз
@@ -967,7 +968,11 @@ onMounted(() => {
 
       // Проверяем тип события
       if (eventData.hook_type === "message") {
-        // props.changeWebhookEventData(eventData);
+        if (!eventData.outgoing && eventData.content) {
+          console.log("sdsd");
+          updateMessages(newMessage);
+        }
+
         if (!eventData.outgoing) {
           if (!receivedMessageIds.includes(eventData.item)) {
             const newMessage = {
