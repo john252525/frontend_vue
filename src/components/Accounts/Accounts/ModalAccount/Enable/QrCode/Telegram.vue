@@ -165,6 +165,7 @@ const closeModal = () => {
 };
 
 const getCode = async () => {
+  stationLoading.value = true;
   await offQrCodeStation();
   await enablePhoneAuth();
   await startFunc();

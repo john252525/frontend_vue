@@ -40,6 +40,7 @@ const { t } = useI18n();
 }
 
 .result-section {
+  /* width: 400px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,6 +127,27 @@ const { t } = useI18n();
   to {
     opacity: 1;
     /* transform: translate(0px, 0px); */
+  }
+}
+
+@media (max-width: 700px) {
+  .result-section {
+    width: 300px;
+  }
+}
+
+@media (max-width: 400px) {
+  .result-section {
+    width: 250px;
+  }
+
+  .error-message {
+    margin-top: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #b73131;
+    text-align: center;
+    transition: opacity 0.5s ease;
   }
 }
 </style>

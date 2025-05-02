@@ -187,6 +187,7 @@ const setState = async (request) => {
         console.log("QR modal open");
         station.qrCode = true;
       } else if (response.data.data.error.message === "Challenge required") {
+        station.stationLoading = false;
         station.ChallengeRequired = true;
         console.log(response.data);
         console.log("Challenge required modal open");
@@ -197,7 +198,9 @@ const setState = async (request) => {
         station.getCode = true;
       } else {
         console.log(response.data);
-        station.result = true;
+        setTimeout(() => {
+          station.result = true;
+        }, 1000);
       }
     } else if (response.data === 401) {
       errorBlock.value = true;

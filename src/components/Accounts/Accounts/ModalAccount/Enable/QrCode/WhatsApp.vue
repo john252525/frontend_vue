@@ -329,4 +329,36 @@ defineExpose({ stopEnableByQR });
   font-weight: 600;
   margin-top: 20px;
 }
+
+@media (max-width: 500px) {
+  .number-section {
+    width: 300px;
+  }
+
+  .num-input {
+    width: 285px;
+    height: 45px;
+  }
+
+  .next-button {
+    width: 300px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 400px) {
+  .number-section {
+    width: 250px;
+  }
+
+  .num-input {
+    width: 235px;
+    height: 45px;
+  }
+
+  .next-button {
+    width: 250px;
+    height: 35px;
+  }
+}
 </style>

@@ -272,6 +272,16 @@ const messages = {
     google: {
       text: "Log in Google",
     },
+    modalAccount: {
+      settings: "Settings",
+      screen: "Screenshot",
+      on: "Enable",
+      off: "Disable",
+      change: "Reset",
+      chat: "Chat",
+      changeProxy: "Change proxy",
+      deleteAccount: "Delete account",
+    },
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -534,6 +544,16 @@ const messages = {
     },
     google: {
       text: "Войти через Google",
+    },
+    modalAccount: {
+      settings: "Настройки",
+      screen: "Скриншот",
+      on: "Включить",
+      off: "Выключить",
+      change: "Сбросить",
+      chat: "Чат",
+      changeProxy: "Сменить прокси",
+      deleteAccount: "Удалить аккаунт",
     },
   },
 };

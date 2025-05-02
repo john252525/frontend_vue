@@ -9,34 +9,40 @@
           left: modalPosition.left + 'px',
         }"
       >
-        <span class="action" @click="handleSubmit">Настройки</span>
+        <span class="action" @click="handleSubmit">{{
+          t("modalAccount.settings")
+        }}</span>
         <span
           class="action"
           v-if="accountStationText === 'whatsapp'"
           @click="changeGetScreenStation"
-          >Скриншот</span
+          >{{ t("modalAccount.screen") }}</span
         >
-        <span class="action action-on" @click="changeEnableStation"
-          >Включить</span
-        >
-        <span class="action" @click="forceStopActive">Выключить</span>
-        <span class="action action-throw" @click="ChangeconfirmStationReset"
-          >Сбросить</span
-        >
+        <span class="action action-on" @click="changeEnableStation">{{
+          t("modalAccount.on")
+        }}</span>
+        <span class="action" @click="forceStopActive">{{
+          t("modalAccount.off")
+        }}</span>
+        <span class="action action-throw" @click="ChangeconfirmStationReset">{{
+          t("modalAccount.change")
+        }}</span>
         <span
           class="action-loading"
           :class="{ 'flash-red': isFlashing }"
           v-if="!chatsStation"
           @click.stop="handleDisabledChat"
-          >Чат</span
+          >{{ t("modalAccount.chat") }}</span
         >
         <span
           class="action"
           v-else="chatsStation === true"
           @click="connectToDatabaseAndNavigate"
-          >Чат</span
+          >{{ t("modalAccount.chat") }}</span
         >
-        <span class="action" @click="getNewProxy">Сменить прокси</span>
+        <span class="action" @click="getNewProxy">{{
+          t("modalAccount.changeProxy")
+        }}</span>
         <!-- <span class="action" @click="startEnableByQR('whatsapp')"
           >Связать через QR</span
         > -->
@@ -54,7 +60,7 @@
               selectedItem.type === 'undefined'
             )
           "
-          >Удалить аккаунт</span
+          >{{ t("modalAccount.deleteAccount") }}</span
         >
       </div>
     </transition>

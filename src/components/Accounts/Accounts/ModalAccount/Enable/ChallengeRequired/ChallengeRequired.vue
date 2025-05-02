@@ -135,6 +135,7 @@ const disablePhoneAuth = async () => {
 };
 
 const getQr = async () => {
+  station.loading = true;
   await disablePhoneAuth();
   await changeEnableStation();
   await startFunc();
@@ -206,5 +207,17 @@ label {
   padding: 4px;
   background-color: rgb(243, 243, 243);
   border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+  .auth-code {
+    width: 300px;
+  }
+}
+
+@media (max-width: 400px) {
+  .auth-code {
+    width: 250px;
+  }
 }
 </style>
