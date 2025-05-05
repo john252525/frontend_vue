@@ -20,13 +20,16 @@
         Сделать снимок
       </h2>
     </section>
-    <div class="image-container">
+    <div v-if="!errorBoolean" class="image-container">
       <img v-if="typeUrl === 'image'" class="img" :src="urlImg" alt="" />
       <video v-if="typeUrl === 'video'" class="video" :src="urlImg" controls />
       <div v-if="typeUrl === 'file'" class="file-preview">
         <p>Предварительный просмотр файла недоступен. Скачать файл:</p>
         <a :href="urlImg" target="_blank">Скачать файл</a>
       </div>
+    </div>
+    <div class="error-cont" v-if="errorBoolean">
+      <div class="error-section">Произошла ошиба при отправке сообщения</div>
     </div>
     <div class="inp-cont">
       <input
@@ -78,6 +81,7 @@ const props = defineProps({
 
 const { urlImg, chatInfo, typeUrl } = toRefs(props);
 
+const errorBoolean = ref(false);
 const emit = defineEmits(["updateMessages", "messages"]);
 
 const messageText = ref("");
@@ -134,11 +138,14 @@ const sendMessage = async () => {
     urlImg.value = "";
     console.log("Сообщение отправлено:", response.data);
     emit("updateMessages", message); // Обновляем список сообщений
+
     messageText.value = "";
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
+    errorBoolean.value = true;
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
+      errorBoolean.value = true;
     }
   }
 };
@@ -200,6 +207,19 @@ const sendMessage = async () => {
   justify-content: center;
 }
 
+.error-section {
+  width: 100%;
+  padding: 0px 20px 0px 20px;
+  height: 400px;
+  /* background-color: rgb(247, 246, 246); */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  color: rgb(249, 53, 53);
+}
+
 .navigate {
   width: 100%;
   height: 50px;
@@ -255,6 +275,15 @@ const sendMessage = async () => {
   align-items: center;
 }
 
+.error-container {
+  width: 100%;
+  max-height: 500px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .img,
 .video {
   max-width: 100%;
@@ -287,6 +316,9 @@ button {
     max-height: 400px;
   }
 
+  .error-container {
+    min-height: 400px;
+  }
   .send-message-input {
     width: 675px;
   }
@@ -297,6 +329,10 @@ button {
     max-height: 300px;
   }
 
+  .error-container {
+    min-height: 300px;
+  }
+
   .send-message-input {
     width: 495px;
   }
@@ -305,6 +341,10 @@ button {
 @media (max-width: 550px) {
   .image-container {
     max-height: 200px;
+  }
+
+  .error-container {
+    min-height: 200px;
   }
 
   .send-message-input {

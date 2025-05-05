@@ -75,7 +75,7 @@ const props = defineProps({
 const fileInput = ref(null);
 const fileURL = ref(null);
 const fileType = ref(null);
-
+const apiUrl = import.meta.env.VITE_API_URL;
 const openFileExplorer = () => {
   fileInput.value.click();
 };
@@ -91,15 +91,11 @@ const handleFileChange = async (event) => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post(
-        "https://hellychat.apitter.com/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${apiUrl}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       props.openMessageContent();
       fileURL.value = response.data.fileUrl;

@@ -138,16 +138,12 @@ const uploadPhoto = async (photoDataURL) => {
     const formData = new FormData();
     formData.append("file", dataURLtoFile(photoDataURL, "photo.jpg"));
 
-    const response = await axios.post(
-      `https://hellychat.apitter.com/upload`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        timeout: 10000,
-      }
-    );
+    const response = await axios.post(`${apiUrl}/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 10000,
+    });
 
     photoURL.value = response.data.fileUrl;
     props.changeImgUrl(photoURL, "image");
