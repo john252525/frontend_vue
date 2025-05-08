@@ -12,16 +12,28 @@
     </article>
   </section>
   <section v-if="station.phone" class="number-section">
-    <input
-      :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-      placeholder="7 (900) 000-000"
-      @input="formatPhone"
-      class="num-input"
-      type="text"
-      id="phone"
-      v-model="phone"
-      required
-    />
+    <div class="phone-input-container">
+      <select
+        v-model="selectedCountry"
+        class="country-select"
+        @change="updatePhoneFormat"
+      >
+        <option v-for="country in countries" :value="country.code">
+          {{ country.code }}
+        </option>
+      </select>
+      <input
+        :class="station.errorPhone ? 'num-input-error' : 'num-input'"
+        :placeholder="placeholder"
+        @input="formatPhone"
+        @keydown.delete="handleBackspace"
+        class="num-input"
+        type="text"
+        id="phone"
+        v-model="formattedPhone"
+        ref="phoneInput"
+      />
+    </div>
     <button @click="getCode" class="next-button">{{ t("enable.next") }}</button>
   </section>
 </template>
@@ -29,7 +41,15 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { inject, ref, reactive, onMounted, onBeforeUnmount } from "vue";
+import {
+  inject,
+  ref,
+  reactive,
+  computed,
+  onMounted,
+  nextTick,
+  watch,
+} from "vue";
 import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
@@ -37,6 +57,140 @@ import ResultModal from "../ResultModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
+
+// Страны с их кодами и форматами
+const countries = ref([
+  { code: "+7", name: "Russia", flag: "🇷🇺", format: "(###) ###-##-##" },
+  { code: "+1", name: "USA/Canada", flag: "🇺🇸", format: "(###) ###-####" },
+  { code: "+44", name: "UK", flag: "🇬🇧", format: "#### ### ####" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", format: "### ### ####" },
+  { code: "+33", name: "France", flag: "🇫🇷", format: "# ## ## ## ##" },
+  { code: "+81", name: "Japan", flag: "🇯🇵", format: "##-####-####" },
+  { code: "+86", name: "China", flag: "🇨🇳", format: "### #### ####" },
+  { code: "+91", name: "India", flag: "🇮🇳", format: "##### #####" },
+]);
+
+const selectedCountry = ref("+7");
+const formattedPhone = ref("");
+const phoneInput = ref(null);
+
+// Получаем текущий формат для выбранной страны
+const currentFormat = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  return country ? country.format : "";
+});
+
+// Плейсхолдер с учетом выбранного формата
+const placeholder = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return "";
+
+  let placeholder = country.code + " ";
+  for (let i = 0; i < country.format.length; i++) {
+    placeholder += country.format[i] === "#" ? "_" : country.format[i];
+  }
+  return placeholder;
+});
+
+// Обновляем формат при изменении страны
+const updatePhoneFormat = () => {
+  formattedPhone.value = selectedCountry.value + " ";
+};
+
+// Обработчик backspace
+const handleBackspace = (e) => {
+  const cursorPosition = phoneInput.value.selectionStart;
+
+  // Не даем удалить код страны
+  if (cursorPosition <= selectedCountry.value.length + 1) {
+    e.preventDefault();
+    return;
+  }
+
+  // Если перед курсором разделитель, пропускаем его
+  const value = formattedPhone.value;
+  const prevChar = value[cursorPosition - 1];
+  if ([" ", "(", ")", "-"].includes(prevChar)) {
+    e.preventDefault();
+    phoneInput.value.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+  }
+};
+
+// Форматирование телефона
+const formatPhone = () => {
+  const cursorPosition = phoneInput.value.selectionStart;
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return;
+
+  // Сохраняем позицию курсора относительно цифр (без учета форматирования)
+  let digitsBeforeCursor = 0;
+  for (let i = 0; i < cursorPosition; i++) {
+    if (formattedPhone.value[i].match(/\d/)) {
+      digitsBeforeCursor++;
+    }
+  }
+
+  // Удаляем все нецифровые символы
+  let digits = formattedPhone.value.replace(/\D/g, "");
+  const countryCode = selectedCountry.value.replace("+", "");
+
+  if (digits.startsWith(countryCode)) {
+    digits = digits.substring(countryCode.length);
+  }
+
+  // Применяем формат
+  let formatted = selectedCountry.value + " ";
+  let digitIndex = 0;
+
+  for (
+    let i = 0;
+    i < country.format.length && digitIndex < digits.length;
+    i++
+  ) {
+    if (country.format[i] === "#") {
+      formatted += digits[digitIndex];
+      digitIndex++;
+    } else {
+      formatted += country.format[i];
+    }
+  }
+
+  formattedPhone.value = formatted;
+
+  // Восстанавливаем позицию курсора с учетом нового форматирования
+  nextTick(() => {
+    let newCursorPos = selectedCountry.value.length + 1; // Начинаем после кода страны и пробела
+    let digitsPassed = 0;
+
+    for (
+      let i = selectedCountry.value.length + 1;
+      i < formattedPhone.value.length;
+      i++
+    ) {
+      if (digitsPassed >= digitsBeforeCursor) break;
+
+      if (formattedPhone.value[i].match(/\d/)) {
+        digitsPassed++;
+      }
+      newCursorPos++;
+    }
+
+    // Корректируем позицию, если курсор должен быть после последней цифры
+    if (digitsPassed < digitsBeforeCursor) {
+      newCursorPos = formattedPhone.value.length;
+    }
+
+    phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
+  });
+};
+
+// Получаем номер в международном формате
+const getInternationalFormat = () => {
+  const digits = formattedPhone.value.replace(/\D/g, "");
+  return "+" + digits;
+};
+
+// Остальной код компонента остается без изменений
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
@@ -50,6 +204,17 @@ const station = reactive({
   text: "",
   loading: false,
 });
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+  }
+};
 
 const qrCodeData = reactive({
   link: "",
@@ -65,29 +230,6 @@ const stationLoading = ref(true);
 const intervalId = ref(null);
 const isRunning = ref(false);
 let previousLink = "";
-
-const phone = ref("7 ");
-
-const formatPhone = () => {
-  const cleaned = phone.value.replace(/\D/g, "");
-
-  if (cleaned.length === 0) {
-    phone.value = "7 ";
-    return;
-  }
-
-  const match = cleaned.match(/^(7)?(\d{0,3})(\d{0,3})(\d{0,4})$/);
-
-  if (match) {
-    phone.value = `7 (${match[2]}) ${match[3]}${
-      match[4] ? "-" + match[4] : ""
-    }`;
-  }
-};
-
-const getInternationalFormat = () => {
-  return phone.value.replace(/\D/g, "");
-};
 
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
@@ -121,6 +263,17 @@ const enablePhoneAuth = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "enablePhoneAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       console.log(response.data);
     } else if (response.data === 401) {
@@ -133,7 +286,7 @@ const enablePhoneAuth = async () => {
       console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error("Ошибка:", error);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
@@ -169,8 +322,18 @@ const getQr = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "getQr",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.data.status === "ok") {
-      previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
+      previousLink = qrCodeData.link;
       qrCodeData.link = response.data.data.value;
       qrCodeData.station = true;
       station.loading = false;
@@ -181,10 +344,9 @@ const getQr = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      // Если значение пустое, останавливаем запросы
       if (!response.data.data.value) {
         clearInterval(intervalId);
-        qrCodeData.link = previousLink; // Отображаем предыдущую ссылку
+        qrCodeData.link = previousLink;
         changeEnableStation();
       }
     }
@@ -195,22 +357,6 @@ const getQr = async () => {
   }
 };
 
-// const EnablebyQR = async () => {
-//   station.loading = true;
-//   station.text = "Генерируем QR-код...";
-//   await getQr();
-
-//   let count = 0;
-//   intervalId = setInterval(async () => {
-//     await getQr();
-//     count++;
-//     if (count >= 6) {
-//       clearInterval(intervalId);
-//       changeEnableStation();
-//     }
-//   }, 20000); // 20 секунд
-// };
-
 const startEnableByQR = async () => {
   stationLoading.value = true;
   station.loading = true;
@@ -218,22 +364,22 @@ const startEnableByQR = async () => {
   await getQr();
 
   let count = 0;
-  isRunning.value = true; // Устанавливаем состояние в "работает"
+  isRunning.value = true;
 
   intervalId.value = setInterval(async () => {
     await getQr();
     count++;
     if (count >= 6) {
       clearInterval(intervalId.value);
-      isRunning.value = false; // Устанавливаем состояние в "не работает"
+      isRunning.value = false;
       changeEnableStation();
     }
-  }, 20000); // 20 секунд
+  }, 20000);
 };
 
 const stopEnableByQR = () => {
-  clearInterval(intervalId.value); // Останавливаем интервал
-  isRunning.value = false; // Устанавливаем состояние в "не работает"
+  clearInterval(intervalId.value);
+  isRunning.value = false;
   station.phone = true;
 };
 
@@ -241,14 +387,9 @@ const closeModal = () => {
   qrCodeData.station = false;
 };
 
-const getPhone = async () => {
-  station.phone = true;
-  clearInterval(intervalId);
-};
-
 const getCode = async () => {
   const phone = getInternationalFormat();
-  if (phone.length != 11) {
+  if (phone.length < 8) {
     console.log("error");
     station.errorPhone = true;
     return;
@@ -260,11 +401,9 @@ const getCode = async () => {
 
 onMounted(() => {
   startEnableByQR();
+  updatePhoneFormat();
 });
 
-// onBeforeUnmount(() => {
-//   clearInterval(intervalId);
-// });
 defineExpose({ stopEnableByQR });
 </script>
 
@@ -295,32 +434,49 @@ defineExpose({ stopEnableByQR });
   flex-direction: column;
 }
 
+.phone-input-container {
+  display: flex;
+  gap: 10px;
+}
+
 .num-input {
   border-radius: 5px;
   padding-left: 10px;
-  width: 350px;
+  width: 280px;
   height: 45px;
   font-weight: 400;
   font-size: 14px;
   color: #000;
   border: 0.5px solid #c1c1c1;
   background: #fcfcfc;
+  flex-grow: 1;
 }
 
 .num-input-error {
   border-radius: 5px;
   padding-left: 10px;
-  width: 350px;
+  width: 280px;
   height: 45px;
   font-weight: 400;
   font-size: 14px;
   color: #000;
   border: 0.5px solid #be2424;
   background: #ffeaea;
+  flex-grow: 1;
+}
+
+.country-select {
+  width: 80px;
+  height: 45px;
+  border-radius: 5px;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  padding: 0 5px;
+  font-size: 14px;
 }
 
 .next-button {
-  width: 365px;
+  width: 100%;
   height: 35px;
   border-radius: 5px;
   background-color: #4950ca;
@@ -328,6 +484,8 @@ defineExpose({ stopEnableByQR });
   color: rgb(255, 255, 255);
   font-weight: 600;
   margin-top: 20px;
+  border: none;
+  cursor: pointer;
 }
 
 @media (max-width: 500px) {
@@ -335,14 +493,9 @@ defineExpose({ stopEnableByQR });
     width: 300px;
   }
 
-  .num-input {
-    width: 285px;
-    height: 45px;
-  }
-
-  .next-button {
-    width: 300px;
-    height: 35px;
+  .num-input,
+  .num-input-error {
+    width: 220px;
   }
 }
 
@@ -351,14 +504,13 @@ defineExpose({ stopEnableByQR });
     width: 250px;
   }
 
-  .num-input {
-    width: 235px;
-    height: 45px;
+  .num-input,
+  .num-input-error {
+    width: 170px;
   }
 
-  .next-button {
-    width: 250px;
-    height: 35px;
+  .country-select {
+    width: 70px;
   }
 }
 </style>

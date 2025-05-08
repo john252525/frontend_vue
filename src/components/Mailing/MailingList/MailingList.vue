@@ -162,6 +162,18 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const props = defineProps({
   changeResultModal: {
     type: Function,
@@ -186,12 +198,24 @@ const getMailingLists = async () => {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
+
+    if (response.data) {
+      await handleSendLog(
+        "mailingList",
+        "list",
+        {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        },
+        response.data.ok,
+        response.data
+      );
+    }
+
     mailingLists.value = response.data.result.items;
     if (mailingLists.value.length === 0) {
-      console.log("данных нет");
       loadDataStation.value = false;
       dataStationNone.value = true;
     } else if (response.data === 401) {
@@ -204,9 +228,8 @@ const getMailingLists = async () => {
       loadDataStation.value = false;
       dataStation.value = true;
     }
-    console.log(response.data);
   } catch (error) {
-    console.error("Ошибка при получении данных:", error.message);
+    console.error("error", error.message);
     errorMailing.value = true;
     loadDataStation.value = false;
     dataStationNone.value = false;

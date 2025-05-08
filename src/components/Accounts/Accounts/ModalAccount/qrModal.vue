@@ -80,7 +80,6 @@ watch(qrCodeData, (newValue) => {
 watch(currentQr, (newValue) => {
   if (newValue.length > 0) {
     props.changeStationQrModalOn();
-    console.log("currentQr");
   }
 });
 </script>

@@ -56,7 +56,6 @@ const handleCredentialResponse = async (response) => {
       localStorage.setItem("accountStationText", "Telegram");
       localStorage.setItem("accountStation", "telegram");
       console.log(response.data);
-      router.push("/MainPage");
       location.reload();
     }
     if (res.ok) {

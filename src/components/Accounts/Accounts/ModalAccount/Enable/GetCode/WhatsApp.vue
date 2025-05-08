@@ -78,7 +78,6 @@ const forceStop = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -86,12 +85,11 @@ const forceStop = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(` - Ошибка`, error);
+    console.error(`error`, error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -114,7 +112,6 @@ const enablePhoneAuth = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log("Состояние установлено");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -122,13 +119,24 @@ const enablePhoneAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
+  }
+};
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error:", err);
+    // Optionally, update the error message ref
   }
 };
 
@@ -160,8 +168,18 @@ const disablePhoneAuth = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "disablePhoneAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log("Состояние установлено");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -169,12 +187,11 @@ const disablePhoneAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -196,7 +213,6 @@ const setState = async () => {
       }
     );
     if (response.data.ok === true) {
-      console.log("Состояние установлено");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -204,12 +220,11 @@ const setState = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -243,10 +258,17 @@ const getAuthCode = async () => {
       }
     );
 
-    if (response.data.ok === true) {
-      console.log("Состояние установлено");
-      console.log(response.data);
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "getAuthCode",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
 
+    if (response.data.ok === true) {
       // Проверяем, пустое ли значение authCode
       if (!response.data.data.authCode) {
         station.error = true;
@@ -266,10 +288,9 @@ const getAuthCode = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     return;
   }
 };

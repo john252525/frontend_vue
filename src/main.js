@@ -179,7 +179,7 @@ router.beforeEach(async (to, from, next) => {
   // Проверка ограничений доступа по домену
   const access = checkRouteAccess(to, currentDomain);
   if (!access.allowed) {
-    console.warn(`Доступ запрещен для ${to.path} на домене ${currentDomain}`);
+    console.warn(`error`);
     return next(access.redirect || "/");
   }
 
@@ -207,7 +207,7 @@ router.beforeEach(async (to, from, next) => {
 
     updatePageMetadata(pageTitle, stationDomen?.cosmetics?.urlLogo);
   } catch (error) {
-    console.error("Ошибка при обновлении метаданных:", error);
+    console.error("error", error);
     updatePageMetadata(to.meta.title);
   }
 
@@ -217,7 +217,7 @@ router.beforeEach(async (to, from, next) => {
 const app = createApp(App);
 
 app.config.errorHandler = (err) => {
-  console.error("Глобальная ошибка Vue:", err);
+  console.error("Global error", err);
 };
 
 app.use(pinia);

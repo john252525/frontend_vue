@@ -12,12 +12,9 @@
         <span class="action" @click="handleSubmit">{{
           t("modalAccount.settings")
         }}</span>
-        <span
-          class="action"
-          v-if="accountStationText === 'whatsapp'"
-          @click="changeGetScreenStation"
-          >{{ t("modalAccount.screen") }}</span
-        >
+        <span class="action" @click="changeGetScreenStation">{{
+          t("modalAccount.screen")
+        }}</span>
         <span class="action action-on" @click="changeEnableStation">{{
           t("modalAccount.on")
         }}</span>
@@ -30,13 +27,32 @@
         <span
           class="action-loading"
           :class="{ 'flash-red': isFlashing }"
-          v-if="!chatsStation"
+          v-if="chatsStation === 'loading'"
           @click.stop="handleDisabledChat"
-          >{{ t("modalAccount.chat") }}</span
-        >
+          >{{ t("modalAccount.chat") }}
+          <LoadingBalance />
+        </span>
+        <span
+          class="action-chat-false"
+          :class="{ 'flash-red': isFlashing }"
+          v-if="chatsStation === false"
+          @click.stop="handleDisabledChat"
+          >{{ t("modalAccount.chat") }}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 32 32"
+          >
+            <path
+              fill="currentColor"
+              d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14s14-6.3 14-14S23.7 2 16 2m-1.1 6h2.2v11h-2.2zM16 25c-.8 0-1.5-.7-1.5-1.5S15.2 22 16 22s1.5.7 1.5 1.5S16.8 25 16 25"
+            />
+          </svg>
+        </span>
         <span
           class="action"
-          v-else="chatsStation === true"
+          v-if="chatsStation === true"
           @click="connectToDatabaseAndNavigate"
           >{{ t("modalAccount.chat") }}</span
         >
@@ -112,6 +128,7 @@ import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
+import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
 // import LoadingMoadal from "../Accounts/LoadingMoadal/LoadingMoadal.vue";
 import GetScreen from "./ModalAccount/GetScreen.vue";
 
@@ -157,6 +174,9 @@ const props = defineProps({
   },
   chatsStation: {
     type: Boolean,
+  },
+  changeForceStopItemData: {
+    type: Function,
   },
 });
 
@@ -223,9 +243,21 @@ const errorStationOff = () => {
   stationLoading.account.error = true;
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const connectToDatabaseAndNavigate = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
-  console.log(localStorage.getItem("accountData"));
+
   try {
     const response = await axios.post(`${apiUrl}/connect`, {
       source: "whatsapp",
@@ -234,6 +266,15 @@ const connectToDatabaseAndNavigate = async () => {
     });
 
     router.push({ name: "Chats", query: { mode: "widget" } });
+    if (response.data) {
+      await handleSendLog(
+        "modalAccount",
+        "connect",
+        { source: "whatsapp", login: selectedItem.value.login, token: `token` },
+        response.data,
+        response.data
+      );
+    }
   } catch (err) {
     console.log(err);
   }
@@ -249,7 +290,6 @@ const ChangeconfirmStation = () => {
 
 const ChangeconfirmStationReset = () => {
   confirmStation.reset = !confirmStation.reset;
-  console.log(selectedItem.value);
 };
 
 const loadingStart = (value) => {
@@ -308,13 +348,24 @@ const createRequest = async (request) => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "modalAccount",
+        request,
+        params,
+        response.data,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       if (request === "getQr") {
         responseQr.value = response.data.data.value;
         qrData.value = Array.from(responseQr.value.split(","));
         stationLoading.account.result = true;
         stationLoading.loading = false;
-        console.log("qr");
+
         // qrCodeDataSubmit();
       } else if (request === "deleteAccount") {
         stationLoading.loading = false;
@@ -331,7 +382,7 @@ const createRequest = async (request) => {
           stationLoading.modalStation = false;
         }, 5000);
       } else {
-        console.log(`${request} - Успешно`);
+        console.log(`error`);
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -340,10 +391,9 @@ const createRequest = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     stationLoading.account.error = true;
     stationLoading.modalStation = true;
     setTimeout(() => {
@@ -351,7 +401,7 @@ const createRequest = async (request) => {
       stationLoading.account.error = false;
     }, 5000);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -387,10 +437,9 @@ const forceStop = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     stationLoading.account.error = true;
     cstationLoading.modalStation = true;
     setTimeout(() => {
@@ -398,7 +447,7 @@ const forceStop = async (request) => {
       stationLoading.account.error = false;
     }, 5000);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -420,8 +469,17 @@ const disablePhoneAuth = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "modalAccount",
+        "disablePhoneAuth",
+        { source: source, login: login },
+        response.data,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log("Аунтефикация 0ff");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -429,12 +487,11 @@ const disablePhoneAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -457,8 +514,17 @@ const setState = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "modalAccount",
+        "setState",
+        { source: source, login: login, setState: true },
+        response.data,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log("Состояние установлено");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -466,12 +532,11 @@ const setState = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error:", error.response.data);
     }
   }
 };
@@ -494,6 +559,16 @@ const setStateTelegram = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "modalAccount",
+        "setState",
+        { source: "whatsapp", login: "helly", setState: true, qrLogin: true },
+        response.data,
+        response.data
+      );
+    }
 
     if (response.data.ok === true) {
       console.log("Состояние установлено");
@@ -551,6 +626,7 @@ const forceStopActive = async () => {
   stationLoading.loading = true;
   stationLoading.text = t("globalLoading.offAccount");
   forceStop("forceStop");
+  props.changeForceStopItemData(selectedItem.value);
 };
 
 const getNewProxy = async () => {
@@ -576,6 +652,18 @@ const resetAccount = async () => {
   background: rgba(117, 117, 117, 0.3);
   top: 0;
   left: 0;
+}
+
+.action-chat-false {
+  font-weight: 400;
+  font-size: 14px;
+  color: #616161;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  cursor: not-allowed;
+  gap: 6px;
 }
 
 .action-list {
@@ -630,6 +718,9 @@ const resetAccount = async () => {
   cursor: pointer;
   animation: shimmer 1s infinite;
   padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .action-loading {

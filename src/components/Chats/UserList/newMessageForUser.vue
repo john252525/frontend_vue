@@ -3,7 +3,7 @@
   <div class="create-new-user">
     <div v-if="!loading && result === null">
       <div class="img-cont">
-        <!-- icon666.com - MILLIONS OF FREE VECTOR ICONS --><svg
+        <svg
           viewBox="0 0 152 152"
           xmlns="http://www.w3.org/2000/svg"
           width="120"
@@ -20,20 +20,34 @@
           </g>
         </svg>
         <div class="username-cont">
-          <input
-            class="send-message-input-to"
-            placeholder="Номер телефона"
-            @input="formatPhoneNumber"
-            maxlength="18"
-            :value="formattedNumber"
-            :class="{ error: error.number }"
+          <div
             v-if="
               stationMess.loginType === 'number' ||
               stationMess.source === 'whatsapp'
             "
-          />
+            class="phone-input-container"
+          >
+            <select
+              v-model="selectedCountry"
+              class="country-select"
+              @change="updatePhoneFormat"
+            >
+              <option v-for="country in countries" :value="country.code">
+                {{ country.code }}
+              </option>
+            </select>
+            <input
+              class="send-message-input-to"
+              :placeholder="placeholder"
+              @input="formatPhone"
+              @keydown.delete="handleBackspace"
+              v-model="formattedPhone"
+              ref="phoneInput"
+              :class="{ error: error.number }"
+            />
+          </div>
           <input
-            class="send-message-input-to"
+            class="send-message-input-to-name"
             placeholder="@username"
             :class="{ error: error.number }"
             v-model="userLoginVal"
@@ -91,13 +105,143 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import True from "./ResultModal/True.vue";
 import False from "./ResultModal/False.vue";
 import { useRouter, useRoute } from "vue-router";
 import Checbox from "./newMessageComponent/Checbox.vue";
+
+// Страны с их кодами и форматами
+const countries = ref([
+  { code: "+7", name: "Russia", flag: "🇷🇺", format: "(###) ###-##-##" },
+  { code: "+1", name: "USA/Canada", flag: "🇺🇸", format: "(###) ###-####" },
+  { code: "+44", name: "UK", flag: "🇬🇧", format: "#### ### ####" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", format: "### ### ####" },
+  { code: "+33", name: "France", flag: "🇫🇷", format: "# ## ## ## ##" },
+  { code: "+81", name: "Japan", flag: "🇯🇵", format: "##-####-####" },
+  { code: "+86", name: "China", flag: "🇨🇳", format: "### #### ####" },
+  { code: "+91", name: "India", flag: "🇮🇳", format: "##### #####" },
+]);
+
+const selectedCountry = ref("+7");
+const formattedPhone = ref("+7 ");
+const phoneInput = ref(null);
+const rawNumber = ref("7");
+
+// Получаем текущий формат для выбранной страны
+const currentFormat = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  return country ? country.format : "";
+});
+
+// Плейсхолдер с учетом выбранного формата
+const placeholder = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return "";
+
+  let placeholder = country.code + " ";
+  for (let i = 0; i < country.format.length; i++) {
+    placeholder += country.format[i] === "#" ? "_" : country.format[i];
+  }
+  return placeholder;
+});
+
+// Обновляем формат при изменении страны
+const updatePhoneFormat = () => {
+  formattedPhone.value = selectedCountry.value + " ";
+  rawNumber.value = selectedCountry.value.replace("+", "");
+};
+
+// Обработчик backspace
+const handleBackspace = (e) => {
+  const cursorPosition = phoneInput.value.selectionStart;
+
+  // Не даем удалить код страны
+  if (cursorPosition <= selectedCountry.value.length + 1) {
+    e.preventDefault();
+    return;
+  }
+
+  // Если перед курсором разделитель, пропускаем его
+  const value = formattedPhone.value;
+  const prevChar = value[cursorPosition - 1];
+  if ([" ", "(", ")", "-"].includes(prevChar)) {
+    e.preventDefault();
+    phoneInput.value.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+  }
+};
+
+// Форматирование телефона
+const formatPhone = () => {
+  const cursorPosition = phoneInput.value.selectionStart;
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return;
+
+  // Сохраняем позицию курсора относительно цифр (без учета форматирования)
+  let digitsBeforeCursor = 0;
+  for (let i = 0; i < cursorPosition; i++) {
+    if (formattedPhone.value[i].match(/\d/)) {
+      digitsBeforeCursor++;
+    }
+  }
+
+  // Удаляем все нецифровые символы
+  let digits = formattedPhone.value.replace(/\D/g, "");
+  const countryCode = selectedCountry.value.replace("+", "");
+
+  if (digits.startsWith(countryCode)) {
+    digits = digits.substring(countryCode.length);
+  }
+
+  // Применяем формат
+  let formatted = selectedCountry.value + " ";
+  let digitIndex = 0;
+
+  for (
+    let i = 0;
+    i < country.format.length && digitIndex < digits.length;
+    i++
+  ) {
+    if (country.format[i] === "#") {
+      formatted += digits[digitIndex];
+      digitIndex++;
+    } else {
+      formatted += country.format[i];
+    }
+  }
+
+  formattedPhone.value = formatted;
+  rawNumber.value = countryCode + digits;
+
+  // Восстанавливаем позицию курсора с учетом нового форматирования
+  nextTick(() => {
+    let newCursorPos = selectedCountry.value.length + 1; // Начинаем после кода страны и пробела
+    let digitsPassed = 0;
+
+    for (
+      let i = selectedCountry.value.length + 1;
+      i < formattedPhone.value.length;
+      i++
+    ) {
+      if (digitsPassed >= digitsBeforeCursor) break;
+
+      if (formattedPhone.value[i].match(/\d/)) {
+        digitsPassed++;
+      }
+      newCursorPos++;
+    }
+
+    // Корректируем позицию, если курсор должен быть после последней цифры
+    if (digitsPassed < digitsBeforeCursor) {
+      newCursorPos = formattedPhone.value.length;
+    }
+
+    phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
+  });
+};
+
 const apiUrl = import.meta.env.VITE_API_URL;
 const selectedAccount = ref("");
 const route = useRoute();
@@ -109,6 +253,13 @@ const result = ref(null);
 const errorMesssage = ref("");
 const userLoginVal = ref("");
 const accounts = ref("");
+const inputHeight = ref("auto");
+
+const error = reactive({
+  number: false,
+  message: false,
+});
+
 const stationMess = reactive({
   source: "",
   loginType: "number",
@@ -130,75 +281,49 @@ const getAccounts = () => {
   const storedAccounts =
     JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
   accounts.value = storedAccounts;
-  console.log(accounts.value);
 };
 
-// Функция для обновления selectedAccount
 const updateSelectedAccount = (account) => {
   selectedAccount.value = account;
   stationMess.isMuilti.source = account.source;
   stationMess.isMuilti.login = account.login;
   stationMess.source = account.source;
-  console.log(account);
 };
-
-onMounted(() => {
-  getAccounts();
-});
 
 const processLogin = () => {
   if (userMessageLogin.value && userMessageLogin.value.includes("@")) {
     userMessageLogin.value = userMessageLogin.value.replace("@", "");
   }
-  console.log("Отправляем логин:", userMessageLogin.value);
 };
 
-const formattedNumber = ref("");
-
-const inputHeight = ref("auto");
-
-const error = reactive({
-  number: false,
-  message: false,
-});
-
-// Функция для настройки высоты текстового поля
 const adjustHeight = (event) => {
   const textarea = event.target;
-  textarea.style.height = "auto"; // Сбрасываем высоту
-  textarea.style.height = textarea.scrollHeight + "px"; // Устанавливаем новую высоту
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
 };
 
 const updateSource = (platform) => {
   stationMess.source = platform;
-
-  console.log("Selected platform:", platform);
 };
-
-const rawNumber = ref("");
 
 const handleKeyDown = (event) => {
   if (event.key === "Enter") {
     if (event.shiftKey) {
-      // Если нажата клавиша Shift + Enter, добавляем новую строку
-      event.preventDefault(); // Предотвращаем стандартное поведение
+      event.preventDefault();
       const textarea = event.target;
-      textarea.value += "\n"; // Добавляем новую строку
-      adjustHeight(event); // Обновляем высоту текстового поля
+      textarea.value += "\n";
+      adjustHeight(event);
     } else {
-      // Если просто нажата клавиша Enter, отправляем сообщение
-      event.preventDefault(); // Предотвращаем стандартное поведение
-      sendMessage(); // Вызываем функцию отправки сообщения
+      event.preventDefault();
+      sendMessage();
     }
   }
 };
 
 function isMultiLogic() {
   if (route.query.multi === "true") {
-    console.log(true);
     stationMess.isMuilti.isMulti = true;
   } else {
-    console.log(false);
     if (localStorage.getItem("accountStation") === "telegram") {
       stationMess.source = "telegram";
     } else {
@@ -210,22 +335,20 @@ function isMultiLogic() {
 function changeUserloginStation() {
   if (stationMess.loginType === "number") {
     stationMess.loginType = "username";
-    console.log("номер");
   } else {
     stationMess.loginType = "number";
-    console.log("текст");
   }
 }
 
 let userMessageLogin = ref("");
+
 const sendMessage = async () => {
   if (stationMess.loginType === "number") {
-    if (!rawNumber.value) {
+    if (!rawNumber.value || rawNumber.value.length < 11) {
       error.number = true;
       return;
     } else {
-      userMessageLogin.value = rawNumber.value;
-      console.log(rawNumber.value);
+      userMessageLogin.value = "+" + rawNumber.value;
       error.number = false;
     }
   } else {
@@ -249,21 +372,10 @@ const sendMessage = async () => {
   const login = ref("");
 
   if (stationMess.isMuilti.isMulti) {
-    console.log(stationMess.isMuilti.isMulti, "stationMess.isMuilti.isMulti");
     source.value = stationMess.isMuilti.source;
   } else {
     source.value = localStorage.getItem("accountStation");
   }
-
-  // if (apiUrl === "https://hellychat.apitter.com/api") {
-  //   if(stationMess.isMuilti.isMuilti) {
-  //     login.value = stationMess.isMuilti.login;
-  //   } else {
-  //     login.value = userLogin.login;
-  //   }
-  // } else {
-  //   login.value = userLogin.login;
-  // }
 
   await processLogin();
 
@@ -289,7 +401,6 @@ const sendMessage = async () => {
   };
   const front_message = {
     text: contentText.value ? contentText.value : messageText.value || null,
-
     content: contentText.value
       ? [
           {
@@ -299,7 +410,6 @@ const sendMessage = async () => {
         ]
       : [],
     state: "error",
-
     time: Date.now(),
     from: "79027631667",
     outgoing: true,
@@ -331,13 +441,6 @@ const sendMessage = async () => {
         Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
-    if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
-    }
     if (response.data.ok === true) {
       loading.value = false;
       result.value = true;
@@ -352,55 +455,31 @@ const sendMessage = async () => {
     errorMesssage.value = error.error;
     result.value = false;
     loading.value = false;
-    if (replyToDataBolean.value) {
-    }
-
     messageText.value = "";
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
       errorMesssage.value = error.response.data.error;
-      result.value = false;
-      loading.value = false;
     }
   }
 };
 
-const username = ref("");
-
-const formatPhoneNumber = (event) => {
-  let input = event.target;
-  let value = input.value.replace(/\D/g, "");
-  let formattedValue = "";
-
-  if (value.length > 0) {
-    formattedValue = "+" + value.substring(0, 1);
-  }
-
-  if (value.length > 1) {
-    formattedValue += " (" + value.substring(1, 4);
-  }
-
-  if (value.length > 4) {
-    formattedValue += ") " + value.substring(4, 7);
-  }
-
-  if (value.length > 7) {
-    formattedValue += "-" + value.substring(7, 9);
-  }
-
-  if (value.length > 9) {
-    formattedValue += "-" + value.substring(9, 11);
-  }
-
-  formattedNumber.value = formattedValue;
-  input.value = formattedValue;
-  rawNumber.value = value; // Update rawNumber directly
-};
-
-onMounted(isMultiLogic);
+onMounted(() => {
+  getAccounts();
+  isMultiLogic();
+  updatePhoneFormat();
+});
 </script>
 
 <style scoped>
+.black-fon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9;
+}
+
 .create-new-user {
   padding: 20px;
   background-color: white;
@@ -417,31 +496,64 @@ onMounted(isMultiLogic);
   flex-direction: column;
 }
 
-.send-icon-cont {
-  width: 50px;
-  height: 50px;
-  background-color: red;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgb(240, 240, 240);
-  border-radius: 100%;
-}
-
-.user-chat-icon-svg path#icon {
-  fill: #808080; /* Серый цвет для всей иконки */
-}
-
-.user-icon {
-  width: 150px;
-}
-
 .img-cont {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 16px;
+}
+
+.user-chat-icon-svg path#icon {
+  fill: #808080;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.country-select {
+  width: 80px;
+  height: 45px;
+  border-radius: 5px;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  padding: 0 5px;
+  font-size: 14px;
+}
+
+.send-message-input-to-name {
+  font-family: system-ui;
+  border-radius: 5px;
+  width: 300px;
+  height: 45px;
+  border: none;
+  font-size: 14px;
+  padding-left: 14px;
+  box-sizing: border-box;
+  border: 0.5px solid rgb(209, 209, 209);
+}
+
+.send-message-input-to-name.error {
+  border: 0.5px solid rgb(252, 98, 98);
+}
+
+.send-message-input-to {
+  font-family: system-ui;
+  border-radius: 5px;
+  width: 210px;
+  height: 45px;
+  border: none;
+  font-size: 14px;
+  padding-left: 14px;
+  box-sizing: border-box;
+  border: 0.5px solid rgb(209, 209, 209);
+}
+
+.send-message-input-to.error {
+  border: 0.5px solid rgb(252, 98, 98);
 }
 
 .cont {
@@ -461,49 +573,30 @@ onMounted(isMultiLogic);
   margin-top: 4px;
   cursor: pointer;
   transition: all 0.25s;
+  text-align: left;
 }
 
 .select-username:hover {
-  font-size: 12px;
   color: rgb(126, 126, 126);
-  margin-top: 4px;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-
-.send-message-input-to {
-  font-family: system-ui;
-  border-radius: 5px;
-  width: 300px;
-  height: 40px; /* Убираем фиксированную высоту */
-  min-height: 20px; /* Минимальная высота */
-  border: none;
-  font-size: 14px;
-  padding-left: 14px;
-  box-sizing: border-box;
-  border: 0.5px solid rgb(209, 209, 209);
-  /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
-}
-
-.send-message-input-to.error {
-  border: 0.5px solid rgb(252, 98, 98);
-  /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
 }
 
 .send-message-input {
   font-family: system-ui;
   border-radius: 5px;
   width: 300px;
-  height: auto; /* Убираем фиксированную высоту */
-  min-height: 160px; /* Минимальная высота */
+  height: auto;
+  min-height: 160px;
   border: none;
   outline: none;
-  overflow: hidden; /* Скрываем переполнение */
-  padding: 16px 16px 16px 16px;
-  box-sizing: border-box; /* Включаем отступы в ширину элемента */
-  resize: none; /* Запрещаем изменение размера вручную */
+  overflow: hidden;
+  padding: 16px;
+  box-sizing: border-box;
+  resize: none;
   border: 0.5px solid rgb(209, 209, 209);
-  /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
+}
+
+.send-message-input.error {
+  border: 0.5px solid rgb(252, 98, 98);
 }
 
 .send-message {
@@ -515,10 +608,36 @@ onMounted(isMultiLogic);
   font-size: 13px;
   color: #fff;
   transition: all 0.25s;
+  border: none;
+  cursor: pointer;
 }
 
-.send-message-input.error {
-  border: 0.5px solid rgb(252, 98, 98);
-  /* box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 0 6px 0 rgba(0, 0, 0, 0.02); */
+.send-message:hover {
+  background: #3a40a0;
+}
+
+@media (max-width: 500px) {
+  .create-new-user {
+    /* width: 90%; */
+    padding: 15px;
+    gap: 30px;
+  }
+
+  .send-message-input,
+  .send-message {
+    width: 100%;
+  }
+
+  .phone-input-container {
+    align-items: stretch;
+  }
+
+  .country-select {
+    width: 100%;
+  }
+
+  .send-message-input-to {
+    width: 230px;
+  }
 }
 </style>

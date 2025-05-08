@@ -98,6 +98,7 @@
       :getScreenStation="getScreenStation"
       :changeGetScreenStation="changeGetScreenStation"
       :chatsStation="chatsStation"
+      :changeForceStopItemData="changeForceStopItemData"
     />
     <SettignsModal
       :closeModal="closeModal"
@@ -161,6 +162,7 @@ const { t } = useI18n();
 
 const router = useRouter();
 
+const forceStopItemData = ref({});
 const chatsLoadingChange = inject("chatsLoadingChange");
 const dataStationNone = ref(false);
 const dataStation = ref(false);
@@ -178,7 +180,90 @@ const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
-const chatsStation = ref(false);
+const chatsStation = ref(null);
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+
+const changeForceStopItemData = async (item) => {
+  try {
+    // 1. Устанавливаем элемент и включаем загрузку
+    forceStopItemData.value = {
+      ...item,
+      loading: true, // Добавляем флаг загрузки
+    };
+
+    // 2. Находим индекс аккаунта в instanceData
+    const accountIndex = instanceData.value.findIndex(
+      (acc) => acc.login === item.login && acc.source === item.source
+    );
+
+    if (accountIndex === -1) {
+      console.warn("Account not found in instanceData");
+      return;
+    }
+
+    // 3. Обновляем состояние загрузки в основном массиве
+    instanceData.value[accountIndex].loading = true;
+
+    // 4. Форсируем обновление UI (если используете Vue 2)
+    // this.$forceUpdate();
+
+    // 5. Делаем запрос для получения актуальных данных
+    const infoResponse = await getInfoWhats(item.source, item.login);
+
+    if (!infoResponse?.data?.data) {
+      throw new Error("Invalid response structure");
+    }
+
+    // 6. Обновляем данные в основном массиве
+    instanceData.value[accountIndex] = {
+      ...instanceData.value[accountIndex],
+      step: infoResponse.data.data.step || "Н/Д",
+      loading: false,
+    };
+
+    // 7. Обновляем forceStopItemData
+    forceStopItemData.value = {
+      ...instanceData.value[accountIndex],
+      loading: false,
+    };
+
+    // 8. Обработка special case для step = 5
+    if (infoResponse.data.data.step?.[0]?.value === 5) {
+      updateLocalStorage(item.login, item.source);
+    }
+  } catch (error) {
+    console.error("error", error);
+
+    // Сбрасываем состояние загрузки в случае ошибки
+    if (forceStopItemData.value) {
+      forceStopItemData.value.loading = false;
+    }
+
+    const accountIndex = instanceData.value.findIndex(
+      (acc) => acc.login === item.login && acc.source === item.source
+    );
+
+    if (accountIndex !== -1) {
+      instanceData.value[accountIndex].loading = false;
+    }
+  }
+};
+
+// Оптимизированная версия функции обновления localStorage
+const updateLocalStorage = (login, source) => {
+  try {
+    const storageKey = "loginWhatsAppChatsStep";
+    const existingLogins = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    if (!existingLogins.some((item) => item.login === login)) {
+      const updatedLogins = [...existingLogins, { login, source }];
+      localStorage.setItem(storageKey, JSON.stringify(updatedLogins));
+    }
+  } catch (e) {
+    console.error("error", e);
+  }
+};
 
 const changeEnableStation = () => {
   enableStation.value = !enableStation.value;
@@ -191,6 +276,17 @@ const changeGetScreenStation = () => {
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
+};
+
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
 };
 
 const getAccounts = async () => {
@@ -223,19 +319,23 @@ const getAccounts = async () => {
       }
     );
     // 9bddaafd-2c8d-4840-96d5-1c19c0bb4bd5
-    console.log(localStorage.getItem("accountToken"));
+
     if (response.data.ok === true) {
-      // Инициализируем accounts с loading: true
+      await handleSendLog(
+        "accountList",
+        "getInfoByToken",
+        params,
+        response.data.ok,
+        response.data
+      );
       accounts.value = response.data;
       instanceData.value = accounts.value.data.instances.map((instance) => ({
         ...instance,
         step: instance.step === null ? "Н/Д" : instance.step,
         loading: true, // Добавляем поле loading
       }));
-      console.log(instanceData.value);
 
       if (instanceData.value.length === 0) {
-        console.log("Данных нет");
         loadDataStation.value = false;
         dataStationNone.value = true;
       } else {
@@ -270,10 +370,7 @@ const getAccounts = async () => {
                 instance.step = infoResponse.data.data.step;
               }
             } catch (error) {
-              console.error(
-                `Ошибка при получении информации для логина ${login}:`,
-                error
-              );
+              console.error(`error ${login}:`, error);
             } finally {
               // Устанавливаем loading в false в любом случае
               instance.loading = false;
@@ -281,7 +378,6 @@ const getAccounts = async () => {
 
             // Проверяем, если step равен 5
             if (instance.step[0].value === 5) {
-              console.log(instance);
               let existingLogins;
 
               const storedData = localStorage.getItem("loginWhatsAppChatsStep");
@@ -290,10 +386,7 @@ const getAccounts = async () => {
                 try {
                   existingLogins = JSON.parse(storedData) || []; // Получаем существующий массив объектов
                 } catch (error) {
-                  console.error(
-                    "Ошибка при парсинге JSON из localStorage:",
-                    error
-                  );
+                  console.error("error", error);
                   existingLogins = []; // Если парсинг не удался, создаем пустой массив
                 }
               } else {
@@ -317,15 +410,7 @@ const getAccounts = async () => {
                   "loginWhatsAppChatsStep",
                   JSON.stringify(existingLogins) // Сохраняем массив объектов
                 );
-                console.log(
-                  "Логины в localStorage:",
-                  localStorage.getItem("loginWhatsAppChatsStep")
-                );
               } else {
-                console.log(`Логин "${login}" уже существует в localStorage.`);
-                console.log(
-                  JSON.parse(localStorage.getItem("loginWhatsAppChatsStep"))
-                );
               }
             }
           });
@@ -334,7 +419,6 @@ const getAccounts = async () => {
           await Promise.all(promises);
           // Выводим сообщение о завершении проверки всех аккаунтов
           chatsLoadingChange();
-          console.log(accounts.value);
         }
       }
     } else if (response.data === 401) {
@@ -349,14 +433,13 @@ const getAccounts = async () => {
     dataStationNone.value = true; // Показываем, что данные отсутствуют
     if (error.response) {
       if (error.response.status === 401) {
-        console.log("Нет доступа");
       } else {
-        console.error("Ошибка при получении списка аккаунтов:", error);
-        console.error("Ответ сервера:", error.response.data);
+        console.error("error", error);
+        console.error("error", error.response.data);
       }
     } else {
       error.value = error.message || "Произошла ошибка.";
-      console.error("Ошибка при получении списка аккаунтов:", error);
+      console.error("error", error);
     }
   }
 };
@@ -377,21 +460,30 @@ const getInfoWhats = async (source, login) => {
         },
       }
     );
-    console.log(response.data);
+    if (response.data) {
+      await handleSendLog(
+        "accountList",
+        "getInfo",
+        { source: source, login: login },
+        response.data.ok,
+        response.data
+      );
+    }
+
     return response;
   } catch (error) {
-    console.error("Ошибка при получении информации:", error);
+    console.error("error", error);
     return null; // Возвращаем null в случае ошибки
   }
 };
 
 const openModal = (event, item) => {
   localStorage.setItem("accauntSourse", item.source);
-  console.log(localStorage.getItem("accauntSourse"));
+
   selectedItem.value = item;
   isModalOpen.value = true;
   localStorage.setItem("userInfo", JSON.stringify(selectedItem.value));
-  console.log(localStorage.getItem("userInfo"));
+
   getInfo();
   const rect = event.currentTarget.getBoundingClientRect();
   modalPosition.value = {
@@ -470,6 +562,7 @@ const hideMessage = () => {
 };
 
 const getInfo = async () => {
+  chatsStation.value = "loading";
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfo",
@@ -484,9 +577,26 @@ const getInfo = async () => {
         },
       }
     );
+    if (response.data) {
+      if (response.data) {
+        await handleSendLog(
+          "accountList",
+          "getInfo",
+          {
+            source: selectedItem.value.source,
+            login: selectedItem.value.login,
+          },
+          response.data.ok,
+          response.data
+        );
+      }
+    }
+
     if (response.data.data.step) {
       if (response.data.data.step.value === 5) {
         chatsStation.value = true;
+      } else {
+        chatsStation.value = false;
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -495,12 +605,11 @@ const getInfo = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error:", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

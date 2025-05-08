@@ -108,6 +108,18 @@ import TogleTheme from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
 
@@ -150,13 +162,20 @@ const getBalance = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "balance",
+        "get-payment-sum",
+        null,
+        response.data,
+        response.data
+      );
+    }
+
     balance.value = response.data.totalAmount;
-    console.log("Платеж создан:", response.data);
   } catch (err) {
-    console.error(
-      "Ошибка при создании платежа:",
-      err.response ? err.response.data : err.message
-    );
+    console.error("error", err.response ? err.response.data : err.message);
   }
 };
 

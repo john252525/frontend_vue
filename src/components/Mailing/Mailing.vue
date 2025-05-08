@@ -50,7 +50,6 @@ const closeResultModal = () => {
 };
 
 const changeResultModal = (change, value) => {
-  console.log("work");
   if (change === "true") {
     stationLoading.modalStation = !stationLoading.modalStation;
   } else {

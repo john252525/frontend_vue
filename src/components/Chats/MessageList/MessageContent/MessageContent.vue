@@ -80,6 +80,18 @@ const openFileExplorer = () => {
   fileInput.value.click();
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const handleFileChange = async (event) => {
   console.log("handleFileChange called");
 
@@ -96,7 +108,15 @@ const handleFileChange = async (event) => {
           "Content-Type": "multipart/form-data",
         },
       });
-
+      if (response.data) {
+        await handleSendLog(
+          "chats",
+          "upload",
+          formData,
+          response.data,
+          response.data
+        );
+      }
       props.openMessageContent();
       fileURL.value = response.data.fileUrl;
 

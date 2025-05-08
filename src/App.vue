@@ -57,7 +57,6 @@ onMounted(() => {
   currentDomain.value = window.location.hostname;
 
   // Выводим в консоль
-  console.log("Текущий домен:", currentDomain.value);
 
   // Дополнительно можно проверить, какой это домен из ваших 4 вариантов
   const myDomains = [
@@ -68,9 +67,7 @@ onMounted(() => {
   ];
 
   if (myDomains.includes(currentDomain.value)) {
-    console.log("Это один из моих доменов");
   } else {
-    console.log("Это неизвестный домен");
   }
 });
 

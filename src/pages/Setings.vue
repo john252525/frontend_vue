@@ -27,6 +27,18 @@ import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const router = useRouter();
 
 // Реактивные переменные
@@ -69,6 +81,21 @@ const getUserIdByToken = async (token) => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "settings",
+        "getUserUuid",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        response.data.ok,
+        response.data
+      );
+    }
+
     userId.value = response.data.uuid;
     return response.data.uuid;
   } catch (error) {
@@ -103,6 +130,16 @@ const loadText = async () => {
       `https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}`
     );
     textContent.value = response.data.components[0]?.value || "";
+
+    if (response.data) {
+      await handleSendLog(
+        "settings",
+        "https://indiparser.apitter.com/inb",
+        "https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}",
+        response.data,
+        response.data
+      );
+    }
   } catch (error) {
     showMessage("Ошибка при загрузке текста", "error");
     console.error("Ошибка загрузки:", error);
@@ -120,6 +157,17 @@ const saveText = async () => {
       `https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}`,
       { text: textContent.value }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "settings",
+        "https://indiparser.apitter.com/indiparser.php?token=i&user_id=${userId.value}",
+        "text: textContent.value",
+        response.data,
+        response.data
+      );
+    }
+
     showMessage("Текст успешно сохранен", "success");
   } catch (error) {
     showMessage(error.message, "error");

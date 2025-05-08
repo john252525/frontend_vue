@@ -75,6 +75,18 @@ const props = defineProps({
   },
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const stationLoading = reactive({
   modalStation: false,
   account: {
@@ -110,9 +122,19 @@ const updateStatus = async (state) => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "state",
+        apiUrlMethod,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       stationLoading.modalStation = true;
-      console.log("Статус изменен", response.data);
+
       props.refreshMailingLists();
       setTimeout(() => {
         offModalSuc();
@@ -124,18 +146,13 @@ const updateStatus = async (state) => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log("Ошибка", response.data);
     }
   } catch (error) {
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
   }
-};
-
-const trst = () => {
-  console.log(localStorage.getItem("accountToken"));
 };
 
 const offModalSuc = () => {
@@ -159,8 +176,17 @@ const getMessages = async () => {
       },
     });
 
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "view",
+        { limit: 10, offset: 0, sort: "asc" },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok) {
-      console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -168,11 +194,11 @@ const getMessages = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.error("Ошибка при получении данных:", response.data);
+      console.error("error", response.data);
     }
   } catch (error) {
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
   }

@@ -70,6 +70,18 @@ const payments = ref([]); // Массив для хранения платеже
 const fetchError = ref(null);
 const apiUrl = import.meta.env.VITE_PAY_URL;
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const paymentsLoadingStation = reactive({
   dataStationNone: false,
   dataStation: false,
@@ -79,7 +91,7 @@ const paymentsLoadingStation = reactive({
 const fetchPayments = async () => {
   paymentsLoadingStation.loadDataStation = true;
   fetchError.value = null; // Сброс сообщения об ошибке
-  console.log(localStorage.getItem("accountToken"));
+
   try {
     const response = await axios.get(
       `${apiUrl}/paymentsList`,
@@ -90,12 +102,25 @@ const fetchPayments = async () => {
         },
       }
     );
-    console.log(response.data);
+
+    if (response.data) {
+      await handleSendLog(
+        "payments",
+        "paymentsList",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          },
+        },
+        response.data,
+        response.data
+      );
+    }
+
     // Извлекаем платежи из массива items
     if (response.data) {
       payments.value = response.data;
       if (instanceData.value.length === 0) {
-        console.log("данных нет");
         paymentsLoadingStation.loadDataStation = false;
         paymentsLoadingStation.dataStationNone = true;
       } else {
@@ -109,7 +134,7 @@ const fetchPayments = async () => {
   } catch (error) {
     paymentsLoadingStation.loadDataStation = false;
     paymentsLoadingStation.dataStationNone = true;
-    console.error("Ошибка при получении списка платежей:", error);
+    console.error("error", error);
     fetchError.value = error.response
       ? error.response.data.message || "Неизвестная ошибка"
       : "Ошибка сети";
@@ -124,11 +149,10 @@ const createUser = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data);
+
     if (response.data) {
       payments.value = response.data;
       if (payments.value.length === 0) {
-        console.log("данных нет");
         paymentsLoadingStation.loadDataStation = false;
         paymentsLoadingStation.dataStationNone = true;
       } else {
@@ -142,7 +166,7 @@ const createUser = async () => {
   } catch (error) {
     paymentsLoadingStation.loadDataStation = false;
     paymentsLoadingStation.dataStationNone = true;
-    console.error("Ошибка при создании платежа:", error);
+    console.error("error", error);
   }
 };
 

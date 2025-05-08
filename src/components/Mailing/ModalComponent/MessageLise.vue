@@ -100,6 +100,18 @@ const errorMessage = ref(false);
 const loadingMessge = ref(true);
 const countMessage = ref(false);
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const getMessages = async () => {
   const apiUrlMethod = `${apiUrl}/view/${selectedItem.value.id}/`;
   loadingMessge.value = true;
@@ -116,11 +128,20 @@ const getMessages = async () => {
       },
     });
 
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "view",
+        { limit: 10, offset: 0, sort: "asc" },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok) {
       loadingMessge.value = false;
       countMessage.value = true;
       mailingLists.value = response.data.result.items;
-      console.log(response.data);
     } else if (response.data === 401) {
       loadingMessge.value = false;
       errorMessage.value = true;
@@ -130,7 +151,7 @@ const getMessages = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.error("Ошибка при получении данных:", response.data);
+      console.error("error", response.data);
       loadingMessge.value = false;
       errorMessage.value = true;
     }
@@ -138,7 +159,7 @@ const getMessages = async () => {
     loadingMessge.value = false;
     errorMessage.value = true;
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
   }

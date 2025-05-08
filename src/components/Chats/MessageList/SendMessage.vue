@@ -151,6 +151,18 @@ import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const router = useRouter();
 const props = defineProps({
   chatInfo: {
@@ -435,6 +447,17 @@ const sendMessage = async () => {
         Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
+
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "sendMessage",
+        messageDataRes,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {

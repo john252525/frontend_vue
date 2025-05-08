@@ -71,6 +71,18 @@ const apiUrl = import.meta.env.VITE_PAY_URL;
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const props = defineProps({
   changeCreatePayments: {
     type: Function,
@@ -101,13 +113,23 @@ const createPayment = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "payment",
+        "create_payment",
+        { amount: payments.amount, currency: "RUB" },
+        response.data,
+        response.data
+      );
+    }
+
     paymentUrl.value = response.data.link;
 
     // Перенаправление пользователя на страницу платежа
     window.location.href = paymentUrl.value;
-    console.log(response.data);
   } catch (error) {
-    console.error("Ошибка при создании платежа:", error);
+    console.error("error", error);
     payments.errorMessage = error.response
       ? error.response.data.message || "Неизвестная ошибка"
       : "Ошибка сети";

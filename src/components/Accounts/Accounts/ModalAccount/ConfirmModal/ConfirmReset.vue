@@ -25,6 +25,17 @@ import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
 const { t } = useI18n();
 const router = useRouter();
 const props = defineProps({
@@ -88,6 +99,15 @@ const createRequest = async (request) => {
         },
       }
     );
+    if (response.data) {
+      await handleSendLog(
+        "getNewProxy",
+        request,
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
     if (response.data.ok === true) {
       if (request === "getNewProxy") {
         props.changeStationLoadingModal(true);
@@ -105,10 +125,9 @@ const createRequest = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     props.errorStationOn();
     props.changeStationLoadingModal(true);
     setTimeout(() => {
@@ -116,7 +135,7 @@ const createRequest = async (request) => {
       props.errorStationOff();
     }, 5000);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

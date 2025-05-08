@@ -28,6 +28,18 @@ const props = defineProps({
   },
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const currentStatus = ref("Загрузка общих чатов...");
 const progress = ref(0);
 const completed = ref(false);
@@ -47,6 +59,15 @@ const getAccountInfo = async (source, login) => {
         },
       }
     );
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "getInfo",
+        { source, login },
+        response.data.ok,
+        response.data
+      );
+    }
     return response.data;
   } catch (error) {
     console.error(`Ошибка при запросе ${login}:`, error);
@@ -70,6 +91,17 @@ const fetchAccounts = async (source) => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "getInfoByToken",
+        { source, skipDetails: true },
+        response.data.ok,
+        response.data
+      );
+    }
+
     return response.data.data.instances || [];
   } catch (error) {
     console.error(`Ошибка при получении ${source} аккаунтов:`, error);

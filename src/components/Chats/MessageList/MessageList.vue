@@ -332,6 +332,23 @@
           :offReplyToDataBoleanFalse="offReplyToDataBoleanFalse"
           :clearDataToReply="clearDataToReply"
         />
+        <div
+          v-if="showScrollButton"
+          class="scroll-to-bottom"
+          @click="scrollToBottom"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6l1.41-1.42Z"
+            />
+          </svg>
+        </div>
       </section>
     </section>
     <ActionModal
@@ -388,6 +405,20 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
 const messages = ref([]);
 const messagesData = ref([]);
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
+const showScrollButton = ref(false);
 
 const station = reactive({
   photoMenu: false,
@@ -639,11 +670,51 @@ const chaneErrorBlock = () => {
 
 const scrollContainer = ref(null);
 
-const scrollToBottom = () => {
+const setupScrollObserver = () => {
   if (scrollContainer.value) {
-    scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
+    scrollContainer.value.addEventListener("scroll", () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+      showScrollButton.value = !isNearBottom;
+
+      // Добавьте/уберите класс для анимации
+      const button = document.querySelector(".scroll-to-bottom");
+      if (button) {
+        if (showScrollButton.value) {
+          button.classList.add("visible");
+        } else {
+          button.classList.remove("visible");
+        }
+      }
+    });
   }
 };
+
+const scrollToBottom = (behavior = "smooth") => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTo({
+      top: scrollContainer.value.scrollHeight,
+      behavior: behavior,
+    });
+    showScrollButton.value = false;
+  }
+};
+
+watch(
+  messages,
+  () => {
+    const container = scrollContainer.value;
+    if (container) {
+      const isNearBottom =
+        container.scrollTop + container.clientHeight >
+        container.scrollHeight - 150;
+      if (isNearBottom) {
+        scrollToBottom();
+      }
+    }
+  },
+  { deep: true }
+);
 
 // Функция для обновления состояния сообщения
 
@@ -689,6 +760,17 @@ const getMessage = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "getChatMessages",
+        requestData,
+        response.data.ok,
+        response.data
+      );
+    }
+
     messagesBolean.value = true;
     if (response.data.ok === true) {
       loading.value = false;
@@ -955,6 +1037,13 @@ function truncateString(str, maxLength) {
 }
 
 onMounted(() => {
+  // Настройка наблюдателя за скроллом
+  setupScrollObserver();
+
+  // Автоматическая прокрутка вниз при загрузке
+  setTimeout(() => scrollToBottom("auto"), 300);
+
+  // Ваш существующий код EventSource
   const connectEventSource = () => {
     const eventSource = new EventSource(`${apiUrl}/events`);
 
@@ -963,128 +1052,69 @@ onMounted(() => {
 
     eventSource.onmessage = (event) => {
       const eventData = JSON.parse(event.data);
+      console.log("Event received:", eventData);
 
-      console.log(eventData);
-
-      // Проверяем тип события
+      // Обработка нового сообщения
       if (eventData.hook_type === "message") {
         if (!eventData.outgoing && eventData.content) {
-          console.log("sdsd");
+          console.log("New incoming message with content");
           updateMessages(newMessage);
         }
 
-        if (!eventData.outgoing) {
-          if (!receivedMessageIds.includes(eventData.item)) {
-            const newMessage = {
-              uniq: eventData.item,
-              timestamp: eventData.time,
-              data: eventData,
-              reaction: null,
-              state: 0,
-            };
-            console.log("новое сообщение ", event.data);
+        if (
+          !eventData.outgoing &&
+          !receivedMessageIds.includes(eventData.item)
+        ) {
+          const newMessage = {
+            uniq: eventData.item,
+            timestamp: eventData.time,
+            data: eventData,
+            reaction: null,
+            state: 0,
+          };
 
-            receivedMessageIds.push(eventData.item);
-            localStorage.setItem(
-              "receivedMessageIds",
-              JSON.stringify(receivedMessageIds)
-            );
-            if (chatInfo.value) {
-              //  Проверяем, является ли сообщение частью текущего чата
-              let isCurrentChat = false;
+          receivedMessageIds.push(eventData.item);
+          localStorage.setItem(
+            "receivedMessageIds",
+            JSON.stringify(receivedMessageIds)
+          );
 
-              if (eventData.outgoing) {
-                // Если сообщение исходящее
-                isCurrentChat =
-                  eventData.thread === chatInfo.value.lastMessage.id.remote; // Сравниваем с номером телефона получателя в chatInfo
-              } else {
-                //  Если сообщение входящее
-                isCurrentChat =
-                  eventData.thread === chatInfo.value.lastMessage.id.remote; // Сравниваем с номером телефона получателя в chatInfo
-              }
-
-              if (isCurrentChat) {
-                //  Проверяем, есть ли уже такое сообщение (по item - уникальному id)
-                if (receivedMessageIds.includes(eventData.item)) {
-                  // <--- Добавлено
-                  const newMessage = {
-                    uniq: eventData.item,
-                    timestamp: eventData.time,
-                    data: eventData,
-                    reaction: null,
-                    state: 0,
-                  };
-                  console.log("новое сообщение ", eventData);
-
-                  receivedMessageIds.push(eventData.item); // Добавлено item в receivedMessageIds
-                  localStorage.setItem(
-                    "receivedMessageIds",
-                    JSON.stringify(receivedMessageIds)
-                  );
-                  updateMessages(newMessage);
-                } else {
-                  console.log(
-                    "Сообщение уже есть в списке, не добавляем:",
-                    eventData.item
-                  );
-                }
-              } else {
-                console.log(
-                  "Сообщение не относится к текущему чату (thread не совпадает):",
-                  eventData.thread,
-                  "vs",
-                  chatInfo.value.phone + "@c.us"
-                );
-              }
-            } else {
-              console.log("нету чататаатааттататататататаата");
+          if (chatInfo.value) {
+            const isCurrentChat =
+              eventData.thread === chatInfo.value.lastMessage.id.remote;
+            if (isCurrentChat) {
+              updateMessages(newMessage);
             }
           }
         }
-        console.log("новое сообщение");
       }
 
+      // Обработка статуса сообщения
       if (eventData.content && eventData.hook_type === "message_status") {
-        if (eventData.content[0].type === "delivered") {
-          console.log("доставлено");
-          const messageToUpdate = messages.value.find(
-            (message) => message.data.item === eventData.item
-          );
+        const messageToUpdate = messages.value.find(
+          (message) => message.data.item === eventData.item
+        );
 
-          if (messageToUpdate) {
+        if (messageToUpdate) {
+          if (eventData.content[0].type === "delivered") {
             messageToUpdate.data.state = "delivered";
-            console.log(messageToUpdate);
-          } else {
-            console.log("Сообщение с таким thread не найдено");
-          }
-        } else if (eventData.content[0].type === "has_seen") {
-          const messageToUpdate = messages.value.find(
-            (message) => message.data.item === eventData.item
-          );
-          if (messageToUpdate) {
+          } else if (eventData.content[0].type === "has_seen") {
             messageToUpdate.data.state = "has_seen";
-            console.log(messages.data);
-          } else {
-            console.log("Сообщение с таким thread не найдено");
           }
         }
-      } else {
-        console.log("Content не найден");
       }
 
+      // Обработка реакций
       if (eventData.content && eventData.hook_type === "add_message_reaction") {
         setTimeout(() => {
           updateReactionState(eventData.replyTo, eventData.content[0].src);
         }, 1000);
-      } else {
-        console.log("Content не найден");
       }
     };
 
     eventSource.onerror = (error) => {
       console.error("Ошибка соединения:", error);
-      eventSource.close(); // Закрываем текущее соединение
-      // Пытаемся переподключиться через 3 секунды
+      eventSource.close();
       setTimeout(() => {
         console.log("Попытка переподключения...");
         connectEventSource();
@@ -1092,10 +1122,11 @@ onMounted(() => {
     };
 
     eventSource.onopen = () => {
-      console.log("Соединение установлено");
+      console.log("Соединение с EventSource установлено");
     };
   };
 
+  // Инициализация подключения
   connectEventSource();
 });
 </script>
@@ -1174,6 +1205,35 @@ onMounted(() => {
   right: 6px;
   top: 8px;
   transition: all 0.25s;
+}
+
+.scroll-to-bottom {
+  position: fixed;
+  bottom: 120px; /* Увеличьте отступ снизу */
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #06cf9c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000; /* Увеличьте z-index */
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.scroll-to-bottom.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Добавьте в .message-section */
+.message-section {
+  position: static; /* Уберите relative */
 }
 
 .dropdown-message-message-incoming {

@@ -52,7 +52,6 @@ export function useDomain() {
       stationDomen.cosmetics.urlLogo =
         "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
     }
-    console.log("Текущий домен:", stationDomen);
   });
 
   return {

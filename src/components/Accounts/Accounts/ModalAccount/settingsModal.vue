@@ -11,7 +11,14 @@
       <h2 @click="changeStationSettingsModal" class="subtitle">
         {{ t("settings.subtitle") }}
       </h2>
-      <textarea id="messageTextarea" v-model="webhookUrlsText"></textarea>
+      <textarea
+        v-if="!loadingStatiom"
+        id="messageTextarea"
+        v-model="webhookUrlsText"
+      ></textarea>
+      <div v-if="loadingStatiom" class="loading-cont">
+        <SettingsLoad />
+      </div>
       <button
         class="submit-button"
         @click="addNewUrl"
@@ -30,6 +37,7 @@
 <script setup>
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoadModal from "../LoadingMoadal/LoadingMoadal.vue";
+import SettingsLoad from "../LoadingMoadal/SettingsLoad.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 import { ref, toRefs, watch, reactive } from "vue";
@@ -78,13 +86,25 @@ const stationLoading = reactive({
 const changeStationLoadingModal = () => {
   stationLoading.modalStation = !stationLoading.modalStation;
 };
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 const getInfoAccount = async () => {
   try {
     loadingStatiom.value = true; // Устанавливаем состояние загрузки
     if (!selectedItems.value) {
-      console.error("selectedItems не определен");
       return;
     }
     const { source, login, storage } = selectedItems.value;
@@ -115,10 +135,19 @@ const getInfoAccount = async () => {
       }
     );
 
-    console.log("Информация о аккаунте", response.data);
     const { webhookUrls } = response.data.data;
     if (Array.isArray(webhookUrls)) {
       webhookUrlsText.value = webhookUrls.join("\n"); // Объединяем значения с новой строки
+    }
+
+    if (response.data) {
+      await handleSendLog(
+        "settingsAccount",
+        "getInfo",
+        params,
+        response.data.ok,
+        response.data
+      );
     }
     if (response.data === 401) {
       errorBlock.value = true;
@@ -130,7 +159,7 @@ const getInfoAccount = async () => {
   } catch (error) {
     console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   } finally {
     loadingStatiom.value = false; // Сбрасываем состояние загрузки в любом случае
@@ -164,7 +193,6 @@ const addNewUrl = async () => {
   try {
     loadingStatiom.value = true; // Устанавливаем состояние загрузки
     if (!selectedItems.value) {
-      console.error("selectedItems не определен");
       return;
     }
     const { source, login } = selectedItems.value;
@@ -181,6 +209,17 @@ const addNewUrl = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "settingsAccount",
+        "updateAccount",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -188,16 +227,15 @@ const addNewUrl = async () => {
         router.push("/login");
       }, 2000);
     }
-    console.log("Информация о аккаунте", response.data);
   } catch (error) {
     console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   } finally {
     loadingStatiom.value = false;
     changeStationLoadingModal();
-    location.reload();
+    // location.reload();
   }
 };
 
@@ -260,6 +298,17 @@ textarea {
   font-size: 14px;
   color: rgb(78, 78, 78);
   font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.loading-cont {
+  max-width: 350px;
+  max-height: 700px;
+  min-width: 350px;
+  min-height: 400px;
+  padding: 10px;
+  border: 0.5px solid rgb(207, 207, 207);
+  border-radius: 5px;
   margin-bottom: 8px;
 }
 

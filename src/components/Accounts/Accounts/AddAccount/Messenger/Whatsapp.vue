@@ -117,7 +117,6 @@ watch(accountData.type, (newValue) => {
   if (newValue) {
     formData.login = "";
     formData.token = "";
-    console.log("dsds");
   }
 });
 </script>

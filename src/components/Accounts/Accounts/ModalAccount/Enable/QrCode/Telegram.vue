@@ -42,6 +42,18 @@ const qrCodeData = reactive({
 let intervalId = null; // Для хранения идентификатора интервала
 let previousLink = ""; // Для хранения предыдущей ссылки
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const getQr = async () => {
   let params = {
     source: source,
@@ -71,6 +83,16 @@ const getQr = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "getQr",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.data.status === "ok") {
       previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
       qrCodeData.link = response.data.data.value;
@@ -91,9 +113,9 @@ const getQr = async () => {
       }
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -127,8 +149,18 @@ const enablePhoneAuth = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "enablePhoneAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -136,12 +168,11 @@ const enablePhoneAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

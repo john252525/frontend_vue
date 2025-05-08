@@ -19,7 +19,11 @@
       <!-- <li><p class="option">Отреагировать</p></li> -->
       <li>
         <p
-          v-if="deleteMessageBolean && (apiUrl === 'https://hellylo.apitter.com/api' || apiUrl === 'http://localhost:4000/api')"
+          v-if="
+            deleteMessageBolean &&
+            (apiUrl === 'https://hellylo.apitter.com/api' ||
+              apiUrl === 'http://localhost:4000/api')
+          "
           @click="deleteMessage"
           class="option delete"
         >
@@ -55,7 +59,7 @@ const emit = defineEmits();
 const { chatInfo, message } = toRefs(props);
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const deleteMessageBolean = ref(false)
+const deleteMessageBolean = ref(false);
 
 const deleteMessage = () => {
   console.log(chatInfo.value.lastMessage.id.remote);
@@ -70,11 +74,22 @@ const addDataToReplyMessage = (message) => {
 };
 
 if (message.value.delete) {
-
-  deleteMessageBolean.value = false
+  deleteMessageBolean.value = false;
 } else {
-  deleteMessageBolean.value = true
+  deleteMessageBolean.value = true;
 }
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
 
 const deleteMessageAxios = async (uniq, item) => {
   console.log(chatInfo);
@@ -84,6 +99,16 @@ const deleteMessageAxios = async (uniq, item) => {
       item: item,
       login: chatInfo.value.loginUser,
     });
+
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "delete-messages",
+        { uniq: uniq, item: item, login: chatInfo.value.loginUser },
+        response.data,
+        response.data
+      );
+    }
     console.log("Response:", response.data); // Логируем ответ сервера
   } catch (error) {
     console.error(

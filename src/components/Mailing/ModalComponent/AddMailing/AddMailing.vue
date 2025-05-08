@@ -42,11 +42,9 @@ const remakeStation = (value) => {
   if (value === "file") {
     station.file = true;
     station.text = false;
-    console.log(station);
   } else {
     station.file = false;
     station.text = true;
-    console.log(station);
   }
 };
 

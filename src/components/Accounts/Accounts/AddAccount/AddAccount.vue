@@ -203,7 +203,6 @@ const selectType = (value) => {
 
 const selectCrmType = (type) => {
   accountData.crmType = type;
-  console.log(type);
 };
 
 const selectCategory = (value) => {
@@ -243,6 +242,17 @@ const selectMessenger = (value) => {
   }
   dropdownOpen("messenger");
 };
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
 
 const addAccount = async () => {
   const login = ref("");
@@ -273,6 +283,25 @@ const addAccount = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "addAccount",
+        "addAccount",
+        {
+          token: accountData.token,
+          login: login.value,
+          type: data.type,
+          group: data.category,
+          proxyString: "",
+          webhookUrls: "",
+          source: data.messenger,
+          crmType: accountData.crmType,
+        },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if ((response.data.ok = "true")) {
       location.reload();
     } else if (response.data === 401) {
@@ -286,16 +315,15 @@ const addAccount = async () => {
     // location.reload();
   } catch (error) {
     error.value = error.message || "Произошла ошибка.";
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error:", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
 
 const changeAcooundDataButton = () => {
   accountData.button = true;
-  console.log(true);
 };
 
 const checkInputTelegram = () => {
@@ -305,7 +333,6 @@ const checkInputTelegram = () => {
 const updateLogin = (newLogin) => {
   accountData.login = newLogin;
   if (newLogin && accountData.type === "Touchapi") {
-    console.log("sds");
     accountData.button = true;
   }
 };
@@ -329,11 +356,9 @@ const dropdownOpen = (value) => {
 
 const AddAccount = () => {
   if (!accountData.category) {
-    console.log("Нет категории");
     return;
   } else {
     if (accountData.category === "Messenger") {
-      console.log("category: Messenger");
     } else if (accountData.category === "CRM") {
       if (accountData.type === "Bitrix24") {
         addAccount();
@@ -345,39 +370,30 @@ const AddAccount = () => {
     }
   }
   if (!accountData.messenger) {
-    console.log("Нет messenger");
   } else {
     if (accountData.messenger === "WhatsApp") {
-      console.log("messenger: WhatsApp");
       if (!accountData.type) {
-        console.log("messenger: WhatsApp | type: NONE");
         return;
       } else {
         if (accountData.type === "Touchapi") {
-          console.log("messenger: WhatsApp | type: Touchapi");
           if (!accountData.login) {
             return;
           } else {
             addAccount();
           }
         } else if (accountData.type === "Edna") {
-          console.log("messenger: WhatsApp | type: edna");
           if (!accountData.token || !accountData.login) {
-            console.log("messenger: WhatsApp | type: edna | token: NoNE");
           } else {
             addAccount();
           }
         }
       }
     } else if (accountData.messenger === "Telegram") {
-      console.log("messenger: Telegram");
       if (!accountData.tgLogin) {
-        console.log("нет логина тг");
       } else {
         addAccount();
       }
     } else if (accountData.messenger === "SMS") {
-      console.log("messenger: SMS");
     }
   }
 };

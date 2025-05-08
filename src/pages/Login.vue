@@ -115,6 +115,18 @@ function errorStyleStation(input, station) {
   }
 }
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const loginAccount = async () => {
   try {
     const response = await axios.post(
@@ -130,6 +142,20 @@ const loginAccount = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "login",
+        "login",
+        {
+          username: formData.login,
+          password: formData.password,
+        },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       console.log(response.data.token);
       localStorage.setItem("accountToken", response.data.token);

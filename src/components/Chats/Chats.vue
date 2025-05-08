@@ -71,6 +71,18 @@ import LoadingMultiChat from "./LoadingMultiChat.vue";
 import { useRouter, useRoute } from "vue-router";
 const route = useRoute();
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const style = reactive({
   userList: {
     display: "none",
@@ -173,6 +185,15 @@ const clearNewMessages = async (uniq) => {
     const response = await axios.post(`${apiUrl}/clear-new-messages`, {
       uniq: uniq,
     });
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "clear-new-messages",
+        { uniq: uniq },
+        response.data,
+        response.data
+      );
+    }
   } catch (error) {
     console.error("Ошибка при очистке новых сообщений:", error);
   }

@@ -84,6 +84,18 @@ const { urlImg, chatInfo, typeUrl } = toRefs(props);
 const errorBoolean = ref(false);
 const emit = defineEmits(["updateMessages", "messages"]);
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const messageText = ref("");
 const userLogin = JSON.parse(localStorage.getItem("userInfo"));
 const sendMessage = async () => {
@@ -127,6 +139,17 @@ const sendMessage = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "sendMessage",
+        { source: chatInfo.value.sourceUser, login: login.value, msg: message },
+        response.data,
+        response.data
+      );
+    }
+
     if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {

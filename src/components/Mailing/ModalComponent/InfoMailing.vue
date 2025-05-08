@@ -118,7 +118,7 @@ watch(
         .map((day) => weekDays[day - 1])
         .filter(Boolean);
     } else {
-      console.error("selectedItem или его свойства не определены");
+      console.error("error");
       weekDaysList.value = []; // Сбросить, если данные недоступны
     }
   },
@@ -133,7 +133,7 @@ watch(
       delayInMinutes.value.min = (min / 60).toFixed(0);
       delayInMinutes.value.max = (max / 60).toFixed(0);
     } else {
-      console.error("selectedItem или его свойства не определены");
+      console.error("error");
       delayInMinutes.value.min = null;
       delayInMinutes.value.max = null;
     }

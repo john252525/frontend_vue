@@ -70,6 +70,10 @@ VITE_TITLE = WhatsApi #Заголовок страницы
 VITE_TITLE_LOGO = WhatsApi #Заголовок навигации
 VITE_URL_LOGO = /whats_api.svg #Ссылка на лого
 
+be_auth
+
+CLIENT_ID = 536063598199-18bggcm8gcrsf1o92jejfkfmktt73c9g.apps.googleusercontent.com
+
 10.Установка зависимостей
 
 cd /var/www/be_pay
@@ -208,7 +212,15 @@ Email разработчика
 Desktop (если десктопное)
 12 Укажите Authorized JavaScript Origins и Authorized Redirect URIs (https://be-auth.developtech.ru/api/auth/google/callback).
 13 Нажмите "Создать".
-14 Получите Client ID и Client Secret
+14 Получите Client ID
 После создания вы увидите:
 Client ID
 Client Secret
+
+Изменения доменов:
+
+1. Перейдите на сайт Google Cloud Console
+2. Выберите Apis & Services
+3. Выберите OAuth consent screen
+4. Выберите Clients
+5. Выбери ваш проект и укажите нужные домены

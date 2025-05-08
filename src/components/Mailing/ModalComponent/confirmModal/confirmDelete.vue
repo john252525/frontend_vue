@@ -55,6 +55,18 @@ const chaneErrorBlock = () => {
 };
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const { selectedItem } = toRefs(props);
 const loadStation = ref(false);
 
@@ -74,8 +86,17 @@ const deleteMailing = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "delete",
+        apiUrlMethod,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log("Рассылка успешно удалена:", response.data);
       props.refreshMailingLists();
       props.changeDeleteMailing();
       props.changeResultModal("false", "true");
@@ -88,12 +109,11 @@ const deleteMailing = async () => {
       }, 2000);
     } else {
       errorBlock.value = true;
-      console.log("Ошибка при удалении рассылки:", response.data);
     }
   } catch (error) {
     errorBlock.value = true;
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
     loadStation.value = false;

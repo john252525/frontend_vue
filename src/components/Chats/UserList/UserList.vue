@@ -442,6 +442,18 @@ const isMulti = computed(() => {
   return route.query.multi === "true"; // Проверяем значение multi
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const test = async () => {
   const isMulti = computed(() => {
     return route.query.multi === "true"; // Проверяем значение multi
@@ -490,6 +502,15 @@ const test = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "getChats",
+        { source: sourse, login: logins },
+        response.data,
+        response.data
+      );
+    }
     if (response.status === 401) {
       errorBlock.value = true;
       setTimeout(() => {

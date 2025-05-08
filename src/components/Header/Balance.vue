@@ -45,6 +45,18 @@ const props = defineProps({
   },
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 function removeDecimalZeros(value) {
   return value.toString().replace(/\.00$/, "");
 }
@@ -65,13 +77,20 @@ const getBalance = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "balance",
+        "get-payment-sum",
+        null,
+        response.data,
+        response.data
+      );
+    }
+
     balance.value = response.data.totalAmount;
-    console.log("Платеж создан:", response.data);
   } catch (err) {
-    console.error(
-      "Ошибка при создании платежа:",
-      err.response ? err.response.data : err.message
-    );
+    console.error("error", err.response ? err.response.data : err.message);
   }
 };
 

@@ -96,6 +96,18 @@ import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 const { selectedItem, enableStation } = toRefs(props);
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const forceStop = async () => {
   const { source, login, storage } = selectedItem.value;
   let params = {
@@ -125,8 +137,18 @@ const forceStop = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "enable",
+        "forceStop",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -134,12 +156,11 @@ const forceStop = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -175,6 +196,17 @@ const setState = async (request) => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "enable",
+        "setState",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.data.status === "ok") {
       station.stationLoading = false;
 
@@ -184,20 +216,15 @@ const setState = async (request) => {
         station.stationLoading = false;
       }, 1000);
       if (response.data.data.error.message === "QR received") {
-        console.log("QR modal open");
         station.qrCode = true;
       } else if (response.data.data.error.message === "Challenge required") {
         station.stationLoading = false;
         station.ChallengeRequired = true;
-        console.log(response.data);
-        console.log("Challenge required modal open");
       } else if (response.data.data.error.message === "QR code received") {
         station.qrCode = true;
-        console.log("QR modal open");
       } else if (response.data.data.error.message === "Auth code received") {
         station.getCode = true;
       } else {
-        console.log(response.data);
         setTimeout(() => {
           station.result = true;
         }, 1000);
@@ -210,12 +237,12 @@ const setState = async (request) => {
       }, 2000);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
-    console.log("ошибка");
+    console.error(`error`, error);
+
     station.result = true;
     station.stationLoading = false;
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

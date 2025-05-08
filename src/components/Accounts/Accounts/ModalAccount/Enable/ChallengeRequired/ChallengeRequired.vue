@@ -44,8 +44,19 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const solveChallenge = async () => {
-  console.log(code.value);
   station.loading = true;
   station.code = false;
   let params = {
@@ -77,6 +88,17 @@ const solveChallenge = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "ChallengeRequired",
+        "solveChallenge",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.data.status === "ok") {
       station.resultTrue = true;
       station.loading = false;
@@ -87,15 +109,14 @@ const solveChallenge = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data);
       station.station = false;
       station.loading = false;
     }
   } catch (error) {
-    console.error(`Ошибка`, error);
+    console.error(`error`, error);
 
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -116,20 +137,32 @@ const disablePhoneAuth = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "ChallengeRequired",
+        "solveChallenge",
+        {
+          source: source,
+          login: login,
+          phone: "89228556998",
+        },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.data.status === "ok") {
-      console.log("Ok", source);
-      console.log(response.data);
       station.loading = false;
     } else {
-      console.log(response.data);
       station.station = false;
       station.loading = false;
     }
   } catch (error) {
-    console.error(`Ошибка`, error);
+    console.error(`error`, error);
 
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

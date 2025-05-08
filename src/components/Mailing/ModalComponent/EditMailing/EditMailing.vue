@@ -174,6 +174,18 @@ const props = defineProps({
   },
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const load = ref(false);
 
 const errorBlock = ref(false);
@@ -213,6 +225,17 @@ async function editWhatsAppBroadcast() {
         // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
+
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "edit",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       props.changeResultModal("true");
       load.value = false;
@@ -231,7 +254,7 @@ async function editWhatsAppBroadcast() {
     }
   } catch (error) {
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
   }
@@ -239,9 +262,8 @@ async function editWhatsAppBroadcast() {
 
 if (selectedItem.value) {
   items.value = selectedItem.value;
-  console.log(items.value);
+
   if (items.value.options.hours) {
-    console.log(items.value.options.hours.min);
   }
 }
 </script>

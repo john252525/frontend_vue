@@ -24,6 +24,18 @@ import { toRefs, ref } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const router = useRouter();
@@ -91,6 +103,16 @@ const createRequest = async (request) => {
         },
       }
     );
+    if (response.data) {
+      await handleSendLog(
+        "deleteAccount",
+        request,
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       if (request === "deleteAccount") {
         props.loadingStop();
@@ -99,7 +121,6 @@ const createRequest = async (request) => {
           props.changeStationLoadingModal(false);
         }, 1000);
       } else {
-        console.log(`${request} - Успешно`);
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -108,10 +129,9 @@ const createRequest = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`error`, error);
     props.errorStationOn();
     props.changeStationLoadingModal(true);
     setTimeout(() => {
@@ -119,7 +139,7 @@ const createRequest = async (request) => {
       props.errorStationOff();
     }, 5000);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

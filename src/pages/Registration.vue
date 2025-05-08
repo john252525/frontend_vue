@@ -96,6 +96,18 @@ const navigateTo = (page) => {
   router.push(page);
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const createUser = async () => {
   try {
     const response = await axios.post(
@@ -109,7 +121,15 @@ const createUser = async () => {
         },
       }
     );
-
+    if (response.data) {
+      await handleSendLog(
+        "create_account",
+        "createUser",
+        { userName: formData.login },
+        response.data,
+        response.data
+      );
+    }
     console.log(response.data);
   } catch (error) {
     console.error("Ошибка при создании платежа:", error);
@@ -131,6 +151,17 @@ const loginAccount = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "create_account",
+        "login",
+        { sername: formData.login, password: formData.password },
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       localStorage.setItem("accountToken", response.data.token);
       localStorage.setItem("accountData", formData.login);

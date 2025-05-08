@@ -51,8 +51,19 @@ const { stationDomen } = useDomain();
 const { selectedItem, getScreenStation } = toRefs(props);
 const { source, login, storage } = selectedItem.value;
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const getScreen = async () => {
-  //   const { source, login } = selectedItems.value;
   let params = {
     source: source,
     login: login,
@@ -80,6 +91,17 @@ const getScreen = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "screenshot",
+        "screenshot",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       station.loading = false;
       station.screen = true;
@@ -91,12 +113,11 @@ const getScreen = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(` - Ошибка`, error);
+    console.error(`error`, error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };

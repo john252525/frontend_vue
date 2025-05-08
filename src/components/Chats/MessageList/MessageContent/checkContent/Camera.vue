@@ -130,6 +130,18 @@ const takePhoto = async () => {
   }
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("Ошибка при парсинге JSON:", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const uploadPhoto = async (photoDataURL) => {
   isUploading.value = true;
   errorMessage.value = null;
@@ -144,7 +156,15 @@ const uploadPhoto = async (photoDataURL) => {
       },
       timeout: 10000,
     });
-
+    if (response.data) {
+      await handleSendLog(
+        "chats",
+        "upload",
+        formData,
+        response.data,
+        response.data
+      );
+    }
     photoURL.value = response.data.fileUrl;
     props.changeImgUrl(photoURL, "image");
     props.openCameraStation();

@@ -219,6 +219,18 @@ const props = defineProps({
   },
 });
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 import { useRouter } from "vue-router";
 const router = useRouter();
 
@@ -255,7 +267,6 @@ const letter = ref(selectedLetter.value); // Инициализируем тек
 
 const selectAlphavit = (item) => {
   letter.value = item;
-  console.log("Выбрана буква:", letter.value); // Для отладки
 };
 
 // Обработчик загрузки картинки
@@ -268,7 +279,6 @@ const handleImageUpload = (event) => {
       imagePreview.value = e.target.result;
     };
     reader.readAsDataURL(file);
-    console.log("Загруженная картинка:", imageFile.value);
   }
 };
 
@@ -281,7 +291,6 @@ const handleOtherFileUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     otherFile.value = file;
-    console.log("Загруженный файл:", otherFile.value);
   }
 };
 
@@ -294,9 +303,7 @@ const startNum = ref(10);
 const endNum = ref(17);
 
 // Функция для обновления выбранных дней
-const updateSelectedDays = () => {
-  console.log("Выбранные дни:", selectedDays.value);
-};
+const updateSelectedDays = () => {};
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -333,9 +340,18 @@ async function createWhatsAppBroadcast() {
         // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });
+
+    if (response.data) {
+      await handleSendLog(
+        "mailing",
+        "new",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log(startNum.value);
-      console.log("Ответ от API:", response.data);
       props.changeAddMailing();
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -344,11 +360,10 @@ async function createWhatsAppBroadcast() {
         router.push("/login");
       }, 2000);
     } else {
-      console.log("ошибка");
     }
   } catch (error) {
     console.error(
-      "Ошибка при отправке запроса:",
+      "error",
       error.response ? error.response.data : error.message
     );
   }

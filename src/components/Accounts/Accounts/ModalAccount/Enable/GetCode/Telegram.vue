@@ -51,6 +51,18 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+    // Optionally, update the error message ref
+  }
+};
+
 const station = reactive({
   code: false,
   loading: false,
@@ -93,9 +105,18 @@ const forceStop = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "forceStop",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
-      console.log("stop", source);
-      console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -103,13 +124,12 @@ const forceStop = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`Ошибка`, error);
+    console.error(`error`, error);
 
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -145,22 +165,27 @@ const setStateTelegram = async () => {
       }
     );
 
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "setState",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (!response.data.data.error) {
-      console.log("Состояние установлено", source, login);
-      console.log(response.data);
     }
     if (response.data.data.error.message === "Challenge required") {
-      console.log("Challenge required");
       station.loading = false;
       station.code = true;
       station.error.challengeRequired = true;
     } else if (
       response.data.data.error.message === "Two factor auth required"
     ) {
-      console.log("Two factor auth required");
       station.loading = false;
       station.code = true;
-      console.log(response.data);
       station.error.twoFactor = true;
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -169,12 +194,11 @@ const setStateTelegram = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log("другое");
     }
   } catch (error) {
-    console.error("Ошибка при создании аккаунта:", error);
+    console.error("error", error);
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -209,6 +233,17 @@ const solveChallenge = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "solveChallenge",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       station.resultTrue = true;
     } else if (response.data === 401) {
@@ -218,13 +253,12 @@ const solveChallenge = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`Ошибка`, error);
+    console.error(`error`, error);
 
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
@@ -259,6 +293,17 @@ const twoFactorAuth = async () => {
         },
       }
     );
+
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "twoFactorAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
     if (response.data.ok === true) {
       station.resultTrue = true;
     } else if (response.data === 401) {
@@ -268,13 +313,12 @@ const twoFactorAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
     }
   } catch (error) {
-    console.error(`Ошибка`, error);
+    console.error(`error`, error);
 
     if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+      console.error("error", error.response.data);
     }
   }
 };
