@@ -202,11 +202,13 @@
       {{ t("addMailing.button") }}
     </button>
   </section>
+  <LoadMoadal :stationLoading="stationLoading" />
 </template>
 
 <script setup>
-import { ref, toRefs, computed, inject } from "vue";
+import { ref, reactive, toRefs, computed, inject } from "vue";
 import axios from "axios";
+import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -221,6 +223,10 @@ const props = defineProps({
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
+
+const stationLoading = reactive({
+  loading: false,
+});
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
@@ -258,6 +264,9 @@ const resultString = computed(() => {
     .filter((item) => item.trim() !== "")
     .join(", ");
 });
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 const alphabet = ref(
   Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
@@ -313,7 +322,7 @@ const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function createWhatsAppBroadcast() {
   const url = `${apiUrl}/new/`;
-
+  stationLoading.loading = true;
   // Параметры запроса
   const params = {
     name: nameMailing.value,
@@ -352,6 +361,8 @@ async function createWhatsAppBroadcast() {
     }
 
     if (response.data.ok === true) {
+      stationLoading.loading = false;
+      setLoadingStatus(true, "success");
       props.changeAddMailing();
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -360,6 +371,8 @@ async function createWhatsAppBroadcast() {
         router.push("/login");
       }, 2000);
     } else {
+      stationLoading.loading = false;
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(
@@ -402,8 +415,8 @@ const createMailing = () => {
   background: var(--input);
   padding-left: 10px;
   padding-top: 10px;
-  max-width: 574px;
-  min-width: 574px;
+  max-width: 400px;
+  min-width: 400px;
   max-height: 80px;
   min-height: 80px;
   color: var(--text);
@@ -415,8 +428,8 @@ const createMailing = () => {
   background: #f6f6f6;
   padding-left: 10px;
   padding-top: 10px;
-  max-width: 574px;
-  min-width: 574px;
+  max-width: 400px;
+  min-width: 400px;
   max-height: 80px;
   min-height: 80px;
   border: 1px solid #fa7171;
@@ -712,21 +725,38 @@ input[type="time"]:focus {
 .textarea-comp {
   display: flex;
   align-items: center;
-  flex-direction: column;
-  gap: 24px;
+  /* flex-direction: column; */
+  gap: 10px;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1150px) {
   .message-text {
-    max-width: 520px;
-    min-width: 520px;
+    max-width: 250px;
+    min-width: 250px;
     max-height: 80px;
     min-height: 80px;
   }
 
   .message-text.error {
-    max-width: 520px;
-    min-width: 520px;
+    max-width: 250px;
+    min-width: 250px;
+    max-height: 80px;
+    min-height: 80px;
+    border: 1px solid #fa7171;
+  }
+}
+
+@media (max-width: 800px) {
+  .message-text {
+    max-width: 200px;
+    min-width: 200px;
+    max-height: 80px;
+    min-height: 80px;
+  }
+
+  .message-text.error {
+    max-width: 200px;
+    min-width: 200px;
     max-height: 80px;
     min-height: 80px;
     border: 1px solid #fa7171;
@@ -734,15 +764,6 @@ input[type="time"]:focus {
 }
 
 @media (max-width: 570px) {
-  .message-text {
-    max-width: 400px;
-    min-width: 400px;
-  }
-
-  .message-text.error {
-    max-width: 400px;
-    min-width: 400px;
-  }
   .title-mess {
     width: 130px;
   }

@@ -24,6 +24,9 @@ import { toRefs, ref } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -116,10 +119,8 @@ const createRequest = async (request) => {
     if (response.data.ok === true) {
       if (request === "deleteAccount") {
         props.loadingStop();
+        setLoadingStatus(true, "success");
         location.reload();
-        setTimeout(() => {
-          props.changeStationLoadingModal(false);
-        }, 1000);
       } else {
       }
     } else if (response.data === 401) {
@@ -129,6 +130,8 @@ const createRequest = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
+      props.loadingStop();
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(`error`, error);

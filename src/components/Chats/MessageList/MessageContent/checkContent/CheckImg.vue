@@ -20,12 +20,18 @@
         Сделать снимок
       </h2>
     </section>
-    <div v-if="!errorBoolean" class="image-container">
+    <div v-if="!errorBoolean && !loadingContenet" class="image-container">
       <img v-if="typeUrl === 'image'" class="img" :src="urlImg" alt="" />
       <video v-if="typeUrl === 'video'" class="video" :src="urlImg" controls />
       <div v-if="typeUrl === 'file'" class="file-preview">
         <p>Предварительный просмотр файла недоступен. Скачать файл:</p>
         <a :href="urlImg" target="_blank">Скачать файл</a>
+      </div>
+    </div>
+
+    <div class="error-cont" v-if="loadingContenet">
+      <div class="error-section">
+        <LoadModal />
       </div>
     </div>
     <div class="error-cont" v-if="errorBoolean">
@@ -59,6 +65,10 @@
 <script setup>
 import { toRefs, ref, computed } from "vue";
 import axios from "axios";
+import LoadModal from "../../../../Mailing/ModalComponent/LoadModal/LoadModal.vue";
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 const props = defineProps({
   urlImg: {
@@ -87,6 +97,8 @@ const emit = defineEmits(["updateMessages", "messages"]);
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
+const loadingContenet = ref(false);
+
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
@@ -100,6 +112,7 @@ const messageText = ref("");
 const userLogin = JSON.parse(localStorage.getItem("userInfo"));
 const sendMessage = async () => {
   console.log(typeUrl.value);
+  loadingContenet.value = true;
   const apiUrl = import.meta.env.VITE_API_URL;
   console.log(22794591901);
   const message = {
@@ -141,6 +154,7 @@ const sendMessage = async () => {
     );
 
     if (response.data) {
+      loadingContenet.value = false;
       await handleSendLog(
         "chats",
         "sendMessage",
@@ -149,7 +163,9 @@ const sendMessage = async () => {
         response.data
       );
     }
-
+    if (response.data) {
+      setLoadingStatus(true, "success");
+    }
     if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -165,6 +181,8 @@ const sendMessage = async () => {
     messageText.value = "";
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
+    loadingContenet.value = false;
+    setLoadingStatus(true, "error");
     errorBoolean.value = true;
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);

@@ -1,5 +1,5 @@
 <template>
-  <div class="black-fon">
+  <div @click="changeGetScreenStation" class="black-fon">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <LoadingModal
       :textLoadin="station.textLoadin"
@@ -20,6 +20,8 @@ import axios from "axios";
 import { ref, toRefs, inject, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 const { t } = useI18n();
 const router = useRouter();
 import LoadingModal from "./Enable/LoadingModal.vue";
@@ -104,6 +106,7 @@ const getScreen = async () => {
 
     if (response.data.ok === true) {
       station.loading = false;
+      setLoadingStatus(true, "success");
       station.screen = true;
       base64Image.value = `data:image/png;base64,${response.data.value}`;
     } else if (response.data === 401) {
@@ -113,6 +116,10 @@ const getScreen = async () => {
         router.push("/login");
       }, 2000);
     } else {
+      props.changeGetScreenStation();
+      station.screen = false;
+      station.loading = false;
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(`error`, error);
@@ -125,8 +132,9 @@ const getScreen = async () => {
 const sendScreen = async () => {
   getScreen();
 };
+
 onMounted(() => {
-  station.textLoadin = "Генерируем изображение...";
+  station.textLoadin = t("GetScreen.text");
   station.loading = true;
   sendScreen();
 });

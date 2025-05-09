@@ -54,6 +54,7 @@ const messages = {
     },
     GetScreen: {
       close: "Close",
+      text: "Generating an image...",
     },
     globalLoading: {
       loading: "Loading...",
@@ -327,6 +328,7 @@ const messages = {
     },
     GetScreen: {
       close: "Закрыть",
+      text: "Генерируем изображение...",
     },
     globalLoading: {
       loading: "Загрузка...",

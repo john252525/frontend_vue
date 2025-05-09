@@ -34,6 +34,9 @@ import axios from "axios";
 import LoadMoadal from "../LoadModal/LoadModal.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -99,7 +102,7 @@ const deleteMailing = async () => {
     if (response.data.ok === true) {
       props.refreshMailingLists();
       props.changeDeleteMailing();
-      props.changeResultModal("false", "true");
+      setLoadingStatus(true, "success");
       loadStation.value = false;
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -109,6 +112,8 @@ const deleteMailing = async () => {
       }, 2000);
     } else {
       errorBlock.value = true;
+      setLoadingStatus(true, "error");
+      props.changeDeleteMailing();
     }
   } catch (error) {
     errorBlock.value = true;

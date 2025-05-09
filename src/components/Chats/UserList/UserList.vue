@@ -169,7 +169,12 @@
             </svg>
           </div>
           <div class="chat-info">
-            <div class="chat-name">{{ chat.data.name }}</div>
+            <div class="chat-name">
+              {{ chat.data.name }}
+              <span v-if="chat.hasDuplicates" class="login-user">
+                ({{ chat.data.loginUser }})
+              </span>
+            </div>
             <div class="chat-last-message">
               <svg
                 v-if="chat.data.lastMessageType === 'audio'"
@@ -235,7 +240,7 @@
           </div>
         </div>
       </section>
-      <section class="loading-chat-list" v-if="chatsNull">
+      <section class="loading-chat-list" v-if="chats && chats.length === 0">
         <h2 class="chat-null-text">Чаты не найдены</h2>
       </section>
       <section class="loading-chat-list" v-if="!chats && !errorStation">
@@ -370,6 +375,28 @@ const updateCountNewMessage = (thread) => {
   } else {
   }
 };
+
+const groupedChats = computed(() => {
+  if (!chats.value) return [];
+
+  // Группируем чаты по имени
+  const groups = chats.value.reduce((acc, chat) => {
+    const name = chat.data.name;
+    if (!acc[name]) {
+      acc[name] = [];
+    }
+    acc[name].push(chat);
+    return acc;
+  }, {});
+
+  // Добавляем флаг hasDuplicates для чатов с одинаковыми именами
+  return chats.value.map((chat) => {
+    return {
+      ...chat,
+      hasDuplicates: groups[chat.data.name].length > 1,
+    };
+  });
+});
 
 const clearCountNewMessage = (thread) => {
   const chat = chats.value.find((chat) => chat.uniq === thread);
@@ -531,13 +558,16 @@ const test = async () => {
         data: chat,
       }));
     }
+
+    chatsNull.value = false;
+
     if (chats.value.length === 0) {
       chatsNull.value = true;
       console.log("dssd");
     }
   } catch (error) {
     errorStation.value = true;
-
+    chatsNull.value = false;
     setTimeout(() => {
       localStorage.removeItem("loginWhatsAppChatsStep");
       // router.push("/accounts");
@@ -620,12 +650,11 @@ const timestampMilliseconds = "1740994136000";
 const formattedTime = formatTimestamp(timestampMilliseconds);
 
 const sortedChats = computed(() => {
-  if (!chats.value) return [];
-  return [...chats.value].sort((a, b) => {
-    // Создаем копию массива
-    const timestampA = a.data?.timestamp || 0; // Безопасный доступ к вложенному свойству и обработка undefined
-    const timestampB = b.data?.timestamp || 0; // Безопасный доступ к вложенному свойству и обработка undefined
-    return timestampB - timestampA; // Сортируем по убыванию
+  if (!groupedChats.value) return [];
+  return [...groupedChats.value].sort((a, b) => {
+    const timestampA = a.data?.timestamp || 0;
+    const timestampB = b.data?.timestamp || 0;
+    return timestampB - timestampA;
   });
 });
 
@@ -677,16 +706,20 @@ const toggleAccount = (account) => {
 
 // Функция для обновления localStorage на основе текущего состояния аккаунтов
 const updateLocalStorage = () => {
-  // Сохраняем массив объектов, но только активные
   const activeAccounts = accounts.value
     .filter((account) => account.active)
-    .map((account) => ({ login: account.name, source: account.source })); // Сохраняем только логин и source
+    .map((account) => ({ login: account.name, source: account.source }));
 
   localStorage.setItem(
     "loginWhatsAppChatsStep",
     JSON.stringify(activeAccounts)
   );
-  test(); // Вызываем test() после каждого изменения
+
+  // Сбрасываем состояние перед новым запросом
+  chatsNull.value = false;
+  chats.value = null;
+
+  test();
 };
 
 // Функция для переключения видимости списка аккаунтов
@@ -821,6 +854,12 @@ const playSound = () => {
 
 .chat-list {
   user-select: none; /* Отключаем выделение текста для списка чатов */
+}
+
+.login-user {
+  font-size: 0.8em;
+  color: #888;
+  margin-left: 4px;
 }
 
 .error-section {

@@ -37,14 +37,18 @@
     :stationLoading="stationLoading"
     :changeStationLoadingModal="offModalSuc"
   />
+  <LoadMoadal :stationLoading="stationLoading" />
 </template>
 
 <script setup>
 import { toRefs, ref, defineProps, reactive, watch } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
+import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -94,7 +98,10 @@ const stationLoading = reactive({
     result: undefined,
     error: false,
   },
+  loading: false,
 });
+
+const textLoadin = ref("");
 
 const { selectedItem } = toRefs(props);
 
@@ -106,6 +113,7 @@ const chaneErrorBlock = () => {
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const updateStatus = async (state) => {
+  stationLoading.loading = true;
   const apiUrlMethod = `${apiUrl}/state/${selectedItem.value.id}/${state}/`;
   const params = {
     token: localStorage.getItem("accountToken"),
@@ -133,12 +141,9 @@ const updateStatus = async (state) => {
     }
 
     if (response.data.ok === true) {
-      stationLoading.modalStation = true;
-
+      setLoadingStatus(true, "success");
+      stationLoading.loading = false;
       props.refreshMailingLists();
-      setTimeout(() => {
-        offModalSuc();
-      }, 5000);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -146,6 +151,8 @@ const updateStatus = async (state) => {
         router.push("/login");
       }, 2000);
     } else {
+      stationLoading.loading = false;
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(

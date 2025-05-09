@@ -7,7 +7,20 @@
         <span v-if="balance || balance === 0">{{
           removeDecimalZeros(balance)
         }}</span>
-        <LoadingBalance v-else /> ₽
+        <LoadingBalance v-if="balanceLoading" /> ₽
+      </h2>
+      <h2 v-if="balanceError" class="balance-text">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#015a83"
+            d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+          />
+        </svg>
       </h2>
       <div class="line"></div>
     </article>
@@ -48,6 +61,9 @@ const props = defineProps({
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
+const balanceError = ref(false);
+const balanceLoading = ref(false);
+
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
@@ -66,7 +82,7 @@ const balance = ref("");
 const getBalance = async () => {
   try {
     const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
-
+    balanceLoading.value = true;
     const response = await axios.post(
       `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
@@ -87,9 +103,11 @@ const getBalance = async () => {
         response.data
       );
     }
-
+    balanceLoading.value = false;
     balance.value = response.data.totalAmount;
   } catch (err) {
+    balanceLoading.value = false;
+    balanceError.value = true;
     console.error("error", err.response ? err.response.data : err.message);
   }
 };
@@ -147,6 +165,7 @@ onMounted(getBalance);
 .balance-text {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-weight: 700;
   font-size: 16px;

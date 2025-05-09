@@ -33,16 +33,36 @@
         </h2>
       </article>
       <article class="user-cont">
-        <!-- <TogleTheme /> -->
         <h2
-          v-if="balance || balance === 0"
+          v-if="(balance || balance === 0) && !balanceError"
           @click="toggleBalanceStation"
           class="balance-user"
         >
           {{ removeDecimalZeros(balance) }} ₽
         </h2>
-        <h2 v-else @click="toggleBalanceStation" class="balance-user">
+        <h2
+          v-if="balanceLoading"
+          @click="toggleBalanceStation"
+          class="balance-user"
+        >
           <LoadingBalance />
+        </h2>
+        <h2
+          v-if="balanceError"
+          @click="toggleBalanceStation"
+          class="balance-user"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#015a83"
+              d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+            />
+          </svg>
         </h2>
 
         <img
@@ -120,6 +140,9 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
+const balanceError = ref(false);
+const balanceLoading = ref(false);
+
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
 
@@ -150,6 +173,7 @@ const balance = ref("");
 
 const getBalance = async () => {
   try {
+    balanceLoading.value = true;
     const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
 
     const response = await axios.post(
@@ -172,9 +196,11 @@ const getBalance = async () => {
         response.data
       );
     }
-
+    balanceLoading.value = false;
     balance.value = response.data.totalAmount;
   } catch (err) {
+    balanceLoading.value = false;
+    balanceError.value = true;
     console.error("error", err.response ? err.response.data : err.message);
   }
 };

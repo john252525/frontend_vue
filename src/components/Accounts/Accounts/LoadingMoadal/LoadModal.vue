@@ -2,9 +2,9 @@
   <transition name="fade">
     <section v-if="stationLoading.loading">
       <div class="black-fon"></div>
-      <section  class="loading">
+      <section class="loading">
         <div class="spinner"></div>
-        <h2 v-if="textLoadin" class="title">{{textLoadin}}</h2>
+        <h2 v-if="textLoadin" class="title">{{ textLoadin }}</h2>
       </section>
     </section>
   </transition>
@@ -20,8 +20,8 @@ const props = defineProps({
   },
   textLoadin: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const { stationLoading } = toRefs(props);
@@ -64,9 +64,9 @@ const { stationLoading } = toRefs(props);
 }
 
 .title {
-font-weight: 400;
-font-size: 20px;
-margin-top: 20px;
+  font-weight: 400;
+  font-size: 20px;
+  margin-top: 20px;
 }
 
 @keyframes spin {
@@ -100,5 +100,4 @@ margin-top: 20px;
     opacity: 1;
   }
 }
-
 </style>

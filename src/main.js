@@ -19,7 +19,9 @@ import { useDomain } from "@/composables/getDomen";
 import i18n from "./i18n";
 import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
+import Logs from "./pages/RequestLogger.vue";
 
+import { useRequestsStore } from "@/stores/requests";
 const pinia = createPinia();
 
 const routes = [
@@ -28,6 +30,12 @@ const routes = [
     name: "PersonalAccount",
     component: PersonalAccount,
     meta: { title: "Аккаунты" },
+  },
+  {
+    path: "/logs",
+    name: "Logs",
+    component: Logs,
+    meta: { title: "Настройки" },
   },
   {
     path: "/settings",
@@ -229,5 +237,31 @@ document.documentElement.setAttribute(
   "data-theme",
   themeStore.isDark ? "dark" : "light"
 );
+
+import axios from "axios";
+axios.interceptors.request.use((config) => {
+  config.metadata = { startTime: Date.now() };
+  return config;
+});
+
+axios.interceptors.response.use((response) => {
+  const endTime = Date.now();
+  const duration = endTime - response.config.metadata.startTime;
+
+  const requestData = {
+    url: response.config.url,
+    method: response.config.method,
+    status: response.status,
+    statusText: response.statusText,
+    duration: duration,
+    requestHeaders: response.config.headers,
+    responseHeaders: response.headers,
+  };
+
+  const requestsStore = useRequestsStore();
+  requestsStore.addRequest(requestData);
+
+  return response;
+});
 
 app.mount("#app");

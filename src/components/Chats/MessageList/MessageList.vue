@@ -131,37 +131,22 @@
                   />
                 </svg>
               </div>
-              <div class="message-content">
-                {{ message.data.text }}
+
+              <!-- Основной контент сообщения -->
+              <div class="message-content-wrapper">
+                <!-- Медиа-контент (фото, видео и т.д.) -->
                 <div
-                  v-if="
-                    message.data.state === 'send' &&
-                    message.data.outgoing &&
-                    apiUrl != 'https://b2288.apitter.com/instances'
-                  "
-                  class="icon-container"
+                  class="media-content"
+                  v-if="message.data.content && message.data.content.length > 0"
                 >
-                  <LoadingMessage />
-                </div>
-                <div class="message-content">
                   <img
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].src &&
-                      message.data.content[0].type === 'sticker'
-                    "
+                    v-if="message.data.content[0].type === 'sticker'"
                     :src="message.data.content[0].src"
                     alt="Sticker"
                     class="sticker"
                   />
                   <img
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].src &&
-                      message.data.content[0].type === 'image'
-                    "
+                    v-if="message.data.content[0].type === 'image'"
                     :src="message.data.content[0].src"
                     alt="Image"
                     class="img-message"
@@ -173,12 +158,7 @@
                     v-if="station.photoMenu"
                   />
                   <video
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].src &&
-                      message.data.content[0].type === 'video'
-                    "
+                    v-if="message.data.content[0].type === 'video'"
                     controls
                     :src="message.data.content[0].src"
                     class="video-message"
@@ -187,36 +167,16 @@
                     Ваш браузер не поддерживает видео.
                   </video>
                   <audio
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].src &&
-                      message.data.content[0].type === 'audio'
-                    "
+                    v-if="message.data.content[0].type === 'audio'"
                     controls
                     :src="message.data.content[0].src"
                     class="audio-message"
                   >
                     Ваш браузер не поддерживает аудио.
                   </audio>
-                  <h2
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].type === 'geo'
-                    "
-                    class="geo-message"
-                  >
-                    Сообщение не поддерживается
-                  </h2>
                   <div
                     class="content-file"
-                    v-if="
-                      message.data.content &&
-                      message.data.content.length > 0 &&
-                      message.data.content[0].src &&
-                      message.data.content[0].type === 'file'
-                    "
+                    v-if="message.data.content[0].type === 'file'"
                     @click="downloadFile(message.data.content[0].src)"
                   >
                     <svg
@@ -232,12 +192,18 @@
                     </svg>
                   </div>
                 </div>
-                <footer>
+
+                <!-- Текст сообщения -->
+                <div class="text-content" v-if="message.data.text">
+                  {{ message.data.text }}
+                </div>
+
+                <!-- Футер с временем и статусом -->
+                <footer class="message-footer">
                   <h2 class="reaction">{{ message.reaction }}</h2>
                   <div class="message-time">
                     {{ formatTimestamp(message.data.time) }}
                   </div>
-
                   <svg
                     v-if="
                       message.data.state === 'delivered' &&
@@ -323,6 +289,7 @@
           </article>
         </section>
         <SendMessage
+          v-if="!loading"
           :changeMessageState="changeMessageState"
           :chatInfo="chatInfo"
           @updateMessages="updateMessages"
@@ -405,6 +372,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
 const messages = ref([]);
 const messagesData = ref([]);
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -593,6 +563,7 @@ const updateMessages = (newMessage) => {
 const modalPosition = ref({ top: 0, left: 0 });
 
 const openModal = (event, item) => {
+  console.log(item);
   if (activeMessage.value !== item) {
     activeMessage.value = item;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -749,6 +720,10 @@ const getMessage = async () => {
       requestData.uniq = chatInfo.value.lastMessage.id.remote;
     }
 
+    if (chatInfo.value.sourceUser != "whatsapp") {
+      requestData.source = "telegram";
+    }
+
     const response = await axios.post(
       // `http://localhost:4000/api/getChatMessages`,
       `${apiUrl}/getChatMessages`,
@@ -760,7 +735,7 @@ const getMessage = async () => {
         },
       }
     );
-
+    console.log("requestData", requestData);
     if (response.data) {
       await handleSendLog(
         "chats",
@@ -817,6 +792,7 @@ const getMessage = async () => {
         router.push("/login");
       }, 2000);
     } else {
+      setLoadingStatus(true, "error");
       console.log("Response ok:", response.data.ok);
     }
   } catch (error) {
@@ -826,6 +802,7 @@ const getMessage = async () => {
     props.blockChatOff();
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
+      setLoadingStatus(true, "error");
       loading.value = false;
       messages.value = [];
       props.blockChatOff();
@@ -1360,6 +1337,7 @@ onMounted(() => {
 }
 
 .user-chat-icon-svg path#icon {
+  cursor: pointer;
   fill: #808080; /* Серый цвет для всей иконки */
 }
 
@@ -1429,6 +1407,7 @@ onMounted(() => {
   width: 35px;
   height: 35px;
   border-radius: 100px;
+  cursor: pointer;
 }
 
 .message {

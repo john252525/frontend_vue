@@ -10,6 +10,10 @@
     />
     <main>
       <section>
+        <ResultModal
+          :changeStationLoadingModal="offModal"
+          :stationLoading="stationLoading"
+        />
         <router-view @routeChanged="checkChatStation"></router-view>
       </section>
     </main>
@@ -20,10 +24,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, provide } from "vue";
+import { ref, computed, onMounted, reactive, provide } from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
+import ResultModal from "./components/GlobalModal/ResutModal.vue";
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { stationLoading, setLoadingStatus } = useStationLoading();
+
+const offModal = () => {
+  setLoadingStatus(false);
+};
 
 const chatStation = ref(true);
 const phoneMenuStation = ref(false);

@@ -184,6 +184,8 @@ const emit = defineEmits();
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);
 import { useRouter } from "vue-router";
 import WhatsApp from "./ModalAccount/GetByCode/WhatsApp.vue";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
 const qrData = ref([]);
 const accountStationText = localStorage.getItem("accountStation");
@@ -374,15 +376,12 @@ const createRequest = async (request) => {
           changeStationLoadingModal();
         }, 1000);
       } else if (request === "getNewProxy") {
-        stationLoading.modalStation = true;
         updateLoadingStation.value = false;
         changeLadingStation();
         stationLoading.loading = false;
-        setTimeout(() => {
-          stationLoading.modalStation = false;
-        }, 5000);
+        setLoadingStatus(true, "success");
       } else {
-        console.log(`error`);
+        setLoadingStatus(true, "error");
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -424,12 +423,7 @@ const forceStop = async (request) => {
     );
     if (response.data.ok === true) {
       stationLoading.loading = false;
-      stationLoading.account.error = false;
-      stationLoading.modalStation = true;
-      setTimeout(() => {
-        stationLoading.modalStation = false;
-        stationLoading.account.error = false;
-      }, 5000);
+      setLoadingStatus(true, "success");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -437,6 +431,7 @@ const forceStop = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(`error`, error);

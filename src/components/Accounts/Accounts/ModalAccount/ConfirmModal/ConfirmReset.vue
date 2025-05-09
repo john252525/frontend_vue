@@ -9,10 +9,10 @@
       <h2 class="title">{{ t("confirmMoadal.reset.message") }}</h2>
       <article class="button-cont">
         <button class="confirm-button" @click="confirm">
-          {{ t("confirmMoadal.reset.continue") }}
+          {{ t("confirmMoadal.reset.cancel") }}
         </button>
         <button class="cansel-button" @click="ChangeconfirmStationReset">
-          {{ t("confirmMoadal.reset.cancel") }}
+          {{ t("confirmMoadal.reset.continue") }}
         </button>
       </article>
     </section>
@@ -27,6 +27,9 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
@@ -110,11 +113,8 @@ const createRequest = async (request) => {
     }
     if (response.data.ok === true) {
       if (request === "getNewProxy") {
-        props.changeStationLoadingModal(true);
+        setLoadingStatus(true, "success");
         props.loadingStop();
-        setTimeout(() => {
-          props.changeStationLoadingModal(false);
-        }, 5000);
       } else {
         console.log(`${request} - Успешно`);
       }
@@ -125,6 +125,7 @@ const createRequest = async (request) => {
         router.push("/login");
       }, 2000);
     } else {
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(`error`, error);

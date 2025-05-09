@@ -177,6 +177,9 @@ const props = defineProps({
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
@@ -237,7 +240,7 @@ async function editWhatsAppBroadcast() {
     }
 
     if (response.data.ok === true) {
-      props.changeResultModal("true");
+      setLoadingStatus(true, "success");
       load.value = false;
       setTimeout(() => {
         location.reload();
@@ -250,7 +253,7 @@ async function editWhatsAppBroadcast() {
       }, 2000);
     } else {
       load.value = false;
-      props.changeResultModal(false, "error");
+      setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(

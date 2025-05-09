@@ -2,10 +2,6 @@
   <div v-if="settingsModalStation">
     <div @click="props.changeStationSettingsModal()" class="black-fon"></div>
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-    <LoadModal
-      :changeStationLoadingModal="changeStationLoadingModal"
-      :stationLoading="stationLoading"
-    />
     <form @submit.prevent="submitForm">
       <h2 class="title">{{ t("settings.title") }}</h2>
       <h2 @click="changeStationSettingsModal" class="subtitle">
@@ -43,6 +39,8 @@ const router = useRouter();
 import { ref, toRefs, watch, reactive } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 const { t } = useI18n();
 const props = defineProps({
   closeModal: {
@@ -66,25 +64,6 @@ const loadingStatiom = ref(false);
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
-};
-
-const stationLoading = reactive({
-  loading: false,
-  value: "",
-  modalStation: false,
-  deleteAccount: {
-    station: false,
-    result: undefined,
-  },
-  account: {
-    station: false,
-    result: undefined,
-    error: false,
-  },
-});
-
-const changeStationLoadingModal = () => {
-  stationLoading.modalStation = !stationLoading.modalStation;
 };
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
@@ -234,7 +213,7 @@ const addNewUrl = async () => {
     }
   } finally {
     loadingStatiom.value = false;
-    changeStationLoadingModal();
+    setLoadingStatus(true, "success");
     // location.reload();
   }
 };
