@@ -262,6 +262,8 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import CheckUserImage from "../CheckUserImage.vue";
 import { useRouter, useRoute } from "vue-router";
 import NewMessageSend from "./newMessageForUser.vue";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -566,6 +568,7 @@ const test = async () => {
       console.log("dssd");
     }
   } catch (error) {
+    setLoadingStatus(true, "error");
     errorStation.value = true;
     chatsNull.value = false;
     setTimeout(() => {

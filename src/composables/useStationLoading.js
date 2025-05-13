@@ -14,7 +14,7 @@ export function useStationLoading() {
       clearTimeout(stationLoading.timer);
       stationLoading.timer = null;
     }
-
+    console.log("erorr_modal");
     stationLoading.isOpen = isOpen;
 
     if (type === "success") {

@@ -107,6 +107,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 import Loading from "./Loading.vue";
 import True from "./ResultModal/True.vue";
 import False from "./ResultModal/False.vue";
@@ -374,7 +376,7 @@ const sendMessage = async () => {
   if (stationMess.isMuilti.isMulti) {
     source.value = stationMess.isMuilti.source;
   } else {
-    source.value = localStorage.getItem("accountStation");
+    source.value = stationMess.isMuilti.source;
   }
 
   await processLogin();
@@ -451,6 +453,7 @@ const sendMessage = async () => {
       loading.value = false;
     }
   } catch (error) {
+    setLoadingStatus(true, "error");
     console.error("Ошибка при отправке сообщения:", error);
     errorMesssage.value = error.error;
     result.value = false;

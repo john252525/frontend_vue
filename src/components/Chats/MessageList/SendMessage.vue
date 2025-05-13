@@ -24,29 +24,31 @@
   </section>
   <section class="send-message">
     <section v-if="replyToDataBolean" class="reply-section">
-      <section class="content">
-        <h2 class="number-user">
-          {{ formatPhoneNumber(replyToData.data.from) }}
-        </h2>
-        <h2 class="message-user">
-          {{ replyToData.data.text }}
-        </h2>
-      </section>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        class="close-img"
-        @click="offReplyToDataBoleanFalse"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="m16 16l-4-4m0 0L8 8m4 4l4-4m-4 4l-4 4"
-        />
-      </svg>
+      <div class="reply-container">
+        <section class="content">
+          <h2 class="number-user">
+            {{ formatPhoneNumber(replyToData.data.from) }}
+          </h2>
+          <h2 class="message-user">
+            {{ replyToData.data.text }}
+          </h2>
+        </section>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          class="close-img"
+          @click="offReplyToDataBoleanFalse"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m16 16l-4-4m0 0L8 8m4 4l4-4m-4 4l-4 4"
+          />
+        </svg>
+      </div>
     </section>
     <div class="img-cont">
       <!-- <img
@@ -143,6 +145,8 @@ import {
   watch,
 } from "vue";
 import axios from "axios";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 import { useRouter } from "vue-router";
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
 import Camera from "./MessageContent/checkContent/Camera.vue";
@@ -488,7 +492,7 @@ const sendMessage = async () => {
     }
   } catch (error) {
     console.error("Ошибка при отправке сообщения:", error);
-
+    setLoadingStatus(true, "error");
     props.changeMessageState(response.data.messsage, newMessage.tempId);
     if (replyToDataBolean.value) {
       props.offReplyToDataBolean();
@@ -496,6 +500,7 @@ const sendMessage = async () => {
     messageText.value = "";
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
+      setLoadingStatus(true, "error");
     }
   }
 };
@@ -575,9 +580,21 @@ provide(cameraContainerStyle, "cameraContainerStyle");
 }
 
 .reply-section {
+  width: 100%;
+  padding: 0 36px; /* Совпадает с отступами send-message */
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.reply-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  width: 100%;
+  background-color: rgb(236, 236, 236);
+  border-radius: 5px;
+  border-left: 6px solid #007bff;
+  padding: 8px 12px;
+  box-sizing: border-box;
 }
 
 .emoji-icon {
@@ -586,22 +603,29 @@ provide(cameraContainerStyle, "cameraContainerStyle");
   left: 8px;
 }
 
-.content {
-  height: 60px;
-  background-color: rgb(236, 236, 236);
-  width: 85%;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border-left: 6px solid #007bff; /* Цвет левой границы */
+.message-user {
+  font-weight: 500;
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.close-img {
+  cursor: pointer;
+  margin-left: 10px;
+  flex-shrink: 0;
 }
 
 .number-user {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
   margin: 0;
-}
-
-.message-user {
-  margin: 0;
+  color: gray;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .close-img {

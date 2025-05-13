@@ -59,7 +59,8 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
-
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 const props = defineProps({
   changeImgUrl: {
     type: Function,
@@ -131,10 +132,10 @@ const handleFileChange = async (event) => {
 
       // Pass fileURL and fileType to the parent
     } catch (error) {
+      setLoadingStatus(true, "error");
       console.error("Ошибка при загрузке файла:", error);
       console.error("Error response:", error.response);
       console.error("Error message:", error.message);
-      alert("Ошибка при загрузке файла.");
     }
   } else {
     fileURL.value = null;

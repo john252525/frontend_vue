@@ -60,6 +60,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, inject } from "vue";
 import axios from "axios";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 const props = defineProps({
   openCameraStation: {
@@ -169,6 +171,7 @@ const uploadPhoto = async (photoDataURL) => {
     props.changeImgUrl(photoURL, "image");
     props.openCameraStation();
   } catch (error) {
+    setLoadingStatus(true, "error");
     console.error("Ошибка при загрузке фото:", error);
     setErrorMessage("Ошибка при загрузке фото");
   } finally {

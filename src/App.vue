@@ -9,11 +9,15 @@
       class="navigation"
     />
     <main>
+      <ResultModal
+        :changeStationLoadingModal="offModal"
+        :stationLoading="stationLoading"
+      />
       <section>
-        <ResultModal
+        <!-- <ResultModal
           :changeStationLoadingModal="offModal"
           :stationLoading="stationLoading"
-        />
+        /> -->
         <router-view @routeChanged="checkChatStation"></router-view>
       </section>
     </main>

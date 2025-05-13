@@ -567,6 +567,7 @@ const openModal = (event, item) => {
   if (activeMessage.value !== item) {
     activeMessage.value = item;
     const rect = event.currentTarget.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
 
     // Проверяем, является ли контент изображением или видео
     if (item.data.content && item.data.content.length > 0) {
@@ -576,60 +577,61 @@ const openModal = (event, item) => {
       }
     }
 
-    // Если контент не изображение и не видео, продолжаем открытие модального окна
-    // Определяем максимальную ширину и высоту сообщения
-    const messageWidth = rect.width;
-    const maxWidth = 400;
-    const messageHeight = rect.height;
-    const maxHeight = 100;
+    // Определяем базовые параметры
+    const modalWidth = 200; // Ширина модального окна
+    const modalHeight = 120; // Высота модального окна
+    const margin = 10; // Отступ от сообщения
 
-    // Проверяем, является ли сообщение последним
-    const isLastMessage = item === messages.value[messages.value.length - 1];
+    // Определяем, в верхней или нижней части экрана находится сообщение
+    const isInTopHalf = rect.top < viewportHeight / 2;
 
-    if (isLastMessage) {
-      // Если сообщение последнее, отображаем меню над ним
-      modalPosition.value = {
-        top: rect.top + window.scrollY - 120,
-        left: rect.left + window.scrollX - 150,
-      };
-    } else {
-      // Для входящих сообщений
-      if (!item.data.outgoing) {
-        if (messageWidth > maxWidth) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50,
-            left: rect.left + window.scrollX + 10,
-          };
-        } else if (messageHeight > maxHeight) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50,
-            left: rect.right + window.scrollX + 10,
-          };
-        } else {
-          modalPosition.value = {
-            top: rect.top + window.scrollY,
-            left: rect.right + window.scrollX + 10,
-          };
-        }
+    // Для входящих сообщений (не исходящих)
+    if (!item.data.outgoing) {
+      if (isInTopHalf) {
+        // Если сообщение в верхней части - открываем ниже
+        modalPosition.value = {
+          top: rect.bottom + window.scrollY + margin,
+          left: rect.left + window.scrollX,
+          transform: "none",
+        };
       } else {
-        // Для исходящих сообщений
-        if (messageWidth > maxWidth) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 120,
-            left: rect.left + window.scrollX - 150,
-          };
-        } else if (messageHeight > maxHeight) {
-          modalPosition.value = {
-            top: rect.top + window.scrollY - 50,
-            left: rect.left + window.scrollX - 150,
-          };
-        } else {
-          modalPosition.value = {
-            top: rect.top + window.scrollY,
-            left: rect.left + window.scrollX - 150,
-          };
-        }
+        // Если сообщение в нижней части - открываем выше
+        modalPosition.value = {
+          top: rect.top + window.scrollY - modalHeight - margin,
+          left: rect.left + window.scrollX,
+          transform: "none",
+        };
       }
+    }
+    // Для исходящих сообщений
+    else {
+      if (isInTopHalf) {
+        // Если сообщение в верхней части - открываем ниже и слева
+        modalPosition.value = {
+          top: rect.bottom + window.scrollY + margin,
+          left: rect.right + window.scrollX - modalWidth,
+          transform: "none",
+        };
+      } else {
+        // Если сообщение в нижней части - открываем выше и слева
+        modalPosition.value = {
+          top: rect.top + window.scrollY - modalHeight - margin,
+          left: rect.right + window.scrollX - modalWidth,
+          transform: "none",
+        };
+      }
+    }
+
+    // Корректировка, если модальное окно выходит за границы экрана
+    const modalRightEdge = modalPosition.value.left + modalWidth;
+    const windowWidth = window.innerWidth;
+
+    if (modalRightEdge > windowWidth) {
+      modalPosition.value.left = windowWidth - modalWidth - margin;
+    }
+
+    if (modalPosition.value.left < 0) {
+      modalPosition.value.left = margin;
     }
   }
 };
@@ -797,6 +799,7 @@ const getMessage = async () => {
     }
   } catch (error) {
     console.error("Ошибка при получении сообщений:", error);
+    setLoadingStatus(true, "error");
     loading.value = false;
     messages.value = [];
     props.blockChatOff();
@@ -1002,7 +1005,7 @@ function truncateString(str, maxLength) {
     console.warn("Предупреждение: str должен быть строкой.", {
       originalInput: str,
     });
-    return "Некорректный ввод"; // Или можно вернуть пустую строку
+    return "Загрузка"; // Или можно вернуть пустую строку
   }
 
   // Ограничиваем длину строки

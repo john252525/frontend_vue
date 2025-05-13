@@ -21,6 +21,8 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 const props = defineProps({
   changeLoadChatMulti: {
@@ -71,6 +73,7 @@ const getAccountInfo = async (source, login) => {
     return response.data;
   } catch (error) {
     console.error(`Ошибка при запросе ${login}:`, error);
+    setLoadingStatus(true, "error");
     return null;
   }
 };
@@ -104,6 +107,7 @@ const fetchAccounts = async (source) => {
 
     return response.data.data.instances || [];
   } catch (error) {
+    setLoadingStatus(true, "error");
     console.error(`Ошибка при получении ${source} аккаунтов:`, error);
     return [];
   }
