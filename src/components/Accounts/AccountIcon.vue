@@ -1,10 +1,6 @@
 <template>
   <svg
-    v-if="
-      item.source === 'telegram' &&
-      item.storage != 'binder' &&
-      item.type != 'touchapi'
-    "
+    v-if="item.source === 'telegram'"
     class="icon-chat-list"
     xmlns="http://www.w3.org/2000/svg"
     width="18"
@@ -24,11 +20,7 @@
     width="16"
     height="16"
     viewBox="0 0 24 24"
-    v-if="
-      item.source === 'whatsapp' &&
-      item.storage != 'binder' &&
-      item.type != 'touchapi'
-    "
+    v-if="item.source === 'whatsapp'"
   >
     <g fill="none">
       <g clip-path="url(#akarIconsWhatsappFill0)">
@@ -123,7 +115,11 @@
     xmlns="http://www.w3.org/2000/svg"
     width="17"
     height="17"
-    v-if="item.storage === 'binder'"
+    v-if="
+      item.storage === 'binder' &&
+      item.source != 'telegram' &&
+      item.source != 'whatsapp'
+    "
     viewBox="0 0 24 24"
   >
     <path
