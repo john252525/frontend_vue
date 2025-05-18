@@ -8,11 +8,11 @@
       :chatsLoading="chatsLoading"
       class="navigation"
     />
+    <ResultModal
+      :changeStationLoadingModal="offModal"
+      :stationLoading="stationLoading"
+    />
     <main>
-      <ResultModal
-        :changeStationLoadingModal="offModal"
-        :stationLoading="stationLoading"
-      />
       <section>
         <!-- <ResultModal
           :changeStationLoadingModal="offModal"
