@@ -74,10 +74,12 @@ const chaneErrorBlock = () => {
 };
 
 const createRequest = async (request) => {
-  const { source, login, storage } = selectedItem.value;
+  const { source, login, storage, type } = selectedItem.value;
   let params = {
     source: source,
     login: login,
+    storage: storage,
+    type: type,
   };
   if (stationDomen.navigate.value != "whatsapi") {
     params = {

@@ -86,10 +86,12 @@ const getInfoAccount = async () => {
     if (!selectedItems.value) {
       return;
     }
-    const { source, login, storage } = selectedItems.value;
+    const { source, login, storage, type } = selectedItems.value;
     let params = {
       source: source,
       login: login,
+      storage: storage,
+      type: type,
     };
     if (stationDomen.navigate.value != "whatsapi") {
       params = {

@@ -51,7 +51,7 @@ const chaneErrorBlock = () => {
 import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 const { selectedItem, getScreenStation } = toRefs(props);
-const { source, login, storage } = selectedItem.value;
+const { source, login, storage, type } = selectedItem.value;
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -69,6 +69,8 @@ const getScreen = async () => {
   let params = {
     source: source,
     login: login,
+    storage: storage,
+    type: type,
   };
   if (stationDomen.navigate.value != "whatsapi") {
     params = {

@@ -502,4 +502,40 @@ tr:not(:last-child):after {
     width: 25%;
   }
 }
+
+@media (max-height: 920px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 660px) {
+  .table-container {
+    height: 78vh;
+  }
+}
+
+@media (max-height: 600px) {
+  .table-container {
+    height: 76vh;
+  }
+}
+
+@media (max-height: 550px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 500px) {
+  .table-container {
+    height: 70vh;
+  }
+}
+
+@media (max-height: 450px) {
+  .table-container {
+    height: 66vh;
+  }
+}
 </style>

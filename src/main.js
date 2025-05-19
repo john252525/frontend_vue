@@ -239,29 +239,65 @@ document.documentElement.setAttribute(
 );
 
 import axios from "axios";
+
 axios.interceptors.request.use((config) => {
   config.metadata = { startTime: Date.now() };
+
+  // Сохраняем тело запроса, если оно есть
+  if (config.data) {
+    config.metadata.requestBody = config.data;
+  }
+
   return config;
 });
 
-axios.interceptors.response.use((response) => {
-  const endTime = Date.now();
-  const duration = endTime - response.config.metadata.startTime;
+axios.interceptors.response.use(
+  (response) => {
+    const endTime = Date.now();
+    const duration = endTime - response.config.metadata.startTime;
 
-  const requestData = {
-    url: response.config.url,
-    method: response.config.method,
-    status: response.status,
-    statusText: response.statusText,
-    duration: duration,
-    requestHeaders: response.config.headers,
-    responseHeaders: response.headers,
-  };
+    const requestData = {
+      url: response.config.url,
+      method: response.config.method.toUpperCase(),
+      status: response.status,
+      statusText: response.statusText,
+      duration: duration,
+      timestamp: Date.now(),
+      requestHeaders: response.config.headers,
+      requestBody: response.config.metadata.requestBody, // Добавляем тело запроса
+      responseHeaders: response.headers,
+      responseBody: response.data, // Добавляем тело ответа
+    };
 
-  const requestsStore = useRequestsStore();
-  requestsStore.addRequest(requestData);
+    const requestsStore = useRequestsStore();
+    requestsStore.addRequest(requestData);
 
-  return response;
-});
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      const endTime = Date.now();
+      const duration = endTime - error.config.metadata.startTime;
+
+      const requestData = {
+        url: error.config.url,
+        method: error.config.method.toUpperCase(),
+        status: error.response.status,
+        statusText: error.response.statusText,
+        duration: duration,
+        timestamp: Date.now(),
+        requestHeaders: error.config.headers,
+        requestBody: error.config.metadata?.requestBody, // Добавляем тело запроса
+        responseHeaders: error.response.headers,
+        responseBody: error.response.data, // Добавляем тело ответа
+      };
+
+      const requestsStore = useRequestsStore();
+      requestsStore.addRequest(requestData);
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 app.mount("#app");

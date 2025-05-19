@@ -1,8 +1,6 @@
 <template>
   <div class="request-logger-container">
     <!-- Фильтры и управление -->
-
-    <!-- Обновлённый блок управления со статистикой -->
     <div class="controls-panel">
       <div class="filters">
         <input
@@ -27,7 +25,6 @@
       </div>
 
       <div class="stats-and-actions">
-        <!-- Компактная статистика -->
         <div class="compact-stats">
           <div class="stat-item">
             <span class="stat-value">{{ filteredRequests.length }}</span>
@@ -47,7 +44,6 @@
           </div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="actions">
           <button
             @click="toggleRecording"
@@ -195,6 +191,14 @@
             >
               {{ tab.label }}
             </button>
+            <!-- Добавлена новая вкладка HL -->
+            <button
+              @click="activeTab = 'hl'"
+              :class="{ active: activeTab === 'hl' }"
+              class="tab-btn"
+            >
+              HL
+            </button>
           </div>
 
           <div class="tab-content">
@@ -319,6 +323,22 @@
                 Копировать тело
               </button>
             </div>
+
+            <!-- Новая вкладка HL -->
+            <div v-if="activeTab === 'hl'" class="hl-tab">
+              <h4>Форматированный запрос</h4>
+              <div class="hl-content">
+                <div class="hl-method">{{ selectedRequest.method }}</div>
+                <div class="hl-url">{{ extractPath(selectedRequest.url) }}</div>
+                <div v-if="selectedRequest.requestBody" class="hl-body">
+                  <pre>{{ formatJson(selectedRequest.requestBody) }}</pre>
+                </div>
+                <div v-else class="hl-no-body">(нет тела запроса)</div>
+              </div>
+              <button @click="copyHlRequest(selectedRequest)" class="copy-btn">
+                Копировать HL
+              </button>
+            </div>
           </div>
         </div>
 
@@ -376,9 +396,11 @@ export default {
         { id: "requestBody", label: "Тело запроса" },
         { id: "responseHeaders", label: "Заголовки ответа" },
         { id: "responseBody", label: "Тело ответа" },
+        { id: "hl", label: "HL" },
       ].filter((tab) => {
-        if (tab.id === "requestBody") return this.selectedRequest.requestBody;
-        if (tab.id === "responseBody") return this.selectedRequest.responseBody;
+        if (tab.id === "requestBody") return this.selectedRequest?.requestBody;
+        if (tab.id === "responseBody")
+          return this.selectedRequest?.responseBody;
         return true;
       });
     },
@@ -386,16 +408,13 @@ export default {
     filteredRequests() {
       return this.requests
         .filter((req) => {
-          // Фильтр по поисковому запросу
           const matchesSearch = req.url
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase());
 
-          // Фильтр по методу
           const matchesMethod =
             !this.methodFilter || req.method === this.methodFilter;
 
-          // Фильтр по статусу
           let matchesStatus = true;
           if (this.statusFilter === "success") {
             matchesStatus = req.status >= 200 && req.status < 300;
@@ -407,7 +426,7 @@ export default {
 
           return matchesSearch && matchesMethod && matchesStatus;
         })
-        .reverse(); // Показываем новые запросы первыми
+        .reverse();
     },
 
     successCount() {
@@ -524,6 +543,26 @@ export default {
       return JSON.stringify(data, null, 2);
     },
 
+    extractPath(url) {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.pathname + urlObj.search;
+      } catch {
+        return url;
+      }
+    },
+
+    copyHlRequest(req) {
+      let hlText = `${req.method} ${this.extractPath(req.url)}\n`;
+
+      if (req.requestBody) {
+        hlText += this.formatJson(req.requestBody);
+      }
+
+      this.copyToClipboard(hlText);
+      this.showToast("HL формат скопирован");
+    },
+
     showDetails(req) {
       this.selectedRequest = req;
       this.activeTab = "overview";
@@ -620,15 +659,13 @@ export default {
     },
 
     showToast(message) {
-      // Здесь можно реализовать toast-уведомления
       console.log("Toast:", message);
-      alert(message); // Временное решение
+      alert(message);
     },
   },
 
   watch: {
     filteredRequests() {
-      // Сброс страницы при изменении фильтров
       this.currentPage = 1;
     },
   },
@@ -641,7 +678,6 @@ export default {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   background-color: #f5f7fa;
-  min-height: 100vh;
 }
 
 /* Панель управления с интегрированной статистикой */
@@ -820,7 +856,7 @@ export default {
   font-size: 16px;
 }
 
-/* Таблица запросов (остаётся без изменений) */
+/* Таблица запросов */
 .requests-table {
   background-color: white;
   border-radius: 10px;
@@ -1072,6 +1108,7 @@ tr:hover {
   display: flex;
   border-bottom: 1px solid #eee;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -1148,6 +1185,45 @@ pre {
   line-height: 1.5;
 }
 
+/* Стили для новой вкладки HL */
+.hl-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hl-content {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #eee;
+  font-family: "Consolas", monospace;
+}
+
+.hl-method {
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 8px;
+}
+
+.hl-url {
+  color: #388e3c;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+.hl-body {
+  background-color: #fff;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.hl-no-body {
+  color: #666;
+  font-style: italic;
+}
+
 .modal-footer {
   padding: 16px 20px;
   border-top: 1px solid #eee;
@@ -1220,6 +1296,12 @@ pre {
   .modal-content {
     width: 95%;
   }
+
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1251,6 +1333,15 @@ pre {
   .page-info {
     font-size: 13px;
     margin-left: 12px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .action-btn {
+    width: 100%;
   }
 }
 </style>

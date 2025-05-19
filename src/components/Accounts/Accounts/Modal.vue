@@ -12,9 +12,12 @@
         <span class="action" @click="handleSubmit">{{
           t("modalAccount.settings")
         }}</span>
-        <span class="action" @click="changeGetScreenStation">{{
-          t("modalAccount.screen")
-        }}</span>
+        <span
+          v-if="selectedItem.source != 'telegram'"
+          class="action"
+          @click="changeGetScreenStation"
+          >{{ t("modalAccount.screen") }}</span
+        >
         <span class="action action-on" @click="changeEnableStation">{{
           t("modalAccount.on")
         }}</span>

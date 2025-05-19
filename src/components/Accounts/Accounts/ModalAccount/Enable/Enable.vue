@@ -36,6 +36,9 @@ const props = defineProps({
   changeEnableStation: {
     type: Function,
   },
+  changeForceStopItemData: {
+    type: Function,
+  },
 });
 
 const errorBlock = ref(false);
@@ -206,6 +209,8 @@ const setState = async (request) => {
         response.data
       );
     }
+    props.changeForceStopItemData(selectedItem.value);
+    // console.log(response.data.data);
 
     if (response.data.data.status === "ok") {
       station.stationLoading = false;

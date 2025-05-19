@@ -125,6 +125,7 @@
     />
     <Enable
       v-if="enableStation"
+      :changeForceStopItemData="changeForceStopItemData"
       :enableStation="enableStation"
       :selectedItem="selectedItem"
       :changeEnableStation="changeEnableStation"
@@ -342,7 +343,6 @@ const getAccounts = async () => {
         loadDataStation.value = false;
         dataStation.value = true;
 
-        // Проверяем, если source равен "whatsapp"
         if (
           localStorage.getItem("accountStation") === "whatsapp" ||
           localStorage.getItem("accountStation") === "telegram"
@@ -353,14 +353,22 @@ const getAccounts = async () => {
 
             if (
               (instance.storage === "binder" && instance.type !== "touchapi") ||
-              (instance.storage === "whatsapi" && instance.type === "whatsapi")
+              (instance.storage === "whatsapi" &&
+                instance.type === "whatsapi" &&
+                (instance.source != "telegram" ||
+                  instance.source != "whatsapp"))
             ) {
               instance.loading = false;
               return; // Пропускаем запрос
             }
             try {
               // Запрос для получения информации о каждом логине
-              const infoResponse = await getInfoWhats(instance.source, login);
+              const infoResponse = await getInfoWhats(
+                instance.source,
+                login,
+                instance.type,
+                instance.storage
+              );
               if (
                 infoResponse &&
                 infoResponse.data &&
@@ -377,7 +385,11 @@ const getAccounts = async () => {
             }
 
             // Проверяем, если step равен 5
-            if (instance.step[0].value === 5) {
+            if (
+              instance.step &&
+              instance.step.value &&
+              instance.step[0].value === 5
+            ) {
               let existingLogins;
 
               const storedData = localStorage.getItem("loginWhatsAppChatsStep");
@@ -445,13 +457,15 @@ const getAccounts = async () => {
 };
 
 // Функция getInfo
-const getInfoWhats = async (source, login) => {
+const getInfoWhats = async (source, login, type, storage) => {
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfo",
       {
         source: source,
         login: login,
+        type: type,
+        storage: storage,
       },
       {
         headers: {
@@ -569,6 +583,8 @@ const getInfo = async () => {
       {
         source: selectedItem.value.source,
         login: selectedItem.value.login,
+        type: selectedItem.value.type,
+        storage: selectedItem.value.storage,
       },
       {
         headers: {
@@ -591,10 +607,12 @@ const getInfo = async () => {
         );
       }
     }
-
-    if (response.data.data.step) {
-      if (response.data.data.step.value === 5) {
-        chatsStation.value = true;
+    console.log(response.data);
+    if (response.data.data) {
+      if (response.data.data.step != null) {
+        if (response.data.data.step.value === 5) {
+          chatsStation.value = true;
+        }
       } else {
         chatsStation.value = false;
       }
@@ -623,7 +641,7 @@ provide("changeEnableStation", { changeEnableStation });
   overflow-x: auto;
   overflow-y: auto;
   max-width: 100%;
-  height: 82vh;
+  height: 80vh;
 }
 
 .table-container::-webkit-scrollbar {
@@ -812,5 +830,41 @@ tr:not(:last-child):after {
 
 tr:hover {
   position: static;
+}
+
+@media (max-height: 900px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 660px) {
+  .table-container {
+    height: 78vh;
+  }
+}
+
+@media (max-height: 600px) {
+  .table-container {
+    height: 76vh;
+  }
+}
+
+@media (max-height: 550px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 500px) {
+  .table-container {
+    height: 70vh;
+  }
+}
+
+@media (max-height: 450px) {
+  .table-container {
+    height: 66vh;
+  }
 }
 </style>
