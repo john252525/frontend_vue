@@ -710,9 +710,12 @@ const getMessage = async () => {
     const token = localStorage.getItem("accountToken");
 
     const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+    console.log(userLogin, "user");
     let requestData = {
       source: chatInfo.value.sourceUser,
       login: userLogin.login,
+      storage: userLogin.storage,
+      type: userLogin.type,
       to: chatInfo.value.phone,
     };
 

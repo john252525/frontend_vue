@@ -485,44 +485,46 @@ const handleSendLog = async (location, method, params, results, answer) => {
 
 const test = async () => {
   const isMulti = computed(() => {
-    return route.query.multi === "true"; // Проверяем значение multi
+    return route.query.multi === "true";
   });
 
   try {
     const token = localStorage.getItem("accountToken");
-    console.log(JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")));
-    // Получаем логин в зависимости от значения multi
-    const logsingFromAccount =
-      JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || []; // Получаем массив объектов из localStorag
-    console.log(logsingFromAccount);
+    const accountsData =
+      JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+    console.log("Accounts from localStorage:", accountsData);
+
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    let logins;
+    let requestData;
 
     if (isMulti.value) {
-      logins = logsingFromAccount.map((item) => item.login) || []; // Извлекаем массив логинов из массива объектов
+      // Для мультиаккаунтного режима формируем массив объектов
+      requestData = accountsData.map((account) => ({
+        login: account.login,
+        source: account.source,
+        storage: account.storage || "undefined", // fallback если не указан
+        type: account.type || "undefined", // fallback если не указан
+      }));
     } else {
-      logins = userInfo?.login; // Если isMulti не true, просто используем login из userInfo
+      // Для одиночного аккаунта берем данные из userInfo
+      requestData = {
+        login: userInfo?.login,
+        source:
+          stationDomen.navigate.value != "whatsapi"
+            ? localStorage.getItem("accountStation")
+            : localStorage.getItem("accauntSourse"),
+        storage: userInfo?.storage || "undefined",
+        type: userInfo?.type || "undefined",
+      };
     }
 
-    let sourse;
-
-    if (isMulti.value) {
-      sourse = logsingFromAccount.map((item) => item.source) || []; // Извлекаем массив логинов из массива объектов
-    } else {
-      if (stationDomen.navigate.value != "whatsapi") {
-        sourse = localStorage.getItem("accountStation");
-      } else {
-        sourse = localStorage.getItem("accauntSourse");
-      }
-    }
-    console.log(logins);
+    console.log("Request data:", requestData);
 
     const response = await axios.post(
       `${apiUrl}/getChats`,
-      {
-        source: sourse,
-        login: logins,
-      },
+      isMulti.value
+        ? { accounts: requestData } // Отправляем массив аккаунтов для мультирежима
+        : { ...requestData }, // Отправляем один объект для одиночного режима
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -535,11 +537,12 @@ const test = async () => {
       await handleSendLog(
         "chats",
         "getChats",
-        { source: sourse, login: logins },
+        isMulti.value ? { accounts: requestData } : requestData,
         response.data,
         response.data
       );
     }
+
     if (response.status === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -549,9 +552,9 @@ const test = async () => {
       return;
     }
 
+    // Обработка ответа
     if (apiUrl === apiCheckUrl) {
       chats.value = response.data.data.chats;
-      console.log(chats.value);
     } else {
       chats.value = response.data.data.chats.map((chat) => ({
         newMessage: chat.unreadCount,
@@ -561,28 +564,22 @@ const test = async () => {
       }));
     }
 
-    chatsNull.value = false;
-
-    if (chats.value.length === 0) {
-      chatsNull.value = true;
-      console.log("dssd");
-    }
+    chatsNull.value = chats.value.length === 0;
   } catch (error) {
     setLoadingStatus(true, "error");
     errorStation.value = true;
     chatsNull.value = false;
-    setTimeout(() => {
-      localStorage.removeItem("loginWhatsAppChatsStep");
-      // router.push("/accounts");
-    }, 2000);
+
     console.error("Ошибка при получении сообщений:", error);
     if (error.response) {
-      errorStation.value = true;
       console.error("Ошибка сервера:", error.response.data);
     }
+
+    setTimeout(() => {
+      localStorage.removeItem("loginWhatsAppChatsStep");
+    }, 2000);
   }
 };
-
 const formatTimestamp = (timestamp) => {
   if (typeof timestamp === "string") {
     timestamp = parseFloat(timestamp);

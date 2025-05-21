@@ -206,10 +206,6 @@ const changeForceStopItemData = async (item) => {
     // 3. Обновляем состояние загрузки в основном массиве
     instanceData.value[accountIndex].loading = true;
 
-    // 4. Форсируем обновление UI (если используете Vue 2)
-    // this.$forceUpdate();
-
-    // 5. Делаем запрос для получения актуальных данных
     const infoResponse = await getInfoWhats(
       item.source,
       item.login,
@@ -236,7 +232,7 @@ const changeForceStopItemData = async (item) => {
 
     // 8. Обработка special case для step = 5
     if (infoResponse.data.data.step?.[0]?.value === 5) {
-      updateLocalStorage(item.login, item.source);
+      updateLocalStorage(item.login, item.source, item.storage, item.type);
     }
   } catch (error) {
     console.error("error", error);
@@ -257,17 +253,35 @@ const changeForceStopItemData = async (item) => {
 };
 
 // Оптимизированная версия функции обновления localStorage
-const updateLocalStorage = (login, source) => {
+const updateLocalStorage = (login, source, storage, type) => {
   try {
     const storageKey = "loginWhatsAppChatsStep";
     const existingLogins = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-    if (!existingLogins.some((item) => item.login === login)) {
-      const updatedLogins = [...existingLogins, { login, source }];
-      localStorage.setItem(storageKey, JSON.stringify(updatedLogins));
+    const newLoginData = {
+      login,
+      source,
+      storage: storage || "undefined", // fallback, если storage отсутствует
+      type: type || "undefined", // fallback, если type отсутствует
+    };
+
+    // Проверяем, есть ли уже такой логин (учитываем source, storage и type)
+    const loginExists = existingLogins.some(
+      (item) =>
+        item.login === login &&
+        item.source === source &&
+        item.storage === storage &&
+        item.type === type
+    );
+
+    if (!loginExists) {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify([...existingLogins, newLoginData])
+      );
     }
   } catch (e) {
-    console.error("error", e);
+    console.error("Error updating localStorage:", e);
   }
 };
 
@@ -311,7 +325,8 @@ const getAccounts = async () => {
       skipDetails: true,
     };
   }
-  loadDataStation.value = true; // Устанавливаем флаг загрузки
+
+  loadDataStation.value = true;
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
@@ -320,11 +335,9 @@ const getAccounts = async () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-          // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
         },
       }
     );
-    // 9bddaafd-2c8d-4840-96d5-1c19c0bb4bd5
 
     if (response.data.ok === true) {
       await handleSendLog(
@@ -334,11 +347,14 @@ const getAccounts = async () => {
         response.data.ok,
         response.data
       );
+
       accounts.value = response.data;
       instanceData.value = accounts.value.data.instances.map((instance) => ({
         ...instance,
         step: instance.step === null ? "Н/Д" : instance.step,
-        loading: true, // Добавляем поле loading
+        loading: true,
+        storage: instance.storage || "undefined",
+        type: instance.type || "undefined",
       }));
 
       if (instanceData.value.length === 0) {
@@ -352,9 +368,8 @@ const getAccounts = async () => {
           localStorage.getItem("accountStation") === "whatsapp" ||
           localStorage.getItem("accountStation") === "telegram"
         ) {
-          // Создаем массив промисов для обработки каждого экземпляра
           const promises = instanceData.value.map(async (instance) => {
-            const login = instance.login; // Извлекаем логин
+            const login = instance.login;
 
             if (
               (instance.storage === "binder" && instance.type !== "touchapi") ||
@@ -364,100 +379,75 @@ const getAccounts = async () => {
                   instance.source != "whatsapp"))
             ) {
               instance.loading = false;
-              return; // Пропускаем запрос
+              return;
             }
+
             try {
-              // Запрос для получения информации о каждом логине
               const infoResponse = await getInfoWhats(
                 instance.source,
                 login,
                 instance.type,
                 instance.storage
               );
-              if (
-                infoResponse &&
-                infoResponse.data &&
-                infoResponse.data.data.step
-              ) {
-                // Обновляем step
+
+              if (infoResponse?.data?.data?.step) {
                 instance.step = infoResponse.data.data.step;
               }
             } catch (error) {
-              console.error(`error ${login}:`, error);
+              console.error(`Error for ${login}:`, error);
             } finally {
-              // Устанавливаем loading в false в любом случае
               instance.loading = false;
             }
 
-            // Проверяем, если step равен 5
-            if (
-              instance.step &&
-              instance.step.value &&
-              instance.step[0].value === 5
-            ) {
-              let existingLogins;
-
-              const storedData = localStorage.getItem("loginWhatsAppChatsStep");
-
-              if (storedData) {
-                try {
-                  existingLogins = JSON.parse(storedData) || []; // Получаем существующий массив объектов
-                } catch (error) {
-                  console.error("error", error);
-                  existingLogins = []; // Если парсинг не удался, создаем пустой массив
-                }
-              } else {
-                existingLogins = []; // Инициализируем пустой массив объектов
-              }
-
-              // Создаем объект для нового логина
-              const newLoginObject = {
-                login: login,
-                source: localStorage.getItem("accountStation"),
-              };
-
-              // Проверяем, есть ли уже логин в массиве объектов (сравниваем объекты)
-              const loginExists = existingLogins.some(
-                (item) => item.login === login
-              );
-
-              if (!loginExists) {
-                existingLogins.push(newLoginObject); // Добавляем новый объект в массив
-                localStorage.setItem(
-                  "loginWhatsAppChatsStep",
-                  JSON.stringify(existingLogins) // Сохраняем массив объектов
-                );
-              } else {
-              }
+            // Запись в localStorage
+            if (instance.step?.value === 5) {
+              updateAccountInLocalStorage(instance);
             }
           });
 
-          // Ждем завершения всех запросов
           await Promise.all(promises);
-          // Выводим сообщение о завершении проверки всех аккаунтов
           chatsLoadingChange();
         }
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
-      // setTimeout(() => {
-      //   localStorage.removeItem("accountToken");
-      //   router.push("/login");
-      // }, 2000);
     }
   } catch (error) {
-    loadDataStation.value = false; // Устанавливаем значение false в случае ошибки
-    dataStationNone.value = true; // Показываем, что данные отсутствуют
-    if (error.response) {
-      if (error.response.status === 401) {
-      } else {
-        console.error("error", error);
-        console.error("error", error.response.data);
-      }
-    } else {
-      error.value = error.message || "Произошла ошибка.";
-      console.error("error", error);
+    loadDataStation.value = false;
+    dataStationNone.value = true;
+    console.error("Error:", error);
+  }
+};
+
+const updateAccountInLocalStorage = (instance) => {
+  try {
+    const storageKey = "loginWhatsAppChatsStep";
+    const existingLogins = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    const newLoginData = {
+      login: instance.login,
+      source: instance.source || localStorage.getItem("accountStation"),
+      storage: instance.storage || "undefined",
+      type: instance.type || "undefined",
+    };
+
+    const isDuplicate = existingLogins.some(
+      (item) =>
+        item.login === newLoginData.login &&
+        item.source === newLoginData.source &&
+        item.storage === newLoginData.storage &&
+        item.type === newLoginData.type
+    );
+
+    if (!isDuplicate) {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify([...existingLogins, newLoginData])
+      );
+      console.log("Account saved to localStorage:", newLoginData);
     }
+  } catch (e) {
+    console.error("Error updating localStorage:", e);
   }
 };
 
@@ -479,20 +469,10 @@ const getInfoWhats = async (source, login, type, storage) => {
         },
       }
     );
-    if (response.data) {
-      await handleSendLog(
-        "accountList",
-        "getInfo",
-        { source: source, login: login },
-        response.data.ok,
-        response.data
-      );
-    }
-
     return response;
   } catch (error) {
-    console.error("error", error);
-    return null; // Возвращаем null в случае ошибки
+    console.error("Error in getInfoWhats:", error);
+    return null;
   }
 };
 
