@@ -409,13 +409,15 @@ const createRequest = async (request) => {
 };
 
 const forceStop = async (request) => {
-  const { source, login } = selectedItem.value;
+  const { source, login, type, storage } = selectedItem.value;
   try {
     const response = await axios.post(
       `https://b2288.apitter.com/instances/${request}`,
       {
         source: source,
         login: login,
+        type: type,
+        storage: storage,
       },
       {
         headers: {

@@ -191,7 +191,6 @@
             >
               {{ tab.label }}
             </button>
-            <!-- Добавлена новая вкладка HL -->
             <button
               @click="activeTab = 'hl'"
               :class="{ active: activeTab === 'hl' }"
@@ -324,16 +323,22 @@
               </button>
             </div>
 
-            <!-- Новая вкладка HL -->
+            <!-- Вкладка HL -->
             <div v-if="activeTab === 'hl'" class="hl-tab">
               <h4>Форматированный запрос</h4>
               <div class="hl-content">
-                <div class="hl-method">{{ selectedRequest.method }}</div>
-                <div class="hl-url">{{ extractPath(selectedRequest.url) }}</div>
+                <div class="hl-method-url">
+                  {{ selectedRequest.method }}
+                  {{ extractDomain(selectedRequest.url) }}
+                </div>
+
                 <div v-if="selectedRequest.requestBody" class="hl-body">
                   <pre>{{ formatJson(selectedRequest.requestBody) }}</pre>
                 </div>
-                <div v-else class="hl-no-body">(нет тела запроса)</div>
+
+                <div v-if="hasAuthHeader(selectedRequest)" class="hl-auth">
+                  header: Authorization: {{ getAuthHeader(selectedRequest) }}
+                </div>
               </div>
               <button @click="copyHlRequest(selectedRequest)" class="copy-btn">
                 Копировать HL
@@ -499,11 +504,52 @@ export default {
   methods: {
     ...mapActions(useRequestsStore, ["clearRequests", "toggleRecording"]),
 
+    showDetails(req) {
+      this.selectedRequest = req;
+      this.activeTab = "overview";
+    },
+
     getStatusClass(req) {
       if (req.status >= 200 && req.status < 300) return "success";
       if (req.status >= 400) return "error";
       if (req.status >= 300 && req.status < 400) return "redirect";
       return "";
+    },
+
+    hasAuthHeader(request) {
+      return !!this.getAuthHeader(request);
+    },
+
+    getAuthHeader(request) {
+      return (
+        request.requestHeaders?.Authorization ||
+        request.requestHeaders?.authorization
+      );
+    },
+
+    extractDomain(url) {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.hostname + urlObj.pathname;
+      } catch {
+        return url;
+      }
+    },
+
+    copyHlRequest(req) {
+      let hlText = `${req.method} ${this.extractDomain(req.url)}\n`;
+
+      if (req.requestBody) {
+        hlText += this.formatJson(req.requestBody) + "\n";
+      }
+
+      const authHeader = this.getAuthHeader(req);
+      if (authHeader) {
+        hlText += `header: Authorization: ${authHeader}`;
+      }
+
+      this.copyToClipboard(hlText);
+      this.showToast("HL формат скопирован");
     },
 
     getDurationClass(duration) {
@@ -541,31 +587,6 @@ export default {
         }
       }
       return JSON.stringify(data, null, 2);
-    },
-
-    extractPath(url) {
-      try {
-        const urlObj = new URL(url);
-        return urlObj.pathname + urlObj.search;
-      } catch {
-        return url;
-      }
-    },
-
-    copyHlRequest(req) {
-      let hlText = `${req.method} ${this.extractPath(req.url)}\n`;
-
-      if (req.requestBody) {
-        hlText += this.formatJson(req.requestBody);
-      }
-
-      this.copyToClipboard(hlText);
-      this.showToast("HL формат скопирован");
-    },
-
-    showDetails(req) {
-      this.selectedRequest = req;
-      this.activeTab = "overview";
     },
 
     copyToClipboard(text) {
@@ -1185,7 +1206,7 @@ pre {
   line-height: 1.5;
 }
 
-/* Стили для новой вкладки HL */
+/* Стили для вкладки HL */
 .hl-tab {
   display: flex;
   flex-direction: column;
@@ -1200,15 +1221,10 @@ pre {
   font-family: "Consolas", monospace;
 }
 
-.hl-method {
+.hl-method-url {
   font-weight: bold;
   color: #1976d2;
   margin-bottom: 8px;
-}
-
-.hl-url {
-  color: #388e3c;
-  margin-bottom: 16px;
   word-break: break-all;
 }
 
@@ -1217,11 +1233,14 @@ pre {
   padding: 12px;
   border-radius: 4px;
   border: 1px solid #e0e0e0;
+  margin-bottom: 12px;
 }
 
-.hl-no-body {
-  color: #666;
-  font-style: italic;
+.hl-auth {
+  color: #6d4c41;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
 .modal-footer {

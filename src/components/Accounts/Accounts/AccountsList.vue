@@ -210,7 +210,12 @@ const changeForceStopItemData = async (item) => {
     // this.$forceUpdate();
 
     // 5. Делаем запрос для получения актуальных данных
-    const infoResponse = await getInfoWhats(item.source, item.login);
+    const infoResponse = await getInfoWhats(
+      item.source,
+      item.login,
+      item.type,
+      item.storage
+    );
 
     if (!infoResponse?.data?.data) {
       throw new Error("Invalid response structure");
