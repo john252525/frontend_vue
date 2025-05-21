@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { ref, toRefs, reactive, computed, onMounted, nextTick } from "vue";
 import axios from "axios";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -268,6 +268,8 @@ const stationMess = reactive({
   isMuilti: {
     source: "",
     login: "",
+    storage: "",
+    type: "",
     isMulti: false,
   },
 });
@@ -276,7 +278,13 @@ const props = defineProps({
   changeAddAccountStation: {
     type: Function,
   },
+  chatInfo: {
+    type: Object,
+  },
 });
+
+const { chatInfo } = toRefs(props);
+
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 
 const getAccounts = () => {
@@ -289,6 +297,8 @@ const updateSelectedAccount = (account) => {
   selectedAccount.value = account;
   stationMess.isMuilti.source = account.source;
   stationMess.isMuilti.login = account.login;
+  stationMess.isMuilti.storage = account.storage;
+  stationMess.isMuilti.type = account.type;
   stationMess.source = account.source;
 };
 
@@ -419,8 +429,11 @@ const sendMessage = async () => {
   };
 
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  console.log(stationMess);
   let messageDataRes = {
     source: source.value,
+    storage: stationMess.isMuilti.storage,
+    type: stationMess.isMuilti.type,
     login: "",
     msg: message,
     errorMessage: front_message,

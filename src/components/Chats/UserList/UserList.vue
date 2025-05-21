@@ -2,6 +2,7 @@
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <NewMessageSend
     :changeAddAccountStation="changeAddAccountStation"
+    :chatInfo="chatInfo"
     v-if="addAccountStation"
   />
 

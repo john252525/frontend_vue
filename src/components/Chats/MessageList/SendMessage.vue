@@ -431,10 +431,13 @@ const sendMessage = async () => {
 
   emit("updateMessages", newMessage);
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  console.log(chatInfo.value);
   let messageDataRes = {
     source: chatInfo.value.sourceUser,
     login: chatInfo.value.loginUser,
     msg: message,
+    storage: chatInfo.value.storageUser,
+    type: chatInfo.value.typeUser,
     errorMessage: front_message,
     mUniq: chatInfo.value.lastMessage.id.remote,
     replyTo: replyToDataBolean ? replyToUniq : null,
