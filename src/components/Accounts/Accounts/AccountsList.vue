@@ -445,6 +445,8 @@ const updateAccountInLocalStorage = (instance) => {
         JSON.stringify([...existingLogins, newLoginData])
       );
       console.log("Account saved to localStorage:", newLoginData);
+    } else {
+      console.log("Account already exists in localStorage:", newLoginData);
     }
   } catch (e) {
     console.error("Error updating localStorage:", e);
