@@ -46,13 +46,15 @@ const currentStatus = ref("Загрузка общих чатов...");
 const progress = ref(0);
 const completed = ref(false);
 
-const getAccountInfo = async (source, login) => {
+const getAccountInfo = async (source, login, storage, type) => {
   try {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfo",
       {
         source,
         login,
+        storage,
+        type,
       },
       {
         headers: {
@@ -84,7 +86,6 @@ const fetchAccounts = async (source) => {
     const response = await axios.post(
       "https://b2288.apitter.com/instances/getInfoByToken",
       {
-        source,
         skipDetails: true,
       },
       {
@@ -125,13 +126,15 @@ const processAccounts = async (accounts, source) => {
     )}/${accounts.length})`;
 
     const batchPromises = batch.map((account) =>
-      getAccountInfo(source, account.login)
+      getAccountInfo(source, account.login, account.storage, account.type)
         .then((info) => {
-          if (info?.data?.step?.value === 5) {
-            resultAccounts.push({
-              login: account.login,
-              source,
-            });
+          if (info.data.step != null) {
+            if (info.data.step.value === 5) {
+              resultAccounts.push({
+                login: account.login,
+                source,
+              });
+            }
           }
           return null;
         })
