@@ -301,6 +301,7 @@ const updateSelectedAccount = (account) => {
   stationMess.isMuilti.storage = account.storage;
   stationMess.isMuilti.type = account.type;
   stationMess.source = account.source;
+  console.log(account);
 };
 
 const processLogin = () => {

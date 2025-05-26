@@ -132,6 +132,8 @@ const processAccounts = async (accounts, source) => {
             if (info.data.step.value === 5) {
               resultAccounts.push({
                 login: account.login,
+                storage: account.storage,
+                type: account.type,
                 source,
               });
             }
@@ -158,46 +160,24 @@ const processAccounts = async (accounts, source) => {
 
 const saveToLocalStorage = (accounts) => {
   try {
-    const storedData = localStorage.getItem("loginWhatsAppChatsStep");
-    const existingLogins = storedData ? JSON.parse(storedData) : [];
-
-    if (!Array.isArray(existingLogins)) {
-      console.warn("Некорректные данные в localStorage, создаем новый массив");
-      existingLogins = [];
-    }
-
-    const existingSet = new Set(
-      existingLogins.map((item) => `${item.login}|${item.source}`)
-    );
-
-    const newAccounts = accounts.filter(
-      (account) => !existingSet.has(`${account.login}|${account.source}`)
-    );
-
-    if (newAccounts.length > 0) {
-      localStorage.setItem(
-        "loginWhatsAppChatsStep",
-        JSON.stringify([...existingLogins, ...newAccounts])
-      );
-    }
+    // Полностью заменяем содержимое localStorage новым списком аккаунтов
+    localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
   } catch (error) {
     console.error("Ошибка при сохранении в localStorage:", error);
+    // В случае ошибки все равно пытаемся сохранить
     localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
   }
 };
-
 const processAllAccounts = async () => {
   try {
     progress.value = 0;
     completed.value = false;
 
-    // Параллельная загрузка аккаунтов из обоих источников
     const [telegramAccounts, whatsappAccounts] = await Promise.all([
       fetchAccounts("telegram"),
       fetchAccounts("whatsapp"),
     ]);
 
-    // Параллельная обработка аккаунтов
     const [telegramPremium, whatsappPremium] = await Promise.all([
       processAccounts(telegramAccounts, "telegram"),
       processAccounts(whatsappAccounts, "whatsapp"),
@@ -205,11 +185,8 @@ const processAllAccounts = async () => {
 
     const resultAccounts = [...telegramPremium, ...whatsappPremium];
 
-    if (resultAccounts.length > 0) {
-      saveToLocalStorage(resultAccounts);
-    } else {
-      localStorage.removeItem("loginWhatsAppChatsStep");
-    }
+    // Всегда сохраняем полный актуальный список
+    saveToLocalStorage(resultAccounts);
 
     completed.value = true;
     currentStatus.value = "Проверка завершена";

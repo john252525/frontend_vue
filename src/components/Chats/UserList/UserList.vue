@@ -85,7 +85,9 @@
           </div>
         </div>
       </section>
-
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
       <section
         v-if="chats"
         v-for="chat in sortedChats"
@@ -484,30 +486,33 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-const test = async () => {
-  const isMulti = computed(() => {
-    return route.query.multi === "true";
-  });
+const isLoading = ref(false);
+const debounceTimer = ref(null);
 
+const test = async () => {
   try {
     const token = localStorage.getItem("accountToken");
     const accountsData =
       JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
-    console.log("Accounts from localStorage:", accountsData);
+
+    // Если нет активных аккаунтов - сразу показываем пустой список
+    if (accountsData.length === 0) {
+      chats.value = [];
+      chatsNull.value = true;
+      return;
+    }
 
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     let requestData;
 
     if (isMulti.value) {
-      // Для мультиаккаунтного режима формируем массив объектов
       requestData = accountsData.map((account) => ({
         login: account.login,
         source: account.source,
-        storage: account.storage || "undefined", // fallback если не указан
-        type: account.type || "undefined", // fallback если не указан
+        storage: account.storageUser || "undefined",
+        type: account.typeUser || "undefined",
       }));
     } else {
-      // Для одиночного аккаунта берем данные из userInfo
       requestData = {
         login: userInfo?.login,
         source:
@@ -519,13 +524,9 @@ const test = async () => {
       };
     }
 
-    console.log("Request data:", requestData);
-
     const response = await axios.post(
       `${apiUrl}/getChats`,
-      isMulti.value
-        ? { accounts: requestData } // Отправляем массив аккаунтов для мультирежима
-        : { ...requestData }, // Отправляем один объект для одиночного режима
+      isMulti.value ? { accounts: requestData } : { ...requestData },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -553,7 +554,6 @@ const test = async () => {
       return;
     }
 
-    // Обработка ответа
     if (apiUrl === apiCheckUrl) {
       chats.value = response.data.data.chats;
     } else {
@@ -570,15 +570,7 @@ const test = async () => {
     setLoadingStatus(true, "error");
     errorStation.value = true;
     chatsNull.value = false;
-
-    console.error("Ошибка при получении сообщений:", error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-
-    setTimeout(() => {
-      localStorage.removeItem("loginWhatsAppChatsStep");
-    }, 2000);
+    throw error; // Пробрасываем ошибку дальше
   }
 };
 const formatTimestamp = (timestamp) => {
@@ -691,10 +683,12 @@ const showAccountList = ref(false);
 const getAccounts = () => {
   const storedAccounts =
     JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
-  // Преобразуем массив объектов из localStorage в массив объектов Vue с флагом active
+  console.log(storedAccounts);
   accounts.value = storedAccounts.map((account) => ({
     name: account.login,
     source: account.source,
+    type: account.storageUser,
+    storage: account.typeUser,
     active: true, // По умолчанию аккаунт активен
   }));
 };
@@ -706,7 +700,20 @@ const toggleAccount = (account) => {
 };
 
 // Функция для обновления localStorage на основе текущего состояния аккаунтов
-const updateLocalStorage = () => {
+const updateLocalStorage = async () => {
+  // Очищаем предыдущий таймер, если он есть
+  if (debounceTimer.value) {
+    clearTimeout(debounceTimer.value);
+  }
+
+  // Устанавливаем состояние загрузки
+  isLoading.value = true;
+
+  // Очищаем чаты перед новым запросом
+  chats.value = null;
+  chatsNull.value = false;
+
+  // Сохраняем активные аккаунты
   const activeAccounts = accounts.value
     .filter((account) => account.active)
     .map((account) => ({ login: account.name, source: account.source }));
@@ -716,11 +723,17 @@ const updateLocalStorage = () => {
     JSON.stringify(activeAccounts)
   );
 
-  // Сбрасываем состояние перед новым запросом
-  chatsNull.value = false;
-  chats.value = null;
-
-  test();
+  // Добавляем debounce (задержку 500мс)
+  debounceTimer.value = setTimeout(async () => {
+    try {
+      await test();
+    } catch (error) {
+      console.error("Ошибка при загрузке чатов:", error);
+      errorStation.value = true;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
 };
 
 // Функция для переключения видимости списка аккаунтов
@@ -1141,6 +1154,49 @@ label {
   position: relative;
   cursor: pointer;
   padding-left: 30px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.setting-chats-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.account-item input:disabled + label {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Создаем стилизованный чекбокс */
