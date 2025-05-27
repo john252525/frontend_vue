@@ -71,6 +71,9 @@ import LoadingMultiChat from "./LoadingMultiChat.vue";
 import { useRouter, useRoute } from "vue-router";
 const route = useRoute();
 
+const storageKey = "chatAppActiveTab";
+const tabId = Math.random().toString(36).substring(2, 15);
+
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -156,6 +159,117 @@ const changeMessageListStation = () => {
   style.messageList.display = "none";
 };
 
+const checkActiveTab = () => {
+  const activeTabData = localStorage.getItem(storageKey);
+
+  if (activeTabData) {
+    try {
+      const { tabId: activeTabId, timestamp } = JSON.parse(activeTabData);
+
+      // Если метка свежая (менее 10 секунд назад) и это не наш ID
+      if (Date.now() - timestamp < 10000 && activeTabId !== tabId) {
+        alert("Пожалуйста, закройте другие вкладки с чатами...");
+        window.location.href = "/close";
+        return false;
+      }
+    } catch (e) {
+      console.error("Error parsing active tab data", e);
+    }
+  }
+
+  // Устанавливаем текущую вкладку как активную
+  localStorage.setItem(
+    storageKey,
+    JSON.stringify({
+      tabId,
+      timestamp: Date.now(),
+    })
+  );
+  return true;
+};
+
+const setupTabControl = () => {
+  if (!checkActiveTab()) return;
+
+  // Обновляем метку активности каждые 3 секунды
+  const activityInterval = setInterval(() => {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        tabId,
+        timestamp: Date.now(),
+      })
+    );
+  }, 3000);
+
+  // Обработчики событий
+  const handleBeforeUnload = () => {
+    clearInterval(activityInterval);
+    if (localStorage.getItem(storageKey)?.includes(tabId)) {
+      localStorage.removeItem(storageKey);
+    }
+  };
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      checkActiveTab();
+    }
+  };
+
+  const handleStorageChange = (e) => {
+    if (e.key === storageKey) {
+      checkActiveTab();
+    }
+  };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  window.addEventListener("visibilitychange", handleVisibilityChange);
+  window.addEventListener("storage", handleStorageChange);
+
+  return () => {
+    clearInterval(activityInterval);
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.removeEventListener("visibilitychange", handleVisibilityChange);
+    window.removeEventListener("storage", handleStorageChange);
+  };
+};
+
+// const setupTabControl = () => {
+//   // Проверяем при загрузке
+//   if (!checkActiveTab()) return;
+
+//   // Обновляем метку активности каждые 5 секунд
+//   const activityInterval = setInterval(() => {
+//     localStorage.setItem(storageKey, tabId);
+//   }, 5000);
+
+//   // Слушаем событие beforeunload для очистки
+//   window.addEventListener("beforeunload", () => {
+//     clearInterval(activityInterval);
+//     if (localStorage.getItem(storageKey) === tabId) {
+//       localStorage.removeItem(storageKey);
+//     }
+//   });
+
+//   // Слушаем изменения в localStorage
+//   const handleStorageChange = (e) => {
+//     if (e.key === storageKey && e.newValue !== tabId) {
+//       // Другая вкладка объявила себя активной
+//       alert(
+//         "Обнаружена другая активная вкладка с чатами. Пожалуйста, используйте только одну вкладку."
+//       );
+//       window.location.href = "/close";
+//     }
+//   };
+
+//   window.addEventListener("storage", handleStorageChange);
+
+//   return () => {
+//     clearInterval(activityInterval);
+//     window.removeEventListener("storage", handleStorageChange);
+//   };
+// };
+
 const selectChat = (chat) => {
   console.log(chat);
   chatInfo.value = chat.data;
@@ -179,6 +293,17 @@ const clearCountNewMessage = (thread, chat) => {
     console.log(`Чат с thread ${thread} не найден`);
   }
 };
+
+onMounted(() => {
+  const cleanup = setupTabControl();
+
+  onBeforeUnmount(() => {
+    cleanup();
+    if (localStorage.getItem(storageKey) === tabId) {
+      localStorage.removeItem(storageKey);
+    }
+  });
+});
 
 const clearNewMessages = async (uniq) => {
   try {

@@ -276,6 +276,27 @@
                       d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
                     />
                   </svg>
+
+                  <svg
+                    v-if="
+                      message.data.state != 'error' &&
+                      message.data.state != 'sendMessage' &&
+                      message.data.state != 'has_seen' &&
+                      message.data.state != 'delivered' &&
+                      message.data.outgoing
+                    "
+                    class="state-img"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 18C12.1217 18 14.1566 17.1571 15.6569 15.6569C17.1571 14.1566 18 12.1217 18 10C18 7.87827 17.1571 5.84344 15.6569 4.34315C14.1566 2.84285 12.1217 2 10 2C7.87827 2 5.84344 2.84285 4.34315 4.34315C2.84285 5.84344 2 7.87827 2 10C2 12.1217 2.84285 14.1566 4.34315 15.6569C5.84344 17.1571 7.87827 18 10 18ZM10 0C11.3132 0 12.6136 0.258658 13.8268 0.761205C15.0401 1.26375 16.1425 2.00035 17.0711 2.92893C17.9997 3.85752 18.7362 4.95991 19.2388 6.17317C19.7413 7.38642 20 8.68678 20 10C20 12.6522 18.9464 15.1957 17.0711 17.0711C15.1957 18.9464 12.6522 20 10 20C4.47 20 0 15.5 0 10C0 7.34784 1.05357 4.8043 2.92893 2.92893C4.8043 1.05357 7.34784 0 10 0ZM10.5 5V10.25L15 12.92L14.25 14.15L9 11V5H10.5Z"
+                      fill="#B5B8B1"
+                    />
+                  </svg>
                 </footer>
               </div>
             </div>
@@ -758,6 +779,9 @@ const getMessage = async () => {
 
       if (apiUrl === apiCheckUrl) {
         messages.value = response.data.data.messages;
+        // if (!messages.value) {
+        //   station.messageNull = true;
+        // }
         console.log(messages.value);
       } else {
         messages.value = response.data.data.messages.map((message) => ({
@@ -798,6 +822,7 @@ const getMessage = async () => {
       }, 2000);
     } else {
       setLoadingStatus(true, "error");
+
       console.log("Response ok:", response.data.ok);
     }
   } catch (error) {
@@ -807,6 +832,7 @@ const getMessage = async () => {
     messages.value = [];
     props.blockChatOff();
     if (error.response) {
+      // station.messageNull = true;
       console.error("Ошибка сервера:", error.response.data);
       setLoadingStatus(true, "error");
       loading.value = false;
@@ -1039,23 +1065,32 @@ onMounted(() => {
 
       // Обработка нового сообщения
       if (eventData.hook_type === "message") {
-        if (!eventData.outgoing && eventData.content) {
-          console.log("New incoming message with content");
-          updateMessages(newMessage);
-        }
+        const newMessage = {
+          uniq: eventData.item,
+          timestamp: eventData.time,
+          data: eventData,
+          reaction: null,
+          state: 0,
+        };
+        if (
+          eventData.thread === chatInfo.value.lastMessage.id.remote &&
+          eventData.outgoing
+        ) {
+          const messageExists = messages.value.some(
+            (msg) => msg.uniq === eventData.item
+          );
 
+          if (!messageExists) {
+            console.log("New incoming message with content - adding to chat");
+            updateMessages(newMessage);
+          } else {
+            console.log("Message already exists, skipping");
+          }
+        }
         if (
           !eventData.outgoing &&
           !receivedMessageIds.includes(eventData.item)
         ) {
-          const newMessage = {
-            uniq: eventData.item,
-            timestamp: eventData.time,
-            data: eventData,
-            reaction: null,
-            state: 0,
-          };
-
           receivedMessageIds.push(eventData.item);
           localStorage.setItem(
             "receivedMessageIds",

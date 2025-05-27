@@ -32,6 +32,11 @@ const routes = [
     meta: { title: "Аккаунты" },
   },
   {
+    path: "/close",
+    name: "close",
+    component: () => import("@/pages/ClosePage.vue"),
+  },
+  {
     path: "/logs",
     name: "Logs",
     component: Logs,
