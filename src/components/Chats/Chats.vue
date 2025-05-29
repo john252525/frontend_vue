@@ -3,13 +3,14 @@
     :changeLoadChatMulti="changeLoadChatMulti"
     v-if="loadChatMulti"
   />
-  <section class="pc-version" v-if="!isMobile && userInfo && !loadChatMulti">
+  <section class="pc-version" v-if="!isMobile && !loadChatMulti">
     <CheckUserImage
       :changeImageStation="changeImageStation"
       :userImageUrl="userImageUrl"
       v-if="imgageStation"
     />
     <UserList
+      :clearNewMessages="clearNewMessages"
       class="user-list"
       :selectChat="selectChat"
       :isChatClickable="isChatClickable"
@@ -18,8 +19,10 @@
       :changeImageStation="changeImageStation"
     />
     <MessageList
+      :thread="route.query.thread"
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
+      @update:chatInfo="chatInfo = $event"
       :chatInfo="chatInfo"
       :blockChatOff="blockChatOff"
       :blockChat="blockChat"
@@ -38,6 +41,7 @@
       v-if="imgageStation"
     />
     <UserList
+      :clearNewMessages="clearNewMessages"
       v-if="!showMessageList"
       class="phone-user-list"
       :changeImageStation="changeImageStation"
@@ -50,8 +54,10 @@
       :getChats="getChats"
     />
     <MessageList
+      :thread="route.query.thread"
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
+      @update:chatInfo="chatInfo = $event"
       :chatInfo="chatInfo"
       :blockChat="blockChat"
       :blockChatOff="blockChatOff"
@@ -62,7 +68,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, onBeforeUnmount } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  watch,
+  computed,
+  onBeforeUnmount,
+} from "vue";
 import UserList from "./UserList/UserList.vue";
 import MessageList from "./MessageList/MessageList.vue";
 import axios from "axios";
@@ -70,6 +83,12 @@ import CheckUserImage from "./CheckUserImage.vue";
 import LoadingMultiChat from "./LoadingMultiChat.vue";
 import { useRouter, useRoute } from "vue-router";
 const route = useRoute();
+
+const props = defineProps({
+  mode: String,
+  userLink: String,
+  thread: String,
+});
 
 const storageKey = "chatAppActiveTab";
 const tabId = Math.random().toString(36).substring(2, 15);
@@ -104,6 +123,7 @@ const isMulti = computed(() => {
   return route.query.multi === "true"; // Проверяем значение multi
 });
 
+const loadAccountLinkChat = ref(false);
 const chats = ref(null);
 const isChatClickable = ref(true);
 const isMobile = ref(false);
@@ -363,12 +383,31 @@ onMounted(() => {
   connectEventSource();
 });
 
+// onMounted(() => {
+//   handleRouteParams();
+// });
+
+// const handleRouteParams = async () => {
+//   if (route.query.thread) {
+//     if (route.query.userLink === "true") {
+//       console.log(true);
+//       loadAccountLinkChat.value = true;
+//     } else {
+//       console.log(false);
+//       loadAccountLinkChat.value = false;
+//     }
+//   }
+// };
+
 onMounted(() => {
   if (isMulti.value) {
+    console.log("мульти тру");
     loadChatMulti.value = true;
   } else {
+    console.log("мульти фщл");
     loadChatMulti.value = false;
   }
+
   checkIfMobile();
 
   // Добавляем обработчик события изменения размера окна
@@ -379,6 +418,31 @@ onBeforeUnmount(() => {
   // Удаляем обработчик события при размонтировании
   window.removeEventListener("resize", checkIfMobile);
 });
+
+watch(
+  () => props.thread,
+  (newThread) => {
+    if (newThread) {
+      // Здесь можно добавить логику обработки thread
+      console.log("Thread changed:", newThread);
+    }
+  },
+  { immediate: true }
+);
+
+// Аналогично для mode и userLink
+watch(
+  () => props.mode,
+  (newMode) => {
+    if (newMode === "widget") {
+      // Применяем стили widget mode
+      document.body.classList.add("widget-mode");
+    } else {
+      document.body.classList.remove("widget-mode");
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

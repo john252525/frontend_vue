@@ -66,7 +66,16 @@ const routes = [
     component: MessagesDataBase,
     meta: { title: "База данных сообщений" },
   },
-  { path: "/chats", name: "Chats", component: Chats, meta: { title: "Чаты" } },
+  {
+    path: "/chats",
+    name: "Chats",
+    component: Chats,
+    props: (route) => ({
+      initialThread: route.query.thread,
+      initialMode: route.query.mode,
+      initialUserLink: route.query.userLink,
+    }),
+  },
   {
     path: "/Mailing",
     name: "Mailing",

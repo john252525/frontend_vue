@@ -1,5 +1,5 @@
 <template>
-  <section v-if="!chatInfo" class="no-message-section">
+  <section v-if="!chatInfoValue" class="no-message-section">
     <h2 class="change-message">Выберите чат для начала общения</h2>
   </section>
   <section v-else class="app-section">
@@ -26,16 +26,16 @@
             <span class="out-text">Назад</span>
           </div>
           <img
-            v-if="chatInfo.avatar"
+            v-if="chatInfoValue.avatar"
             class="user-img"
-            :src="chatInfo.avatar"
-            @click="changeImageStation(chatInfo, true)"
+            :src="chatInfoValue.avatar"
+            @click="changeImageStation(chatInfoValue, true)"
             alt=""
           />
 
           <svg
             viewBox="0 0 152 152"
-            @click="changeImageStation(chatInfo, true)"
+            @click="changeImageStation(chatInfoValue, true)"
             xmlns="http://www.w3.org/2000/svg"
             width="36"
             height="36"
@@ -52,8 +52,22 @@
             </g>
           </svg>
           <div>
-            <h2 class="name-user">{{ chatInfo.name }}</h2>
+            <h2 class="name-user">{{ chatInfoValue.name }}</h2>
           </div>
+          <button @click="copyUserLink" class="copy-link-button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Zm0-2h9V4H9v12Zm0 0V4v12Z"
+              />
+            </svg>
+            Копировать ссылку
+          </button>
         </header>
         <div ref="scrollContainer" v-if="!loading" class="messages">
           <template
@@ -312,7 +326,7 @@
         <SendMessage
           v-if="!loading"
           :changeMessageState="changeMessageState"
-          :chatInfo="chatInfo"
+          :chatInfo="chatInfoValue"
           @updateMessages="updateMessages"
           :replyToData="replyToData"
           :replyToDataBolean="replyToDataBolean"
@@ -346,7 +360,7 @@
       @close="activeMessage = null"
       :addDataToReply="addDataToReply"
       :updateDeleteMessage="updateDeleteMessage"
-      :chatInfo="chatInfo"
+      :chatInfo="chatInfoValue"
     />
   </section>
 </template>
@@ -362,10 +376,12 @@ import Error from "../UserList/Error.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
 import NewMessageForUser from "../UserList/newMessageForUser.vue";
 import ActionModal from "./ActionModal/ActionModal.vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
+const route = useRoute();
 const loading = ref(false);
 const props = defineProps({
+  thread: String,
   chatInfo: {
     type: Object,
   },
@@ -393,6 +409,10 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const lastSentMessageIndex = ref(-1);
 const messages = ref([]);
 const messagesData = ref([]);
+
+const { chatInfo } = toRefs(props);
+
+const chatInfoValue = ref(chatInfo.value);
 
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -544,9 +564,67 @@ const handleMouseDown = (event, message) => {
   }
 };
 
+const copyUserLink = () => {
+  // Generate the user link
+  const userLink = `${window.location.origin}/#/chats?mode=widget&userLink=true&thread=${chatInfoValue.value.lastMessage.id.remote}`;
+  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  console.log(userLogin);
+  navigator.clipboard
+    .writeText(userLink)
+    .then(() => {
+      // Show success message (you can use a toast or alert)
+      alert("Ссылка скопирована в буфер обмена");
+    })
+    .catch((err) => {
+      console.error("Failed to copy: ", err);
+      alert("Не удалось скопировать ссылку");
+    });
+};
+
+onMounted(() => {
+  handleRouteParams();
+});
+
+const handleRouteParams = async () => {
+  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  if (route.query.thread) {
+    if (route.query.userLink === "true") {
+      // Режим по ссылке - загружаем данные чата с сервера
+      try {
+        const response = await axios.post(`${apiUrl}/getChatByThread`, {
+          thread: route.query.thread,
+          login: userLogin.login,
+          source: userLogin.source,
+        });
+        chatInfoValue.value = response.data.data.data;
+        console.log(chatInfoValue.value);
+      } catch (error) {
+        console.error("Ошибка загрузки чата:", error);
+      }
+    } else {
+      const chat = chatInfoValue.value;
+      if (chat) {
+        chatInfoValue.value = chat.data;
+        console.log(chatInfoValue.value);
+      }
+    }
+  }
+};
+
+watch(
+  () => route.query,
+  () => {
+    handleRouteParams();
+  }
+);
+
+watch(chatInfo, (newInfo) => {
+  chatInfoValue.value = chatInfo.value;
+});
+
 const updateMessages = (newMessage) => {
   console.log("newMessage in updateMessages", newMessage); //  Для отладки
-  console.log("chatInfo in updateMessages", props.chatInfo);
+  console.log("chatInfo in updateMessages", props.chatInfoValue);
   console.log("updateMessages updateMessages updateMessages");
   if (station.messageNull) {
     station.messageNull = false;
@@ -712,10 +790,10 @@ watch(
 
 // Функция для обновления состояния сообщения
 
-const { chatInfo } = toRefs(props);
-
 const pageTitle = computed(() => {
-  return chatInfo.value && chatInfo.value.name ? chatInfo.value.name : "Чат";
+  return chatInfoValue.value && chatInfoValue.value.name
+    ? chatInfoValue.value.name
+    : "Чат";
 });
 
 // Устанавливаем заголовок страницы
@@ -733,20 +811,20 @@ const getMessage = async () => {
     const userLogin = JSON.parse(localStorage.getItem("userInfo"));
     console.log(userLogin, "user");
     let requestData = {
-      source: chatInfo.value.sourceUser,
+      source: chatInfoValue.value.sourceUser,
       login: userLogin.login,
       storage: userLogin.storage,
       type: userLogin.type,
-      to: chatInfo.value.phone,
+      to: chatInfoValue.value.phone,
     };
 
     if (apiUrl === apiCheckUrl) {
-      requestData.to = chatInfo.value.phone;
-      requestData.login = chatInfo.value.loginUser;
-      requestData.uniq = chatInfo.value.lastMessage.id.remote;
+      requestData.to = chatInfoValue.value.phone;
+      requestData.login = chatInfoValue.value.loginUser;
+      requestData.uniq = chatInfoValue.value.lastMessage.id.remote;
     }
 
-    if (chatInfo.value.sourceUser != "whatsapp") {
+    if (chatInfoValue.value.sourceUser != "whatsapp") {
       requestData.source = "telegram";
     }
 
@@ -920,8 +998,40 @@ const shouldShowDateSeparator = (index) => {
   return !isSameDay(currentDate, previousDate);
 };
 
+const loadMessages = async (thread) => {
+  try {
+    loading.value = true;
+    const token = localStorage.getItem("accountToken");
+    const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+
+    const response = await axios.post(
+      `${apiUrl}/getChatMessages`,
+      {
+        source: props.chatInfoValue.sourceUser,
+        login: userLogin.login,
+        storage: userLogin.storage,
+        type: userLogin.type,
+        to: thread, // Используем переданный thread
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.ok) {
+      messages.value = response.data.data.messages;
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки сообщений:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 watch(
-  () => chatInfo.value,
+  () => chatInfoValue.value,
   (newChatInfo) => {
     if (!loading.value) {
       console.log("вывы");
@@ -931,6 +1041,16 @@ watch(
     }
   }
 );
+
+// watch(
+//   () => props.chatInfo,
+//   (newChatInfo) => {
+//     if (newChatInfo && newChatInfo.phone) {
+//       getMessage(newChatInfo.phone);
+//     }
+//   },
+//   { immediate: true, deep: true }
+// );
 
 // watch(
 //   () => messages.value,
@@ -1073,7 +1193,7 @@ onMounted(() => {
           state: 0,
         };
         if (
-          eventData.thread === chatInfo.value.lastMessage.id.remote &&
+          eventData.thread === chatInfoValue.value.lastMessage.id.remote &&
           eventData.outgoing
         ) {
           const messageExists = messages.value.some(
@@ -1097,9 +1217,9 @@ onMounted(() => {
             JSON.stringify(receivedMessageIds)
           );
 
-          if (chatInfo.value) {
+          if (chatInfoValue.value) {
             const isCurrentChat =
-              eventData.thread === chatInfo.value.lastMessage.id.remote;
+              eventData.thread === chatInfoValue.value.lastMessage.id.remote;
             if (isCurrentChat) {
               updateMessages(newMessage);
             }
@@ -1274,6 +1394,23 @@ onMounted(() => {
   right: 6px;
   top: 8px;
   transition: all 0.25s;
+}
+
+.copy-link-button {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.copy-link-button:hover {
+  background: #e0e0e0;
 }
 
 .dropdown-message-message {

@@ -7,7 +7,6 @@
   />
 
   <div class="chat-container">
-    <!-- <CheckUserImage /> -->
     <button
       v-if="!chatsNull"
       @click="changeAddAccountStation"
@@ -279,6 +278,9 @@ const props = defineProps({
   isChatClickable: {
     type: Boolean,
   },
+  clearNewMessages: {
+    type: Function,
+  },
   blockChat: {
     type: Function,
   },
@@ -306,8 +308,34 @@ import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 
 const selectChatClick = (chat) => {
-  props.selectChat(chat);
+  // Всегда обновляем локальные данные
+  // chatInfo.value = {
+  //   ...chat.data,
+  //   phone: chat.uniq,
+  // };
   chatInfo.value = chat;
+  console.log(chatInfo.value);
+  // Для widget mode делаем навигацию
+  if (route.query.mode === "widget") {
+    router.push({
+      path: "/chats",
+      query: {
+        mode: "widget",
+        userLink: "false",
+        thread: chat.uniq,
+      },
+    });
+  }
+
+  // Вызываем родительский метод
+  props.selectChat({
+    data: chatInfo.value,
+    uniq: chat.uniq,
+  });
+
+  // Очищаем непрочитанные
+  clearCountNewMessage(chat.uniq, chat);
+  props.clearNewMessages(chat.uniq);
 };
 
 const changeAddAccountStation = () => {
