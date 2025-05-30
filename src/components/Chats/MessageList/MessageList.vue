@@ -54,21 +54,32 @@
           <div>
             <h2 class="name-user">{{ chatInfoValue.name }}</h2>
           </div>
-          <button @click="copyUserLink" class="copy-link-button">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M5 22q-.825 0-1.413-.588T3 20V6h2v14h11v2H5Zm4-4q-.825 0-1.413-.588T7 16V4q0-.825.588-1.413T9 2h9q.825 0 1.413.588T20 4v12q0 .825-.588 1.413T18 18H9Zm0-2h9V4H9v12Zm0 0V4v12Z"
-              />
-            </svg>
-            Копировать ссылку
-          </button>
         </header>
+        <svg
+          @click="changeChatMenuStation"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          class="chat-menu-button"
+          viewBox="0 0 16 16"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+          >
+            <circle cx="2.5" cy="8" r=".75" />
+            <circle cx="8" cy="8" r=".75" />
+            <circle cx="13.5" cy="8" r=".75" />
+          </g>
+        </svg>
+        <ChatMenu
+          v-if="chatMenuStation"
+          :chatInfoValue="chatInfoValue"
+          :changeChatMenuStation="changeChatMenuStation"
+        />
         <div ref="scrollContainer" v-if="!loading" class="messages">
           <template
             v-for="(message, index) in messages"
@@ -372,6 +383,7 @@ import SendMessage from "./SendMessage.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Loading from "./Loading.vue";
 import LoadingMessage from "./Loading/LoadingMessage.vue";
+import ChatMenu from "./ActionModal/ChatMenu.vue";
 import Error from "../UserList/Error.vue";
 import PhotoMenu from "./MenuContent/PhotoMenu.vue";
 import NewMessageForUser from "../UserList/newMessageForUser.vue";
@@ -420,6 +432,8 @@ const { setLoadingStatus } = useStationLoading();
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
+const chatMenuStation = ref(false);
+
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
@@ -460,6 +474,10 @@ const addDataToReply = (data) => {
   replyToData.value = data;
   replyToDataBolean.value = true;
   console.log(replyToData.value);
+};
+
+const changeChatMenuStation = () => {
+  chatMenuStation.value = !chatMenuStation.value;
 };
 
 const clearDataToReply = () => {
@@ -565,14 +583,12 @@ const handleMouseDown = (event, message) => {
 };
 
 const copyUserLink = () => {
-  // Generate the user link
   const userLink = `${window.location.origin}/#/chats?mode=widget&userLink=true&thread=${chatInfoValue.value.lastMessage.id.remote}`;
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   console.log(userLogin);
   navigator.clipboard
     .writeText(userLink)
     .then(() => {
-      // Show success message (you can use a toast or alert)
       alert("Ссылка скопирована в буфер обмена");
     })
     .catch((err) => {
@@ -588,25 +604,17 @@ onMounted(() => {
 const handleRouteParams = async () => {
   const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   if (route.query.thread) {
-    if (route.query.userLink === "true") {
-      // Режим по ссылке - загружаем данные чата с сервера
-      try {
-        const response = await axios.post(`${apiUrl}/getChatByThread`, {
-          thread: route.query.thread,
-          login: userLogin.login,
-          source: userLogin.source,
-        });
-        chatInfoValue.value = response.data.data.data;
-        console.log(chatInfoValue.value);
-      } catch (error) {
-        console.error("Ошибка загрузки чата:", error);
-      }
-    } else {
-      const chat = chatInfoValue.value;
-      if (chat) {
-        chatInfoValue.value = chat.data;
-        console.log(chatInfoValue.value);
-      }
+    // Режим по ссылке - загружаем данные чата с сервера
+    try {
+      const response = await axios.post(`${apiUrl}/getChatByThread`, {
+        thread: route.query.thread,
+        login: route.query.login,
+        source: route.query.source,
+      });
+      chatInfoValue.value = response.data.data.data;
+      console.log(chatInfoValue.value);
+    } catch (error) {
+      console.error("Ошибка загрузки чата:", error);
     }
   }
 };
@@ -1527,16 +1535,31 @@ onMounted(() => {
   width: auto;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 10px;
   box-sizing: border-box;
+}
+
+.chat-menu-button {
+  position: absolute;
+  right: 20px;
+  top: 14px;
+  z-index: 100;
+  cursor: pointer;
+  border-radius: 100%;
+  padding: 5px;
+  transition: all 0.25s;
+}
+
+.chat-menu-button:hover {
+  background-color: #e9e9e9;
+  transition: all 0.25s;
 }
 
 .name-user {
   font-weight: 400;
   font-size: 16px;
   color: #000;
-  margin-bottom: -5px;
 }
 
 .video-message {

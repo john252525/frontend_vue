@@ -308,11 +308,7 @@ import { useDomain } from "@/composables/getDomen";
 const { stationDomen } = useDomain();
 
 const selectChatClick = (chat) => {
-  // Всегда обновляем локальные данные
-  // chatInfo.value = {
-  //   ...chat.data,
-  //   phone: chat.uniq,
-  // };
+  console.log(chat);
   chatInfo.value = chat;
   console.log(chatInfo.value);
   // Для widget mode делаем навигацию
@@ -321,7 +317,9 @@ const selectChatClick = (chat) => {
       path: "/chats",
       query: {
         mode: "widget",
-        userLink: "false",
+        multi: route.query.multi,
+        source: chat.data.sourceUser,
+        login: chat.data.loginUser,
         thread: chat.uniq,
       },
     });
@@ -686,7 +684,7 @@ const formatLastMessage = (message, chat) => {
   if (message && message.length > maxLength) {
     return message.slice(0, maxLength) + "...";
   }
-  console.log(chat);
+  // console.log(chat);
   if (chat.lastMessageType === "audio") {
     return "Голосовое сообщение";
   } else if (chat.lastMessageType === "video") {

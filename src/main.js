@@ -74,6 +74,9 @@ const routes = [
       initialThread: route.query.thread,
       initialMode: route.query.mode,
       initialUserLink: route.query.userLink,
+      initialSourse: route.query.source,
+      initialLogin: route.query.login,
+      initialMulti: route.query.multi,
     }),
   },
   {

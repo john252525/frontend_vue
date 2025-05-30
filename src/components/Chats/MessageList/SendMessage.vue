@@ -148,6 +148,7 @@ import axios from "axios";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 import { useRouter } from "vue-router";
+
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
 import Camera from "./MessageContent/checkContent/Camera.vue";
 import Emoji from "./MessageContent/Emoji.vue";
