@@ -78,6 +78,7 @@ const routes = [
       initialLogin: route.query.login,
       initialMulti: route.query.multi,
     }),
+    meta: { title: "Чаты" },
   },
   {
     path: "/Mailing",

@@ -878,18 +878,30 @@ const playSound = () => {
   overflow-x: hidden;
   height: 100%;
   position: relative;
+  min-width: 300px; /* Минимальная ширина */
+  max-width: 600px; /* Максимальная ширина */
 }
 
 .resizer {
-  width: 10px; /* Ширина элемента изменения размера */
-  cursor: ew-resize; /* Курсор при наведении на элемент изменения размера */
-  background-color: transparent; /* Сделать его прозрачным */
-  position: absolute; /* Позволяет позиционировать его рядом со списком */
-  right: 0; /* Позиционирование справа от списка */
-  top: 0; /* Позиционирование сверху */
-  height: 100%; /* Высота на 100% от контейнера */
-  z-index: 1; /* Убедиться, что элемент изменения размера выше других элементов */
-  user-select: none; /* Отключаем выделение текста */
+  width: 6px; /* Уменьшаем ширину ресайзера */
+  cursor: ew-resize;
+  background-color: transparent;
+  position: absolute;
+  right: -6px; /* Смещаем на половину ширины за пределы списка */
+  top: 0;
+  height: 100%;
+  z-index: 10;
+  user-select: none;
+}
+
+/* При наведении на ресайзер добавляем визуальный эффект */
+.resizer:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* При активном ресайзинге */
+.resizer.active {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .chat-list {
@@ -1278,6 +1290,11 @@ input[type="checkbox"]:checked + label:after {
   .chat-list {
     width: 100%;
   }
+
+  .resizer {
+    display: none;
+  }
+
   .chat-list {
     width: 100%; /* Устанавливаем ширину списка чатов на 100% */
   }
