@@ -29,6 +29,7 @@
               @keydown.delete="handleBackspace"
               ref="phoneInput"
               :class="{ error: error.number }"
+              v-if="stationMess.loginType === 'number'"
             />
           </div>
           <input
@@ -362,7 +363,7 @@ const sendMessage = async () => {
       error.number = true;
       return;
     } else {
-      userMessageLogin.value = "+" + rawNumber.value;
+      userMessageLogin.value = rawNumber.value;
       error.number = false;
     }
   } else {
@@ -407,7 +408,7 @@ const sendMessage = async () => {
           },
         ]
       : [],
-    from: "79228933680",
+    from: "",
     time: Date.now(),
     replyTo: replyToDataBolean ? replyToUniq : null,
     outgoing: true,
@@ -445,11 +446,14 @@ const sendMessage = async () => {
   if (apiUrl === apiCheckUrl) {
     if (stationMess.isMuilti.isMulti) {
       messageDataRes.login = stationMess.isMuilti.login;
+      message.from = stationMess.isMuilti.login;
     } else {
       messageDataRes.login = userLogin.login;
+      message.from = userLogin.login;
     }
   } else {
     messageDataRes.login = userLogin.login;
+    message.from = userLogin.login;
   }
   try {
     const response = await axios.post(`${apiUrl}/sendMessage`, messageDataRes, {

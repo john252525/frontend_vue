@@ -74,6 +74,7 @@ import {
   onMounted,
   watch,
   computed,
+  onUnmounted,
   onBeforeUnmount,
 } from "vue";
 import UserList from "./UserList/UserList.vue";
@@ -155,9 +156,31 @@ const changeImageStation = (chat, value) => {
   }
 };
 
+const flagReload = ref(null); // Хранит текущий тип устройства
+
 const checkIfMobile = () => {
-  isMobile.value = window.innerWidth <= 768;
+  const newIsMobile = window.innerWidth <= 768;
+
+  // Если состояние изменилось (мобильный ↔ десктоп)
+  if (flagReload.value !== null && flagReload.value !== newIsMobile) {
+    location.reload();
+  }
+
+  // Обновляем флаг и состояние
+  flagReload.value = newIsMobile;
+  isMobile.value = newIsMobile;
 };
+
+// Инициализация при загрузке
+onMounted(() => {
+  checkIfMobile(); // Устанавливаем начальное значение
+  window.addEventListener("resize", checkIfMobile);
+});
+
+// Очистка при размонтировании
+onUnmounted(() => {
+  window.removeEventListener("resize", checkIfMobile);
+});
 
 const changeWebhookEventData = (data) => {
   const transformedData = {
