@@ -10,10 +10,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 const router = useRouter();
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const storedData = computed(() => accountStore.getAccountData);
 
 const { t } = useI18n();
 const props = defineProps({
@@ -22,15 +26,17 @@ const props = defineProps({
   },
 });
 
-const storedData = localStorage.getItem("accountData");
-
 const navigateTo = (page) => {
   router.push(page);
 };
 
 const leaveAccount = () => {
-  localStorage.removeItem("accountToken");
-  // location.reload();
+  localStorage.removeItem("accauntSourse");
+  localStorage.removeItem("accountStore");
+  localStorage.removeItem("loginWhatsAppChatsStep");
+  localStorage.removeItem("userInfo");
+  // resetAllStores();
+  location.reload();
   navigateTo("/login");
 };
 </script>

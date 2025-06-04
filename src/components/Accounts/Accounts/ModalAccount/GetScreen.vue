@@ -17,11 +17,14 @@
 <script setup>
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
-import { ref, toRefs, inject, reactive, onMounted } from "vue";
+import { ref, toRefs, inject, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const { t } = useI18n();
 const router = useRouter();
 import LoadingModal from "./Enable/LoadingModal.vue";
@@ -49,7 +52,7 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const { selectedItem, getScreenStation } = toRefs(props);
 const { source, login, storage, type } = selectedItem.value;
 
@@ -61,7 +64,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -72,7 +74,7 @@ const getScreen = async () => {
     storage: storage,
     type: type,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -91,7 +93,7 @@ const getScreen = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

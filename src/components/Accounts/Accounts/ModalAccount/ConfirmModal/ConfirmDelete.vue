@@ -20,9 +20,12 @@
 </template>
 
 <script setup>
-import { toRefs, ref } from "vue";
+import { toRefs, ref, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -75,7 +78,7 @@ const chaneErrorBlock = () => {
 };
 
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 const createRequest = async (request) => {
   const { source, login, storage, type } = selectedItem.value;
@@ -85,7 +88,7 @@ const createRequest = async (request) => {
     storage: storage,
     type: type,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -104,7 +107,7 @@ const createRequest = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

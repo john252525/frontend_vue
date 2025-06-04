@@ -12,7 +12,14 @@
 </template>
 
 <script setup>
-import { inject, ref, reactive, onMounted, onBeforeUnmount } from "vue";
+import {
+  inject,
+  ref,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+} from "vue";
 import axios from "axios";
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
@@ -30,8 +37,12 @@ const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 const stationLoading = ref(false);
 const qrCodeData = reactive({
@@ -59,7 +70,7 @@ const getQr = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -78,7 +89,7 @@ const getQr = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -126,7 +137,7 @@ const enablePhoneAuth = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -145,7 +156,7 @@ const enablePhoneAuth = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

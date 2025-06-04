@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide } from "vue";
+import { ref, reactive, onMounted, computed, provide } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -88,6 +88,10 @@ const paymentsLoadingStation = reactive({
   loadDataStation: false,
 });
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const fetchPayments = async () => {
   paymentsLoadingStation.loadDataStation = true;
   fetchError.value = null; // Сброс сообщения об ошибке
@@ -98,7 +102,7 @@ const fetchPayments = async () => {
       {},
       {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -109,7 +113,7 @@ const fetchPayments = async () => {
         "paymentsList",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+            Authorization: `Bearer ${token.value}`,
           },
         },
         response.data,
@@ -143,10 +147,9 @@ const fetchPayments = async () => {
 
 const createUser = async () => {
   try {
-    const token = localStorage.getItem("accountToken");
     const response = await axios.get(`${apiUrl}/paymentsList`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 

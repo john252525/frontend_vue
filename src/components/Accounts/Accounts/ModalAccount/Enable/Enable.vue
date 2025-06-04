@@ -23,8 +23,11 @@ import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
 import LoadingModal from "./LoadingModal.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
-import { ref, toRefs, provide, onMounted, reactive } from "vue";
+import { ref, toRefs, provide, onMounted, reactive, computed } from "vue";
 import axios from "axios";
 const props = defineProps({
   selectedItem: {
@@ -96,7 +99,7 @@ const offQrQrStation = () => {
 
 const code = ref(null);
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const { selectedItem, enableStation } = toRefs(props);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
@@ -117,7 +120,7 @@ const forceStop = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -136,7 +139,7 @@ const forceStop = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -174,7 +177,7 @@ const setState = async (request) => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -195,7 +198,7 @@ const setState = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

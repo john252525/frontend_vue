@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide } from "vue";
+import { ref, reactive, onMounted, provide, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import Mailing from "@/components/Mailing/Mailing.vue";
@@ -147,6 +147,9 @@ import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
 import ErrorAccount from "./errorAccount.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const { t } = useI18n();
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const router = useRouter();
@@ -191,13 +194,12 @@ const modalPosition = ref({ top: 0, left: 0 });
 
 const getMailingLists = async () => {
   loadDataStation.value = true;
-  const token = localStorage.getItem("accountToken");
   const apiUrlMethod = `${apiUrl}/list/`;
   try {
     const response = await axios.get(apiUrlMethod, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 
@@ -207,7 +209,7 @@ const getMailingLists = async () => {
         "list",
         {
           "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
         response.data.ok,
         response.data

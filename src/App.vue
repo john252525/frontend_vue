@@ -112,9 +112,11 @@ main > section {
 .page-container {
   display: flex;
 }
+
 .navigation {
-  width: 260px;
+  width: 230px;
 }
+
 .auth-container {
   display: flex;
   justify-content: center;

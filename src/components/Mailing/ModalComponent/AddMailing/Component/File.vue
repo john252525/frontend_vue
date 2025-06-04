@@ -257,6 +257,10 @@ const imagePreview = ref(null);
 const messageError = ref(false);
 const messageContactError = ref(false);
 const errorFile = ref(false);
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const resultString = computed(() => {
   // Разбиваем текст на массив строк, фильтруем пустые строки и объединяем в строку через запятую
   return inputText.value
@@ -345,7 +349,7 @@ async function createWhatsAppBroadcast() {
     const response = await axios.post(url, params, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
         // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
     });

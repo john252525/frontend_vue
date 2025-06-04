@@ -17,7 +17,7 @@
           >
             <td class="table-text-number">
               <AccountIcon
-                v-if="stationDomen.navigate.value === 'whatsapi'"
+                v-if="stationDomain.navigate.value === 'whatsapi'"
                 :item="item"
               />
               {{ formatPhoneNumber(item.login) }}
@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, inject } from "vue";
+import { ref, reactive, onMounted, provide, inject, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import LoadingAccount from "./LoadingMoadal/LoadingAccount.vue";
@@ -149,14 +149,26 @@ import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
-const dataAccount = reactive({
-  token: "342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
-  source: "telegram",
-  error: null,
-});
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const accountStation = computed(() => accountStore.getAccountStation);
+
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
+import { storeToRefs } from "pinia";
+const loginChatsStore = useLoginWhatsAppChatsStepStore();
+const { loginWhatsAppChatsStep } = storeToRefs(loginChatsStore);
+
+import { useUserInfoStore } from "@/stores/userInfoStore";
+
+const updateUserInfo = (event) => {
+  userInfoStore.setUserInfo(event); // Передаем весь объект
+};
+
+const userInfoStore = useUserInfoStore();
 
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -252,11 +264,9 @@ const changeForceStopItemData = async (item) => {
   }
 };
 
-// Оптимизированная версия функции обновления localStorage
 const updateLocalStorage = (login, source, storage, type) => {
   try {
-    const storageKey = "loginWhatsAppChatsStep";
-    const existingLogins = JSON.parse(localStorage.getItem(storageKey)) || [];
+    const existingLogins = loginWhatsAppChatsStep.value || [];
 
     const newLoginData = {
       login,
@@ -275,10 +285,7 @@ const updateLocalStorage = (login, source, storage, type) => {
     );
 
     if (!loginExists) {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify([...existingLogins, newLoginData])
-      );
+      loginChatsStore.addOrUpdateChat([...existingLogins, newLoginData]);
     }
   } catch (e) {
     console.error("Error updating localStorage:", e);
@@ -311,13 +318,13 @@ const handleSendLog = async (location, method, params, results, answer) => {
 
 const getAccounts = async () => {
   let params = {
-    source: localStorage.getItem("accountStation"),
+    source: accountStation.value,
     skipDetails: true,
   };
 
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
-      source: localStorage.getItem("accountStation"),
+      source: accountStation.value,
       skipDetails: true,
     };
   } else {
@@ -334,7 +341,7 @@ const getAccounts = async () => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -365,8 +372,8 @@ const getAccounts = async () => {
         dataStation.value = true;
 
         if (
-          localStorage.getItem("accountStation") === "whatsapp" ||
-          localStorage.getItem("accountStation") === "telegram"
+          accountStation.value === "whatsapp" ||
+          accountStation.value === "telegram"
         ) {
           const promises = instanceData.value.map(async (instance) => {
             const login = instance.login;
@@ -421,12 +428,11 @@ const getAccounts = async () => {
 
 const updateAccountInLocalStorage = (instance) => {
   try {
-    const storageKey = "loginWhatsAppChatsStep";
-    const existingLogins = JSON.parse(localStorage.getItem(storageKey)) || [];
+    const existingLogins = loginWhatsAppChatsStep.value || [];
 
     const newLoginData = {
       login: instance.login,
-      source: instance.source || localStorage.getItem("accountStation"),
+      source: instance.source || accountStation.value,
       storage: instance.storage || "undefined",
       type: instance.type || "undefined",
     };
@@ -440,10 +446,8 @@ const updateAccountInLocalStorage = (instance) => {
     );
 
     if (!isDuplicate) {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify([...existingLogins, newLoginData])
-      );
+      loginChatsStore.addOrUpdateChat([...existingLogins, newLoginData]);
+
       console.log("Account saved to localStorage:", newLoginData);
     } else {
       console.log("Account already exists in localStorage:", newLoginData);
@@ -467,7 +471,7 @@ const getInfoWhats = async (source, login, type, storage) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -477,14 +481,13 @@ const getInfoWhats = async (source, login, type, storage) => {
     return null;
   }
 };
+const { userInfo } = storeToRefs(userInfoStore);
 
 const openModal = (event, item) => {
-  localStorage.setItem("accauntSourse", item.source);
-
   selectedItem.value = item;
   isModalOpen.value = true;
-  localStorage.setItem("userInfo", JSON.stringify(selectedItem.value));
-
+  updateUserInfo(JSON.stringify(selectedItem.value));
+  console.log(userInfo);
   getInfo();
   const rect = event.currentTarget.getBoundingClientRect();
   modalPosition.value = {
@@ -576,7 +579,7 @@ const getInfo = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

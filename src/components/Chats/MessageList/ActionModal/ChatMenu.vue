@@ -46,8 +46,6 @@ const copyUserLink = () => {
     userLink = `${window.location.origin}/#/chats?mode=widget&source=${chatInfoValue.value.sourceUser}&login=${chatInfoValue.value.loginUser}&thread=${chatInfoValue.value.lastMessage.id.remote}`;
   }
 
-  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
-  console.log(userLogin);
   navigator.clipboard
     .writeText(userLink)
     .then(() => {

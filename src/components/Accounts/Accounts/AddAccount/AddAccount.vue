@@ -143,6 +143,9 @@ import Crm from "./Crm/Crm.vue";
 import axios from "axios";
 import { ref, reactive, watch, provide, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 const errorBlock = ref(false);
 import { useI18n } from "vue-i18n";
@@ -277,8 +280,7 @@ const addAccount = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-          // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

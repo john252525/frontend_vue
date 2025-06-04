@@ -54,9 +54,11 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -157,12 +159,10 @@ const loginAccount = async () => {
     }
 
     if (response.data.ok === true) {
-      console.log(response.data.token);
-      localStorage.setItem("accountToken", response.data.token);
-      localStorage.setItem("accountData", formData.login);
-      localStorage.setItem("accountStationText", "Telegram");
-      localStorage.setItem("accountStation", "telegram");
-      console.log(response.data);
+      accountStore.setAccountToken(response.data.token);
+      accountStore.setAccountData(formData.login);
+      accountStore.setAccountStation("telegram");
+      accountStore.setAccountStationText("Telegram");
       location.reload();
     } else {
       inputStyle.incorrectPassword = true;

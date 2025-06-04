@@ -160,6 +160,9 @@ const { t } = useI18n();
 import LoadModal from "../LoadModal/LoadModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 const props = defineProps({
   selectedItem: {
@@ -224,8 +227,7 @@ async function editWhatsAppBroadcast() {
     const response = await axios.post(url, params, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 

@@ -32,7 +32,7 @@
 </template>
 <!--   {{ t("personalAccount.out") }} -->
 <script setup>
-import { inject, reactive, ref, onMounted } from "vue";
+import { inject, reactive, ref, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -45,11 +45,15 @@ const { selectedItem } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
 const stationLoading = ref(false);
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -82,7 +86,7 @@ const forceStop = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -101,7 +105,7 @@ const forceStop = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -139,7 +143,7 @@ const setStateTelegram = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -160,7 +164,7 @@ const setStateTelegram = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -208,7 +212,7 @@ const solveChallenge = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -229,7 +233,7 @@ const solveChallenge = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -268,7 +272,7 @@ const twoFactorAuth = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -289,7 +293,7 @@ const twoFactorAuth = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

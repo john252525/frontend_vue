@@ -41,11 +41,14 @@
 </template>
 
 <script setup>
-import { toRefs, ref, defineProps, reactive, watch } from "vue";
+import { toRefs, ref, computed, defineProps, reactive, watch } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const { t } = useI18n();
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -116,7 +119,7 @@ const updateStatus = async (state) => {
   stationLoading.loading = true;
   const apiUrlMethod = `${apiUrl}/state/${selectedItem.value.id}/${state}/`;
   const params = {
-    token: localStorage.getItem("accountToken"),
+    token: token.value,
   };
   try {
     const response = await axios.post(
@@ -125,7 +128,7 @@ const updateStatus = async (state) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -178,8 +181,7 @@ const getMessages = async () => {
       },
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 

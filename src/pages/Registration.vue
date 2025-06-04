@@ -75,6 +75,8 @@ import axios from "axios";
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const router = useRouter();
@@ -163,10 +165,10 @@ const loginAccount = async () => {
     }
 
     if (response.data.ok === true) {
-      localStorage.setItem("accountToken", response.data.token);
-      localStorage.setItem("accountData", formData.login);
-      localStorage.setItem("accountStationText", "Telegram");
-      localStorage.setItem("accountStation", "telegram");
+      accountStore.setAccountToken(response.data.token);
+      accountStore.setAccountData(formData.login);
+      accountStore.setAccountStation("telegram");
+      accountStore.setAccountStationText("Telegram");
       await createUser();
       console.log(response.data);
       navigateTo("/accounts");

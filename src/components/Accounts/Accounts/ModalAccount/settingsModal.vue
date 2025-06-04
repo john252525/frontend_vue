@@ -35,13 +35,17 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoadModal from "../LoadingMoadal/LoadingMoadal.vue";
 import SettingsLoad from "../LoadingMoadal/SettingsLoad.vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+
 const router = useRouter();
-import { ref, toRefs, watch, reactive } from "vue";
+import { ref, toRefs, watch, reactive, computed } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 const { t } = useI18n();
+const token = computed(() => accountStore.getAccountToken);
 const props = defineProps({
   closeModal: {
     type: Function,
@@ -79,7 +83,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const getInfoAccount = async () => {
   try {
     loadingStatiom.value = true; // Устанавливаем состояние загрузки
@@ -93,7 +97,7 @@ const getInfoAccount = async () => {
       storage: storage,
       type: type,
     };
-    if (stationDomen.navigate.value != "whatsapi") {
+    if (stationDomain.navigate.value != "whatsapi") {
       params = {
         source: source,
         login: login,
@@ -111,7 +115,7 @@ const getInfoAccount = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -157,7 +161,7 @@ const addNewUrl = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -186,7 +190,7 @@ const addNewUrl = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

@@ -30,7 +30,10 @@
       :changeImageStation="changeImageStation"
     />
   </section>
-  <section class="phone-version" v-if="isMobile && userInfo && !loadChatMulti">
+  <section
+    class="phone-version"
+    v-if="isMobile && userInfo.value && !loadChatMulti"
+  >
     <LoadingMultiChat
       :changeLoadChatMulti="changeLoadChatMulti"
       v-if="loadChatMulti"
@@ -85,6 +88,11 @@ import LoadingMultiChat from "./LoadingMultiChat.vue";
 import { useRouter, useRoute } from "vue-router";
 const route = useRoute();
 
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
+
 const props = defineProps({
   mode: String,
   userLink: String,
@@ -130,7 +138,6 @@ const isChatClickable = ref(true);
 const isMobile = ref(false);
 const showMessageList = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
-const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const imgageStation = ref(false);
 const userImageUrl = ref(null);

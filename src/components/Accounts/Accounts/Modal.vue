@@ -124,6 +124,7 @@ import {
   onMounted,
   inject,
   watch,
+  computed,
 } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
@@ -187,11 +188,13 @@ const emit = defineEmits();
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);
 import { useRouter } from "vue-router";
 import WhatsApp from "./ModalAccount/GetByCode/WhatsApp.vue";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
 const qrData = ref([]);
-const accountStationText = localStorage.getItem("accountStation");
 const router = useRouter();
 const handleSubmit = () => {
   emit("update:selectedItems", selectedItem.value);
@@ -322,7 +325,7 @@ const qrCodeDataSubmit = async () => {
 };
 
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 const createRequest = async (request) => {
   const { source, login, storage } = selectedItem.value;
@@ -330,7 +333,7 @@ const createRequest = async (request) => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -349,7 +352,7 @@ const createRequest = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -422,7 +425,7 @@ const forceStop = async (request) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -464,7 +467,7 @@ const disablePhoneAuth = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -509,7 +512,7 @@ const setState = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -555,7 +558,7 @@ const setStateTelegram = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

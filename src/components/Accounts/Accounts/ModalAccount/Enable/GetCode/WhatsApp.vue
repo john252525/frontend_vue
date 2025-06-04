@@ -13,7 +13,7 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, toRefs, reactive, onMounted, inject } from "vue";
+import { ref, toRefs, reactive, onMounted, inject, computed } from "vue";
 import axios from "axios";
 import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
@@ -31,11 +31,15 @@ const station = reactive({
   text: "",
 });
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 let authCodeInterval = null;
 const isRunning = ref(false);
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
@@ -73,7 +77,7 @@ const forceStop = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -107,7 +111,7 @@ const enablePhoneAuth = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -145,7 +149,7 @@ const disablePhoneAuth = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -164,7 +168,7 @@ const disablePhoneAuth = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -208,7 +212,7 @@ const setState = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -234,7 +238,7 @@ const getAuthCode = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -253,7 +257,7 @@ const getAuthCode = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

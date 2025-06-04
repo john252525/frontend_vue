@@ -24,8 +24,12 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import ResultModal from "../ResultModal.vue";
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
-import { ref, inject, reactive } from "vue";
+import { ref, inject, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const router = useRouter();
 const code = ref("");
 const { selectedItem, offQrQrStation, startFunc } = inject("accountItems");
@@ -38,7 +42,7 @@ const station = reactive({
   resultTrue: false,
 });
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -63,7 +67,7 @@ const solveChallenge = async () => {
     source: source,
     login: login,
   };
-  if (stationDomen.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value != "whatsapi") {
     params = {
       source: source,
       login: login,
@@ -84,7 +88,7 @@ const solveChallenge = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

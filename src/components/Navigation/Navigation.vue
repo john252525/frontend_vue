@@ -1,56 +1,39 @@
 <template>
   <!-- Desktop Navigation -->
-  <aside class="pc-menu" v-if="!isChatPage && stationDomen.navigate.value">
+  <aside class="pc-menu" v-if="!isChatPage && stationDomain.navigate.value">
     <nav>
-      <!-- Language switcher for whatsapi and touchapi -->
       <LangSwither
         class="theme-block"
-        v-if="stationDomen.navigate.value !== 'settings'"
+        v-if="stationDomain.navigate.value !== 'settings'"
       />
 
       <ul>
-        <!-- Main menu items -->
         <li
-          v-for="item in currentNavConfig.items"
+          v-for="item in filteredItems"
           :key="item.name"
-          v-if="item.condition"
           class="list"
           @click="item.action ? item.action() : navigateTo(item.name)"
         >
-          <span v-html="item.icon"></span>
-          <p class="page">{{ item.text }}</p>
-        </li>
-
-        <!-- Dropdown toggle if exists -->
-        <li v-if="currentNavConfig.dropdown" class="list" @click="openList">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
             class="svg-icon"
-            viewBox="0 0 16 16"
-          >
-            <g>
-              <path
-                d="M12.5 9a3.5 3.5 0 1 1 0 7a3.5 3.5 0 0 1 0-7m.354 5.854l1.5-1.5a.5.5 0 0 0-.708-.708l-.646.647V10.5a.5.5 0 0 0-1 0v2.793l-.646-.647a.5.5 0 0 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0"
-              />
-              <path
-                d="M12.096 6.223A5 5 0 0 0 13 5.698V7c0 .289-.213.654-.753 1.007a4.5 4.5 0 0 1 1.753.25V4c0-1.007-.875-1.755-1.904-2.223C11.022 1.289 9.573 1 8 1s-3.022.289-4.096.777C2.875 2.245 2 2.993 2 4v9c0 1.007.875 1.755 1.904 2.223C4.978 15.71 6.427 16 8 16c.536 0 1.058-.034 1.555-.097a4.5 4.5 0 0 1-.813-.927Q8.378 15 8 15c-1.464 0-2.766-.27-3.682-.687C3.356 13.875 3 13.373 3 13v-1.302c.271.202.58.378.904.525C4.978 12.71 6.427 13 8 13h.027a4.6 4.6 0 0 1 0-1H8c-1.464 0-2.766-.27-3.682-.687C3.356 10.875 3 10.373 3 10V8.698c.271.202.58.378.904.525C4.978 9.71 6.427 10 8 10q.393 0 .774-.024a4.5 4.5 0 0 1 1.102-1.132C9.298 8.944 8.666 9 8 9c-1.464 0-2.766-.27-3.682-.687C3.356 7.875 3 7.373 3 7V5.698c.271.202.58.378.904.525C4.978 6.711 6.427 7 8 7s3.022-.289 4.096-.777M3 4c0-.374.356-.875 1.318-1.313C5.234 2.271 6.536 2 8 2s2.766.27 3.682.687C12.644 3.125 13 3.627 13 4c0 .374-.356.875-1.318 1.313C10.766 5.729 9.464 6 8 6s-2.766-.27-3.682-.687C3.356 4.875 3 4.373 3 4"
-              />
-            </g>
-          </svg>
-          <p class="page">База данных</p>
+          />
+          <p class="page">{{ item.text }}</p>
         </li>
       </ul>
 
-      <!-- Dropdown menu if exists -->
-      <ul v-if="isOpen && currentNavConfig.dropdown">
+      <ul v-if="isOpen && navElement.dropdown?.length">
         <li
-          v-for="item in currentNavConfig.dropdown"
+          v-for="item in navElement.dropdown"
           :key="item.name"
           v-if="item.condition"
           @click="clickMenu(`/${item.name}`)"
           class="drop-item"
         >
-          <span v-html="item.icon"></span>
+          <img
+            :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+            class="svg-icon"
+          />
           <p class="page-drop">{{ item.text }}</p>
         </li>
       </ul>
@@ -59,26 +42,25 @@
   </aside>
 
   <!-- Mobile Navigation -->
-  <div
+  <!-- <div
     v-if="phoneMenuStation && (chatStation || isChatPage)"
     class="black-fon"
     @click="phoneMenuOn"
   >
     <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
-      <!-- Mobile menu content similar to desktop but with clickMenu handler -->
       <LangSwither
         class="theme-block"
-        v-if="stationDomen.navigate.value !== 'settings'"
+        v-if="stationDomain.navigate.value !== 'settings'"
       />
 
       <div class="logo-header-cont">
         <h2 class="logo-header">
           <img
-            :src="stationDomen.cosmetics.urlLogo"
+            :src="stationDomain.cosmetics.urlLogo"
             class="logo-img"
             alt="Logo"
           />
-          {{ stationDomen.cosmetics.titleLogo }}
+          {{ stationDomain.cosmetics.titleLogo }}
         </h2>
       </div>
 
@@ -87,7 +69,7 @@
       <nav>
         <ul>
           <li
-            v-for="item in currentNavConfig.items"
+            v-for="item in navElement.items"
             :key="item.name"
             v-if="item.condition"
             class="list"
@@ -97,22 +79,39 @@
             <p class="page">{{ item.text }}</p>
           </li>
 
-          <!-- Rest of mobile menu similar to desktop -->
+          <li
+            v-if="navElement.dropdown?.length"
+            class="list"
+            @click="openList"
+          ></li>
+        </ul>
+
+        <ul v-if="isOpen && navElement.dropdown?.length">
+          <li
+            v-for="item in navElement.dropdown"
+            :key="item.name"
+            v-if="item.condition"
+            @click="clickMenu(`/${item.name}`)"
+            class="drop-item"
+          >
+            <span v-html="item.icon"></span>
+            <p class="page-drop">{{ item.text }}</p>
+          </li>
         </ul>
       </nav>
     </aside>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
-import { computed, ref, inject } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 import LangSwither from "../LangSwither.vue";
-import Spinner from "./Spinner.vue";
-
 import { useI18n } from "vue-i18n";
+import { times } from "lodash";
+import { onMounted } from "vue";
 const { t } = useI18n();
 
 const props = defineProps({
@@ -121,9 +120,6 @@ const props = defineProps({
   chatStation: Boolean,
   chatsLoading: Boolean,
 });
-
-const logo = import.meta.env.VITE_TITLE_LOGO;
-const logoUrl = import.meta.env.VITE_URL_LOGO;
 
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -139,7 +135,6 @@ const navigateToChats = () => {
   router.push({ name: "Chats", query: { mode: "widget", multi: true } });
 };
 
-// In your script setup
 const navConfig = {
   whatsapi: {
     items: [
@@ -214,9 +209,32 @@ const navConfig = {
   },
 };
 
+const navElement = ref({});
+
 const currentNavConfig = computed(() => {
-  return navConfig[stationDomen.navigate.value] || {};
+  const config = navConfig[stationDomain.navigate.value] || {};
+  console.log({ items: config.items || [], dropdown: config.dropdown || [] });
+  return {
+    items: config.items || [],
+    dropdown: config.dropdown || [],
+  };
 });
+
+const filteredItems = computed(() => {
+  return navElement.value.items?.filter((item) => item.condition) || [];
+});
+
+const filteredDropdown = computed(() => {
+  return navElement.value.dropdown?.filter((item) => item.condition) || [];
+});
+
+const getNavElement = () => {
+  const config = navConfig[stationDomain.navigate.value];
+  navElement.value = {
+    items: config.items || [], // Добавьте fallback на пустой массив
+    dropdown: config.dropdown || [], // Добавьте fallback на пустой массив
+  };
+};
 
 const clickMenu = (page) => {
   props.phoneMenuOn();
@@ -230,12 +248,14 @@ const navigateTo = (page) => {
 const isChatPage = computed(() => {
   return route.name === "Chats";
 });
+
+onMounted(getNavElement);
 </script>
 
 <style scoped>
 .pc-menu {
   display: flex;
-  width: 230px;
+  width: 200px;
   /* height: calc(100vh - 57  px); */
   box-sizing: border-box;
   background: var(--bg);
@@ -370,7 +390,7 @@ nav {
 }
 
 .phone-menu-chat {
-  width: 260px;
+  /* width: 260px; */
   height: 100vh;
   box-sizing: border-box;
   position: fixed;

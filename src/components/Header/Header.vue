@@ -25,11 +25,11 @@
         </svg>
         <h2 class="logo-header">
           <img
-            :src="stationDomen.cosmetics.urlLogo"
+            :src="stationDomain.cosmetics.urlLogo"
             class="logo-img"
             alt="Logo"
           />
-          {{ stationDomen.cosmetics.titleLogo }}
+          {{ stationDomain.cosmetics.titleLogo }}
         </h2>
       </article>
       <article class="user-cont">
@@ -126,7 +126,11 @@ import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
 import TogleTheme from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -174,7 +178,6 @@ const balance = ref("");
 const getBalance = async () => {
   try {
     balanceLoading.value = true;
-    const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
 
     const response = await axios.post(
       `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
@@ -182,7 +185,7 @@ const getBalance = async () => {
       {
         headers: {
           "Content-Type": "application/json", // Убедитесь, что заголовок указан
-          Authorization: `Bearer ${token}`, // Заголовок авторизации с токеном
+          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
         },
       }
     );

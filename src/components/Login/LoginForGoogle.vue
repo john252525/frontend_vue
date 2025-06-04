@@ -38,9 +38,10 @@ const apiUrl = import.meta.env.VITE_GOOGLE_AUTH_URL;
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-const handleCredentialResponse = async (response) => {
-  console.log("Google token:", response.credential);
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
 
+const handleCredentialResponse = async (response) => {
   try {
     const res = await fetch(`${apiUrl}/api/auth/google/callback`, {
       method: "POST",
@@ -51,11 +52,10 @@ const handleCredentialResponse = async (response) => {
     const data = await res.json();
     console.log("Auth result:", data);
     if (data.apiResponse.ok === true || data.apiResponse.ok === "true") {
-      localStorage.setItem("accountToken", data.apiResponse.token);
-      localStorage.setItem("accountData", data.email);
-      localStorage.setItem("accountStationText", "Telegram");
-      localStorage.setItem("accountStation", "telegram");
-      console.log(response.data);
+      accountStore.setAccountToken(data.apiResponse.token);
+      accountStore.setAccountData(data.email);
+      accountStore.setAccountStation("telegram");
+      accountStore.setAccountStationText("Telegram");
       location.reload();
     }
     if (res.ok) {

@@ -266,6 +266,14 @@ import { useRouter, useRoute } from "vue-router";
 import NewMessageSend from "./newMessageForUser.vue";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
+
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
+const loginChatsStore = useLoginWhatsAppChatsStepStore();
+const { loginWhatsAppChatsStep } = storeToRefs(loginChatsStore);
 
 import Error from "./Error.vue";
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -299,13 +307,17 @@ const { isChatClickable, webhookEventData } = toRefs(props);
 const addAccountStation = ref(false);
 const errorBlock = ref(false);
 const chats = ref(null);
-const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 const chatInfo = ref(null);
 const errorStation = ref(false);
 const chatsNull = ref(false);
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const accountStation = computed(() => accountStore.getAccountStation);
+
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 const selectChatClick = (chat) => {
   console.log(chat);
@@ -371,11 +383,6 @@ const updateLastMessage = (thread, newLastMessage) => {
 };
 
 const updateContentType = (thread, content, text) => {
-  // console.log(
-  //   "СОООООООООООООООООООООБЩЕНИЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ",
-  //   newLastMessage
-  // );
-
   const chat = chats.value.find((chat) => chat.uniq === thread);
   console.log("work");
   if (content.length > 0) {
@@ -434,7 +441,7 @@ const clearCountNewMessage = (thread) => {
 
   if (chat) {
     if (chat.newMessage) {
-      chat.newMessage++;
+      chat.newMessage = 0;
     } else {
     }
   } else {
@@ -501,6 +508,7 @@ const isMulti = computed(() => {
 });
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
+import { lte } from "lodash";
 const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
@@ -517,18 +525,14 @@ const debounceTimer = ref(null);
 
 const test = async () => {
   try {
-    const token = localStorage.getItem("accountToken");
-    const accountsData =
-      JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+    const accountsData = JSON.parse(loginWhatsAppChatsStep.value) || [];
 
-    // Если нет активных аккаунтов - сразу показываем пустой список
     if (accountsData.length === 0) {
       chats.value = [];
       chatsNull.value = true;
       return;
     }
 
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     let requestData;
 
     if (isMulti.value) {
@@ -539,14 +543,12 @@ const test = async () => {
         type: account.typeUser || "undefined",
       }));
     } else {
+      const userInfoParse = JSON.parse(userInfo.value);
       requestData = {
-        login: userInfo?.login,
-        source:
-          stationDomen.navigate.value != "whatsapi"
-            ? localStorage.getItem("accountStation")
-            : localStorage.getItem("accauntSourse"),
-        storage: userInfo?.storage || "undefined",
-        type: userInfo?.type || "undefined",
+        login: userInfoParse.login,
+        source: userInfoParse.source,
+        storage: userInfoParse.storage || "undefined",
+        type: userInfoParse.type || "undefined",
       };
     }
 
@@ -556,7 +558,7 @@ const test = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -707,8 +709,12 @@ const showAccountList = ref(false);
 
 // Функция для получения аккаунтов из localStorage
 const getAccounts = () => {
-  const storedAccounts =
-    JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [];
+  let storedAccounts;
+  if (isMulti.value) {
+    storedAccounts = JSON.parse(loginWhatsAppChatsStep.value);
+  } else {
+    storedAccounts = [];
+  }
   console.log(storedAccounts);
   accounts.value = storedAccounts.map((account) => ({
     name: account.login,
@@ -743,11 +749,7 @@ const updateLocalStorage = async () => {
   const activeAccounts = accounts.value
     .filter((account) => account.active)
     .map((account) => ({ login: account.name, source: account.source }));
-
-  localStorage.setItem(
-    "loginWhatsAppChatsStep",
-    JSON.stringify(activeAccounts)
-  );
+  loginChatsStore.addOrUpdateChat(JSON.stringify(activeAccounts));
 
   // Добавляем debounce (задержку 500мс)
   debounceTimer.value = setTimeout(async () => {

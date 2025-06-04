@@ -10,13 +10,13 @@
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("account.accounts") }}</h2>
-      <h2 v-if="stationDomen.navigate.value != 'whatsapi'" class="account">
+      <h2 v-if="stationDomain.navigate.value != 'whatsapi'" class="account">
         {{ platformStationText }}
       </h2>
     </section>
     <section class="account-section">
       <button
-        v-if="stationDomen.navigate.value != 'whatsapi'"
+        v-if="stationDomain.navigate.value != 'whatsapi'"
         @click="openPlatformChoice"
         class="account-list-button"
       >
@@ -74,9 +74,11 @@
 </template>
 
 <script setup>
-import AddTelegramAccount from "./TelegramAccount/AddAccount.vue";
 import AccountList from "./Accounts/AccountsList.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccount.vue";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+
 import { ref, onMounted } from "vue";
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
@@ -86,7 +88,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 import { useDomain } from "@/composables/getDomen";
-const { stationDomen } = useDomain();
+const { stationDomain } = useDomain();
 
 function openPlatformChoice() {
   platformStation.value = !platformStation.value;
@@ -94,8 +96,8 @@ function openPlatformChoice() {
 
 function choiceNetWork(value, valueTwo) {
   location.reload();
-  localStorage.setItem("accountStation", value);
-  localStorage.setItem("accountStationText", valueTwo);
+  accountStore.setAccountStation(value);
+  accountStore.setAccountStationText(valueTwo);
   platformStation.value = !platformStation.value;
 }
 

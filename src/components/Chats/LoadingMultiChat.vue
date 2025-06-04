@@ -24,6 +24,15 @@ import axios from "axios";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
+import { storeToRefs } from "pinia";
+const loginChatsStore = useLoginWhatsAppChatsStepStore();
+const { loginWhatsAppChatsStep } = storeToRefs(loginChatsStore);
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const props = defineProps({
   changeLoadChatMulti: {
     type: Function,
@@ -59,7 +68,7 @@ const getAccountInfo = async (source, login, storage, type) => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -91,7 +100,7 @@ const fetchAccounts = async (source) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -161,11 +170,11 @@ const processAccounts = async (accounts, source) => {
 const saveToLocalStorage = (accounts) => {
   try {
     // Полностью заменяем содержимое localStorage новым списком аккаунтов
-    localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
+    loginChatsStore.addOrUpdateChat(JSON.stringify(accounts));
   } catch (error) {
     console.error("Ошибка при сохранении в localStorage:", error);
     // В случае ошибки все равно пытаемся сохранить
-    localStorage.setItem("loginWhatsAppChatsStep", JSON.stringify(accounts));
+    loginChatsStore.addOrUpdateChat(JSON.stringify(accounts));
   }
 };
 const processAllAccounts = async () => {

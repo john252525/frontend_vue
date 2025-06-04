@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, toRefs, provide } from "vue";
+import { ref, reactive, onMounted, computed, toRefs, provide } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import errorAccount from "../MailingList/errorAccount.vue";
@@ -100,6 +100,10 @@ const errorMessage = ref(false);
 const loadingMessge = ref(true);
 const countMessage = ref(false);
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -124,7 +128,7 @@ const getMessages = async () => {
       },
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 

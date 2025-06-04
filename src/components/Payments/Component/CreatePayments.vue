@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, computed, ref } from "vue";
 import axios from "axios";
 const apiUrl = import.meta.env.VITE_PAY_URL;
 import { useI18n } from "vue-i18n";
@@ -98,6 +98,10 @@ const payments = reactive({
 
 const paymentUrl = ref(null);
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const createPayment = async () => {
   payments.errorMessage = "";
   try {
@@ -109,7 +113,7 @@ const createPayment = async () => {
       },
       {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

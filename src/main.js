@@ -1,6 +1,6 @@
 import "./assets/main.css";
 import { createRouter, createWebHashHistory } from "vue-router";
-import { createApp } from "vue";
+import { createApp, computed } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
 import Login from "./pages/Login.vue";
@@ -20,9 +20,12 @@ import i18n from "./i18n";
 import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+import { useAccountStore } from "@/stores/accountStore"; // Путь к вашему store
 
 import { useRequestsStore } from "@/stores/requests";
 const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 const routes = [
   {
@@ -195,9 +198,10 @@ const updatePageMetadata = (title, logoUrl) => {
 
 router.beforeEach(async (to, from, next) => {
   const currentDomain = window.location.hostname;
-  const token = localStorage.getItem("accountToken");
 
-  // Пропускаем проверку для NotFound
+  const accountStore = useAccountStore();
+  const token = computed(() => accountStore.getAccountToken);
+
   if (to.name === "NotFound") {
     return next();
   }
@@ -214,7 +218,7 @@ router.beforeEach(async (to, from, next) => {
     to.name
   );
 
-  if (token) {
+  if (token.value) {
     if (isAuthPage) {
       return next({ name: "PersonalAccount" });
     }
@@ -224,14 +228,13 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // Обновление метаданных страницы
   try {
-    const { stationDomen } = useDomain();
-    const pageTitle = stationDomen?.cosmetics?.titleLogo
-      ? `${to.meta.title} | ${stationDomen.cosmetics.titleLogo}`
+    const { stationDomain } = useDomain();
+    const pageTitle = stationDomain?.cosmetics?.titleLogo
+      ? `${to.meta.title} | ${stationDomain.cosmetics.titleLogo}`
       : to.meta.title || "Touch-API";
 
-    updatePageMetadata(pageTitle, stationDomen?.cosmetics?.urlLogo);
+    updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
   } catch (error) {
     console.error("error", error);
     updatePageMetadata(to.meta.title);

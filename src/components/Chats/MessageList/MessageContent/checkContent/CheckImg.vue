@@ -65,7 +65,9 @@
 <script setup>
 import { toRefs, ref, computed } from "vue";
 import axios from "axios";
-
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 import LoadModal from "../../../../Mailing/ModalComponent/LoadModal/LoadModal.vue";
 
 import { useStationLoading } from "@/composables/useStationLoading";
@@ -109,8 +111,13 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
+
 const messageText = ref("");
-const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+const userLogin = userInfo.value;
 const sendMessage = async () => {
   console.log(typeUrl.value);
   loadingContenet.value = true;
@@ -149,7 +156,7 @@ const sendMessage = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );

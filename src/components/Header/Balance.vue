@@ -50,13 +50,16 @@ import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import LoadingBalance from "./Loading/LoadingBalance.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 const router = useRouter();
 const props = defineProps({
   balanceStationOn: {
     type: Function,
   },
 });
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -81,7 +84,6 @@ const balance = ref("");
 
 const getBalance = async () => {
   try {
-    const token = localStorage.getItem("accountToken"); // Получаем токен из localStorage
     balanceLoading.value = true;
     const response = await axios.post(
       `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
@@ -89,7 +91,7 @@ const getBalance = async () => {
       {
         headers: {
           "Content-Type": "application/json", // Убедитесь, что заголовок указан
-          Authorization: `Bearer ${token}`, // Заголовок авторизации с токеном
+          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
         },
       }
     );

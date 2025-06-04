@@ -143,18 +143,27 @@ import {
   onBeforeUnmount,
   onMounted,
   watch,
+  computed,
 } from "vue";
 import axios from "axios";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 import { useRouter } from "vue-router";
-
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const sourceUser = computed(() => accountStore.getAccountStation);
 import checkImg from "./MessageContent/checkContent/CheckImg.vue";
 import Camera from "./MessageContent/checkContent/Camera.vue";
 import Emoji from "./MessageContent/Emoji.vue";
 import MessageContent from "./MessageContent/MessageContent.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 const apiCheckUrl = import.meta.env.VITE_API_CHECK_BE_CHAT;
+
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -353,10 +362,10 @@ const sendMessage = async () => {
   if (!messageText.value) {
     return;
   }
+  console.log(chatInfo.value);
   closeEmojiModal();
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const replyToUniq = replyToData.value.uniq;
-  const sourceUser = localStorage.getItem("accountStation");
+
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const message = {
@@ -372,7 +381,7 @@ const sendMessage = async () => {
         ]
       : [],
     from:
-      sourceUser === "whatsapp"
+      sourceUser.value === "whatsapp"
         ? extractPhoneNumber(chatInfo.value.lastMessage.from)
         : chatInfo.value.lastMessage.from,
     time: Date.now(),
@@ -431,7 +440,7 @@ const sendMessage = async () => {
   };
 
   emit("updateMessages", newMessage);
-  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  const userLogin = userInfo.value;
   console.log(chatInfo.value);
   let messageDataRes = {
     source: chatInfo.value.sourceUser,
@@ -452,7 +461,7 @@ const sendMessage = async () => {
     const response = await axios.post(`${apiUrl}/sendMessage`, messageDataRes, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
 

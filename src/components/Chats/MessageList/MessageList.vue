@@ -389,6 +389,14 @@ import PhotoMenu from "./MenuContent/PhotoMenu.vue";
 import NewMessageForUser from "../UserList/newMessageForUser.vue";
 import ActionModal from "./ActionModal/ActionModal.vue";
 import { useRouter, useRoute } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
+
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 const route = useRoute();
 const loading = ref(false);
@@ -584,7 +592,7 @@ const handleMouseDown = (event, message) => {
 
 const copyUserLink = () => {
   const userLink = `${window.location.origin}/#/chats?mode=widget&userLink=true&thread=${chatInfoValue.value.lastMessage.id.remote}`;
-  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  const userLogin = userInfo.value;
   console.log(userLogin);
   navigator.clipboard
     .writeText(userLink)
@@ -602,7 +610,6 @@ onMounted(() => {
 });
 
 const handleRouteParams = async () => {
-  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
   if (route.query.thread) {
     // Режим по ссылке - загружаем данные чата с сервера
     try {
@@ -813,10 +820,10 @@ const messagesBolean = ref(false);
 
 const getMessage = async () => {
   props.blockChat();
-  try {
-    const token = localStorage.getItem("accountToken");
+  messages.value = [];
 
-    const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  try {
+    const userLogin = userInfo.value;
     console.log(userLogin, "user");
     let requestData = {
       source: chatInfoValue.value.sourceUser,
@@ -837,13 +844,12 @@ const getMessage = async () => {
     }
 
     const response = await axios.post(
-      // `http://localhost:4000/api/getChatMessages`,
       `${apiUrl}/getChatMessages`,
       requestData,
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
@@ -1010,7 +1016,7 @@ const loadMessages = async (thread) => {
   try {
     loading.value = true;
     const token = localStorage.getItem("accountToken");
-    const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+    const userLogin = userInfo.value;
 
     const response = await axios.post(
       `${apiUrl}/getChatMessages`,

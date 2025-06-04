@@ -100,6 +100,15 @@ import True from "./ResultModal/True.vue";
 import False from "./ResultModal/False.vue";
 import { useRouter, useRoute } from "vue-router";
 import Checbox from "./newMessageComponent/Checbox.vue";
+import { useUserInfoStore } from "@/stores/userInfoStore";
+import { storeToRefs } from "pinia";
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const accountStation = computed(() => accountStore.getAccountStation);
 
 // Страны с их кодами и форматами
 const countries = ref([
@@ -339,7 +348,7 @@ function isMultiLogic() {
   if (route.query.multi === "true") {
     stationMess.isMuilti.isMulti = true;
   } else {
-    if (localStorage.getItem("accountStation") === "telegram") {
+    if (accountStation.value === "telegram") {
       stationMess.source = "telegram";
     } else {
       stationMess.source = "whatsapp";
@@ -395,7 +404,6 @@ const sendMessage = async () => {
   await processLogin();
 
   loading.value = true;
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
   const message = {
     to: userMessageLogin.value,
@@ -431,7 +439,7 @@ const sendMessage = async () => {
     replyTo: replyToDataBolean ? replyToUniq : null,
   };
 
-  const userLogin = JSON.parse(localStorage.getItem("userInfo"));
+  const userLogin = userInfo.value;
   console.log(stationMess);
   let messageDataRes = {
     source: source.value,
@@ -459,7 +467,7 @@ const sendMessage = async () => {
     const response = await axios.post(`${apiUrl}/sendMessage`, messageDataRes, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+        Authorization: `Bearer ${token.value}`,
       },
     });
     if (response.data.ok === true) {

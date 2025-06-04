@@ -22,6 +22,10 @@ import axios from "axios";
 import LoadModal from "../../LoadingMoadal/LoadModal.vue";
 const { getByCodeStation, selectedItems } = inject("Items");
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const stationLoading = reactive({
   loading: true,
 });

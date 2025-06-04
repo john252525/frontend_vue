@@ -26,13 +26,16 @@
 </template>
 
 <script setup>
-import { toRefs, ref } from "vue";
+import { toRefs, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import LoadMoadal from "../LoadModal/LoadModal.vue";
 import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -84,7 +87,7 @@ const deleteMailing = async () => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
