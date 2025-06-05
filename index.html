@@ -39,14 +39,14 @@
       app.mount("#app");
 
       // Получаем данные о домене
-      const { stationDomen } = useDomain();
+      const { stationDomain } = useDomain();
 
       // Функция для обновления favicon и title
       function updatePageMetadata() {
         // Favicon
         const faviconLink = document.createElement("link");
         faviconLink.rel = "icon";
-        faviconLink.href = stationDomen.cosmetics.urlLogo || "/favicon.ico";
+        faviconLink.href = stationDomain.cosmetics.urlLogo || "/favicon.ico";
         faviconLink.type = "image/x-icon";
 
         // Удаляем старый favicon, если есть
@@ -57,16 +57,16 @@
         document.head.appendChild(faviconLink);
 
         // Title
-        document.title = stationDomen.cosmetics.titleLogo || "Touch-API";
+        document.title = stationDomain.cosmetics.titleLogo || "Touch-API";
       }
 
       // Вызываем после загрузки данных
-      if (stationDomen) {
+      if (stationDomain) {
         updatePageMetadata();
       } else {
         // Подписываемся на изменения, если данные загружаются асинхронно
         const unwatch = app.config.globalProperties.$watch(
-          () => stationDomen,
+          () => stationDomain,
           (newVal) => {
             if (newVal) {
               updatePageMetadata();
