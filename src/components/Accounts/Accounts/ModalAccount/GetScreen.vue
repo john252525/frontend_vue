@@ -51,7 +51,7 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const { selectedItem, getScreenStation } = toRefs(props);
 const { source, login, storage, type } = selectedItem.value;

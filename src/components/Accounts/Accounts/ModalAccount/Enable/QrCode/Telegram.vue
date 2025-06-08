@@ -41,7 +41,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 const stationLoading = ref(false);

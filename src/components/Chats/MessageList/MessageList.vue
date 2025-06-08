@@ -395,6 +395,10 @@ import { storeToRefs } from "pinia";
 const userInfoStore = useUserInfoStore();
 const { userInfo } = storeToRefs(userInfoStore);
 
+// import { loadMessages, saveMessages } from "@/stores/chatStore/chatHelpers";
+import { createChatStore } from "@/stores/chatStore/chatStoreFactory";
+
+const userToken = ref("");
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
@@ -610,6 +614,7 @@ onMounted(() => {
 });
 
 const handleRouteParams = async () => {
+  loading.value = true;
   if (route.query.thread) {
     // Режим по ссылке - загружаем данные чата с сервера
     try {
@@ -620,6 +625,9 @@ const handleRouteParams = async () => {
       });
       chatInfoValue.value = response.data.data.data;
       console.log(chatInfoValue.value);
+      if (response.data.data.data) {
+        getMessages();
+      }
     } catch (error) {
       console.error("Ошибка загрузки чата:", error);
     }
@@ -818,7 +826,7 @@ watch(pageTitle, (newTitle) => {
 
 const messagesBolean = ref(false);
 
-const getMessage = async () => {
+const getMessages = async () => {
   props.blockChat();
   messages.value = [];
 
@@ -832,16 +840,39 @@ const getMessage = async () => {
       type: userLogin.type,
       to: chatInfoValue.value.phone,
     };
-
+    userToken.value = `${userLogin.login}_${userLogin.source}_${token.value}`;
     if (apiUrl === apiCheckUrl) {
       requestData.to = chatInfoValue.value.phone;
       requestData.login = chatInfoValue.value.loginUser;
       requestData.uniq = chatInfoValue.value.lastMessage.id.remote;
+      userToken.value = `${chatInfoValue.value.loginUser}_${chatInfoValue.value.sourceUser}_${token.value}`;
     }
-
+    console.log(chatInfoValue.value);
     if (chatInfoValue.value.sourceUser != "whatsapp") {
       requestData.source = "telegram";
+      userToken.value = `${chatInfoValue.value.loginUser}_telegram_${token.value}`;
     }
+    const chatStore = createChatStore(userToken.value);
+    const threadMessages = chatStore.messages[requestData.uniq];
+
+    // Проверяем есть ли сообщения (для массива или объекта)
+    if (
+      threadMessages &&
+      (Array.isArray(threadMessages)
+        ? threadMessages.length
+        : Object.keys(threadMessages).length)
+    ) {
+      messages.value = Array.isArray(threadMessages)
+        ? [...threadMessages]
+        : Object.values(threadMessages);
+
+      console.log("Сообщения загружены:", messages.value);
+      loading.value = false;
+      props.blockChat();
+      return;
+    }
+
+    // Продолжаем выполнение если сообщений нет
 
     const response = await axios.post(
       `${apiUrl}/getChatMessages`,
@@ -870,11 +901,12 @@ const getMessage = async () => {
       props.blockChat();
 
       if (apiUrl === apiCheckUrl) {
-        messages.value = response.data.data.messages;
-        // if (!messages.value) {
-        //   station.messageNull = true;
-        // }
-        console.log(messages.value);
+        // messages.value = response.data.data.messages;
+        // saveMessages(userToken.value, response.data.data.messages);
+        chatStore.loadMessages(requestData.uniq, response.data.data.messages);
+        const threadMessages = chatStore.messages[requestData.uniq];
+
+        messages.value = threadMessages;
       } else {
         messages.value = response.data.data.messages.map((message) => ({
           data: message,
@@ -882,7 +914,6 @@ const getMessage = async () => {
         }));
       }
 
-      // Обработка replyTo
       messages.value.forEach((message) => {
         if (message.data.replyTo !== null) {
           const replyToMessage = messages.value.find(
@@ -1012,65 +1043,46 @@ const shouldShowDateSeparator = (index) => {
   return !isSameDay(currentDate, previousDate);
 };
 
-const loadMessages = async (thread) => {
-  try {
-    loading.value = true;
-    const token = localStorage.getItem("accountToken");
-    const userLogin = userInfo.value;
+// const loadMessages = async (thread) => {
+//   try {
+//     loading.value = true;
+//     const token = localStorage.getItem("accountToken");
+//     const userLogin = userInfo.value;
 
-    const response = await axios.post(
-      `${apiUrl}/getChatMessages`,
-      {
-        source: props.chatInfoValue.sourceUser,
-        login: userLogin.login,
-        storage: userLogin.storage,
-        type: userLogin.type,
-        to: thread, // Используем переданный thread
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+//     const response = await axios.post(
+//       `${apiUrl}/getChatMessages`,
+//       {
+//         source: props.chatInfoValue.sourceUser,
+//         login: userLogin.login,
+//         storage: userLogin.storage,
+//         type: userLogin.type,
+//         to: thread, // Используем переданный thread
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }
+//     );
 
-    if (response.data.ok) {
-      messages.value = response.data.data.messages;
-    }
-  } catch (error) {
-    console.error("Ошибка загрузки сообщений:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-watch(
-  () => chatInfoValue.value,
-  (newChatInfo) => {
-    if (!loading.value) {
-      console.log("вывы");
-      // Проверка состояния загрузки
-      loading.value = true;
-      getMessage();
-    }
-  }
-);
-
-// watch(
-//   () => props.chatInfo,
-//   (newChatInfo) => {
-//     if (newChatInfo && newChatInfo.phone) {
-//       getMessage(newChatInfo.phone);
+//     if (response.data.ok) {
+//       messages.value = response.data.data.messages;
 //     }
-//   },
-//   { immediate: true, deep: true }
-// );
+//   } catch (error) {
+//     console.error("Ошибка загрузки сообщений:", error);
+//   } finally {
+//     loading.value = false;
+//   }
+// };
 
 // watch(
-//   () => messages.value,
-//   (newMessages) => {
-//     if (station.messageNull) {
-//       station.messageNull = false;
+//   () => chatInfoValue.value,
+//   (newChatInfo) => {
+//     if (!loading.value) {
+//       console.log("вывы");
+//       // Проверка состояния загрузки
+//       loading.value = true;
+//       getMessages();
 //     }
 //   }
 // );

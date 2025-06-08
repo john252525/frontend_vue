@@ -41,7 +41,7 @@ const station = reactive({
   code: true,
   resultTrue: false,
 });
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {

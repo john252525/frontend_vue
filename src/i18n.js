@@ -6,7 +6,7 @@ import GetByCode from "./components/Accounts/Accounts/ModalAccount/GetByCode/Get
 import EditMailing from "./components/Mailing/ModalComponent/EditMailing/EditMailing.vue";
 import { min } from "lodash";
 import Checbox from "./components/Chats/UserList/newMessageComponent/Checbox.vue";
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomen } = useDomain();
 
 const messages = {

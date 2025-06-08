@@ -311,12 +311,18 @@ const chatInfo = ref(null);
 const errorStation = ref(false);
 const chatsNull = ref(false);
 
+// import { getStore, loadChats } from "@/stores/chatStore/chatHelpers";
+
+import { createChatStore } from "@/stores/chatStore/chatStoreFactory";
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 
-import { useDomain } from "@/composables/getDomen";
+const userToken = ref("");
+
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 const selectChatClick = (chat) => {
@@ -337,7 +343,6 @@ const selectChatClick = (chat) => {
     });
   }
 
-  // Вызываем родительский метод
   props.selectChat({
     data: chatInfo.value,
     uniq: chat.uniq,
@@ -367,10 +372,6 @@ const updateChatTimestamp = (thread, newTimestamp) => {
 };
 
 const updateLastMessage = (thread, newLastMessage) => {
-  // console.log(
-  //   "СОООООООООООООООООООООБЩЕНИЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ",
-  //   newLastMessage
-  // );
   const chat = chats.value.find((chat) => chat.uniq === thread);
 
   if (chat) {
@@ -417,7 +418,6 @@ const updateCountNewMessage = (thread) => {
 const groupedChats = computed(() => {
   if (!chats.value) return [];
 
-  // Группируем чаты по имени
   const groups = chats.value.reduce((acc, chat) => {
     const name = chat.data.name;
     if (!acc[name]) {
@@ -427,7 +427,6 @@ const groupedChats = computed(() => {
     return acc;
   }, {});
 
-  // Добавляем флаг hasDuplicates для чатов с одинаковыми именами
   return chats.value.map((chat) => {
     return {
       ...chat,
@@ -525,7 +524,7 @@ const debounceTimer = ref(null);
 
 const test = async () => {
   try {
-    const accountsData = JSON.parse(loginWhatsAppChatsStep.value) || [];
+    const accountsData = loginWhatsAppChatsStep.value;
 
     if (accountsData.length === 0) {
       chats.value = [];
@@ -542,6 +541,9 @@ const test = async () => {
         storage: account.storageUser || "undefined",
         type: account.typeUser || "undefined",
       }));
+      userToken.value = accountsData.map(
+        (account) => `${account.login}_${account.source}_${token.value}`
+      );
     } else {
       const userInfoParse = JSON.parse(userInfo.value);
       requestData = {
@@ -550,6 +552,18 @@ const test = async () => {
         storage: userInfoParse.storage || "undefined",
         type: userInfoParse.type || "undefined",
       };
+      userToken.value = `${userInfoParse.login}_${userInfoParse.source}_${token.value}`;
+    }
+    const chatStore = createChatStore(userToken.value);
+
+    const allChats = chatStore.chats;
+
+    const chatsArray = Object.values(allChats);
+
+    if (chatsArray.length > 0) {
+      chats.value = [...chatsArray];
+      console.log(chats.value);
+      return;
     }
 
     const response = await axios.post(
@@ -584,6 +598,7 @@ const test = async () => {
 
     if (apiUrl === apiCheckUrl) {
       chats.value = response.data.data.chats;
+      chatStore.loadChats(response.data.data.chats);
     } else {
       chats.value = response.data.data.chats.map((chat) => ({
         newMessage: chat.unreadCount,
@@ -601,6 +616,7 @@ const test = async () => {
     throw error; // Пробрасываем ошибку дальше
   }
 };
+
 const formatTimestamp = (timestamp) => {
   if (typeof timestamp === "string") {
     timestamp = parseFloat(timestamp);

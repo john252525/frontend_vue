@@ -167,7 +167,7 @@ const updateUserInfo = (event) => {
 
 const userInfoStore = useUserInfoStore();
 
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 import { useI18n } from "vue-i18n";

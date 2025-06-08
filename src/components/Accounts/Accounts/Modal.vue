@@ -324,7 +324,7 @@ const qrCodeDataSubmit = async () => {
   props.closeModal();
 };
 
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 const createRequest = async (request) => {

@@ -87,7 +87,7 @@ const platformStation = ref(false);
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 function openPlatformChoice() {

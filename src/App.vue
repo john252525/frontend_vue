@@ -1,10 +1,21 @@
 <template>
   <Header v-if="!isAuthPage && !isWidgetMode" :phoneMenuOn="phoneMenuOn" />
-  <div class="page-container" v-if="!isAuthPage && !isWidgetMode">
+  <div class="page-container" v-if="!isAuthPage">
     <Navigation
+      v-if="isWidgetMode"
       :phoneMenuStation="phoneMenuStation"
       :phoneMenuOn="phoneMenuOn"
       :chatStation="chatStation"
+      :isWidgetMode="isWidgetMode"
+      :chatsLoading="chatsLoading"
+      class="navigation-chat"
+    />
+    <Navigation
+      v-else
+      :phoneMenuStation="phoneMenuStation"
+      :phoneMenuOn="phoneMenuOn"
+      :chatStation="chatStation"
+      :isWidgetMode="isWidgetMode"
       :chatsLoading="chatsLoading"
       class="navigation"
     />
@@ -14,10 +25,6 @@
     />
     <main>
       <section>
-        <!-- <ResultModal
-          :changeStationLoadingModal="offModal"
-          :stationLoading="stationLoading"
-        /> -->
         <router-view @routeChanged="checkChatStation"></router-view>
       </section>
     </main>
@@ -111,6 +118,10 @@ main > section {
 
 .page-container {
   display: flex;
+}
+
+.navigation-chat {
+  width: 60px;
 }
 
 .navigation {

@@ -149,7 +149,6 @@ const loginAccount = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         },
       }
     );
@@ -170,8 +169,7 @@ const loginAccount = async () => {
       accountStore.setAccountStation("telegram");
       accountStore.setAccountStationText("Telegram");
       await createUser();
-      console.log(response.data);
-      navigateTo("/accounts");
+      navigateTo("/");
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);

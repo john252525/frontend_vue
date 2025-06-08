@@ -140,7 +140,6 @@ const loginAccount = async () => {
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          Authorization: "Bearer 342b63fd-6017-446f-adf8-d1b8e0b7bfc6",
         },
       }
     );
@@ -163,7 +162,7 @@ const loginAccount = async () => {
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
       accountStore.setAccountStationText("Telegram");
-      location.reload();
+      navigateTo("/");
     } else {
       inputStyle.incorrectPassword = true;
       inputStyle.incorrectPasswordMessage = response.data.error_message;

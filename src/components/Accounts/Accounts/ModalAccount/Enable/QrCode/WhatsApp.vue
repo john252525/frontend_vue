@@ -194,7 +194,7 @@ const getInternationalFormat = () => {
 const { changeEnableStation } = inject("changeEnableStation");
 const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const station = reactive({
   phone: false,

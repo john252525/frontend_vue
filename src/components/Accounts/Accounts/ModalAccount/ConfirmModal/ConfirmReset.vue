@@ -67,7 +67,7 @@ const props = defineProps({
     type: Function,
   },
 });
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const { selectedItem } = toRefs(props);
 

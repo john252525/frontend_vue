@@ -82,7 +82,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const getInfoAccount = async () => {
   try {

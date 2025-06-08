@@ -44,7 +44,7 @@ const router = useRouter();
 const { selectedItem } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
 const stationLoading = ref(false);
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {

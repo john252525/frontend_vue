@@ -125,7 +125,7 @@ import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
 import TogleTheme from "./ThemeTogle.vue";
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 import { useAccountStore } from "@/stores/accountStore";
@@ -250,7 +250,7 @@ onMounted(getBalance);
   font-weight: 700;
   font-size: 12px;
   color: #4047ca;
-  padding: 8px;
+  padding: 5px;
   border: 1px solid rgba(64, 71, 202, 0.2);
   border-radius: 5px;
   cursor: pointer;

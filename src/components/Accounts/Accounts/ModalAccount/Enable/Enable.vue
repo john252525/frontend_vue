@@ -98,7 +98,7 @@ const offQrQrStation = () => {
 };
 
 const code = ref(null);
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 const { selectedItem, enableStation } = toRefs(props);
 

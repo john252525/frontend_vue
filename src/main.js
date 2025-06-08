@@ -15,17 +15,22 @@ import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import Setings from "./pages/Setings.vue";
 import NotFound from "./pages/NotFound.vue";
-import { useDomain } from "@/composables/getDomen";
+import { useDomain } from "@/composables/getDomain";
 import i18n from "./i18n";
 import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import { useAccountStore } from "@/stores/accountStore"; // Путь к вашему store
+import { hookManager } from "@/hooks/HookManager";
 
 import { useRequestsStore } from "@/stores/requests";
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
+
+if ("Notification" in window) {
+  Notification.requestPermission();
+}
 
 const routes = [
   {
