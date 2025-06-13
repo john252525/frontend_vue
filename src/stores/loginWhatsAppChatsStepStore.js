@@ -4,40 +4,86 @@ export const useLoginWhatsAppChatsStepStore = defineStore(
   "loginWhatsAppChatsStep",
   {
     state: () => ({
-      loginWhatsAppChatsStep: [], // Инициализируем пустым массивом
+      loginWhatsAppChatsStep:
+        JSON.parse(localStorage.getItem("loginWhatsAppChatsStep")) || [],
     }),
-    getters: {
-      // Геттер для получения всего массива
-      getLoginWhatsAppChatsStep: (state) => state.loginWhatsAppChatsStep,
-    },
     actions: {
-      // Добавить новый объект в массив (или обновить существующий)
-      addOrUpdateChat(chatData) {
-        const existingIndex = this.loginWhatsAppChatsStep.findIndex(
-          (chat) =>
-            chat.login === chatData.login && chat.source === chatData.source
-        ); // Поиск по login и source
-        if (existingIndex !== -1) {
-          // Если элемент существует, обновим его
-          this.loginWhatsAppChatsStep[existingIndex] = chatData;
-        } else {
-          // Если элемента нет, добавим его
-          this.loginWhatsAppChatsStep.push(chatData);
+      // Инициализация хранилища
+      async init() {
+        try {
+          const saved = localStorage.getItem("loginWhatsAppChatsStep");
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            this.loginWhatsAppChatsStep = Array.isArray(parsed) ? parsed : [];
+          }
+        } catch (e) {
+          console.error("Ошибка загрузки из localStorage:", e);
+          this.loginWhatsAppChatsStep = [];
         }
       },
 
-      // Удалить элемент из массива по login и source
-      removeChat(login, source) {
-        this.loginWhatsAppChatsStep = this.loginWhatsAppChatsStep.filter(
-          (chat) => !(chat.login === login && chat.source === source)
-        ); // Фильтруем, исключая элемент с указанными login и source
+      // Добавление/обновление аккаунта
+      addOrUpdateChat(account) {
+        try {
+          if (!account?.login || !account?.source) {
+            throw new Error("Невалидные данные аккаунта");
+          }
+
+          const index = this.loginWhatsAppChatsStep.findIndex(
+            (a) => a.login === account.login && a.source === account.source
+          );
+
+          const newAccount = {
+            login: String(account.login),
+            source: String(account.source),
+            storage: account.storage || "undefined",
+            type: account.type || "undefined",
+            updatedAt: Date.now(),
+          };
+
+          if (index >= 0) {
+            this.loginWhatsAppChatsStep[index] = newAccount;
+          } else {
+            this.loginWhatsAppChatsStep.push(newAccount);
+          }
+
+          this.saveToLocalStorage();
+          return true;
+        } catch (e) {
+          console.error("Ошибка сохранения аккаунта:", e);
+          return false;
+        }
       },
 
-      // Очистить весь массив
-      clearChats() {
-        this.loginWhatsAppChatsStep = [];
+      removeChat(login, source) {
+        try {
+          const initialLength = this.loginWhatsAppChatsStep.length;
+
+          this.loginWhatsAppChatsStep = this.loginWhatsAppChatsStep.filter(
+            (account) => !(account.login === login && account.source === source)
+          );
+
+          if (this.loginWhatsAppChatsStep.length < initialLength) {
+            this.saveToLocalStorage();
+            console.log(`Аккаунт ${login} (${source}) успешно удален`);
+            return true;
+          }
+
+          console.warn(`Аккаунт ${login} (${source}) не найден`);
+          return false;
+        } catch (e) {
+          console.error("Ошибка при удалении аккаунта:", e);
+          return false;
+        }
+      },
+      // Сохранение в localStorage
+      saveToLocalStorage() {
+        localStorage.setItem(
+          "loginWhatsAppChatsStep",
+          JSON.stringify(this.loginWhatsAppChatsStep)
+        );
       },
     },
-    persist: true, // Используем pinia-plugin-persistedstate для сохранения
+    persist: false, // Отключаем встроенную персистенцию Pinia
   }
 );

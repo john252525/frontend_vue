@@ -1,15 +1,16 @@
 <template>
-  <LoadingMultiChat
+  <!-- <LoadingMultiChat
     :changeLoadChatMulti="changeLoadChatMulti"
     v-if="loadChatMulti"
-  />
-  <section class="pc-version" v-if="!isMobile && !loadChatMulti">
+  /> -->
+  <section class="pc-version" v-if="!isMobile">
     <CheckUserImage
       :changeImageStation="changeImageStation"
       :userImageUrl="userImageUrl"
       v-if="imgageStation"
     />
     <UserList
+      :changeMessageListStation="changeMessageListStation"
       :clearNewMessages="clearNewMessages"
       class="user-list"
       :selectChat="selectChat"
@@ -30,10 +31,7 @@
       :changeImageStation="changeImageStation"
     />
   </section>
-  <section
-    class="phone-version"
-    v-if="isMobile && userInfo.value && !loadChatMulti"
-  >
+  <section class="phone-version" v-if="isMobile && !loadChatMulti">
     <LoadingMultiChat
       :changeLoadChatMulti="changeLoadChatMulti"
       v-if="loadChatMulti"
@@ -45,7 +43,7 @@
     />
     <UserList
       :clearNewMessages="clearNewMessages"
-      v-if="!showMessageList"
+      v-if="stationSection.userList"
       class="phone-user-list"
       :changeImageStation="changeImageStation"
       :selectChat="selectChat"
@@ -55,8 +53,10 @@
       :webhookEventData="webhookEventData"
       :chats="chats"
       :getChats="getChats"
+      :changeMessageListStation="changeMessageListStation"
     />
     <MessageList
+      v-if="stationSection.messageList"
       :thread="route.query.thread"
       class="message-list"
       :changeMessageListStation="changeMessageListStation"
@@ -101,6 +101,11 @@ const props = defineProps({
 
 const storageKey = "chatAppActiveTab";
 const tabId = Math.random().toString(36).substring(2, 15);
+
+const stationSection = reactive({
+  messageList: false,
+  userList: true,
+});
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -203,86 +208,90 @@ const blockChatOff = () => {
   isChatClickable.value = true;
 };
 
-const changeMessageListStation = () => {
-  showMessageList.value = false;
-  style.userList.display = "block";
-  style.messageList.display = "none";
-};
-
-const checkActiveTab = () => {
-  const activeTabData = localStorage.getItem(storageKey);
-
-  if (activeTabData) {
-    try {
-      const { tabId: activeTabId, timestamp } = JSON.parse(activeTabData);
-
-      // Если метка свежая (менее 10 секунд назад) и это не наш ID
-      if (Date.now() - timestamp < 10000 && activeTabId !== tabId) {
-        alert("Пожалуйста, закройте другие вкладки с чатами...");
-        window.location.href = "/close";
-        return false;
-      }
-    } catch (e) {
-      console.error("Error parsing active tab data", e);
-    }
+const changeMessageListStation = (value) => {
+  if (value === "messageList") {
+    stationSection.userList = true;
+    stationSection.messageList = false;
+  } else {
+    stationSection.userList = false;
+    stationSection.messageList = true;
   }
-
-  // Устанавливаем текущую вкладку как активную
-  localStorage.setItem(
-    storageKey,
-    JSON.stringify({
-      tabId,
-      timestamp: Date.now(),
-    })
-  );
-  return true;
 };
 
-const setupTabControl = () => {
-  if (!checkActiveTab()) return;
+// const checkActiveTab = () => {
+//   const activeTabData = localStorage.getItem(storageKey);
 
-  // Обновляем метку активности каждые 3 секунды
-  const activityInterval = setInterval(() => {
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        tabId,
-        timestamp: Date.now(),
-      })
-    );
-  }, 3000);
+//   if (activeTabData) {
+//     try {
+//       const { tabId: activeTabId, timestamp } = JSON.parse(activeTabData);
 
-  // Обработчики событий
-  const handleBeforeUnload = () => {
-    clearInterval(activityInterval);
-    if (localStorage.getItem(storageKey)?.includes(tabId)) {
-      localStorage.removeItem(storageKey);
-    }
-  };
+//       // Если метка свежая (менее 10 секунд назад) и это не наш ID
+//       if (Date.now() - timestamp < 10000 && activeTabId !== tabId) {
+//         alert("Пожалуйста, закройте другие вкладки с чатами...");
+//         window.location.href = "/close";
+//         return false;
+//       }
+//     } catch (e) {
+//       console.error("Error parsing active tab data", e);
+//     }
+//   }
 
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === "visible") {
-      checkActiveTab();
-    }
-  };
+//   // Устанавливаем текущую вкладку как активную
+//   localStorage.setItem(
+//     storageKey,
+//     JSON.stringify({
+//       tabId,
+//       timestamp: Date.now(),
+//     })
+//   );
+//   return true;
+// };
 
-  const handleStorageChange = (e) => {
-    if (e.key === storageKey) {
-      checkActiveTab();
-    }
-  };
+// const setupTabControl = () => {
+//   if (!checkActiveTab()) return;
 
-  window.addEventListener("beforeunload", handleBeforeUnload);
-  window.addEventListener("visibilitychange", handleVisibilityChange);
-  window.addEventListener("storage", handleStorageChange);
+//   // Обновляем метку активности каждые 3 секунды
+//   const activityInterval = setInterval(() => {
+//     localStorage.setItem(
+//       storageKey,
+//       JSON.stringify({
+//         tabId,
+//         timestamp: Date.now(),
+//       })
+//     );
+//   }, 3000);
 
-  return () => {
-    clearInterval(activityInterval);
-    window.removeEventListener("beforeunload", handleBeforeUnload);
-    window.removeEventListener("visibilitychange", handleVisibilityChange);
-    window.removeEventListener("storage", handleStorageChange);
-  };
-};
+//   // Обработчики событий
+//   const handleBeforeUnload = () => {
+//     clearInterval(activityInterval);
+//     if (localStorage.getItem(storageKey)?.includes(tabId)) {
+//       localStorage.removeItem(storageKey);
+//     }
+//   };
+
+//   const handleVisibilityChange = () => {
+//     if (document.visibilityState === "visible") {
+//       checkActiveTab();
+//     }
+//   };
+
+//   const handleStorageChange = (e) => {
+//     if (e.key === storageKey) {
+//       checkActiveTab();
+//     }
+//   };
+
+//   window.addEventListener("beforeunload", handleBeforeUnload);
+//   window.addEventListener("visibilitychange", handleVisibilityChange);
+//   window.addEventListener("storage", handleStorageChange);
+
+//   return () => {
+//     clearInterval(activityInterval);
+//     window.removeEventListener("beforeunload", handleBeforeUnload);
+//     window.removeEventListener("visibilitychange", handleVisibilityChange);
+//     window.removeEventListener("storage", handleStorageChange);
+//   };
+// };
 
 // const setupTabControl = () => {
 //   // Проверяем при загрузке

@@ -29,6 +29,12 @@ const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 import { ref, toRefs, provide, onMounted, reactive, computed } from "vue";
 import axios from "axios";
+
+import { storeToRefs } from "pinia";
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
+
+const chatStore = useLoginWhatsAppChatsStepStore();
+
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -172,7 +178,7 @@ const forceStop = async () => {
 };
 
 const setState = async (request) => {
-  const { source, login, storage } = selectedItem.value;
+  const { source, login, storage, type } = selectedItem.value;
   let params = {
     source: source,
     login: login,
@@ -214,10 +220,15 @@ const setState = async (request) => {
     }
     props.changeForceStopItemData(selectedItem.value);
     // console.log(response.data.data);
-
+    const newLoginData = {
+      login,
+      source,
+      storage: storage,
+      type: type,
+    };
     if (response.data.data.status === "ok") {
       station.stationLoading = false;
-
+      chatStore.addOrUpdateChat(newLoginData);
       station.resultTrue = true;
     } else if (response.data.data.error) {
       setTimeout(() => {

@@ -1,4 +1,5 @@
 import { createChatStore } from "@/stores/chatStore/chatStoreFactory";
+import { union } from "lodash";
 
 class HookManager {
   constructor() {
@@ -46,7 +47,28 @@ class HookManager {
         break;
 
       case "message":
-        store.addMessages(eventData.thread, [eventData.message]);
+        const message = {
+          data: {
+            content: eventData.content,
+            item: eventData.item,
+            outgoing: eventData.outgoing,
+            reaction: "",
+            replyTo: eventData.replyTo,
+            send: "",
+            source: eventData.source,
+            state: "delivered",
+            text: eventData.text,
+            thread: eventData.thread,
+            time: eventData.time,
+            to: eventData.to,
+          },
+          delete: false,
+          id: eventData.item,
+          reaction: null,
+          timestamp: eventData.time,
+          uniq: eventData.uniq,
+        };
+        store.addMessages(eventData.thread, [message]);
         this.showNotification(eventData);
         console.log("хук");
         break;

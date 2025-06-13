@@ -71,7 +71,7 @@
                 </defs>
               </g>
             </svg>
-            <span class="text-account-item">{{ account.name }} </span>
+            <span class="text-account-item">{{ account.login }} </span>
             <div class="checkbox-input">
               <input
                 type="checkbox"
@@ -301,6 +301,9 @@ const props = defineProps({
   changeImageStation: {
     type: Function,
   },
+  changeMessageListStation: {
+    type: Function,
+  },
 });
 
 const { isChatClickable, webhookEventData } = toRefs(props);
@@ -310,7 +313,9 @@ const chats = ref(null);
 const chatInfo = ref(null);
 const errorStation = ref(false);
 const chatsNull = ref(false);
+const chatNameAccount = ref([]);
 
+import { getChatStoresByNames } from "@/utils/storeUtils";
 // import { getStore, loadChats } from "@/stores/chatStore/chatHelpers";
 
 import { createChatStore } from "@/stores/chatStore/chatStoreFactory";
@@ -326,6 +331,7 @@ import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 const selectChatClick = (chat) => {
+  props.changeMessageListStation("userList");
   console.log(chat);
   chatInfo.value = chat;
   console.log(chatInfo.value);
@@ -524,26 +530,43 @@ const debounceTimer = ref(null);
 
 const test = async () => {
   try {
-    const accountsData = loginWhatsAppChatsStep.value;
+    let activeAccounts;
+    if (isMulti.value) {
+      // Берем только активные аккаунты из локальной переменной
+      activeAccounts = accounts.value.filter((account) => account.active);
 
-    if (accountsData.length === 0) {
-      chats.value = [];
-      chatsNull.value = true;
-      return;
+      if (activeAccounts.length === 0) {
+        chats.value = [];
+        chatsNull.value = true;
+        return;
+      }
     }
 
     let requestData;
 
     if (isMulti.value) {
-      requestData = accountsData.map((account) => ({
-        login: account.login,
-        source: account.source,
-        storage: account.storageUser || "undefined",
-        type: account.typeUser || "undefined",
-      }));
-      userToken.value = accountsData.map(
-        (account) => `${account.login}_${account.source}_${token.value}`
-      );
+      // requestData = activeAccounts.map((account) => ({
+      //   login: account.login,
+      //   source: account.source,
+      //   storage: account.storage,
+      //   type: account.type,
+      // }));
+      // userToken.value = activeAccounts.map(
+      //   (account) => `${account.login}_${account.source}_${token.value}`
+      // );
+      const chatNames = [
+        "chat_hellyxx_whatsapp_3655105a-41b2-4d93-8cdc-cf6dcb8f0f37",
+        // "chat_testtest_whatsapp_3655105a-41b2-4d93-8cdc-cf6dcb8f0f37",
+      ];
+
+      // Получаем чаты
+      const chatsFromStores = getChatStoresByNames(chatNameAccount);
+      console.log("Чаты из указанных хранилищ:", chatsFromStores);
+
+      // Если используете Composition API с ref/reactive
+      chats.value = chatsFromStores;
+
+      return;
     } else {
       const userInfoParse = JSON.parse(userInfo.value);
       requestData = {
@@ -568,7 +591,7 @@ const test = async () => {
 
     const response = await axios.post(
       `${apiUrl}/getChats`,
-      isMulti.value ? { accounts: requestData } : { ...requestData },
+      isMulti.value ? { ...requestData } : { ...requestData },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -695,8 +718,6 @@ const sortedChats = computed(() => {
   });
 });
 
-onMounted(test);
-
 const formatLastMessage = (message, chat) => {
   const maxLength = 20;
   if (message && message.length > maxLength) {
@@ -721,30 +742,67 @@ const formatLastMessage = (message, chat) => {
 const audio = ref(null);
 
 const accounts = ref([]);
+
 const showAccountList = ref(false);
 
-// Функция для получения аккаунтов из localStorage
 const getAccounts = () => {
-  let storedAccounts;
-  if (isMulti.value) {
-    storedAccounts = JSON.parse(loginWhatsAppChatsStep.value);
-  } else {
-    storedAccounts = [];
-  }
-  console.log(storedAccounts);
+  console.log("getAccounts");
+  const storedAccounts = isMulti.value
+    ? loginWhatsAppChatsStep.value || []
+    : [];
+  console.log(isMulti.value);
+
   accounts.value = storedAccounts.map((account) => ({
-    name: account.login,
-    source: account.source,
-    type: account.storageUser,
-    storage: account.typeUser,
-    active: true, // По умолчанию аккаунт активен
+    ...account,
+    active: account.active !== false, // сохраняем существующий статус или true
   }));
+  // Инициализируем chatNameAccount только активными чатами
+  chatNameAccount.value = accounts.value
+    .filter((account) => account.active)
+    .map((account) => `chat_${account.login}_${account.source}_${token.value}`);
 };
 
-// Функция для переключения активности аккаунта
+const updateChats = async () => {
+  if (debounceTimer.value) {
+    clearTimeout(debounceTimer.value);
+  }
+
+  isLoading.value = true;
+  chats.value = null;
+  chatsNull.value = false;
+
+  debounceTimer.value = setTimeout(async () => {
+    try {
+      await test();
+    } catch (error) {
+      console.error("Ошибка при загрузке чатов:", error);
+      errorStation.value = true;
+    } finally {
+      isLoading.value = false;
+    }
+  }, 500);
+};
+
 const toggleAccount = (account) => {
+  // Меняем статус аккаунта
   account.active = !account.active;
-  updateLocalStorage();
+
+  // Формируем имя чата для этого аккаунта
+  const chatName = `chat_${account.login}_${account.source}_${token.value}`;
+
+  if (account.active) {
+    // Если аккаунт включен - добавляем его чат (если еще нет)
+    if (!chatNameAccount.value.includes(chatName)) {
+      chatNameAccount.value = [...chatNameAccount.value, chatName];
+    }
+  } else {
+    // Если выключен - удаляем
+    chatNameAccount.value = chatNameAccount.value.filter(
+      (item) => item !== chatName
+    );
+  }
+
+  updateChats();
 };
 
 // Функция для обновления localStorage на основе текущего состояния аккаунтов
@@ -787,7 +845,8 @@ const toggleAccountList = () => {
 
 // Получаем аккаунты при монтировании компонента
 onMounted(() => {
-  getAccounts();
+  getAccounts(); // Загружаем аккаунты из хранилища
+  test(); // Первоначальная загрузка чатов
 });
 
 // onMounted(() => {
@@ -1314,7 +1373,8 @@ input[type="checkbox"]:checked + label:after {
   }
 
   .chat-list {
-    width: 100%; /* Устанавливаем ширину списка чатов на 100% */
+    width: 100%;
+    max-width: 100%;
   }
 
   .chat-container {

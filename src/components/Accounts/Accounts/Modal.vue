@@ -184,6 +184,10 @@ const props = defineProps({
   },
 });
 
+import { storeToRefs } from "pinia";
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
+
+const chatStore = useLoginWhatsAppChatsStepStore();
 const emit = defineEmits();
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);
 import { useRouter } from "vue-router";
@@ -430,6 +434,7 @@ const forceStop = async (request) => {
       }
     );
     if (response.data.ok === true) {
+      chatStore.removeChat(login, source);
       stationLoading.loading = false;
       setLoadingStatus(true, "success");
     } else if (response.data === 401) {

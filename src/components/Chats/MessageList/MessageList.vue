@@ -7,7 +7,10 @@
     <section class="chat-section">
       <section class="message-section">
         <header class="user-info-section">
-          <div @click="changeMessageListStation" class="phone-out">
+          <div
+            @click="changeMessageListStation('messageList')"
+            class="phone-out"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -616,7 +619,6 @@ onMounted(() => {
 const handleRouteParams = async () => {
   loading.value = true;
   if (route.query.thread) {
-    // Режим по ссылке - загружаем данные чата с сервера
     try {
       const response = await axios.post(`${apiUrl}/getChatByThread`, {
         thread: route.query.thread,
@@ -624,6 +626,7 @@ const handleRouteParams = async () => {
         source: route.query.source,
       });
       chatInfoValue.value = response.data.data.data;
+      props.changeMessageListStation("ss");
       console.log(chatInfoValue.value);
       if (response.data.data.data) {
         getMessages();

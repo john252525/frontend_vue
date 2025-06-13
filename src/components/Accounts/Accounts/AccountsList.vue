@@ -154,16 +154,22 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 
-import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
+// import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
 import { storeToRefs } from "pinia";
-const loginChatsStore = useLoginWhatsAppChatsStepStore();
-const { loginWhatsAppChatsStep } = storeToRefs(loginChatsStore);
+import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
+
+// Получаем доступ к хранилищу
+const chatStore = useLoginWhatsAppChatsStepStore();
+
+const allAcoount = computed(() => chatStore.getLoginWhatsAppChatsStep);
 
 import { useUserInfoStore } from "@/stores/userInfoStore";
 
 const updateUserInfo = (event) => {
   userInfoStore.setUserInfo(event); // Передаем весь объект
 };
+
+import { fetchChats } from "@/utils/getChats";
 
 const userInfoStore = useUserInfoStore();
 
@@ -266,29 +272,17 @@ const changeForceStopItemData = async (item) => {
 
 const updateLocalStorage = (login, source, storage, type) => {
   try {
-    const existingLogins = loginWhatsAppChatsStep.value || [];
-
     const newLoginData = {
       login,
       source,
-      storage: storage || "undefined", // fallback, если storage отсутствует
-      type: type || "undefined", // fallback, если type отсутствует
+      storage: storage || "undefined",
+      type: type || "undefined",
     };
 
-    // Проверяем, есть ли уже такой логин (учитываем source, storage и type)
-    const loginExists = existingLogins.some(
-      (item) =>
-        item.login === login &&
-        item.source === source &&
-        item.storage === storage &&
-        item.type === type
-    );
-
-    if (!loginExists) {
-      loginChatsStore.addOrUpdateChat([...existingLogins, newLoginData]);
-    }
+    chatStore.addOrUpdateChat(newLoginData);
+    console.log("Account saved to store:", newLoginData);
   } catch (e) {
-    console.error("Error updating localStorage:", e);
+    console.error("Error updating store:", e);
   }
 };
 
@@ -408,7 +402,20 @@ const getAccounts = async () => {
 
             // Запись в localStorage
             if (instance.step?.value === 5) {
-              updateAccountInLocalStorage(instance);
+              try {
+                await new Promise((resolve) => setTimeout(resolve, 200 * 12));
+                await updateAccountInLocalStorage(instance);
+                console.log("Сохранен аккаунт с step 5:", instance.login);
+                const result = await fetchChats({
+                  login: instance.login,
+                  source: instance.source,
+                  type: instance.type,
+                  storage: instance.storage,
+                  token: token.value,
+                });
+              } catch (e) {
+                console.error("Ошибка при сохранении аккаунта:", e);
+              }
             }
           });
 
@@ -426,37 +433,33 @@ const getAccounts = async () => {
   }
 };
 
-const updateAccountInLocalStorage = (instance) => {
+const updateAccountInLocalStorage = async (instance) => {
   try {
-    const existingLogins = loginWhatsAppChatsStep.value || [];
-
-    const newLoginData = {
+    // Используем базовый метод addOrUpdateChat вместо safeAddOrUpdateChat
+    const success = await chatStore.addOrUpdateChat({
       login: instance.login,
       source: instance.source || accountStation.value,
       storage: instance.storage || "undefined",
       type: instance.type || "undefined",
-    };
+    });
 
-    const isDuplicate = existingLogins.some(
-      (item) =>
-        item.login === newLoginData.login &&
-        item.source === newLoginData.source &&
-        item.storage === newLoginData.storage &&
-        item.type === newLoginData.type
-    );
+    if (success && instance.step?.value === 5) {
+      // Для fetchChats используем createChatStore
 
-    if (!isDuplicate) {
-      loginChatsStore.addOrUpdateChat([...existingLogins, newLoginData]);
-
-      console.log("Account saved to localStorage:", newLoginData);
-    } else {
-      console.log("Account already exists in localStorage:", newLoginData);
+      await fetchChats({
+        login: instance.login,
+        source: instance.source,
+        type: instance.type,
+        storage: instance.storage,
+        token: token.value,
+      });
     }
+    return success;
   } catch (e) {
-    console.error("Error updating localStorage:", e);
+    console.error("Ошибка при сохранении аккаунта:", e);
+    return false;
   }
 };
-
 // Функция getInfo
 const getInfoWhats = async (source, login, type, storage) => {
   try {
@@ -621,7 +624,10 @@ const getInfo = async () => {
     }
   }
 };
-onMounted(getAccounts);
+onMounted(async () => {
+  await chatStore.init(); // Инициализируем хранилище
+  await getAccounts();
+});
 provide("selectedItems", { selectedItems });
 provide("changeEnableStation", { changeEnableStation });
 </script>
