@@ -1,274 +1,214 @@
 <template>
-  <!-- <div class="chat-app">
-    <div class="header">
-      <h1>Чат приложение (Pinia demo)</h1>
-      <div class="controls">
-        <input v-model="newToken" placeholder="Введите токен" />
-        <button @click="initStore">Инициализировать хранилище</button>
+  <div class="midjourney-generator">
+    <h2>Midjourney Image Generator</h2>
+
+    <div class="input-section">
+      <textarea
+        v-model="prompt"
+        placeholder="Введите описание изображения..."
+        rows="5"
+      ></textarea>
+
+      <div class="options">
+        <select v-model="selectedModel" class="model-select">
+          <option
+            v-for="model in availableModels"
+            :value="model.value"
+            :key="model.value"
+          >
+            {{ model.label }}
+          </option>
+        </select>
+
+        <input
+          v-model="width"
+          type="number"
+          placeholder="Ширина"
+          class="size-input"
+        />
+        <input
+          v-model="height"
+          type="number"
+          placeholder="Высота"
+          class="size-input"
+        />
       </div>
+
+      <button @click="generateImage" :disabled="isLoading">
+        {{ isLoading ? "Генерация..." : "Сгенерировать изображение" }}
+      </button>
     </div>
 
-    <div class="content">
-      <div class="sidebar">
-        <h2>Чаты</h2>
-        <div v-for="(chat, id) in chats" :key="id" class="chat-item">
-          <h3>{{ chat.title }}</h3>
-          <p>Участники: {{ chat.participants.join(", ") }}</p>
-          <button @click="selectChat(id)">Открыть</button>
-        </div>
-
-        <div class="add-chat">
-          <h3>Добавить чат</h3>
-          <input v-model="newChat.title" placeholder="Название чата" />
-          <input
-            v-model="newChat.participants"
-            placeholder="Участники (через запятую)"
-          />
-          <button @click="addNewChat">Добавить</button>
-        </div>
-      </div>
-
-      <div class="chat-area">
-        <div v-if="selectedChat" class="messages">
-          <h2>{{ chats[selectedChat]?.title }}</h2>
-          <div v-for="(msg, index) in messages" :key="index" class="message">
-            <strong>{{ msg.sender }}:</strong> {{ msg.text }}
-            <small>{{ new Date(msg.timestamp).toLocaleTimeString() }}</small>
-          </div>
-        </div>
-        <div v-else class="empty-chat">
-          <p>Выберите чат для просмотра сообщений</p>
-        </div>
-
-        <div v-if="selectedChat" class="message-input">
-          <input
-            v-model="newMessage"
-            placeholder="Введите сообщение"
-            @keyup.enter="sendMessage"
-          />
-          <button @click="sendMessage">Отправить</button>
-        </div>
-      </div>
+    <div v-if="error" class="error-message">
+      {{ error }}
     </div>
-  </div> -->
+
+    <div v-if="result" class="result-section">
+      <h3>Результат:</h3>
+      <pre>{{ result }}</pre>
+    </div>
+  </div>
 </template>
 
-<script setup>
-// import { ref, computed } from "vue";
-// import { storeToRefs } from "pinia";
-// import {
-//   addChatsToStore,
-//   addMessagesToThread,
-//   createThreadInStore,
-// } from "@/stores/chatStore/chatHelpers";
+<script>
+import axios from "axios";
 
-// const newToken = ref("user123_token");
-// const newChat = ref({
-//   title: "",
-//   participants: "",
-// });
-// const selectedChat = ref(null);
-// const newMessage = ref("");
-// const currentToken = ref(null);
+export default {
+  name: "MidjourneyGenerator",
+  data() {
+    return {
+      prompt: "",
+      isLoading: false,
+      error: null,
+      result: null,
+      selectedModel: "midjourney", // Значение по умолчанию
+      availableModels: [
+        { value: "midjourney", label: "Midjourney" },
+        { value: "stable-diffusion", label: "Stable Diffusion" },
+        // Добавьте другие модели, если они поддерживаются API
+      ],
+      width: 1024,
+      height: 1024,
+      apiKey: "sk-K6j9wfoVqC6zMoQkRMidhoxDBd0vuKc2wswMo5e09fLGsZbPqzf85vX0Uxfv",
+      apiEndpoint: "https://api.gen-api.ru/api/v1/networks/midjourney",
+    };
+  },
+  methods: {
+    async generateImage() {
+      if (!this.prompt.trim()) {
+        this.error = "Пожалуйста, введите описание изображения";
+        return;
+      }
 
-// // Доступ к хранилищу через ваш созданный store
-// const currentStore = computed(() => {
-//   if (!currentToken.value) return null;
-//   return useChatStore(currentToken.value)();
-// });
+      this.isLoading = true;
+      this.error = null;
+      this.result = null;
 
-// const { chats, messages } = storeToRefs(currentStore.value || {});
+      try {
+        const requestData = {
+          model: "7.0",
+          prompt: this.prompt,
+          width: this.width,
+          height: this.height,
+          callback_url:
+            "https://webhook.site/efc22831-76b5-4030-a3ef-2c15e9e59935",
+        };
 
-// function initStore() {
-//   if (!newToken.value) return;
-//   currentToken.value = newToken.value;
+        const response = await axios.post(this.apiEndpoint, requestData, {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${this.apiKey}`,
+          },
+        });
 
-//   // Инициализация с тестовыми данными
-//   addChatsToStore(currentToken.value, {
-//     chat1: {
-//       id: "chat1",
-//       title: "Основной чат",
-//       participants: ["user1", "user2"],
-//       createdAt: new Date(),
-//     },
-//     chat2: {
-//       id: "chat2",
-//       title: "Технические вопросы",
-//       participants: ["user1", "user3"],
-//       createdAt: new Date(),
-//     },
-//   });
+        this.result = response.data;
+      } catch (err) {
+        console.error("Ошибка при генерации изображения:", err);
 
-//   // Тестовые сообщения
-//   createThreadInStore(currentToken.value, "chat1", [
-//     {
-//       id: "1",
-//       text: "Привет! Как дела?",
-//       sender: "user1",
-//       timestamp: Date.now() - 10000,
-//     },
-//     {
-//       id: "2",
-//       text: "Привет! Все отлично!",
-//       sender: "user2",
-//       timestamp: Date.now() - 5000,
-//     },
-//   ]);
-// }
-
-// function selectChat(chatId) {
-//   selectedChat.value = chatId;
-//   newMessage.value = "";
-// }
-
-// function addNewChat() {
-//   if (!newChat.value.title || !newChat.value.participants) return;
-
-//   const chatId = `chat${Date.now()}`;
-//   const participants = newChat.value.participants
-//     .split(",")
-//     .map((p) => p.trim())
-//     .filter((p) => p);
-
-//   addChatsToStore(currentToken.value, {
-//     [chatId]: {
-//       id: chatId,
-//       title: newChat.value.title,
-//       participants,
-//       createdAt: new Date(),
-//     },
-//   });
-
-//   createThreadInStore(currentToken.value, chatId);
-
-//   newChat.value.title = "";
-//   newChat.value.participants = "";
-// }
-
-// function sendMessage() {
-//   if (!newMessage.value || !selectedChat.value) return;
-
-//   addMessagesToThread(currentToken.value, selectedChat.value, [
-//     {
-//       id: Date.now().toString(),
-//       text: newMessage.value,
-//       sender: "Я",
-//       timestamp: Date.now(),
-//       status: "sent",
-//     },
-//   ]);
-
-//   newMessage.value = "";
-// }
+        if (err.response) {
+          if (err.response.status === 422) {
+            this.error = "Ошибка валидации: ";
+            if (err.response.data?.errors_validation) {
+              for (const [field, messages] of Object.entries(
+                err.response.data.errors_validation
+              )) {
+                this.error += `${field}: ${messages.join(", ")}. `;
+              }
+            } else {
+              this.error += "Неверный формат запроса";
+            }
+          } else {
+            this.error = `Ошибка сервера: ${err.response.status} - ${err.response.statusText}`;
+          }
+        } else {
+          this.error = `Произошла ошибка: ${err.message}`;
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
-.chat-app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+.midjourney-generator {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
   font-family: Arial, sans-serif;
 }
 
-.header {
-  padding: 1rem;
-  background: #2c3e50;
-  color: white;
+.input-section {
+  margin-bottom: 20px;
 }
 
-.controls {
-  margin-top: 1rem;
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.options {
   display: flex;
-  gap: 0.5rem;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 300px;
-  padding: 1rem;
-  background: #f5f5f5;
-  overflow-y: auto;
-  border-right: 1px solid #ddd;
-}
-
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.messages {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.message {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #f0f0f0;
+.model-select,
+.size-input {
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-.message small {
-  display: block;
-  color: #666;
-  font-size: 0.8rem;
+.model-select {
+  flex-grow: 1;
 }
 
-.message-input {
-  padding: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  border-top: 1px solid #ddd;
-}
-
-input {
-  padding: 0.5rem;
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.size-input {
+  width: 80px;
 }
 
 button {
-  padding: 0.5rem 1rem;
-  background: #2c3e50;
+  background-color: #4caf50;
   color: white;
+  padding: 10px 15px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 16px;
 }
 
-button:hover {
-  background: #1a252f;
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
-.chat-item {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: white;
+button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.error-message {
+  color: #d32f2f;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #fde0e0;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.add-chat {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: white;
+.result-section {
+  margin-top: 20px;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 10px;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.empty-chat {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
+  overflow-x: auto;
 }
 </style>
