@@ -849,6 +849,8 @@ const getMessages = async () => {
       requestData.login = chatInfoValue.value.loginUser;
       requestData.uniq = chatInfoValue.value.lastMessage.id.remote;
       userToken.value = `${chatInfoValue.value.loginUser}_${chatInfoValue.value.sourceUser}_${token.value}`;
+      requestData.storage = chatInfoValue.value.storageUser;
+      requestData.type = chatInfoValue.value.typeUser;
     }
     console.log(chatInfoValue.value);
     if (chatInfoValue.value.sourceUser != "whatsapp") {

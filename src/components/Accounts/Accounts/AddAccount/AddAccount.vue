@@ -1,7 +1,7 @@
 <template>
   <div @click="openAddAccountStation" class="black-fon"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section class="add-account-section">
+  <section v-if="!loading" class="add-account-section">
     <div>
       <h2 class="title">{{ t("addAccount.title") }}</h2>
       <div @click="dropdownOpen('category')" class="dropdown-select">
@@ -134,6 +134,9 @@
       {{ t("addAccount.addButton") }}
     </button>
   </section>
+  <section v-else class="add-account-section">
+    <SettingsLoad />
+  </section>
 </template>
 
 <script setup>
@@ -144,6 +147,8 @@ import axios from "axios";
 import { ref, reactive, watch, provide, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
@@ -188,6 +193,7 @@ const isOpen = reactive({
 });
 
 const isDropdownOpen = ref(false);
+const loading = ref(false);
 
 const selectType = (value) => {
   accountData.type = value;
@@ -246,6 +252,7 @@ const selectMessenger = (value) => {
   dropdownOpen("messenger");
 };
 import useFrontendLogger from "@/composables/useFrontendLogger";
+import SettingsLoad from "../LoadingMoadal/SettingsLoad.vue";
 const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
@@ -258,6 +265,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const addAccount = async () => {
+  loading.value = true;
   const login = ref("");
   if (data.messenger === "whatsapp") {
     login.value = accountData.login;
@@ -304,7 +312,10 @@ const addAccount = async () => {
       );
     }
 
-    if ((response.data.ok = "true")) {
+    if (response.data.data.status != "error") {
+      loading.value = false;
+      setLoadingStatus(true, "success");
+      props.openAddAccountStation();
       location.reload();
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -312,13 +323,17 @@ const addAccount = async () => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
-    } else {
     }
-    // location.reload();
+    if ((response.data.data.status = "error")) {
+      loading.value = false;
+      setLoadingStatus(true, "error");
+    }
   } catch (error) {
     error.value = error.message || "Произошла ошибка.";
     console.error("error:", error);
     if (error.response) {
+      setLoadingStatus(true, "error");
+      loading.value = false;
       console.error("error", error.response.data);
     }
   }

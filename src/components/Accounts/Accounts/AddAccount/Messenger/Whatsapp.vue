@@ -7,7 +7,7 @@
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
-          Тип
+          {{ t("addAccount.type") }}
         </h2>
         <h2 :class="{ unactive: !isDropdownOpen }" v-else class="item-selected">
           {{ accountData.type }}
@@ -17,7 +17,7 @@
           class="selected"
           :class="{ active: isDropdownOpen }"
         >
-          Тип
+          {{ t("addAccount.type") }}
         </h2>
         <svg
           xmlns="http://www.w3.org/2000/svg"

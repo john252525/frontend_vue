@@ -63,19 +63,61 @@ class HookManager {
             to: eventData.to,
           },
           delete: false,
+          uniq: eventData.item,
           id: eventData.item,
           reaction: null,
           timestamp: eventData.time,
-          uniq: eventData.uniq,
         };
         store.addMessages(eventData.thread, [message]);
         this.showNotification(eventData);
         console.log("хук");
         break;
 
-      case "message_update":
-        store.loadMessages(eventData.thread, eventData.messages);
+      case "message_status":
+        // Находим сообщения для указанного thread
+        const messages = store.messages[eventData.thread] || [];
+
+        // Ищем сообщение с соответствующим uniq
+        const messageIndex = messages.findIndex(
+          (msg) => msg.uniq === eventData.item
+        );
+
+        if (messageIndex !== -1) {
+          // Обновляем state сообщения
+          messages[messageIndex].data.state =
+            eventData.content[0]?.type || "delivered";
+          // Обновляем массив сообщений в сторе
+          store.messages[eventData.thread] = [...messages];
+          console.log(
+            `Статус сообщения ${eventData.item} обновлен на ${eventData.content[0]?.type}`
+          );
+        } else {
+          console.warn(
+            `Сообщение с uniq ${eventData.item} не найдено в thread ${eventData.thread}`
+          );
+        }
         break;
+
+      // case "add_message_reaction":
+      //   const threadMessages = store.messages[eventData.thread] || [];
+      //   const reactionMessageIndex = threadMessages.findIndex(
+      //     (msg) => msg.uniq === eventData.item
+      //   );
+
+      //   if (reactionMessageIndex !== -1) {
+      //     const newReaction = eventData.content[0]?.reaction || "";
+      //     threadMessages[reactionMessageIndex].data.reaction = newReaction;
+      //     threadMessages[reactionMessageIndex].reaction = newReaction || null;
+      //     store.messages[eventData.thread] = [...threadMessages];
+      //     console.log(
+      //       `Реакция на сообщение ${eventData.item} обновлена на ${newReaction}`
+      //     );
+      //   } else {
+      //     console.warn(
+      //       `Сообщение с uniq ${eventData.item} не найдено в thread ${eventData.thread}`
+      //     );
+      //   }
+      //   break;
 
       default:
         console.warn("Unhandled hook type:", eventData);
@@ -85,7 +127,7 @@ class HookManager {
   showNotification(eventData) {
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification(`Новое сообщение в ${eventData.thread}`, {
-        body: eventData.message.text || "Вложение",
+        body: eventData.text || "Вложение",
         icon: "/notification-icon.png",
       });
     }

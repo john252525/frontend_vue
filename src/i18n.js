@@ -34,6 +34,7 @@ const messages = {
     },
     addAccount: {
       title: "Add accounts",
+      type: "Type",
       typeCategory: "Select a category",
       typeMessanger: "Choose a messenger",
       addButton: "Add",
@@ -309,6 +310,7 @@ const messages = {
     addAccount: {
       title: "Добавить аккаунты",
       typeCategory: "Выберите категорию",
+      type: "Тип",
       typeMessanger: "Выберите мессенджер",
       addButton: "Добавить",
       login: "Логин",

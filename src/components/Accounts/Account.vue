@@ -37,18 +37,34 @@
           v-if="platformStationText === 'Telegram'"
           class="platform-list-telegram"
         >
-          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">
+          <li
+            @click="choiceNetWork('telegram', 'Telegram')"
+            class="platform"
+            :class="{ active: platformStationText === 'Telegram' }"
+          >
             Telegram
           </li>
-          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">
+          <li
+            @click="choiceNetWork('whatsapp', 'WhatsApp')"
+            :class="{ active: platformStationText === 'WhatsApp' }"
+            class="platform"
+          >
             WhatsApp
           </li>
         </ul>
         <ul v-else class="platform-list-whatsapp">
-          <li @click="choiceNetWork('telegram', 'Telegram')" class="platform">
+          <li
+            @click="choiceNetWork('telegram', 'Telegram')"
+            :class="{ active: platformStationText === 'Telegram' }"
+            class="platform"
+          >
             Telegram
           </li>
-          <li @click="choiceNetWork('whatsapp', 'WhatsApp')" class="platform">
+          <li
+            @click="choiceNetWork('whatsapp', 'WhatsApp')"
+            :class="{ active: platformStationText === 'WhatsApp' }"
+            class="platform"
+          >
             WhatsApp
           </li>
         </ul>
@@ -82,7 +98,7 @@ const accountStore = useAccountStore();
 import { ref, onMounted } from "vue";
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
-const platformStationText = localStorage.getItem("accountStationText");
+const platformStationText = accountStore.getAccountStationText;
 const platformStation = ref(false);
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -295,6 +311,14 @@ header {
 }
 
 .platform:hover {
+  text-align: center;
+  width: 80px;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.platform.active {
   text-align: center;
   width: 80px;
   background-color: #eeeeee;

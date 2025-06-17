@@ -9,7 +9,6 @@ export const useAccountStore = defineStore("accountStore", {
     accountToken: "",
   }),
   getters: {
-    // Геттеры для доступа к отдельным полям (опционально)
     getAccountSource: (state) => state.accountSourse,
     getAccountData: (state) => state.accountData,
     getAccountStation: (state) => state.accountStation,
@@ -25,7 +24,6 @@ export const useAccountStore = defineStore("accountStore", {
     }),
   },
   actions: {
-    // Обновить все данные аккаунта сразу
     setAccountInfo(accountInfo) {
       this.accountSourse = accountInfo.accountSourse;
       this.accountData = accountInfo.accountData;

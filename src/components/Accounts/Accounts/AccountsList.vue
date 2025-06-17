@@ -146,7 +146,6 @@ import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
-import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
 import { useAccountStore } from "@/stores/accountStore";
@@ -154,25 +153,16 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 
-// import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore"; // Путь к вашему файлу
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
-
-// Получаем доступ к хранилищу
 const chatStore = useLoginWhatsAppChatsStepStore();
-
 const allAcoount = computed(() => chatStore.getLoginWhatsAppChatsStep);
 
 import { useUserInfoStore } from "@/stores/userInfoStore";
-
-const updateUserInfo = (event) => {
-  userInfoStore.setUserInfo(event); // Передаем весь объект
-};
+const userInfoStore = useUserInfoStore();
+const { userInfo } = storeToRefs(userInfoStore);
 
 import { fetchChats } from "@/utils/getChats";
-
-const userInfoStore = useUserInfoStore();
-
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
@@ -202,16 +192,11 @@ const loadingStation = ref(false);
 const chatsStation = ref(null);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
 
 const changeForceStopItemData = async (item) => {
   try {
-    // 1. Устанавливаем элемент и включаем загрузку
-    forceStopItemData.value = {
-      ...item,
-      loading: true, // Добавляем флаг загрузки
-    };
-
-    // 2. Находим индекс аккаунта в instanceData
+    forceStopItemData.value = { ...item, loading: true };
     const accountIndex = instanceData.value.findIndex(
       (acc) => acc.login === item.login && acc.source === item.source
     );
@@ -221,7 +206,6 @@ const changeForceStopItemData = async (item) => {
       return;
     }
 
-    // 3. Обновляем состояние загрузки в основном массиве
     instanceData.value[accountIndex].loading = true;
 
     const infoResponse = await getInfoWhats(
@@ -235,35 +219,28 @@ const changeForceStopItemData = async (item) => {
       throw new Error("Invalid response structure");
     }
 
-    // 6. Обновляем данные в основном массиве
     instanceData.value[accountIndex] = {
       ...instanceData.value[accountIndex],
       step: infoResponse.data.data.step || "Н/Д",
       loading: false,
     };
 
-    // 7. Обновляем forceStopItemData
     forceStopItemData.value = {
       ...instanceData.value[accountIndex],
       loading: false,
     };
 
-    // 8. Обработка special case для step = 5
     if (infoResponse.data.data.step?.[0]?.value === 5) {
       updateLocalStorage(item.login, item.source, item.storage, item.type);
     }
   } catch (error) {
     console.error("error", error);
-
-    // Сбрасываем состояние загрузки в случае ошибки
     if (forceStopItemData.value) {
       forceStopItemData.value.loading = false;
     }
-
     const accountIndex = instanceData.value.findIndex(
       (acc) => acc.login === item.login && acc.source === item.source
     );
-
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
     }
@@ -278,7 +255,6 @@ const updateLocalStorage = (login, source, storage, type) => {
       storage: storage || "undefined",
       type: type || "undefined",
     };
-
     chatStore.addOrUpdateChat(newLoginData);
     console.log("Account saved to store:", newLoginData);
   } catch (e) {
@@ -296,17 +272,14 @@ const changeGetScreenStation = () => {
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
+  errorBlock.value = !errorBlock.value;
 };
-
-const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -316,7 +289,7 @@ const getAccounts = async () => {
     skipDetails: true,
   };
 
-  if (stationDomain.navigate.value != "whatsapi") {
+  if (stationDomain.navigate.value !== "whatsapi") {
     params = {
       source: accountStation.value,
       skipDetails: true,
@@ -369,15 +342,41 @@ const getAccounts = async () => {
           accountStation.value === "whatsapp" ||
           accountStation.value === "telegram"
         ) {
+          const accountsToFetch = instanceData.value.filter(
+            (instance) =>
+              instance.step?.value === 5 &&
+              ((instance.storage === "binder" &&
+                instance.type !== "touchapi") ||
+                (instance.storage === "whatsapi" &&
+                  instance.type === "whatsapi"))
+          );
+
+          if (accountsToFetch.length > 0) {
+            try {
+              await new Promise((resolve) =>
+                setTimeout(resolve, 200 * accountsToFetch.length)
+              );
+              const result = await fetchChats({
+                token: token.value,
+                accounts: accountsToFetch,
+              });
+              if (result.error) {
+                console.error("Ошибка пакетного запроса чатов:", result.error);
+              }
+            } catch (e) {
+              console.error("Ошибка при сохранении аккаунтов:", e);
+            } finally {
+              accountsToFetch.forEach((instance) => {
+                instance.loading = false;
+              });
+            }
+          }
+
           const promises = instanceData.value.map(async (instance) => {
             const login = instance.login;
-
             if (
               (instance.storage === "binder" && instance.type !== "touchapi") ||
-              (instance.storage === "whatsapi" &&
-                instance.type === "whatsapi" &&
-                (instance.source != "telegram" ||
-                  instance.source != "whatsapp"))
+              (instance.storage === "whatsapi" && instance.type === "whatsapi")
             ) {
               instance.loading = false;
               return;
@@ -399,24 +398,6 @@ const getAccounts = async () => {
             } finally {
               instance.loading = false;
             }
-
-            // Запись в localStorage
-            if (instance.step?.value === 5) {
-              try {
-                await new Promise((resolve) => setTimeout(resolve, 200 * 12));
-                await updateAccountInLocalStorage(instance);
-                console.log("Сохранен аккаунт с step 5:", instance.login);
-                const result = await fetchChats({
-                  login: instance.login,
-                  source: instance.source,
-                  type: instance.type,
-                  storage: instance.storage,
-                  token: token.value,
-                });
-              } catch (e) {
-                console.error("Ошибка при сохранении аккаунта:", e);
-              }
-            }
           });
 
           await Promise.all(promises);
@@ -433,34 +414,6 @@ const getAccounts = async () => {
   }
 };
 
-const updateAccountInLocalStorage = async (instance) => {
-  try {
-    // Используем базовый метод addOrUpdateChat вместо safeAddOrUpdateChat
-    const success = await chatStore.addOrUpdateChat({
-      login: instance.login,
-      source: instance.source || accountStation.value,
-      storage: instance.storage || "undefined",
-      type: instance.type || "undefined",
-    });
-
-    if (success && instance.step?.value === 5) {
-      // Для fetchChats используем createChatStore
-
-      await fetchChats({
-        login: instance.login,
-        source: instance.source,
-        type: instance.type,
-        storage: instance.storage,
-        token: token.value,
-      });
-    }
-    return success;
-  } catch (e) {
-    console.error("Ошибка при сохранении аккаунта:", e);
-    return false;
-  }
-};
-// Функция getInfo
 const getInfoWhats = async (source, login, type, storage) => {
   try {
     const response = await axios.post(
@@ -484,7 +437,10 @@ const getInfoWhats = async (source, login, type, storage) => {
     return null;
   }
 };
-const { userInfo } = storeToRefs(userInfoStore);
+
+const updateUserInfo = (event) => {
+  userInfoStore.setUserInfo(event);
+};
 
 const openModal = (event, item) => {
   selectedItem.value = item;
@@ -548,17 +504,14 @@ const tooltipMessage = ref("");
 const tooltipStyle = ref({});
 
 const showMessage = (event, step) => {
-  tooltipMessage.value = `Текущий шаг: ${step}`; // Замените на нужное сообщение
+  tooltipMessage.value = `Текущий шаг: ${step}`;
   messageVisible.value = true;
-
-  // Позиционирование всплывающего сообщения
-  const tooltipWidth = 100; // Ширина всплывающего сообщения
-  const tooltipHeight = 30; // Высота всплывающего сообщения
-  const rect = event.currentTarget.getBoundingClientRect(); // Получаем размеры ячейки
-
+  const tooltipWidth = 100;
+  const tooltipHeight = 30;
+  const rect = event.currentTarget.getBoundingClientRect();
   tooltipStyle.value = {
-    top: `${rect.bottom + window.scrollY}px`, // Позиция сверху
-    left: `${rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2}px`, // Центруем по горизонтали
+    top: `${rect.bottom + window.scrollY}px`,
+    left: `${rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2}px`,
     width: `${tooltipWidth}px`,
     height: `${tooltipHeight}px`,
   };
@@ -587,18 +540,16 @@ const getInfo = async () => {
       }
     );
     if (response.data) {
-      if (response.data) {
-        await handleSendLog(
-          "accountList",
-          "getInfo",
-          {
-            source: selectedItem.value.source,
-            login: selectedItem.value.login,
-          },
-          response.data.ok,
-          response.data
-        );
-      }
+      await handleSendLog(
+        "accountList",
+        "getInfo",
+        {
+          source: selectedItem.value.source,
+          login: selectedItem.value.login,
+        },
+        response.data.ok,
+        response.data
+      );
     }
     console.log(response.data);
     if (response.data.data) {
@@ -615,7 +566,6 @@ const getInfo = async () => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
-    } else {
     }
   } catch (error) {
     console.error("error:", error);
@@ -624,10 +574,12 @@ const getInfo = async () => {
     }
   }
 };
+
 onMounted(async () => {
-  await chatStore.init(); // Инициализируем хранилище
+  await chatStore.init();
   await getAccounts();
 });
+
 provide("selectedItems", { selectedItems });
 provide("changeEnableStation", { changeEnableStation });
 </script>
@@ -661,35 +613,20 @@ provide("changeEnableStation", { changeEnableStation });
   border-radius: 5px;
   font-size: 12px;
   z-index: 10;
-  /* Можно добавить дополнительные стили */
 }
 
 .table-header {
-  /* position: sticky; */
   top: 0;
   z-index: 1;
 }
 
 .table {
   width: 100%;
-  /* min-width: 600px; */
   border-collapse: collapse;
 }
 
-/* .table-login {
-  width: 30%;
-}
-
-.table-step {
-  width: 50%;
-}
-
-.table-action {
-  width: 20%;
-} */
-
 .bi-list {
-  width: 16px; /* Ширина и высота иконки */
+  width: 16px;
   height: 16px;
   fill: currentColor;
   margin-bottom: -4px;
@@ -720,17 +657,6 @@ provide("changeEnableStation", { changeEnableStation });
   font-weight: 500;
   color: var(--noAccountTableText);
   margin-left: 10px;
-}
-
-.loading-data-text {
-  font-weight: 600;
-  font-size: 14px;
-  color: #000000;
-  margin-top: 20px;
-  text-align: center;
-  padding: 10px;
-  background-color: #efefef;
-  border-radius: 6px;
 }
 
 .table-login {
@@ -791,10 +717,6 @@ provide("changeEnableStation", { changeEnableStation });
   transition: all 0.15s;
 }
 
-.action-table-button img {
-  margin-right: 10px;
-}
-
 th,
 td {
   padding: 1rem;
@@ -810,22 +732,14 @@ td {
   text-align: left;
 }
 
-tr {
-  position: relative; /* Позволяет псевдоэлементу позиционироваться относительно строки */
-}
-
 tr:not(:last-child):after {
-  content: ""; /* Создает пустой контент для псевдоэлемента */
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0; /* Позиционируем линию внизу строки */
-  height: 1px; /* Высота линии */
+  bottom: 0;
+  height: 1px;
   background-color: #ebebeb;
-}
-
-tr:hover {
-  position: static;
 }
 
 @media (max-height: 900px) {
