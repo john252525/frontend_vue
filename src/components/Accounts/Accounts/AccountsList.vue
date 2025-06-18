@@ -76,6 +76,13 @@
               </div>
             </td>
           </tr>
+          <tr v-if="errorAccountBolean && !loadDataStation">
+            <td colspan="3">
+              <div class="load-cont">
+                <errorAccount />
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
       <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">{{
@@ -145,6 +152,7 @@ import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
+import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
@@ -176,6 +184,7 @@ const chatsLoadingChange = inject("chatsLoadingChange");
 const dataStationNone = ref(false);
 const dataStation = ref(false);
 const loadDataStation = ref(false);
+const errorAccountBolean = ref(false);
 const qrCodeData = ref([]);
 const enableStation = ref(false);
 const getByCodeStation = ref(false);
@@ -192,6 +201,7 @@ const loadingStation = ref(false);
 const chatsStation = ref(null);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
+import False from "@/components/Chats/UserList/ResultModal/False.vue";
 const { sendLog } = useFrontendLogger();
 
 const changeForceStopItemData = async (item) => {
@@ -409,7 +419,7 @@ const getAccounts = async () => {
     }
   } catch (error) {
     loadDataStation.value = false;
-    dataStationNone.value = true;
+    errorAccountBolean.value = true;
     console.error("Error:", error);
   }
 };
