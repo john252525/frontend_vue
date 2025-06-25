@@ -66,7 +66,13 @@ const checkChatStation = () => {
 };
 
 const isAuthPage = computed(() => {
-  return ["Login", "Registration", "PasswordRecovery"].includes(route.name);
+  return [
+    "Login",
+    "Registration",
+    "PasswordRecovery",
+    "VerifyEmail",
+    "ResetPassword",
+  ].includes(route.name);
 });
 
 const isWidgetMode = computed(() => {

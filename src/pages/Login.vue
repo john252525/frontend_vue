@@ -5,6 +5,8 @@
     :changeIncorrectPassword="changeIncorrectPassword"
   />
   <section class="login-section">
+    <button @click="sendEmail">test</button>
+    <button @click="getUUID">test2</button>
     <form>
       <h2 class="title">{{ t("login.title") }}</h2>
       <div class="input-cont">
@@ -125,17 +127,17 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("Ошибка при парсинге JSON:", err);
-    // Optionally, update the error message ref
   }
 };
 
 const loginAccount = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/login`,
+      `https://b2288.developtech.ru/api/v1/auth/login`,
       {
-        username: formData.login,
+        email: formData.login,
         password: formData.password,
+        withCredentials: false,
       },
       {
         headers: {
@@ -164,8 +166,64 @@ const loginAccount = async () => {
       accountStore.setAccountStationText("Telegram");
       navigateTo("/");
     } else {
-      inputStyle.incorrectPassword = true;
-      inputStyle.incorrectPasswordMessage = response.data.error_message;
+      console.log(false);
+    }
+  } catch (error) {
+    inputStyle.incorrectPassword = true;
+    inputStyle.incorrectPasswordMessage = response.data.error_message;
+    console.error(`${response} - Ошибка`, error);
+
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const sendEmail = async () => {
+  try {
+    const response = await axios.post(
+      `https://b2288.developtech.ru/api/v1/auth/resetPassword`,
+      {
+        token:
+          "reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2",
+        password: "zaqxsw",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2`,
+        },
+      }
+    );
+
+    conole.log(response.data);
+    if (response.data.ok === true) {
+    }
+  } catch (error) {
+    console.error(`${request} - Ошибка`, error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const getUUID = async () => {
+  try {
+    const response = await axios.post(
+      `https://b2288.developtech.ru/api/v1/auth/login`,
+      {
+        email: "it.maksim123@mail.ru",
+        password: "123123",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    conole.log(response.data);
+    if (response.data.ok === true) {
     }
   } catch (error) {
     console.error(`${request} - Ошибка`, error);

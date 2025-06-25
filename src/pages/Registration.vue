@@ -1,4 +1,9 @@
 <template>
+  <ErrorBlock
+    v-if="inputStyle.incorrectPassword"
+    :errorMessage="inputStyle.incorrectPasswordMessage"
+    :changeIncorrectPassword="changeIncorrectPassword"
+  />
   <section class="registration-section">
     <form>
       <h2 class="title">{{ t("registration.title") }}</h2>
@@ -72,10 +77,13 @@
 
 <script setup>
 import axios from "axios";
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import { useAccountStore } from "@/stores/accountStore";
+import { useStationLoading } from "@/composables/useStationLoading";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+const { setLoadingStatus } = useStationLoading();
 const accountStore = useAccountStore();
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -86,6 +94,19 @@ const formData = reactive({
   fogoutPassword: "",
   check: false,
 });
+
+const changeIncorrectPassword = () => {
+  console.log("rrrrr");
+  inputStyle.incorrectPassword = false;
+};
+
+const changeIncorrectPasswordTrue = () => {
+  inputStyle.incorrectPassword = true;
+};
+const inputStyle = {
+  incorrectPassword: false,
+  incorrectPasswordMessage: "",
+};
 
 const error = reactive({
   login: false,
@@ -113,9 +134,10 @@ const handleSendLog = async (location, method, params, results, answer) => {
 const createUser = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:3000/createUser",
+      "https://b2288.apitter.com/createUser",
       {
-        userName: formData.login,
+        username: formData.login,
+        password: formData.password,
       },
       {
         headers: {
@@ -141,10 +163,12 @@ const createUser = async () => {
 const loginAccount = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/login`,
+      `https://b2288.developtech.ru/api/v1/auth/register`,
       {
-        username: formData.login,
+        email: formData.login,
         password: formData.password,
+        type: "frontend_vue",
+        app: "app1",
       },
       {
         headers: {
@@ -162,18 +186,22 @@ const loginAccount = async () => {
         response.data
       );
     }
-
-    if (response.data.ok === true) {
-      accountStore.setAccountToken(response.data.token);
-      accountStore.setAccountData(formData.login);
-      accountStore.setAccountStation("telegram");
-      accountStore.setAccountStationText("Telegram");
-      await createUser();
-      navigateTo("/");
+    if (response.data.ok != true) {
+      console.log(false);
     }
+    // if (response.data.ok === true) {
+    //   accountStore.setAccountToken(response.data.token);
+    //   accountStore.setAccountData(formData.login);
+    //   accountStore.setAccountStation("telegram");
+    //   accountStore.setAccountStationText("Telegram");
+    // }
   } catch (error) {
+    console.log("error");
+    changeIncorrectPasswordTrue();
     console.error(`${request} - Ошибка`, error);
+    changeIncorrectPasswordTrue();
     if (error.response) {
+      inputStyle.incorrectPassword = true;
       console.error("Ошибка сервера:", error.response.data);
     }
   }

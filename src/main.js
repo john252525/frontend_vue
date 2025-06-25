@@ -6,6 +6,7 @@ import PersonalAccount from "./pages/Account.vue";
 import Login from "./pages/Login.vue";
 import Registration from "./pages/Registration.vue";
 import PasswordRecovery from "./pages/PasswordRecovery.vue";
+import VerifyEmail from "./pages/VerifyEmail.vue";
 import test from "./pages/test.vue";
 import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
@@ -13,6 +14,7 @@ import Chats from "./pages/Chats.vue";
 import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
+import ResetPassword from "./pages/ResetPassword.vue";
 import Setings from "./pages/Setings.vue";
 import NotFound from "./pages/NotFound.vue";
 import { useDomain } from "@/composables/getDomain";
@@ -57,6 +59,12 @@ const routes = [
     meta: { title: "Настройки" },
   },
   {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: ResetPassword,
+    meta: { title: "Сброс пароля" },
+  },
+  {
     path: "/",
     name: "MainPage",
     component: () => import("./pages/Redirect.vue"),
@@ -93,6 +101,12 @@ const routes = [
     name: "Mailing",
     component: Mailing,
     meta: { title: "Рассылки" },
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail,
+    meta: { title: "Подтверждение Email" },
   },
   { path: "/login", name: "Login", component: Login, meta: { title: "Вход" } },
   {
@@ -141,6 +155,8 @@ const DOMAIN_CONFIG = {
       "Registration",
       "PasswordRecovery",
       "payments",
+      "VerifyEmail",
+      "ResetPassword",
     ],
     defaultRoute: "/Accounts",
     redirectRoute: "/Accounts",
@@ -152,7 +168,14 @@ const DOMAIN_CONFIG = {
     redirectRoute: "/Accounts",
   },
   "app4.developtech.ru": {
-    allowedRoutes: ["Setings", "Login", "Registration", "PasswordRecovery"],
+    allowedRoutes: [
+      "Setings",
+      "Login",
+      "Registration",
+      "PasswordRecovery",
+      "VerifyEmail",
+      "ResetPassword",
+    ],
     defaultRoute: "/settings",
     redirectRoute: "/settings",
   },
@@ -211,17 +234,19 @@ router.beforeEach(async (to, from, next) => {
     return next();
   }
 
-  // Проверка ограничений доступа по домену
   const access = checkRouteAccess(to, currentDomain);
   if (!access.allowed) {
     console.warn(`error`);
     return next(access.redirect || "/");
   }
 
-  // Проверка авторизации
-  const isAuthPage = ["Login", "Registration", "PasswordRecovery"].includes(
-    to.name
-  );
+  const isAuthPage = [
+    "Login",
+    "Registration",
+    "PasswordRecovery",
+    "VerifyEmail",
+    "ResetPassword",
+  ].includes(to.name);
 
   if (token.value) {
     if (isAuthPage) {
