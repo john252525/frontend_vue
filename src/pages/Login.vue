@@ -5,8 +5,6 @@
     :changeIncorrectPassword="changeIncorrectPassword"
   />
   <section class="login-section">
-    <button @click="sendEmail">test</button>
-    <button @click="getUUID">test2</button>
     <form>
       <h2 class="title">{{ t("login.title") }}</h2>
       <div class="input-cont">
@@ -138,11 +136,6 @@ const loginAccount = async () => {
         email: formData.login,
         password: formData.password,
         withCredentials: false,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
       }
     );
 
@@ -160,7 +153,7 @@ const loginAccount = async () => {
     }
 
     if (response.data.ok === true) {
-      accountStore.setAccountToken(response.data.token);
+      accountStore.setAccountToken(response.data.data.refresh_token);
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
       accountStore.setAccountStationText("Telegram");
