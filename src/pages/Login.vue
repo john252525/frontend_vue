@@ -153,7 +153,7 @@ const loginAccount = async () => {
     }
 
     if (response.data.ok === true) {
-      accountStore.setAccountToken(response.data.data.refresh_token);
+      accountStore.setAccountToken(response.data.data.token);
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
       accountStore.setAccountStationText("Telegram");
