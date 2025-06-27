@@ -148,14 +148,6 @@ const getAccounts = async () => {
     );
 
     if (response.data.ok === true) {
-      await handleSendLog(
-        "accountList",
-        "getInfoByToken",
-
-        response.data.ok,
-        response.data
-      );
-
       accounts.value = response.data.data.vendors;
       console.log(response.data);
     }
