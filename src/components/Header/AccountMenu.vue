@@ -90,9 +90,19 @@ const leaveAccount = () => {
   text-align: center;
 }
 
+.account-button {
+  font-weight: 500;
+  font-size: 20px;
+  color: var(--text);
+  margin-left: 35px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+
 .out-account-button {
   font-weight: 500;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--text);
   margin-left: 35px;
   cursor: pointer;

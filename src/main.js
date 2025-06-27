@@ -15,6 +15,7 @@ import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import ResetPassword from "./pages/ResetPassword.vue";
+import Referrals from "./pages/ReferralsPage.vue";
 import Setings from "./pages/Setings.vue";
 import NotFound from "./pages/NotFound.vue";
 import { useDomain } from "@/composables/getDomain";
@@ -51,6 +52,12 @@ const routes = [
     name: "Logs",
     component: Logs,
     meta: { title: "Настройки" },
+  },
+  {
+    path: "/referrals",
+    name: "Referrals",
+    component: Referrals,
+    meta: { title: "Рефералы" },
   },
   {
     path: "/settings",
