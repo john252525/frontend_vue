@@ -150,7 +150,8 @@ const getAccounts = async () => {
     if (response.data.ok === true) {
       loadDataStation.value = false;
       accounts.value = response.data.data.vendors;
-      console.log(response.data);
+      console.log(response.data.data);
+      console.log(response.data.data.vendors);
     }
   } catch (error) {
     loadDataStation.value = false;
