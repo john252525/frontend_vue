@@ -1,10 +1,10 @@
 <template>
   <header>
     <section class="account-section">
-      <h2 class="title">{{ t("account.accounts") }}</h2>
+      <h2 class="title">Рефералы</h2>
     </section>
     <section class="account-section">
-      <button @click="openReferralsList" class="add-account-button">
+      <button @click="copyReferralLink" class="add-account-button">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -27,7 +27,7 @@
           </g>
         </svg>
 
-        https://app1.developtech.ru/#/login...
+        {{ textButton }}
       </button>
     </section>
   </header>
@@ -41,6 +41,37 @@ import ReferralsList from "./ReferralsList.vue";
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+
+const textButton = ref("https://app1.developtech.ru/#/login...");
+
+const copyReferralLink = async () => {
+  const referralLink =
+    "https://app1.developtech.ru/#/login?ref=" + accountStore.accountToken;
+
+  try {
+    await navigator.clipboard.writeText(referralLink);
+    // Здесь можно добавить уведомление об успешном копировании
+    console.log("Ссылка скопирована в буфер обмена:", referralLink);
+    textButton.value = "Ссылка скопирована";
+    setTimeout(() => {
+      textButton.value = "https://app1.developtech.ru/#/login...";
+    }, 3000);
+  } catch (err) {
+    console.error("Не удалось скопировать ссылку:", err);
+    // Альтернативный способ для старых браузеров
+    const textArea = document.createElement("textarea");
+    textArea.value = referralLink;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      console.log("Ссылка скопирована (старый метод)");
+    } catch (err) {
+      console.error("Не удалось скопировать ссылку (старый метод):", err);
+    }
+    document.body.removeChild(textArea);
+  }
+};
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();

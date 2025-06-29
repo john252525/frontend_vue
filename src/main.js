@@ -235,47 +235,53 @@ const updatePageMetadata = (title, logoUrl) => {
 
 router.beforeEach(async (to, from, next) => {
   const currentDomain = window.location.hostname;
-
   const accountStore = useAccountStore();
-  const token = computed(() => accountStore.getAccountToken);
+  const token = accountStore.getAccountToken;
+
+  // Сначала проверяем страницу сброса пароля
+  if (to.name === "ResetPassword" && to.query.token) {
+    return next(); // Разрешаем доступ к странице сброса пароля с токеном
+  }
+
+  // Затем проверяем доступ по домену
+  const access = checkRouteAccess(to, currentDomain);
+  if (!access.allowed) {
+    console.warn(`Доступ запрещен для ${currentDomain}`);
+    return next(access.redirect || "/");
+  }
+
+  // Страницы, доступные без токена
+  const publicPages = [
+    "Login",
+    "Registration",
+    "PasswordRecovery",
+    "ResetPassword", // Добавляем сюда, но проверка уже выше
+    "VerifyEmail",
+  ];
 
   if (to.name === "NotFound") {
     return next();
   }
 
-  const access = checkRouteAccess(to, currentDomain);
-  if (!access.allowed) {
-    console.warn(`error`);
-    return next(access.redirect || "/");
+  // Если нет токена и это не публичная страница - на логин
+  if (!token && !publicPages.includes(to.name)) {
+    return next({ name: "Login" });
   }
 
-  const isAuthPage = [
-    "Login",
-    "Registration",
-    "PasswordRecovery",
-    "VerifyEmail",
-    "ResetPassword",
-  ].includes(to.name);
-
-  if (token.value) {
-    if (isAuthPage) {
-      return next({ name: "PersonalAccount" });
-    }
-  } else {
-    if (!isAuthPage) {
-      return next({ name: "Login" });
-    }
+  // Если есть токен и пользователь на публичной странице - на аккаунт
+  if (token && publicPages.includes(to.name) && to.name !== "ResetPassword") {
+    return next({ name: "PersonalAccount" });
   }
 
+  // Обновление метаданных
   try {
     const { stationDomain } = useDomain();
     const pageTitle = stationDomain?.cosmetics?.titleLogo
       ? `${to.meta.title} | ${stationDomain.cosmetics.titleLogo}`
       : to.meta.title || "Touch-API";
-
     updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
   } catch (error) {
-    console.error("error", error);
+    console.error("Ошибка метаданных:", error);
     updatePageMetadata(to.meta.title);
   }
 

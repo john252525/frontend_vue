@@ -8,30 +8,34 @@
           </tr>
         </thead>
         <tbody class="tbody">
-          <tr v-if="dataStation" v-for="(item, index) in accounts" :key="index">
-            <td class="table-text-number">{{ item.login }}</td>
-          </tr>
-          <tr v-else-if="dataStationNone">
-            <td colspan="3">
-              <div class="none-account-cont">
-                <h2>{{ t("accountList.accountNone") }}</h2>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="loadDataStation">
-            <td colspan="3">
-              <div class="load-cont">
-                <LoadAccount />
-              </div>
-            </td>
-          </tr>
-          <tr v-if="errorAccountBolean && !loadDataStation">
-            <td colspan="3">
-              <div class="load-cont">
-                <errorAccount />
-              </div>
-            </td>
-          </tr>
+          <template v-if="accounts.length > 0">
+            <tr v-for="(item, index) in accounts" :key="index">
+              <td class="table-text-number">{{ item.login }}</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr v-if="!loadDataStation && !errorAccountBolean">
+              <td colspan="2">
+                <div class="none-account-cont">
+                  <h2>{{ t("accountList.accountNone") }}</h2>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="loadDataStation">
+              <td colspan="2">
+                <div class="load-cont">
+                  <LoadAccount />
+                </div>
+              </td>
+            </tr>
+            <tr v-if="errorAccountBolean && !loadDataStation">
+              <td colspan="2">
+                <div class="load-cont">
+                  <errorAccount />
+                </div>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
       <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">{{
@@ -87,18 +91,7 @@ const getScreenStation = ref(false);
 const qrModalStation = ref(false);
 const settingsModalStation = ref(false);
 const instanceData = ref([]);
-const accounts = ref([
-  {
-    id: "245",
-    uuid: "e183462c-0e5a-4ea1-8cfe-ee260bc526ae",
-    dt_ins: "2025-06-26 21:53:16",
-    type: "frontend_vue",
-    token: "32d4f3ca2e781add555730b56de15ed3",
-    login: "maksim.birukov.2007@mail.ru",
-    source: "",
-    enable: "1",
-  },
-]);
+const accounts = ref([]);
 const isModalOpen = ref(false);
 const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
@@ -116,28 +109,14 @@ const chaneErrorBlock = () => {
 };
 
 const getAccounts = async () => {
-  //   let params = {
-  //     source: accountStation.value,
-  //     skipDetails: true,
-  //   };
-
-  //   if (stationDomain.navigate.value !== "whatsapi") {
-  //     params = {
-  //       source: accountStation.value,
-  //       skipDetails: true,
-  //     };
-  //   } else {
-  //     params = {
-  //       skipDetails: true,
-  //     };
-  //   }
-
   loadDataStation.value = true;
+  errorAccountBolean.value = false;
+
   try {
     const response = await axios.post(
       "https://b2288.developtech.ru/api/v1/vendors/getByIds",
       {
-        vendor_ids: [245],
+        vendor_ids: [245], // Здесь можно указать массив ID или другой параметр для получения всех аккаунтов
       },
       {
         headers: {
@@ -147,16 +126,14 @@ const getAccounts = async () => {
       }
     );
 
-    if (response.data.ok === true) {
-      loadDataStation.value = false;
-      accounts.value = JSON.stringify(response.data.data.vendors);
-      console.log(response.data.data);
-      console.log(response.data.data.vendors);
+    if (response.data.ok) {
+      accounts.value = response.data.data.vendors;
     }
   } catch (error) {
-    loadDataStation.value = false;
+    console.error("Error fetching accounts:", error);
     errorAccountBolean.value = true;
-    console.error("Error:", error);
+  } finally {
+    loadDataStation.value = false;
   }
 };
 
