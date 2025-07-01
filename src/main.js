@@ -238,12 +238,15 @@ router.beforeEach(async (to, from, next) => {
   const accountStore = useAccountStore();
   const token = accountStore.getAccountToken;
 
-  // Сначала проверяем страницу сброса пароля
-  if (to.name === "ResetPassword" && to.query.token) {
-    return next(); // Разрешаем доступ к странице сброса пароля с токеном
+  // Проверяем страницы ResetPassword и VerifyEmail с query-токеном
+  if (
+    (to.name === "ResetPassword" && to.query.token) ||
+    (to.name === "VerifyEmail" && to.query.token)
+  ) {
+    return next(); // Разрешаем доступ к страницам с токеном
   }
 
-  // Затем проверяем доступ по домену
+  // Проверяем доступ по домену
   const access = checkRouteAccess(to, currentDomain);
   if (!access.allowed) {
     console.warn(`Доступ запрещен для ${currentDomain}`);
@@ -255,7 +258,7 @@ router.beforeEach(async (to, from, next) => {
     "Login",
     "Registration",
     "PasswordRecovery",
-    "ResetPassword", // Добавляем сюда, но проверка уже выше
+    "ResetPassword",
     "VerifyEmail",
   ];
 
@@ -269,7 +272,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Если есть токен и пользователь на публичной странице - на аккаунт
-  if (token && publicPages.includes(to.name) && to.name !== "ResetPassword") {
+  if (token && publicPages.includes(to.name)) {
     return next({ name: "PersonalAccount" });
   }
 
