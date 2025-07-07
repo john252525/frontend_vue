@@ -129,13 +129,13 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const loginAccount = async () => {
-  accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZW5kb3JfaWQiOiIyNDQiLCJlbWFpbCI6Iml0Lm1ha3NpbTEyM0BtYWlsLnJ1IiwiZXhwIjoxNzUxNTgzNTA1fQ.cuydzIW_u_zw4Y8pFqTj7vwYb6sI9ZNuiosaR2MZ-7g"
-  );
-  accountStore.setAccountData("it.maksim123@mail.ru");
-  accountStore.setAccountStation("telegram");
-  accountStore.setAccountStationText("Telegram");
-  navigateTo("/");
+  // accountStore.setAccountToken(
+  //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZW5kb3JfaWQiOiIyNDQiLCJlbWFpbCI6Iml0Lm1ha3NpbTEyM0BtYWlsLnJ1IiwiZXhwIjoxNzUxNTgzNTA1fQ.cuydzIW_u_zw4Y8pFqTj7vwYb6sI9ZNuiosaR2MZ-7g"
+  // );
+  // accountStore.setAccountData("it.maksim123@mail.ru");
+  // accountStore.setAccountStation("telegram");
+  // accountStore.setAccountStationText("Telegram");
+  // navigateTo("/");
 
   try {
     const response = await axios.post(

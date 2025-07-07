@@ -1,6 +1,6 @@
 <template>
   <div class="cont">
-    <h3>Не удалось загрузить данные</h3>
+    <h3>{{ t("referrals.errorAccount") }}</h3>
   </div>
 </template>
 

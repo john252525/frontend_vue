@@ -7,6 +7,8 @@ import EditMailing from "./components/Mailing/ModalComponent/EditMailing/EditMai
 import { min } from "lodash";
 import Checbox from "./components/Chats/UserList/newMessageComponent/Checbox.vue";
 import { useDomain } from "@/composables/getDomain";
+import Redirect from "./pages/Redirect.vue";
+import VerifyEmail from "./pages/VerifyEmail.vue";
 const { stationDomen } = useDomain();
 
 const messages = {
@@ -16,9 +18,46 @@ const messages = {
       submit: "Submit",
       cancel: "Cancel",
     },
+    VerifyEmail: {
+      title: "Checking email...",
+      message: "Please wait",
+      true: "Email confirmed!",
+      messageTrue: "Thank you for confirming your email address.",
+      buttonNext: "Continue",
+      error: "An error has occurred",
+      errorMessage: "Unable to confirm your email.",
+      repeat: "Repeat",
+      errorOne: "Unknown verification error",
+      errorTwo: "Server not responding. errorThree: Error sending request",
+      errorFour: "No confirmation token found in URL",
+    },
+    PasswordReset: {
+      title: "Reset Password",
+      inputOne: "New Password",
+      inputTwo: "Repeat Password",
+      button: "Change Password",
+      loadin: "Processing...",
+      true: "Password successfully changed!",
+      redirect: "You will be redirected to the login page via",
+      redirectButton: "Go Now",
+      errorOne: "Enter a new password",
+      errorTwo: "Password must contain at least 8 characters",
+      errorThree: "Repeat Password",
+      errorFour: "Passwords do not match",
+      errorFive: "Invalid or missing link to reset your password",
+      errorSix: "An error occurred while changing your password",
+      errorSeven: "Server error while changing your password",
+      errorEight: "Unable to connect to the server",
+      errorNine: "Error while sending the request",
+    },
     account: {
       accounts: "Accounts",
       addButton: "Add",
+    },
+    referrals: {
+      title: "Referrals",
+      link: "Link copied",
+      errorAccount: "Unable to load data",
     },
     accountList: {
       login: "LOGIN",
@@ -291,6 +330,39 @@ const messages = {
       submit: "Отправить",
       cancel: "Отмена",
     },
+    VerifyEmail: {
+      title: "Проверка email...",
+      message: "Пожалуйста, подождите",
+      true: "Email подтверждён!",
+      messageTrue: " Спасибо за подтверждение вашего адреса электронной почты.",
+      buttonNext: "Продолжить",
+      error: "Произошла ошибка",
+      errorMessage: "Не удалось подтвердить ваш email.",
+      repeat: "Повторить",
+      errorOne: "Неизвестная ошибка верификации",
+      errorTwo: "Сервер не отвечает. Проверьте подключение к интернету.",
+      errorThree: "Ошибка при отправке запроса",
+      errorFour: "Токен подтверждения не найден в URL",
+    },
+    PasswordReset: {
+      title: "Сброс пароля",
+      inputOne: "Новый пароль",
+      inputTwo: "Повторите пароль",
+      button: "Сменить пароль",
+      loadin: "Обработка...",
+      true: "Пароль успешно изменен!",
+      redirect: "Вы будете перенаправлены на страницу входа через",
+      redirectButton: "Перейти сейчас",
+      errorOne: "Введите новый пароль",
+      errorTwo: "Пароль должен содержать минимум 8 символов",
+      errorThree: "Повторите пароль",
+      errorFour: "Пароли не совпадают",
+      errorFive: "Неверная или отсутствующая ссылка для сброса пароля",
+      errorSix: "Произошла ошибка при смене пароля",
+      errorSeven: "Ошибка сервера при смене пароля",
+      errorEight: "Не удалось соединиться с сервером",
+      errorNine: "Ошибка при отправке запроса",
+    },
     account: {
       accounts: "Аккаунты",
       addButton: "Добавить",
@@ -301,6 +373,11 @@ const messages = {
       action: "ДЕЙСТВИЕ",
       actionButton: "Действие",
       accountNone: "Аккаунты отсутствуют.",
+    },
+    referrals: {
+      title: "Рефералы",
+      link: "Ссылка скопирована",
+      errorAccount: "Не удалось загрузить данные",
     },
     personalAccount: {
       out: "Выйти",
@@ -527,7 +604,7 @@ const messages = {
       noAccaunt: "Нет аккаунта?",
       createAccount: "Создать аккаунт",
     },
-    registation: {
+    registration: {
       title: "Регистрация",
       mail: "Почта",
       password: "Пароль",

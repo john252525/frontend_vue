@@ -7,8 +7,8 @@
         <div class="bounce2"></div>
         <div class="bounce3"></div>
       </div>
-      <h2 class="title">Проверка email...</h2>
-      <p class="message">Пожалуйста, подождите</p>
+      <h2 class="title">{{ t("VerifyEmail.title") }}</h2>
+      <p class="message">{{ t("VerifyEmail.message") }}</p>
     </div>
 
     <!-- Success State -->
@@ -25,11 +25,13 @@
           d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
         />
       </svg>
-      <h2 class="title">Email подтверждён!</h2>
+      <h2 class="title">{{ t("VerifyEmail.true") }}!</h2>
       <p class="message">
-        Спасибо за подтверждение вашего адреса электронной почты.
+        {{ t("VerifyEmail.messageTrue") }}
       </p>
-      <button class="btn success-btn" @click="redirectToApp">Продолжить</button>
+      <button class="btn success-btn" @click="redirectToApp">
+        {{ t("VerifyEmail.buttonNext") }}
+      </button>
     </div>
 
     <!-- Error State -->
@@ -46,12 +48,12 @@
           d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
         />
       </svg>
-      <h2 class="title error-text">Произошла ошибка</h2>
+      <h2 class="title error-text">{{ t("VerifyEmail.error") }}</h2>
       <p class="message">
-        {{ errorMessage || "Не удалось подтвердить ваш email." }}
+        {{ errorMessage || t("VerifyEmail.errorMessage") }}
       </p>
       <button class="btn error-btn" @click="retryVerification">
-        Повторить
+        {{ t("VerifyEmail.repeat") }}
       </button>
     </div>
   </div>
@@ -61,6 +63,9 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
+
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const isLoading = ref(true);
 const error = ref(false);
@@ -102,7 +107,7 @@ const verifyToken = async (token) => {
       console.error("Ошибка верификации:", response.data.message);
       return {
         success: false,
-        message: response.data.message || "Неизвестная ошибка верификации",
+        message: response.data.message || t("VerifyEmail.errorOne"),
       };
     }
   } catch (err) {
@@ -120,14 +125,14 @@ const verifyToken = async (token) => {
       console.error("Нет ответа от сервера:", err.request);
       return {
         success: false,
-        message: "Сервер не отвечает. Проверьте подключение к интернету.",
+        message: t("VerifyEmail.errorTwo"),
       };
     } else {
       // Ошибка при настройке запроса
       console.error("Ошибка настройки запроса:", err.message);
       return {
         success: false,
-        message: "Ошибка при отправке запроса",
+        message: t("VerifyEmail.errorThree"),
       };
     }
   }
@@ -150,7 +155,7 @@ onMounted(() => {
     verifyToken(token);
   } else {
     error.value = true;
-    errorMessage.value = "Токен подтверждения не найден в URL";
+    errorMessage.value = t("VerifyEmail.errorFour");
     isLoading.value = false;
   }
 });

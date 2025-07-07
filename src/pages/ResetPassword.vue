@@ -1,62 +1,85 @@
 <template>
   <div class="cont">
-    <form @submit.prevent="handleResetPassword">
-      <h2 class="title">Сброс пароля</h2>
+    <template v-if="!passwordChanged">
+      <form @submit.prevent="handleResetPassword">
+        <h2 class="title">{{ t("PasswordReset.title") }}</h2>
 
-      <div v-if="errorMessage" class="error-message">
-        {{ errorMessage }}
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <div class="input-cont">
+          <label class="name-input" for="password">{{
+            t("PasswordReset.inputOne")
+          }}</label>
+          <input
+            type="password"
+            placeholder="••••••••••••"
+            id="password"
+            v-model="formData.password"
+            required
+            :class="{ 'input-error': errors.password }"
+            @input="clearError('password')"
+          />
+          <span v-if="errors.password" class="error-text">{{
+            errors.password
+          }}</span>
+        </div>
+
+        <div class="input-cont">
+          <label class="name-input" for="repeatPassword">{{
+            t("PasswordReset.inputTwo")
+          }}</label>
+          <input
+            placeholder="••••••••••••"
+            type="password"
+            id="repeatPassword"
+            v-model="formData.repeatPassword"
+            required
+            :class="{ 'input-error': errors.repeatPassword }"
+            @input="clearError('repeatPassword')"
+          />
+          <span v-if="errors.repeatPassword" class="error-text">{{
+            errors.repeatPassword
+          }}</span>
+        </div>
+
+        <button
+          type="submit"
+          class="login-account-button"
+          :disabled="isLoading"
+        >
+          <span v-if="!isLoading">{{ t("PasswordReset.button") }}</span>
+          <span v-else>{{ t("PasswordReset.loadin") }}</span>
+        </button>
+      </form>
+    </template>
+
+    <template v-else>
+      <div class="success-container">
+        <h2 class="title-changed">{{ t("PasswordReset.true") }}</h2>
+        <p class="redirect-message">
+          {{ t("PasswordReset.redirect") }}
+          {{ countdown }}
+        </p>
+        <button class="login-account-button" @click="redirectToLogin">
+          {{ t("PasswordReset.redirectButton") }}
+        </button>
       </div>
-
-      <div v-if="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
-
-      <div class="input-cont">
-        <label class="name-input" for="password">Новый пароль</label>
-        <input
-          type="password"
-          placeholder="••••••••••••"
-          id="password"
-          v-model="formData.password"
-          required
-          :class="{ 'input-error': errors.password }"
-          @input="clearError('password')"
-        />
-        <span v-if="errors.password" class="error-text">{{
-          errors.password
-        }}</span>
-      </div>
-
-      <div class="input-cont">
-        <label class="name-input" for="repeatPassword">Повторите пароль</label>
-        <input
-          placeholder="••••••••••••"
-          type="password"
-          id="repeatPassword"
-          v-model="formData.repeatPassword"
-          required
-          :class="{ 'input-error': errors.repeatPassword }"
-          @input="clearError('repeatPassword')"
-        />
-        <span v-if="errors.repeatPassword" class="error-text">{{
-          errors.repeatPassword
-        }}</span>
-      </div>
-
-      <button type="submit" class="login-account-button" :disabled="isLoading">
-        <span v-if="!isLoading">Сменить пароль</span>
-        <span v-else>Обработка...</span>
-      </button>
-    </form>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 const route = useRoute();
+const router = useRouter();
 const token = ref("");
 
 onMounted(() => {
@@ -76,7 +99,9 @@ const errors = reactive({
 
 const isLoading = ref(false);
 const errorMessage = ref("");
-const successMessage = ref("");
+const passwordChanged = ref(false);
+const countdown = ref(5);
+let countdownInterval = null;
 
 const clearError = (field) => {
   errors[field] = "";
@@ -92,27 +117,42 @@ const validateForm = () => {
   errors.form = "";
 
   if (!formData.password) {
-    errors.password = "Введите новый пароль";
+    errors.password = t("PasswordReset.errorOne");
     isValid = false;
   } else if (formData.password.length < 8) {
-    errors.password = "Пароль должен содержать минимум 8 символов";
+    errors.password = t("PasswordReset.errorTwo");
     isValid = false;
   }
 
   if (!formData.repeatPassword) {
-    errors.repeatPassword = "Повторите пароль";
+    errors.repeatPassword = t("PasswordReset.errorThree");
     isValid = false;
   } else if (formData.password !== formData.repeatPassword) {
-    errors.repeatPassword = "Пароли не совпадают";
+    errors.repeatPassword = t("PasswordReset.errorFour");
     isValid = false;
   }
 
   if (!token.value) {
-    errors.form = "Неверная или отсутствующая ссылка для сброса пароля";
+    errors.form = t("PasswordReset.errorFive");
     isValid = false;
   }
 
   return isValid;
+};
+
+const startCountdown = () => {
+  countdownInterval = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      clearInterval(countdownInterval);
+      redirectToLogin();
+    }
+  }, 1000);
+};
+
+const redirectToLogin = () => {
+  clearInterval(countdownInterval);
+  router.push("/login");
 };
 
 const handleResetPassword = async () => {
@@ -134,21 +174,19 @@ const handleResetPassword = async () => {
     );
 
     if (response.data.ok) {
-      successMessage.value = response.data.message || "Пароль успешно изменен";
-      formData.password = "";
-      formData.repeatPassword = "";
+      passwordChanged.value = true;
+      startCountdown();
     } else {
-      errorMessage.value =
-        response.data.message || "Произошла ошибка при смене пароля";
+      errorMessage.value = response.data.message || t("PasswordReset.errorSix");
     }
   } catch (error) {
     if (error.response) {
       errorMessage.value =
-        error.response.data.message || "Ошибка сервера при смене пароля";
+        error.response.data.message || t("PasswordReset.errorSeven");
     } else if (error.request) {
-      errorMessage.value = "Не удалось соединиться с сервером";
+      errorMessage.value = t("PasswordReset.errorEight");
     } else {
-      errorMessage.value = "Ошибка при отправке запроса";
+      errorMessage.value = t("PasswordReset.errorNine");
     }
   } finally {
     isLoading.value = false;
@@ -179,6 +217,14 @@ const handleResetPassword = async () => {
   font-size: 28px;
   color: var(--text);
   text-align: left;
+  margin-bottom: 44px;
+}
+
+.title-changed {
+  font-weight: 600;
+  font-size: 28px;
+  color: var(--text);
+  text-align: center;
   margin-bottom: 44px;
 }
 
@@ -247,11 +293,15 @@ input {
   width: 100%;
 }
 
-.success-message {
-  color: #33cc33;
-  margin-bottom: 20px;
+.success-container {
   text-align: center;
-  width: 100%;
+  padding: 20px;
+}
+
+.redirect-message {
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 30px;
 }
 
 .error-text {

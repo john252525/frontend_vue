@@ -1,6 +1,6 @@
 import "./assets/main.css";
-import { createRouter, createWebHashHistory } from "vue-router";
-import { createApp, computed } from "vue";
+import { createRouter, createWebHistory } from "vue-router";
+import { createApp } from "vue";
 import App from "./App.vue";
 import PersonalAccount from "./pages/Account.vue";
 import Login from "./pages/Login.vue";
@@ -24,15 +24,27 @@ import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import { useAccountStore } from "@/stores/accountStore"; // Путь к вашему store
+import { useAccountStore } from "@/stores/accountStore";
 import { hookManager } from "@/hooks/HookManager";
-
 import { useRequestsStore } from "@/stores/requests";
+import axios from "axios";
+
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
+// Запрос разрешения на уведомления
 if ("Notification" in window) {
-  Notification.requestPermission();
+  try {
+    Notification.requestPermission()
+      .then((permission) => {
+        console.log("[main.js] Разрешение на уведомления:", permission);
+      })
+      .catch((error) => {
+        console.error("[main.js] Ошибка при запросе уведомлений:", error);
+      });
+  } catch (error) {
+    console.error("[main.js] Ошибка в Notification API:", error);
+  }
 }
 
 const routes = [
@@ -74,7 +86,20 @@ const routes = [
   {
     path: "/",
     name: "MainPage",
-    component: () => import("./pages/Redirect.vue"),
+    redirect: (to) => {
+      const accountStore = useAccountStore();
+      const token = accountStore.getAccountToken;
+      console.log(
+        "[MainPage] Запрошенный URL:",
+        window.location.pathname,
+        "Токен:",
+        token
+      );
+      if (token) {
+        return { name: "PersonalAccount", query: to.query };
+      }
+      return { name: "Login", query: to.query };
+    },
     meta: { title: "Главная страница" },
   },
   {
@@ -149,11 +174,11 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 });
 
-// Обновленная конфигурация ограничений по доменам
+// Конфигурация ограничений по доменам
 const DOMAIN_CONFIG = {
   "app1.developtech.ru": {
     allowedRoutes: [
@@ -191,10 +216,31 @@ const DOMAIN_CONFIG = {
 };
 
 const checkRouteAccess = (to, domain) => {
-  const config = DOMAIN_CONFIG[domain];
-  if (!config) return { allowed: true };
+  console.log(
+    `[checkRouteAccess] Проверка маршрута ${to.name} для домена ${domain}`
+  );
+  const publicPages = [
+    "Login",
+    "Registration",
+    "PasswordRecovery",
+    "VerifyEmail",
+    "ResetPassword",
+  ];
+  if (publicPages.includes(to.name)) {
+    console.log(
+      `[checkRouteAccess] Разрешен доступ к публичной странице ${to.name}`
+    );
+    return { allowed: true };
+  }
 
-  // Для app1 разрешаем только указанные маршруты
+  const config = DOMAIN_CONFIG[domain];
+  if (!config) {
+    console.log(
+      `[checkRouteAccess] Конфигурация для домена ${domain} отсутствует`
+    );
+    return { allowed: true };
+  }
+
   if (domain === "app1.developtech.ru") {
     return {
       allowed: config.allowedRoutes.includes(to.name),
@@ -202,7 +248,6 @@ const checkRouteAccess = (to, domain) => {
     };
   }
 
-  // Для app2 запрещаем только указанные маршруты
   if (domain === "app2.developtech.ru") {
     return {
       allowed: !config.blockedRoutes.includes(to.name),
@@ -210,7 +255,6 @@ const checkRouteAccess = (to, domain) => {
     };
   }
 
-  // Для app4 разрешаем только указанные маршруты
   if (domain === "app4.developtech.ru") {
     return {
       allowed: config.allowedRoutes.includes(to.name),
@@ -223,7 +267,6 @@ const checkRouteAccess = (to, domain) => {
 
 const updatePageMetadata = (title, logoUrl) => {
   document.title = title || "Touch-API";
-
   let favicon = document.querySelector('link[rel="icon"]');
   if (!favicon) {
     favicon = document.createElement("link");
@@ -234,67 +277,147 @@ const updatePageMetadata = (title, logoUrl) => {
 };
 
 router.beforeEach(async (to, from, next) => {
-  const currentDomain = window.location.hostname;
-  const accountStore = useAccountStore();
-  const token = accountStore.getAccountToken;
-
-  // Проверяем страницы ResetPassword и VerifyEmail с query-токеном
-  if (
-    (to.name === "ResetPassword" && to.query.token) ||
-    (to.name === "VerifyEmail" && to.query.token)
-  ) {
-    return next(); // Разрешаем доступ к страницам с токеном
-  }
-
-  // Проверяем доступ по домену
-  const access = checkRouteAccess(to, currentDomain);
-  if (!access.allowed) {
-    console.warn(`Доступ запрещен для ${currentDomain}`);
-    return next(access.redirect || "/");
-  }
-
-  // Страницы, доступные без токена
-  const publicPages = [
-    "Login",
-    "Registration",
-    "PasswordRecovery",
-    "ResetPassword",
-    "VerifyEmail",
-  ];
-
-  if (to.name === "NotFound") {
-    return next();
-  }
-
-  // Если нет токена и это не публичная страница - на логин
-  if (!token && !publicPages.includes(to.name)) {
-    return next({ name: "Login" });
-  }
-
-  // Если есть токен и пользователь на публичной странице - на аккаунт
-  if (token && publicPages.includes(to.name)) {
-    return next({ name: "PersonalAccount" });
-  }
-
-  // Обновление метаданных
   try {
-    const { stationDomain } = useDomain();
-    const pageTitle = stationDomain?.cosmetics?.titleLogo
-      ? `${to.meta.title} | ${stationDomain.cosmetics.titleLogo}`
-      : to.meta.title || "Touch-API";
-    updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
-  } catch (error) {
-    console.error("Ошибка метаданных:", error);
-    updatePageMetadata(to.meta.title);
-  }
+    console.log(
+      "[main.js] Начало навигации. От:",
+      from.fullPath,
+      "К:",
+      to.fullPath
+    );
+    console.log("[main.js] Имя маршрута:", to.name);
+    console.log("[main.js] Query параметры:", to.query);
+    console.log("[main.js] Домен:", window.location.hostname);
 
-  next();
+    const accountStore = useAccountStore();
+    const token = accountStore.getAccountToken;
+    console.log("[main.js] Токен:", token);
+
+    // Определяем публичные страницы
+    const publicPages = [
+      "Login",
+      "Registration",
+      "PasswordRecovery",
+      "VerifyEmail",
+      "ResetPassword",
+    ];
+
+    // Пропускаем NotFound
+    if (to.name === "NotFound") {
+      console.log("[main.js] Страница NotFound, пропускаем");
+      return next();
+    }
+
+    // Разрешаем публичные страницы без проверки токена
+    if (publicPages.includes(to.name)) {
+      console.log(`[main.js] Доступ к публичной странице ${to.name} разрешен`);
+      if (to.query.token) {
+        console.log(`[main.js] URL-токен:`, to.query.token);
+      } else {
+        console.log(`[main.js] URL-токен отсутствует`);
+      }
+
+      // Проверка доступа по домену
+      const currentDomain = window.location.hostname;
+      const access = checkRouteAccess(to, currentDomain);
+      console.log("[main.js] Результат проверки доступа:", access);
+      if (!access.allowed) {
+        console.warn(
+          `[main.js] Доступ запрещен для ${currentDomain} на маршрут ${to.name}`
+        );
+        if (to.path !== access.redirect) {
+          return next({ path: access.redirect || "/", query: to.query });
+        }
+        return next({ name: "Login", query: to.query });
+      }
+
+      // Обновление метаданных
+      try {
+        const { stationDomain } = useDomain();
+        const pageTitle = stationDomain?.cosmetics?.titleLogo
+          ? `${to.meta.title} | ${stationDomain.cosmetics.titleLogo}`
+          : to.meta.title || "Touch-API";
+        updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
+      } catch (error) {
+        console.error("[main.js] Ошибка метаданных:", error);
+        updatePageMetadata(to.meta.title);
+      }
+      return next();
+    }
+
+    // Проверка запрошенного URL для verify-email и reset-password
+    const requestedPath = window.location.pathname;
+    console.log("[main.js] Запрошенный URL:", requestedPath);
+    if (requestedPath.includes("/verify-email") && to.name !== "VerifyEmail") {
+      console.log("[main.js] Перенаправление на VerifyEmail");
+      return next({ name: "VerifyEmail", query: to.query });
+    } else if (
+      requestedPath.includes("/reset-password") &&
+      to.name !== "ResetPassword"
+    ) {
+      console.log("[main.js] Перенаправление на ResetPassword");
+      return next({ name: "ResetPassword", query: to.query });
+    }
+
+    // Проверка доступа по домену для непубличных страниц
+    const currentDomain = window.location.hostname;
+    const access = checkRouteAccess(to, currentDomain);
+    console.log("[main.js] Результат проверки доступа:", access);
+    if (!access.allowed) {
+      console.warn(
+        `[main.js] Доступ запрещен для ${currentDomain} на маршрут ${to.name}`
+      );
+      if (to.path !== access.redirect) {
+        return next({ path: access.redirect || "/", query: to.query });
+      }
+      return next({ name: "Login", query: to.query });
+    }
+
+    // Если нет токена и это не публичная страница, перенаправляем на логин
+    if (!token && !publicPages.includes(to.name)) {
+      console.log("[main.js] Нет токена, перенаправление на Login");
+      if (to.name !== "Login") {
+        return next({ name: "Login", query: to.query });
+      }
+      return next();
+    }
+
+    // Если есть токен и пользователь на публичной странице (кроме VerifyEmail и ResetPassword), перенаправляем на PersonalAccount
+    if (
+      token &&
+      publicPages.includes(to.name) &&
+      !["VerifyEmail", "ResetPassword"].includes(to.name)
+    ) {
+      console.log("[main.js] Есть токен, перенаправление на PersonalAccount");
+      if (to.name !== "PersonalAccount") {
+        return next({ name: "PersonalAccount", query: to.query });
+      }
+      return next();
+    }
+
+    // Обновление метаданных для остальных страниц
+    try {
+      const { stationDomain } = useDomain();
+      const pageTitle = stationDomain?.cosmetics?.titleLogo
+        ? `${to.meta.title} | ${stationDomain.cosmetics.titleLogo}`
+        : to.meta.title || "Touch-API";
+      updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
+    } catch (error) {
+      console.error("[main.js] Ошибка метаданных:", error);
+      updatePageMetadata(to.meta.title);
+    }
+
+    console.log("[main.js] Переход разрешен на", to.name);
+    next();
+  } catch (error) {
+    console.error("[main.js] Ошибка в router.beforeEach:", error);
+    next({ name: "Login", query: to.query });
+  }
 });
 
 const app = createApp(App);
 
 app.config.errorHandler = (err) => {
-  console.error("Global error", err);
+  console.error("[main.js] Global error:", err);
 };
 
 app.use(pinia);
@@ -307,16 +430,11 @@ document.documentElement.setAttribute(
   themeStore.isDark ? "dark" : "light"
 );
 
-import axios from "axios";
-
 axios.interceptors.request.use((config) => {
   config.metadata = { startTime: Date.now() };
-
-  // Сохраняем тело запроса, если оно есть
   if (config.data) {
     config.metadata.requestBody = config.data;
   }
-
   return config;
 });
 
@@ -333,9 +451,9 @@ axios.interceptors.response.use(
       duration: duration,
       timestamp: Date.now(),
       requestHeaders: response.config.headers,
-      requestBody: response.config.metadata.requestBody, // Добавляем тело запроса
+      requestBody: response.config.metadata.requestBody,
       responseHeaders: response.headers,
-      responseBody: response.data, // Добавляем тело ответа
+      responseBody: response.data,
     };
 
     const requestsStore = useRequestsStore();
@@ -356,9 +474,9 @@ axios.interceptors.response.use(
         duration: duration,
         timestamp: Date.now(),
         requestHeaders: error.config.headers,
-        requestBody: error.config.metadata?.requestBody, // Добавляем тело запроса
+        requestBody: error.config.metadata?.requestBody,
         responseHeaders: error.response.headers,
-        responseBody: error.response.data, // Добавляем тело ответа
+        responseBody: error.response.data,
       };
 
       const requestsStore = useRequestsStore();

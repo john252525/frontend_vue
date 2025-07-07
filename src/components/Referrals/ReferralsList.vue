@@ -108,7 +108,60 @@ const chaneErrorBlock = () => {
   errorBlock.value = !errorBlock.value;
 };
 
-const getAccounts = async () => {
+function decodeJWT(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new Error("Invalid JWT format");
+
+    const payload = parts[1];
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error("JWT decode error:", e);
+    return null;
+  }
+}
+
+console.log(decodeJWT(token.value).vendor_id);
+
+const getIds = async () => {
+  loadDataStation.value = true;
+  errorAccountBolean.value = false;
+
+  try {
+    const response = await axios.post(
+      `https://b2288.developtech.ru/api/v1/vendors/${
+        decodeJWT(token.value).vendor_id
+      }/getAllReferrals`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.ok) {
+      // accounts.value = response.data.data.referral_ids;
+      getAccounts(response.data.data.referral_ids);
+    }
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    errorAccountBolean.value = true;
+  } finally {
+    loadDataStation.value = false;
+  }
+};
+
+const getAccounts = async (ids) => {
   loadDataStation.value = true;
   errorAccountBolean.value = false;
 
@@ -116,7 +169,7 @@ const getAccounts = async () => {
     const response = await axios.post(
       "https://b2288.developtech.ru/api/v1/vendors/getByIds",
       {
-        vendor_ids: [245], // Здесь можно указать массив ID или другой параметр для получения всех аккаунтов
+        vendor_ids: ids, // Здесь можно указать массив ID или другой параметр для получения всех аккаунтов
       },
       {
         headers: {
@@ -209,7 +262,7 @@ const hideMessage = () => {
 
 onMounted(async () => {
   await chatStore.init();
-  await getAccounts();
+  await getIds();
 });
 </script>
 

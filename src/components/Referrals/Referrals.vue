@@ -1,7 +1,7 @@
 <template>
   <header>
     <section class="account-section">
-      <h2 class="title">Рефералы</h2>
+      <h2 class="title">{{ t("referrals.title") }}</h2>
     </section>
     <section class="account-section">
       <button @click="copyReferralLink" class="add-account-button">
@@ -52,7 +52,7 @@ const copyReferralLink = async () => {
     await navigator.clipboard.writeText(referralLink);
     // Здесь можно добавить уведомление об успешном копировании
     console.log("Ссылка скопирована в буфер обмена:", referralLink);
-    textButton.value = "Ссылка скопирована";
+    textButton.value = t("referrals.link");
     setTimeout(() => {
       textButton.value = "https://app1.developtech.ru/#/login...";
     }, 3000);
