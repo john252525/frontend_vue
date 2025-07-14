@@ -137,6 +137,7 @@
 import { ref, reactive, onMounted, provide, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import Mailing from "@/components/Mailing/Mailing.vue";
 import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
 import ConfirmDelete from "../ModalComponent/confirmModal/confirmDelete.vue";

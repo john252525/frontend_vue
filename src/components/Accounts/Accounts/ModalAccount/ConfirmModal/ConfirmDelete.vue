@@ -46,6 +46,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const router = useRouter();
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const props = defineProps({
   loadingStart: {
     type: Function,
@@ -101,16 +102,12 @@ const createRequest = async (request) => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/${request}`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}${request}`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
     if (response.data) {
       await handleSendLog(
         "deleteAccount",

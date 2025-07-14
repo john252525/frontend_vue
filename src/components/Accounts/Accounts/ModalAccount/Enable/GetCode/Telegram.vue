@@ -37,6 +37,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import ResultModalTrue from "../ResultModalTrue.vue";
 import LoadingModal from "../LoadingModal.vue";
 import { useRouter } from "vue-router";
@@ -99,16 +100,12 @@ const forceStop = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}forceStop`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -158,16 +155,12 @@ const setStateTelegram = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}setState`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -227,16 +220,12 @@ const solveChallenge = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/solveChallenge`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}solveChallenge`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -287,16 +276,12 @@ const twoFactorAuth = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/twoFactorAuth`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}twoFactorAuth`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(

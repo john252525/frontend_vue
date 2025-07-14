@@ -15,6 +15,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, toRefs, reactive, onMounted, inject, computed } from "vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import ResultModal from "../ResultModal.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -69,7 +70,7 @@ const getInternationalFormat = () => {
 const forceStop = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
+      `${FRONTEND_URL}forceStop`,
       {
         source: source,
         login: login,
@@ -102,7 +103,7 @@ const enablePhoneAuth = async () => {
   const phone = getInternationalFormat();
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/enablePhoneAuth",
+      `${FRONTEND_URL}enablePhoneAuth`,
       {
         source: source,
         login: login,
@@ -163,7 +164,7 @@ const disablePhoneAuth = async () => {
   }
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/disablePhoneAuth",
+      `${FRONTEND_URL}disablePhoneAuth`,
       params,
       {
         headers: {
@@ -203,7 +204,7 @@ const disablePhoneAuth = async () => {
 const setState = async () => {
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
+      `${FRONTEND_URL}setState`,
       {
         source: source,
         login: login,
@@ -251,16 +252,12 @@ const getAuthCode = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getAuthCode",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}getAuthCode`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(

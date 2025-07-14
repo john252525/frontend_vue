@@ -4,8 +4,8 @@
     :errorMessage="inputStyle.incorrectPasswordMessage"
     :changeIncorrectPassword="changeIncorrectPassword"
   />
-  <section class="registration-section">
-    <form>
+  <section v-if="!sendEmail" class="registration-section">
+    <form @submit.prevent="logAccoutn">
       <h2 class="title">{{ t("registration.title") }}</h2>
       <div class="input-cont">
         <label class="name-input" for="name">{{
@@ -63,7 +63,7 @@
           >{{ t("registration.checkbox") }}</label
         >
       </div>
-      <button @click="logAccoutn" class="registration-account-button">
+      <button type="submit" class="registration-account-button">
         {{ t("registration.button") }}
       </button>
       <p class="login-account-button">
@@ -71,18 +71,37 @@
         <span @click="navigateTo('/Login')">{{ t("registration.login") }}</span>
       </p>
     </form>
-    <LoginForGoogle class="login-for-google" />
+    <LoginForGoogle v-if="!sendEmail" class="login-for-google" />
   </section>
+  <div v-if="sendEmail" class="cont">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="60"
+      height="60"
+      viewBox="0 0 32 32"
+    >
+      <path
+        fill="#4950ca"
+        d="m7.416 3.604l4.605 4.98l-3.251 6.395l6.855-1.229l3.12 7.532L32 3.902zm-.843 10.781l1.276-1.047l-1.647.521l-.172-.24l.683-.661l-.891.359c-3.407 1.323-5.823 4.62-5.823 8.485a9.043 9.043 0 0 0 2.844 6.593A9.006 9.006 0 0 1 1.66 23.92c0-3.817 2.417-7.219 5.755-8.557l.423-1.02l-1 .437l-.281-.38zm5.818-2.625L14.522 8l12.531-2.932z"
+      />
+    </svg>
+    <h2 class="text-email-sent">
+      На ваш E-mail отправлено письмо, перейдите по ссылке, чтобы подтвердить
+      почту
+    </h2>
+  </div>
 </template>
 
 <script setup>
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import { reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useStationLoading } from "@/composables/useStationLoading";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+const sendEmail = ref(false);
 const { setLoadingStatus } = useStationLoading();
 const accountStore = useAccountStore();
 import { useI18n } from "vue-i18n";
@@ -94,6 +113,8 @@ const formData = reactive({
   fogoutPassword: "",
   check: false,
 });
+
+const route = useRoute();
 
 const changeIncorrectPassword = () => {
   console.log("rrrrr");
@@ -131,39 +152,11 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-const createUser = async () => {
-  try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/createUser",
-      {
-        username: formData.login,
-        password: formData.password,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
-        },
-      }
-    );
-    if (response.data) {
-      await handleSendLog(
-        "create_account",
-        "createUser",
-        { userName: formData.login },
-        response.data,
-        response.data
-      );
-    }
-    console.log(response.data);
-  } catch (error) {
-    console.error("Ошибка при создании платежа:", error);
-  }
-};
-
 const loginAccount = async () => {
+  sendEmail.value = true;
   try {
     const response = await axios.post(
-      `https://b2288.developtech.ru/api/v1/auth/register`,
+      `${FRONTEND_URL}register`,
       {
         email: formData.login,
         password: formData.password,
@@ -189,12 +182,10 @@ const loginAccount = async () => {
     if (response.data.ok != true) {
       console.log(false);
     }
-    // if (response.data.ok === true) {
-    //   accountStore.setAccountToken(response.data.token);
-    //   accountStore.setAccountData(formData.login);
-    //   accountStore.setAccountStation("telegram");
-    //   accountStore.setAccountStationText("Telegram");
-    // }
+    if (response.data.ok === true) {
+      sendEmail.value = true;
+      loginRefAccount();
+    }
   } catch (error) {
     console.log("error");
     changeIncorrectPasswordTrue();
@@ -202,6 +193,39 @@ const loginAccount = async () => {
     changeIncorrectPasswordTrue();
     if (error.response) {
       inputStyle.incorrectPassword = true;
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const loginRefAccount = async () => {
+  if (!route.query.ref) {
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}addReferral`,
+      {
+        email: formData.login,
+        ref_id: route.query.ref,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    );
+
+    if (response.data.ok != true) {
+      console.log(false);
+    }
+    if (response.data.ok === true) {
+    }
+  } catch (error) {
+    console.log("error");
+    console.error(`${request} - Ошибка`, error);
+    if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }
   }
@@ -327,6 +351,30 @@ const logAccoutn = () => {
   border: 0.5px solid #be2424;
   height: 45px;
   background: #ffeaea;
+}
+
+.cont {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  width: 350px;
+  height: 400px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.text-email-sent {
+  /* text-align: center; */
+  font-size: 20px;
+  width: 300px;
+  font-weight: 500;
 }
 
 .registration-account-button {

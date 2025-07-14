@@ -26,7 +26,7 @@
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -73,7 +73,7 @@ const updateWindowWidth = () => {
 const getUserIdByToken = async (token) => {
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getUserUuid",
+      `${FRONTEND_URL}getUserUuid`,
       {},
       {
         headers: {

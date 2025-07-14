@@ -160,6 +160,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
@@ -312,16 +313,12 @@ const getAccounts = async () => {
 
   loadDataStation.value = true;
   try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getInfoByToken",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}getInfoByToken`, params, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data.ok === true) {
       await handleSendLog(
@@ -416,6 +413,8 @@ const getAccounts = async () => {
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
+      loadDataStation.value = false;
+      errorAccountBolean.value = true;
     }
   } catch (error) {
     loadDataStation.value = false;
@@ -427,7 +426,7 @@ const getAccounts = async () => {
 const getInfoWhats = async (source, login, type, storage) => {
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getInfo",
+      `${FRONTEND_URL}getInfo`,
       {
         source: source,
         login: login,
@@ -535,7 +534,7 @@ const getInfo = async () => {
   chatsStation.value = "loading";
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getInfo",
+      `${FRONTEND_URL}getInfo`,
       {
         source: selectedItem.value.source,
         login: selectedItem.value.login,

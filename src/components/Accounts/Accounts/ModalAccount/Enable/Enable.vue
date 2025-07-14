@@ -29,6 +29,7 @@ const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
 import { ref, toRefs, provide, onMounted, reactive, computed } from "vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
@@ -139,16 +140,12 @@ const forceStop = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}forceStop`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -198,16 +195,12 @@ const setState = async (request) => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/setState`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}setState`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(

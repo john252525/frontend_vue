@@ -41,6 +41,7 @@ const accountStore = useAccountStore();
 const router = useRouter();
 import { ref, toRefs, watch, reactive, computed } from "vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import { useI18n } from "vue-i18n";
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
@@ -109,16 +110,12 @@ const getInfoAccount = async () => {
         storage: storage,
       };
     }
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getInfo",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}getInfo`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     const { webhookUrls } = response.data.data;
     if (Array.isArray(webhookUrls)) {
@@ -184,16 +181,12 @@ const addNewUrl = async () => {
 
     // Разделяем строки в textarea на массив
 
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/updateAccount",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}updateAccount`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(

@@ -38,7 +38,7 @@ import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import LoadingMoadal from "../../LoadingMoadal/LoadingMoadal.vue";
-
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const props = defineProps({
   changeStationGetByCode: {
     type: Function,
@@ -93,7 +93,7 @@ const createRequest = async (request) => {
 
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/${request}`,
+      `${FRONTEND_URL}${request}`,
       {
         source: source,
         login: login,
@@ -131,7 +131,7 @@ const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/enablePhoneAuth",
+      `${FRONTEND_URL}enablePhoneAuth`,
       {
         source: source,
         login: login,
@@ -170,7 +170,7 @@ const setState = async () => {
   const { source, login } = selectedItems.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
+      `${FRONTEND_URL}setState`,
       {
         source: source,
         login: login,
@@ -209,7 +209,7 @@ const getAuthCode = async () => {
   const { source, login } = selectedItems.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/getAuthCode",
+      `${FRONTEND_URL}getAuthCode`,
       {
         source: source,
         login: login,

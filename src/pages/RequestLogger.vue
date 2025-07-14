@@ -368,7 +368,7 @@ import { useRequestsStore } from "@/stores/requests";
 import { mapState, mapActions, mapGetters } from "pinia";
 import { ref, computed } from "vue";
 import axios from "axios";
-
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 export default {
   setup() {
     const selectedRequest = ref(null);

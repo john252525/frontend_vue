@@ -21,6 +21,7 @@ import {
   computed,
 } from "vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -83,16 +84,12 @@ const getQr = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      "https://b2288.apitter.com/instances/getQr",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}getQr`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -151,7 +148,7 @@ const enablePhoneAuth = async () => {
   }
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/enablePhoneAuth`,
+      `${FRONTEND_URL}enablePhoneAuth`,
       params,
       {
         headers: {

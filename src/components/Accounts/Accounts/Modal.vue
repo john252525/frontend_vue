@@ -133,7 +133,7 @@ import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
-// import LoadingMoadal from "../Accounts/LoadingMoadal/LoadingMoadal.vue";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import GetScreen from "./ModalAccount/GetScreen.vue";
 
 const props = defineProps({
@@ -350,16 +350,12 @@ const createRequest = async (request) => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/${request}`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}${request}`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -419,7 +415,7 @@ const forceStop = async (request) => {
   const { source, login, type, storage } = selectedItem.value;
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/${request}`,
+      `${FRONTEND_URL}${request}`,
       {
         source: source,
         login: login,
@@ -464,7 +460,7 @@ const disablePhoneAuth = async () => {
   const { source, login } = selectedItem.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/disablePhoneAuth",
+      `${FRONTEND_URL}disablePhoneAuth`,
       {
         source: source,
         login: login,
@@ -508,7 +504,7 @@ const setState = async () => {
   const { source, login } = selectedItem.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
+      `${FRONTEND_URL}setState`,
       {
         source: source,
         login: login,
@@ -553,7 +549,7 @@ const setStateTelegram = async () => {
   const { source, login } = selectedItem.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
+      `${FRONTEND_URL}setState`,
       {
         source: "whatsapp",
         login: "helly",

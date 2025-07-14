@@ -39,18 +39,61 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 import ReferralsList from "./ReferralsList.vue";
 import { ref, onMounted } from "vue";
+import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const textButton = ref("https://app1.developtech.ru/#/login...");
 
+function decodeJWT(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      throw new Error("Invalid JWT token format");
+    }
+
+    const header = JSON.parse(atob(parts[0]));
+    const payload = JSON.parse(atob(parts[1]));
+    console.log(payload);
+    return payload.vendor_id;
+  } catch (error) {
+    console.error("Failed to decode JWT:", error);
+    return null;
+  }
+}
+
+const refId = ref("");
+
+const getRefId = async () => {
+  try {
+    const response = await axios.get(
+      `https://b2288.developtech.ru/api/v1/vendors/getRefId/${decodeJWT(
+        accountStore.accountToken
+      )}`,
+
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accountStore.accountToken}`,
+        },
+      }
+    );
+
+    if (response.data.ok) {
+      refId.value = response.data.data.ref_id;
+    }
+  } catch (error) {
+    console.error("Error", error);
+  }
+};
+
 const copyReferralLink = async () => {
   const referralLink =
-    "https://app1.developtech.ru/#/login?ref=" + accountStore.accountToken;
+    "https://app1.developtech.ru/Registration?ref=" + refId.value;
 
   try {
     await navigator.clipboard.writeText(referralLink);
-    // Здесь можно добавить уведомление об успешном копировании
+
     console.log("Ссылка скопирована в буфер обмена:", referralLink);
     textButton.value = t("referrals.link");
     setTimeout(() => {
@@ -75,6 +118,8 @@ const copyReferralLink = async () => {
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
+
+onMounted(getRefId);
 </script>
 
 <style scoped>
@@ -84,6 +129,9 @@ header {
   justify-content: space-between;
   margin: 18px 12px 18px 18px;
   box-sizing: border-box;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .account-section {

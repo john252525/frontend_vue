@@ -67,6 +67,7 @@ import { useThemeStore } from "@/stores/theme";
 const theme = useThemeStore();
 
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const router = useRouter();
 const formData = reactive({
   login: "",
@@ -129,23 +130,20 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const loginAccount = async () => {
-  // accountStore.setAccountToken(
-  //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZW5kb3JfaWQiOiIyNDQiLCJlbWFpbCI6Iml0Lm1ha3NpbTEyM0BtYWlsLnJ1IiwiZXhwIjoxNzUxNTgzNTA1fQ.cuydzIW_u_zw4Y8pFqTj7vwYb6sI9ZNuiosaR2MZ-7g"
-  // );
-  // accountStore.setAccountData("it.maksim123@mail.ru");
-  // accountStore.setAccountStation("telegram");
-  // accountStore.setAccountStationText("Telegram");
-  // navigateTo("/");
+  accountStore.setAccountToken(
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZW5kb3JfaWQiOiIyODMiLCJlbWFpbCI6Im1ha3NpbS5iaXJ1a292LjIwMDdAbWFpbC5ydSIsImV4cCI6MTc1MjUyOTAzN30.2-5LTv11I2w2ZS-K8-1xOad-DpSOPRFLp0po_3NvWJM"
+  );
+  accountStore.setAccountData("it.maksim123@mail.ru");
+  accountStore.setAccountStation("telegram");
+  accountStore.setAccountStationText("Telegram");
+  navigateTo("/");
 
   try {
-    const response = await axios.post(
-      `https://b2288.developtech.ru/api/v1/auth/login`,
-      {
-        email: formData.login,
-        password: formData.password,
-        withCredentials: false,
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}login`, {
+      email: formData.login,
+      password: formData.password,
+      withCredentials: false,
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -183,7 +181,7 @@ const loginAccount = async () => {
 const sendEmail = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.developtech.ru/api/v1/auth/resetPassword`,
+      `${FRONTEND_URL}resetPassword`,
       {
         token:
           "reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2",
@@ -211,7 +209,7 @@ const sendEmail = async () => {
 const getUUID = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.developtech.ru/api/v1/auth/login`,
+      `${FRONTEND_URL}login`,
       {
         email: "it.maksim123@mail.ru",
         password: "123123",

@@ -19,6 +19,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { inject, reactive } from "vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import LoadModal from "../../LoadingMoadal/LoadModal.vue";
 const { getByCodeStation, selectedItems } = inject("Items");
 
@@ -46,7 +47,7 @@ const forceStop = async () => {
   await changeStationLoading();
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/forceStop`,
+      `${FRONTEND_URL}forceStop`,
       {
         source: source,
         login: login,
@@ -81,7 +82,7 @@ const setStateTelegram = async () => {
   const { source, login } = selectedItems.value;
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/setState",
+      `${FRONTEND_URL}setState`,
       {
         source: source,
         login: login,
@@ -126,7 +127,7 @@ const solveChallenge = async () => {
 
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/solveChallenge`,
+      `${FRONTEND_URL}solveChallenge`,
       {
         source: source,
         login: login,

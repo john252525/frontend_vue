@@ -25,6 +25,7 @@ import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 import { useAccountStore } from "@/stores/accountStore";
@@ -97,16 +98,12 @@ const createRequest = async (request) => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/${request}`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}${request}`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
     if (response.data) {
       await handleSendLog(
         "getNewProxy",

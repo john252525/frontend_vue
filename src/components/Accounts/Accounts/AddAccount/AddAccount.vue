@@ -144,6 +144,7 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Whatsapp from "./Messenger/Whatsapp.vue";
 import Crm from "./Crm/Crm.vue";
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import { ref, reactive, watch, provide, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
@@ -274,7 +275,7 @@ const addAccount = async () => {
   }
   try {
     const response = await axios.post(
-      "https://b2288.apitter.com/instances/addAccount",
+      `${FRONTEND_URL}addAccount`,
       {
         token: accountData.token,
         login: login.value,

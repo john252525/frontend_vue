@@ -20,6 +20,7 @@
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import axios from "axios";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import ResultModal from "../ResultModal.vue";
 import ResultModalTrue from "../ResultModalTrue.vue";
@@ -82,16 +83,12 @@ const solveChallenge = async () => {
     };
   }
   try {
-    const response = await axios.post(
-      `https://b2288.apitter.com/instances/solveChallenge`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL}solveChallenge`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data) {
       await handleSendLog(
@@ -128,7 +125,7 @@ const solveChallenge = async () => {
 const disablePhoneAuth = async () => {
   try {
     const response = await axios.post(
-      `https://b2288.apitter.com/instances/disablePhoneAuth`,
+      `${FRONTEND_URL}disablePhoneAuth`,
       {
         source: source,
         login: login,
