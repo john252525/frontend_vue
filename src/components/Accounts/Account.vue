@@ -4,7 +4,7 @@
     v-if="openAddAccountStation"
   /> -->
   <AddAccount
-    :openAddAccountStation="openAddAccount"
+    :openModal="openAddAccount"
     v-if="openAddAccountStation"
   />
   <header>
@@ -91,7 +91,7 @@
 
 <script setup>
 import AccountList from "./Accounts/AccountsList.vue";
-import AddAccount from "./Accounts/AddAccount/AddAccount.vue";
+import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 
