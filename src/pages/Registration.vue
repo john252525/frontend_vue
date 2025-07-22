@@ -156,7 +156,7 @@ const loginAccount = async () => {
   sendEmail.value = true;
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}register`,
+      `${FRONTEND_URL}/auth/register`,
       {
         email: formData.login,
         password: formData.password,
@@ -205,7 +205,7 @@ const loginRefAccount = async () => {
 
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}addReferral`,
+      `${FRONTEND_URL}/auth/addReferral`,
       {
         email: formData.login,
         ref_id: route.query.ref,

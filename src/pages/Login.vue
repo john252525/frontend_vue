@@ -139,7 +139,7 @@ const loginAccount = async () => {
   // navigateTo("/");
 
   try {
-    const response = await axios.post(`${FRONTEND_URL}login`, {
+    const response = await axios.post(`${FRONTEND_URL}/auth/login`, {
       email: formData.login,
       password: formData.password,
       withCredentials: false,
@@ -181,7 +181,7 @@ const loginAccount = async () => {
 const sendEmail = async () => {
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}resetPassword`,
+      `${FRONTEND_URL}/auth/resetPassword`,
       {
         token:
           "reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2",
@@ -209,7 +209,7 @@ const sendEmail = async () => {
 const getUUID = async () => {
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}login`,
+      `${FRONTEND_URL}/auth/login`,
       {
         email: "it.maksim123@mail.ru",
         password: "123123",

@@ -81,7 +81,7 @@ const verifyToken = async (token) => {
     error.value = false;
 
     const response = await axios.post(
-      `${FRONTEND_URL}verifyEmail`,
+      `${FRONTEND_URL}/auth/verifyEmail`,
       {
         token: token,
         withCredentials: false,

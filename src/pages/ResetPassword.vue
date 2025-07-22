@@ -165,7 +165,7 @@ const handleResetPassword = async () => {
   errorMessage.value = "";
 
   try {
-    const response = await axios.post(`${FRONTEND_URL}resetPassword`, {
+    const response = await axios.post(`${FRONTEND_URL}/auth/resetPassword`, {
       token: token.value,
       password: formData.password,
     });

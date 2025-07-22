@@ -66,7 +66,7 @@ const sendEmail = async () => {
   emailSendStation.value = true;
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}forgotPassword`,
+      `${FRONTEND_URL}/auth/forgotPassword`,
       {
         email: email.value,
         app: "app1",
