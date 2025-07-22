@@ -81,7 +81,7 @@ const verifyToken = async (token) => {
     error.value = false;
 
     const response = await axios.post(
-      `${FRONTEND_URL}/auth/verifyEmail`,
+      `https://bapi88.developtech.ru/api/v1/auth/verifyEmail`,
       {
         token: token,
         withCredentials: false,

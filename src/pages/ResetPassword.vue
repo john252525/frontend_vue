@@ -165,10 +165,13 @@ const handleResetPassword = async () => {
   errorMessage.value = "";
 
   try {
-    const response = await axios.post(`${FRONTEND_URL}/auth/resetPassword`, {
-      token: token.value,
-      password: formData.password,
-    });
+    const response = await axios.post(
+      `https://bapi88.developtech.ru/api/v1/auth/auth/resetPassword`,
+      {
+        token: token.value,
+        password: formData.password,
+      }
+    );
 
     if (response.data.ok) {
       passwordChanged.value = true;

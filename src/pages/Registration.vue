@@ -156,7 +156,7 @@ const loginAccount = async () => {
   sendEmail.value = true;
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}/auth/register`,
+      `https://bapi88.developtech.ru/api/v1/auth/register`,
       {
         email: formData.login,
         password: formData.password,
@@ -205,7 +205,7 @@ const loginRefAccount = async () => {
 
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}/auth/addReferral`,
+      `https://bapi88.developtech.ru/api/v1/auth/addReferral`,
       {
         email: formData.login,
         ref_id: route.query.ref,
