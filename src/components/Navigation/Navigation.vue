@@ -6,22 +6,28 @@
         class="theme-block"
         v-if="stationDomain.navigate.value !== 'settings'"
       />
-
-      <ul>
-        <li
-          v-for="item in filteredItems"
-          :key="item.name"
-          class="list"
-          :class="{ active: item.isActive }"
-          @click="item.action ? item.action() : navigateTo(item.name)"
-        >
-          <img
-            :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-            class="svg-icon"
-          />
-          <p class="page">{{ item.text }}</p>
-        </li>
-      </ul>
+      
+      <!-- Основные секции меню -->
+       
+      <div v-for="(section, sectionName) in navSections" :key="sectionName" class="menu-section">
+        <h3 class="section-title">{{ sectionName }}</h3>
+        <ul>
+          <li
+            v-for="item in section.items"
+            :key="item.name"
+            class="list"
+            :class="{ active: item.isActive }"
+            @click="item.action ? item.action() : navigateTo(item.name)"
+          >
+            <img
+              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+              class="svg-icon"
+            />
+            <p class="page">{{ item.text }}</p>
+          </li>
+        </ul>
+        <!-- <div class="section-divider" v-if="sectionName !== 'Помощь'"></div> -->
+      </div>
     </nav>
 
     <nav class="nav-chat" v-else>
@@ -31,11 +37,7 @@
         v-if="stationDomain.navigate.value !== 'settings'"
       />
       <div @click="navigateTo('accounts')" class="logo-header-cont-chat">
-        <img
-          :src="stationDomain.cosmetics.urlLogo"
-          class="logo-img"
-          alt="Logo"
-        />
+        <!-- Логотип -->
       </div>
       <ul>
         <li
@@ -55,67 +57,6 @@
     <div v-if="!isWidgetMode" class="line"></div>
     <div v-else class="line-chat"></div>
   </aside>
-
-  <!-- Mobile Navigation -->
-  <!-- <div
-    v-if="phoneMenuStation && (chatStation || isChatPage)"
-    class="black-fon"
-    @click="phoneMenuOn"
-  >
-    <aside class="phone-menu" :class="{ active: phoneMenuStation }" @click.stop>
-      <LangSwither
-        class="theme-block"
-        v-if="stationDomain.navigate.value !== 'settings'"
-      />
-
-      <div class="logo-header-cont">
-        <h2 class="logo-header">
-          <img
-            :src="stationDomain.cosmetics.urlLogo"
-            class="logo-img"
-            alt="Logo"
-          />
-          {{ stationDomain.cosmetics.titleLogo }}
-        </h2>
-      </div>
-
-      <div class="line-menu"></div>
-
-      <nav>
-        <ul>
-          <li
-            v-for="item in navElement.items"
-            :key="item.name"
-            v-if="item.condition"
-            class="list"
-            @click="clickMenu(item.name)"
-          >
-            <span v-html="item.icon"></span>
-            <p class="page">{{ item.text }}</p>
-          </li>
-
-          <li
-            v-if="navElement.dropdown?.length"
-            class="list"
-            @click="openList"
-          ></li>
-        </ul>
-
-        <ul v-if="isOpen && navElement.dropdown?.length">
-          <li
-            v-for="item in navElement.dropdown"
-            :key="item.name"
-            v-if="item.condition"
-            @click="clickMenu(`/${item.name}`)"
-            class="drop-item"
-          >
-            <span v-html="item.icon"></span>
-            <p class="page-drop">{{ item.text }}</p>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-  </div> -->
 </template>
 
 <script setup>
@@ -143,57 +84,38 @@ const route = useRoute();
 const router = useRouter();
 const isOpen = ref(false);
 
-const navElement = ref({});
-
-const currentNavConfig = computed(() => {
-  const config = navConfig.value[stationDomain.navigate.value] || {};
+const navSections = computed(() => {
+  const currentNav = stationDomain.navigate.value;
+  if (!navConfig.value[currentNav]) return {};
+  
   return {
-    items: config.items || [],
-    dropdown: config.dropdown || [],
+    'Основное': {
+      items: (navConfig.value[currentNav].main || []).filter(item => item.condition)
+    },
+    'Настройки': {
+      items: (navConfig.value[currentNav].settings || []).filter(item => item.condition)
+    },
+    'Помощь': {
+      items: (navConfig.value[currentNav].help || []).filter(item => item.condition)
+    }
   };
 });
 
 const filteredItems = computed(() => {
-  return navElement.value.items?.filter((item) => item.condition) || [];
-});
-
-const filteredDropdown = computed(() => {
-  return navElement.value.dropdown?.filter((item) => item.condition) || [];
-});
-
-const getNavElement = () => {
   const currentNav = stationDomain.navigate.value;
-  if (navConfig.value && navConfig.value[currentNav]) {
-    navElement.value = {
-      items: navConfig.value[currentNav].items || [],
-      dropdown: navConfig.value[currentNav].dropdown || [],
-    };
-  } else {
-    console.error(`Navigation config for '${currentNav}' not found`);
-    navElement.value = { items: [], dropdown: [] };
-  }
-};
-
-const clickMenu = (page) => {
-  props.phoneMenuOn?.();
-  router.push(page);
-};
+  return navConfig.value[currentNav]?.items?.filter(item => item.condition) || [];
+});
 
 const navigateTo = (page) => {
   router.push(page);
 };
 
 const isActive = (routeName) => {
-  console.log(route.name);
   return route.name === routeName;
 };
 
 const isChatPage = computed(() => {
   return route.name === "Chats";
-});
-
-onMounted(() => {
-  getNavElement();
 });
 </script>
 
@@ -201,14 +123,13 @@ onMounted(() => {
 .pc-menu {
   display: flex;
   width: 200px;
-  /* height: calc(100vh - 57  px); */
   box-sizing: border-box;
   background: var(--bg);
 }
 
 nav {
   margin-top: 20px;
-  margin-left: 8px;
+  width: 100%;
 }
 
 .logo-header {
@@ -221,18 +142,40 @@ nav {
   gap: 8px;
 }
 
+.menu-section {
+  margin-bottom: 30px;
+  border-bottom: 1.5px solid var(--line);
+}
+
+.section-title {
+  font-family: system-ui;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: 8px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.section-divider {
+  height: 1px;
+  background-color: var(--line);
+  margin: 16px 0;
+  /* background-color: red; */
+}
+
 .svg-icon {
-  width: 22px; /* 24px */
-  height: 22px; /* 24px */
-  fill: var(--svgColor); /* Tailwind gray-500 */
-  transition: all 75ms; /* Переход для всех свойств за 75 мс */
+  width: 22px;
+  height: 22px;
+  fill: var(--svgColor);
+  transition: all 75ms;
 }
 
 .svg-icon-chat {
-  width: 26px; /* 24px */
-  height: 26px; /* 24px */
-  fill: var(--svgColor); /* Tailwind gray-500 */
-  transition: all 75ms; /* Переход для всех свойств за 75 мс */
+  width: 26px;
+  height: 26px;
+  fill: var(--svgColor);
+  transition: all 75ms;
 }
 
 .line {
@@ -250,8 +193,9 @@ nav {
   background-color: var(--line);
   position: absolute;
   z-index: 2;
-  height: 100%;
   left: 60px;
+  top: 56px;
+  height: calc(100% - 57px);
 }
 
 .logo-img {
@@ -281,13 +225,12 @@ nav {
     opacity: 1;
   }
 }
-
 .list {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 4px;
-  padding: 8px 0px 8px 8px;
+  padding: 8px 0px 8px 16px;
   cursor: pointer;
 }
 
@@ -310,13 +253,6 @@ nav {
   background-color: var(--textNavHover);
   border-radius: 10px;
   width: 35px;
-}
-
-.list-chat:hover {
-  background-color: var(--textNavHover);
-  border-radius: 10px;
-  width: 35px;
-  transition: all 0.25s;
 }
 
 .drop-item {
@@ -374,6 +310,7 @@ nav {
 .list:hover .svg-icon path {
   fill: var(--iconNavHover);
 }
+
 
 .phone-menu nav ul {
   opacity: 0;

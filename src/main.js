@@ -28,6 +28,9 @@ import { useAccountStore } from "@/stores/accountStore";
 // import { hookManager } from "@/hooks/HookManager";
 import { useRequestsStore } from "@/stores/requests";
 import axios from "axios";
+import Support from "./pages/Support.vue";
+import Help from "./pages/Help.vue";
+import Profile from "./pages/Profile.vue";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -53,6 +56,24 @@ const routes = [
     name: "PersonalAccount",
     component: PersonalAccount,
     meta: { title: "Аккаунты" },
+  },
+  {
+    path: "/help",
+    name: "Help",
+    component: Help,
+    meta: { title: "Помощь" },
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+    meta: { title: "Профиль" },
+  },
+  {
+    path: "/support",
+    name: "Support",
+    component: Support,
+    meta: { title: "Тех. поддержка" },
   },
   {
     path: "/close",
