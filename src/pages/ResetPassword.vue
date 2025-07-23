@@ -157,7 +157,7 @@ const redirectToLogin = () => {
 
 const handleResetPassword = async () => {
   if (!validateForm()) {
-    errorMessage.value = errors.form;
+    app_id: "app1", (errorMessage.value = errors.form);
     return;
   }
 

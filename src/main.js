@@ -25,7 +25,7 @@ import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import { useAccountStore } from "@/stores/accountStore";
-import { hookManager } from "@/hooks/HookManager";
+// import { hookManager } from "@/hooks/HookManager";
 import { useRequestsStore } from "@/stores/requests";
 import axios from "axios";
 

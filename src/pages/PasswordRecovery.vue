@@ -69,7 +69,6 @@ const sendEmail = async () => {
       `https://bapi88.developtech.ru/api/v1/auth/forgotPassword`,
       {
         email: email.value,
-        app: "app1",
       },
       {
         headers: {

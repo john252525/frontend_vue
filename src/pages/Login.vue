@@ -202,7 +202,7 @@ const sendEmail = async () => {
     if (response.data.ok === true) {
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    console.error(`${error.response} - Ошибка`, error);
     if (error.response) {
       console.error("Ошибка сервера:", error.response.data);
     }

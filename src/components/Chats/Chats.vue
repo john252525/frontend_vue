@@ -383,44 +383,44 @@ const clearNewMessages = async (uniq) => {
   }
 };
 
-onMounted(() => {
-  const connectEventSource = () => {
-    const eventSource = new EventSource(`${apiUrl}/events`);
+// onMounted(() => {
+//   const connectEventSource = () => {
+//     const eventSource = new EventSource(`${apiUrl}/events`);
 
-    const receivedMessageIds =
-      JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
+//     const receivedMessageIds =
+//       JSON.parse(localStorage.getItem("receivedMessageIds")) || [];
 
-    eventSource.onmessage = (event) => {
-      const eventData = JSON.parse(event.data);
+//     eventSource.onmessage = (event) => {
+//       const eventData = JSON.parse(event.data);
 
-      console.log(eventData);
+//       console.log(eventData);
 
-      // Проверяем тип события
-      if (eventData.hook_type === "message") {
-        changeWebhookEventData(eventData);
-        console.log(
-          "новое сообщения для чата от ивана кикунаныыыыыыыыыыыыыыыыыыыыыыыыыан"
-        );
-      }
-    };
+//       // Проверяем тип события
+//       if (eventData.hook_type === "message") {
+//         changeWebhookEventData(eventData);
+//         console.log(
+//           "новое сообщения для чата от ивана кикунаныыыыыыыыыыыыыыыыыыыыыыыыыан"
+//         );
+//       }
+//     };
 
-    eventSource.onerror = (error) => {
-      console.error("Ошибка соединения:", error);
-      eventSource.close(); // Закрываем текущее соединение
-      // Пытаемся переподключиться через 3 секунды
-      setTimeout(() => {
-        console.log("Попытка переподключения...");
-        connectEventSource();
-      }, 3000);
-    };
+//     eventSource.onerror = (error) => {
+//       console.error("Ошибка соединения:", error);
+//       eventSource.close(); // Закрываем текущее соединение
+//       // Пытаемся переподключиться через 3 секунды
+//       setTimeout(() => {
+//         console.log("Попытка переподключения...");
+//         connectEventSource();
+//       }, 3000);
+//     };
 
-    eventSource.onopen = () => {
-      console.log("Соединение установлено");
-    };
-  };
+//     eventSource.onopen = () => {
+//       console.log("Соединение установлено");
+//     };
+//   };
 
-  connectEventSource();
-});
+//   connectEventSource();
+// });
 
 // onMounted(() => {
 //   handleRouteParams();

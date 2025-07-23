@@ -124,10 +124,10 @@ const changeIncorrectPassword = () => {
 const changeIncorrectPasswordTrue = () => {
   inputStyle.incorrectPassword = true;
 };
-const inputStyle = {
+const inputStyle = reactive({
   incorrectPassword: false,
   incorrectPasswordMessage: "",
-};
+});
 
 const error = reactive({
   login: false,
@@ -153,7 +153,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const loginAccount = async () => {
-  sendEmail.value = true;
+  // sendEmail.value = true;
   try {
     const response = await axios.post(
       `https://bapi88.developtech.ru/api/v1/auth/register`,
@@ -161,7 +161,6 @@ const loginAccount = async () => {
         email: formData.login,
         password: formData.password,
         type: "frontend_vue",
-        app: "app1",
       },
       {
         headers: {
@@ -182,14 +181,17 @@ const loginAccount = async () => {
     if (response.data.ok != true) {
       console.log(false);
     }
-    if (response.data.ok === true) {
+    if (response.data.data.result === true) {
       sendEmail.value = true;
-      loginRefAccount();
+      // loginRefAccount();
     }
   } catch (error) {
+    inputStyle.incorrectPassword = true;
+    console.log(inputStyle.incorrectPassword);
     console.log("error");
+
     changeIncorrectPasswordTrue();
-    console.error(`${request} - Ошибка`, error);
+    console.error(`${error.response} - Ошибка`, error);
     changeIncorrectPasswordTrue();
     if (error.response) {
       inputStyle.incorrectPassword = true;
