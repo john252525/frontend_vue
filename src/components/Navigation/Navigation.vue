@@ -6,10 +6,14 @@
         class="theme-block"
         v-if="stationDomain.navigate.value !== 'settings'"
       />
-      
+
       <!-- Основные секции меню -->
-       
-      <div v-for="(section, sectionName) in navSections" :key="sectionName" class="menu-section">
+
+      <div
+        v-for="(section, sectionName) in navSections"
+        :key="sectionName"
+        class="menu-section"
+      >
         <h3 class="section-title">{{ sectionName }}</h3>
         <ul>
           <li
@@ -38,21 +42,33 @@
       />
       <div @click="navigateTo('accounts')" class="logo-header-cont-chat">
         <!-- Логотип -->
+        <img
+          :src="stationDomain.cosmetics.urlLogo"
+          class="logo-img"
+          alt="Logo"
+        />
       </div>
-      <ul>
-        <li
-          v-for="item in filteredItems"
-          :key="item.name"
-          :class="{ active: item.isActive }"
-          class="list-chat"
-          @click="item.action ? item.action() : navigateTo(item.name)"
-        >
-          <img
-            :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-            class="svg-icon-chat"
-          />
-        </li>
-      </ul>
+      <div
+        v-for="(section, sectionName) in navSections"
+        :key="sectionName"
+        class="menu-section"
+      >
+        <ul>
+          <li
+            v-for="item in section.items"
+            :key="item.name"
+            class="list-mode"
+            :class="{ active: item.isActive }"
+            @click="item.action ? item.action() : navigateTo(item.name)"
+          >
+            <img
+              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+              class="svg-icon"
+            />
+          </li>
+        </ul>
+        <!-- <div class="section-divider" v-if="sectionName !== 'Помощь'"></div> -->
+      </div>
     </nav>
     <div v-if="!isWidgetMode" class="line"></div>
     <div v-else class="line-chat"></div>
@@ -60,7 +76,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDomain } from "@/composables/getDomain";
 import LangSwither from "../LangSwither.vue";
@@ -80,6 +96,8 @@ const props = defineProps({
   isWidgetMode: Boolean,
 });
 
+const { isWidgetMode } = toRefs(props);
+
 const route = useRoute();
 const router = useRouter();
 const isOpen = ref(false);
@@ -87,23 +105,33 @@ const isOpen = ref(false);
 const navSections = computed(() => {
   const currentNav = stationDomain.navigate.value;
   if (!navConfig.value[currentNav]) return {};
-  
+
   return {
-    'Основное': {
-      items: (navConfig.value[currentNav].main || []).filter(item => item.condition)
+    Основное: {
+      items: (navConfig.value[currentNav].main || []).filter(
+        (item) => item.condition
+      ),
     },
-    'Настройки': {
-      items: (navConfig.value[currentNav].settings || []).filter(item => item.condition)
+    Настройки: {
+      items: (navConfig.value[currentNav].settings || []).filter(
+        (item) => item.condition
+      ),
     },
-    'Помощь': {
-      items: (navConfig.value[currentNav].help || []).filter(item => item.condition)
-    }
+    Помощь: {
+      items: (navConfig.value[currentNav].help || []).filter(
+        (item) => item.condition
+      ),
+    },
   };
 });
 
+console.log(navSections.value, "navSections");
+
 const filteredItems = computed(() => {
   const currentNav = stationDomain.navigate.value;
-  return navConfig.value[currentNav]?.items?.filter(item => item.condition) || [];
+  return (
+    navConfig.value[currentNav]?.items?.filter((item) => item.condition) || []
+  );
 });
 
 const navigateTo = (page) => {
@@ -145,6 +173,10 @@ nav {
 .menu-section {
   margin-bottom: 30px;
   border-bottom: 1.5px solid var(--line);
+}
+
+.logo-img {
+  width: 2rem;
 }
 
 .section-title {
@@ -194,12 +226,13 @@ nav {
   position: absolute;
   z-index: 2;
   left: 60px;
-  top: 56px;
-  height: calc(100% - 57px);
+  height: 100vh;
 }
 
 .logo-img {
   height: 2rem;
+  margin-left: 12px;
+  margin-top: 10px;
 }
 
 .list-chats-loading {
@@ -238,6 +271,26 @@ nav {
   background-color: var(--textNavHover);
   border-radius: 10px;
   width: 200px;
+}
+
+.list-mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 8px 0px 8px 16px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.list-mode:hover {
+  background-color: var(--textNavHover);
+  transition: all 0.3s ease;
+}
+
+.list-mode.active {
+  background-color: var(--textNavHover);
 }
 
 .list-chat {
@@ -310,7 +363,6 @@ nav {
 .list:hover .svg-icon path {
   fill: var(--iconNavHover);
 }
-
 
 .phone-menu nav ul {
   opacity: 0;

@@ -45,6 +45,14 @@ export function useDomain() {
       stationDomain.cosmetics.urlLogo = "/whatsApi_logo.svg";
     }
 
+    if (currentDomain.value === "app2.touch-api.com") {
+      stationDomain.navigate.value = "touchapi";
+      stationDomain.cosmetics.logo = "TouchApi";
+      stationDomain.cosmetics.titleLogo = "Touch-Api";
+      stationDomain.cosmetics.urlLogo =
+        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+    }
+
     if (currentDomain.value === "app1.developtech.ru") {
       stationDomain.navigate.value = "touchapi";
       stationDomain.cosmetics.logo = "TouchApi";

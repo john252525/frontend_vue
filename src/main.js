@@ -31,6 +31,7 @@ import axios from "axios";
 import Support from "./pages/Support.vue";
 import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
+import UserChats from "./pages/UserChats.vue";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -56,6 +57,12 @@ const routes = [
     name: "PersonalAccount",
     component: PersonalAccount,
     meta: { title: "Аккаунты" },
+  },
+  {
+    path: "/UserChats",
+    name: "UserChats",
+    component: UserChats,
+    meta: { title: "Чаты" },
   },
   {
     path: "/help",
@@ -202,6 +209,20 @@ const router = createRouter({
 // Конфигурация ограничений по доменам
 const DOMAIN_CONFIG = {
   "app1.developtech.ru": {
+    allowedRoutes: [
+      "PersonalAccount",
+      "Login",
+      "Registration",
+      "PasswordRecovery",
+      "payments",
+      "VerifyEmail",
+      "ResetPassword",
+      "Referrals",
+    ],
+    defaultRoute: "/Accounts",
+    redirectRoute: "/Accounts",
+  },
+  "app2.touch-api.com": {
     allowedRoutes: [
       "PersonalAccount",
       "Login",

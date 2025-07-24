@@ -31,7 +31,6 @@ export default {
 
 .side-menu {
   width: 250px;
-  /* стили меню */
 }
 
 .content {

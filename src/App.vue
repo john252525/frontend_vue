@@ -1,5 +1,5 @@
 <template>
-  <Header v-if="!isAuthPage" :phoneMenuOn="phoneMenuOn" />
+  <Header v-if="!isAuthPage && !isWidgetMode" :phoneMenuOn="phoneMenuOn" />
   <div class="page-container" v-if="!isAuthPage">
     <Navigation
       v-if="isWidgetMode"
@@ -119,7 +119,7 @@ main > section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  /* overflow: auto; */
 }
 
 .page-container {
