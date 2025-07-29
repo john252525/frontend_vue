@@ -18,26 +18,17 @@
             v-for="(item, index) in payments"
             :key="index"
           >
-            <td class="name-pay">YooKassa</td>
+            <td class="name-pay">{{ getPaymentSystem(item.ext_system) }}</td>
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
-            <td class="table-text">{{ formatDate(item.created_at) }}</td>
+            <td class="table-text">{{ formatDate(item.dt_ins) }}</td>
+            <!-- <td class="table-status-text" :class="getStatusClass(item.state)">
+              {{ getStatusText(item.state) }}
+            </td> -->
             <td
-              class="table-status-text canceled"
-              v-if="item.status === 'canceled'"
+              class="table-status-text"
+              :class="getStatusClass(item.public_status)"
             >
-              {{ t("paymentList.status.canceled") }}
-            </td>
-            <td
-              class="table-status-text succeeded"
-              v-else-if="item.status === 'succeeded'"
-            >
-              {{ t("paymentList.status.succeeded") }}
-            </td>
-            <td
-              class="table-status-text pending"
-              v-else="item.status === 'pending'"
-            >
-              {{ t("paymentList.status.pending") }}
+              {{ item.public_status }}
             </td>
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
@@ -61,26 +52,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, provide } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import LoadAccount from "/src/components/Accounts/Accounts/LoadAccount.vue";
-const payments = ref([]); // Массив для хранения платежей
+
+const payments = ref([]);
 const fetchError = ref(null);
 const apiUrl = import.meta.env.VITE_PAY_URL;
-
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-    // Optionally, update the error message ref
-  }
-};
 
 const paymentsLoadingStation = reactive({
   dataStationNone: false,
@@ -94,43 +74,19 @@ const token = computed(() => accountStore.getAccountToken);
 
 const fetchPayments = async () => {
   paymentsLoadingStation.loadDataStation = true;
-  fetchError.value = null; // Сброс сообщения об ошибке
+  fetchError.value = null;
 
   try {
-    const response = await axios.get(
-      `${apiUrl}/paymentsList`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.get(`${apiUrl}/getPaymentsList`, {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-    if (response.data) {
-      await handleSendLog(
-        "payments",
-        "paymentsList",
-        {
-          headers: {
-            Authorization: `Bearer ${token.value}`,
-          },
-        },
-        response.data,
-        response.data
-      );
-    }
-
-    // Извлекаем платежи из массива items
-    if (response.data) {
-      payments.value = response.data;
-      if (instanceData.value.length === 0) {
-        paymentsLoadingStation.loadDataStation = false;
-        paymentsLoadingStation.dataStationNone = true;
-      } else {
-        paymentsLoadingStation.loadDataStation = false;
-        paymentsLoadingStation.dataStation = true;
-      }
+    if (response.data && response.data.data.length > 0) {
+      payments.value = response.data.data;
+      paymentsLoadingStation.loadDataStation = false;
+      paymentsLoadingStation.dataStation = true;
     } else {
       paymentsLoadingStation.loadDataStation = false;
       paymentsLoadingStation.dataStationNone = true;
@@ -145,63 +101,63 @@ const fetchPayments = async () => {
   }
 };
 
-const createUser = async () => {
-  try {
-    const response = await axios.get(`${apiUrl}/paymentsList`, {
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    if (response.data) {
-      payments.value = response.data;
-      if (payments.value.length === 0) {
-        paymentsLoadingStation.loadDataStation = false;
-        paymentsLoadingStation.dataStationNone = true;
-      } else {
-        paymentsLoadingStation.loadDataStation = false;
-        paymentsLoadingStation.dataStation = true;
-      }
-    } else {
-      paymentsLoadingStation.loadDataStation = false;
-      paymentsLoadingStation.dataStationNone = true;
-    }
-  } catch (error) {
-    paymentsLoadingStation.loadDataStation = false;
-    paymentsLoadingStation.dataStationNone = true;
-    console.error("error", error);
-  }
-};
-
 function removeDecimalZeros(value) {
   return value.toString().replace(/\.00$/, "");
 }
 
 function formatDate(dateString) {
-  // Создаем объект Date из входной строки
   const date = new Date(dateString);
-
-  // Получаем компоненты даты и времени
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+  const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");
 
-  // Формируем строку в нужном формате
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-onMounted(createUser);
-</script>
+function getPaymentSystem(system) {
+  const systems = {
+    yookassa: "YooKassa",
+    // Добавьте другие платежные системы по мере необходимости
+  };
+  return systems[system] || system;
+}
 
+function getStatusClass(state) {
+  switch (state) {
+    case "Пополнение завершено": // Успешный платеж
+      return "succeeded";
+    case "Ошибка обработки платежа": // Ошибка
+      return "canceled";
+    case "Ожидание оплаты": // В обработке
+      return "pending";
+    default:
+      return "pending";
+  }
+}
+
+function getStatusText(state) {
+  switch (state) {
+    case 1:
+      return t("paymentList.status.succeeded");
+    case -100:
+      return t("paymentList.status.canceled");
+    case 4:
+      return t("paymentList.status.pending");
+    default:
+      return t("paymentList.status.pending");
+  }
+}
+
+onMounted(fetchPayments);
+</script>
 <style scoped>
 .table-container {
   overflow-x: auto;
   overflow-y: auto;
   height: 83vh;
-  /* width: 80%; */
 }
 
 .table-header {
@@ -212,8 +168,6 @@ onMounted(createUser);
 
 .table {
   width: 100%;
-  /* min-width: 1200px;
-  max-width: 1000px; */
   border-collapse: collapse;
 }
 

@@ -166,10 +166,10 @@ const handleResetPassword = async () => {
 
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/auth/resetPassword`,
+      `https://bapi88.developtech.ru/api/v1/auth/resetPassword`,
       {
         token: token.value,
-        password: formData.password,
+        new_password: formData.password,
       }
     );
 

@@ -175,12 +175,46 @@ function toggleAccountMenu() {
 
 const balance = ref("");
 
+const regBalanceUser = async () => {
+  try {
+    balanceLoading.value = true;
+
+    const response = await axios.post(
+      `${apiUrl}createUser`, // URL вашего бэкенда
+      {}, // Тело запроса, если не нужно отправлять дополнительные данные
+      {
+        headers: {
+          "Content-Type": "application/json", // Убедитесь, что заголовок указан
+          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
+        },
+      }
+    );
+
+    if (response.data) {
+      await handleSendLog(
+        "balance",
+        "get-payment-sum",
+        null,
+        response.data,
+        response.data
+      );
+    }
+    if (response.data.success) {
+      getBalance();
+    }
+  } catch (err) {
+    balanceLoading.value = false;
+    balanceError.value = true;
+    console.error("error", err.response ? err.response.data : err.message);
+  }
+};
+
 const getBalance = async () => {
   try {
     balanceLoading.value = true;
 
     const response = await axios.post(
-      `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
+      `${apiUrl}/getUserBalance`, // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
       {
         headers: {
@@ -213,7 +247,7 @@ const isChatPage = computed(() => {
   return route.name === "Chats"; // Ensure "Chats" matches the route name for the chat page
 });
 
-onMounted(getBalance);
+onMounted(regBalanceUser);
 </script>
 
 <style scoped>

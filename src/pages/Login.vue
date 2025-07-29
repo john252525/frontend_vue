@@ -131,7 +131,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 
 const loginAccount = async () => {
   accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZW5kb3JfaWQiOiIyODMiLCJlbWFpbCI6Im1ha3NpbS5iaXJ1a292LjIwMDdAbWFpbC5ydSIsImV4cCI6MTc1MjUyOTAzN30.2-5LTv11I2w2ZS-K8-1xOad-DpSOPRFLp0po_3NvWJM"
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTciLCJlbWFpbCI6ImNhZmFsNDI4ODhAZGV2ZGlncy5jb20iLCJleHAiOjE3NTQzNzcyMDd9.g-7CcftvTDMHWBgpG7RytJGkErcuajbgnLaNfy-Vl64"
   );
   accountStore.setAccountData("it.maksim123@mail.ru");
   accountStore.setAccountStation("telegram");

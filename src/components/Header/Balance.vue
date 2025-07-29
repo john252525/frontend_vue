@@ -85,8 +85,9 @@ const balance = ref("");
 const getBalance = async () => {
   try {
     balanceLoading.value = true;
+
     const response = await axios.post(
-      `${apiUrl}/get-payment-sum`, // URL вашего бэкенда
+      `${apiUrl}/getUserBalance`, // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
       {
         headers: {
@@ -106,7 +107,7 @@ const getBalance = async () => {
       );
     }
     balanceLoading.value = false;
-    balance.value = response.data.totalAmount;
+    balance.value = response.data.balance;
   } catch (err) {
     balanceLoading.value = false;
     balanceError.value = true;

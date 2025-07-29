@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="openModal">
+  <div class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
         <h2>Настройка интеграции</h2>
@@ -10,10 +10,7 @@
         <!-- Group Select -->
         <div class="form-group">
           <label>Тип интеграции</label>
-          <div
-            class="custom-select"
-            v-click-outside="() => closeDropdown('group')"
-          >
+          <div class="custom-select" ref="groupSelect">
             <div class="selected-option" @click="toggleDropdown('group')">
               <span>{{ selectedGroup || "Выберите тип" }}</span>
               <svg
@@ -36,36 +33,26 @@
             </div>
             <div class="dropdown-options" v-show="dropdownOpen.group">
               <div
-                v-for="option in formData.data.options"
+                v-for="option in groupOptions"
                 :key="option.value"
                 class="option"
                 @click="selectOption('group', option.value)"
               >
-                {{ option.value }}
+                {{ option.text }}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Source Select (for messenger) -->
-        <div
-          v-if="
-            selectedGroup === 'messenger' &&
-            currentChildren &&
-            currentChildren.type === 'select'
-          "
-          class="form-group"
-        >
-          <label>Источник</label>
-          <div
-            class="custom-select"
-            v-click-outside="() => closeDropdown('source')"
-          >
-            <div class="selected-option" @click="toggleDropdown('source')">
-              <span>{{ selectedSource || "Выберите источник" }}</span>
+        <!-- Messenger Select (shown when group is messenger) -->
+        <div v-if="selectedGroup === 'messenger'" class="form-group">
+          <label>Мессенджер</label>
+          <div class="custom-select" ref="messengerSelect">
+            <div class="selected-option" @click="toggleDropdown('messenger')">
+              <span>{{ selectedMessenger || "Выберите мессенджер" }}</span>
               <svg
                 class="dropdown-icon"
-                :class="{ 'rotate-180': dropdownOpen.source }"
+                :class="{ 'rotate-180': dropdownOpen.messenger }"
                 width="12"
                 height="8"
                 viewBox="0 0 12 8"
@@ -81,38 +68,28 @@
                 />
               </svg>
             </div>
-            <div class="dropdown-options" v-show="dropdownOpen.source">
+            <div class="dropdown-options" v-show="dropdownOpen.messenger">
               <div
-                v-for="option in currentChildren.options"
+                v-for="option in messengerOptions"
                 :key="option.value"
                 class="option"
-                @click="selectOption('source', option.value)"
+                @click="selectOption('messenger', option.value)"
               >
-                {{ option.value }}
+                {{ option.text }}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Type Select (for whatsapp) -->
-        <div
-          v-if="
-            selectedSource === 'whatsapp' &&
-            sourceChildren &&
-            sourceChildren.type === 'select'
-          "
-          class="form-group"
-        >
-          <label>Тип подключения</label>
-          <div
-            class="custom-select"
-            v-click-outside="() => closeDropdown('type')"
-          >
-            <div class="selected-option" @click="toggleDropdown('type')">
-              <span>{{ selectedType || "Выберите тип" }}</span>
+        <!-- CRM Select (shown when group is crm) -->
+        <div v-if="selectedGroup === 'crm'" class="form-group">
+          <label>CRM система</label>
+          <div class="custom-select" ref="crmSelect">
+            <div class="selected-option" @click="toggleDropdown('crm')">
+              <span>{{ selectedCrm || "Выберите CRM" }}</span>
               <svg
                 class="dropdown-icon"
-                :class="{ 'rotate-180': dropdownOpen.type }"
+                :class="{ 'rotate-180': dropdownOpen.crm }"
                 width="12"
                 height="8"
                 viewBox="0 0 12 8"
@@ -128,97 +105,59 @@
                 />
               </svg>
             </div>
-            <div class="dropdown-options" v-show="dropdownOpen.type">
+            <div class="dropdown-options" v-show="dropdownOpen.crm">
               <div
-                v-for="option in sourceChildren.options"
+                v-for="option in crmOptions"
                 :key="option.value"
                 class="option"
-                @click="selectOption('type', option.value)"
+                @click="selectOption('crm', option.value)"
               >
-                {{ option.value }}
+                {{ option.text }}
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Fields for edna -->
-        <div
-          v-if="selectedType === 'edna' && typeChildren && typeChildren.length"
-          class="fields-group"
-        >
-          <div
-            v-for="field in typeChildren"
-            :key="field.name"
-            class="form-field"
-          >
-            <label>{{ getFieldLabel(field.name) }}</label>
-            <input
-              v-model="formValues[field.name]"
-              :type="field.type === 'input' ? 'text' : field.type"
-              :required="field.required"
-              :placeholder="getFieldPlaceholder(field.name)"
-            />
-          </div>
-        </div>
-
-        <!-- Field for telegram -->
+        <!-- Phone input for Telegram -->
         <div
           v-if="
-            selectedSource === 'telegram' &&
-            sourceChildren &&
-            sourceChildren.type === 'input'
+            selectedGroup === 'messenger' && selectedMessenger === 'telegram'
           "
           class="form-field"
         >
           <label>Номер телефона</label>
           <input
-            v-model="formValues[sourceChildren.name]"
-            type="text"
+            v-model="phoneDisplay"
+            @input="handlePhoneInput"
+            @keydown.delete="handleBackspace"
+            type="tel"
+            :placeholder="
+              isRussianFormat ? '+7 (___) ___-__-__' : 'Введите номер'
+            "
             required
-            placeholder="+71234567890"
           />
         </div>
 
-        <!-- Message for empty children -->
+        <!-- Domain input for CRM -->
+        <div v-if="selectedGroup === 'crm' && selectedCrm" class="form-field">
+          <label>Адрес аккаунта</label>
+          <input
+            v-model="formValues.domain"
+            type="text"
+            :placeholder="getDomainPlaceholder()"
+            required
+          />
+        </div>
+
+        <!-- Info message for WhatsApp -->
         <div
           v-if="
-            (selectedSource === 'sms' && !sourceChildren) ||
-            (selectedGroup === 'crm' &&
-              selectedType === 'bitrix24' &&
-              !typeChildren)
+            selectedGroup === 'messenger' && selectedMessenger === 'whatsapp'
           "
           class="info-message"
         >
-          <p>Дополнительная настройка не требуется</p>
-        </div>
-
-        <!-- Fields for megaplan -->
-        <div
-          v-if="
-            selectedType === 'megaplan' && typeChildren && typeChildren.length
-          "
-          class="fields-group"
-        >
-          <div
-            v-for="field in typeChildren"
-            :key="field.name"
-            class="form-field"
-          >
-            <label>{{ getFieldLabel(field.name) }}</label>
-            <input
-              v-model="formValues[field.name]"
-              :type="field.type === 'input' ? 'text' : field.type"
-              :required="field.required"
-              :placeholder="getFieldPlaceholder(field.name)"
-            />
-          </div>
-        </div>
-
-        <!-- Link for amocrm -->
-        <div v-if="selectedType === 'amocrm'" class="info-message">
           <p>
-            Перейдите по <a href="#" class="link">ссылке</a> для подключения
-            AmoCRM
+            Привязать номер своего Whatsapp можно будет после создания аккаунта
           </p>
         </div>
       </div>
@@ -234,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -246,330 +185,237 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "submit"]);
 
-// Form data
-const formData = ref({
-  ok: true,
-  message: null,
-  data: {
-    type: "select",
-    required: true,
-    validate: false,
-    name: "group",
-    options: [
-      {
-        value: "messenger",
-        children: {
-          type: "select",
-          required: true,
-          validate: false,
-          name: "source",
-          options: [
-            {
-              value: "whatsapp",
-              children: {
-                type: "select",
-                required: true,
-                validate: false,
-                name: "type",
-                options: [
-                  {
-                    value: "touchapi",
-                    children: [],
-                  },
-                  {
-                    value: "edna",
-                    children: [
-                      {
-                        type: "input",
-                        required: true,
-                        validate: false,
-                        name: "token",
-                        value: "",
-                      },
-                      {
-                        type: "input",
-                        required: false,
-                        validate: false,
-                        name: "login",
-                        value: "",
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-            {
-              value: "telegram",
-              children: {
-                type: "input",
-                required: true,
-                validate: "phone",
-                name: "login",
-                value: "",
-              },
-            },
-            {
-              value: "sms",
-              children: [],
-            },
-          ],
-        },
-      },
-      {
-        value: "crm",
-        children: {
-          type: "select",
-          required: true,
-          validate: false,
-          name: "type",
-          options: [
-            {
-              value: "",
-            },
-            {
-              value: "amocrm",
-              children: {
-                type: "p",
-                value: "link",
-              },
-            },
-            {
-              value: "bitrix24",
-              children: [],
-            },
-            {
-              value: "megaplan",
-              children: [
-                {
-                  type: "input",
-                  required: true,
-                  validate: false,
-                  name: "token",
-                  value: "",
-                },
-                {
-                  type: "input",
-                  required: true,
-                  validate: false,
-                  name: "login",
-                  value: "",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    ],
-  },
-});
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 // Selected values
 const selectedGroup = ref("");
-const selectedSource = ref("");
-const selectedType = ref("");
+const selectedMessenger = ref("");
+const selectedCrm = ref("");
+
+// Form values
+const formValues = ref({
+  phone: "",
+  domain: "",
+});
 
 // Dropdown states
 const dropdownOpen = ref({
   group: false,
-  source: false,
-  type: false,
+  messenger: false,
+  crm: false,
 });
 
-// Children references
-const currentChildren = ref(null);
-const sourceChildren = ref(null);
-const typeChildren = ref(null);
+const phoneDisplay = ref("");
+const isRussianFormat = ref(true);
 
-// Form values
-const formValues = ref({});
+const formatPhoneNumber = (event) => {
+  let input = event.target.value.replace(/\D/g, "");
+  let formattedInput = "";
 
-// Field labels and placeholders mapping
-const fieldLabels = {
-  token: "API Токен",
-  login: "Логин",
-};
+  // Российский номер (начинается с 7 или 8, длина до 11 цифр)
+  if (/^[78]/.test(input) && input.length <= 11) {
+    // Сохраняем чистое значение
+    formValues.value.phone = input;
 
-const fieldPlaceholders = {
-  token: "Введите ваш API токен",
-  login: "Введите ваш логин",
-};
+    // Форматируем для отображения
+    formattedInput = "+7 ";
 
-// Директива для закрытия при клике вне элемента
-const vClickOutside = {
-  beforeMount(el, binding) {
-    el.clickOutsideEvent = function (event) {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value();
-      }
-    };
-    document.addEventListener("click", el.clickOutsideEvent);
-  },
-  unmounted(el) {
-    document.removeEventListener("click", el.clickOutsideEvent);
-  },
-};
-
-// Helper functions
-const getFieldLabel = (name) => fieldLabels[name] || name;
-const getFieldPlaceholder = (name) => fieldPlaceholders[name] || "";
-
-// Fetch form data
-onMounted(async () => {
-  try {
-    const response = await axios.get(
-      "https://bapi88.developtech.ru/api/v1/forms/getAddInstanceForm2"
-    );
-    formData.value = response.data;
-  } catch (error) {
-    console.error("Error fetching form data:", error);
-  }
-});
-
-// Отслеживаем открытие/закрытие модального окна
-watch(
-  () => props.isOpen,
-  (newVal) => {
-    if (newVal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (input.length > 1) {
+      formattedInput += "(" + input.substring(1, 4);
     }
+    if (input.length > 4) {
+      formattedInput += ") " + input.substring(4, 7);
+    }
+    if (input.length > 7) {
+      formattedInput += "-" + input.substring(7, 9);
+    }
+    if (input.length > 9) {
+      formattedInput += "-" + input.substring(9, 11);
+    }
+
+    phoneDisplay.value = formattedInput;
+  } else {
+    // Для не российских номеров или если больше 11 цифр
+    formValues.value.phone = input;
+    phoneDisplay.value = input;
   }
-);
-
-// Очищаем при размонтировании
-onBeforeUnmount(() => {
-  document.body.style.overflow = "";
-});
-
-// Dropdown methods
-const toggleDropdown = (name) => {
-  // Закрываем все другие dropdown
-  Object.keys(dropdownOpen.value).forEach((key) => {
-    if (key !== name) dropdownOpen.value[key] = false;
-  });
-  // Переключаем текущий
-  dropdownOpen.value[name] = !dropdownOpen.value[name];
 };
 
-const closeDropdown = (name) => {
-  dropdownOpen.value[name] = false;
+const handlePhoneInput = (event) => {
+  const input = event.target;
+  let value = input.value.replace(/\D/g, "");
+  let cursorPos = input.selectionStart;
+
+  // Определяем, российский ли номер
+  isRussianFormat.value = /^[78]/.test(value) && value.length <= 11;
+
+  if (isRussianFormat.value) {
+    // Форматируем российский номер
+    let formattedValue = "+7";
+
+    if (value.length > 1) {
+      formattedValue += ` (${value.substring(1, 4)}`;
+      cursorPos += value.length > 1 ? 2 : 0;
+    }
+    if (value.length > 4) {
+      formattedValue += `) ${value.substring(4, 7)}`;
+      cursorPos += value.length > 4 ? 2 : 0;
+    }
+    if (value.length > 7) {
+      formattedValue += `-${value.substring(7, 9)}`;
+      cursorPos += value.length > 7 ? 1 : 0;
+    }
+    if (value.length > 9) {
+      formattedValue += `-${value.substring(9)}`;
+      cursorPos += value.length > 9 ? 1 : 0;
+    }
+
+    phoneDisplay.value = formattedValue;
+    formValues.value.phone = value;
+
+    // Корректируем позицию курсора
+    nextTick(() => {
+      input.setSelectionRange(cursorPos, cursorPos);
+    });
+  } else {
+    // Для не российских номеров
+    phoneDisplay.value = value;
+    formValues.value.phone = value;
+  }
 };
 
-const selectOption = (name, value) => {
-  if (name === "group") {
-    selectedGroup.value = value;
-    handleGroupChange();
-  } else if (name === "source") {
-    selectedSource.value = value;
-    handleSourceChange();
-  } else if (name === "type") {
-    selectedType.value = value;
-    handleTypeChange();
+const handleBackspace = (event) => {
+  if (!isRussianFormat.value) return;
+
+  const input = event.target;
+  const value = input.value;
+  const cursorPos = input.selectionStart;
+
+  // Если удаляем разделитель, удаляем предыдущую цифру
+  if (cursorPos > 0 && /\D/.test(value[cursorPos - 1])) {
+    event.preventDefault();
+    const cleanValue = phoneDisplay.value.replace(/\D/g, "");
+    const newValue =
+      cleanValue.substring(0, cursorPos - 2) +
+      cleanValue.substring(cursorPos - 1);
+    phoneDisplay.value = newValue;
+    handlePhoneInput({
+      target: { value: newValue, selectionStart: cursorPos - 1 },
+    });
   }
-  // Закрываем dropdown после выбора
-  closeDropdown(name);
+};
+
+// Refs for dropdown elements
+const groupSelect = ref(null);
+const messengerSelect = ref(null);
+const crmSelect = ref(null);
+
+// Options
+const groupOptions = [
+  { value: "messenger", text: "Мессенджер" },
+  { value: "crm", text: "CRM" },
+];
+
+const messengerOptions = [
+  { value: "whatsapp", text: "WhatsApp" },
+  { value: "telegram", text: "Telegram" },
+];
+
+const crmOptions = [
+  { value: "amocrm", text: "AmoCRM" },
+  { value: "bitrix24", text: "Bitrix24" },
+];
+
+// Get domain placeholder based on selected CRM
+const getDomainPlaceholder = () => {
+  if (selectedCrm.value === "amocrm") return "account.amocrm.ru";
+  if (selectedCrm.value === "bitrix24") return "account.bitrix24.ru";
+  return "Введите адрес аккаунта";
 };
 
 // Form validation
 const isFormValid = computed(() => {
   if (!selectedGroup.value) return false;
 
-  // Messenger validation
   if (selectedGroup.value === "messenger") {
-    if (!selectedSource.value) return false;
-
-    // Telegram validation
-    if (selectedSource.value === "telegram") {
-      return !!formValues.value.login;
-    }
-
-    // WhatsApp edna validation
-    if (selectedSource.value === "whatsapp" && selectedType.value === "edna") {
-      return !!formValues.value.token;
-    }
+    if (!selectedMessenger.value) return false;
+    if (selectedMessenger.value === "telegram" && !formValues.value.phone)
+      return false;
   }
 
-  // CRM validation
   if (selectedGroup.value === "crm") {
-    if (!selectedType.value) return false;
-
-    // Megaplan validation
-    if (selectedType.value === "megaplan") {
-      return !!formValues.value.token && !!formValues.value.login;
-    }
+    if (!selectedCrm.value) return false;
+    if (!formValues.value.domain) return false;
   }
 
   return true;
 });
 
-// Handlers
-const handleGroupChange = () => {
-  selectedSource.value = "";
-  selectedType.value = "";
-  formValues.value = {};
-
-  const selectedOption = formData.value.data.options.find(
-    (opt) => opt.value === selectedGroup.value
-  );
-  currentChildren.value = selectedOption ? selectedOption.children : null;
-  sourceChildren.value = null;
-  typeChildren.value = null;
-};
-
-const handleSourceChange = () => {
-  selectedType.value = "";
-
-  if (currentChildren.value && currentChildren.value.options) {
-    const selectedOption = currentChildren.value.options.find(
-      (opt) => opt.value === selectedSource.value
-    );
-    sourceChildren.value = selectedOption ? selectedOption.children : null;
-
-    if (
-      selectedSource.value === "telegram" &&
-      sourceChildren.value &&
-      sourceChildren.value.name
-    ) {
-      formValues.value[sourceChildren.value.name] = "";
-    }
+// Handle clicks outside dropdowns
+const handleClickOutside = (event) => {
+  if (groupSelect.value && !groupSelect.value.contains(event.target)) {
+    dropdownOpen.value.group = false;
+  }
+  if (messengerSelect.value && !messengerSelect.value.contains(event.target)) {
+    dropdownOpen.value.messenger = false;
+  }
+  if (crmSelect.value && !crmSelect.value.contains(event.target)) {
+    dropdownOpen.value.crm = false;
   }
 };
 
-const handleTypeChange = () => {
-  if (sourceChildren.value && sourceChildren.value.options) {
-    const selectedOption = sourceChildren.value.options.find(
-      (opt) => opt.value === selectedType.value
-    );
-    typeChildren.value = selectedOption ? selectedOption.children : null;
+// Set up event listeners
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
 
-    // Initialize field values
-    if (Array.isArray(typeChildren.value)) {
-      typeChildren.value.forEach((field) => {
-        if (field.name && !formValues.value[field.name]) {
-          formValues.value[field.name] = field.value || "";
-        }
-      });
-    }
-  }
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+
+// Dropdown methods
+const toggleDropdown = (name) => {
+  // Close all other dropdowns
+  Object.keys(dropdownOpen.value).forEach((key) => {
+    if (key !== name) dropdownOpen.value[key] = false;
+  });
+  // Toggle current dropdown
+  dropdownOpen.value[name] = !dropdownOpen.value[name];
 };
 
-const closeModal = () => {
-  props.openModal();
+const selectOption = (name, value) => {
+  if (name === "group") {
+    selectedGroup.value = value;
+    selectedMessenger.value = "";
+    selectedCrm.value = "";
+    formValues.value.phone = "";
+    formValues.value.domain = "";
+  } else if (name === "messenger") {
+    selectedMessenger.value = value;
+    formValues.value.phone = "";
+  } else if (name === "crm") {
+    selectedCrm.value = value;
+    formValues.value.domain = "";
+  }
+
+  dropdownOpen.value[name] = false;
 };
 
 const submitForm = async () => {
   const formData = {
     group: selectedGroup.value,
-    source:
-      selectedGroup.value === "messenger" ? selectedSource.value : undefined,
-    type:
-      selectedGroup.value === "messenger" && selectedSource.value === "whatsapp"
-        ? selectedType.value
-        : selectedGroup.value === "crm"
-        ? selectedType.value
-        : undefined,
-    ...formValues.value,
+    ...(selectedGroup.value === "messenger" && {
+      messenger: selectedMessenger.value,
+      ...(selectedMessenger.value === "telegram" && {
+        phone: formValues.value.phone,
+      }),
+    }),
+    ...(selectedGroup.value === "crm" && {
+      type: selectedCrm.value,
+      domain: formValues.value.domain,
+    }),
   };
 
   try {
@@ -579,22 +425,19 @@ const submitForm = async () => {
       {
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
 
     if (response.data.ok) {
-      // Успешное сохранение
       emit("submit", formData);
-      closeModal();
+      props.openModal();
     } else {
-      // Обработка ошибки от сервера
       console.error("Ошибка сохранения:", response.data.message);
-      // Можно добавить уведомление пользователю
     }
   } catch (error) {
     console.error("Ошибка при отправке данных:", error);
-    // Обработка ошибки сети или других ошибок
   }
 };
 </script>
@@ -620,6 +463,10 @@ const submitForm = async () => {
   backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease-out;
   overflow-y: auto;
+}
+
+.hidden-input {
+  display: none;
 }
 
 .modal-container {
@@ -754,7 +601,7 @@ const submitForm = async () => {
 }
 
 .form-field {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .form-field:last-child {
@@ -783,7 +630,6 @@ const submitForm = async () => {
   border-color: #6366f1;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
-
 /* Info message */
 .info-message {
   padding: 12px;

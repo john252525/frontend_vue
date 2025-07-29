@@ -71,6 +71,10 @@ const apiUrl = import.meta.env.VITE_PAY_URL;
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
+console.log(window.location.hostname);
+
+console.log(`https://${window.location.hostname}/Payments`);
+
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -110,6 +114,8 @@ const createPayment = async () => {
       {
         amount: payments.amount,
         currency: "RUB",
+        type: "+",
+        domain: `https://${window.location.hostname}/Payments`,
       },
       {
         headers: {
@@ -128,10 +134,12 @@ const createPayment = async () => {
       );
     }
 
-    paymentUrl.value = response.data.link;
-
-    // Перенаправление пользователя на страницу платежа
-    window.location.href = paymentUrl.value;
+    if (response.data.success) {
+      paymentUrl.value = response.data.confirmation_url;
+      window.location.href = paymentUrl.value;
+    }
+    console.log(paymentUrl.value);
+    // window.location.href = paymentUrl.value;
   } catch (error) {
     console.error("error", error);
     payments.errorMessage = error.response
