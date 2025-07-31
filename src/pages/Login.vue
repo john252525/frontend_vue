@@ -133,7 +133,7 @@ const loginAccount = async () => {
   accountStore.setAccountToken(
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTciLCJlbWFpbCI6ImNhZmFsNDI4ODhAZGV2ZGlncy5jb20iLCJleHAiOjE3NTQzNzcyMDd9.g-7CcftvTDMHWBgpG7RytJGkErcuajbgnLaNfy-Vl64"
   );
-  accountStore.setAccountData("it.maksim123@mail.ru");
+  accountStore.setAccountData("maksim.birykov.2007@mail.ru");
   accountStore.setAccountStation("telegram");
   accountStore.setAccountStationText("Telegram");
   navigateTo("/");

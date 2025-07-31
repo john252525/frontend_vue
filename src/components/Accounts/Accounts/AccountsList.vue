@@ -20,7 +20,7 @@
                 v-if="stationDomain.navigate.value === 'whatsapi'"
                 :item="item"
               />
-              {{ formatPhoneNumber(item.login) }}
+              {{ item.login }}
             </td>
             <td
               class="table-text"

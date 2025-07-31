@@ -283,9 +283,11 @@ provide("selectedItem", { selectedItem });
   overflow-x: auto;
   overflow-y: auto;
   height: 82vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-container::-webkit-scrollbar {
+  height: 6px;
   width: 6px;
 }
 
@@ -306,7 +308,7 @@ provide("selectedItem", { selectedItem });
 
 .table {
   width: 100%;
-  min-width: 600px;
+  min-width: 600px; /* Минимальная ширина для горизонтального скролла */
   border-collapse: collapse;
 }
 
@@ -509,6 +511,30 @@ tr:not(:last-child):after {
 @media (max-height: 920px) {
   .table-container {
     height: 74vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    width: 100vw;
+    margin-left: -1rem; /* Компенсируем padding родительского элемента */
+    padding: 0 1rem;
+  }
+
+  .action-table-button {
+    display: none; /* Скрываем обычную кнопку на мобильных */
+  }
+
+  .action-table-button-phone {
+    display: inline-block; /* Показываем кнопку для мобильных */
+    background: var(--tableActiveButton);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 10px;
+    color: var(--tableActiveButtonColor);
+    transition: all 0.25s;
+    border-radius: 5px;
+    border: none;
   }
 }
 

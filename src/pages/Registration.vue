@@ -6,7 +6,23 @@
   />
   <section v-if="!sendEmail" class="registration-section">
     <form @submit.prevent="logAccoutn">
-      <h2 class="title">{{ t("registration.title") }}</h2>
+      <div class="title-cont">
+        <h2 class="title">{{ t("registration.title") }}</h2>
+        <div v-if="route.query.ref" class="refferals-reg-cont">
+          <svg
+            xmlns="http://www.w3.org/62000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 32 32"
+          >
+            <path
+              fill="#FB8C00"
+              d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14s14-6.3 14-14S23.7 2 16 2m-1.1 6h2.2v11h-2.2zM16 25c-.8 0-1.5-.7-1.5-1.5S15.2 22 16 22s1.5.7 1.5 1.5S16.8 25 16 25"
+            />
+          </svg>
+          <span>Реферальная система</span>
+        </div>
+      </div>
       <div class="input-cont">
         <label class="name-input" for="name">{{
           t("registration.mail")
@@ -183,7 +199,7 @@ const loginAccount = async () => {
     }
     if (response.data.data.result === true) {
       sendEmail.value = true;
-      // loginRefAccount();
+      loginRefAccount();
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
@@ -207,7 +223,7 @@ const loginRefAccount = async () => {
 
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/addReferral`,
+      `https://bapi88.developtech.ru/api/v1/users/addReferral`,
       {
         email: formData.login,
         ref_id: route.query.ref,
@@ -298,7 +314,7 @@ const logAccoutn = () => {
   font-size: 28px;
   color: var(--text);
   text-align: left;
-  margin-bottom: 44px;
+  /* margin-bottom: 44px; */
 }
 
 .input-cont {
@@ -306,6 +322,22 @@ const logAccoutn = () => {
   flex-direction: column;
   gap: 8px;
   margin-bottom: 28px;
+}
+
+.refferals-reg-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fae7c7;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.refferals-reg-cont span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5d4037;
 }
 
 .error-mes {
@@ -377,6 +409,13 @@ const logAccoutn = () => {
   font-size: 20px;
   width: 300px;
   font-weight: 500;
+}
+
+.title-cont {
+  margin-bottom: 44px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .registration-account-button {

@@ -43,7 +43,7 @@ import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-const textButton = ref("https://app1.developtech.ru/#/login...");
+const textButton = ref(`https://${window.location.hostname}/Registration...`);
 
 function decodeJWT(token) {
   try {
@@ -67,9 +67,7 @@ const refId = ref("");
 const getRefId = async () => {
   try {
     const response = await axios.get(
-      `https://b2288.developtech.ru/api/v1/vendors/getRefId/${decodeJWT(
-        accountStore.accountToken
-      )}`,
+      `https://bapi88.developtech.ru/api/v1/users/getRefId`,
 
       {
         headers: {
@@ -88,8 +86,7 @@ const getRefId = async () => {
 };
 
 const copyReferralLink = async () => {
-  const referralLink =
-    "https://app1.developtech.ru/Registration?ref=" + refId.value;
+  const referralLink = `https://${window.location.hostname}/Registration?ref=${refId.value}`;
 
   try {
     await navigator.clipboard.writeText(referralLink);
@@ -97,7 +94,7 @@ const copyReferralLink = async () => {
     console.log("Ссылка скопирована в буфер обмена:", referralLink);
     textButton.value = t("referrals.link");
     setTimeout(() => {
-      textButton.value = "https://app1.developtech.ru/#/login...";
+      textButton.value = `https://${window.location.hostname}/Registration...`;
     }, 3000);
   } catch (err) {
     console.error("Не удалось скопировать ссылку:", err);

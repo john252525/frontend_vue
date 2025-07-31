@@ -10,7 +10,7 @@
         <tbody class="tbody">
           <template v-if="accounts.length > 0">
             <tr v-for="(item, index) in accounts" :key="index">
-              <td class="table-text-number">{{ item.login }}</td>
+              <td class="table-text-number">{{ item.email }}</td>
             </tr>
           </template>
           <template v-else>
@@ -161,16 +161,13 @@ const getIds = async () => {
   }
 };
 
-const getAccounts = async (ids) => {
+const getAccounts = async () => {
   loadDataStation.value = true;
   errorAccountBolean.value = false;
-
+  console.log(token.value);
   try {
-    const response = await axios.post(
-      "https://b2288.developtech.ru/api/v1/vendors/getByIds",
-      {
-        vendor_ids: ids, // Здесь можно указать массив ID или другой параметр для получения всех аккаунтов
-      },
+    const response = await axios.get(
+      "https://bapi88.developtech.ru/api/v1/users/getAllReferrals?referer=https://app2.touch-api.com/",
       {
         headers: {
           "Content-Type": "application/json",
@@ -180,7 +177,7 @@ const getAccounts = async (ids) => {
     );
 
     if (response.data.ok) {
-      accounts.value = response.data.data.vendors;
+      accounts.value = response.data.data.referrals;
     }
   } catch (error) {
     console.error("Error fetching accounts:", error);
@@ -262,7 +259,7 @@ const hideMessage = () => {
 
 onMounted(async () => {
   await chatStore.init();
-  await getIds();
+  await getAccounts();
 });
 </script>
 

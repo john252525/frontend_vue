@@ -222,7 +222,7 @@ onUnmounted(() => {
 
 .cont {
   width: 230px;
-  border-top: 1px solid var(--line);
+  /* border-top: 1px solid var(--line); */
   height: 60px;
   display: flex;
   align-items: center;

@@ -59,6 +59,7 @@ const chatsLoadingChange = () => {
 
 const phoneMenuOn = () => {
   phoneMenuStation.value = !phoneMenuStation.value;
+  console.log("меню");
 };
 
 const checkChatStation = () => {

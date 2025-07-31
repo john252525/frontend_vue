@@ -19,6 +19,24 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const storedData = computed(() => accountStore.getAccountData);
 
+// Функция для обрезки длинных email
+const truncatedEmail = computed(() => {
+  const email = storedData.value;
+  if (!email) return "";
+
+  const maxLength = 20;
+  if (email.length <= maxLength) return email;
+
+  const [username, domain] = email.split("@");
+  const usernameLength = Math.floor(maxLength / 2) - 3; // -3 для троеточия
+  const domainLength = maxLength - usernameLength - 3 - 1; // -1 для @
+
+  return `${username.substring(0, usernameLength)}...@${domain.substring(
+    0,
+    domainLength
+  )}`;
+});
+
 const { t } = useI18n();
 const props = defineProps({
   AccountMenuStationOn: {
@@ -88,6 +106,12 @@ const leaveAccount = () => {
   font-size: 18px;
   color: var(--text);
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 0 10px;
 }
 
 .account-button {

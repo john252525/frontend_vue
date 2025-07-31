@@ -8,21 +8,7 @@
           src="/header/menu_phone.svg"
           alt="Меню для телефона"
         /> -->
-        <svg
-          :class="{ s: isChatPage, 'phone-menu': !isChatPage }"
-          @click="phoneMenuOn"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            d="M2 19h20M2 5h20M2 12h20"
-          />
-        </svg>
+
         <h2 class="logo-header">
           <img
             :src="stationDomain.cosmetics.urlLogo"
@@ -180,7 +166,7 @@ const regBalanceUser = async () => {
     balanceLoading.value = true;
 
     const response = await axios.post(
-      `${apiUrl}createUser`, // URL вашего бэкенда
+      `${apiUrl}/createUser`, // URL вашего бэкенда
       {}, // Тело запроса, если не нужно отправлять дополнительные данные
       {
         headers: {
@@ -234,7 +220,7 @@ const getBalance = async () => {
       );
     }
     balanceLoading.value = false;
-    balance.value = response.data.totalAmount;
+    balance.value = response.data.balance;
   } catch (err) {
     balanceLoading.value = false;
     balanceError.value = true;
@@ -329,7 +315,7 @@ onMounted(regBalanceUser);
 @media (max-width: 500px) {
   .logo,
   .logo-header {
-    display: none;
+    /* display: none; */
     cursor: pointer;
   }
 }

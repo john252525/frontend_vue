@@ -21,15 +21,18 @@
             <td class="name-pay">{{ getPaymentSystem(item.ext_system) }}</td>
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td class="table-text">{{ formatDate(item.dt_ins) }}</td>
-            <!-- <td class="table-status-text" :class="getStatusClass(item.state)">
-              {{ getStatusText(item.state) }}
-            </td> -->
             <td
               class="table-status-text"
               :class="getStatusClass(item.public_status)"
             >
-              {{ item.public_status }}
+              {{ getStatusText(item.public_status) }}
             </td>
+            <!-- <td
+              class="table-status-text"
+              :class="getStatusClass(item.public_status)"
+            >
+              {{ item.public_status }}
+            </td> -->
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
             <td colspan="4">
@@ -140,12 +143,12 @@ function getStatusClass(state) {
 
 function getStatusText(state) {
   switch (state) {
-    case 1:
+    case "Пополнение завершено":
       return t("paymentList.status.succeeded");
-    case -100:
+    case "Платеж отменен":
       return t("paymentList.status.canceled");
-    case 4:
-      return t("paymentList.status.pending");
+    case "Ошибка обработки платежа":
+      return t("paymentList.status.error");
     default:
       return t("paymentList.status.pending");
   }
@@ -154,6 +157,11 @@ function getStatusText(state) {
 onMounted(fetchPayments);
 </script>
 <style scoped>
+.account-list-section {
+  overflow: hidden; /* Это предотвратит появление скролла для всей секции */
+  height: 100%;
+}
+
 .table-container {
   overflow-x: auto;
   overflow-y: auto;

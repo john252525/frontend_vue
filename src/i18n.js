@@ -13,6 +13,21 @@ const { stationDomen } = useDomain();
 
 const messages = {
   en: {
+    navigation: {
+      account: "Accounts",
+      mailings: "Mailings",
+      chats: "Chats",
+      profile: "Profile",
+      payment: "Payments",
+      refferals: "Referrals",
+      support: "Tech. support",
+      help: "Help",
+    },
+    navPage: {
+      main: "Main",
+      help: "Help",
+      settings: "Settings",
+    },
     welcome: "Welcome",
     buttons: {
       submit: "Submit",
@@ -258,9 +273,10 @@ const messages = {
       date: "DATE",
       status: {
         table: "STATUS",
-        cancelled: "Canceled",
-        succeeded: "Paid",
-        pending: "Pending",
+        canceled: "Payment canceled",
+        succeeded: "Top-up completed",
+        error: "Payment processing error",
+        pending: "Waiting for payment",
       },
       accountNone: "No accounts available.",
     },
@@ -325,6 +341,21 @@ const messages = {
     },
   },
   ru: {
+    navigation: {
+      account: "Аккаунты",
+      mailings: "Рассылки",
+      chats: "Чаты",
+      profile: "Профиль",
+      payment: "Оплаты",
+      refferals: "Рефералы",
+      support: "Тех. поддержка",
+      help: "Помощь",
+    },
+    navPage: {
+      main: "Основное",
+      help: "Помощь",
+      settings: "Настройки",
+    },
     welcome: "Добро пожаловать",
     buttons: {
       submit: "Отправить",
@@ -572,9 +603,10 @@ const messages = {
       date: "ДАТА",
       status: {
         table: "СТАТУС",
-        canceled: "Отменён",
-        succeeded: "Оплачен",
-        pending: "Ожидается",
+        canceled: "Платеж отменен",
+        succeeded: "Пополнение завершено",
+        error: "Ошибка обработки платежа",
+        pending: "Ожидание оплаты",
       },
       accountNone: "Аккаунты отсутствуют.",
     },
