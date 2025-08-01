@@ -2,23 +2,24 @@
   <div class="profile-section info-section">
     <h2 class="section-title">
       <svg class="icon" viewBox="0 0 24 24" width="16" height="16">
-        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
       </svg>
       Основное
     </h2>
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">Email:</span>
-        <span class="info-value">{{ email || '—' }}</span>
+        <span class="info-value">{{ email || "—" }}</span>
       </div>
-      <div class="info-item">
+      <!-- <div class="info-item">
         <span class="info-label">Страна:</span>
         <span class="info-value">{{ country || '—' }}</span>
       </div>
       <div class="info-item">
         <span class="info-label">Телефон:</span>
         <span class="info-value">{{ phone || '—' }}</span>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -27,8 +28,8 @@
 defineProps({
   email: String,
   country: String,
-  phone: String
-})
+  phone: String,
+});
 </script>
 
 <style scoped>
@@ -86,16 +87,16 @@ defineProps({
     padding: 1.5rem;
     border-radius: 12px;
   }
-  
+
   .section-title {
     font-size: 1.15rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .info-grid {
     gap: 1rem;
   }
-  
+
   .info-item {
     font-size: 0.95rem;
   }

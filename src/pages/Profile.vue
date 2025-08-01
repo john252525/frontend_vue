@@ -11,7 +11,7 @@
           class="grid-item"
         />
 
-        <SecuritySettings @changePassword="changePassword" class="grid-item" />
+        <!-- <SecuritySettings @changePassword="changePassword" class="grid-item" />
 
         <NotificationsSettings
           @updateNotifications="updateNotifications"
@@ -23,7 +23,7 @@
           @upgrade="upgradeSubscription"
           @cancel="cancelSubscription"
           class="grid-item"
-        />
+        /> -->
       </div>
     </div>
   </div>
@@ -37,8 +37,11 @@ import SecuritySettings from "@/components/Profile/SecuritySettings.vue";
 import NotificationsSettings from "@/components/Profile/NotificationsSettings.vue";
 import TariffInfo from "@/components/Profile/TariffInfo.vue";
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+
 const user = ref({
-  email: "user@example.com",
+  email: accountStore.getAccountData,
   country: "Россия",
   phone: "+7 (999) 123-45-67",
   subscription: {

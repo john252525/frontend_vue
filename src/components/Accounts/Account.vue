@@ -46,18 +46,21 @@
         <ul>
           <li
             @click="changeCrmPlatform('amocrm', 'AmoCRM')"
+            :class="{ active: crmText === 'AmoCRM' }"
             class="crm-platform"
           >
             AmoCRM
           </li>
           <li
             @click="changeCrmPlatform('bitrix24', 'Bitrix24')"
+            :class="{ active: crmText === 'Bitrix24' }"
             class="crm-platform"
           >
             Bitrix24
           </li>
           <li
             @click="changeCrmPlatform('megaplan', 'MegaPlan')"
+            :class="{ active: crmText === 'MegaPlan' }"
             class="crm-platform"
           >
             MegaPlan
@@ -462,6 +465,10 @@ header {
 }
 
 @media (max-width: 768px) {
+  .crm-list {
+    left: 120px;
+    top: 120px;
+  }
   .account {
     display: none;
   }

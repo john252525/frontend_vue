@@ -27,15 +27,15 @@
         <span class="action action-throw" @click="ChangeconfirmStationReset">{{
           t("modalAccount.change")
         }}</span>
-        <span
+        <!-- <span
           class="action-loading"
           :class="{ 'flash-red': isFlashing }"
           v-if="chatsStation === 'loading'"
           @click.stop="handleDisabledChat"
           >{{ t("modalAccount.chat") }}
           <LoadingBalance />
-        </span>
-        <span
+        </span> -->
+        <!-- <span
           class="action-chat-false"
           :class="{ 'flash-red': isFlashing }"
           v-if="chatsStation === false"
@@ -52,13 +52,13 @@
               d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14s14-6.3 14-14S23.7 2 16 2m-1.1 6h2.2v11h-2.2zM16 25c-.8 0-1.5-.7-1.5-1.5S15.2 22 16 22s1.5.7 1.5 1.5S16.8 25 16 25"
             />
           </svg>
-        </span>
-        <span
+        </span> -->
+        <!-- <span
           class="action"
           v-if="chatsStation === true"
           @click="connectToDatabaseAndNavigate"
           >{{ t("modalAccount.chat") }}</span
-        >
+        > -->
         <span class="action" @click="getNewProxy">{{
           t("modalAccount.changeProxy")
         }}</span>
