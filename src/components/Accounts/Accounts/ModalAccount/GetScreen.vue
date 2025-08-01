@@ -1,13 +1,14 @@
 <template>
-  <div @click="changeGetScreenStation" class="black-fon">
-    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-    <LoadingModal
-      :textLoadin="station.textLoadin"
-      :stationLoading="station.loading"
+  <div @click="handleBackdropClick" class="black-fon">
+    <ErrorBlock
+      v-if="showError"
+      :errorMessage="errorMessage"
+      @close="closeError"
     />
-    <section v-if="station.screen" class="screen-section">
-      <img class="screen-img" :src="base64Image" alt="screenshot" />
-      <button @click="changeGetScreenStation" class="close">
+    <LoadingModal :text="loadingText" :isLoading="isLoading" />
+    <section v-if="showScreen" class="screen-section">
+      <img class="screen-img" :src="screenImage" alt="screenshot" />
+      <button @click="closeScreen" class="close">
         {{ t("GetScreen.close") }}
       </button>
     </section>
@@ -15,129 +16,109 @@
 </template>
 
 <script setup>
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import axios from "axios";
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-import { ref, toRefs, inject, computed, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { useStationLoading } from "@/composables/useStationLoading";
-const { setLoadingStatus } = useStationLoading();
+import axios from "axios";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import LoadingModal from "./Enable/LoadingModal.vue";
+
+const { t } = useI18n();
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
-const { t } = useI18n();
-const router = useRouter();
-import LoadingModal from "./Enable/LoadingModal.vue";
-const base64Image = ref("");
+
+// Реактивные состояния
+const screenImage = ref("");
+const errorMessage = ref("");
+const showError = ref(false);
+const isLoading = ref(false);
+const showScreen = ref(false);
+const loadingText = ref(t("GetScreen.text"));
+
 const props = defineProps({
-  selectedItem: {
-    type: Object,
-  },
-  getScreenStation: {
-    type: Boolean,
-  },
-  changeGetScreenStation: {
-    type: Function,
-  },
+  selectedItem: Object,
+  getScreenStation: Boolean,
+  changeGetScreenStation: Function,
 });
 
-const station = reactive({
-  loading: false,
-  screen: false,
-  textLoadin: "",
-});
-
-const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
-};
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
-const { selectedItem, getScreenStation } = toRefs(props);
-const { source, login, storage, type } = selectedItem.value;
-
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
-const handleSendLog = async (location, method, params, results, answer) => {
+const decodeBase64Response = (base64String) => {
   try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
+    const decodedString = atob(base64String);
+    return JSON.parse(decodedString);
+  } catch (error) {
+    console.error("Error decoding base64 response:", error);
+    return null;
   }
 };
 
 const getScreen = async () => {
-  let params = {
-    source: source,
-    login: login,
-    storage: storage,
-    type: type,
-  };
-  if (stationDomain.navigate.value != "whatsapi") {
-    params = {
-      source: source,
-      login: login,
-    };
-  } else {
-    params = {
-      source: source,
-      login: login,
-      storage: storage,
-    };
-  }
+  isLoading.value = true;
+  showError.value = false;
+  showScreen.value = false;
+
   try {
+    const params = {
+      source: props.selectedItem.source,
+      login: props.selectedItem.login,
+      ...(props.selectedItem.storage && {
+        storage: props.selectedItem.storage,
+      }),
+      ...(props.selectedItem.type && { type: props.selectedItem.type }),
+    };
+
     const response = await axios.post(`${FRONTEND_URL}screenshot`, params, {
       headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token.value}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`, // Замените на ваш токен
       },
     });
 
-    if (response.data) {
-      await handleSendLog(
-        "screenshot",
-        "screenshot",
-        params,
-        response.data.ok,
-        response.data
-      );
-    }
+    if (response.data.ok && response.data.data?.value) {
+      const decodedData = decodeBase64Response(response.data.data.value);
 
-    if (response.data.ok === true) {
-      station.loading = false;
-      setLoadingStatus(true, "success");
-      station.screen = true;
-      base64Image.value = `data:image/png;base64,${response.data.value}`;
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
+      if (decodedData?.status === "error") {
+        // Обработка ошибки от сервера
+        errorMessage.value = decodedData.error?.message || t("errors.unknown");
+        showError.value = true;
+      } else {
+        // Предполагаем, что это изображение
+        screenImage.value = `data:image/png;base64,${response.data.data.value}`;
+        showScreen.value = true;
+      }
     } else {
-      props.changeGetScreenStation();
-      station.screen = false;
-      station.loading = false;
-      setLoadingStatus(true, "error");
+      errorMessage.value = t("errors.noScreenshotData");
+      showError.value = true;
     }
   } catch (error) {
-    console.error(`error`, error);
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
+    console.error("Screenshot error:", error);
+    errorMessage.value =
+      error.response?.data?.message || t("errors.connectionFailed");
+    showError.value = true;
+  } finally {
+    isLoading.value = false;
   }
 };
 
-const sendScreen = async () => {
-  getScreen();
+const handleBackdropClick = (e) => {
+  if (e.target === e.currentTarget) {
+    closeScreen();
+  }
+};
+
+const closeScreen = () => {
+  showScreen.value = false;
+  props.changeGetScreenStation();
+};
+
+const closeError = () => {
+  showError.value = false;
+  props.changeGetScreenStation();
 };
 
 onMounted(() => {
-  station.textLoadin = t("GetScreen.text");
-  station.loading = true;
-  sendScreen();
+  getScreen();
 });
 </script>
 
@@ -168,6 +149,8 @@ onMounted(() => {
 
 .screen-img {
   width: 600px;
+  max-height: 80vh;
+  object-fit: contain;
 }
 
 .close {
@@ -180,6 +163,7 @@ onMounted(() => {
   font-size: 14px;
   color: #fff;
   transition: all 0.25s;
+  cursor: pointer;
 }
 
 @media (max-width: 700px) {

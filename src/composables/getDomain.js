@@ -24,11 +24,19 @@ export function useDomain() {
     }
 
     if (currentDomain.value === "localhost") {
-      stationDomain.navigate.value = "whatsapi";
-      stationDomain.cosmetics.logo = "WhatsApi";
-      stationDomain.cosmetics.titleLogo = "WhatsApi";
-      stationDomain.cosmetics.urlLogo = "/whatsApi_logo.svg";
+      stationDomain.navigate.value = "touchapi";
+      stationDomain.cosmetics.logo = "TouchApi";
+      stationDomain.cosmetics.titleLogo = "Touch-Api";
+      stationDomain.cosmetics.urlLogo =
+        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
     }
+
+    // if (currentDomain.value === "localhost") {
+    //   stationDomain.navigate.value = "whatsapi";
+    //   stationDomain.cosmetics.logo = "WhatsApi";
+    //   stationDomain.cosmetics.titleLogo = "WhatsApi";
+    //   stationDomain.cosmetics.urlLogo = "/whatsApi_logo.svg";
+    // }
 
     if (currentDomain.value === "mwi.apitter.com") {
       stationDomain.navigate.value = "mwi";

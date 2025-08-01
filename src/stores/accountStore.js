@@ -2,11 +2,13 @@ import { defineStore } from "pinia";
 
 export const useAccountStore = defineStore("accountStore", {
   state: () => ({
-    accountSourse: "", // Значения по умолчанию
+    accountSourse: "",
     accountData: "",
     accountStation: "",
     accountStationText: "",
     accountToken: "",
+    crmPlatform: "amocrm",
+    crmPlatformText: "AmoCRM",
   }),
   getters: {
     getAccountSource: (state) => state.accountSourse,
@@ -14,6 +16,8 @@ export const useAccountStore = defineStore("accountStore", {
     getAccountStation: (state) => state.accountStation,
     getAccountStationText: (state) => state.accountStationText,
     getAccountToken: (state) => state.accountToken,
+    getCrmPlatform: (state) => state.crmPlatform,
+    getCrmPlatformText: (state) => state.crmPlatformText,
 
     getAccountInfo: (state) => ({
       accountSourse: state.accountSourse,
@@ -35,6 +39,12 @@ export const useAccountStore = defineStore("accountStore", {
     // Обновить отдельные поля (опционально)
     setAccountSource(accountSourse) {
       this.accountSourse = accountSourse;
+    },
+    setCrmPlatform(crmPlatform) {
+      this.crmPlatform = crmPlatform;
+    },
+    setCrmPlatformText(crmPlatformText) {
+      this.crmPlatformText = crmPlatformText;
     },
     setAccountData(accountData) {
       this.accountData = accountData;

@@ -5,8 +5,15 @@
         <thead class="table-header">
           <tr>
             <th class="table-login">{{ t("accountList.login") }}</th>
-            <th class="table-step">{{ t("accountList.step") }}</th>
-            <th class="table-action">{{ t("accountList.action") }}</th>
+            <th v-if="accountStation === 'crm'" class="table-login">СОУРС</th>
+            <th v-if="accountStation === 'crm'" class="table-login">СТАТУС</th>
+            <th v-if="accountStation === 'crm'" class="table-login">ТИП</th>
+            <th v-if="accountStation != 'crm'" class="table-step">
+              {{ t("accountList.step") }}
+            </th>
+            <th v-if="accountStation != 'crm'" class="table-action">
+              {{ t("accountList.action") }}
+            </th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -15,25 +22,51 @@
             v-for="(item, index) in instanceData"
             :key="index"
           >
-            <td class="table-text-number">
-              <AccountIcon
-                v-if="stationDomain.navigate.value === 'whatsapi'"
-                :item="item"
-              />
+            <td v-if="item.login" class="table-text-number">
+              <AccountIcon :item="item" />
               {{ item.login }}
+            </td>
+            <td v-else class="table-text">-</td>
+            <td
+              v-if="accountStation === 'crm' && item.source"
+              class="table-text"
+            >
+              {{ item.source }}
+            </td>
+            <td
+              v-if="accountStation === 'crm' && !item.source"
+              class="table-text"
+            >
+              -
             </td>
             <td
               class="table-text"
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
-              v-if="item.step"
+              v-if="item.step && accountStation != 'crm'"
             >
               {{ item.step.value }}
             </td>
-            <td class="table-text" v-else-if="item.loading">
+
+            <td
+              class="table-text"
+              v-else-if="item.loading && accountStation != 'crm'"
+            >
               <LoadingAccount />
             </td>
-            <td class="table-text" v-else>-</td>
+            <td
+              class="table-text"
+              v-if="!item.loading && accountStation != 'crm'"
+            >
+              -
+            </td>
+            <td v-if="item.enable === 1 && accountStation === 'crm'">
+              Активно
+            </td>
+            <td v-if="item.enable === 0 && accountStation === 'crm'">
+              Неактивно
+            </td>
+            <td v-if="accountStation === 'crm'">{{ item.type }}</td>
             <td class="table-action-text">
               <button
                 v-if="
@@ -160,6 +193,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
+const crmPlatform = computed(() => accountStore.getCrmPlatform);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 import { storeToRefs } from "pinia";
@@ -298,14 +332,27 @@ const getAccounts = async () => {
   let params = {
     source: accountStation.value,
     skipDetails: true,
+    group: "messenger",
   };
 
-  if (stationDomain.navigate.value !== "whatsapi") {
+  if (stationDomain.navigate.value === "touchapi") {
+    console.log("touch");
     params = {
       source: accountStation.value,
       skipDetails: true,
+      group: "messenger",
     };
-  } else {
+
+    if (accountStation.value === "crm") {
+      console.log("crn");
+      params = {
+        group: "crm",
+        type: crmPlatform.value,
+      };
+    }
+  }
+
+  if (stationDomain.navigate.value === "whatsapi") {
     params = {
       skipDetails: true,
     };

@@ -1,18 +1,69 @@
 <template>
-  <!-- <AddTelegramAccount
-    :openAddAccountStation="openAddAccount"
-    v-if="openAddAccountStation"
-  /> -->
-  <AddAccount
-    :openModal="openAddAccount"
-    v-if="openAddAccountStation"
-  />
+  <AddAccount :openModal="openAddAccount" v-if="openAddAccountStation" />
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("account.accounts") }}</h2>
-      <h2 v-if="stationDomain.navigate.value != 'whatsapi'" class="account">
+      <h2
+        v-if="
+          stationDomain.navigate.value != 'whatsapi' &&
+          platformStationText != 'CRM'
+        "
+        class="account"
+      >
         {{ platformStationText }}
       </h2>
+
+      <div
+        @click="openCrmPlatform"
+        v-if="
+          stationDomain.navigate.value != 'whatsapi' &&
+          platformStationText === 'CRM'
+        "
+        class="crm-platform-cont"
+      >
+        <h2>
+          {{ crmText }}
+        </h2>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fill="currentColor"
+            fill-rule="evenodd"
+            d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4"
+          />
+        </svg>
+      </div>
+      <div
+        v-if="setPlatformStation"
+        @click="openCrmPlatform"
+        class="black-fon"
+      ></div>
+      <div v-if="setPlatformStation" class="crm-list">
+        <ul>
+          <li
+            @click="changeCrmPlatform('amocrm', 'AmoCRM')"
+            class="crm-platform"
+          >
+            AmoCRM
+          </li>
+          <li
+            @click="changeCrmPlatform('bitrix24', 'Bitrix24')"
+            class="crm-platform"
+          >
+            Bitrix24
+          </li>
+          <li
+            @click="changeCrmPlatform('megaplan', 'MegaPlan')"
+            class="crm-platform"
+          >
+            MegaPlan
+          </li>
+        </ul>
+      </div>
     </section>
     <section class="account-section">
       <button
@@ -51,6 +102,13 @@
           >
             WhatsApp
           </li>
+          <li
+            @click="choiceNetWork('crm', 'CRM')"
+            class="platform"
+            :class="{ active: platformStationText === 'CRM' }"
+          >
+            CRM
+          </li>
         </ul>
         <ul v-else class="platform-list-whatsapp">
           <li
@@ -66,6 +124,13 @@
             class="platform"
           >
             WhatsApp
+          </li>
+          <li
+            @click="choiceNetWork('crm', 'CRM')"
+            class="platform"
+            :class="{ active: platformStationText === 'CRM' }"
+          >
+            CRM
           </li>
         </ul>
       </article>
@@ -99,6 +164,7 @@ import { ref, onMounted } from "vue";
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = accountStore.getAccountStationText;
+const crmText = accountStore.getCrmPlatformText;
 const platformStation = ref(false);
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -106,8 +172,21 @@ const { t } = useI18n();
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
+const setPlatformStation = ref(false);
+
+function openCrmPlatform() {
+  setPlatformStation.value = !setPlatformStation.value;
+}
+
 function openPlatformChoice() {
   platformStation.value = !platformStation.value;
+}
+
+function changeCrmPlatform(value, valueTwo) {
+  accountStore.setCrmPlatform(value);
+  accountStore.setCrmPlatformText(valueTwo);
+  setPlatformStation.value = !setPlatformStation.value;
+  location.reload();
 }
 
 function choiceNetWork(value, valueTwo) {
@@ -213,6 +292,19 @@ header {
   padding: 8px 12px;
 }
 
+.crm-platform-cont {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--headerAccountText);
+  background: var(--headerAccount);
+  border-radius: 5px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
 .add-account-button:hover {
   background: #565cc8;
   transition: all 0.25s;
@@ -241,7 +333,23 @@ header {
   top: 120px;
   border-radius: 10px;
   width: 100px;
-  height: 70px;
+  height: 100px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crm-list {
+  position: absolute;
+  z-index: 10;
+  left: 350px;
+  top: 120px;
+  border-radius: 10px;
+  width: 108px;
+  height: 100px;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -257,7 +365,7 @@ header {
   top: 120px;
   border-radius: 10px;
   width: 108px;
-  height: 70px;
+  height: 100px;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -308,6 +416,33 @@ header {
   transition: all 0.1s;
   cursor: pointer;
   font-size: 14px;
+}
+
+.crm-platform {
+  padding: 4px;
+  transition: all 0.1s;
+  cursor: pointer;
+  font-size: 14px;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crm-platform:hover {
+  text-align: center;
+  width: 80px;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.crm-platform.active {
+  text-align: center;
+  width: 80px;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  transition: all 0.2s;
 }
 
 .platform:hover {
