@@ -122,6 +122,7 @@
         tooltipMessage
       }}</span>
     </div>
+    <Tariff />
     <Modal
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
@@ -189,6 +190,7 @@ import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
+import Tariff from "./TariffAccount/Tariff.vue";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);

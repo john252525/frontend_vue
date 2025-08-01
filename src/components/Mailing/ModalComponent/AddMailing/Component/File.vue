@@ -348,7 +348,7 @@ async function createWhatsAppBroadcast() {
   try {
     const response = await axios.post(url, params, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token.value}`,
         // Authorization: `Bearer ${localStorage.getItem("accountToken")}`,
       },
