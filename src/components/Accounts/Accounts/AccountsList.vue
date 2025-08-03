@@ -11,6 +11,7 @@
             <th v-if="accountStation != 'crm'" class="table-step">
               {{ t("accountList.step") }}
             </th>
+            <th class="table-login">ПОДПИСКА</th>
             <th v-if="accountStation != 'crm'" class="table-action">
               {{ t("accountList.action") }}
             </th>
@@ -67,6 +68,7 @@
               Неактивно
             </td>
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
+            <td><button @click="changeTariffStation">Продлить</button></td>
             <td class="table-action-text">
               <button
                 v-if="

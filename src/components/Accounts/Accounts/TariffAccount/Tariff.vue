@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" v-if="showModal" @click.self="closeModal">
+  <div class="modal-overlay" v-if="tariffStation" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
         <h2>Выберите тариф</h2>
@@ -12,7 +12,11 @@
         </button>
       </div>
 
-      <div class="tariffs-container">
+      <div v-if="loading" class="loading-container">
+        <div class="loader"></div>
+      </div>
+
+      <div v-else class="tariffs-container">
         <div
           class="tariff-card"
           v-for="tariff in displayedTariffs"
@@ -61,22 +65,71 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
 
-const showModal = ref(true);
-const hoverIndex = ref(-1);
 const props = defineProps({
-  tariffsData: {
-    type: Array,
-    default: () => [],
+  changeTariffStation: {
+    type: Function,
+  },
+  tariffStation: {
+    type: Boolean,
   },
 });
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
+const showModal = ref(true);
+const hoverIndex = ref(-1);
+const loading = ref(false);
+const tariffsData = ref([]);
+const error = ref(null);
+
+// Коды тарифов для запроса
+const tariffCodes = [
+  "touchapi-whatsapp-1m",
+  "touchapi-whatsapp-3m",
+  "touchapi-whatsapp-6m",
+  "touchapi-whatsapp-12m",
+];
+
+const fetchTariffs = async () => {
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const requests = tariffCodes.map((code) =>
+      axios.post(
+        "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
+        { code: code },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.value}`,
+          },
+        }
+      )
+    );
+
+    const responses = await Promise.all(requests);
+    tariffsData.value = responses.map((res) => res.data);
+  } catch (err) {
+    error.value = err.response?.data?.message || "Ошибка при загрузке тарифов";
+    console.error("Error fetching tariffs:", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const displayedTariffs = computed(() => {
-  return props.tariffsData.map((tariff) => ({
-    ...tariff.data,
-    id: tariff.data.id || Math.random().toString(36).substring(2, 9),
-  }));
+  return tariffsData.value
+    .filter((tariff) => tariff.ok && tariff.data.enable)
+    .map((tariff) => ({
+      ...tariff.data,
+      id: tariff.data.id || Math.random().toString(36).substring(2, 9),
+    }));
 });
 
 const getPeriodText = (period) => {
@@ -90,7 +143,6 @@ const getPeriodText = (period) => {
 };
 
 const isPopular = (tariff) => {
-  // Помечаем как популярный тариф с самым длительным периодом
   const periodsOrder = ["1m", "3m", "6m", "12m"];
   const maxPeriod = Math.max(
     ...displayedTariffs.value.map((t) => periodsOrder.indexOf(t.period))
@@ -108,14 +160,17 @@ const cardStyle = (id) => {
   return {};
 };
 
-const closeModal = () => {
-  showModal.value = false;
+const openModal = async () => {
+  showModal.value = true;
+  if (tariffsData.value.length === 0) {
+  }
 };
 
-defineExpose({
-  openModal: () => (showModal.value = true),
-  closeModal,
-});
+const closeModal = () => {
+  props.changeTariffStation;
+};
+
+onMounted(fetchTariffs);
 </script>
 
 <style scoped>
