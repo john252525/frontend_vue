@@ -1,6 +1,20 @@
 <template>
-  <div class="modal-overlay" v-if="tariffStation" @click.self="closeModal">
-    <div class="modal-container">
+  <div class="modal-overlay" @click.self="closeModal">
+    <SuccessfulPurchase
+      :changeTariffStation="changeTariffStation"
+      v-if="paymentsStation.success"
+      :tariff="selectTariff"
+    />
+    <FailedPurchase
+      v-if="paymentsStation.error"
+      :error="paymentsStation.errorMessages"
+      :tariff="selectTariff"
+      :changeTariffStation="changeTariffStation"
+    />
+    <div
+      v-if="!buySection && !paymentsStation.success && !paymentsStation.error"
+      class="modal-container"
+    >
       <div class="modal-header">
         <h2>Выберите тариф</h2>
         <button class="close-button" @click="closeModal">
@@ -12,61 +26,123 @@
         </button>
       </div>
 
-      <div v-if="loading" class="loading-container">
+      <!-- <div v-if="loading" class="loading-container">
         <div class="loader"></div>
       </div>
 
-      <div v-else class="tariffs-container">
-        <div
-          class="tariff-card"
-          v-for="tariff in displayedTariffs"
-          :key="tariff.id"
-          @mouseenter="hoverIndex = tariff.id"
-          @mouseleave="hoverIndex = -1"
-          :style="cardStyle(tariff.id)"
-        >
-          <div class="tariff-header">
-            <h3>{{ tariff.name }}</h3>
-            <div class="price">
-              <span class="amount">{{ tariff.price }}</span>
-              <span class="currency">{{ tariff.currency }}</span>
-              <span class="period">/{{ getPeriodText(tariff.period) }}</span>
-            </div>
-            <div v-if="isPopular(tariff)" class="popular-badge">Выгодно</div>
-          </div>
-          <div class="tariff-features">
-            <div class="feature" v-if="tariff.limits">
-              <svg class="feature-icon" viewBox="0 0 24 24">
-                <path
-                  d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                />
-              </svg>
-              <span>{{ tariff.limits }}</span>
-            </div>
-            <div class="feature">
-              <svg class="feature-icon" viewBox="0 0 24 24">
-                <path
-                  d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                />
-              </svg>
-              <span>Доступ на {{ getPeriodText(tariff.period) }}</span>
-            </div>
-          </div>
-          <button
-            class="select-button"
-            :class="{ 'hover-effect': hoverIndex === tariff.id }"
+      <div v-else-if="error" class="error-message">
+        {{ error }}
+        <button @click="fetchTariffs" class="retry-button">
+          Повторить попытку
+        </button>
+      </div> -->
+
+      <div class="tariffs-wrapper">
+        <div class="tariffs-container">
+          <div
+            class="tariff-card"
+            v-for="(tariff, index) in paginatedTariffs"
+            :key="tariff.id"
+            @mouseenter="hoverIndex = currentPage * itemsPerPage + index"
+            @mouseleave="hoverIndex = -1"
+            :class="{
+              hovered: hoverIndex === currentPage * itemsPerPage + index,
+            }"
           >
-            Выбрать тариф
+            <div class="tariff-header">
+              <div class="price-container">
+                <div class="price">
+                  <span class="amount">{{ formatPrice(tariff.price) }}</span>
+                  <span class="currency">{{ tariff.currency }}</span>
+                </div>
+                <div class="period">/{{ getPeriodText(tariff.period) }}</div>
+                <div v-if="showMonthlyPrice(tariff)" class="monthly-price">
+                  {{ calculateMonthlyPrice(tariff) }} ₽/мес
+                </div>
+              </div>
+            </div>
+
+            <div class="tariff-features">
+              <div class="feature" v-if="tariff.limits">
+                <svg class="feature-icon" viewBox="0 0 24 24">
+                  <path
+                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                  />
+                </svg>
+                <span>{{ tariff.limits || "Без ограничений" }}</span>
+              </div>
+              <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24">
+                  <path
+                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                  />
+                </svg>
+                <span>Доступ на {{ getPeriodText(tariff.period) }}</span>
+              </div>
+              <div class="feature">
+                <svg class="feature-icon" viewBox="0 0 24 24">
+                  <path
+                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                  />
+                </svg>
+                <span>Техническая поддержка 24/7</span>
+              </div>
+            </div>
+
+            <button
+              @click="clickSelectTariff(tariff)"
+              class="select-button"
+              :class="{
+                hovered: hoverIndex === currentPage * itemsPerPage + index,
+              }"
+            >
+              Выбрать тариф
+            </button>
+          </div>
+        </div>
+
+        <div v-if="totalPages > 1" class="pagination-controls">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 0"
+            class="pagination-button"
+          >
+            &larr;
+          </button>
+          <span class="page-indicator">
+            Страница {{ currentPage + 1 }} из {{ totalPages }}
+          </span>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages - 1"
+            class="pagination-button"
+          >
+            &rarr;
           </button>
         </div>
       </div>
+    </div>
+    <div
+      class="modal-container"
+      v-if="buySection && !paymentsStation.success && !paymentsStation.error"
+    >
+      <BuySection
+        :changePaymentsStation="changePaymentsStation"
+        :selectTariff="selectTariff"
+        :close="changeStationTariff"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, reactive } from "vue";
 import axios from "axios";
+import { useAccountStore } from "@/stores/accountStore";
+
+import FailedPurchase from "./Purchase/FailedPurchase.vue";
+import SuccessfulPurchase from "./Purchase/SuccessfulPurchase.vue";
+import BuySection from "./BuySection.vue";
 
 const props = defineProps({
   changeTariffStation: {
@@ -77,44 +153,121 @@ const props = defineProps({
   },
 });
 
-import { useAccountStore } from "@/stores/accountStore";
+const emit = defineEmits(["close"]);
+
+const buySection = ref(false);
+
+const paymentsStation = reactive({
+  error: false,
+  success: false,
+  errorMessages: "",
+});
+
+const changePaymentsStation = (isOpen, answer, error) => {
+  if (answer === "error") {
+    if (isOpen) {
+      paymentsStation.errorMessages = error;
+      paymentsStation.error = true;
+    } else {
+      paymentsStation.error = false;
+    }
+  }
+
+  if (answer === "success") {
+    if (isOpen) {
+      paymentsStation.success = true;
+    } else {
+      paymentsStation.success = false;
+    }
+  }
+};
+
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
-const showModal = ref(true);
 const hoverIndex = ref(-1);
 const loading = ref(false);
-const tariffsData = ref([]);
+const tariffsData = ref([
+  {
+    id: 3,
+    brand_slug: "touchapi",
+    code: "touchapi-whatsapp",
+    period: "1m",
+    limits: "",
+    name: "Whatsapp",
+    price: 1050,
+    currency: "RUB",
+    dt_ins: "2025-07-23 20:04:17",
+    dt_upd: "2025-07-28 11:38:13",
+    enable: 1,
+  },
+  {
+    id: 9,
+    brand_slug: "touchapi",
+    code: "touchapi-whatsapp",
+    period: "1y",
+    limits: "",
+    name: "Whatsapp 1 year",
+    price: 9000,
+    currency: "RUB",
+    dt_ins: "2025-07-23 20:04:17",
+    dt_upd: "2025-07-28 11:38:13",
+    enable: 1,
+  },
+  {
+    id: 7,
+    brand_slug: "touchapi",
+    code: "touchapi-whatsapp",
+    period: "3m",
+    limits: "",
+    name: "Whatsapp 3 month",
+    price: 2600,
+    currency: "RUB",
+    dt_ins: "2025-07-23 20:04:17",
+    dt_upd: "2025-07-28 11:38:13",
+    enable: 1,
+  },
+  {
+    id: 8,
+    brand_slug: "touchapi",
+    code: "touchapi-whatsapp",
+    period: "6m",
+    limits: "",
+    name: "Whatsapp 6 month",
+    price: 5000,
+    currency: "RUB",
+    dt_ins: "2025-07-23 20:04:17",
+    dt_upd: "2025-07-28 11:38:13",
+    enable: 1,
+  },
+]);
 const error = ref(null);
-
-// Коды тарифов для запроса
-const tariffCodes = [
-  "touchapi-whatsapp-1m",
-  "touchapi-whatsapp-3m",
-  "touchapi-whatsapp-6m",
-  "touchapi-whatsapp-12m",
-];
+const currentPage = ref(0);
+const itemsPerPage = 3;
 
 const fetchTariffs = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    const requests = tariffCodes.map((code) =>
-      axios.post(
-        "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
-        { code: code },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token.value}`,
-          },
-        }
-      )
+    const response = await axios.post(
+      "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
+      { code: "touchapi-whatsapp" },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
     );
 
-    const responses = await Promise.all(requests);
-    tariffsData.value = responses.map((res) => res.data);
+    if (response.data.ok && response.data.data) {
+      tariffsData.value = Array.isArray(response.data.data)
+        ? response.data.data
+        : [response.data.data];
+    } else {
+      throw new Error("Неверный формат ответа от сервера");
+    }
   } catch (err) {
     error.value = err.response?.data?.message || "Ошибка при загрузке тарифов";
     console.error("Error fetching tariffs:", err);
@@ -123,14 +276,50 @@ const fetchTariffs = async () => {
   }
 };
 
-const displayedTariffs = computed(() => {
-  return tariffsData.value
-    .filter((tariff) => tariff.ok && tariff.data.enable)
-    .map((tariff) => ({
-      ...tariff.data,
-      id: tariff.data.id || Math.random().toString(36).substring(2, 9),
-    }));
+const selectTariff = ref({});
+
+const changeStationTariff = () => {
+  buySection.value = !buySection.value;
+};
+
+const clickSelectTariff = (tariff) => {
+  changeStationTariff();
+  selectTariff.value = tariff;
+  console.log(selectTariff.value);
+};
+
+const sortedTariffs = computed(() => {
+  const periodOrder = { "1m": 1, "3m": 2, "6m": 3, "12m": 4, "1y": 4 };
+  return [...tariffsData.value]
+    .filter((tariff) => tariff.enable)
+    .sort((a, b) => periodOrder[a.period] - periodOrder[b.period]);
 });
+
+const totalPages = computed(() => {
+  return Math.ceil(sortedTariffs.value.length / itemsPerPage);
+});
+
+const paginatedTariffs = computed(() => {
+  const start = currentPage.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  return sortedTariffs.value.slice(start, end);
+});
+
+const prevPage = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value - 1) {
+    currentPage.value++;
+  }
+};
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat("ru-RU").format(price);
+};
 
 const getPeriodText = (period) => {
   const periods = {
@@ -138,36 +327,47 @@ const getPeriodText = (period) => {
     "3m": "3 месяца",
     "6m": "6 месяцев",
     "12m": "1 год",
+    "1y": "1 год",
   };
   return periods[period] || period;
 };
 
-const isPopular = (tariff) => {
-  const periodsOrder = ["1m", "3m", "6m", "12m"];
-  const maxPeriod = Math.max(
-    ...displayedTariffs.value.map((t) => periodsOrder.indexOf(t.period))
-  );
-  return periodsOrder.indexOf(tariff.period) === maxPeriod;
+const calculateMonthlyPrice = (tariff) => {
+  const months = {
+    "1m": 1,
+    "3m": 3,
+    "6m": 6,
+    "12m": 12,
+    "1y": 12,
+  };
+  return Math.round(tariff.price / months[tariff.period]);
 };
 
-const cardStyle = (id) => {
-  if (hoverIndex.value === id) {
-    return {
-      transform: "translateY(-5px)",
-      boxShadow: "0 10px 20px oklch(0.65 0.22 267 / 0.16)",
-    };
-  }
-  return {};
+const calculateOriginalMonthly = (tariff) => {
+  const monthlyTariff = sortedTariffs.value.find((t) => t.period === "1m");
+  return monthlyTariff ? monthlyTariff.price : 1050;
 };
 
-const openModal = async () => {
-  showModal.value = true;
-  if (tariffsData.value.length === 0) {
+const calculateSavings = (tariff) => {
+  if (tariff.period !== "1y") return 0;
+  const monthlyPrice = calculateMonthlyPrice(tariff);
+  const originalMonthly = calculateOriginalMonthly(tariff);
+  return Math.round((1 - monthlyPrice / originalMonthly) * 100);
+};
+
+const showMonthlyPrice = (tariff) => {
+  return tariff.period !== "1m";
+};
+
+const getTariffName = (tariff) => {
+  if (tariff.period === "1y") {
+    return "Годовой тариф";
   }
+  return tariff.name.replace("Whatsapp", "").trim();
 };
 
 const closeModal = () => {
-  props.changeTariffStation;
+  props.changeTariffStation();
 };
 
 onMounted(fetchTariffs);
@@ -186,19 +386,22 @@ onMounted(fetchTariffs);
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .modal-container {
   background: white;
-  border-radius: 12px;
-  width: 90%;
+  border-radius: 16px;
+  width: 100%;
   max-width: 900px;
-  max-height: 90vh;
-  overflow-y: auto;
   padding: 25px;
   position: relative;
   animation: slideUp 0.4s ease;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  margin: auto;
+  overflow: hidden;
 }
 
 .modal-header {
@@ -206,12 +409,12 @@ onMounted(fetchTariffs);
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .modal-header h2 {
-  font-size: 24px;
+  font-size: clamp(20px, 4vw, 24px);
   color: #333;
   margin: 0;
   font-weight: 600;
@@ -221,9 +424,13 @@ onMounted(fetchTariffs);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px;
   border-radius: 50%;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .close-button:hover {
@@ -232,115 +439,222 @@ onMounted(fetchTariffs);
 
 .close-button svg {
   fill: #666;
+  transition: fill 0.2s;
+  width: 20px;
+  height: 20px;
+}
+
+.tariffs-wrapper {
+  width: 100%;
 }
 
 .tariffs-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .tariff-card {
+  width: 280px; /* Фиксированная ширина */
   position: relative;
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px oklch(0.65 0.22 267 / 0.08);
+  border: 1px solid rgba(101, 52, 255, 0.08);
   transition: all 0.3s ease;
-  border: 1px solid oklch(0.65 0.22 267 / 0.08);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box; /* Чтобы padding не влиял на общую ширину */
+}
+
+.tariff-card.hovered {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .tariff-header {
   text-align: center;
   margin-bottom: 20px;
   position: relative;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .tariff-header h3 {
-  font-size: 18px;
+  font-size: clamp(16px, 3vw, 20px);
   color: #333;
   margin-bottom: 12px;
   font-weight: 600;
 }
 
+.price-container {
+  margin-bottom: 5px;
+}
+
 .price {
-  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 5px;
 }
 
 .amount {
-  font-size: 28px;
+  font-size: clamp(24px, 5vw, 32px);
   font-weight: 700;
-  color: oklch(0.65 0.22 267);
+  color: #6732ff;
+  line-height: 1;
 }
 
 .currency {
-  font-size: 16px;
+  font-size: clamp(14px, 3vw, 18px);
   margin-left: 3px;
   color: #666;
+  align-self: flex-start;
+  line-height: 1.5;
 }
 
 .period {
-  display: block;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 14px);
   color: #888;
-  margin-top: 3px;
+  margin-bottom: 8px;
 }
 
-.popular-badge {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: oklch(0.65 0.22 267);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.monthly-price {
+  font-size: clamp(12px, 2.5vw, 14px);
+  color: #4caf50;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.savings-text {
+  font-size: clamp(12px, 2.5vw, 14px);
+  color: #4caf50;
+  font-weight: 500;
+  margin-top: 5px;
 }
 
 .tariff-features {
-  margin: 20px 0;
+  margin: 15px 0;
+  flex-grow: 1;
 }
 
 .feature {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: clamp(13px, 2.5vw, 14px);
   color: #555;
+  line-height: 1.4;
 }
 
 .feature-icon {
   width: 16px;
   height: 16px;
-  fill: oklch(0.65 0.22 267);
+  fill: #6732ff;
   margin-right: 8px;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .select-button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 6px;
-  background: oklch(0.65 0.22 267);
+  border-radius: 8px;
+  background: #6732ff;
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: clamp(14px, 3vw, 15px);
+  margin-top: auto;
 }
 
-.select-button.hover-effect {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px oklch(0.65 0.22 267 / 0.3);
+.select-button:hover,
+.select-button.hovered {
+  background: #7a4aff;
 }
 
-.select-button:active {
-  transform: translateY(1px);
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
 }
 
-/* Анимации */
+.loader {
+  border: 4px solid rgba(101, 52, 255, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #6732ff;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: #ff5252;
+  font-weight: 500;
+  font-size: clamp(14px, 3vw, 16px);
+}
+
+.retry-button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #6732ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: clamp(13px, 2.5vw, 14px);
+}
+
+.retry-button:hover {
+  background: #7a4aff;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 15px;
+}
+
+.pagination-button {
+  background: #6732ff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #7a4aff;
+}
+
+.page-indicator {
+  font-size: 14px;
+  color: #666;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -361,18 +675,60 @@ onMounted(fetchTariffs);
   }
 }
 
-@media (max-width: 768px) {
-  .modal-container {
-    width: 95%;
-    padding: 15px;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
+@media (max-width: 768px) {
   .tariffs-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: center;
   }
 
   .tariff-card {
     width: 100%;
+    max-width: 320px;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .modal-container {
+    padding: 20px 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .tariff-card {
+    padding: 18px;
+  }
+
+  .feature {
+    margin-bottom: 8px;
+  }
+
+  .select-button {
+    padding: 10px;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .modal-overlay {
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>

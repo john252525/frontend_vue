@@ -1,5 +1,6 @@
 <template>
-  <div class="modal-overlay">
+  <LoadModal :stationLoading="stationLoading" />
+  <div v-if="!stationLoading.loading" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
         <h2>Настройка интеграции</h2>
@@ -12,7 +13,7 @@
           <label>Тип интеграции</label>
           <div class="custom-select" ref="groupSelect">
             <div class="selected-option" @click="toggleDropdown('group')">
-              <span>{{ selectedGroup || "Выберите тип" }}</span>
+              <span>{{ getSelectedGroupText() || "Выберите тип" }}</span>
               <svg
                 class="dropdown-icon"
                 :class="{ 'rotate-180': dropdownOpen.group }"
@@ -49,7 +50,9 @@
           <label>Мессенджер</label>
           <div class="custom-select" ref="messengerSelect">
             <div class="selected-option" @click="toggleDropdown('messenger')">
-              <span>{{ selectedMessenger || "Выберите мессенджер" }}</span>
+              <span>{{
+                getSelectedMessengerText() || "Выберите мессенджер"
+              }}</span>
               <svg
                 class="dropdown-icon"
                 :class="{ 'rotate-180': dropdownOpen.messenger }"
@@ -86,7 +89,7 @@
           <label>CRM система</label>
           <div class="custom-select" ref="crmSelect">
             <div class="selected-option" @click="toggleDropdown('crm')">
-              <span>{{ selectedCrm || "Выберите CRM" }}</span>
+              <span>{{ getSelectedCrmText() || "Выберите CRM" }}</span>
               <svg
                 class="dropdown-icon"
                 :class="{ 'rotate-180': dropdownOpen.crm }"
@@ -173,9 +176,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  reactive,
+} from "vue";
 import axios from "axios";
-
+import LoadModal from "../LoadingMoadal/LoadModal.vue";
 const props = defineProps({
   isOpen: Boolean,
   openModal: {
@@ -190,6 +200,10 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
 // Selected values
+
+const stationLoading = reactive({
+  loading: false,
+});
 const selectedGroup = ref("");
 const selectedMessenger = ref("");
 const selectedCrm = ref("");
@@ -210,37 +224,38 @@ const dropdownOpen = ref({
 const phoneDisplay = ref("");
 const isRussianFormat = ref(true);
 
-const formatPhoneNumber = (event) => {
-  let input = event.target.value.replace(/\D/g, "");
-  let formattedInput = "";
+// Options
+const groupOptions = [
+  { value: "messenger", text: "Мессенджер" },
+  { value: "crm", text: "CRM" },
+];
 
-  // Российский номер (начинается с 7 или 8, длина до 11 цифр)
-  if (/^[78]/.test(input) && input.length <= 11) {
-    // Сохраняем чистое значение
-    formValues.value.phone = input;
+const messengerOptions = [
+  { value: "whatsapp", text: "WhatsApp" },
+  { value: "telegram", text: "Telegram" },
+];
 
-    // Форматируем для отображения
-    formattedInput = "+7 ";
+const crmOptions = [
+  { value: "amocrm", text: "AmoCRM" },
+  { value: "bitrix24", text: "Bitrix24" },
+];
 
-    if (input.length > 1) {
-      formattedInput += "(" + input.substring(1, 4);
-    }
-    if (input.length > 4) {
-      formattedInput += ") " + input.substring(4, 7);
-    }
-    if (input.length > 7) {
-      formattedInput += "-" + input.substring(7, 9);
-    }
-    if (input.length > 9) {
-      formattedInput += "-" + input.substring(9, 11);
-    }
+// Helper functions to get display text for selected values
+const getSelectedGroupText = () => {
+  const option = groupOptions.find((opt) => opt.value === selectedGroup.value);
+  return option ? option.text : "";
+};
 
-    phoneDisplay.value = formattedInput;
-  } else {
-    // Для не российских номеров или если больше 11 цифр
-    formValues.value.phone = input;
-    phoneDisplay.value = input;
-  }
+const getSelectedMessengerText = () => {
+  const option = messengerOptions.find(
+    (opt) => opt.value === selectedMessenger.value
+  );
+  return option ? option.text : "";
+};
+
+const getSelectedCrmText = () => {
+  const option = crmOptions.find((opt) => opt.value === selectedCrm.value);
+  return option ? option.text : "";
 };
 
 const handlePhoneInput = (event) => {
@@ -311,22 +326,6 @@ const handleBackspace = (event) => {
 const groupSelect = ref(null);
 const messengerSelect = ref(null);
 const crmSelect = ref(null);
-
-// Options
-const groupOptions = [
-  { value: "messenger", text: "Мессенджер" },
-  { value: "crm", text: "CRM" },
-];
-
-const messengerOptions = [
-  { value: "whatsapp", text: "WhatsApp" },
-  { value: "telegram", text: "Telegram" },
-];
-
-const crmOptions = [
-  { value: "amocrm", text: "AmoCRM" },
-  { value: "bitrix24", text: "Bitrix24" },
-];
 
 // Get domain placeholder based on selected CRM
 const getDomainPlaceholder = () => {
@@ -417,7 +416,7 @@ const submitForm = async () => {
       domain: formValues.value.domain,
     }),
   };
-
+  stationLoading.loading = true;
   try {
     const response = await axios.post(
       "https://bapi88.developtech.ru/api/v1/users/addAccount",
@@ -432,12 +431,15 @@ const submitForm = async () => {
 
     if (response.data.ok) {
       emit("submit", formData);
+      stationLoading.loading = false;
+      location.reload();
       props.openModal();
     } else {
       console.error("Ошибка сохранения:", response.data.message);
     }
   } catch (error) {
     console.error("Ошибка при отправке данных:", error);
+    stationLoading.loading = false;
   }
 };
 </script>

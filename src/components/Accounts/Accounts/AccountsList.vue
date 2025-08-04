@@ -68,7 +68,11 @@
               Неактивно
             </td>
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
-            <td><button @click="changeTariffStation">Продлить</button></td>
+            <td>
+              <button class="open-tariff-button" @click="changeTariffStation">
+                Продлить
+              </button>
+            </td>
             <td class="table-action-text">
               <button
                 v-if="
@@ -124,7 +128,8 @@
         tooltipMessage
       }}</span>
     </div>
-    <Tariff />
+    <Tariff :changeTariffStation="changeTariffStation" />
+    <!-- v-if="tariffStation" -->
     <Modal
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
@@ -218,6 +223,7 @@ const { t } = useI18n();
 
 const router = useRouter();
 
+const tariffStation = ref(false);
 const forceStopItemData = ref({});
 const chatsLoadingChange = inject("chatsLoadingChange");
 const dataStationNone = ref(false);
@@ -330,6 +336,10 @@ const handleSendLog = async (location, method, params, results, answer) => {
   } catch (err) {
     console.error("error", err);
   }
+};
+
+const changeTariffStation = () => {
+  tariffStation.value = !tariffStation.value;
 };
 
 const getAccounts = async () => {
@@ -673,6 +683,20 @@ provide("changeEnableStation", { changeEnableStation });
   border-radius: 5px;
   font-size: 12px;
   z-index: 10;
+}
+
+.open-tariff-button {
+  width: 80px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #6732ff;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
 }
 
 .table-header {
