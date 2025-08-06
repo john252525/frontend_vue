@@ -117,7 +117,7 @@ const forceStop = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -172,15 +172,13 @@ const setStateTelegram = async () => {
       );
     }
 
-    if (!response.data.data.error) {
+    if (!response.data.error) {
     }
-    if (response.data.data.error.message === "Challenge required") {
+    if (response.data.error.message === "Challenge required") {
       station.loading = false;
       station.code = true;
       station.error.challengeRequired = true;
-    } else if (
-      response.data.data.error.message === "Two factor auth required"
-    ) {
+    } else if (response.data.error.message === "Two factor auth required") {
       station.loading = false;
       station.code = true;
       station.error.twoFactor = true;
@@ -237,7 +235,7 @@ const solveChallenge = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       station.resultTrue = true;
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -293,7 +291,7 @@ const twoFactorAuth = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       station.resultTrue = true;
     } else if (response.data === 401) {
       errorBlock.value = true;

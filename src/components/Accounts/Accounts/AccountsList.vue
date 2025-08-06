@@ -19,6 +19,10 @@
         </thead>
         <tbody class="tbody">
           <tr
+            class="table-row"
+            :class="{
+              active: item.isPay,
+            }"
             v-if="dataStation"
             v-for="(item, index) in instanceData"
             :key="index"
@@ -68,10 +72,16 @@
               Неактивно
             </td>
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
-            <td>
-              <button class="open-tariff-button" @click="changeTariffStation">
+            <td v-if="item.subscription_dt_to === null">
+              <button
+                class="open-tariff-button"
+                @click="changeTariffStation(item)"
+              >
                 Продлить
               </button>
+            </td>
+            <td v-if="item.subscription_dt_to !== null">
+              До {{ item.subscription_dt_to }}
             </td>
             <td class="table-action-text">
               <button
@@ -102,21 +112,21 @@
             </td>
           </tr>
           <tr v-else-if="dataStationNone">
-            <td colspan="3">
+            <td colspan="4">
               <div class="none-account-cont">
                 <h2>{{ t("accountList.accountNone") }}</h2>
               </div>
             </td>
           </tr>
           <tr v-if="loadDataStation">
-            <td colspan="3">
+            <td colspan="4">
               <div class="load-cont">
                 <LoadAccount />
               </div>
             </td>
           </tr>
           <tr v-if="errorAccountBolean && !loadDataStation">
-            <td colspan="3">
+            <td colspan="4">
               <div class="load-cont">
                 <errorAccount />
               </div>
@@ -128,9 +138,16 @@
         tooltipMessage
       }}</span>
     </div>
-    <Tariff :changeTariffStation="changeTariffStation" />
+    <Tariff
+      v-if="tariffStation"
+      :selectedItem="selectedItem"
+      :changeTariffStation="changeTariffStation"
+      :getAccounts="getAccounts"
+      :changePayDataForAccounts="changePayDataForAccounts"
+    />
     <!-- v-if="tariffStation" -->
     <Modal
+      :changeTariffStation="changeTariffStation"
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
       :modalPosition="modalPosition"
@@ -202,6 +219,9 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
+const sourceGroup = computed(() => accountStore.getSource);
+const typeGroup = computed(() => accountStore.getType);
+const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
@@ -302,6 +322,32 @@ const changeForceStopItemData = async (item) => {
   }
 };
 
+const changePayDataForAccounts = (item) => {
+  const index = instanceData.value.findIndex(
+    (account) => account.uuid === item.uuid
+  );
+
+  if (index !== -1) {
+    // Добавляем флаг isPay и обновляем дату подписки
+    instanceData.value[index] = {
+      ...instanceData.value[index],
+      isPay: true, // флаг для анимации
+    };
+
+    // Через 3 секунды убираем анимацию
+    setTimeout(() => {
+      instanceData.value[index] = {
+        ...instanceData.value[index],
+        isPay: false,
+      };
+    }, 3000);
+
+    console.log("Данные обновлены для аккаунта с uuid:", item.uuid);
+  } else {
+    console.warn("Аккаунт с таким uuid не найден:", item.uuid);
+  }
+};
+
 const updateLocalStorage = (login, source, storage, type) => {
   try {
     const newLoginData = {
@@ -338,11 +384,16 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-const changeTariffStation = () => {
+const changeTariffStation = (item) => {
+  selectedItem.value = item;
   tariffStation.value = !tariffStation.value;
 };
 
 const getAccounts = async () => {
+  dataStationNone.value = false;
+  errorAccountBolean.value = false;
+  console.log(sourceGroup.value);
+  instanceData.value = [];
   let params = {
     source: accountStation.value,
     skipDetails: true,
@@ -352,18 +403,10 @@ const getAccounts = async () => {
   if (stationDomain.navigate.value === "touchapi") {
     console.log("touch");
     params = {
-      source: accountStation.value,
-      skipDetails: true,
-      group: "messenger",
+      source: sourceGroup.value,
+      type: typeGroup.value,
+      group: allGroup.value,
     };
-
-    if (accountStation.value === "crm") {
-      console.log("crn");
-      params = {
-        group: "crm",
-        type: crmPlatform.value,
-      };
-    }
   }
 
   if (stationDomain.navigate.value === "whatsapi") {
@@ -650,6 +693,10 @@ onMounted(async () => {
   await getAccounts();
 });
 
+defineExpose({
+  getAccounts,
+});
+
 provide("selectedItems", { selectedItems });
 provide("changeEnableStation", { changeEnableStation });
 </script>
@@ -683,6 +730,12 @@ provide("changeEnableStation", { changeEnableStation });
   border-radius: 5px;
   font-size: 12px;
   z-index: 10;
+}
+
+.settings-cont {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .open-tariff-button {
@@ -722,6 +775,15 @@ provide("changeEnableStation", { changeEnableStation });
   align-items: center;
   justify-content: center;
   margin-top: -10px;
+}
+
+.settings-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 100%;
+  background: #7a4aff;
 }
 
 .none-account-cont {
@@ -801,6 +863,65 @@ provide("changeEnableStation", { changeEnableStation });
   transition: all 0.15s;
 }
 
+.table-row.active {
+  position: relative;
+  animation: pulse-green 2s ease-in-out;
+  box-shadow: 0 0 0 rgba(76, 175, 80, 0.7);
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Альтернативный вариант с градиентной подсветкой */
+.table-row.active {
+  position: relative;
+  overflow: hidden;
+}
+
+.table-row.active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(76, 175, 80, 0.1) 0%,
+    rgba(76, 175, 80, 0.3) 50%,
+    rgba(76, 175, 80, 0.1) 100%
+  );
+  animation: highlight 3s ease-in-out forwards;
+  z-index: -1;
+}
+
+@keyframes highlight {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
 th,
 td {
   padding: 1rem;

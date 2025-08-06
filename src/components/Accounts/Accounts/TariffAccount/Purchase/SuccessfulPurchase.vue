@@ -43,7 +43,7 @@
       <p>Доступ к тарифу активирован. Наслаждайтесь использованием!</p>
     </div>
 
-    <button class="action-btn" @click="changeTariffStation">
+    <button class="action-btn" @click="close">
       <span>Продолжить!</span>
       <svg viewBox="0 0 24 24" width="20">
         <path
@@ -57,8 +57,9 @@
 
 <script setup>
 import { defineProps } from "vue";
+import { toRefs } from "vue";
 
-defineProps({
+const props = defineProps({
   tariff: {
     type: Object,
     required: true,
@@ -70,7 +71,18 @@ defineProps({
   changeTariffStation: {
     type: Function,
   },
+  getAccounts: {
+    type: Function,
+  },
+  selectedItem: {
+    type: Object,
+  },
+  changePayDataForAccounts: {
+    type: Function,
+  },
 });
+
+const { selectedItem } = toRefs(props);
 
 const getPeriodText = (period) => {
   const periods = {
@@ -79,6 +91,13 @@ const getPeriodText = (period) => {
     "1y": "1 год",
   };
   return periods[period] || period;
+};
+
+const close = async () => {
+  props.changeTariffStation();
+  await props.getAccounts();
+  props.changePayDataForAccounts(selectedItem.value);
+  console.log(true);
 };
 
 const confettiStyle = (i) => {

@@ -103,6 +103,7 @@
     </div>
   </section>
   <Modal
+    :changeStatusMailing="changeStatusMailing"
     :isModalOpen="station.isModalOpen"
     :closeModal="closeModal"
     :modalPosition="modalPosition"
@@ -194,6 +195,9 @@ const mailingLists = ref([]);
 const modalPosition = ref({ top: 0, left: 0 });
 
 const getMailingLists = async () => {
+  mailingLists.value = false;
+  errorMailing.value = false;
+  dataStationNone.value = false;
   loadDataStation.value = true;
   const apiUrlMethod = `${apiUrl}/list/`;
   try {
@@ -236,6 +240,16 @@ const getMailingLists = async () => {
     errorMailing.value = true;
     loadDataStation.value = false;
     dataStationNone.value = false;
+  }
+};
+
+const changeStatusMailing = (item, state) => {
+  const index = mailingLists.value.findIndex(
+    (mailing) => mailing.id === item.id
+  );
+  if (index !== -1) {
+    mailingLists.value[index].state = state;
+    // Если нужно также обновить другие поля, например state_text
   }
 };
 

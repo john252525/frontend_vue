@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <section v-if="stationLoading.loading">
-      <div class="black-fon"></div>
+      <div @click="changeStationLoading" class="black-fon"></div>
       <section class="loading">
         <div class="spinner"></div>
         <h2 v-if="textLoadin" class="title">{{ textLoadin }}</h2>
@@ -21,6 +21,9 @@ const props = defineProps({
   textLoadin: {
     type: String,
     required: true,
+  },
+  changeStationLoading: {
+    type: Function,
   },
 });
 

@@ -1,10 +1,17 @@
 <template>
+  <ErrorBlock
+    v-if="showErrorBlock"
+    :errorMessage="errorMessage"
+    :changeIncorrectPassword="hideErrorBlock"
+  />
+
   <section v-if="!emailSendStation" class="password-recovery-section">
-    <form>
+    <form @submit.prevent="sendEmail">
       <h2 class="title">{{ t("fogoutPassword.title") }}</h2>
       <p class="subtitle">
         {{ t("fogoutPassword.subtitle") }}
       </p>
+
       <div class="input-cont">
         <label class="name-input" for="name">{{
           t("fogoutPassword.mail")
@@ -14,18 +21,31 @@
           placeholder="name@company.com"
           id="name"
           v-model="email"
+          @blur="validateEmail"
+          @input="clearEmailError"
+          :class="{ error: emailError }"
           required
         />
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="emailError" class="error-message">
+              {{ emailErrorMessage }}
+            </p>
+          </transition>
+        </div>
       </div>
-      <button @click="sendEmail" class="send-сode-button">
+
+      <button type="submit" class="send-сode-button">
         {{ t("fogoutPassword.send") }}
       </button>
+
       <p class="login-account-button">
         {{ t("fogoutPassword.pas") }}
         <span @click="navigateToLogin"> {{ t("fogoutPassword.login") }}</span>
       </p>
     </form>
   </section>
+
   <div v-else class="cont">
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -51,19 +71,63 @@ const { t } = useI18n();
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import { useRoute, useRouter } from "vue-router";
+import { ref } from "vue";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+
 const route = useRoute();
 const router = useRouter();
-import { ref } from "vue";
 
 const emailSendStation = ref(false);
 const email = ref("");
+const emailError = ref(false);
+const emailErrorMessage = ref("");
+const showErrorBlock = ref(false);
+const errorMessage = ref("");
 
-const navigateToLogin = (page) => {
+const navigateToLogin = () => {
   router.push("/Login");
 };
 
+const validateEmail = () => {
+  const emailValue = email.value.trim();
+  if (!emailValue) {
+    emailErrorMessage.value = "Пожалуйста, введите email";
+    emailError.value = true;
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailValue)) {
+    emailErrorMessage.value = "Пожалуйста, введите корректный email";
+    emailError.value = true;
+    return false;
+  }
+
+  if (emailValue.length > 30) {
+    emailErrorMessage.value = "Email должен быть не длиннее 30 символов";
+    emailError.value = true;
+    return false;
+  }
+
+  emailErrorMessage.value = "";
+  emailError.value = false;
+  return true;
+};
+
+const clearEmailError = () => {
+  if (emailError.value) {
+    emailErrorMessage.value = "";
+    emailError.value = false;
+  }
+};
+
+const hideErrorBlock = () => {
+  showErrorBlock.value = false;
+};
+
 const sendEmail = async () => {
-  emailSendStation.value = true;
+  if (!validateEmail()) return;
+
   try {
     const response = await axios.post(
       `https://bapi88.developtech.ru/api/v1/auth/forgotPassword`,
@@ -77,36 +141,25 @@ const sendEmail = async () => {
       }
     );
 
-    conole.log(response.data);
-
     if (response.data.ok === true) {
+      emailSendStation.value = true;
+    } else {
+      showErrorBlock.value = true;
+      errorMessage.value =
+        response.data.error_message || "Ошибка при отправке письма";
     }
   } catch (error) {
-    console.error(`${request} - Ошибка`, error);
+    showErrorBlock.value = true;
     if (error.response) {
+      errorMessage.value =
+        error.response.data?.error_message || "Ошибка сервера";
       console.error("Ошибка сервера:", error.response.data);
+    } else {
+      errorMessage.value = "Сетевая ошибка";
     }
   }
 };
 </script>
-
-<!-- <script>
-export default {
-  data() {
-    return {
-      form: {
-        login: "",
-        password: "",
-      },
-    };
-  },
-  methods: {
-    navigateToLogin() {
-      this.$router.push("/Login");
-    },
-  },
-};
-</script> -->
 
 <style scoped>
 .password-recovery-section {
@@ -123,6 +176,41 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+.error-container {
+  min-height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-message {
+  font-weight: 500;
+  font-size: 14px;
+  color: #d33838;
+  margin: 4px 0 0;
+  position: absolute;
+  width: 100%;
+}
+
+/* Анимация для появления/исчезания ошибок */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+input.error {
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
 }
 
 .title {
@@ -144,7 +232,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 10px;
 }
 
 .name-input {
@@ -166,10 +254,10 @@ input {
 }
 
 .text-email-sent {
-  /* text-align: center; */
   font-size: 20px;
   width: 300px;
   font-weight: 500;
+  text-align: center;
 }
 
 .cont {
@@ -197,11 +285,11 @@ input {
   font-weight: 600;
   font-size: 14px;
   color: white;
+  transition: all 0.25s;
 }
 
 .send-сode-button:hover {
   background: #595fd1;
-  transition: all 0.25s;
 }
 
 .send-сode-button:active {
@@ -238,10 +326,7 @@ input {
   }
 
   .subtitle {
-    font-weight: 400;
     font-size: 16px;
-    color: #6d6d6d;
-    margin-bottom: 38px;
     width: 350px;
   }
 }

@@ -9,6 +9,17 @@ export const useAccountStore = defineStore("accountStore", {
     accountToken: "",
     crmPlatform: "amocrm",
     crmPlatformText: "AmoCRM",
+    allSource: [],
+    source: ["telegram", "whatsapp", "crm"],
+    group: ["messenger", "crm"],
+    type: ["amocrm", "bitrix24"],
+    filterState: {
+      telegram: true,
+      whatsapp: true,
+      crm: true,
+      amocrm: true,
+      bitrix24: true,
+    },
   }),
   getters: {
     getAccountSource: (state) => state.accountSourse,
@@ -18,6 +29,12 @@ export const useAccountStore = defineStore("accountStore", {
     getAccountToken: (state) => state.accountToken,
     getCrmPlatform: (state) => state.crmPlatform,
     getCrmPlatformText: (state) => state.crmPlatformText,
+    getAllSource: (state) => state.allSource,
+    // Новые геттеры
+    getSource: (state) => state.source,
+    getGroup: (state) => state.group,
+    getType: (state) => state.type,
+    getFilterState: (state) => state.filterState,
 
     getAccountInfo: (state) => ({
       accountSourse: state.accountSourse,
@@ -25,6 +42,9 @@ export const useAccountStore = defineStore("accountStore", {
       accountStation: state.accountStation,
       accountStationText: state.accountStationText,
       accountToken: state.accountToken,
+      source: state.source,
+      group: state.group,
+      type: state.type,
     }),
   },
   actions: {
@@ -36,7 +56,9 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountToken = accountInfo.accountToken;
     },
 
-    // Обновить отдельные поля (опционально)
+    setAllSource(allSource) {
+      this.allSource = allSource;
+    },
     setAccountSource(accountSourse) {
       this.accountSourse = accountSourse;
     },
@@ -58,6 +80,24 @@ export const useAccountStore = defineStore("accountStore", {
     setAccountToken(accountToken) {
       this.accountToken = accountToken;
     },
+    // Новые actions для работы с фильтрами
+    setSource(source) {
+      this.source = source;
+    },
+    setGroup(group) {
+      this.group = group;
+    },
+    setType(type) {
+      this.type = type;
+    },
+    setFilterState(filterState) {
+      this.filterState = filterState;
+    },
+    updateFilters({ source, group, type }) {
+      this.source = source;
+      this.group = group;
+      this.type = type;
+    },
     resetAccount() {
       this.accountSourse = "whatsapp";
       this.accountData = "test@mail.ru";
@@ -65,6 +105,19 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStationText = "Telegram";
       this.accountToken = "86e0fb94-8f1f-4bfc-9764-320214c1e2f0";
     },
+    // Сброс фильтров
+    resetFilters() {
+      this.source = [];
+      this.group = [];
+      this.type = [];
+      this.filterState = {
+        telegram: false,
+        whatsapp: false,
+        crm: false,
+        amocrm: false,
+        bitrix24: false,
+      };
+    },
   },
-  persist: true, // Включаем автоматическое сохранение в localStorage
+  persist: true,
 });

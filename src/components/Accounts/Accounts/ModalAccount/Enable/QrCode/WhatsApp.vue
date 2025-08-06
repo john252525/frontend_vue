@@ -279,7 +279,7 @@ const enablePhoneAuth = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       console.log(response.data);
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -288,7 +288,7 @@ const enablePhoneAuth = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      console.log(response.data.ok);
+      // console.log(response.data.ok);
     }
   } catch (error) {
     console.error("Ошибка:", error);
@@ -333,9 +333,9 @@ const getQr = async () => {
       );
     }
 
-    if (response.data.data.status === "ok") {
+    if (response.data.status === "ok") {
       previousLink = qrCodeData.link;
-      qrCodeData.link = response.data.data.value;
+      qrCodeData.link = response.data.value;
       qrCodeData.station = true;
       station.loading = false;
     } else if (response.data === 401) {
@@ -345,7 +345,7 @@ const getQr = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      if (!response.data.data.value) {
+      if (!response.data.value) {
         clearInterval(intervalId);
         qrCodeData.link = previousLink;
         changeEnableStation();

@@ -33,6 +33,9 @@ import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 import { useI18n } from "vue-i18n";
 
@@ -44,6 +47,10 @@ const stationLoading = reactive({
     error: false,
   },
 });
+
+const navigateTo = (page) => {
+  router.push(page);
+};
 
 const closeResultModal = () => {
   stationLoading.modalStation = false;
@@ -71,6 +78,12 @@ const changeResultModal = (change, value) => {
 const addMailing = ref(false);
 
 const changeAddMailing = () => {
+  navigateTo({
+    path: "/Mailing",
+    query: {
+      mode: "mailing",
+    },
+  });
   addMailing.value = !addMailing.value;
 };
 </script>

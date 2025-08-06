@@ -100,7 +100,7 @@ const solveChallenge = async () => {
       );
     }
 
-    if (response.data.data.status === "ok") {
+    if (response.data.status === "ok") {
       station.resultTrue = true;
       station.loading = false;
     } else if (response.data === 401) {
@@ -153,7 +153,7 @@ const disablePhoneAuth = async () => {
       );
     }
 
-    if (response.data.data.status === "ok") {
+    if (response.data.status === "ok") {
       station.loading = false;
     } else {
       station.station = false;

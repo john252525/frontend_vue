@@ -9,6 +9,7 @@
       <div class="title-cont">
         <h2 class="title">{{ t("registration.title") }}</h2>
       </div>
+
       <div class="input-cont">
         <label class="name-input" for="name">{{
           t("registration.mail")
@@ -18,11 +19,21 @@
           placeholder="name@company.com"
           id="name"
           v-model="formData.login"
+          @blur="validateEmail"
+          @input="clearEmailError"
           required
           :class="{ error: error.login }"
           class="input-reg"
         />
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="error.login" class="error-message">
+              {{ emailError }}
+            </p>
+          </transition>
+        </div>
       </div>
+
       <div class="input-cont">
         <label class="name-input" for="email">{{
           t("registration.password")
@@ -32,11 +43,21 @@
           type="password"
           id="email"
           v-model="formData.password"
+          @blur="validatePassword"
+          @input="clearPasswordError"
           :class="{ error: error.password }"
           required
           class="input-reg"
         />
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="error.password" class="error-message">
+              {{ passwordError }}
+            </p>
+          </transition>
+        </div>
       </div>
+
       <div class="input-cont">
         <label class="name-input" for="email">{{
           t("registration.passwordTwo")
@@ -46,11 +67,21 @@
           type="password"
           id="email"
           v-model="formData.fogoutPassword"
+          @blur="validatePasswordConfirmation"
+          @input="clearPasswordConfirmationError"
           required
           :class="{ error: error.fogoutPassword }"
           class="input-reg"
         />
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="error.fogoutPassword" class="error-message">
+              {{ passwordConfirmationError }}
+            </p>
+          </transition>
+        </div>
       </div>
+
       <div class="checkbox-cont">
         <input
           type="checkbox"
@@ -62,19 +93,29 @@
           class="name-checkbox"
           :class="{ error: error.check }"
           for="email"
-          >{{ t("registration.checkbox") }}</label
         >
+          {{ t("registration.checkbox") }}
+        </label>
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="error.check" class="error-message">
+              {{ checkboxError }}
+            </p>
+          </transition>
+        </div>
       </div>
+
       <button type="submit" class="registration-account-button">
         {{ t("registration.button") }}
       </button>
+
       <p class="login-account-button">
         {{ t("registration.haveAccount") }}
         <span @click="navigateTo('/Login')">{{ t("registration.login") }}</span>
       </p>
     </form>
-    <LoginForGoogle v-if="!sendEmail" class="login-for-google" />
   </section>
+
   <div v-if="sendEmail" class="cont">
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -103,12 +144,15 @@ import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useStationLoading } from "@/composables/useStationLoading";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
 const sendEmail = ref(false);
 const { setLoadingStatus } = useStationLoading();
 const accountStore = useAccountStore();
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-const router = useRouter();
+
 const formData = reactive({
   login: "",
   password: "",
@@ -116,16 +160,12 @@ const formData = reactive({
   check: false,
 });
 
-const route = useRoute();
+// Error messages
+const emailError = ref("");
+const passwordError = ref("");
+const passwordConfirmationError = ref("");
+const checkboxError = ref("");
 
-const changeIncorrectPassword = () => {
-  console.log("rrrrr");
-  inputStyle.incorrectPassword = false;
-};
-
-const changeIncorrectPasswordTrue = () => {
-  inputStyle.incorrectPassword = true;
-};
 const inputStyle = reactive({
   incorrectPassword: false,
   incorrectPasswordMessage: "",
@@ -137,6 +177,102 @@ const error = reactive({
   fogoutPassword: false,
   check: false,
 });
+
+// Validation functions
+const validateEmail = () => {
+  const email = formData.login.trim();
+  if (!email) {
+    emailError.value = "Пожалуйста, введите email";
+    error.login = true;
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    emailError.value = "Пожалуйста, введите корректный email";
+    error.login = true;
+    return false;
+  }
+
+  if (email.length > 30) {
+    emailError.value = "Email должен быть не длиннее 30 символов";
+    error.login = true;
+    return false;
+  }
+
+  emailError.value = "";
+  error.login = false;
+  return true;
+};
+
+const validatePassword = () => {
+  const password = formData.password.trim();
+  if (!password) {
+    passwordError.value = "Пожалуйста, введите пароль";
+    error.password = true;
+    return false;
+  }
+
+  if (password.length < 8) {
+    passwordError.value = "Пароль должен содержать минимум 8 символов";
+    error.password = true;
+    return false;
+  }
+
+  passwordError.value = "";
+  error.password = false;
+  return true;
+};
+
+const validatePasswordConfirmation = () => {
+  if (formData.password !== formData.fogoutPassword) {
+    passwordConfirmationError.value = "Пароли не совпадают";
+    error.fogoutPassword = true;
+    return false;
+  }
+
+  passwordConfirmationError.value = "";
+  error.fogoutPassword = false;
+  return true;
+};
+
+const validateCheckbox = () => {
+  if (!formData.check) {
+    checkboxError.value = "Необходимо принять условия";
+    error.check = true;
+    return false;
+  }
+
+  checkboxError.value = "";
+  error.check = false;
+  return true;
+};
+
+// Clear error functions
+const clearEmailError = () => {
+  if (error.login) {
+    emailError.value = "";
+    error.login = false;
+  }
+};
+
+const clearPasswordError = () => {
+  if (error.password) {
+    passwordError.value = "";
+    error.password = false;
+  }
+};
+
+const clearPasswordConfirmationError = () => {
+  if (error.fogoutPassword) {
+    passwordConfirmationError.value = "";
+    error.fogoutPassword = false;
+  }
+};
+
+const changeIncorrectPassword = () => {
+  inputStyle.incorrectPassword = false;
+};
 
 const navigateTo = (page) => {
   router.push(page);
@@ -150,12 +286,10 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("Ошибка при парсинге JSON:", err);
-    // Optionally, update the error message ref
   }
 };
 
 const loginAccount = async () => {
-  // sendEmail.value = true;
   try {
     const response = await axios.post(
       `https://bapi88.developtech.ru/api/v1/auth/register`,
@@ -175,37 +309,36 @@ const loginAccount = async () => {
       await handleSendLog(
         "create_account",
         "login",
-        { sername: formData.login, password: formData.password },
+        { username: formData.login, password: formData.password },
         response.data.ok,
         response.data
       );
     }
+
     if (response.data.ok != true) {
-      console.log(false);
+      inputStyle.incorrectPassword = true;
+      inputStyle.incorrectPasswordMessage =
+        response.data.error_message || "Ошибка регистрации";
+      return;
     }
+
     if (response.data.data.result === true) {
       sendEmail.value = true;
       loginRefAccount();
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
-    console.log(inputStyle.incorrectPassword);
-    console.log("error");
-
-    changeIncorrectPasswordTrue();
-    console.error(`${error.response} - Ошибка`, error);
-    changeIncorrectPasswordTrue();
     if (error.response) {
-      inputStyle.incorrectPassword = true;
+      inputStyle.incorrectPasswordMessage = error.response.data?.errors[0];
       console.error("Ошибка сервера:", error.response.data);
+    } else {
+      inputStyle.incorrectPasswordMessage = "Сетевая ошибка";
     }
   }
 };
 
 const loginRefAccount = async () => {
-  if (!route.query.ref) {
-    return;
-  }
+  if (!route.query.ref) return;
 
   try {
     const response = await axios.post(
@@ -222,54 +355,30 @@ const loginRefAccount = async () => {
     );
 
     if (response.data.ok != true) {
-      console.log(false);
-    }
-    if (response.data.ok === true) {
+      console.error("Ошибка при добавлении реферала");
     }
   } catch (error) {
-    console.log("error");
-    console.error(`${request} - Ошибка`, error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
+    console.error("Ошибка при добавлении реферала:", error);
   }
 };
 
 const logAccoutn = () => {
-  if (!formData.login) {
-    error.login = true;
-  } else {
-    error.login = false;
-  }
-
-  if (!formData.password) {
-    error.password = true;
-  } else {
-    error.password = false;
-  }
-
-  if (formData.password != formData.fogoutPassword) {
-    error.fogoutPassword = true;
-  } else {
-    error.fogoutPassword = false;
-  }
-
-  if (!formData.check) {
-    error.check = true;
-  } else {
-    error.check = false;
-  }
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
+  const isPasswordConfirmed = validatePasswordConfirmation();
+  const isCheckboxChecked = validateCheckbox();
 
   if (
-    formData.password === formData.fogoutPassword &&
-    formData.password &&
-    formData.login &&
-    formData.check
+    isEmailValid &&
+    isPasswordValid &&
+    isPasswordConfirmed &&
+    isCheckboxChecked
   ) {
     loginAccount();
   }
 };
 </script>
+
 <style scoped>
 .registration-section {
   border-radius: 10px;
@@ -288,6 +397,42 @@ const logAccoutn = () => {
   flex-direction: column;
 }
 
+.error-container {
+  min-height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-message {
+  font-weight: 500;
+  font-size: 14px;
+  color: #d33838;
+  margin: 4px 0 0;
+  position: absolute;
+  width: 100%;
+}
+
+/* Анимация для появления/исчезания ошибок */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.input-reg.error {
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
+}
+
+/* Остальные стили остаются без изменений */
 .login-for-google {
   position: absolute;
   top: 108%;
@@ -300,35 +445,12 @@ const logAccoutn = () => {
   font-size: 28px;
   color: var(--text);
   text-align: left;
-  /* margin-bottom: 44px; */
 }
 
 .input-cont {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 28px;
-}
-
-.refferals-reg-cont {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fae7c7;
-  gap: 6px;
-  border-radius: 10px;
-  padding: 4px;
-}
-
-.refferals-reg-cont span {
-  font-size: 14px;
-  font-weight: 500;
-  color: #5d4037;
-}
-
-.error-mes {
-  color: rgb(233, 86, 86);
-  margin-bottom: -8px;
 }
 
 .checkbox-cont {
@@ -336,6 +458,7 @@ const logAccoutn = () => {
   align-items: center;
   gap: 6px;
   margin-bottom: 18px;
+  position: relative;
 }
 
 .name-input {
@@ -367,12 +490,6 @@ const logAccoutn = () => {
   color: var(--text);
 }
 
-.input-reg.error {
-  border: 0.5px solid #be2424;
-  height: 45px;
-  background: #ffeaea;
-}
-
 .cont {
   position: absolute;
   top: 50%;
@@ -391,10 +508,10 @@ const logAccoutn = () => {
 }
 
 .text-email-sent {
-  /* text-align: center; */
   font-size: 20px;
   width: 300px;
   font-weight: 500;
+  text-align: center;
 }
 
 .title-cont {

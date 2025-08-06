@@ -1,12 +1,13 @@
 <template>
+  <ErrorBlock
+    v-if="showErrorBlock"
+    :errorMessage="errorMessage"
+    :changeIncorrectPassword="hideErrorBlock"
+  />
   <div class="cont">
     <template v-if="!passwordChanged">
       <form @submit.prevent="handleResetPassword">
         <h2 class="title">{{ t("PasswordReset.title") }}</h2>
-
-        <div v-if="errorMessage" class="error-message">
-          {{ errorMessage }}
-        </div>
 
         <div class="input-cont">
           <label class="name-input" for="password">{{
@@ -17,13 +18,18 @@
             placeholder="••••••••••••"
             id="password"
             v-model="formData.password"
+            @blur="validatePassword"
+            @input="clearPasswordError"
             required
             :class="{ 'input-error': errors.password }"
-            @input="clearError('password')"
           />
-          <span v-if="errors.password" class="error-text">{{
-            errors.password
-          }}</span>
+          <div class="error-container">
+            <transition name="slide-fade">
+              <span v-if="errors.password" class="error-text">{{
+                errors.password
+              }}</span>
+            </transition>
+          </div>
         </div>
 
         <div class="input-cont">
@@ -35,13 +41,18 @@
             type="password"
             id="repeatPassword"
             v-model="formData.repeatPassword"
+            @blur="validatePasswordConfirmation"
+            @input="clearPasswordConfirmationError"
             required
             :class="{ 'input-error': errors.repeatPassword }"
-            @input="clearError('repeatPassword')"
           />
-          <span v-if="errors.repeatPassword" class="error-text">{{
-            errors.repeatPassword
-          }}</span>
+          <div class="error-container">
+            <transition name="slide-fade">
+              <span v-if="errors.repeatPassword" class="error-text">{{
+                errors.repeatPassword
+              }}</span>
+            </transition>
+          </div>
         </div>
 
         <button
@@ -74,18 +85,14 @@
 import { reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+
 const token = ref("");
-
-onMounted(() => {
-  token.value = route.query.token;
-});
-
 const formData = reactive({
   password: "",
   repeatPassword: "",
@@ -94,50 +101,61 @@ const formData = reactive({
 const errors = reactive({
   password: "",
   repeatPassword: "",
-  form: "",
 });
 
 const isLoading = ref(false);
+const showErrorBlock = ref(false);
 const errorMessage = ref("");
 const passwordChanged = ref(false);
 const countdown = ref(5);
 let countdownInterval = null;
 
-const clearError = (field) => {
-  errors[field] = "";
-  errorMessage.value = "";
-};
+onMounted(() => {
+  token.value = route.query.token;
+  if (!token.value) {
+    showErrorBlock.value = true;
+    errorMessage.value = "Неверная ссылка для сброса пароля";
+  }
+});
 
-const validateForm = () => {
-  let isValid = true;
-
-  // Clear previous errors
-  errors.password = "";
-  errors.repeatPassword = "";
-  errors.form = "";
-
+const validatePassword = () => {
   if (!formData.password) {
     errors.password = t("PasswordReset.errorOne");
-    isValid = false;
+    return false;
   } else if (formData.password.length < 8) {
     errors.password = t("PasswordReset.errorTwo");
-    isValid = false;
+    return false;
   }
+  errors.password = "";
+  return true;
+};
 
+const validatePasswordConfirmation = () => {
   if (!formData.repeatPassword) {
     errors.repeatPassword = t("PasswordReset.errorThree");
-    isValid = false;
+    return false;
   } else if (formData.password !== formData.repeatPassword) {
     errors.repeatPassword = t("PasswordReset.errorFour");
-    isValid = false;
+    return false;
   }
+  errors.repeatPassword = "";
+  return true;
+};
 
-  if (!token.value) {
-    errors.form = t("PasswordReset.errorFive");
-    isValid = false;
+const clearPasswordError = () => {
+  if (errors.password) {
+    errors.password = "";
   }
+};
 
-  return isValid;
+const clearPasswordConfirmationError = () => {
+  if (errors.repeatPassword) {
+    errors.repeatPassword = "";
+  }
+};
+
+const hideErrorBlock = () => {
+  showErrorBlock.value = false;
 };
 
 const startCountdown = () => {
@@ -156,13 +174,19 @@ const redirectToLogin = () => {
 };
 
 const handleResetPassword = async () => {
-  if (!validateForm()) {
-    app_id: "app1", (errorMessage.value = errors.form);
+  const isPasswordValid = validatePassword();
+  const isPasswordConfirmed = validatePasswordConfirmation();
+
+  if (!isPasswordValid || !isPasswordConfirmed || !token.value) {
+    if (!token.value) {
+      showErrorBlock.value = true;
+      errorMessage.value = t("PasswordReset.errorFive");
+    }
     return;
   }
 
   isLoading.value = true;
-  errorMessage.value = "";
+  showErrorBlock.value = false;
 
   try {
     const response = await axios.post(
@@ -177,9 +201,11 @@ const handleResetPassword = async () => {
       passwordChanged.value = true;
       startCountdown();
     } else {
+      showErrorBlock.value = true;
       errorMessage.value = response.data.message || t("PasswordReset.errorSix");
     }
   } catch (error) {
+    showErrorBlock.value = true;
     if (error.response) {
       errorMessage.value =
         error.response.data.message || t("PasswordReset.errorSeven");
@@ -232,7 +258,7 @@ const handleResetPassword = async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 14px;
   width: 550px;
 }
 
@@ -249,14 +275,15 @@ input {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
-  border: none;
-  background-color: #fcfcfc;
+  color: var(--text);
   border: 0.5px solid #c1c1c1;
+  background: var(--input);
+  transition: all 0.3s ease;
 }
 
 .input-error {
-  border: 1px solid #ff3333 !important;
+  border: 0.5px solid #be2424 !important;
+  background: #ffeaea;
 }
 
 .login-account-button {
@@ -274,7 +301,6 @@ input {
 
 .login-account-button:hover:not(:disabled) {
   background: #595fd1;
-  transition: all 0.25s;
 }
 
 .login-account-button:active:not(:disabled) {
@@ -284,13 +310,6 @@ input {
 .login-account-button:disabled {
   background: #a0a0a0;
   cursor: not-allowed;
-}
-
-.error-message {
-  color: #ff3333;
-  margin-bottom: 20px;
-  text-align: center;
-  width: 100%;
 }
 
 .success-container {
@@ -304,10 +323,33 @@ input {
   margin-bottom: 30px;
 }
 
+.error-container {
+  min-height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
 .error-text {
-  color: #ff3333;
+  color: #d33838;
   font-size: 14px;
   margin-top: 4px;
+  position: absolute;
+  width: 100%;
+}
+
+/* Анимация для появления/исчезания ошибок */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 
 @media (max-width: 700px) {
@@ -320,16 +362,16 @@ input {
     width: 400px;
   }
 
-  input {
+  .input-cont {
     width: 350px;
-    height: 45px;
-    font-size: 14px;
+  }
+
+  input {
+    width: 100%;
   }
 
   .login-account-button {
     width: 365px;
-    height: 44px;
-    font-size: 14px;
   }
 }
 
@@ -338,27 +380,17 @@ input {
     width: 350px;
     height: 504px;
   }
+
   form {
     width: 300px;
   }
-  .error-message {
-    font-size: 14px;
-  }
 
-  input {
+  .input-cont {
     width: 250px;
-    height: 35px;
-    font-size: 14px;
   }
 
   .login-account-button {
     width: 265px;
-    height: 44px;
-    font-size: 14px;
-  }
-
-  .create-account-button {
-    font-size: 14px;
   }
 }
 </style>

@@ -15,11 +15,17 @@
           placeholder="name@company.com"
           id="login"
           v-model="formData.login"
+          @blur="validateEmail"
+          @input="clearEmailError"
           required
         />
-        <p v-if="inputStyle.loginStation" class="error-message">
-          {{ t("login.errorMail") }}
-        </p>
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="inputStyle.loginStation" class="error-message">
+              {{ emailError }}
+            </p>
+          </transition>
+        </div>
       </div>
       <div class="input-cont">
         <label class="name-input" for="email">{{ t("login.password") }}</label>
@@ -29,11 +35,17 @@
           type="password"
           id="password"
           v-model="formData.password"
+          @blur="validatePassword"
+          @input="clearPasswordError"
           required
         />
-        <p v-if="inputStyle.passwordStation" class="error-message">
-          {{ t("login.errorPassword") }}
-        </p>
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="inputStyle.passwordStation" class="error-message">
+              {{ passwordError }}
+            </p>
+          </transition>
+        </div>
         <p @click="navigateTo('/Forgot')" class="forgot-password-text">
           {{ t("login.fogoutPassword") }}
         </p>
@@ -48,27 +60,27 @@
         }}</span>
       </p>
     </form>
-    <LoginForGoogle class="login-for-google" />
   </section>
 </template>
 
 <script setup>
 import { useRouter } from "vue-router";
-import { ref, reactive, computed } from "vue";
+import { ref, reactive } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-
 import { useThemeStore } from "@/stores/theme";
-const theme = useThemeStore();
-
 import axios from "axios";
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+import useFrontendLogger from "@/composables/useFrontendLogger";
+
+const { t } = useI18n();
 const router = useRouter();
+const accountStore = useAccountStore();
+const theme = useThemeStore();
+const { sendLog } = useFrontendLogger();
+
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 const formData = reactive({
   login: "",
   password: "",
@@ -88,6 +100,9 @@ const inputStyle = reactive({
   incorrectPassword: false,
   incorrectPasswordMessage: "",
 });
+
+const emailError = ref("");
+const passwordError = ref("");
 
 if (theme.isDark) {
   inputStyle.password.background = "#1f2937";
@@ -118,8 +133,50 @@ function errorStyleStation(input, station) {
   }
 }
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
+const validateEmail = () => {
+  const email = formData.login.trim();
+  if (!email) {
+    emailError.value = "Пожалуйста, введите email";
+    errorStyleStation("login", "on");
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    emailError.value = "Пожалуйста, введите корректный email";
+    errorStyleStation("login", "on");
+    return false;
+  }
+
+  if (email.length > 30) {
+    emailError.value = "Email должен быть не длиннее 30 символов";
+    errorStyleStation("login", "on");
+    return false;
+  }
+
+  emailError.value = "";
+  errorStyleStation("login", "off");
+  return true;
+};
+
+const validatePassword = () => {
+  const password = formData.password.trim();
+  if (!password) {
+    passwordError.value = "Пожалуйста, введите пароль";
+    errorStyleStation("password", "on");
+    return false;
+  }
+
+  if (password.length < 8) {
+    passwordError.value = "Пароль должен содержать минимум 8 символов";
+    errorStyleStation("password", "on");
+    return false;
+  }
+
+  passwordError.value = "";
+  errorStyleStation("password", "off");
+  return true;
+};
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
@@ -129,15 +186,28 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
+const clearEmailError = () => {
+  if (inputStyle.loginStation) {
+    emailError.value = "";
+    errorStyleStation("login", "off");
+  }
+};
+
+const clearPasswordError = () => {
+  if (inputStyle.passwordStation) {
+    passwordError.value = "";
+    errorStyleStation("password", "off");
+  }
+};
+
 const loginAccount = async () => {
   accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTciLCJlbWFpbCI6ImNhZmFsNDI4ODhAZGV2ZGlncy5jb20iLCJleHAiOjE3NTQzNzcyMDd9.g-7CcftvTDMHWBgpG7RytJGkErcuajbgnLaNfy-Vl64"
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTkiLCJlbWFpbCI6ImphdGlnbzI4NjlAY291cnNvcmEuY29tIiwiZXhwIjoxNzU0OTQ0NzE2fQ.vRy3-OkB1O3Ks1IC1Kaz1Bq-BOKEI4_Em48WplBeqr8"
   );
-  accountStore.setAccountData("maksim.birykov.2007@mail.ru");
+  accountStore.setAccountData("jatigo2869@coursora.com");
   accountStore.setAccountStation("telegram");
   accountStore.setAccountStationText("Telegram");
   navigateTo("/");
-
   try {
     const response = await axios.post(
       `https://bapi88.developtech.ru/api/v1/auth/login`,
@@ -168,69 +238,18 @@ const loginAccount = async () => {
       accountStore.setAccountStationText("Telegram");
       navigateTo("/");
     } else {
-      console.log(false);
+      inputStyle.incorrectPassword = true;
+      inputStyle.incorrectPasswordMessage =
+        response.data.error_message || t("login.serverError");
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
-    inputStyle.incorrectPasswordMessage = response.data.error_message;
-    console.error(`${response} - Ошибка`, error);
-
     if (error.response) {
+      inputStyle.incorrectPasswordMessage =
+        error.response.data?.error_message || error.response.data.errors[0];
       console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
-const sendEmail = async () => {
-  try {
-    const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/resetPassword`,
-      {
-        token:
-          "reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2",
-        password: "zaqxsw",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer reset_token040e7de2983957b758951105da059313705c8f1f838ce3c5c5c8d8ce1b53b5b2`,
-        },
-      }
-    );
-
-    conole.log(response.data);
-    if (response.data.ok === true) {
-    }
-  } catch (error) {
-    console.error(`${error.response} - Ошибка`, error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
-    }
-  }
-};
-
-const getUUID = async () => {
-  try {
-    const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/login`,
-      {
-        email: "it.maksim123@mail.ru",
-        password: "123123",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
-      }
-    );
-
-    conole.log(response.data);
-    if (response.data.ok === true) {
-    }
-  } catch (error) {
-    console.error(`${request} - Ошибка`, error);
-    if (error.response) {
-      console.error("Ошибка сервера:", error.response.data);
+    } else {
+      inputStyle.incorrectPasswordMessage = "Ошибка сервера";
     }
   }
 };
@@ -240,35 +259,10 @@ const changeIncorrectPassword = () => {
 };
 
 function login() {
-  const login = formData.login;
-  const password = formData.password;
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
 
-  const stationAuth = reactive({
-    login: false,
-    password: false,
-  });
-
-  if (login.length === 0) {
-    errorStyleStation("login", "on");
-  } else if (login.length > 30) {
-    errorStyleStation("login", "on");
-  } else if (login.length < 10) {
-    errorStyleStation("login", "on");
-  } else if (!login.includes("@")) {
-    errorStyleStation("login", "on");
-  } else {
-    errorStyleStation("login", "off");
-    stationAuth.login = true;
-  }
-
-  if (password.length === 0) {
-    errorStyleStation("password", "on");
-  } else {
-    errorStyleStation("password", "off");
-    stationAuth.password = true;
-  }
-
-  if (stationAuth.password === true && stationAuth.login === true) {
+  if (isEmailValid && isPasswordValid) {
     loginAccount();
   }
 }
@@ -308,14 +302,28 @@ const navigateTo = (page) => {
   font-size: 28px;
   color: var(--text);
   text-align: left;
-  margin-bottom: 44px;
+  margin-bottom: 24px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+  max-height: 50px;
+  overflow: hidden;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-5px);
 }
 
 .input-cont {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 28px;
+  position: relative;
 }
 
 .name-input {
@@ -334,10 +342,33 @@ input {
   color: #000;
 }
 
+.error-container {
+  min-height: 24px; /* Фиксированная высота для контейнера ошибок */
+  position: relative;
+  overflow: hidden;
+}
+
 .error-message {
   font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
   color: #d33838;
+  margin: 4px 0 0;
+  position: absolute;
+  width: 100%;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 
 .forgot-password-text {
@@ -345,7 +376,7 @@ input {
   font-size: 14px;
   text-align: right;
   color: var(--text);
-  margin-top: 10px;
+  margin-bottom: 10px;
   cursor: pointer;
 }
 

@@ -191,9 +191,15 @@ const props = defineProps({
   openModal: {
     type: Function,
   },
+  getAccounts: {
+    type: Function,
+  },
 });
 
 const emit = defineEmits(["close", "submit"]);
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -207,6 +213,12 @@ const stationLoading = reactive({
 const selectedGroup = ref("");
 const selectedMessenger = ref("");
 const selectedCrm = ref("");
+
+const handleSomeAction = () => {
+  if (props.getAccounts) {
+    props.getAccounts();
+  }
+};
 
 // Form values
 const formValues = ref({
@@ -263,62 +275,78 @@ const handlePhoneInput = (event) => {
   let value = input.value.replace(/\D/g, "");
   let cursorPos = input.selectionStart;
 
-  // Определяем, российский ли номер
+  // Определяем российский ли номер (начинается с 7 или 8)
   isRussianFormat.value = /^[78]/.test(value) && value.length <= 11;
 
   if (isRussianFormat.value) {
-    // Форматируем российский номер
-    let formattedValue = "+7";
+    // Автоматически добавляем +7 если ввод начинается с 7 или 8
+    if (value.startsWith("7") || value.startsWith("8")) {
+      value = "7" + value.substring(1); // Приводим к формату 7...
+    }
 
+    let formattedValue = "+7";
+    let newCursorPos = 2;
+
+    // Форматируем номер с учетом позиции курсора
     if (value.length > 1) {
       formattedValue += ` (${value.substring(1, 4)}`;
-      cursorPos += value.length > 1 ? 2 : 0;
+      if (cursorPos >= 3) newCursorPos = formattedValue.length;
     }
     if (value.length > 4) {
       formattedValue += `) ${value.substring(4, 7)}`;
-      cursorPos += value.length > 4 ? 2 : 0;
+      if (cursorPos >= 6) newCursorPos = formattedValue.length;
     }
     if (value.length > 7) {
       formattedValue += `-${value.substring(7, 9)}`;
-      cursorPos += value.length > 7 ? 1 : 0;
+      if (cursorPos >= 8) newCursorPos = formattedValue.length;
     }
     if (value.length > 9) {
       formattedValue += `-${value.substring(9)}`;
-      cursorPos += value.length > 9 ? 1 : 0;
+      newCursorPos = formattedValue.length;
     }
 
+    // Сохраняем значения
     phoneDisplay.value = formattedValue;
     formValues.value.phone = value;
 
     // Корректируем позицию курсора
     nextTick(() => {
-      input.setSelectionRange(cursorPos, cursorPos);
+      input.setSelectionRange(newCursorPos, newCursorPos);
     });
   } else {
-    // Для не российских номеров
+    // Для международных номеров
     phoneDisplay.value = value;
     formValues.value.phone = value;
   }
 };
 
 const handleBackspace = (event) => {
-  if (!isRussianFormat.value) return;
-
   const input = event.target;
   const value = input.value;
   const cursorPos = input.selectionStart;
 
-  // Если удаляем разделитель, удаляем предыдущую цифру
+  if (!isRussianFormat.value) return;
+
+  // Обработка удаления символов в отформатированном номере
   if (cursorPos > 0 && /\D/.test(value[cursorPos - 1])) {
     event.preventDefault();
     const cleanValue = phoneDisplay.value.replace(/\D/g, "");
-    const newValue =
-      cleanValue.substring(0, cursorPos - 2) +
-      cleanValue.substring(cursorPos - 1);
+    const newValue = cleanValue.substring(0, cleanValue.length - 1);
     phoneDisplay.value = newValue;
     handlePhoneInput({
-      target: { value: newValue, selectionStart: cursorPos - 1 },
+      target: {
+        value: newValue,
+        selectionStart: cursorPos - 1,
+      },
     });
+  }
+
+  // Обработка удаления +7
+  if (cursorPos <= 2 && value.startsWith("+7")) {
+    event.preventDefault();
+    phoneDisplay.value = "";
+    formValues.value.phone = "";
+    isRussianFormat.value = false;
   }
 };
 
@@ -432,9 +460,11 @@ const submitForm = async () => {
     if (response.data.ok) {
       emit("submit", formData);
       stationLoading.loading = false;
-      location.reload();
+      handleSomeAction();
+      setLoadingStatus(true, "success");
       props.openModal();
     } else {
+      setLoadingStatus(true, "error");
       console.error("Ошибка сохранения:", response.data.message);
     }
   } catch (error) {

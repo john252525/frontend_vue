@@ -24,6 +24,7 @@
         <span class="action" @click="forceStopActive">{{
           t("modalAccount.off")
         }}</span>
+        <span class="action" @click="openTariff">Тарифы</span>
         <span class="action action-throw" @click="ChangeconfirmStationReset">{{
           t("modalAccount.change")
         }}</span>
@@ -91,6 +92,7 @@
   <LoadMoadal
     :stationLoading="stationLoading"
     :textLoadin="stationLoading.text"
+    :changeStationLoading="changeStationLoading"
   />
   <ConfirmDelete
     :loadingStart="loadingStart"
@@ -138,6 +140,9 @@ import GetScreen from "./ModalAccount/GetScreen.vue";
 
 const props = defineProps({
   closeModal: {
+    type: Function,
+  },
+  changeTariffStation: {
     type: Function,
   },
   modalPosition: {
@@ -207,6 +212,10 @@ const handleSubmit = () => {
 };
 const isFlashing = ref(false);
 
+const openTariff = () => {
+  props.changeTariffStation(selectedItem.value);
+};
+
 const changeLadingStation = () => {
   emit("update:loadingStation", updateLoadingStation.value);
 };
@@ -241,6 +250,10 @@ const stationLoading = reactive({
     error: false,
   },
 });
+
+const changeStationLoading = () => {
+  stationLoading.loading = !stationLoading.loading;
+};
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -367,7 +380,7 @@ const createRequest = async (request) => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       if (request === "getQr") {
         responseQr.value = response.data.data.value;
         qrData.value = Array.from(responseQr.value.split(","));
@@ -429,7 +442,8 @@ const forceStop = async (request) => {
         },
       }
     );
-    if (response.data.ok === true) {
+    console.log(response.data);
+    if (response.data.status === "ok") {
       chatStore.removeChat(login, source);
       stationLoading.loading = false;
       setLoadingStatus(true, "success");
@@ -443,15 +457,19 @@ const forceStop = async (request) => {
       setLoadingStatus(true, "error");
     }
   } catch (error) {
+    console.log("Огиька level1");
     console.error(`error`, error);
+    stationLoading.loading = false;
     stationLoading.account.error = true;
-    cstationLoading.modalStation = true;
+    stationLoading.modalStation = true;
     setTimeout(() => {
       stationLoading.modalStation = false;
       stationLoading.account.error = false;
     }, 5000);
     if (error.response) {
+      console.log("Огиька level 2");
       console.error("error", error.response.data);
+      stationLoading.loading = false;
     }
   }
 };

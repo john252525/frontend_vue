@@ -11,14 +11,14 @@
           class="grid-item"
         />
 
-        <!-- <SecuritySettings @changePassword="changePassword" class="grid-item" />
+        <SecuritySettings @changePassword="changePassword" class="grid-item" />
 
-        <NotificationsSettings
+        <!-- <NotificationsSettings
           @updateNotifications="updateNotifications"
           class="grid-item"
-        />
+        /> -->
 
-        <TariffInfo
+        <!-- <TariffInfo
           :subscription="user.subscription"
           @upgrade="upgradeSubscription"
           @cancel="cancelSubscription"

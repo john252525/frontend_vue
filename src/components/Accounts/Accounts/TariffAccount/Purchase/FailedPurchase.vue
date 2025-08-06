@@ -76,6 +76,8 @@ const sendError = (error) => {
   if (error === "Balance error") {
     balanceError.value = true;
     return "Недостаточно средств";
+  } else {
+    return "Ошибка сервера";
   }
 };
 

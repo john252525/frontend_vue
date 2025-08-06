@@ -4,9 +4,7 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">
-              {{ t("paymentList.paySistem") }}
-            </th>
+            <th class="table-login">ID</th>
             <th class="table-step">{{ t("paymentList.sum") }}</th>
             <th class="table-status">{{ t("paymentList.date") }}</th>
             <th class="table-action">{{ t("paymentList.status.table") }}</th>
@@ -18,7 +16,7 @@
             v-for="(item, index) in payments"
             :key="index"
           >
-            <td class="name-pay">{{ getPaymentSystem(item.ext_system) }}</td>
+            <td class="name-pay">{{ getPaymentSystem(item.public_id) }}</td>
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td class="table-text">{{ formatDate(item.dt_ins) }}</td>
             <td
@@ -136,6 +134,10 @@ function getStatusClass(state) {
       return "canceled";
     case "Ожидание оплаты": // В обработке
       return "pending";
+    case "Успешная покупка":
+      return "succeeded";
+    case "Недостаточно средств":
+      return "canceled";
     default:
       return "pending";
   }
@@ -149,6 +151,10 @@ function getStatusText(state) {
       return t("paymentList.status.canceled");
     case "Ошибка обработки платежа":
       return t("paymentList.status.error");
+    case "Успешная покупка":
+      return "Успешная покупка";
+    case "Недостаточно средств":
+      return "Недостаточно средств";
     default:
       return t("paymentList.status.pending");
   }

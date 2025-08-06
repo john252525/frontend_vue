@@ -4,6 +4,7 @@
       <h2 class="title">{{ t("referrals.title") }}</h2>
     </section>
     <section class="account-section">
+      <span class="link-title">Ваша ссылка для привлечения клиентов</span>
       <button @click="copyReferralLink" class="add-account-button">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +134,9 @@ header {
 
 .account-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .title {
@@ -142,6 +145,11 @@ header {
   color: var(--text);
   flex: 1;
   margin-right: 8px;
+}
+
+.link-title {
+  font-size: 16px;
+  color: #585858;
 }
 
 .account {

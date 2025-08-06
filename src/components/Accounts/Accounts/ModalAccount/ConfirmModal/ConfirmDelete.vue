@@ -118,7 +118,7 @@ const createRequest = async (request) => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       if (request === "deleteAccount") {
         props.loadingStop();
         setLoadingStatus(true, "success");

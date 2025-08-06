@@ -82,7 +82,7 @@ const forceStop = async () => {
         },
       }
     );
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -116,7 +116,7 @@ const enablePhoneAuth = async () => {
         },
       }
     );
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -184,7 +184,7 @@ const disablePhoneAuth = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -217,7 +217,7 @@ const setState = async () => {
         },
       }
     );
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -269,9 +269,9 @@ const getAuthCode = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       // Проверяем, пустое ли значение authCode
-      if (!response.data.data.authCode) {
+      if (!response.data.authCode) {
         station.error = true;
         clearInterval(authCodeInterval);
         station.stationLoading = false;
@@ -281,7 +281,7 @@ const getAuthCode = async () => {
 
       station.stationLoading = false;
       station.code = true;
-      userCode.value = response.data.data.authCode;
+      userCode.value = response.data.authCode;
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {

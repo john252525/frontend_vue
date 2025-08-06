@@ -9,10 +9,10 @@
       <h2 class="title">{{ t("confirmMoadal.reset.message") }}</h2>
       <article class="button-cont">
         <button class="confirm-button" @click="confirm">
-          {{ t("confirmMoadal.reset.cancel") }}
+          {{ t("confirmMoadal.reset.continue") }}
         </button>
         <button class="cansel-button" @click="ChangeconfirmStationReset">
-          {{ t("confirmMoadal.reset.continue") }}
+          {{ t("confirmMoadal.reset.cancel") }}
         </button>
       </article>
     </section>
@@ -113,7 +113,7 @@ const createRequest = async (request) => {
         response.data
       );
     }
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
       if (request === "getNewProxy") {
         setLoadingStatus(true, "success");
         props.loadingStop();

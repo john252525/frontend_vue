@@ -1,9 +1,13 @@
 <template>
-  <AddAccount :openModal="openAddAccount" v-if="openAddAccountStation" />
+  <AddAccount
+    :getAccounts="getAccountListMethod"
+    :openModal="openAddAccount"
+    v-if="openAddAccountStation"
+  />
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("account.accounts") }}</h2>
-      <h2
+      <!-- <h2
         v-if="
           stationDomain.navigate.value != 'whatsapi' &&
           platformStationText != 'CRM'
@@ -36,7 +40,7 @@
             d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4"
           />
         </svg>
-      </div>
+      </div> -->
       <div
         v-if="setPlatformStation"
         @click="openCrmPlatform"
@@ -67,6 +71,11 @@
           </li>
         </ul>
       </div>
+      <Filters
+        :getAccounts="getAccountListMethod"
+        :close="openPlatformChoice"
+        :isOpen="platformStation"
+      />
     </section>
     <section class="account-section">
       <button
@@ -83,9 +92,9 @@
             d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2m0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM1 2a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 2m0 12a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 14"
           ></path>
         </svg>
-        {{ platformStationText }}
+        Фильтры
       </button>
-      <article v-if="platformStation">
+      <!-- <article v-if="platformStation">
         <div @click="openPlatformChoice" class="black-fon"></div>
         <ul
           v-if="platformStationText === 'Telegram'"
@@ -136,7 +145,7 @@
             CRM
           </li>
         </ul>
-      </article>
+      </article> -->
       <button @click="openAddAccount" class="add-account-button">
         <svg
           class="svg-icon"
@@ -149,18 +158,21 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-
         {{ t("account.addButton") }}
       </button>
     </section>
   </header>
-  <AccountList :platformStationTextValue="platformStationTextValue" />
+  <AccountList
+    ref="accountListRef"
+    :platformStationTextValue="platformStationTextValue"
+  />
 </template>
 
 <script setup>
 import AccountList from "./Accounts/AccountsList.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
 import { useAccountStore } from "@/stores/accountStore";
+import Filters from "./Filters.vue";
 const accountStore = useAccountStore();
 
 import { ref, onMounted } from "vue";
@@ -176,6 +188,14 @@ import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 const setPlatformStation = ref(false);
+
+const accountListRef = ref(null);
+
+const getAccountListMethod = () => {
+  if (accountListRef.value) {
+    accountListRef.value.getAccounts();
+  }
+};
 
 function openCrmPlatform() {
   setPlatformStation.value = !setPlatformStation.value;

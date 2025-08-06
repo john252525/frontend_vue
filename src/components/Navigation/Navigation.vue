@@ -1,6 +1,9 @@
 <template>
   <!-- Desktop Menu -->
-  <aside class="pc-menu" v-if="stationDomain.navigate.value && !isWidgetMode">
+  <aside
+    class="pc-menu"
+    v-if="stationDomain.navigate.value && !isMailingMode && !isWidgetMode"
+  >
     <nav v-if="!isWidgetMode">
       <!-- Основные секции меню -->
       <div
@@ -56,7 +59,7 @@
           <li
             v-for="item in section.items"
             :key="item.name"
-            class="list-mode"
+            class="list"
             :class="{ active: item.isActive }"
             @click="item.action ? item.action() : navigateTo(item.name)"
           >
@@ -73,6 +76,37 @@
         v-if="stationDomain.navigate.value !== 'settings'"
       />
     </nav>
+  </aside>
+
+  <aside v-if="isMailingMode" class="chat-menu">
+    <nav class="nav-chat">
+      <div
+        v-for="(section, sectionName) in navSections"
+        :key="sectionName"
+        class="menu-section-mailing"
+      >
+        <ul>
+          <li
+            v-for="item in section.items"
+            :key="item.name"
+            class="list-mailing"
+            :class="{ active: item.isActive }"
+            @click="item.action ? item.action() : navigateTo(item.name)"
+          >
+            <img
+              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+              class="svg-icon"
+            />
+          </li>
+        </ul>
+      </div>
+      <!-- <LangSwither
+        :isWidgetMode="isWidgetMode"
+        class="theme-block"
+        v-if="stationDomain.navigate.value !== 'settings'"
+      /> -->
+    </nav>
+    <div class="line-mailing"></div>
   </aside>
 
   <!-- Mobile Menu -->
@@ -137,15 +171,41 @@
               :key="item.name"
               class="list"
               :class="{ active: item.isActive }"
-              @click="handleMobileItemClick(item)"
             >
-              <img
-                :src="`data:image/svg+xml;utf8,${encodeURIComponent(
-                  item.icon
-                )}`"
-                class="svg-icon"
-              />
-              <p class="page">{{ item.text }}</p>
+              <!-- Если это Support, используем <a href="mailto:"> -->
+              <a
+                v-if="item.name === 'Support'"
+                href="mailto:maksim.test@mail.ru"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  text-decoration: none;
+                  color: inherit;
+                "
+              >
+                <img
+                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(
+                    item.icon
+                  )}`"
+                  class="svg-icon"
+                />
+                <p class="page">{{ item.text }}</p>
+              </a>
+
+              <!-- Остальные пункты меню -->
+              <template
+                v-else
+                @click="item.action ? item.action() : navigateTo(item.name)"
+              >
+                <img
+                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(
+                    item.icon
+                  )}`"
+                  class="svg-icon"
+                />
+                <p class="page">{{ item.text }}</p>
+              </template>
             </li>
           </ul>
         </div>
@@ -212,6 +272,7 @@ const { stationDomain } = useDomain();
 const { navConfig } = useNavigationConfig();
 
 const props = defineProps({
+  isMailingMode: Boolean,
   phoneMenuOn: Function,
   phoneMenuStation: Boolean,
   chatStation: Boolean,
@@ -240,6 +301,10 @@ onMounted(() => {
 // Остальные функции без изменений
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const testbtn = () => {
+  window.location.href = "mailto:maksim.test@mail.ru";
 };
 
 const handleMobileItemClick = (item) => {
@@ -302,8 +367,20 @@ nav {
 }
 
 .chat-menu {
+  border-right: 1px solid black;
   background-color: white;
   width: 60px;
+  height: calc(100% - 57px);
+}
+
+.line-mailing {
+  width: 0.5px;
+  background-color: var(--line);
+  position: absolute;
+  z-index: 2;
+  top: 56px;
+  height: calc(100% - 57px);
+  left: 60px;
 }
 
 .nav-chat {
@@ -320,6 +397,11 @@ nav {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.menu-section-mailing {
+  margin-bottom: 6px;
+  border-bottom: 1.5px solid var(--line);
 }
 
 .menu-section {
@@ -414,6 +496,29 @@ nav {
   margin-bottom: 4px;
   padding: 8px 0px 8px 16px;
   cursor: pointer;
+}
+
+.list-mailing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 8px 8px 8px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-mailing:hover {
+  background-color: var(--textNavHover);
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.list-mailing.active {
+  background-color: var(--textNavHover);
+  border-radius: 10px;
 }
 
 .list.active {

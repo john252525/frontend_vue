@@ -4,12 +4,16 @@
       :changeTariffStation="changeTariffStation"
       v-if="paymentsStation.success"
       :tariff="selectTariff"
+      :getAccounts="getAccounts"
+      :selectedItem="selectedItem"
+      :changePayDataForAccounts="changePayDataForAccounts"
     />
     <FailedPurchase
       v-if="paymentsStation.error"
       :error="paymentsStation.errorMessages"
       :tariff="selectTariff"
       :changeTariffStation="changeTariffStation"
+      :changePayDataForAccounts="changePayDataForAccounts"
     />
     <div
       v-if="!buySection && !paymentsStation.success && !paymentsStation.error"
@@ -26,7 +30,7 @@
         </button>
       </div>
 
-      <!-- <div v-if="loading" class="loading-container">
+      <div v-if="loading" class="loading-container">
         <div class="loader"></div>
       </div>
 
@@ -35,7 +39,7 @@
         <button @click="fetchTariffs" class="retry-button">
           Повторить попытку
         </button>
-      </div> -->
+      </div>
 
       <div class="tariffs-wrapper">
         <div class="tariffs-container">
@@ -56,8 +60,19 @@
                   <span class="currency">{{ tariff.currency }}</span>
                 </div>
                 <div class="period">/{{ getPeriodText(tariff.period) }}</div>
-                <div v-if="showMonthlyPrice(tariff)" class="monthly-price">
-                  {{ calculateMonthlyPrice(tariff) }} ₽/мес
+
+                <!-- Улучшенный расчет и отображение ежемесячной стоимости -->
+                <div
+                  v-if="shouldShowMonthlyPrice(tariff)"
+                  class="monthly-price"
+                >
+                  {{ calculateMonthlyEquivalent(tariff) }} ₽/мес
+                  <span
+                    v-if="calculateSavings(tariff) > 0"
+                    class="savings-text"
+                  >
+                    (Экономия {{ calculateSavings(tariff) }}%)
+                  </span>
                 </div>
               </div>
             </div>
@@ -130,13 +145,14 @@
         :changePaymentsStation="changePaymentsStation"
         :selectTariff="selectTariff"
         :close="changeStationTariff"
+        :selectedItem="selectedItem"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, toRefs } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 
@@ -151,7 +167,18 @@ const props = defineProps({
   tariffStation: {
     type: Boolean,
   },
+  selectedItem: {
+    type: Object,
+  },
+  getAccounts: {
+    type: Function,
+  },
+  changePayDataForAccounts: {
+    type: Function,
+  },
 });
+
+const { selectedItem } = toRefs(props);
 
 const emit = defineEmits(["close"]);
 
@@ -189,61 +216,107 @@ const hoverIndex = ref(-1);
 const loading = ref(false);
 const tariffsData = ref([
   {
-    id: 3,
-    brand_slug: "touchapi",
-    code: "touchapi-whatsapp",
-    period: "1m",
-    limits: "",
-    name: "Whatsapp",
-    price: 1050,
-    currency: "RUB",
-    dt_ins: "2025-07-23 20:04:17",
-    dt_upd: "2025-07-28 11:38:13",
-    enable: 1,
-  },
-  {
-    id: 9,
-    brand_slug: "touchapi",
+    id: 13,
+    brand_slug: "default",
     code: "touchapi-whatsapp",
     period: "1y",
     limits: "",
     name: "Whatsapp 1 year",
-    price: 9000,
+    price: 9600,
     currency: "RUB",
-    dt_ins: "2025-07-23 20:04:17",
-    dt_upd: "2025-07-28 11:38:13",
+    dt_ins: "2025-07-23 19:57:29",
+    dt_upd: "2025-08-01 17:43:13",
     enable: 1,
   },
   {
-    id: 7,
-    brand_slug: "touchapi",
+    id: 16,
+    brand_slug: "default",
     code: "touchapi-whatsapp",
-    period: "3m",
+    period: "14m",
     limits: "",
-    name: "Whatsapp 3 month",
-    price: 2600,
+    name: "Whatsapp 1 year 2 month",
+    price: 10000,
     currency: "RUB",
-    dt_ins: "2025-07-23 20:04:17",
-    dt_upd: "2025-07-28 11:38:13",
+    dt_ins: "2025-07-23 19:57:29",
+    dt_upd: "2025-08-04 19:34:48",
     enable: 1,
   },
   {
-    id: 8,
-    brand_slug: "touchapi",
+    id: 14,
+    brand_slug: "default",
     code: "touchapi-whatsapp",
-    period: "6m",
+    period: "2y",
     limits: "",
-    name: "Whatsapp 6 month",
-    price: 5000,
+    name: "Whatsapp 2 year",
+    price: 14000,
     currency: "RUB",
-    dt_ins: "2025-07-23 20:04:17",
-    dt_upd: "2025-07-28 11:38:13",
+    dt_ins: "2025-07-23 19:57:29",
+    dt_upd: "2025-08-01 17:43:13",
     enable: 1,
   },
 ]);
 const error = ref(null);
 const currentPage = ref(0);
 const itemsPerPage = 3;
+
+const shouldShowMonthlyPrice = (tariff) => {
+  // Не показываем для периодов меньше месяца
+  if (tariff.period.endsWith("d") || tariff.period.endsWith("w")) {
+    return false;
+  }
+  // Показываем для всех остальных периодов
+  return true;
+};
+
+const calculateMonthlyEquivalent = (tariff) => {
+  const period = tariff.period;
+  const price = tariff.price;
+
+  // Разбираем период на число и единицу измерения
+  const match = period.match(/^(\d+)([dmyw])$/);
+  if (!match) return price; // Если не распознано - возвращаем как есть
+
+  const num = parseInt(match[1]);
+  const unit = match[2];
+
+  let monthsEquivalent = 1;
+
+  switch (unit) {
+    case "d": // дни
+      monthsEquivalent = num / 30; // ~30 дней в месяце
+      break;
+    case "w": // недели
+      monthsEquivalent = num / 4.345; // ~4.345 недели в месяце
+      break;
+    case "m": // месяцы
+      monthsEquivalent = num;
+      break;
+    case "y": // годы
+      monthsEquivalent = num * 12;
+      break;
+  }
+
+  // Округляем до 2 знаков после запятой
+  const monthlyPrice = price / monthsEquivalent;
+  return monthlyPrice.toFixed(2);
+};
+
+const calculateSavings = (tariff) => {
+  // Находим месячный тариф для сравнения
+  const monthlyTariff = sortedTariffs.value.find(
+    (t) => t.period === "1m" || t.period === "30d"
+  );
+
+  if (!monthlyTariff) return 0;
+
+  const monthlyPrice = parseFloat(calculateMonthlyEquivalent(tariff));
+  const baseMonthlyPrice = monthlyTariff.price;
+
+  if (monthlyPrice >= baseMonthlyPrice) return 0;
+
+  const savings = ((baseMonthlyPrice - monthlyPrice) / baseMonthlyPrice) * 100;
+  return Math.round(savings);
+};
 
 const fetchTariffs = async () => {
   loading.value = true;
@@ -252,7 +325,7 @@ const fetchTariffs = async () => {
   try {
     const response = await axios.post(
       "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
-      { code: "touchapi-whatsapp" },
+      { code: `touchapi-${selectedItem.value.source}` },
       {
         headers: {
           "Content-Type": "application/json",
@@ -322,14 +395,137 @@ const formatPrice = (price) => {
 };
 
 const getPeriodText = (period) => {
-  const periods = {
+  const periodMap = {
+    // Дни
+    "1d": "1 день",
+    "2d": "2 дня",
+    "3d": "3 дня",
+    "4d": "4 дня",
+    "5d": "5 дней",
+    "6d": "6 дней",
+    "7d": "7 дней",
+    "14d": "14 дней",
+    "21d": "21 день",
+    "28d": "28 дней",
+    "30d": "30 дней",
+
+    // Месяцы
     "1m": "1 месяц",
+    "2m": "2 месяца",
     "3m": "3 месяца",
+    "4m": "4 месяца",
+    "5m": "5 месяцев",
     "6m": "6 месяцев",
-    "12m": "1 год",
+    "7m": "7 месяцев",
+    "8m": "8 месяцев",
+    "9m": "9 месяцев",
+    "10m": "10 месяцев",
+    "11m": "11 месяцев",
+    "12m": "12 месяцев",
+    "14m": "14 месяцев",
+    "18m": "18 месяцев",
+    "24m": "24 месяца",
+
+    // Годы
     "1y": "1 год",
+    "2y": "2 года",
+    "3y": "3 года",
+    "4y": "4 года",
+    "5y": "5 лет",
+    "6y": "6 лет",
+    "7y": "7 лет",
+    "8y": "8 лет",
+    "9y": "9 лет",
+    "10y": "10 лет",
+
+    // Недели
+    "1w": "1 неделя",
+    "2w": "2 недели",
+    "3w": "3 недели",
+    "4w": "4 недели",
   };
-  return periods[period] || period;
+
+  // Если период есть в мапе - возвращаем его
+  if (periodMap[period]) {
+    return periodMap[period];
+  }
+
+  // Если период в формате типа "30d" - пытаемся разобрать
+  const match = period.match(/^(\d+)([dmyw])$/);
+  if (match) {
+    const num = parseInt(match[1]);
+    const unit = match[2];
+
+    let unitText;
+    switch (unit) {
+      case "d":
+        unitText = "день";
+        break;
+      case "m":
+        unitText = "месяц";
+        break;
+      case "y":
+        unitText = "год";
+        break;
+      case "w":
+        unitText = "неделя";
+        break;
+      default:
+        unitText = "";
+    }
+
+    // Формируем правильное окончание
+    if (unit === "d") {
+      if (num % 10 === 1 && num % 100 !== 11) {
+        unitText = "день";
+      } else if (
+        [2, 3, 4].includes(num % 10) &&
+        ![12, 13, 14].includes(num % 100)
+      ) {
+        unitText = "дня";
+      } else {
+        unitText = "дней";
+      }
+    } else if (unit === "m") {
+      if (num % 10 === 1 && num % 100 !== 11) {
+        unitText = "месяц";
+      } else if (
+        [2, 3, 4].includes(num % 10) &&
+        ![12, 13, 14].includes(num % 100)
+      ) {
+        unitText = "месяца";
+      } else {
+        unitText = "месяцев";
+      }
+    } else if (unit === "y") {
+      if (num % 10 === 1 && num % 100 !== 11) {
+        unitText = "год";
+      } else if (
+        [2, 3, 4].includes(num % 10) &&
+        ![12, 13, 14].includes(num % 100)
+      ) {
+        unitText = "года";
+      } else {
+        unitText = "лет";
+      }
+    } else if (unit === "w") {
+      if (num % 10 === 1 && num % 100 !== 11) {
+        unitText = "неделя";
+      } else if (
+        [2, 3, 4].includes(num % 10) &&
+        ![12, 13, 14].includes(num % 100)
+      ) {
+        unitText = "недели";
+      } else {
+        unitText = "недель";
+      }
+    }
+
+    return `${num} ${unitText}`;
+  }
+
+  // Если не смогли разобрать - возвращаем как есть
+  return period;
 };
 
 const calculateMonthlyPrice = (tariff) => {
@@ -346,13 +542,6 @@ const calculateMonthlyPrice = (tariff) => {
 const calculateOriginalMonthly = (tariff) => {
   const monthlyTariff = sortedTariffs.value.find((t) => t.period === "1m");
   return monthlyTariff ? monthlyTariff.price : 1050;
-};
-
-const calculateSavings = (tariff) => {
-  if (tariff.period !== "1y") return 0;
-  const monthlyPrice = calculateMonthlyPrice(tariff);
-  const originalMonthly = calculateOriginalMonthly(tariff);
-  return Math.round((1 - monthlyPrice / originalMonthly) * 100);
 };
 
 const showMonthlyPrice = (tariff) => {
@@ -482,6 +671,12 @@ onMounted(fetchTariffs);
   position: relative;
   padding-bottom: 15px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.savings-text {
+  color: #4caf50;
+  font-size: 0.85em;
+  margin-left: 5px;
 }
 
 .tariff-header h3 {

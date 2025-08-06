@@ -39,21 +39,21 @@ export function useDomain() {
     // }
 
     if (currentDomain.value === "mwi.apitter.com") {
-      stationDomain.navigate.value = "mwi";
+      stationDomain.navigate.value = "touchapi";
       stationDomain.cosmetics.logo = "mwi";
       stationDomain.cosmetics.titleLogo = "MWI";
       stationDomain.cosmetics.urlLogo = "/mvi_logo.svg";
     }
 
     if (currentDomain.value === "ctacrew.apitter.com") {
-      stationDomain.navigate.value = "ctacrew";
+      stationDomain.navigate.value = "touchapi";
       stationDomain.cosmetics.logo = "ctacrew";
       stationDomain.cosmetics.titleLogo = "CtaCrew";
       stationDomain.cosmetics.urlLogo = "/ctacrew_logo.svg";
     }
 
     if (currentDomain.value === "chatserv.apitter.com") {
-      stationDomain.navigate.value = "chatserv";
+      stationDomain.navigate.value = "touchapi";
       stationDomain.cosmetics.logo = "chatserv";
       stationDomain.cosmetics.titleLogo = "ChatServ";
       stationDomain.cosmetics.urlLogo = "/chatserv_icon.svg";

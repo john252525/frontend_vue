@@ -219,22 +219,22 @@ const setState = async (request) => {
       storage: storage,
       type: type,
     };
-    if (response.data.data.status === "ok") {
+    if (response.data.status === "ok") {
       station.stationLoading = false;
       chatStore.addOrUpdateChat(newLoginData);
       station.resultTrue = true;
-    } else if (response.data.data.error) {
+    } else if (response.data.error) {
       setTimeout(() => {
         station.stationLoading = false;
       }, 1000);
-      if (response.data.data.error.message === "QR received") {
+      if (response.data.error.message === "QR received") {
         station.qrCode = true;
-      } else if (response.data.data.error.message === "Challenge required") {
+      } else if (response.data.error.message === "Challenge required") {
         station.stationLoading = false;
         station.ChallengeRequired = true;
-      } else if (response.data.data.error.message === "QR code received") {
+      } else if (response.data.error.message === "QR code received") {
         station.qrCode = true;
-      } else if (response.data.data.error.message === "Auth code received") {
+      } else if (response.data.error.message === "Auth code received") {
         station.getCode = true;
       } else {
         setTimeout(() => {

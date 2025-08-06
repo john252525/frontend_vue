@@ -80,6 +80,9 @@ const props = defineProps({
   changeisEditMailing: {
     type: Function,
   },
+  changeStatusMailing: {
+    type: Function,
+  },
 });
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
@@ -116,11 +119,10 @@ const chaneErrorBlock = () => {
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const updateStatus = async (state) => {
+  console.log(selectedItem.value);
   stationLoading.loading = true;
   const apiUrlMethod = `${apiUrl}/state/${selectedItem.value.id}/${state}/`;
-  const params = {
-    token: token.value,
-  };
+
   try {
     const response = await axios.post(
       apiUrlMethod,
@@ -146,7 +148,8 @@ const updateStatus = async (state) => {
     if (response.data.ok === true) {
       setLoadingStatus(true, "success");
       stationLoading.loading = false;
-      props.refreshMailingLists();
+      props.changeStatusMailing(selectedItem.value, state);
+      // props.refreshMailingLists();
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {

@@ -2,12 +2,13 @@
   <Header v-if="!isAuthPage && !isWidgetMode" :phoneMenuOn="phoneMenuOn" />
   <div class="page-container" v-if="!isAuthPage">
     <Navigation
-      v-if="isWidgetMode"
+      v-if="isWidgetMode || isMailingMode"
       :phoneMenuStation="phoneMenuStation"
       :phoneMenuOn="phoneMenuOn"
       :chatStation="chatStation"
       :isWidgetMode="isWidgetMode"
       :chatsLoading="chatsLoading"
+      :isMailingMode="isMailingMode"
       class="navigation-chat"
     />
     <Navigation
@@ -17,6 +18,7 @@
       :chatStation="chatStation"
       :isWidgetMode="isWidgetMode"
       :chatsLoading="chatsLoading"
+      :isMailingMode="isMailingMode"
       class="navigation"
     />
     <ResultModal
@@ -73,11 +75,15 @@ const isAuthPage = computed(() => {
     "PasswordRecovery",
     "VerifyEmail",
     "ResetPassword",
-  ].includes(route.name);
+  ].includes(route.name?.toString());
+});
+
+const isMailingMode = computed(() => {
+  return route.query?.mode === "mailing";
 });
 
 const isWidgetMode = computed(() => {
-  return route.query.mode === "widget";
+  return route.query?.mode === "widget";
 });
 
 const currentDomain = ref("");

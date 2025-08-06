@@ -101,9 +101,9 @@ const getQr = async () => {
       );
     }
 
-    if (response.data.data.status === "ok") {
+    if (response.data.status === "ok") {
       previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
-      qrCodeData.link = response.data.data.value;
+      qrCodeData.link = response.data.value;
       qrCodeData.station = true;
       stationLoading.value = false;
     } else if (response.data === 401) {
@@ -114,7 +114,7 @@ const getQr = async () => {
       }, 2000);
     } else {
       // Если значение пустое, останавливаем запросы
-      if (!response.data.data.value) {
+      if (!response.data.value) {
         clearInterval(intervalId);
         qrCodeData.link = previousLink; // Отображаем предыдущую ссылку
         changeEnableStation();
@@ -168,7 +168,7 @@ const enablePhoneAuth = async () => {
       );
     }
 
-    if (response.data.ok === true) {
+    if (response.data.status === "ok") {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
