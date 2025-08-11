@@ -3,7 +3,7 @@
     :changeStationLoadingModal="closeResultModal"
     :stationLoading="stationLoading"
   />
-  <header v-if="!addMailing">
+  <header>
     <section class="account-section">
       <h2 class="title">{{ t("mailing.title") }}</h2>
     </section>
@@ -24,7 +24,7 @@
       </button>
     </section>
   </header>
-  <MailingList :changeResultModal="changeResultModal" v-if="!addMailing" />
+  <MailingList :changeResultModal="changeResultModal" />
   <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
 </template>
 
@@ -78,12 +78,6 @@ const changeResultModal = (change, value) => {
 const addMailing = ref(false);
 
 const changeAddMailing = () => {
-  navigateTo({
-    path: "/Mailing",
-    query: {
-      mode: "mailing",
-    },
-  });
   addMailing.value = !addMailing.value;
 };
 </script>

@@ -35,10 +35,15 @@
       </div>
 
       <div v-else-if="error" class="error-message">
-        {{ error }}
-        <button @click="fetchTariffs" class="retry-button">
-          Повторить попытку
-        </button>
+        <div v-if="nullTariff">
+          <span>Тарифов нет</span>
+        </div>
+        <div v-else>
+          {{ error }}
+          <button @click="fetchTariffs" class="retry-button">
+            Повторить попытку
+          </button>
+        </div>
       </div>
 
       <div class="tariffs-wrapper">
@@ -188,6 +193,7 @@ const paymentsStation = reactive({
   error: false,
   success: false,
   errorMessages: "",
+  nullTariff: false,
 });
 
 const changePaymentsStation = (isOpen, answer, error) => {
@@ -256,6 +262,7 @@ const tariffsData = ref([
   },
 ]);
 const error = ref(null);
+const nullTariff = ref(false);
 const currentPage = ref(0);
 const itemsPerPage = 3;
 
@@ -322,6 +329,14 @@ const fetchTariffs = async () => {
   loading.value = true;
   error.value = null;
 
+  let code;
+
+  if (selectedItem.value.source !== "whatsapi") {
+    code = `touchapi-${selectedItem.value.source}`;
+  } else {
+    code = "whatsapi-bulk";
+  }
+
   try {
     const response = await axios.post(
       "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
@@ -343,6 +358,9 @@ const fetchTariffs = async () => {
     }
   } catch (err) {
     error.value = err.response?.data?.message || "Ошибка при загрузке тарифов";
+    if (err.response.data.message === "No tariffs found") {
+      nullTariff.value = true;
+    }
     console.error("Error fetching tariffs:", err);
   } finally {
     loading.value = false;

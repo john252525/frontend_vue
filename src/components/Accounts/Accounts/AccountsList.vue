@@ -5,14 +5,9 @@
         <thead class="table-header">
           <tr>
             <th class="table-login">{{ t("accountList.login") }}</th>
-            <th v-if="accountStation === 'crm'" class="table-login">СОУРС</th>
-            <th v-if="accountStation === 'crm'" class="table-login">СТАТУС</th>
-            <th v-if="accountStation === 'crm'" class="table-login">ТИП</th>
-            <th v-if="accountStation != 'crm'" class="table-step">
-              {{ t("accountList.step") }}
-            </th>
+            <th class="table-step">СТАТУС</th>
             <th class="table-login">ПОДПИСКА</th>
-            <th v-if="accountStation != 'crm'" class="table-action">
+            <th class="table-action">
               {{ t("accountList.action") }}
             </th>
           </tr>
@@ -33,22 +28,10 @@
             </td>
             <td v-else class="table-text">-</td>
             <td
-              v-if="accountStation === 'crm' && item.source"
-              class="table-text"
-            >
-              {{ item.source }}
-            </td>
-            <td
-              v-if="accountStation === 'crm' && !item.source"
-              class="table-text"
-            >
-              -
-            </td>
-            <td
               class="table-text"
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
-              v-if="item.step && accountStation != 'crm'"
+              v-if="item.step"
             >
               {{ item.step.value }}
             </td>
@@ -61,19 +44,25 @@
             </td>
             <td
               class="table-text"
-              v-if="!item.loading && accountStation != 'crm'"
+              v-if="
+                item.type != 'amocrm' &&
+                item.source != 'bitrix' &&
+                !item.loading &&
+                !item.step
+              "
             >
               -
             </td>
-            <td v-if="item.enable === 1 && accountStation === 'crm'">
+            <!-- <td v-if="item.enable === 1 && accountStation === 'crm'">
               Активно
             </td>
             <td v-if="item.enable === 0 && accountStation === 'crm'">
               Неактивно
-            </td>
+            </td> -->
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
             <td v-if="item.subscription_dt_to === null">
               <button
+                v-if="item.type != 'amocrm' && item.source != 'bitrix'"
                 class="open-tariff-button"
                 @click="changeTariffStation(item)"
               >
@@ -290,13 +279,13 @@ const changeForceStopItemData = async (item) => {
       item.storage
     );
 
-    if (!infoResponse?.data?.data) {
+    if (!infoResponse?.data) {
       throw new Error("Invalid response structure");
     }
 
     instanceData.value[accountIndex] = {
       ...instanceData.value[accountIndex],
-      step: infoResponse.data.data.step || "Н/Д",
+      step: infoResponse.step || "Н/Д",
       loading: false,
     };
 
@@ -305,7 +294,7 @@ const changeForceStopItemData = async (item) => {
       loading: false,
     };
 
-    if (infoResponse.data.data.step?.[0]?.value === 5) {
+    if (infoResponse.step?.[0]?.value === 5) {
       updateLocalStorage(item.login, item.source, item.storage, item.type);
     }
   } catch (error) {
@@ -501,8 +490,8 @@ const getAccounts = async () => {
                 instance.storage
               );
 
-              if (infoResponse?.data?.data?.step) {
-                instance.step = infoResponse.data.data.step;
+              if (infoResponse?.data?.step) {
+                instance.step = infoResponse.data.step;
               }
             } catch (error) {
               console.error(`Error for ${login}:`, error);
@@ -665,9 +654,9 @@ const getInfo = async () => {
       );
     }
     console.log(response.data);
-    if (response.data.data) {
-      if (response.data.data.step != null) {
-        if (response.data.data.step.value === 5) {
+    if (response.data) {
+      if (response.data.step != null) {
+        if (response.data.step.value === 5) {
           chatsStation.value = true;
         }
       } else {

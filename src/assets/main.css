@@ -163,7 +163,7 @@ td {
 /* 
 .table-container::-webkit-scrollbar {
   width: 12px;
-  height: 12px;
+  height: 12px;\rf
 }
 
 .table-container::-webkit-scrollbar-track {

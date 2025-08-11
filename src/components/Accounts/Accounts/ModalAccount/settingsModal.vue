@@ -117,7 +117,7 @@ const getInfoAccount = async () => {
       },
     });
 
-    const { webhookUrls } = response.data.data;
+    const { webhookUrls } = response.data;
     if (Array.isArray(webhookUrls)) {
       webhookUrlsText.value = webhookUrls.join("\n"); // Объединяем значения с новой строки
     }

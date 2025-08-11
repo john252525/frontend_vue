@@ -13,24 +13,17 @@
   </section>
   <section v-if="station.phone" class="number-section">
     <div class="phone-input-container">
-      <select
-        v-model="selectedCountry"
-        class="country-select"
-        @change="updatePhoneFormat"
-      >
-        <option v-for="country in countries" :value="country.code">
-          {{ country.code }}
-        </option>
-      </select>
       <input
         :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-        :placeholder="placeholder"
+        :placeholder="
+          showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
+        "
         @input="formatPhone"
         @keydown.delete="handleBackspace"
         class="num-input"
         type="text"
         id="phone"
-        v-model="formattedPhone"
+        v-model="phoneNumber"
         ref="phoneInput"
       />
     </div>
@@ -59,7 +52,6 @@ import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
-// Страны с их кодами и форматами
 const countries = ref([
   { code: "+7", name: "Russia", flag: "🇷🇺", format: "(###) ###-##-##" },
   { code: "+1", name: "USA/Canada", flag: "🇺🇸", format: "(###) ###-####" },
@@ -73,7 +65,9 @@ const countries = ref([
 
 const selectedCountry = ref("+7");
 const formattedPhone = ref("");
+const phoneNumber = ref("");
 const phoneInput = ref(null);
+const showMask = ref(true);
 
 // Получаем текущий формат для выбранной страны
 const currentFormat = computed(() => {
@@ -100,94 +94,134 @@ const updatePhoneFormat = () => {
 
 // Обработчик backspace
 const handleBackspace = (e) => {
+  const value = phoneNumber.value;
   const cursorPosition = phoneInput.value.selectionStart;
 
-  // Не даем удалить код страны
-  if (cursorPosition <= selectedCountry.value.length + 1) {
+  if (!showMask.value) return;
+
+  // Полное удаление +7 при нажатии Backspace на +7
+  if (value === "+7" && cursorPosition <= 2) {
+    phoneNumber.value = "";
     e.preventDefault();
     return;
   }
 
-  // Если перед курсором разделитель, пропускаем его
-  const value = formattedPhone.value;
-  const prevChar = value[cursorPosition - 1];
-  if ([" ", "(", ")", "-"].includes(prevChar)) {
+  // Удаление +7 при курсоре после них
+  if (value.startsWith("+7") && cursorPosition === 2) {
+    phoneNumber.value = "";
+    e.preventDefault();
+    return;
+  }
+
+  // Пропуск разделителей при удалении
+  if (
+    cursorPosition > 0 &&
+    [" ", "(", ")", "-"].includes(value[cursorPosition - 1])
+  ) {
     e.preventDefault();
     phoneInput.value.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
   }
 };
 
 // Форматирование телефона
+
 const formatPhone = () => {
+  const value = phoneNumber.value;
   const cursorPosition = phoneInput.value.selectionStart;
-  const country = countries.value.find((c) => c.code === selectedCountry.value);
-  if (!country) return;
 
-  // Сохраняем позицию курсора относительно цифр (без учета форматирования)
-  let digitsBeforeCursor = 0;
-  for (let i = 0; i < cursorPosition; i++) {
-    if (formattedPhone.value[i].match(/\d/)) {
-      digitsBeforeCursor++;
+  if (value === "") {
+    showMask.value = true;
+    return;
+  }
+
+  // Автодобавление +7 при вводе + или 7
+  if (value === "+") {
+    phoneNumber.value = "+7";
+    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
+    return;
+  }
+
+  if (value === "7") {
+    phoneNumber.value = "+7";
+    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
+    return;
+  }
+
+  let digits = value.replace(/[^\d+]/g, "");
+
+  if (digits.startsWith("+")) {
+    digits = "+" + digits.substring(1).replace(/\D/g, "");
+  } else {
+    digits = digits.replace(/\D/g, "");
+  }
+
+  const digitsCount = digits.startsWith("+")
+    ? digits.length - 1
+    : digits.length;
+
+  if (digitsCount > 11) {
+    showMask.value = false;
+    phoneNumber.value = digits;
+    return;
+  } else {
+    showMask.value = true;
+  }
+
+  if (showMask.value) {
+    let formatted = "";
+
+    if (digits.startsWith("+")) {
+      formatted = "+";
+      digits = digits.substring(1);
     }
-  }
 
-  // Удаляем все нецифровые символы
-  let digits = formattedPhone.value.replace(/\D/g, "");
-  const countryCode = selectedCountry.value.replace("+", "");
-
-  if (digits.startsWith(countryCode)) {
-    digits = digits.substring(countryCode.length);
-  }
-
-  // Применяем формат
-  let formatted = selectedCountry.value + " ";
-  let digitIndex = 0;
-
-  for (
-    let i = 0;
-    i < country.format.length && digitIndex < digits.length;
-    i++
-  ) {
-    if (country.format[i] === "#") {
-      formatted += digits[digitIndex];
-      digitIndex++;
-    } else {
-      formatted += country.format[i];
-    }
-  }
-
-  formattedPhone.value = formatted;
-
-  // Восстанавливаем позицию курсора с учетом нового форматирования
-  nextTick(() => {
-    let newCursorPos = selectedCountry.value.length + 1; // Начинаем после кода страны и пробела
-    let digitsPassed = 0;
-
-    for (
-      let i = selectedCountry.value.length + 1;
-      i < formattedPhone.value.length;
-      i++
-    ) {
-      if (digitsPassed >= digitsBeforeCursor) break;
-
-      if (formattedPhone.value[i].match(/\d/)) {
-        digitsPassed++;
+    if (digits.length > 0) {
+      if (formatted === "+" && digits[0] !== "7") {
+        digits = "7" + digits;
       }
-      newCursorPos++;
+      formatted += digits[0];
+      digits = digits.substring(1);
     }
 
-    // Корректируем позицию, если курсор должен быть после последней цифры
-    if (digitsPassed < digitsBeforeCursor) {
-      newCursorPos = formattedPhone.value.length;
+    // Форматирование по маске
+    if (digits.length > 0) {
+      formatted += " (" + digits.substring(0, 3);
+      digits = digits.substring(3);
     }
 
-    phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
-  });
+    if (digits.length > 0) {
+      formatted += ") " + digits.substring(0, 3);
+      digits = digits.substring(3);
+    }
+
+    if (digits.length > 0) {
+      formatted += "-" + digits.substring(0, 2);
+      digits = digits.substring(2);
+    }
+
+    if (digits.length > 0) {
+      formatted += "-" + digits.substring(0, 2);
+    }
+
+    phoneNumber.value = formatted;
+
+    nextTick(() => {
+      let newCursorPos = cursorPosition;
+      const changes = phoneNumber.value.length - value.length;
+
+      if (changes > 0) {
+        newCursorPos += changes;
+      }
+
+      newCursorPos = Math.min(newCursorPos, phoneNumber.value.length);
+      phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
+    });
+  }
 };
 
 // Получаем номер в международном формате
 const getInternationalFormat = () => {
-  const digits = formattedPhone.value.replace(/\D/g, "");
+  const digits = phoneNumber.value.replace(/\D/g, "");
   return "+" + digits;
 };
 

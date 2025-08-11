@@ -1,11 +1,11 @@
 <template>
-  <div @click="handleBackdropClick" class="black-fon">
-    <ErrorBlock
+  <div @click="changeGetScreenStation" class="black-fon">
+    <!-- <ErrorBlock
       v-if="showError"
       :errorMessage="errorMessage"
       @close="closeError"
-    />
-    <LoadingModal :text="loadingText" :isLoading="isLoading" />
+    /> -->
+    <LoadingModal :text="loadingText" :stationLoading="isLoading" />
     <section v-if="showScreen" class="screen-section">
       <img class="screen-img" :src="screenImage" alt="screenshot" />
       <button @click="closeScreen" class="close">
@@ -22,6 +22,9 @@ import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import LoadingModal from "./Enable/LoadingModal.vue";
 
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
 const { t } = useI18n();
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
@@ -35,7 +38,7 @@ const errorMessage = ref("");
 const showError = ref(false);
 const isLoading = ref(false);
 const showScreen = ref(false);
-const loadingText = ref(t("GetScreen.text"));
+const loadingText = ref("Загрузка изображения");
 
 const props = defineProps({
   selectedItem: Object,
@@ -81,7 +84,8 @@ const getScreen = async () => {
       if (decodedData?.status === "error") {
         // Обработка ошибки от сервера
         errorMessage.value = decodedData.error?.message || t("errors.unknown");
-        showError.value = true;
+        setLoadingStatus(true, "error");
+        props.changeGetScreenStation();
       } else {
         // Предполагаем, что это изображение
         screenImage.value = `data:image/png;base64,${response.data.data.value}`;
@@ -89,13 +93,15 @@ const getScreen = async () => {
       }
     } else {
       errorMessage.value = t("errors.noScreenshotData");
-      showError.value = true;
+      setLoadingStatus(true, "error");
+      props.changeGetScreenStation();
     }
   } catch (error) {
     console.error("Screenshot error:", error);
     errorMessage.value =
       error.response?.data?.message || t("errors.connectionFailed");
-    showError.value = true;
+    setLoadingStatus(true, "error");
+    props.changeGetScreenStation();
   } finally {
     isLoading.value = false;
   }

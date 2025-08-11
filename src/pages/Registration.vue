@@ -329,7 +329,15 @@ const loginAccount = async () => {
   } catch (error) {
     inputStyle.incorrectPassword = true;
     if (error.response) {
-      inputStyle.incorrectPasswordMessage = error.response.data?.errors[0];
+      if (
+        error.response.data?.errors[0] ===
+        "User with this credentials already exists."
+      ) {
+        inputStyle.incorrectPasswordMessage = "Пользователь уже существует";
+      } else {
+        inputStyle.incorrectPasswordMessage = "Ошибка регстрации";
+      }
+
       console.error("Ошибка сервера:", error.response.data);
     } else {
       inputStyle.incorrectPasswordMessage = "Сетевая ошибка";

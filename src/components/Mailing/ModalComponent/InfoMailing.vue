@@ -37,7 +37,7 @@
         </h3>
         <h3>
           {{ t("information.weekDay") }}
-          <span> {{ weekDaysList.join(", ") }}</span>
+          <span> {{ formattedWeekDays }}</span>
         </h3>
         <h3>
           {{ t("information.time") }}
@@ -50,10 +50,7 @@
 
         <h3>
           {{ t("information.timeout.title") }}
-          <span
-            >{{ delayInMinutes.min }} - {{ delayInMinutes.max }}
-            {{ t("information.timeout.min") }}</span
-          >
+          <span> {{ min }} - {{ max }} {{ t("information.timeout.min") }}</span>
         </h3>
         <h3>
           {{ t("information.message") }}
@@ -75,7 +72,7 @@
 </template>
 
 <script setup>
-import { inject, reactive, ref, toRefs, watch } from "vue";
+import { inject, reactive, ref, toRefs, watch, computed } from "vue";
 import MessageLise from "./MessageLise.vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -91,6 +88,8 @@ const props = defineProps({
   },
 });
 const { selectedItem } = toRefs(props);
+
+const { min, max } = selectedItem.value.options.delay;
 
 const station = reactive({
   message: false,
@@ -109,21 +108,40 @@ const weekDays = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 
 const weekDaysList = ref([]);
 
-watch(
-  selectedItem,
-  (newValue) => {
-    if (newValue && newValue.options && newValue.options.days) {
-      // Получаем дни недели, соответствующие числам
-      weekDaysList.value = newValue.options.days
-        .map((day) => weekDays[day - 1])
-        .filter(Boolean);
-    } else {
-      console.error("error");
-      weekDaysList.value = []; // Сбросить, если данные недоступны
-    }
-  },
-  { immediate: true }
-);
+const weekDaysMap = {
+  1: "пн",
+  2: "вт",
+  3: "ср",
+  4: "чт",
+  5: "пт",
+  6: "сб",
+  7: "вс",
+};
+
+// Форматированные дни недели в правильном порядке
+const formattedWeekDays = computed(() => {
+  if (!selectedItem.value?.options?.days) return "";
+
+  const daysObj = selectedItem.value.options.days;
+  // Получаем и сортируем дни по их номеру
+  const sortedDays = Object.keys(daysObj)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map((day) => weekDaysMap[day]);
+
+  return sortedDays.join(", ");
+});
+
+const formattedDelayInterval = computed(() => {
+  if (!selectedItem.value?.options?.delay) return "";
+
+  const { min, max } = selectedItem.value.options.delay;
+  // Преобразуем секунды в минуты
+  const minMinutes = Math.round(min / 60);
+  const maxMinutes = Math.round(max / 60);
+
+  return `${minMinutes} - ${maxMinutes}`;
+});
 
 watch(
   selectedItem,

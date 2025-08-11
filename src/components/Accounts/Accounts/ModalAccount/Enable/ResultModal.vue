@@ -1,35 +1,396 @@
 <template>
   <div class="error-container">
-    <section class="result-section">
-      <div class="circle">
+    <section v-if="!station.phone" class="result-section">
+      <div class="error-icon">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="48"
+          height="48"
           viewBox="0 0 24 24"
         >
           <path
-            fill="#b73131"
+            fill="#ff4757"
             d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
           />
         </svg>
       </div>
       <p class="error-message">
-        {{ t("result.false.message.one") }} <br />
+        {{ t("result.false.message.one") }}<br />
         {{ t("result.false.message.two") }}
       </p>
+
+      <div class="action-buttons">
+        <button @click="enableCode" class="connect-button code-button">
+          <svg width="14" height="14" viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M8.7 17.3q-.275-.275-.275-.7t.275-.7l3.9-3.9l-3.9-3.9q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l4.6 4.6q.15.15.213.325t.062.375q0 .2-.063.375t-.212.325l-4.6 4.6q-.275.275-.7.275t-.7-.275Zm3.6 0q-.275-.275-.275-.7t.275-.7l3.9-3.9l-3.9-3.9q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l4.6 4.6q.15.15.213.325t.062.375q0 .2-.063.375t-.212.325l-4.6 4.6q-.275.275-.7.275t-.7-.275Z"
+            />
+          </svg>
+          Связать через код
+        </button>
+        <button @click="getQr" class="connect-button qr-button">
+          <svg width="14" height="14" viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M3 11V3h8v8H3Zm2-2h4V5H5v4ZM3 21v-8h8v8H3Zm2-2h4v-4H5v4Zm8-12V3h8v8h-8Zm2-2h4V5h-4v4Zm2 12h2v-2h2v-2h-4v4Zm-2 2v-4h4v4h-4Zm4-4v-2h2v2h-2Zm-2 0h-2v-2h2v2Zm2-6h2V7h-2v2Zm-2 0v-2h2v2h-2Z"
+            />
+          </svg>
+          Связать через qr
+        </button>
+      </div>
+
       <button @click="startFunc" class="reload-button">
         {{ t("result.false.button") }}
+      </button>
+    </section>
+    <section v-if="station.phone" class="number-section">
+      <div class="phone-input-container">
+        <input
+          :class="station.errorPhone ? 'num-input-error' : 'num-input'"
+          :placeholder="
+            showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
+          "
+          @input="formatPhone"
+          @keydown.delete="handleBackspace"
+          class="num-input"
+          type="text"
+          id="phone"
+          v-model="phoneNumber"
+          ref="phoneInput"
+        />
+      </div>
+      <button @click="getCode" class="next-button">
+        {{ t("enable.next") }}
       </button>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, inject } from "vue";
-const { startFunc } = inject("accountItems");
+import { inject, computed, reactive, nextTick, ref } from "vue";
+const { selectedItem, startFunc, offQrQrStation, offQrCodeStation } =
+  inject("accountItems");
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+import axios from "axios";
+const { source, login, storage } = selectedItem.value;
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
+
+const connectViaCode = () => console.log("Connect via code");
+const connectViaQR = () => console.log("Connect via QR");
+//
+
+const countries = ref([
+  { code: "+7", name: "Russia", flag: "🇷🇺", format: "(###) ###-##-##" },
+  { code: "+1", name: "USA/Canada", flag: "🇺🇸", format: "(###) ###-####" },
+  { code: "+44", name: "UK", flag: "🇬🇧", format: "#### ### ####" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", format: "### ### ####" },
+  { code: "+33", name: "France", flag: "🇫🇷", format: "# ## ## ## ##" },
+  { code: "+81", name: "Japan", flag: "🇯🇵", format: "##-####-####" },
+  { code: "+86", name: "China", flag: "🇨🇳", format: "### #### ####" },
+  { code: "+91", name: "India", flag: "🇮🇳", format: "##### #####" },
+]);
+
+const selectedCountry = ref("+7");
+const formattedPhone = ref("");
+const phoneNumber = ref("");
+const phoneInput = ref(null);
+const showMask = ref(true);
+
+const currentFormat = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  return country ? country.format : "";
+});
+
+const placeholder = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return "";
+
+  let placeholder = country.code + " ";
+  for (let i = 0; i < country.format.length; i++) {
+    placeholder += country.format[i] === "#" ? "_" : country.format[i];
+  }
+  return placeholder;
+});
+
+const updatePhoneFormat = () => {
+  formattedPhone.value = selectedCountry.value + " ";
+};
+
+const handleBackspace = (e) => {
+  const value = phoneNumber.value;
+  const cursorPosition = phoneInput.value.selectionStart;
+
+  if (!showMask.value) return;
+
+  // Полное удаление +7 при нажатии Backspace на +7
+  if (value === "+7" && cursorPosition <= 2) {
+    phoneNumber.value = "";
+    e.preventDefault();
+    return;
+  }
+
+  // Удаление +7 при курсоре после них
+  if (value.startsWith("+7") && cursorPosition === 2) {
+    phoneNumber.value = "";
+    e.preventDefault();
+    return;
+  }
+
+  // Пропуск разделителей при удалении
+  if (
+    cursorPosition > 0 &&
+    [" ", "(", ")", "-"].includes(value[cursorPosition - 1])
+  ) {
+    e.preventDefault();
+    phoneInput.value.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+  }
+};
+
+const formatPhone = () => {
+  const value = phoneNumber.value;
+  const cursorPosition = phoneInput.value.selectionStart;
+
+  if (value === "") {
+    showMask.value = true;
+    return;
+  }
+
+  // Автодобавление +7 при вводе + или 7
+  if (value === "+") {
+    phoneNumber.value = "+7";
+    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
+    return;
+  }
+
+  if (value === "7") {
+    phoneNumber.value = "+7";
+    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
+    return;
+  }
+
+  let digits = value.replace(/[^\d+]/g, "");
+
+  if (digits.startsWith("+")) {
+    digits = "+" + digits.substring(1).replace(/\D/g, "");
+  } else {
+    digits = digits.replace(/\D/g, "");
+  }
+
+  const digitsCount = digits.startsWith("+")
+    ? digits.length - 1
+    : digits.length;
+
+  if (digitsCount > 11) {
+    showMask.value = false;
+    phoneNumber.value = digits;
+    return;
+  } else {
+    showMask.value = true;
+  }
+
+  if (showMask.value) {
+    let formatted = "";
+
+    if (digits.startsWith("+")) {
+      formatted = "+";
+      digits = digits.substring(1);
+    }
+
+    if (digits.length > 0) {
+      if (formatted === "+" && digits[0] !== "7") {
+        digits = "7" + digits;
+      }
+      formatted += digits[0];
+      digits = digits.substring(1);
+    }
+
+    // Форматирование по маске
+    if (digits.length > 0) {
+      formatted += " (" + digits.substring(0, 3);
+      digits = digits.substring(3);
+    }
+
+    if (digits.length > 0) {
+      formatted += ") " + digits.substring(0, 3);
+      digits = digits.substring(3);
+    }
+
+    if (digits.length > 0) {
+      formatted += "-" + digits.substring(0, 2);
+      digits = digits.substring(2);
+    }
+
+    if (digits.length > 0) {
+      formatted += "-" + digits.substring(0, 2);
+    }
+
+    phoneNumber.value = formatted;
+
+    nextTick(() => {
+      let newCursorPos = cursorPosition;
+      const changes = phoneNumber.value.length - value.length;
+
+      if (changes > 0) {
+        newCursorPos += changes;
+      }
+
+      newCursorPos = Math.min(newCursorPos, phoneNumber.value.length);
+      phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
+    });
+  }
+};
+
+const enableCode = () => {
+  station.phone = true;
+};
+
+const station = reactive({
+  phone: false,
+  error: false,
+  errorPhone: false,
+  qrSend: false,
+  text: "",
+  loading: false,
+});
+
+// Получаем номер в международном формате
+const getInternationalFormat = () => {
+  const digits = phoneNumber.value.replace(/\D/g, "");
+  return "+" + digits;
+};
+
+//
+const disablePhoneAuth = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomain.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}disablePhoneAuth`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.status === "ok") {
+    } else if (response.data === 401) {
+      setLoadingStatus(true, "error");
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    setLoadingStatus(true, "error");
+    console.error("error", error);
+    if (error.response) {
+      setLoadingStatus(true, "error");
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const getQr = async () => {
+  await disablePhoneAuth();
+  await offQrQrStation();
+  await startFunc();
+};
+
+const enablePhoneAuth = async () => {
+  const internationalPhone = getInternationalFormat();
+  station.loading = true;
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomain.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      phone: internationalPhone,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      phone: internationalPhone,
+    };
+  }
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}enablePhoneAuth`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.status === "ok") {
+      console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      // console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
+  }
+};
+
+const getCode = async () => {
+  const phone = getInternationalFormat();
+  if (phone.length < 8) {
+    console.log("error");
+    station.errorPhone = true;
+    return;
+  }
+  await enablePhoneAuth();
+  await offQrCodeStation();
+  await startFunc();
+};
 </script>
 
 <style scoped>
@@ -37,117 +398,188 @@ const { t } = useI18n();
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .result-section {
-  /* width: 400px; */
+  min-width: 350px;
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
+  align-items: center;
 }
 
-.circle {
-  width: 50px;
-  height: 50px;
-  border: 1.9px solid #b73131;
-  border-radius: 50%;
+.error-icon {
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #495057;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.action-buttons {
   display: flex;
-  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.connect-button {
+  flex: 1;
+  display: flex;
   align-items: center;
-  animation: rotate 1s ease-in-out forwards;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.code-button {
+  background-color: #4dabf7;
+  color: white;
+}
+
+.code-button:hover {
+  background-color: #339af0;
+}
+
+.qr-button {
+  background-color: #40c057;
+  color: white;
+}
+
+.qr-button:hover {
+  background-color: #37b24d;
 }
 
 .reload-button {
-  border-radius: 5px;
-  width: 100px;
-  height: 30px;
-  background: #b73131;
-  font-weight: 600;
-  font-size: 12px;
-  color: #fff;
-  margin-top: 24px;
-  animation: opacity 0.5s ease-in-out forwards;
-}
-
-.reload-img {
-  margin-top: 36px;
-}
-
-.plus {
-  font-size: 30px;
-  color: #ff0000; /* Цвет плюса */
-}
-
-@keyframes opacity {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(350deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.error-message {
-  margin-top: 24px;
-  font-size: 18px;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 6px;
+  background: #ff6b6b;
   font-weight: 500;
-  color: #b73131;
-  text-align: center;
-  transition: opacity 0.5s ease;
+  font-size: 0.85rem;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.error-message,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.error-message,
-.fade-leave-to {
-  opacity: 0;
+.reload-button:hover {
+  background: #ff5252;
 }
 
-.error-message {
-  animation: fadeIn 1s forwards;
+/* Анимации */
+.error-icon,
+.error-message,
+.action-buttons,
+.reload-button {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.action-buttons {
+  animation-delay: 0.1s;
+}
+
+.reload-button {
+  animation-delay: 0.2s;
+}
+
+/*  */
+
+.number-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.num-input {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  flex-grow: 1;
+}
+
+.num-input-error {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
+  flex-grow: 1;
+}
+
+.country-select {
+  width: 80px;
+  height: 45px;
+  border-radius: 5px;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  padding: 0 5px;
+  font-size: 14px;
+}
+
+.next-button {
+  width: 100%;
+  height: 35px;
+  border-radius: 5px;
+  background-color: #4950ca;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  margin-top: 20px;
+  border: none;
+  cursor: pointer;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    /* transform: translate(0px, 20px); */
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    /* transform: translate(0px, 0px); */
-  }
-}
-
-@media (max-width: 700px) {
-  .result-section {
-    width: 300px;
+    transform: translateY(0);
   }
 }
 
 @media (max-width: 400px) {
   .result-section {
-    width: 250px;
+    padding: 1.25rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .error-message {
-    margin-top: 24px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #b73131;
-    text-align: center;
-    transition: opacity 0.5s ease;
+    font-size: 0.9rem;
   }
 }
 </style>

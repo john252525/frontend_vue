@@ -1,7 +1,7 @@
 <template>
   <section class="container">
     <header>
-      <h2 class="title">{{ t("payment.title") }}</h2>
+      <h2 class="title">Пополнение баланса</h2>
       <button @click="changeCreatePayments" class="add-account-button">
         <svg
           class="svg-icon"

@@ -33,7 +33,7 @@
                 type="checkbox"
                 :id="'day-' + (index + 1)"
                 :value="index + 1"
-                v-model="items.options.days"
+                v-model="selectedDays"
               />
               <label class="day-text" :for="'day-' + (index + 1)">
                 <span class="custom-checkbox"></span>
@@ -202,6 +202,7 @@ const chaneErrorBlock = () => {
 const { selectedItem } = toRefs(props);
 
 const days = ref(["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]);
+const selectedDays = ref([]);
 
 const items = ref("");
 
@@ -210,9 +211,12 @@ const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function editWhatsAppBroadcast() {
   const url = `${apiUrl}/edit/${items.value.id}/`;
-
+  const daysObject = {};
+  selectedDays.value.forEach((day, index) => {
+    daysObject[day] = day; // или другая логика преобразования, если нужно
+  });
   const params = {
-    days: items.value.options.days,
+    days: daysObject,
     time_from: items.value.options.hours.min,
     time_to: items.value.options.hours.max,
     delay_from: items.value.options.delay.min,
@@ -243,6 +247,7 @@ async function editWhatsAppBroadcast() {
 
     if (response.data.ok === true) {
       setLoadingStatus(true, "success");
+      props.changeisEditMailing();
       load.value = false;
       setTimeout(() => {
         location.reload();
@@ -271,6 +276,26 @@ if (selectedItem.value) {
   if (items.value.options.hours) {
   }
 }
+
+watch(
+  selectedItem,
+  (newVal) => {
+    if (newVal && newVal.options && newVal.options.days) {
+      // Если days - это объект {1: 2, 2: 3, ...}
+      if (
+        typeof newVal.options.days === "object" &&
+        !Array.isArray(newVal.options.days)
+      ) {
+        selectedDays.value = Object.keys(newVal.options.days).map(Number);
+      }
+      // Если days - это массив [1, 2, 3,...]
+      else if (Array.isArray(newVal.options.days)) {
+        selectedDays.value = [...newVal.options.days];
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

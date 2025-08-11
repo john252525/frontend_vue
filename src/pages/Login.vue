@@ -201,13 +201,13 @@ const clearPasswordError = () => {
 };
 
 const loginAccount = async () => {
-  accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTkiLCJlbWFpbCI6ImphdGlnbzI4NjlAY291cnNvcmEuY29tIiwiZXhwIjoxNzU0OTQ0NzE2fQ.vRy3-OkB1O3Ks1IC1Kaz1Bq-BOKEI4_Em48WplBeqr8"
-  );
-  accountStore.setAccountData("jatigo2869@coursora.com");
-  accountStore.setAccountStation("telegram");
-  accountStore.setAccountStationText("Telegram");
-  navigateTo("/");
+  // accountStore.setAccountToken(
+  //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTkiLCJlbWFpbCI6ImphdGlnbzI4NjlAY291cnNvcmEuY29tIiwiZXhwIjoxNzU0OTQ0NzE2fQ.vRy3-OkB1O3Ks1IC1Kaz1Bq-BOKEI4_Em48WplBeqr8"
+  // );
+  // accountStore.setAccountData("jatigo2869@coursora.com");
+  // accountStore.setAccountStation("telegram");
+  // accountStore.setAccountStationText("Telegram");
+  // navigateTo("/");
   try {
     const response = await axios.post(
       `https://bapi88.developtech.ru/api/v1/auth/login`,
@@ -239,14 +239,19 @@ const loginAccount = async () => {
       navigateTo("/");
     } else {
       inputStyle.incorrectPassword = true;
-      inputStyle.incorrectPasswordMessage =
-        response.data.error_message || t("login.serverError");
+      inputStyle.incorrectPasswordMessage = "Ошибка при авторизации";
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
     if (error.response) {
-      inputStyle.incorrectPasswordMessage =
-        error.response.data?.error_message || error.response.data.errors[0];
+      if (error.response.data.errors[0] === "Wrong password or login.") {
+        inputStyle.incorrectPasswordMessage = "Неверный логин или пароль";
+      } else if (error.response.data.errors[0] === "User not found.") {
+        inputStyle.incorrectPasswordMessage = "Пользователь не найден";
+      } else {
+        inputStyle.incorrectPasswordMessage = "Ошибка при авторизации";
+      }
+
       console.error("Ошибка сервера:", error.response.data);
     } else {
       inputStyle.incorrectPasswordMessage = "Ошибка сервера";

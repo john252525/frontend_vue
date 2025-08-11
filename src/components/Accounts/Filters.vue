@@ -85,6 +85,11 @@ const items = reactive([
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,
   },
+  {
+    id: "bulk",
+    name: "Рассылки",
+    checked: accountStore.filterState.bulk,
+  },
   { id: "crm", name: "CRM", checked: accountStore.filterState.crm },
 ]);
 
@@ -145,10 +150,14 @@ const updateGroups = () => {
     (item) => (item.id === "telegram" || item.id === "whatsapp") && item.checked
   );
   const crmSelected = items.find((item) => item.id === "crm")?.checked || false;
+  const bulkSelected =
+    items.find((item) => item.id === "bulk")?.checked || false;
 
   result.group = [];
   if (messengerSelected) result.group.push("messenger");
   if (crmSelected) result.group.push("crm");
+  if (bulkSelected) result.group.push("bulk");
+
   accountStore.setGroup(result.group);
 };
 

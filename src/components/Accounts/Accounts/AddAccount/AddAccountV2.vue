@@ -1,5 +1,8 @@
 <template>
-  <LoadModal :stationLoading="stationLoading" />
+  <LoadModal
+    :changeStationLoading="changeStationLoading"
+    :stationLoading="stationLoading"
+  />
   <div v-if="!stationLoading.loading" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
@@ -9,11 +12,11 @@
 
       <div class="modal-content">
         <!-- Group Select -->
-        <div class="form-group">
-          <label>Тип интеграции</label>
+        <div v-if="showElement('group')" class="form-group">
+          <label v-if="getLabel('group')">{{ getLabel("group") }}</label>
           <div class="custom-select" ref="groupSelect">
             <div class="selected-option" @click="toggleDropdown('group')">
-              <span>{{ getSelectedGroupText() || "Выберите тип" }}</span>
+              <span>{{ getSelectedText("group") || "Выберите тип" }}</span>
               <svg
                 class="dropdown-icon"
                 :class="{ 'rotate-180': dropdownOpen.group }"
@@ -34,7 +37,7 @@
             </div>
             <div class="dropdown-options" v-show="dropdownOpen.group">
               <div
-                v-for="option in groupOptions"
+                v-for="option in getOptions('group')"
                 :key="option.value"
                 class="option"
                 @click="selectOption('group', option.value)"
@@ -45,13 +48,15 @@
           </div>
         </div>
 
-        <!-- Messenger Select (shown when group is messenger) -->
-        <div v-if="selectedGroup === 'messenger'" class="form-group">
-          <label>Мессенджер</label>
+        <!-- Messenger Select -->
+        <div v-if="showElement('messenger')" class="form-group">
+          <label v-if="getLabel('messenger')">{{
+            getLabel("messenger")
+          }}</label>
           <div class="custom-select" ref="messengerSelect">
             <div class="selected-option" @click="toggleDropdown('messenger')">
               <span>{{
-                getSelectedMessengerText() || "Выберите мессенджер"
+                getSelectedText("messenger") || "Выберите мессенджер"
               }}</span>
               <svg
                 class="dropdown-icon"
@@ -73,7 +78,7 @@
             </div>
             <div class="dropdown-options" v-show="dropdownOpen.messenger">
               <div
-                v-for="option in messengerOptions"
+                v-for="option in getOptions('messenger')"
                 :key="option.value"
                 class="option"
                 @click="selectOption('messenger', option.value)"
@@ -84,15 +89,15 @@
           </div>
         </div>
 
-        <!-- CRM Select (shown when group is crm) -->
-        <div v-if="selectedGroup === 'crm'" class="form-group">
-          <label>CRM система</label>
+        <!-- CRM Select -->
+        <div v-if="showElement('type')" class="form-group">
+          <label v-if="getLabel('type')">{{ getLabel("type") }}</label>
           <div class="custom-select" ref="crmSelect">
-            <div class="selected-option" @click="toggleDropdown('crm')">
-              <span>{{ getSelectedCrmText() || "Выберите CRM" }}</span>
+            <div class="selected-option" @click="toggleDropdown('type')">
+              <span>{{ getSelectedText("type") || "Выберите CRM" }}</span>
               <svg
                 class="dropdown-icon"
-                :class="{ 'rotate-180': dropdownOpen.crm }"
+                :class="{ 'rotate-180': dropdownOpen.type }"
                 width="12"
                 height="8"
                 viewBox="0 0 12 8"
@@ -108,12 +113,12 @@
                 />
               </svg>
             </div>
-            <div class="dropdown-options" v-show="dropdownOpen.crm">
+            <div class="dropdown-options" v-show="dropdownOpen.type">
               <div
-                v-for="option in crmOptions"
+                v-for="option in getOptions('type')"
                 :key="option.value"
                 class="option"
-                @click="selectOption('crm', option.value)"
+                @click="selectOption('type', option.value)"
               >
                 {{ option.text }}
               </div>
@@ -121,28 +126,11 @@
           </div>
         </div>
 
-        <!-- Phone input for Telegram -->
+        <!-- Domain input for CRM -->
         <div
-          v-if="
-            selectedGroup === 'messenger' && selectedMessenger === 'telegram'
-          "
+          v-if="formValues.group === 'crm' && formValues.type"
           class="form-field"
         >
-          <label>Номер телефона</label>
-          <input
-            v-model="phoneDisplay"
-            @input="handlePhoneInput"
-            @keydown.delete="handleBackspace"
-            type="tel"
-            :placeholder="
-              isRussianFormat ? '+7 (___) ___-__-__' : 'Введите номер'
-            "
-            required
-          />
-        </div>
-
-        <!-- Domain input for CRM -->
-        <div v-if="selectedGroup === 'crm' && selectedCrm" class="form-field">
           <label>Адрес аккаунта</label>
           <input
             v-model="formValues.domain"
@@ -152,15 +140,28 @@
           />
         </div>
 
-        <!-- Info message for WhatsApp -->
+        <!-- Info messages -->
         <div
           v-if="
-            selectedGroup === 'messenger' && selectedMessenger === 'whatsapp'
+            formValues.group === 'messenger' &&
+            formValues.messenger === 'whatsapp'
           "
           class="info-message"
         >
           <p>
             Привязать номер своего Whatsapp можно будет после создания аккаунта
+          </p>
+        </div>
+
+        <div
+          v-if="
+            formValues.group === 'messenger' &&
+            formValues.messenger === 'telegram'
+          "
+          class="info-message"
+        >
+          <p>
+            Привязать свой аккаунт Telegram можно будет после создания аккаунта
           </p>
         </div>
       </div>
@@ -176,16 +177,10 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-  reactive,
-} from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
 import axios from "axios";
 import LoadModal from "../LoadingMoadal/LoadModal.vue";
+
 const props = defineProps({
   isOpen: Boolean,
   openModal: {
@@ -205,14 +200,155 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
-// Selected values
-
+// State
 const stationLoading = reactive({
   loading: false,
 });
-const selectedGroup = ref("");
-const selectedMessenger = ref("");
-const selectedCrm = ref("");
+
+const changeStationLoading = () => {
+  stationLoading.loading = false;
+};
+const formElements = ref([]);
+const formValues = reactive({
+  group: "",
+  messenger: "",
+  type: "",
+  domain: "",
+});
+const dropdownOpen = reactive({
+  group: false,
+  messenger: false,
+  type: false,
+});
+
+// Fetch form structure from API
+const fetchFormStructure = async () => {
+  stationLoading.loading = true;
+  try {
+    const response = await axios.get(
+      "https://bapi88.developtech.ru/api/v1/forms/getForm?referer=https://app2.touch-api.com/"
+    );
+
+    if (response.data.ok) {
+      formElements.value = response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching form structure:", error);
+  } finally {
+    stationLoading.loading = false;
+  }
+};
+
+// Helper functions
+const getSelectElement = (name) => {
+  return formElements.value.find(
+    (el) => el.element === "select" && el.name === name
+  );
+};
+
+const getLabel = (forAttr) => {
+  const label = formElements.value.find(
+    (el) => el.element === "label" && el.for === forAttr
+  );
+  return label?.text_content || "";
+};
+
+const getOptions = (selectName) => {
+  const select = getSelectElement(selectName);
+  if (!select) return [];
+
+  return formElements.value
+    .filter((el) => el.parent_id === select.id && el.element === "option")
+    .map((option) => ({
+      value: option.value,
+      text: option.text_content,
+    }));
+};
+
+const getSelectedText = (selectName) => {
+  const select = getSelectElement(selectName);
+  if (!select) return "";
+
+  const selectedValue = formValues[selectName];
+  if (!selectedValue) return "";
+
+  const option = formElements.value.find(
+    (el) =>
+      el.parent_id === select.id &&
+      el.element === "option" &&
+      el.value === selectedValue
+  );
+
+  return option?.text_content || "";
+};
+
+const showElement = (name) => {
+  if (name === "group") return true;
+  if (name === "messenger") return formValues.group === "messenger";
+  if (name === "type") return formValues.group === "crm";
+  return false;
+};
+
+const getDomainPlaceholder = () => {
+  if (formValues.type === "amocrm") return "account.amocrm.ru";
+  if (formValues.type === "bitrix24") return "account.bitrix24.ru";
+  return "Введите адрес аккаунта";
+};
+
+// Form validation
+const isFormValid = computed(() => {
+  if (!formValues.group) return false;
+
+  if (formValues.group === "messenger") {
+    return !!formValues.messenger;
+  }
+
+  if (formValues.group === "crm") {
+    return !!formValues.type && !!formValues.domain;
+  }
+
+  return true;
+});
+
+// Dropdown methods
+const toggleDropdown = (name) => {
+  Object.keys(dropdownOpen).forEach((key) => {
+    if (key !== name) dropdownOpen[key] = false;
+  });
+  dropdownOpen[name] = !dropdownOpen[name];
+};
+
+const selectOption = (name, value) => {
+  formValues[name] = value;
+
+  // Reset dependent values when parent changes
+  if (name === "group") {
+    formValues.messenger = "";
+    formValues.type = "";
+    formValues.domain = "";
+  }
+
+  dropdownOpen[name] = false;
+};
+
+// Handle clicks outside dropdowns
+const handleClickOutside = (event) => {
+  if (!event.target.closest(".custom-select")) {
+    Object.keys(dropdownOpen).forEach((key) => {
+      dropdownOpen[key] = false;
+    });
+  }
+};
+
+// Set up event listeners
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  fetchFormStructure();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 
 const handleSomeAction = () => {
   if (props.getAccounts) {
@@ -220,230 +356,11 @@ const handleSomeAction = () => {
   }
 };
 
-// Form values
-const formValues = ref({
-  phone: "",
-  domain: "",
-});
-
-// Dropdown states
-const dropdownOpen = ref({
-  group: false,
-  messenger: false,
-  crm: false,
-});
-
-const phoneDisplay = ref("");
-const isRussianFormat = ref(true);
-
-// Options
-const groupOptions = [
-  { value: "messenger", text: "Мессенджер" },
-  { value: "crm", text: "CRM" },
-];
-
-const messengerOptions = [
-  { value: "whatsapp", text: "WhatsApp" },
-  { value: "telegram", text: "Telegram" },
-];
-
-const crmOptions = [
-  { value: "amocrm", text: "AmoCRM" },
-  { value: "bitrix24", text: "Bitrix24" },
-];
-
-// Helper functions to get display text for selected values
-const getSelectedGroupText = () => {
-  const option = groupOptions.find((opt) => opt.value === selectedGroup.value);
-  return option ? option.text : "";
-};
-
-const getSelectedMessengerText = () => {
-  const option = messengerOptions.find(
-    (opt) => opt.value === selectedMessenger.value
-  );
-  return option ? option.text : "";
-};
-
-const getSelectedCrmText = () => {
-  const option = crmOptions.find((opt) => opt.value === selectedCrm.value);
-  return option ? option.text : "";
-};
-
-const handlePhoneInput = (event) => {
-  const input = event.target;
-  let value = input.value.replace(/\D/g, "");
-  let cursorPos = input.selectionStart;
-
-  // Определяем российский ли номер (начинается с 7 или 8)
-  isRussianFormat.value = /^[78]/.test(value) && value.length <= 11;
-
-  if (isRussianFormat.value) {
-    // Автоматически добавляем +7 если ввод начинается с 7 или 8
-    if (value.startsWith("7") || value.startsWith("8")) {
-      value = "7" + value.substring(1); // Приводим к формату 7...
-    }
-
-    let formattedValue = "+7";
-    let newCursorPos = 2;
-
-    // Форматируем номер с учетом позиции курсора
-    if (value.length > 1) {
-      formattedValue += ` (${value.substring(1, 4)}`;
-      if (cursorPos >= 3) newCursorPos = formattedValue.length;
-    }
-    if (value.length > 4) {
-      formattedValue += `) ${value.substring(4, 7)}`;
-      if (cursorPos >= 6) newCursorPos = formattedValue.length;
-    }
-    if (value.length > 7) {
-      formattedValue += `-${value.substring(7, 9)}`;
-      if (cursorPos >= 8) newCursorPos = formattedValue.length;
-    }
-    if (value.length > 9) {
-      formattedValue += `-${value.substring(9)}`;
-      newCursorPos = formattedValue.length;
-    }
-
-    // Сохраняем значения
-    phoneDisplay.value = formattedValue;
-    formValues.value.phone = value;
-
-    // Корректируем позицию курсора
-    nextTick(() => {
-      input.setSelectionRange(newCursorPos, newCursorPos);
-    });
-  } else {
-    // Для международных номеров
-    phoneDisplay.value = value;
-    formValues.value.phone = value;
-  }
-};
-
-const handleBackspace = (event) => {
-  const input = event.target;
-  const value = input.value;
-  const cursorPos = input.selectionStart;
-
-  if (!isRussianFormat.value) return;
-
-  // Обработка удаления символов в отформатированном номере
-  if (cursorPos > 0 && /\D/.test(value[cursorPos - 1])) {
-    event.preventDefault();
-    const cleanValue = phoneDisplay.value.replace(/\D/g, "");
-    const newValue = cleanValue.substring(0, cleanValue.length - 1);
-    phoneDisplay.value = newValue;
-    handlePhoneInput({
-      target: {
-        value: newValue,
-        selectionStart: cursorPos - 1,
-      },
-    });
-  }
-
-  // Обработка удаления +7
-  if (cursorPos <= 2 && value.startsWith("+7")) {
-    event.preventDefault();
-    phoneDisplay.value = "";
-    formValues.value.phone = "";
-    isRussianFormat.value = false;
-  }
-};
-
-// Refs for dropdown elements
-const groupSelect = ref(null);
-const messengerSelect = ref(null);
-const crmSelect = ref(null);
-
-// Get domain placeholder based on selected CRM
-const getDomainPlaceholder = () => {
-  if (selectedCrm.value === "amocrm") return "account.amocrm.ru";
-  if (selectedCrm.value === "bitrix24") return "account.bitrix24.ru";
-  return "Введите адрес аккаунта";
-};
-
-// Form validation
-const isFormValid = computed(() => {
-  if (!selectedGroup.value) return false;
-
-  if (selectedGroup.value === "messenger") {
-    if (!selectedMessenger.value) return false;
-    if (selectedMessenger.value === "telegram" && !formValues.value.phone)
-      return false;
-  }
-
-  if (selectedGroup.value === "crm") {
-    if (!selectedCrm.value) return false;
-    if (!formValues.value.domain) return false;
-  }
-
-  return true;
-});
-
-// Handle clicks outside dropdowns
-const handleClickOutside = (event) => {
-  if (groupSelect.value && !groupSelect.value.contains(event.target)) {
-    dropdownOpen.value.group = false;
-  }
-  if (messengerSelect.value && !messengerSelect.value.contains(event.target)) {
-    dropdownOpen.value.messenger = false;
-  }
-  if (crmSelect.value && !crmSelect.value.contains(event.target)) {
-    dropdownOpen.value.crm = false;
-  }
-};
-
-// Set up event listeners
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
-
-// Dropdown methods
-const toggleDropdown = (name) => {
-  // Close all other dropdowns
-  Object.keys(dropdownOpen.value).forEach((key) => {
-    if (key !== name) dropdownOpen.value[key] = false;
-  });
-  // Toggle current dropdown
-  dropdownOpen.value[name] = !dropdownOpen.value[name];
-};
-
-const selectOption = (name, value) => {
-  if (name === "group") {
-    selectedGroup.value = value;
-    selectedMessenger.value = "";
-    selectedCrm.value = "";
-    formValues.value.phone = "";
-    formValues.value.domain = "";
-  } else if (name === "messenger") {
-    selectedMessenger.value = value;
-    formValues.value.phone = "";
-  } else if (name === "crm") {
-    selectedCrm.value = value;
-    formValues.value.domain = "";
-  }
-
-  dropdownOpen.value[name] = false;
-};
-
 const submitForm = async () => {
   const formData = {
-    group: selectedGroup.value,
-    ...(selectedGroup.value === "messenger" && {
-      messenger: selectedMessenger.value,
-      ...(selectedMessenger.value === "telegram" && {
-        phone: formValues.value.phone,
-      }),
-    }),
-    ...(selectedGroup.value === "crm" && {
-      type: selectedCrm.value,
-      domain: formValues.value.domain,
-    }),
+    ...formValues,
   };
+
   stationLoading.loading = true;
   try {
     const response = await axios.post(
@@ -462,9 +379,11 @@ const submitForm = async () => {
       stationLoading.loading = false;
       handleSomeAction();
       setLoadingStatus(true, "success");
+      changeStationLoading();
       props.openModal();
     } else {
       setLoadingStatus(true, "error");
+      changeStationLoading();
       console.error("Ошибка сохранения:", response.data.message);
     }
   } catch (error) {

@@ -204,19 +204,48 @@ const getPeriodText = (tariff) => {
   return getTariffValue(tariff).toLowerCase();
 };
 
+const encodeTariff = (tariffCode, id) => {
+  try {
+    const prefix = "tariff_";
+    const timestamp = Date.now();
+    const randomSalt = Math.random().toString(36).substring(2, 8);
+    const str = `${prefix}${tariffCode}|${id}|${timestamp}|${randomSalt}`;
+
+    // Двойное кодирование для дополнительной безопасности
+    const firstPass = btoa(unescape(encodeURIComponent(str)));
+    const secondPass = btoa(
+      unescape(encodeURIComponent(firstPass.split("").reverse().join("")))
+    );
+
+    return secondPass;
+  } catch (error) {
+    console.error("Encoding error:", error);
+    throw new Error("Failed to encode tariff code");
+  }
+};
+
 const buyTariff = async () => {
   loadingPay.value = true;
   console.log(selectTariff.value);
+
   try {
+    // Кодируем идентификатор тарифа перед отправкой
+    const encodedTariff = encodeTariff(
+      selectTariff.value.code,
+      selectTariff.value.id
+    );
+
     const response = await axios.post(
       `${apiUrl}/buy`,
       {
         amount: selectTariff.value.price,
         tariff_id: selectTariff.value.id,
+        tariff: encodedTariff, // Добавляем закодированный тариф
         currency: selectTariff.value.currency,
+        domain: window.location.hostname,
         entity: "vendor",
         category: "tariff",
-        entity_uuid: "3ed9f920-f6ed-419f-afda-118dc4f32881",
+        entity_uuid: selectTariff.value.uuid,
       },
       {
         headers: {

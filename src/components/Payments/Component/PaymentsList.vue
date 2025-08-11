@@ -35,7 +35,7 @@
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
             <td colspan="4">
               <div class="none-account-cont">
-                <h2>{{ t("paymentList.accountNone") }}</h2>
+                <h2>Tранзакций нет</h2>
               </div>
             </td>
           </tr>

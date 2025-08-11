@@ -77,7 +77,6 @@ const cancelSubscription = () => {
 .profile-page {
   display: flex;
   flex-direction: column;
-  background-color: #f8fafc;
   min-height: 80vh;
 }
 

@@ -28,13 +28,13 @@
           </li>
         </ul>
       </div>
-      <div class="footer-pc-menu">
+      <!-- <div class="footer-pc-menu">
         <LangSwither
           :isWidgetMode="isWidgetMode"
           class="theme-block"
           v-if="stationDomain.navigate.value !== 'settings'"
         />
-      </div>
+      </div> -->
     </nav>
 
     <div v-if="!isWidgetMode" class="line"></div>
@@ -70,11 +70,11 @@
           </li>
         </ul>
       </div>
-      <LangSwither
+      <!-- <LangSwither
         :isWidgetMode="isWidgetMode"
         class="theme-block"
         v-if="stationDomain.navigate.value !== 'settings'"
-      />
+      /> -->
     </nav>
   </aside>
 
@@ -211,13 +211,13 @@
         </div>
       </div>
 
-      <div class="mobile-menu-footer">
+      <!-- <div class="mobile-menu-footer">
         <LangSwither
           :isWidgetMode="isWidgetMode"
           class="theme-block"
           v-if="stationDomain.navigate.value !== 'settings'"
         />
-      </div>
+      </div> -->
     </div>
 
     <!-- Mobile menu toggle button (hamburger) -->
