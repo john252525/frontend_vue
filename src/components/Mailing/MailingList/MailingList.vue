@@ -24,12 +24,15 @@
             <td class="table-text">{{ item.dt_create }}</td>
             <td class="table-state-active" v-if="item.state === 1">
               {{ t("mailingList.status.active") }}
+              <span class="state-text"> {{ item.state_text }}</span>
             </td>
             <td class="table-state" v-if="item.state === 0">
               {{ t("mailingList.status.noActive") }}
+              <span class="state-text"> {{ item.state_text }}</span>
             </td>
             <td class="table-state-active" v-if="item.state === 2">
               {{ t("mailingList.status.completed") }}
+              <span class="state-text"> {{ item.state_text }}</span>
             </td>
             <td
               class="table-state"
@@ -112,6 +115,7 @@
     :changeDeleteMailing="changeDeleteMailing"
     :refreshMailingLists="getMailingLists"
     :changeisEditMailing="changeisEditMailing"
+    :changeStationMessage="changeStationMessage"
   />
   <InfoMailing
     :changeInfoMailing="changeInfoMailing"
@@ -132,9 +136,15 @@
     :selectedItem="selectedItem"
     :changeResultModal="changeResultModal"
   />
+  <MessageLise
+    v-if="stationMessage"
+    :changeStationMessage="changeStationMessage"
+    :selectedItem="selectedItem"
+  />
 </template>
 
 <script setup>
+import MessageLise from "../ModalComponent/MessageLise.vue";
 import { ref, reactive, onMounted, provide, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
@@ -261,6 +271,12 @@ const openModal = (event, item) => {
     top: rect.bottom + window.scrollY,
     left: rect.left + window.scrollX,
   };
+};
+
+const stationMessage = ref(false);
+
+const changeStationMessage = () => {
+  stationMessage.value = !stationMessage.value;
 };
 
 const closeModal = () => {
@@ -408,6 +424,11 @@ provide("selectedItem", { selectedItem });
   width: 20%;
 }
 
+.state-text {
+  color: black;
+  font-weight: 400;
+}
+
 .table-action {
   width: 25%;
 }
@@ -421,12 +442,18 @@ provide("selectedItem", { selectedItem });
 }
 
 .table-state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 1rem;
   text-align: left;
   color: rgb(211, 59, 59);
 }
 
 .table-state-active {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 1rem;
   text-align: left;
   color: rgb(32, 179, 40);

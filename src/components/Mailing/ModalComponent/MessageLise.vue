@@ -1,6 +1,7 @@
 <template>
+  <div @click="changeStationMessage" class="black-fon"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section>
+  <section class="cont">
     <h2 class="title">
       {{ t("messageList.title") }}
       <svg
@@ -51,12 +52,20 @@
           </tr>
           <tr v-if="errorMessage">
             <td colspan="4">
-              <errorAccount />
+              <div class="error-account-cont">
+                <h3 class="error-account-title">
+                  {{ t("referrals.errorAccount") }}
+                </h3>
+              </div>
             </td>
           </tr>
           <tr v-if="loadingMessge">
             <td colspan="4">
-              <LoadAccount />
+              <div class="load-account-cont">
+                <h3 class="load-account-title">
+                  {{ t("globalLoading.loading") }}
+                </h3>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -181,6 +190,18 @@ onMounted(getMessages);
   height: auto;
 }
 
+.cont {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  padding: 25px 40px;
+  background: var(--modalBg);
+  border: 0.5px solid rgb(144, 144, 144);
+  z-index: 10;
+}
+
 .title {
   font-weight: 500;
   font-size: 24px;
@@ -189,6 +210,71 @@ onMounted(getMessages);
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.load-account-cont {
+  background-color: var(--tableAccountBg);
+  width: 100%;
+  height: 50px;
+  border-radius: 5px;
+  border: 1px solid #d8d8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.load-account-title {
+  color: #4966b1;
+  font-size: 10px;
+  font-weight: 500;
+  background-color: #cee3fd;
+  padding: 4px 14px;
+  border-radius: 20px;
+  animation: shimmer 1s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.error-account-cont {
+  background-color: rgb(255, 209, 209);
+  width: 100%;
+  height: 50px;
+  border-radius: 5px;
+  border: 1px solid #cea2a2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-account-title {
+  color: rgb(128, 76, 76);
+  font-size: 10px;
+  font-weight: 500;
+  background-color: rgb(246, 180, 180);
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
 }
 
 .title img {

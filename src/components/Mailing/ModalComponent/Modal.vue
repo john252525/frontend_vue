@@ -24,6 +24,7 @@
         <span @click="changeInfoMailing" class="action">{{
           t("modalMailing.info")
         }}</span>
+        <span @click="changeStationMessage" class="action">Сообщения</span>
         <span @click="changeisEditMailing" class="action">{{
           t("modalMailing.edit")
         }}</span>
@@ -81,6 +82,9 @@ const props = defineProps({
     type: Function,
   },
   changeStatusMailing: {
+    type: Function,
+  },
+  changeStationMessage: {
     type: Function,
   },
 });
