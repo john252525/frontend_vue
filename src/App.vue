@@ -1,43 +1,49 @@
 <template>
-  <Header v-if="!isAuthPage && !isWidgetMode" :phoneMenuOn="phoneMenuOn" />
-  <div class="page-container" v-if="!isAuthPage">
-    <Navigation
-      v-if="isWidgetMode || isMailingMode"
-      :phoneMenuStation="phoneMenuStation"
-      :phoneMenuOn="phoneMenuOn"
-      :chatStation="chatStation"
-      :isWidgetMode="isWidgetMode"
-      :chatsLoading="chatsLoading"
-      :isMailingMode="isMailingMode"
-      class="navigation-chat"
-    />
-    <Navigation
-      v-else
-      :phoneMenuStation="phoneMenuStation"
-      :phoneMenuOn="phoneMenuOn"
-      :chatStation="chatStation"
-      :isWidgetMode="isWidgetMode"
-      :chatsLoading="chatsLoading"
-      :isMailingMode="isMailingMode"
-      class="navigation"
-    />
-    <ResultModal
-      :changeStationLoadingModal="offModal"
-      :stationLoading="stationLoading"
-    />
-    <main>
-      <section>
-        <router-view @routeChanged="checkChatStation"></router-view>
-      </section>
-    </main>
+  <div v-if="isLoading" class="loading-container">
+    <div class="loader">Загрузка...</div>
   </div>
-  <div v-else class="auth-container">
-    <router-view></router-view>
+
+  <div v-else>
+    <Header v-if="!isAuthPage && !isWidgetMode && !isMailingMode" :phoneMenuOn="phoneMenuOn" />
+    <div class="page-container" v-if="!isAuthPage">
+      <Navigation
+        v-if="isWidgetMode || isMailingMode"
+        :phoneMenuStation="phoneMenuStation"
+        :phoneMenuOn="phoneMenuOn"
+        :chatStation="chatStation"
+        :isWidgetMode="isWidgetMode"
+        :chatsLoading="chatsLoading"
+        :isMailingMode="isMailingMode"
+        class="navigation-chat"
+      />
+      <Navigation
+        v-else
+        :phoneMenuStation="phoneMenuStation"
+        :phoneMenuOn="phoneMenuOn"
+        :chatStation="chatStation"
+        :isWidgetMode="isWidgetMode"
+        :chatsLoading="chatsLoading"
+        :isMailingMode="isMailingMode"
+        class="navigation"
+      />
+      <ResultModal
+        :changeStationLoadingModal="offModal"
+        :stationLoading="stationLoading"
+      />
+      <main>
+        <section>
+          <router-view @routeChanged="checkChatStation"></router-view>
+        </section>
+      </main>
+    </div>
+    <div v-else class="auth-container">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, provide } from "vue";
+import { ref, watch, computed, onMounted, reactive, provide, nextTick } from "vue"; // Добавили nextTick
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -54,6 +60,7 @@ const chatStation = ref(true);
 const phoneMenuStation = ref(false);
 const route = useRoute();
 const chatsLoading = ref(true);
+const isLoading = ref(true);
 
 const chatsLoadingChange = () => {
   chatsLoading.value = !chatsLoading.value;
@@ -65,36 +72,37 @@ const phoneMenuOn = () => {
 };
 
 const checkChatStation = () => {
-  chatStation.value = route.name === "Chats";
+  chatStation.value = route?.name === "Chats";
 };
 
 const isAuthPage = computed(() => {
+  const routeName = route?.name?.toString();
+  if (!routeName) return false;
   return [
     "Login",
     "Registration",
     "PasswordRecovery",
     "VerifyEmail",
     "ResetPassword",
-  ].includes(route.name?.toString());
+  ].includes(routeName);
 });
 
 const isMailingMode = computed(() => {
-  return route.query?.mode === "mailing";
+  return route?.query?.mode === "mailing";
 });
 
 const isWidgetMode = computed(() => {
-  return route.query?.mode === "widget";
+  return route?.query?.mode === "widget";
 });
 
 const currentDomain = ref("");
 
-onMounted(() => {
+// Убрали дублирующий onMounted и улучшили логику
+onMounted(async () => {
   // Получаем текущий домен
   currentDomain.value = window.location.hostname;
 
-  // Выводим в консоль
-
-  // Дополнительно можно проверить, какой это домен из ваших 4 вариантов
+  // Проверяем домены
   const myDomains = [
     "app1.developtech.ru",
     "app2.developtech.ru",
@@ -103,9 +111,29 @@ onMounted(() => {
   ];
 
   if (myDomains.includes(currentDomain.value)) {
+    console.log("Текущий домен:", currentDomain.value);
   } else {
+    console.log("Неизвестный домен:", currentDomain.value);
   }
+
+  // Ждем следующего тика для инициализации
+  await nextTick();
+  
+  // Даем дополнительное время для полной инициализации роутера
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 150);
 });
+
+// Альтернативно: используем watch для отслеживания готовности роутера
+watch(() => route?.fullPath, (newPath) => {
+  if (newPath) {
+    // Роутер готов, скрываем лоадер
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 100);
+  }
+}, { immediate: true });
 
 function getDomen() {
   return currentDomain.value;
@@ -126,7 +154,6 @@ main > section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* overflow: auto; */
 }
 
 .page-container {
@@ -147,5 +174,18 @@ main > section {
   align-items: center;
   height: 100vh;
   background-color: var(--authBg);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--authBg);
+}
+
+.loader {
+  font-size: 18px;
+  color: var(--text-color);
 }
 </style>
