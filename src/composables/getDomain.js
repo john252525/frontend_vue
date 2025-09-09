@@ -10,6 +10,7 @@ const stationDomain = reactive({
     logo: "",
     titleLogo: "",
     urlLogo: "",
+    additionallyLogo: "",
   },
 });
 
@@ -23,12 +24,20 @@ export function useDomain() {
       stationDomain.cosmetics.urlLogo = "/crypto.svg";
     }
 
+    // if (currentDomain.value === "localhost") {
+    //   stationDomain.navigate.value = "touchapi";
+    //   stationDomain.cosmetics.logo = "TouchApi";
+    //   stationDomain.cosmetics.titleLogo = "Touch-Api";
+    //   stationDomain.cosmetics.urlLogo =
+    //     "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+    // }
+
     if (currentDomain.value === "localhost") {
       stationDomain.navigate.value = "touchapi";
-      stationDomain.cosmetics.logo = "TouchApi";
-      stationDomain.cosmetics.titleLogo = "Touch-Api";
-      stationDomain.cosmetics.urlLogo =
-        "https://static.tildacdn.com/tild3630-6562-4930-b532-356635636363/favicon.ico";
+      stationDomain.cosmetics.logo = "chatserv";
+      stationDomain.cosmetics.titleLogo = "ChatServ";
+      stationDomain.cosmetics.urlLogo = "/chatserv_logo.svg";
+      stationDomain.cosmetics.additionallyLogo = "/title_chatserv.svg";
     }
 
     // if (currentDomain.value === "localhost") {
@@ -56,7 +65,16 @@ export function useDomain() {
       stationDomain.navigate.value = "touchapi";
       stationDomain.cosmetics.logo = "chatserv";
       stationDomain.cosmetics.titleLogo = "ChatServ";
-      stationDomain.cosmetics.urlLogo = "/chatserv_icon.svg";
+      stationDomain.cosmetics.urlLogo = "/chatserv_logo.svg";
+      stationDomain.cosmetics.additionallyLogo = "/title_chatserv.svg";
+    }
+
+    if (currentDomain.value === "app.chatserv.ru") {
+      stationDomain.navigate.value = "touchapi";
+      stationDomain.cosmetics.logo = "chatserv";
+      stationDomain.cosmetics.titleLogo = "ChatServ";
+      stationDomain.cosmetics.urlLogo = "/chatserv_logo.svg";
+      stationDomain.cosmetics.additionallyLogo = "/title_chatserv.svg";
     }
 
     if (currentDomain.value === "helly.apitter.com") {

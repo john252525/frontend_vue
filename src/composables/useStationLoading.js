@@ -5,6 +5,7 @@ const stationLoading = reactive({
   error: null,
   isOpen: false,
   timer: null,
+  text: "",
 });
 
 export function useStationLoading() {
@@ -14,6 +15,7 @@ export function useStationLoading() {
       clearTimeout(stationLoading.timer);
       stationLoading.timer = null;
     }
+
     console.log("erorr_modal");
     stationLoading.isOpen = isOpen;
 
@@ -21,8 +23,9 @@ export function useStationLoading() {
       stationLoading.successfully = true; // Сохраняем сообщение
       stationLoading.error = null;
     } else if (type === "error") {
-      stationLoading.successfully = false; // Сохраняем сообщение
+      stationLoading.successfully = false;
       stationLoading.successfully = null;
+      stationLoading.text = message;
     } else {
       stationLoading.successfully = null;
       stationLoading.error = null;
