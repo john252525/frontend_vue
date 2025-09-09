@@ -64,6 +64,7 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 import { useRouter } from "vue-router";
 const router = useRouter();
 import { useI18n } from "vue-i18n";
@@ -81,7 +82,7 @@ const verifyToken = async (token) => {
     error.value = false;
 
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/verifyEmail`,
+      `${FRONTEND_URL_AUTH}verifyEmail`,
       {
         token: token,
         withCredentials: false,

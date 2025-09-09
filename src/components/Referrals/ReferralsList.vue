@@ -51,6 +51,9 @@
 import { ref, reactive, onMounted, provide, inject, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
+const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
+
 import LoadingAccount from "../Accounts/Accounts/LoadingMoadal/LoadingAccount.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
@@ -137,7 +140,7 @@ const getIds = async () => {
 
   try {
     const response = await axios.post(
-      `https://b2288.developtech.ru/api/v1/vendors/${
+      `${VITE_FRONTEND_URL_VENDORS}${
         decodeJWT(token.value).vendor_id
       }/getAllReferrals`,
       {},
@@ -167,7 +170,7 @@ const getAccounts = async () => {
   console.log(token.value);
   try {
     const response = await axios.get(
-      "https://bapi88.developtech.ru/api/v1/users/getAllReferrals?referer=https://app2.touch-api.com/",
+      `${FRONTEND_URL_USERS}getAllReferrals?referer=https://app2.touch-api.com/`,
       {
         headers: {
           "Content-Type": "application/json",

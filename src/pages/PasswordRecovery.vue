@@ -70,6 +70,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -130,7 +131,7 @@ const sendEmail = async () => {
 
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/forgotPassword`,
+      `${FRONTEND_URL_AUTH}forgotPassword`,
       {
         email: email.value,
       },

@@ -175,6 +175,8 @@ import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 import CreatePayments from "./CreatePayments.vue";
 
+const FRONTEND_URL_TARIFFS = import.meta.env.VITE_FRONTEND_URL_TARIFFS;
+
 import FailedPurchase from "./Purchase/FailedPurchase.vue";
 import SuccessfulPurchase from "./Purchase/SuccessfulPurchase.vue";
 import BuySection from "./BuySection.vue";
@@ -315,7 +317,7 @@ const fetchTariffs = async () => {
 
   try {
     const response = await axios.post(
-      "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
+      `${FRONTEND_URL_TARIFFS}getByCode`,
       { code: code },
       {
         headers: {

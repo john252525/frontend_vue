@@ -44,6 +44,8 @@ import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
+const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
+
 const textButton = ref(`https://${window.location.hostname}/Registration...`);
 
 function decodeJWT(token) {
@@ -68,7 +70,7 @@ const refId = ref("");
 const getRefId = async () => {
   try {
     const response = await axios.get(
-      `https://bapi88.developtech.ru/api/v1/users/getRefId`,
+      `${FRONTEND_URL_USERS}getRefId`,
 
       {
         headers: {

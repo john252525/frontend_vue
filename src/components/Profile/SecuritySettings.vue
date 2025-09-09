@@ -55,6 +55,8 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 
+const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
@@ -101,7 +103,7 @@ const handleChangePassword = async () => {
 
   try {
     const response = await axios.post(
-      "https://bapi88.developtech.ru/api/v1/auth/resetPassword",
+      `${VITE_FRONTEND_URL_AUTH}resetPassword`,
       {
         password: currentPassword.value,
         new_password: newPassword.value,

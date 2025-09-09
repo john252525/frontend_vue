@@ -5,19 +5,33 @@
       <div
         class="action-list"
         :class="{ 'mobile-fullscreen': isMobile }"
-        :style="isMobile ? {} : {
-          top: modalPosition.top + 'px',
-          left: modalPosition.left + 'px',
-        }"
+        :style="
+          isMobile
+            ? {}
+            : {
+                top: modalPosition.top + 'px',
+                left: modalPosition.left + 'px',
+              }
+        "
       >
         <!-- Мобильный заголовок -->
         <div v-if="isMobile" class="mobile-header">
           <div class="account-info-mobile">
             <AccountIcon :item="selectedItem" />
-            <span class="account-login-mobile">{{ selectedItem.login || '-' }}</span>
+            <span class="account-login-mobile">{{
+              selectedItem.login || "-"
+            }}</span>
           </div>
           <button class="close-button" @click="closeModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -65,24 +79,28 @@
           >{{ t("modalAccount.change") }}</span
         >
         <span
-        v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) && 
-              ['telegram', 'whatsapp'].includes(selectedItem.source) && 
-              chatsStation === 'loading'"
-        class="action-loading"
-      >
-        Чат <LoadingBalance/>
-      </span>
-      
-      <!-- Чат доступный для клика -->
-      <span
-        v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) && 
-              ['telegram', 'whatsapp'].includes(selectedItem.source) && 
-              (chatsStation === true || chatsStation === false)"
-        class="action"
-        @click="openChat"
-      >
-        Чат
-      </span>
+          v-if="
+            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
+            ['telegram', 'whatsapp'].includes(selectedItem.source) &&
+            chatsStation === 'loading'
+          "
+          class="action-loading"
+        >
+          Чат <LoadingBalance />
+        </span>
+
+        <!-- Чат доступный для клика -->
+        <span
+          v-if="
+            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
+            ['telegram', 'whatsapp'].includes(selectedItem.source) &&
+            (chatsStation === true || chatsStation === false)
+          "
+          class="action"
+          @click="openChat"
+        >
+          Чат
+        </span>
         <span
           v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
           class="action"
@@ -111,7 +129,7 @@
           @click="updateAccountButton"
           >Обновить аккаунт</span
         >
-       
+
         <span
           v-if="
             selectedItem.source != 'telegram' &&
@@ -154,7 +172,11 @@
     :changeForceStopItemData="changeForceStopItemData"
     :loadingStop="loadingStop"
   />
-  <ChatStation v-if="chatsStationModal" :close="changeChatsStationModal" :error="errorValueChat"/>
+  <ChatStation
+    v-if="chatsStationModal"
+    :close="changeChatsStationModal"
+    :error="errorValueChat"
+  />
 </template>
 
 <script setup>
@@ -168,7 +190,7 @@ import {
   watch,
   computed,
 } from "vue";
-import ChatStation from "./ModalAccount/ChatStation.vue"
+import ChatStation from "./ModalAccount/ChatStation.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
@@ -177,6 +199,7 @@ import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
 import GetScreen from "./ModalAccount/GetScreen.vue";
 
 const props = defineProps({
@@ -256,53 +279,52 @@ const handleSubmit = () => {
 };
 const isFlashing = ref(false);
 
-const chatsStationModal = ref(false)
+const chatsStationModal = ref(false);
 
 const changeChatsStationModal = () => {
-  chatsStationModal.value = !chatsStationModal.value
-}
+  chatsStationModal.value = !chatsStationModal.value;
+};
 
-const errorValueChat = ref('')
+const errorValueChat = ref("");
 
 const isMobile = computed(() => window.innerWidth <= 768);
 
 const navigateTo = (page, queryParams = {}) => {
   router.push({
     path: page,
-    query: queryParams
+    query: queryParams,
   });
 };
 
 const openChat = () => {
-  console.log(chatsStation.value)
+  console.log(chatsStation.value);
   if (selectedItem.value.subscription_dt_to === null) {
-    chatsStationModal.value = true
-    errorValueChat.value = "tariff"
+    chatsStationModal.value = true;
+    errorValueChat.value = "tariff";
   } else if (chatsStation.value === false) {
-    errorValueChat.value = 'noStarted'
-    chatsStationModal.value = true
+    errorValueChat.value = "noStarted";
+    chatsStationModal.value = true;
   } else {
-
-    navigateTo('/UserChats', { 
-      login: selectedItem.value.login, 
+    navigateTo("/UserChats", {
+      login: selectedItem.value.login,
       uuid: selectedItem.value.uuid,
       type: selectedItem.value.type,
       storage: selectedItem.value.storage,
       source: selectedItem.value.source,
-      mode: "mailing"
-});
+      mode: "mailing",
+    });
   }
-}
+};
 
 const openScreen = () => {
   if (!selectedItem.value.step) {
-    errorValueChat.value = 'noStarted'
-    changeChatsStationModal()
-    return
+    errorValueChat.value = "noStarted";
+    changeChatsStationModal();
+    return;
   }
 
-  props.changeGetScreenStation()
-}
+  props.changeGetScreenStation();
+};
 
 const openTariff = () => {
   props.changeTariffStation(selectedItem.value);
@@ -520,7 +542,7 @@ const updateAccountButton = async () => {
   const { source, login, type, storage } = selectedItem.value;
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/vendors/updateAccount`,
+      `${FRONTEND_URL_VENDORS}updateAccount`,
       {
         source: source,
         login: login,
@@ -566,7 +588,7 @@ const deleteAccountButton = async () => {
   const { source, login, type, storage } = selectedItem.value;
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/vendors/deleteAccount`,
+      `${FRONTEND_URL_VENDORS}deleteAccount`,
       {
         source: source,
         login: login,
@@ -1078,11 +1100,11 @@ const resetAccount = async () => {
 }
 
 /* Медиа-запрос для скрытия десктопной версии на мобильных */
-@media (max-width: 768px){
+@media (max-width: 768px) {
   .action-list:not(.mobile-fullscreen) {
     display: none;
   }
-  
+
   .action-list.mobile-fullscreen {
     display: flex;
   }
@@ -1093,7 +1115,7 @@ const resetAccount = async () => {
   .action-list.mobile-fullscreen {
     display: none;
   }
-  
+
   .action-list:not(.mobile-fullscreen) {
     display: flex;
   }

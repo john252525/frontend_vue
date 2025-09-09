@@ -88,6 +88,8 @@ import axios from "axios";
 import { useI18n } from "vue-i18n";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -189,13 +191,10 @@ const handleResetPassword = async () => {
   showErrorBlock.value = false;
 
   try {
-    const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/resetPassword`,
-      {
-        token: token.value,
-        new_password: formData.password,
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL_AUTH}resetPassword`, {
+      token: token.value,
+      new_password: formData.password,
+    });
 
     if (response.data.ok) {
       passwordChanged.value = true;

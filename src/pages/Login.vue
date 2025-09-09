@@ -7,7 +7,7 @@
   <section class="login-section">
     <form>
       <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
-        {{ t("login.title") }} 
+        {{ t("login.title") }}
         <div class="logo-cont">
           в
           <img
@@ -23,7 +23,7 @@
         </div>
       </h2>
       <h2 class="title" v-else>
-        {{ t("login.title") }} 
+        {{ t("login.title") }}
         <div class="logo-cont">
           в
           <img
@@ -112,6 +112,7 @@ const theme = useThemeStore();
 const { sendLog } = useFrontendLogger();
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 
 const formData = reactive({
   login: "",
@@ -241,14 +242,11 @@ const loginAccount = async () => {
   // accountStore.setAccountStationText("Telegram");
   // navigateTo("/");
   try {
-    const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/login`,
-      {
-        email: formData.login,
-        password: formData.password,
-        withCredentials: false,
-      }
-    );
+    const response = await axios.post(`${FRONTEND_URL_USERS}login`, {
+      email: formData.login,
+      password: formData.password,
+      withCredentials: false,
+    });
 
     if (response.data) {
       await handleSendLog(
