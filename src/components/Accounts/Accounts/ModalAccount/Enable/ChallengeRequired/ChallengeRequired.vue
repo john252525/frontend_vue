@@ -1,19 +1,45 @@
 <template>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section v-if="station.code" class="auth-code">
-    <div class="input-cont">
-      <label for="code">{{ t("enable.code") }}</label>
-      <input class="num-input" type="number" v-model="code" required />
+  <div class="code-component">
+    <div class="code-header">
+      <h3 class="code-title">Введите код</h3>
+      <button class="code-close" @click="handleClose">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="code-body">
+      <div class="input-cont">
+        <!-- <label for="code">Код подтверждения</label> -->
+        <input
+          class="code-input"
+          type="number"
+          v-model="code"
+          required
+          placeholder="000000"
+        />
+      </div>
+    </div>
+    
+    <div class="code-footer">
+      <button @click="solveChallenge" class="code-button">
+        Далее
+      </button>
+      
+      <button @click="getQr" class="code-switch">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M2 9V7C2 5.89543 2.89543 5 4 5H7M16 5H20C21.1046 5 22 5.89543 22 7V9M22 16V20C22 21.1046 21.1046 22 20 22H16M7 22H4C2.89543 22 2 21.1046 2 20V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Перейти к QR-коду
+      </button>
     </div>
 
-    <button @click="solveChallenge" class="next-button">Далее</button>
-    <h2 @click="getQr" class="title">
-      {{ t("enable.ChallengeRequired.title") }}
-    </h2>
-  </section>
-  <ResultModal v-if="station.station === false" />
-  <LoadingModal :station-loading="station.loading" />
-  <ResultModalTrue v-if="station.resultTrue" />
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+    <ResultModal v-if="station.station === false" />
+    <LoadingModal :station-loading="station.loading" />
+    <ResultModalTrue v-if="station.resultTrue" />
+  </div>
 </template>
 
 <script setup>
@@ -30,6 +56,15 @@ import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+
+const props = defineProps({
+  changeChallengeRequired: {
+    type: Function
+  },
+  openEnableMenuTrue: {
+    type: Function
+  }
+})
 
 const router = useRouter();
 const code = ref("");
@@ -57,8 +92,11 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
+};
+
+const handleClose = () => {
+  // Логика закрытия компонента
 };
 
 const solveChallenge = async () => {
@@ -101,7 +139,7 @@ const solveChallenge = async () => {
     }
 
     if (response.data.status === "ok") {
-      station.resultTrue = true;
+      props.openEnableMenuTrue()
       station.loading = false;
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -177,81 +215,180 @@ const getQr = async () => {
 </script>
 
 <style scoped>
-.auth-code {
+.code-component {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 20px;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+}
+
+.code-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.code-close {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.code-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.code-body {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.num-input {
-  border-radius: 5px;
-  width: 100%;
-  height: 70px;
-  font-weight: 400;
-  font-size: 26px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
-  text-align: center;
-}
-
-.num-input-error {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 100%;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #be2424;
-  background: #ffeaea;
-}
-
 .input-cont {
   display: flex;
-  align-self: flex-start;
   flex-direction: column;
+  gap: 12px;
+  width: 100%;
 }
 
 label {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  color: rgb(78, 78, 78);
-}
-
-.next-button {
-  width: 100%;
-  height: 40px;
-  border-radius: 5px;
-  background-color: #4950ca;
   font-size: 14px;
-  color: rgb(255, 255, 255);
-  font-weight: 600;
-  margin-top: 20px;
-}
-
-.title {
-  margin-top: 16px;
   font-weight: 500;
-  font-size: 14px;
-  width: 95%;
+  color: #495057;
   text-align: center;
-  padding: 4px;
-  background-color: rgb(243, 243, 243);
-  border-radius: 5px;
 }
 
-@media (max-width: 600px) {
-  .auth-code {
-    width: 300px;
+.code-input {
+  border-radius: 8px;
+  width: 100%;
+  height: 60px;
+  font-weight: 500;
+  font-size: 20px;
+  color: #000;
+  box-sizing: border-box;
+  border: 1px solid #e9ecef;
+  background: #f8f9fa;
+  text-align: center;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: #4950ca;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(73, 80, 202, 0.1);
+}
+
+.code-input::placeholder {
+  color: #adb5bd;
+  font-weight: 400;
+}
+
+.code-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.code-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #4950ca;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.code-button:hover {
+  background: #3a40a0;
+}
+
+.code-button:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+.code-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid #e9ecef;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6c757d;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.code-switch:hover {
+  background: #f8f9fa;
+  color: #495057;
+  border-color: #ced4da;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  .code-component {
+    gap: 16px;
+  }
+  
+  .code-input {
+    height: 54px;
+    font-size: 18px;
+    padding: 0 14px;
+  }
+  
+  .code-button {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .code-switch {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  label {
+    font-size: 13px;
   }
 }
 
-@media (max-width: 400px) {
-  .auth-code {
-    width: 250px;
+@media (max-width: 360px) {
+  .code-input {
+    height: 50px;
+    font-size: 16px;
+  }
+  
+  .code-title {
+    font-size: 16px;
   }
 }
 </style>

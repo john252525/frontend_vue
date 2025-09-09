@@ -21,7 +21,7 @@
     </div>
 
     <div class="action-buttons">
-      <button v-if="createPayment" class="retry-btn" @click="getBalance">
+      <button v-if="balanceError" class="retry-btn" @click="getBalance">
         <span>Пополнить баланс</span>
       </button>
       <button class="close-btn" @click="changeTariffStation">
@@ -64,6 +64,15 @@ const props = defineProps({
   changeTariffStation: {
     type: Function,
   },
+  changeCreatePayments: {
+    type: Function,
+  },
+  changePaymentsStation: {
+    type: Function,
+  },
+  chaneMinimumAmount: {
+    type: Function,
+  },
 });
 
 const { tariff } = toRefs(props);
@@ -100,11 +109,17 @@ const getBalance = async () => {
     if (response.data.success) {
       console.log(tariff.value.price - +response.data.balance);
 
-      createPayment(tariff.value.price - +response.data.balance);
+      props.chaneMinimumAmount(tariff.value.price - +response.data.balance);
+      props.changeCreatePayments();
     }
   } catch (err) {
     console.error("error", err.response ? err.response.data : err.message);
   }
+};
+
+const changePay = () => {
+  // props.changePaymentsStation(false, "error");
+  props.changeCreatePayments();
 };
 
 const createPayment = async (amount) => {

@@ -136,6 +136,7 @@ const createRequest = async (request) => {
       setLoadingStatus(true, "error");
     }
   } catch (error) {
+    props.loadingStop();
     console.error(`error`, error);
     props.errorStationOn();
     props.changeStationLoadingModal(true);

@@ -1,7 +1,9 @@
 <template>
   <section class="account-list-section">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-    <div class="table-container">
+    
+    <!-- Десктопная таблица -->
+    <div class="table-container desktop-view">
       <table class="table">
         <thead class="table-header">
           <tr>
@@ -24,15 +26,15 @@
             <td class="table-text">{{ item.dt_create }}</td>
             <td class="table-state-active" v-if="item.state === 1">
               {{ t("mailingList.status.active") }}
-              <span class="state-text"> {{ item.state_text }}</span>
+              <span v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
             </td>
             <td class="table-state" v-if="item.state === 0">
               {{ t("mailingList.status.noActive") }}
-              <span class="state-text"> {{ item.state_text }}</span>
+              <span v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
             </td>
             <td class="table-state-active" v-if="item.state === 2">
               {{ t("mailingList.status.completed") }}
-              <span class="state-text"> {{ item.state_text }}</span>
+              <span  v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
             </td>
             <td
               class="table-state"
@@ -60,24 +62,6 @@
                 </svg>
                 {{ t("mailingList.buttonActive") }}
               </button>
-              <button
-                class="action-table-button-phone"
-                @click="openModal($event, item)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  class="bi bi-list"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
-                  ></path>
-                </svg>
-              </button>
             </td>
           </tr>
           <tr v-else-if="dataStationNone">
@@ -104,7 +88,80 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Мобильные карточки -->
+    <div class="mobile-cards" v-if="dataStation && mailingLists.length > 0">
+      <div 
+        class="mailing-card"
+        v-for="(item, index) in mailingLists"
+        :key="'mobile-' + index"
+      >
+        <!-- Заголовок карточки -->
+        <div class="card-header">
+          <div class="mailing-info">
+            <span class="mailing-name">
+              <span v-if="item.name.length > 0">{{ item.name }}</span>
+              <span v-else>{{ t("mailingList.name") }}</span>
+            </span>
+          </div>
+          <button 
+            class="action-gear"
+            @click="openMobileModal($event, item)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Контент карточки -->
+        <div class="card-content">
+          <!-- Дата создания -->
+          <div class="card-row">
+            <span class="label">Дата создания:</span>
+            <span class="value">{{ formatDate(item.dt_create) }}</span>
+          </div>
+
+          <!-- Статус -->
+          <div class="card-row">
+            <span class="label">Статус:</span>
+            <span class="value" :class="getStatusClass(item.state)">
+              {{ getStatusText(item.state) }}
+              <span class="state-text-mobile">{{ item.state_text }}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Кнопка действия -->
+        <!-- <div class="card-actions">
+          <button 
+            class="action-btn"
+            @click="openMobileModal($event, item)"
+          >
+            Действия
+          </button>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Состояния для мобильной версии -->
+    <div class="mobile-states" v-if="!dataStation || dataStationNone || loadDataStation || errorMailing">
+      <div class="none-account-cont" v-if="dataStationNone">
+       <NoData type="campaigns"/>
+      </div>
+      
+      <div class="load-cont" v-if="loadDataStation">
+        <LoadAccount />
+      </div>
+      
+      <div class="load-cont" v-if="errorMailing">
+        <ErrorAccount />
+      </div>
+    </div>
   </section>
+
+  <!-- Модальные окна (остаются без изменений) -->
   <Modal
     :changeStatusMailing="changeStatusMailing"
     :isModalOpen="station.isModalOpen"
@@ -172,6 +229,7 @@ const station = reactive({
   deleteMailing: false,
   editMailing: false,
 });
+import NoData from "@/components/GlobalModal/StationList/NoData.vue";
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -203,6 +261,42 @@ const loadDataStation = ref(false);
 const selectedItem = ref(null);
 const mailingLists = ref([]);
 const modalPosition = ref({ top: 0, left: 0 });
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return dateString;
+  }
+};
+
+const getStatusText = (state) => {
+  switch (state) {
+    case 1: return t("mailingList.status.active");
+    case 0: return t("mailingList.status.noActive");
+    case 2: return t("mailingList.status.completed");
+    default: return '-';
+  }
+};
+
+const getStatusClass = (state) => {
+  switch (state) {
+    case 1: return 'status-active';
+    case 2: return 'status-completed';
+    case 0: return 'status-inactive';
+    default: return '';
+  }
+};
+
+const openMobileModal = (event, item) => {
+  openModal(event, item);
+};
 
 const getMailingLists = async () => {
   mailingLists.value = false;
@@ -267,9 +361,28 @@ const openModal = (event, item) => {
   selectedItem.value = item;
   station.isModalOpen = true;
   const rect = event.currentTarget.getBoundingClientRect();
+  const modalWidth = 150;
+  const modalHeight = 200;
+  const offset = 4; // Минимальный отступ
+
+  let left = rect.right + window.scrollX + offset;
+  let top = rect.bottom + window.scrollY + offset;
+
+  if (left + modalWidth > window.innerWidth) {
+    left = rect.left + window.scrollX - modalWidth - offset;
+  }
+
+  // Гарантируем минимальный отступ 4px
+  left = Math.max(offset, left);
+  top = Math.max(offset, top);
+
+  // Гарантируем невыход за правый и нижний края
+  left = Math.min(left, window.innerWidth - modalWidth - offset);
+  top = Math.min(top, window.innerHeight - modalHeight - offset + window.scrollY);
+
   modalPosition.value = {
-    top: rect.bottom + window.scrollY,
-    left: rect.left + window.scrollX,
+    top: top,
+    left: left
   };
 };
 
@@ -314,6 +427,15 @@ provide("selectedItem", { selectedItem });
   overflow-y: auto;
   height: 82vh;
   -webkit-overflow-scrolling: touch;
+}
+
+.desktop-view {
+  display: block;
+}
+
+.mobile-cards,
+.mobile-states {
+  display: none;
 }
 
 .table-container::-webkit-scrollbar {
@@ -363,22 +485,11 @@ provide("selectedItem", { selectedItem });
 
 .none-account-cont {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: 0px;
-  height: 50px;
-  width: 100%;
-  background-color: #ebf5ff;
-  border-radius: 5px;
 }
 
-.none-account-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #17388d;
-  margin-left: 10px;
-}
 
 .table-login {
   text-align: left;
@@ -426,6 +537,7 @@ provide("selectedItem", { selectedItem });
 
 .state-text {
   color: black;
+  
   font-weight: 400;
 }
 
@@ -555,57 +667,254 @@ tr:not(:last-child):after {
   }
 }
 
+
 @media (max-width: 768px) {
-  .table-container {
-    width: 100vw;
-    margin-left: -1rem; /* Компенсируем padding родительского элемента */
-    padding: 0 1rem;
+  .desktop-view {
+    display: none;
   }
-
-  .action-table-button {
-    display: none; /* Скрываем обычную кнопку на мобильных */
+  
+  .mobile-cards,
+  .mobile-states {
+    display: block;
   }
-
-  .action-table-button-phone {
-    display: inline-block; /* Показываем кнопку для мобильных */
-    background: var(--tableActiveButton);
+  
+  .mobile-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .mailing-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+    min-width: 0;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+    min-width: 0;
+    gap: 8px;
+  }
+  
+  .mailing-info {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .mailing-name {
     font-weight: 600;
-    font-size: 12px;
-    padding: 10px;
-    color: var(--tableActiveButtonColor);
-    transition: all 0.25s;
-    border-radius: 5px;
+    font-size: 16px;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  
+  .action-gear {
+    background: oklch(0.65 0.22 267 / 0.1);
     border: none;
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .action-gear:hover {
+    background: oklch(0.65 0.22 267 / 0.2);
+  }
+  
+  .action-gear svg {
+    width: 16px;
+    height: 16px;
+    color: #5a4fc1;
+  }
+  
+  .card-content {
+    flex: 1;
+    margin-bottom: 12px;
+    min-width: 0;
+  }
+  
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    min-width: 0;
+    gap: 8px;
+  }
+  
+  .label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .value {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+    text-align: right;
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .status-active {
+    color: rgb(32, 179, 40);
+  }
+  
+  .status-completed {
+    color: rgb(32, 179, 40);
+  }
+  
+  .status-inactive {
+    color: rgb(211, 59, 59);
+  }
+  
+  .state-text-mobile {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    background-color: transparent;
+    margin-top: 2px;
+  }
+  
+  .card-actions {
+    margin-top: auto;
+  }
+  
+  .action-btn {
+    width: 100%;
+    background: oklch(0.65 0.22 267 / 0.16);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    color: #5a4fc1;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .action-btn:hover {
+    background: oklch(0.65 0.22 267 / 0.25);
   }
 }
 
-@media (max-height: 660px) {
-  .table-container {
-    height: 78vh;
+@media (max-width: 640px) {
+  .mobile-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .mailing-card {
+    min-height: 170px;
+    padding: 14px;
+  }
+  
+  .mailing-name {
+    font-size: 15px;
+  }
+  
+  .label {
+    font-size: 13px;
+  }
+  
+  .value {
+    font-size: 13px;
+  }
+  
+  .action-btn {
+    padding: 10px;
+    font-size: 13px;
   }
 }
 
-@media (max-height: 600px) {
-  .table-container {
-    height: 76vh;
+@media (max-width: 480px) {
+  .mobile-cards {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .mailing-card {
+    padding: 12px;
+    min-height: 160px;
+  }
+  
+  .mailing-name {
+    font-size: 14px;
+  }
+  
+  .label {
+    font-size: 12px;
+  }
+  
+  .value {
+    font-size: 12px;
+  }
+  
+  .action-btn {
+    padding: 9px;
+    font-size: 12px;
   }
 }
 
-@media (max-height: 550px) {
-  .table-container {
-    height: 74vh;
-  }
+/* Состояния для мобильной версии */
+.mobile-states {
+  padding: 20px;
 }
 
-@media (max-height: 500px) {
-  .table-container {
-    height: 70vh;
-  }
+.mobile-states .none-account-cont,
+.mobile-states .load-cont {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-height: 450px) {
-  .table-container {
-    height: 66vh;
-  }
+.mobile-states .none-account-cont h2 {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Остальные стили десктопной версии остаются без изменений */
+.table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 82vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
 }
 </style>

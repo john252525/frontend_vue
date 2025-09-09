@@ -1,89 +1,121 @@
 <template>
-  <div @click="changeStationMessage" class="black-fon"></div>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section class="cont">
-    <h2 class="title">
-      {{ t("messageList.title") }}
-      <svg
-        class="close"
-        @click="changeStationMessage"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 32 32"
-      >
-        <path
-          fill="currentColor"
-          d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
-        />
-      </svg>
-    </h2>
-    <div class="table-container">
-      <table class="table">
-        <thead class="table-header">
-          <tr>
-            <th class="table-login">ID</th>
-            <th class="table-num">{{ t("messageList.table.number") }}</th>
-            <th class="table-text">{{ t("messageList.table.text") }}</th>
-            <th class="table-status">{{ t("messageList.table.status") }}</th>
-          </tr>
-        </thead>
-        <tbody class="tbody">
-          <tr
-            v-if="countMessage"
-            v-for="(item, index) in mailingLists"
-            :key="index"
-          >
-            <td class="table-text-number">
-              <span>{{ item.id }}</span>
-            </td>
-            <td class="table-text">{{ item.to }}</td>
-            <td class="table-text">{{ item.text }}</td>
-            <td v-if="item.state === 0" class="table-text state">
-              {{ t("messageList.waitingSend") }}
-            </td>
-          </tr>
-          <tr v-if="!errorMessage && mailingLists.length < 0">
-            <td colspan="4">
-              <div class="none-message-cont">
-                <h2>{{ t("accountList.accountNone") }}</h2>
+  <div class="modal-overlay" @click="changeStationMessage">
+    <div class="modal-container" @click.stop>
+      <div class="modal-header">
+        <h2 class="modal-title">
+          Сообщения рассылки
+          <span class="message-count" v-if="mailingLists.length > 0">
+            ({{ mailingLists.length }})
+          </span>
+        </h2>
+        <button class="close-button" @click="changeStationMessage" aria-label="Закрыть">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32">
+            <path fill="currentColor" d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-content">
+        <div class="table-container" :class="{ 'empty-state': mailingLists.length === 0 }">
+          <div v-if="loadingMessge" class="loading-container">
+            <div class="spinner"></div>
+            <p>Загрузка сообщений...</p>
+          </div>
+
+          <div v-else-if="errorMessage" class="error-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="error-icon">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <h3>Ошибка загрузки данных</h3>
+            <button class="retry-button" @click="getMessages">
+              Попробовать снова
+            </button>
+          </div>
+
+          <div v-else-if="mailingLists.length === 0" class="empty-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="empty-icon">
+              <path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+            </svg>
+            <h3>Сообщения отсутствуют</h3>
+            <p>В этой рассылке пока нет сообщений</p>
+          </div>
+
+          <!-- Десктопная таблица -->
+          <template v-else>
+            <table class="messages-table desktop-view">
+              <thead class="table-header">
+                <tr>
+                  <th class="column-id">ID</th>
+                  <th class="column-number">Номер</th>
+                  <th class="column-text">Текст сообщения</th>
+                  <th class="column-status">Статус</th>
+                </tr>
+              </thead>
+              <tbody class="table-body">
+                <tr v-for="(item, index) in mailingLists" :key="index" class="table-row">
+                  <td class="cell-id">
+                    <span class="id-badge">#{{ item.id }}</span>
+                  </td>
+                  <td class="cell-number">
+                    <div class="number-wrapper">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="phone-icon">
+                        <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                      </svg>
+                      {{ item.to }}
+                    </div>
+                  </td>
+                  <td class="cell-text" :title="item.text">
+                    <div class="text-truncate">{{ item.text }}</div>
+                  </td>
+                  <td class="cell-status">
+                    <span :class="['status-badge', `status-${item.state}`]">
+                      {{ getStatusText(item.state) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Мобильные карточки -->
+            <div class="mobile-cards mobile-view">
+              <div v-for="(item, index) in mailingLists" :key="index" class="message-card">
+                <div class="card-header">
+                  <span class="id-badge">#{{ item.id }}</span>
+                  <span :class="['status-badge', `status-${item.state}`]">
+                    {{ getStatusText(item.state) }}
+                  </span>
+                </div>
+                <div class="card-content">
+                  <div class="card-field">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="field-icon">
+                      <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                    <span class="field-value">{{ item.to }}</span>
+                  </div>
+                  <div class="card-field">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="field-icon">
+                      <path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg>
+                    <span class="field-value text-truncate">{{ item.text }}</span>
+                  </div>
+                </div>
               </div>
-            </td>
-          </tr>
-          <tr v-if="errorMessage">
-            <td colspan="4">
-              <div class="error-account-cont">
-                <h3 class="error-account-title">
-                  {{ t("referrals.errorAccount") }}
-                </h3>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="loadingMessge">
-            <td colspan="4">
-              <div class="load-account-cont">
-                <h3 class="load-account-title">
-                  {{ t("globalLoading.loading") }}
-                </h3>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
-  </section>
+  </div>
+
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, toRefs, provide } from "vue";
+import { ref, reactive, onMounted, computed, toRefs } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import errorAccount from "../MailingList/errorAccount.vue";
-import LoadAccount from "../MailingList/LoadAccount.vue";
 import { useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-import MessageContent from "@/components/Chats/MessageList/MessageContent/MessageContent.vue";
-const { t } = useI18n();
+
 const router = useRouter();
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -107,31 +139,31 @@ const mailingLists = ref([]);
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const errorMessage = ref(false);
 const loadingMessge = ref(true);
-const countMessage = ref(false);
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-    // Optionally, update the error message ref
-  }
+const getStatusText = (state) => {
+  const statusMap = {
+    0: "Ожидание отправки",
+    1: "Отправлено",
+    2: "Ошибка отправки",
+    3: "Доставлено",
+    4: "Прочитано"
+  };
+  return statusMap[state] || "Неизвестный статус";
 };
 
 const getMessages = async () => {
   const apiUrlMethod = `${apiUrl}/view/${selectedItem.value.id}/`;
   loadingMessge.value = true;
+  errorMessage.value = false;
+  
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
-        limit: 10,
+        limit: 50,
         offset: 0,
         sort: "asc",
       },
@@ -141,21 +173,10 @@ const getMessages = async () => {
       },
     });
 
-    if (response.data) {
-      await handleSendLog(
-        "mailing",
-        "view",
-        { limit: 10, offset: 0, sort: "asc" },
-        response.data.ok,
-        response.data
-      );
-    }
-
     if (response.data.ok) {
       loadingMessge.value = false;
-      countMessage.value = true;
       mailingLists.value = response.data.result.items;
-    } else if (response.data === 401) {
+    } else if (response.status === 401) {
       loadingMessge.value = false;
       errorMessage.value = true;
       errorBlock.value = true;
@@ -182,319 +203,383 @@ onMounted(getMessages);
 </script>
 
 <style scoped>
-.table-container {
-  max-width: 100%;
-  min-width: 1200px;
-  overflow-x: auto;
-  min-height: 50vh;
-  height: auto;
-}
-
-.cont {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 10px;
-  padding: 25px 40px;
-  background: var(--modalBg);
-  border: 0.5px solid rgb(144, 144, 144);
-  z-index: 10;
-}
-
-.title {
-  font-weight: 500;
-  font-size: 24px;
-  color: var(--modalColor);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.load-account-cont {
-  background-color: var(--tableAccountBg);
-  width: 100%;
-  height: 50px;
-  border-radius: 5px;
-  border: 1px solid #d8d8d8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.load-account-title {
-  color: #4966b1;
-  font-size: 10px;
-  font-weight: 500;
-  background-color: #cee3fd;
-  padding: 4px 14px;
-  border-radius: 20px;
-  animation: shimmer 1s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.7;
-  }
-}
-
-.error-account-cont {
-  background-color: rgb(255, 209, 209);
-  width: 100%;
-  height: 50px;
-  border-radius: 5px;
-  border: 1px solid #cea2a2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.error-account-title {
-  color: rgb(128, 76, 76);
-  font-size: 10px;
-  font-weight: 500;
-  background-color: rgb(246, 180, 180);
-  padding: 4px 14px;
-  border-radius: 20px;
-}
-
-@keyframes shimmer {
-  0% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.7;
-  }
-}
-
-.title img {
-  margin-top: 5px;
-  transition: all 0.15s;
-  cursor: pointer;
-}
-
-.title img:hover {
-  transition: all 0.15s;
-  transform: translate(-5px);
-}
-
-.table-header {
-  position: sticky;
+.modal-overlay {
+  position: fixed;
   top: 0;
-  z-index: 1;
-  /* background: rgb(243 244 246); */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
 }
 
-table {
+.modal-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: scaleIn 0.2s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.message-count {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+.modal-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.table-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.messages-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.none-message-cont {
+.table-header {
+  background-color: #f9fafb;
+}
+
+.table-header th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-body {
+  background-color: #fff;
+}
+
+.table-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.table-row td {
+  padding: 16px;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.cell-id {
+  width: 80px;
+}
+
+.id-badge {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.cell-number {
+  width: 160px;
+}
+
+.number-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phone-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.cell-text {
+  max-width: 0;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-status {
+  width: 140px;
+}
+
+.status-badge {
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+}
+
+.status-0 {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-1 {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-2 {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-3 {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-4 {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Мобильные карточки */
+.mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.message-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-field {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  gap: 8px;
+}
+
+.field-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.field-value {
+  font-size: 0.9rem;
+  color: #374151;
+  word-break: break-word;
+}
+
+.loading-container, .error-container, .empty-container {
+  display: flex;
   flex-direction: column;
-  /* margin-top: 0px; */
-  height: 50px;
-  width: 100%;
-  padding: 0px 10px;
-  box-sizing: border-box;
-  background-color: var(--noAccountTableBg);
-  border-radius: 5px;
-}
-
-.none-message-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--noAccountTableText);
-}
-
-.bi-list {
-  width: 16px; /* Ширина и высота иконки */
-  height: 16px;
-  fill: currentColor; /* Использует текущий цвет текста */
-  margin-bottom: -4px;
-  margin-right: 6px;
-}
-
-.loading-data-text {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
   text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--modalColor);
-  /* text-align: center; */
-  /* padding: 10px; */
-  border-radius: 6px;
-  /* width: 100%; */
 }
 
-.table-login {
-  text-align: left;
-  padding: 1rem;
-  width: 20px;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-.table-num {
-  text-align: left;
-  padding: 1rem;
-  width: 100px;
+.error-icon, .empty-icon {
+  margin-bottom: 16px;
+  color: #9ca3af;
 }
 
-.table-text {
-  text-align: left;
-  padding: 1rem;
-  width: 300px;
+.error-icon {
+  color: #ef4444;
 }
 
-.state {
-  text-align: right;
-}
-
-.table-status {
-  text-align: right;
-  padding: 1rem;
-  width: 100px;
-}
-
-.table-action {
-  text-align: right;
-  padding: 1rem;
-  padding-right: 15px;
-}
-
-.table-text-number {
-  padding: 1rem;
-}
-
-.table-text {
-  padding: 1rem;
-}
-
-.table-action-text {
-  padding: 1rem;
-  text-align: right;
-}
-
-.action-table-button {
-  background: oklch(0.65 0.22 267 / 0.16);
-  font-weight: 600;
-  font-size: 12px;
-  padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
-  margin-right: 10px;
-  gap: 6px;
-  transition: all 0.25s;
-  border-radius: 5px;
-  margin-right: -3px;
-}
-
-.action-table-button:hover {
-  background: rgba(23, 30, 162, 0.2);
-  transition: all 0.15s;
-}
-
-.action-table-button:active {
-  background: rgba(0, 4, 78, 0.2);
-  transition: all 0.15s;
-}
-
-.action-table-button img {
-  margin-right: 10px;
-}
-
-th,
-td {
-  padding: 1rem;
+.loading-container p, .error-container h3, .empty-container h3 {
+  margin: 0 0 8px 0;
+  color: #111827;
   font-weight: 500;
-  font-size: 11px;
+}
+
+.empty-container p {
+  margin: 0;
   color: #6b7280;
+  max-width: 300px;
 }
 
-td {
+.retry-button {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
   font-weight: 500;
-  font-size: 14px;
-  color: #000;
-  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-tr {
-  position: relative; /* Позволяет псевдоэлементу позиционироваться относительно строки */
+.retry-button:hover {
+  background-color: #2563eb;
 }
 
-tr:not(:last-child):after {
-  content: ""; /* Создает пустой контент для псевдоэлемента */
-  position: absolute; /* Абсолютное позиционирование относительно строки */
-  left: 0;
-  right: 0;
-  bottom: 0; /* Позиционируем линию внизу строки */
-  height: 1px; /* Высота линии */
-  background-color: #ebebeb;
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-tr:hover {
-  background: var(--noAccountTableHover);
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-.close {
-  position: absolute;
-  right: 37px;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@media (max-width: 1300px) {
-  .table-container {
-    min-width: 1000px;
+/* Адаптивность */
+@media (max-width: 768px) {
+  .modal-container {
+    max-height: 95vh;
+    margin: 0 10px;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .desktop-view {
+    display: none;
+  }
+  
+  .mobile-view {
+    display: flex;
   }
 }
 
-@media (max-width: 1100px) {
-  .table-container {
-    min-width: 800px;
+@media (min-width: 769px) {
+  .desktop-view {
+    display: table;
+  }
+  
+  .mobile-view {
+    display: none;
   }
 }
 
-@media (max-width: 900px) {
-  .table-container {
-    min-width: 600px;
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 10px;
   }
-}
-
-@media (max-width: 700px) {
-  .table-container {
-    min-width: 400px;
+  
+  .modal-title {
+    font-size: 1.25rem;
   }
-}
-
-@media (max-width: 500px) {
-  .table-container {
-    min-width: 300px;
+  
+  .message-card {
+    padding: 12px;
   }
-}
-
-@media (max-width: 400px) {
-  th,
-  td {
-    padding: 1rem;
-    font-weight: 500;
-    font-size: 11px;
-    color: #6b7280;
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
-
-  td {
-    font-weight: 500;
-    font-size: 12px;
-    color: #000;
-    text-align: left;
+  
+  .status-badge {
+    align-self: flex-start;
   }
 }
 </style>

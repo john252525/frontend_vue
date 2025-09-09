@@ -8,9 +8,9 @@
     <LoadingModal :text="loadingText" :stationLoading="isLoading" />
     <section v-if="showScreen" class="screen-section">
       <img class="screen-img" :src="screenImage" alt="screenshot" />
-      <button @click="closeScreen" class="close">
+      <!-- <button @click="closeScreen" class="close">
         {{ t("GetScreen.close") }}
-      </button>
+      </button> -->
     </section>
   </div>
 </template>
@@ -44,6 +44,7 @@ const props = defineProps({
   selectedItem: Object,
   getScreenStation: Boolean,
   changeGetScreenStation: Function,
+  closeScreen: Function
 });
 
 const decodeBase64Response = (base64String) => {

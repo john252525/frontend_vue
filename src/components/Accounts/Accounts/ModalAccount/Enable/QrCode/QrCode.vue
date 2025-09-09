@@ -1,7 +1,18 @@
 <template>
   <section>
-    <Telegram v-if="source === 'telegram'" />
-    <WhatsApp ref="childComponentRef" v-else />
+    <Telegram
+      :changeForceStopItemData="changeForceStopItemData"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeEnableStation="changeEnableStation"
+      v-if="source === 'telegram'"
+    />
+    <WhatsApp
+      :changeForceStopItemData="changeForceStopItemData"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeEnableStation="changeEnableStation"
+      ref="childComponentRef"
+      v-else
+    />
   </section>
 </template>
 
@@ -13,12 +24,22 @@ const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const childComponentRef = ref(null);
 
-// Функция для получения дочернего компонента
+const props = defineProps({
+  changeForceStopItemData: {
+    type: Function,
+  },
+  openEnableMenuTrue: {
+    type: Function,
+  },
+  changeEnableStation: {
+    type: Function
+  }
+}); 
+
 const getChild = () => {
-  return childComponentRef.value; // Возвращаем реф на дочерний компонент
+  return childComponentRef.value;
 };
 
-// Экспортируем функцию getChild для доступа из родительского компонента
 defineExpose({ getChild });
 </script>
 <style scoped></style>

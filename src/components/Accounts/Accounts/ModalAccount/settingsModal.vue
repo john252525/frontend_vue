@@ -213,6 +213,7 @@ const addNewUrl = async () => {
   } finally {
     loadingStatiom.value = false;
     setLoadingStatus(true, "success");
+    props.changeStationSettingsModal()
     // location.reload();
   }
 };

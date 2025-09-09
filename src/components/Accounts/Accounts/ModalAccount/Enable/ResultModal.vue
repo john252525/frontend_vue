@@ -269,7 +269,7 @@ const station = reactive({
 // Получаем номер в международном формате
 const getInternationalFormat = () => {
   const digits = phoneNumber.value.replace(/\D/g, "");
-  return "+" + digits;
+  return digits;
 };
 
 //

@@ -24,7 +24,9 @@
               :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
               class="svg-icon"
             />
-            <p class="page">{{ item.text }}</p>
+            <p class="page">
+              {{ item.text }}
+            </p>
           </li>
         </ul>
       </div>
@@ -118,18 +120,34 @@
       @click="toggleMobileMenu"
     ></div>
 
-    <!-- Mobile menu content -->
     <div class="mobile-menu-content" :class="{ active: mobileMenuOpen }">
       <div class="mobile-menu-header">
         <div class="logo-header-cont">
-          <div class="mobile-logo-title-cont">
+          <div
+            v-if="!stationDomain.cosmetics.additionallyLogo"
+            class="mobile-logo-title-cont"
+          >
             <img
               :src="stationDomain.cosmetics.urlLogo"
               class="phone-logo"
               alt="Logo"
-              @click="navigateTo('accounts')"
+              @click="handleMobileItemClick({ name: 'accounts' })"
             />
             <h1 class="title">{{ stationDomain.cosmetics.logo }}</h1>
+          </div>
+          <div v-else class="mobile-logo-additionallyLogo-title-cont">
+            <img
+              :src="stationDomain.cosmetics.urlLogo"
+              class="phone-logo-additionallyLogo"
+              alt="Logo"
+              @click="handleMobileItemClick({ name: 'accounts' })"
+            />
+            <img
+              :src="stationDomain.cosmetics.additionallyLogo"
+              class="phone-logo"
+              alt="Logo"
+              @click="handleMobileItemClick({ name: 'accounts' })"
+            />
           </div>
           <button class="close-menu-btn" @click="toggleMobileMenu">
             <svg
@@ -169,6 +187,7 @@
             <li
               v-for="item in section.items"
               :key="item.name"
+              @click="handleMobileItemClick(item)"
               class="list"
               :class="{ active: item.isActive }"
             >
@@ -183,6 +202,7 @@
                   text-decoration: none;
                   color: inherit;
                 "
+                @click.prevent="handleMobileItemClick(item)"
               >
                 <img
                   :src="`data:image/svg+xml;utf8,${encodeURIComponent(
@@ -194,10 +214,7 @@
               </a>
 
               <!-- Остальные пункты меню -->
-              <template
-                v-else
-                @click="item.action ? item.action() : navigateTo(item.name)"
-              >
+              <template v-else>
                 <img
                   :src="`data:image/svg+xml;utf8,${encodeURIComponent(
                     item.icon
@@ -210,14 +227,6 @@
           </ul>
         </div>
       </div>
-
-      <!-- <div class="mobile-menu-footer">
-        <LangSwither
-          :isWidgetMode="isWidgetMode"
-          class="theme-block"
-          v-if="stationDomain.navigate.value !== 'settings'"
-        />
-      </div> -->
     </div>
 
     <!-- Mobile menu toggle button (hamburger) -->
@@ -226,35 +235,35 @@
       v-if="!mobileMenuOpen"
       @click="toggleMobileMenu"
     >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M3 12H21"
-          stroke="var(--text)"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M3 6H21"
-          stroke="var(--text)"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M3 18H21"
-          stroke="var(--text)"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+    <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M3 12H21"
+      stroke="var(--text)"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3 6H21"
+      stroke="var(--text)"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3 18H21"
+      stroke="var(--text)"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
     </button>
   </div>
 </template>
@@ -313,9 +322,8 @@ const handleMobileItemClick = (item) => {
   } else {
     navigateTo(item.name);
   }
-  toggleMobileMenu();
+  toggleMobileMenu(); // Закрываем меню после клика
 };
-
 const navSections = computed(() => {
   const currentNav = stationDomain?.navigate?.value;
   if (!currentNav || !navConfig.value?.[currentNav]) return {};
@@ -552,6 +560,11 @@ nav {
   background-color: var(--textNavHover);
 }
 
+.mobile-logo-additionallyLogo-title-cont {
+  display: flex;
+  gap: 6px;
+}
+
 .list-chat {
   display: flex;
   align-items: center;
@@ -559,6 +572,10 @@ nav {
   margin-bottom: 4px;
   padding: 8px 0px 8px 8px;
   cursor: pointer;
+}
+
+.phone-logo-additionallyLogo {
+  width: 20%;
 }
 
 .list-chat.active {
@@ -699,6 +716,9 @@ nav {
 
 @media (max-width: 768px) {
   .pc-menu {
+    display: none;
+  }
+  .chat-menu {
     display: none;
   }
 }

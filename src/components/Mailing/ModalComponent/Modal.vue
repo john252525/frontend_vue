@@ -4,21 +4,35 @@
     <transition name="fade">
       <div
         class="action-list"
-        :style="{
+        :class="{ 'mobile-fullscreen': isMobile }"
+        :style="isMobile ? {} : {
           top: modalPosition.top + 'px',
           left: modalPosition.left + 'px',
         }"
       >
+        <!-- Мобильный заголовок (только для мобильных) -->
+        <div v-if="isMobile" class="mobile-header">
+          <div class="mailing-info-mobile">
+            <span class="mailing-name-mobile">{{ selectedItem.name || '-' }}</span>
+          </div>
+          <button class="close-button" @click="closeModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
         <span
           @click="updateStatus(1)"
           v-if="selectedItem.state === 0"
-          class="action"
+          class="action action-on"
           >{{ t("modalMailing.on") }}</span
         >
         <span
           @click="updateStatus(0)"
           v-if="selectedItem.state === 1"
-          class="action"
+          class="action action-off"
           >{{ t("modalMailing.off") }}</span
         >
         <span @click="changeInfoMailing" class="action">{{
@@ -28,7 +42,7 @@
         <span @click="changeisEditMailing" class="action">{{
           t("modalMailing.edit")
         }}</span>
-        <span class="action" @click="changeDeleteMailing">{{
+        <span class="action action-delete" @click="changeDeleteMailing">{{
           t("modalMailing.delete")
         }}</span>
       </div>
@@ -42,7 +56,7 @@
 </template>
 
 <script setup>
-import { toRefs, ref, computed, defineProps, reactive, watch } from "vue";
+import { toRefs, ref, computed, defineProps, reactive, watch, onMounted, onUnmounted } from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import axios from "axios";
@@ -56,6 +70,7 @@ const { setLoadingStatus } = useStationLoading();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
+
 const props = defineProps({
   modalPosition: {
     type: Object,
@@ -89,6 +104,9 @@ const props = defineProps({
   },
 });
 
+// Определяем мобильные устройства (только ширина экрана <= 550px)
+const isMobile = computed(() => window.innerWidth <= 768);
+
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
 
@@ -97,7 +115,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -153,7 +170,6 @@ const updateStatus = async (state) => {
       setLoadingStatus(true, "success");
       stationLoading.loading = false;
       props.changeStatusMailing(selectedItem.value, state);
-      // props.refreshMailingLists();
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -222,23 +238,38 @@ const getMessages = async () => {
 </script>
 
 <style scoped>
+.black-fon {
+  position: fixed;
+  z-index: 1000;
+  width: 100%;
+  height: 100vh;
+  background: rgba(117, 117, 117, 0.3);
+  top: 0;
+  left: 0;
+}
+
+/* Стили для десктопной версии (как было) */
 .action-list {
   border-radius: 10px;
   width: 150px;
   height: auto;
   background: #ffffff;
-  position: sticky;
-  z-index: 20;
+  position: absolute;
+  z-index: 1010;
   display: flex;
   justify-content: center;
   flex-direction: column;
   margin: 12px;
   padding: 10px 0px 10px 10px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
+
 .action-list.fade-enter-active,
 .action-list.fade-leave-active {
   transition: opacity 0.5s ease;
 }
+
 .action-list.fade-enter,
 .action-list.fade-leave-to {
   opacity: 0;
@@ -259,6 +290,95 @@ const getMessages = async () => {
   }
 }
 
+/* Стили для мобильной версии (только при isMobile) */
+.action-list.mobile-fullscreen {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  margin: 0;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: mobileFadeIn 0.3s forwards;
+}
+
+@keyframes mobileFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 16px 16px 0 0;
+}
+
+.mailing-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mailing-name-mobile {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: #e5e7eb;
+}
+
+.close-button svg {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+/* Контент модалки для мобильных */
+.action-list.mobile-fullscreen .action {
+  padding: 16px;
+  font-size: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  margin: 0;
+}
+
+.action-list.mobile-fullscreen .action:last-child {
+  border-bottom: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.action-list.mobile-fullscreen .action:hover {
+  background-color: #f3f4f6;
+  border-radius: 0;
+}
+
+/* Общие стили для действий */
 .action {
   font-weight: 400;
   font-size: 14px;
@@ -276,8 +396,33 @@ const getMessages = async () => {
   color: green;
 }
 
-.action-throw:hover,
+.action-off:hover {
+  color: orange;
+}
+
 .action-delete:hover {
   color: rgb(255, 0, 0);
+}
+
+/* Медиа-запрос для скрытия десктопной версии на мобильных */
+@media (max-width: 768px) {
+  .action-list:not(.mobile-fullscreen) {
+    display: none;
+  }
+  
+  .action-list.mobile-fullscreen {
+    display: flex;
+  }
+}
+
+/* Медиа-запрос для скрытия мобильной версии на десктопе */
+@media (min-width: 769px) {
+  .action-list.mobile-fullscreen {
+    display: none;
+  }
+  
+  .action-list:not(.mobile-fullscreen) {
+    display: flex;
+  }
 }
 </style>

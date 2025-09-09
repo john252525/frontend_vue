@@ -20,7 +20,7 @@
     <PaymentsList />
     <CreatePayments
       :changeCreatePayments="changeCreatePayments"
-      v-if="createPayments"
+      v-if="createPayments || route.query.payment === 'create'"
     />
   </section>
 </template>
@@ -28,20 +28,28 @@
 <script setup>
 import PaymentsList from "./Component/PaymentsList.vue";
 import CreatePayments from "./Component/CreatePayments.vue";
+import { useRoute, useRouter } from "vue-router";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const createPayments = ref(false);
+const route = useRoute();
+const router = useRouter()
+      
+      
 
 const changeCreatePayments = () => {
   createPayments.value = !createPayments.value;
+  if ( route.query.payment === 'create') {
+    router.push("/payments")
+    createPayments.value = !createPayments.value;
+  }
 };
 </script>
 
 <style scoped>
-.container {
-}
+
 
 .title {
   font-weight: 500;

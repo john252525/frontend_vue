@@ -86,8 +86,8 @@ const validate = () => {
   if (!newPassword.value.trim()) {
     errors.value.newPassword = "Введите новый пароль";
     isValid = false;
-  } else if (newPassword.value.length < 6) {
-    errors.value.newPassword = "Пароль должен быть не менее 6 символов";
+  } else if (newPassword.value.length < 8) {
+    errors.value.newPassword = "Пароль должен быть не менее 8 символов";
     isValid = false;
   }
 
@@ -108,7 +108,7 @@ const handleChangePassword = async () => {
       },
       {
         headers: {
-          Authorization: `Bearer ${token}`, // если используется авторизация
+          Authorization: `Bearer ${token.value}`, // если используется авторизация
         },
       }
     );

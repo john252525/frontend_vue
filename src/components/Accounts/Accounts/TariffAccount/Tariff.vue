@@ -2,21 +2,34 @@
   <div class="modal-overlay" @click.self="closeModal">
     <SuccessfulPurchase
       :changeTariffStation="changeTariffStation"
-      v-if="paymentsStation.success"
+      v-if="paymentsStation.success && !createPaymentsStation"
       :tariff="selectTariff"
       :getAccounts="getAccounts"
       :selectedItem="selectedItem"
       :changePayDataForAccounts="changePayDataForAccounts"
     />
     <FailedPurchase
-      v-if="paymentsStation.error"
+      v-if="paymentsStation.error && !createPaymentsStation"
       :error="paymentsStation.errorMessages"
       :tariff="selectTariff"
       :changeTariffStation="changeTariffStation"
       :changePayDataForAccounts="changePayDataForAccounts"
+      :changePaymentsStation="changePaymentsStation"
+      :changeCreatePayments="changePaymentsStationModal"
+      :chaneMinimumAmount="chaneMinimumAmount"
+    />
+    <CreatePayments
+      :minimumAmount="minimumAmount"
+      v-if="createPaymentsStation"
+      :changeCreatePayments="changePaymentsStationModal"
     />
     <div
-      v-if="!buySection && !paymentsStation.success && !paymentsStation.error"
+      v-if="
+        !buySection &&
+        !paymentsStation.success &&
+        !paymentsStation.error &&
+        !createPaymentsStation
+      "
       class="modal-container"
     >
       <div class="modal-header">
@@ -160,6 +173,7 @@
 import { ref, computed, onMounted, reactive, toRefs } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import CreatePayments from "./CreatePayments.vue";
 
 import FailedPurchase from "./Purchase/FailedPurchase.vue";
 import SuccessfulPurchase from "./Purchase/SuccessfulPurchase.vue";
@@ -218,49 +232,11 @@ const changePaymentsStation = (isOpen, answer, error) => {
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
+const minimumAmount = ref(null);
+const createPaymentsStation = ref(false);
 const hoverIndex = ref(-1);
 const loading = ref(false);
-const tariffsData = ref([
-  {
-    id: 13,
-    brand_slug: "default",
-    code: "touchapi-whatsapp",
-    period: "1y",
-    limits: "",
-    name: "Whatsapp 1 year",
-    price: 9600,
-    currency: "RUB",
-    dt_ins: "2025-07-23 19:57:29",
-    dt_upd: "2025-08-01 17:43:13",
-    enable: 1,
-  },
-  {
-    id: 16,
-    brand_slug: "default",
-    code: "touchapi-whatsapp",
-    period: "14m",
-    limits: "",
-    name: "Whatsapp 1 year 2 month",
-    price: 10000,
-    currency: "RUB",
-    dt_ins: "2025-07-23 19:57:29",
-    dt_upd: "2025-08-04 19:34:48",
-    enable: 1,
-  },
-  {
-    id: 14,
-    brand_slug: "default",
-    code: "touchapi-whatsapp",
-    period: "2y",
-    limits: "",
-    name: "Whatsapp 2 year",
-    price: 14000,
-    currency: "RUB",
-    dt_ins: "2025-07-23 19:57:29",
-    dt_upd: "2025-08-01 17:43:13",
-    enable: 1,
-  },
-]);
+const tariffsData = ref([]);
 const error = ref(null);
 const nullTariff = ref(false);
 const currentPage = ref(0);
@@ -340,7 +316,7 @@ const fetchTariffs = async () => {
   try {
     const response = await axios.post(
       "https://bapi88.developtech.ru/api/v1/tariffs/getByCode",
-      { code: `touchapi-${selectedItem.value.source}` },
+      { code: code },
       {
         headers: {
           "Content-Type": "application/json",
@@ -575,6 +551,14 @@ const getTariffName = (tariff) => {
 
 const closeModal = () => {
   props.changeTariffStation();
+};
+
+const changePaymentsStationModal = () => {
+  createPaymentsStation.value = !createPaymentsStation.value;
+};
+
+const chaneMinimumAmount = (value) => {
+  minimumAmount.value = value;
 };
 
 onMounted(fetchTariffs);

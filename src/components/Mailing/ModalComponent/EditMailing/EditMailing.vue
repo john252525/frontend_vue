@@ -1,154 +1,148 @@
 <template>
-  <div @click="changeisEditMailing" class="black-fon"></div>
+  <div class="modal-overlay" @click="changeisEditMailing"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section class="file-section">
-    <div class="cont" v-if="!load">
-      <h2 class="main-title">
-        {{ t("editMailing.title") }}
-        <svg
-          class="close"
-          @click="changeisEditMailing"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 32 32"
-        >
-          <path
-            fill="currentColor"
-            d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
-          />
-        </svg>
-      </h2>
+  
+  <section class="info-modal">
+    <div v-if="!load" class="modal-content">
+      <!-- Заголовок с кнопкой закрытия -->
+      <div class="modal-header">
+        <h2 class="modal-title">
+          {{ t("editMailing.title") }}
+        </h2>
+        <button class="close-btn" @click="changeisEditMailing" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
 
-      <section class="info-section">
-        <article class="days-comp">
-          <h2 class="title">{{ t("editMailing.weekDay") }}:</h2>
-          <div class="checkbox-group">
-            <div
-              v-for="(day, index) in days"
-              :key="index"
-              class="checkbox-container"
+      <!-- Дни недели -->
+      <div class="edit-section">
+        <h3 class="edit-label">{{ t("editMailing.weekDay") }}:</h3>
+        <div class="checkbox-group">
+          <div
+            v-for="(day, index) in days"
+            :key="index"
+            class="checkbox-container"
+          >
+            <input
+              type="checkbox"
+              :id="'day-' + (index + 1)"
+              :value="index + 1"
+              v-model="selectedDays"
+            />
+            <label class="day-text" :for="'day-' + (index + 1)">
+              <span class="custom-checkbox"></span>
+              {{ day }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Время рассылки -->
+      <div class="edit-section">
+        <h3 class="edit-label">{{ t("editMailing.time.title") }}:</h3>
+        <div class="time-grid">
+          <div class="time-input-group">
+            <label for="end-time">{{ t("editMailing.time.c") }}</label>
+            <input
+              type="time"
+              id="end-time"
+              v-model="items.options.hours.min"
+              @change="updateTimes"
+            />
+          </div>
+          <div class="time-input-group">
+            <label for="start-time">{{ t("editMailing.time.po") }}</label>
+            <input
+              type="time"
+              id="start-time"
+              v-model="items.options.hours.max"
+              @change="updateTimes"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Таймаут -->
+      <div class="edit-section">
+        <h3 class="edit-label">{{ t("editMailing.timeout.title") }}:</h3>
+        <div class="timeout-grid">
+          <div class="timeout-input-group">
+            <label for="start-num">{{ t("editMailing.timeout.ot") }}</label>
+            <select
+              id="start-num"
+              v-model="items.options.delay.min"
             >
-              <input
-                type="checkbox"
-                :id="'day-' + (index + 1)"
-                :value="index + 1"
-                v-model="selectedDays"
-              />
-              <label class="day-text" :for="'day-' + (index + 1)">
-                <span class="custom-checkbox"></span>
-                {{ day }}
-              </label>
-            </div>
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
           </div>
-        </article>
+          <div class="timeout-input-group">
+            <label for="end-num">{{ t("editMailing.timeout.do") }}</label>
+            <select
+              id="end-num"
+              v-model="items.options.delay.max"
+            >
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
+            <span class="min-text">{{ t("editMailing.timeout.min") }}.</span>
+          </div>
+        </div>
+      </div>
 
-        <article class="title-comp">
-          <h2 class="title">{{ t("editMailing.time.title") }}:</h2>
-          <div class="time-cont">
-            <div class="time-selection">
-              <label class="label-time" for="end-time">{{
-                t("editMailing.time.c")
-              }}</label>
-              <input
-                type="time"
-                id="end-time"
-                v-model="items.options.hours.min"
-                @change="updateTimes"
-              />
-            </div>
-            <div class="time-selection">
-              <label class="label-time" for="start-time">{{
-                t("editMailing.time.po")
-              }}</label>
-              <input
-                type="time"
-                id="start-time"
-                v-model="items.options.hours.max"
-                @change="updateTimes"
-              />
-            </div>
-          </div>
-        </article>
-        <article class="title-comp">
-          <h2 class="title-mess">{{ t("editMailing.timeout.title") }}:</h2>
-          <div class="time-cont">
-            <div class="time-selection">
-              <label class="label-time" for="start-num">{{
-                t("editMailing.timeout.ot")
-              }}</label>
-              <select
-                class="time-select"
-                id="start-num"
-                v-model="items.options.delay.min"
-              >
-                <option v-for="minute in minutes" :key="minute" :value="minute">
-                  {{ minute }}
-                </option>
-              </select>
-            </div>
-            <div class="time-selection">
-              <label class="label-time" for="end-num">{{
-                t("editMailing.timeout.do")
-              }}</label>
-              <select
-                class="time-select"
-                id="end-num"
-                v-model="items.options.delay.max"
-              >
-                <option v-for="minute in minutes" :key="minute" :value="minute">
-                  {{ minute }}
-                </option>
-              </select>
-              <p class="min">{{ t("editMailing.timeout.min") }}.</p>
-            </div>
-          </div>
-        </article>
-      </section>
-      <section class="settings-section">
-        <article class="remove-duplicates-comp">
-          <div class="checkbox-container">
+      <!-- Настройки -->
+      <div class="edit-section">
+        <h3 class="edit-label">Дополнительные Настройки</h3>
+        <div class="settings-grid">
+          <div class="checkbox-container setting-item">
             <input
               type="checkbox"
               id="remove-duplicates"
               v-model="items.options.exist"
             />
-            <label class="settings-text" for="remove-duplicates">
+            <label for="remove-duplicates">
               <span class="custom-checkbox"></span>
               {{ t("editMailing.checbox.one") }}
             </label>
           </div>
 
-          <div class="checkbox-container">
+          <div class="checkbox-container setting-item">
             <input
               type="checkbox"
               id="existing-dialogs"
               v-model="items.options.uniq"
             />
-            <label class="settings-text" for="existing-dialogs">
+            <label for="existing-dialogs">
               <span class="custom-checkbox"></span>
               {{ t("editMailing.checbox.two") }}
             </label>
           </div>
 
-          <div class="checkbox-container">
+          <div class="checkbox-container setting-item">
             <input
               type="checkbox"
               id="random-order"
               v-model="items.options.random"
             />
-            <label class="settings-text" for="random-order">
+            <label for="random-order">
               <span class="custom-checkbox"></span>
               {{ t("editMailing.checbox.three") }}
             </label>
           </div>
-        </article>
-      </section>
-      <button @click="editWhatsAppBroadcast" class="create">
+        </div>
+      </div>
+
+      <!-- Кнопка сохранения -->
+      <button @click="editWhatsAppBroadcast" class="edit-btn">
         {{ t("editMailing.button") }}
       </button>
     </div>
-    <LoadModal :text="'Сохраняем данные'" v-else />
+    
+    <LoadModal v-else :text="'Сохраняем данные'" />
   </section>
 </template>
 
@@ -188,7 +182,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -213,7 +206,7 @@ async function editWhatsAppBroadcast() {
   const url = `${apiUrl}/edit/${items.value.id}/`;
   const daysObject = {};
   selectedDays.value.forEach((day, index) => {
-    daysObject[day] = day; // или другая логика преобразования, если нужно
+    daysObject[day] = day;
   });
   const params = {
     days: daysObject,
@@ -272,23 +265,18 @@ async function editWhatsAppBroadcast() {
 
 if (selectedItem.value) {
   items.value = selectedItem.value;
-
-  if (items.value.options.hours) {
-  }
 }
 
 watch(
   selectedItem,
   (newVal) => {
     if (newVal && newVal.options && newVal.options.days) {
-      // Если days - это объект {1: 2, 2: 3, ...}
       if (
         typeof newVal.options.days === "object" &&
         !Array.isArray(newVal.options.days)
       ) {
         selectedDays.value = Object.keys(newVal.options.days).map(Number);
       }
-      // Если days - это массив [1, 2, 3,...]
       else if (Array.isArray(newVal.options.days)) {
         selectedDays.value = [...newVal.options.days];
       }
@@ -299,119 +287,113 @@ watch(
 </script>
 
 <style scoped>
-.file-section {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  gap: 30px;
-  position: absolute;
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+}
+
+.info-modal {
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 10px;
-  padding: 25px 40px;
-  background: var(--modalBg);
-  border: 0.5px solid rgb(144, 144, 144);
-  z-index: 10;
+  background: var(--modalBg, #ffffff);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 101;
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.cont {
+.modal-content {
+  padding: 20px;
+}
+
+.modal-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  gap: 30px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
 }
 
-.close {
-  position: absolute;
-  right: 42px;
-  top: 32px;
-  cursor: pointer;
-}
-
-.remove-duplicates-comp {
-  display: flex;
-  flex-direction: column;
-}
-
-.main-title {
-  font-size: 22px;
+.modal-title {
+  font-size: 18px;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  color: var(--modalColor, #1a1a1a);
+  margin: 0;
 }
 
-.name-mailing {
+.close-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-secondary, #666);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: var(--bg-hover, #f5f5f5);
+  color: var(--text-primary, #1a1a1a);
+}
+
+.edit-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.edit-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 15px;
+}
+
+.edit-label {
+  font-weight: 500;
+  color: var(--text-secondary, #666);
   font-size: 14px;
-  font-weight: 500;
-  color: #c0c0c0;
-}
-
-.info-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.days-comp {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.title {
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--modalColor);
-}
-
-.title-mess {
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--modalColor);
+  margin-bottom: 12px;
 }
 
 .checkbox-group {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .checkbox-container {
   display: flex;
+  align-items: center;
   position: relative;
-  margin: 10px 0;
 }
 
 input[type="checkbox"] {
-  display: none; /* Скрываем стандартный чекбокс */
+  display: none;
 }
 
 label {
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding-left: 20px;
+  padding-left: 24px;
   position: relative;
-}
-
-.settings-text {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  position: relative;
-}
-
-.label-time {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  position: relative;
+  font-size: 14px;
+  color: var(--text-primary, #1a1a1a);
 }
 
 .custom-checkbox {
@@ -419,11 +401,11 @@ label {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  border-radius: 4px; /* Скругление углов */
-  background-color: #d9d9d9; /* Цвет фона */
-  transition: background-color 0.2s, border-color 0.2s;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background-color: var(--bg-secondary, #f0f0f0);
+  transition: all 0.2s ease;
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox {
@@ -434,188 +416,180 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   content: "";
   position: absolute;
   left: 6px;
-  top: 2.5px;
-  width: 3px;
-  height: 7px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-.time-selection {
+.time-grid, .timeout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.time-input-group, .timeout-input-group {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.title-comp {
-  display: flex;
-  align-items: center;
+.time-input-group label, .timeout-input-group label {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  padding-left: 0;
 }
 
-.time-cont {
-  display: flex;
-  align-items: center;
-}
-
-input[type="time"] {
-  padding: 4px;
-  border: 1px solid #000;
-  border-radius: 5px;
-  outline: none;
-  font-size: 12px;
-  transition: border-color 0.3s;
-  margin-left: 6px;
-}
-
-input[type="time"]:focus {
-  border-color: #0056b3;
-}
-
-.time-select {
-  padding: 4px;
+.time-input-group input, .timeout-input-group select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
   font-size: 14px;
-  border: 1px solid #000;
-  border-radius: 3px;
-  outline: none;
-  transition: border-color 0.3s;
-  margin-left: 6px;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1a1a1a);
 }
 
-.min {
-  margin-left: 6px;
+.timeout-input-group {
+  position: relative;
 }
 
-.upload-file-comp {
-  display: flex;
-  align-items: center;
-}
-
-.image-preview {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 5px;
-  margin-right: 10px;
-}
-
-.create {
-  border-radius: 5px;
-  width: 100%;
-  height: 34px;
-  background: oklch(0.541 0.198 267);
-  font-weight: 600;
+.min-text {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
   font-size: 12px;
-  color: #fff;
-  transition: all 0.25s;
+  color: var(--text-secondary, #666);
 }
 
-@media (max-width: 500px) {
-  .title {
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setting-item {
+  margin: 0;
+}
+
+.edit-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: oklch(0.541 0.198 267);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .info-modal {
+    width: 95%;
+    max-width: none;
+    border-radius: 10px;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .modal-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .modal-title {
     font-size: 16px;
   }
-
-  .title-mess {
-    font-size: 16px;
-  }
-
-  .main-title {
-    font-size: 18px;
-  }
-
-  .close {
-    right: 40px;
-  }
-
-  input[type="time"] {
-    font-size: 12px;
-  }
-
-  input[type="checkbox"]:checked + label .custom-checkbox::after {
-    left: 5px;
-    top: 2.5px;
-    width: 3px;
-    height: 6px;
-  }
-
-  .label-time {
-    padding-left: 0px;
-  }
-
-  .title-comp {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .time-cont {
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .days-comp {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2px;
-  }
-
+  
   .checkbox-group {
-    width: 300px;
-    overflow-x: auto;
+    gap: 10px;
+  }
+  
+  .time-grid, .timeout-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .edit-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
 
-@media (max-width: 390px) {
-  .title {
-    font-size: 16px;
+@media (max-width: 480px) {
+  .info-modal {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: none;
   }
-
-  .title-mess {
-    font-size: 16px;
+  
+  .modal-content {
+    padding: 20px 16px;
   }
-
-  .main-title {
-    font-size: 18px;
+  
+  .edit-label {
+    font-size: 13px;
   }
-
-  .close {
-    right: 40px;
+  
+  label {
+    font-size: 13px;
   }
+  
+  .time-input-group input, .timeout-input-group select {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+  
+  .min-text {
+    font-size: 11px;
+    bottom: 7px;
+  }
+}
 
-  input[type="time"] {
+/* Для очень маленьких экранов */
+@media (max-width: 320px) {
+  .modal-content {
+    padding: 16px 12px;
+  }
+  
+  .modal-title {
+    font-size: 15px;
+  }
+  
+  .checkbox-group {
+    gap: 8px;
+  }
+  
+  label {
     font-size: 12px;
+    padding-left: 22px;
   }
-
+  
+  .custom-checkbox {
+    width: 16px;
+    height: 16px;
+  }
+  
   input[type="checkbox"]:checked + label .custom-checkbox::after {
     left: 5px;
-    top: 2.5px;
-    width: 3px;
-    height: 6px;
-  }
-
-  .label-time {
-    padding-left: 0px;
-  }
-
-  .title-comp {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .time-cont {
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .days-comp {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .checkbox-group {
-    width: 250px;
-    overflow-x: auto;
+    top: 1px;
+    width: 4px;
+    height: 8px;
   }
 }
 </style>

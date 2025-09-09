@@ -1,12 +1,13 @@
 <template>
   <section class="account-list-section">
-    <div class="table-container">
+    <!-- Десктопная таблица -->
+    <div class="table-container desktop-view">
       <table class="table">
         <thead class="table-header">
           <tr>
             <th class="table-login">{{ t("accountList.login") }}</th>
             <th class="table-step">СТАТУС</th>
-            <th class="table-login">ПОДПИСКА</th>
+            <th class="table-sub">ПОДПИСКА</th>
             <th class="table-action">
               {{ t("accountList.action") }}
             </th>
@@ -31,7 +32,9 @@
               class="table-text"
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
-              v-if="item.step"
+              v-if="
+                item.step && item.type != 'amocrm' && item.source != 'bitrix'
+              "
             >
               {{ item.step.value }}
             </td>
@@ -46,28 +49,29 @@
               class="table-text"
               v-if="
                 item.type != 'amocrm' &&
-                item.source != 'bitrix' &&
+                item.type != 'bitrix24' &&
                 !item.loading &&
                 !item.step
               "
             >
               -
             </td>
-            <!-- <td v-if="item.enable === 1 && accountStation === 'crm'">
-              Активно
+            <td
+              class="table-text"
+              v-if="item.type === 'amocrm' || item.type === 'bitrix24'"
+            >
+              {{ item.enable }}
             </td>
-            <td v-if="item.enable === 0 && accountStation === 'crm'">
-              Неактивно
-            </td> -->
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
             <td v-if="item.subscription_dt_to === null">
               <button
-                v-if="item.type != 'amocrm' && item.source != 'bitrix'"
+                v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
                 class="open-tariff-button"
                 @click="changeTariffStation(item)"
               >
                 Продлить
               </button>
+              <span v-else>-</span>
             </td>
             <td v-if="item.subscription_dt_to !== null">
               До {{ item.subscription_dt_to }}
@@ -78,7 +82,10 @@
                   (item.storage === 'local' && item.type === 'undefined') ||
                   (item.storage === 'binder' && item.type === 'touchapi') ||
                   (item.storage === 'undefined' && item.type === 'whatsapi') ||
-                  (item.storage === 'whatsapi' && item.type === 'undefined')
+                  (item.storage === 'whatsapi' && item.type === 'undefined') ||
+                  item.type === 'bulk' ||
+                  item.type === 'amocrm' ||
+                  item.type === 'bitrix24'
                 "
                 class="action-table-button"
                 @click="openModal($event, item)"
@@ -97,6 +104,23 @@
                   ></path>
                 </svg>
                 {{ t("accountList.actionButton") }}
+              </button>
+              <button
+                v-if="
+                  (item.storage === 'local' && item.type === 'undefined') ||
+                  (item.storage === 'binder' && item.type === 'touchapi') ||
+                  (item.storage === 'undefined' && item.type === 'whatsapi') ||
+                  (item.storage === 'whatsapi' && item.type === 'undefined') ||
+                  item.type === 'bulk' ||
+                  item.type === 'amocrm' ||
+                  item.type === 'bitrix24'
+                "
+                class="action-table-button-phone"
+                @click="openModal($event, item)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <path fill="#5a4fc1" d="M13.82 22h-3.64a1 1 0 0 1-.977-.786l-.407-1.884a8.002 8.002 0 0 1-1.535-.887l-1.837.585a1 1 0 0 1-1.17-.453L2.43 15.424a1.006 1.006 0 0 1 .193-1.239l1.425-1.3a8.1 8.1 0 0 1 0-1.772L2.623 9.816a1.006 1.006 0 0 1-.193-1.24l1.82-3.153a1 1 0 0 1 1.17-.453l1.837.585c.244-.18.498-.348.76-.5c.253-.142.513-.271.779-.386l.408-1.882A1 1 0 0 1 10.18 2h3.64a1 1 0 0 1 .976.787l.412 1.883a8.192 8.192 0 0 1 1.535.887l1.838-.585a1 1 0 0 1 1.169.453l1.82 3.153c.232.407.152.922-.193 1.239l-1.425 1.3a8.1 8.1 0 0 1 0 1.772l1.425 1.3c.345.318.425.832.193 1.239l-1.82 3.153a1 1 0 0 1-1.17.453l-1.837-.585a7.98 7.98 0 0 1-1.534.886l-.413 1.879a1 1 0 0 1-.976.786ZM11.996 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8Z"/>
+                </svg>
               </button>
             </td>
           </tr>
@@ -127,6 +151,96 @@
         tooltipMessage
       }}</span>
     </div>
+
+    <!-- Мобильные карточки -->
+    <div class="mobile-cards" v-if="dataStation && instanceData.length > 0">
+      <div 
+        class="account-card"
+        :class="{ active: item.isPay }"
+        v-for="(item, index) in instanceData"
+        :key="'mobile-' + index"
+      >
+        <!-- Заголовок карточки -->
+        <div class="card-header">
+          <div class="account-info">
+            <AccountIcon :item="item" />
+            <span class="account-login">{{ item.login || '-' }}</span>
+          </div>
+          <button 
+            class="action-gear"
+            @click="openMobileModal($event, item)"
+            v-if="isActionAvailable(item)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Контент карточки -->
+        <div class="card-content">
+          <!-- Статус -->
+          <div class="card-row">
+            <span class="label">Статус:</span>
+            <span class="value">
+              <span v-if="item.loading && accountStation != 'crm'">
+                <LoadingAccount />
+              </span>
+              <span v-else-if="item.step && item.type != 'amocrm' && item.source != 'bitrix'">
+                {{ item.step.value }}
+              </span>
+              <span v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'">
+                {{ item.enable }}
+              </span>
+              <span v-else-if="accountStation === 'crm'">
+                {{ item.type }}
+              </span>
+              <span v-else>-</span>
+            </span>
+          </div>
+
+          <!-- Подписка -->
+          <div class="card-row">
+            <span class="label">Подписка:</span>
+            <span class="value">
+              <span v-if="item.subscription_dt_to === null">
+                -
+              </span>
+              <span v-else class="subscription-date">
+                До {{ formatSubscriptionDate(item.subscription_dt_to) }}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Кнопка оплаты на всю ширину -->
+        <div class="card-payment" v-if="item.type != 'amocrm' && item.type != 'bitrix24'">
+          <button 
+            class="payment-btn"
+            @click="changeTariffStation(item)"
+          >
+            Оплатить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Состояния загрузки и ошибок для мобильной версии -->
+    <div class="mobile-states">
+      <div class="none-account-cont" v-if="dataStationNone">
+       <NoData type="accounts"/>
+      </div>
+      
+      <div class="load-cont" v-if="loadDataStation">
+        <LoadAccount />
+      </div>
+      
+      <div class="load-cont" v-if="errorAccountBolean && !loadDataStation">
+        <errorAccount />
+      </div>
+    </div>
+
     <Tariff
       v-if="tariffStation"
       :selectedItem="selectedItem"
@@ -134,7 +248,7 @@
       :getAccounts="getAccounts"
       :changePayDataForAccounts="changePayDataForAccounts"
     />
-    <!-- v-if="tariffStation" -->
+
     <Modal
       :changeTariffStation="changeTariffStation"
       :isModalOpen="isModalOpen"
@@ -153,30 +267,37 @@
       :changeGetScreenStation="changeGetScreenStation"
       :chatsStation="chatsStation"
       :changeForceStopItemData="changeForceStopItemData"
+      :getAccounts="getAccounts"
     />
+
     <SettignsModal
       :closeModal="closeModal"
       :selectedItems="selectedItems"
       :settingsModalStation="settingsModalStation"
       :changeStationSettingsModal="changeStationSettingsModal"
     />
+
     <QrModal
       :qrModalStation="qrModalStation"
       :changeStationQrModal="changeStationQrModal"
       :qrCodeData="qrCodeData"
       :changeStationQrModalOn="changeStationQrModalOn"
     />
+
     <getByCode
       v-if="getByCodeStation"
       :changeStationGetByCode="changeStationGetByCode"
       :selectedItems="selectedItems"
       :getByCodeStation="getByCodeStation"
     />
+
     <getScreen
       v-if="getScreenStation"
+      :closeScreen="closeScreen"
       :changeGetScreenStation="changeGetScreenStation"
       :selectedItem="selectedItem"
     />
+
     <Enable
       v-if="enableStation"
       :changeForceStopItemData="changeForceStopItemData"
@@ -184,6 +305,7 @@
       :selectedItem="selectedItem"
       :changeEnableStation="changeEnableStation"
     />
+
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   </section>
 </template>
@@ -205,6 +327,8 @@ import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
 import { useAccountStore } from "@/stores/accountStore";
+import NoData from "@/components/GlobalModal/StationList/NoData.vue";
+
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
@@ -213,6 +337,7 @@ const typeGroup = computed(() => accountStore.getType);
 const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
@@ -283,9 +408,12 @@ const changeForceStopItemData = async (item) => {
       throw new Error("Invalid response structure");
     }
 
+    // Исправляем обработку шага
+    const currentStep = infoResponse.data.step || { value: "-", message: "" };
+
     instanceData.value[accountIndex] = {
       ...instanceData.value[accountIndex],
-      step: infoResponse.step || "Н/Д",
+      step: currentStep,
       loading: false,
     };
 
@@ -294,11 +422,12 @@ const changeForceStopItemData = async (item) => {
       loading: false,
     };
 
-    if (infoResponse.step?.[0]?.value === 5) {
+    // Обновляем localStorage только если аккаунт подключен (значение 5)
+    if (currentStep.value === 5) {
       updateLocalStorage(item.login, item.source, item.storage, item.type);
     }
   } catch (error) {
-    console.error("error", error);
+    console.error("Error in changeForceStopItemData:", error);
     if (forceStopItemData.value) {
       forceStopItemData.value.loading = false;
     }
@@ -308,6 +437,21 @@ const changeForceStopItemData = async (item) => {
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
     }
+  }
+};
+
+const formatSubscriptionDate = (dateString) => {
+  if (!dateString) return '-';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return dateString;
   }
 };
 
@@ -358,6 +502,10 @@ const changeEnableStation = () => {
 
 const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
+};
+
+const closeScreen= () => {
+  getScreenStation.value = false
 };
 
 const errorBlock = ref(false);
@@ -544,16 +692,48 @@ const updateUserInfo = (event) => {
   userInfoStore.setUserInfo(event);
 };
 
+
 const openModal = (event, item) => {
   selectedItem.value = item;
   isModalOpen.value = true;
   updateUserInfo(JSON.stringify(selectedItem.value));
-  console.log(userInfo);
   getInfo();
+  
   const rect = event.currentTarget.getBoundingClientRect();
+  const modalWidth = 160;
+  const edgeMargin = 10; // Минимальный отступ от краев
+  
+  // Базовая позиция - сразу под кнопкой с небольшим отступом
+  let left = rect.left + window.scrollX;
+  let top = rect.bottom + window.scrollY + 2; // Всего 2px от кнопки
+  
+  // Проверяем правую границу (только если действительно выходит)
+  if (left + modalWidth > window.innerWidth + window.scrollX - edgeMargin) {
+    left = window.innerWidth + window.scrollX - modalWidth - edgeMargin;
+  }
+  
+  // Проверяем левую границу (только если действительно выходит)
+  if (left < window.scrollX + edgeMargin) {
+    left = window.scrollX + edgeMargin;
+  }
+  
+  // Проверяем нижнюю границу только если модалка сильно выходит
+  const modalHeight = 300;
+  const bottomEdge = window.innerHeight + window.scrollY;
+  
+  if (top + modalHeight > bottomEdge - edgeMargin) {
+    // Показываем над кнопкой, но тоже близко
+    top = rect.top + window.scrollY - modalHeight - 2; // Всего 2px от кнопки
+    
+    // Если не помещается и сверху, немного сдвигаем вниз
+    if (top < window.scrollY + edgeMargin) {
+      top = window.scrollY + edgeMargin;
+    }
+  }
+  
   modalPosition.value = {
-    top: rect.bottom + window.scrollY,
-    left: rect.left + window.scrollX,
+    top: Math.round(top),
+    left: Math.round(left),
   };
 };
 
@@ -604,6 +784,22 @@ const updateLoading = (newValue) => {
 const messageVisible = ref(false);
 const tooltipMessage = ref("");
 const tooltipStyle = ref({});
+
+const isActionAvailable = (item) => {
+  return (
+    (item.storage === 'local' && item.type === 'undefined') ||
+    (item.storage === 'binder' && item.type === 'touchapi') ||
+    (item.storage === 'undefined' && item.type === 'whatsapi') ||
+    (item.storage === 'whatsapi' && item.type === 'undefined') ||
+    item.type === 'bulk' ||
+    item.type === 'amocrm' ||
+    item.type === 'bitrix24'
+  );
+};
+
+const openMobileModal = (event, item) => {
+  openModal(event, item);
+};
 
 const showMessage = (event, step) => {
   tooltipMessage.value = `Текущий шаг: ${step}`;
@@ -698,6 +894,15 @@ provide("changeEnableStation", { changeEnableStation });
   height: 80vh;
 }
 
+.desktop-view {
+  display: block;
+}
+
+.mobile-cards,
+.mobile-states {
+  display: none;
+}
+
 .table-container::-webkit-scrollbar {
   width: 6px;
 }
@@ -777,24 +982,19 @@ provide("changeEnableStation", { changeEnableStation });
 
 .none-account-cont {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: 0px;
-  height: 50px;
-  width: 100%;
-  background-color: var(--noAccountTableBg);
-  border-radius: 5px;
 }
 
-.none-account-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--noAccountTableText);
-  margin-left: 10px;
-}
 
 .table-login {
+  text-align: left;
+  padding: 1rem;
+  width: 200px;
+}
+
+.table-sub {
   text-align: left;
   padding: 1rem;
   width: 200px;
@@ -840,6 +1040,15 @@ provide("changeEnableStation", { changeEnableStation });
   transition: all 0.25s;
   border-radius: 5px;
   margin-right: -3px;
+}
+
+.action-table-button-phone {
+  display: none;
+}
+
+.action-table-button-phone:active {
+  background: rgba(0, 4, 78, 0.2);
+  transition: all 0.15s;
 }
 
 .action-table-button:hover {
@@ -971,4 +1180,360 @@ tr:not(:last-child):after {
     height: 66vh;
   }
 }
+
+/* .table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 80vh;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+} */
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background-color: var(--scrolBg);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--scrolColor);
+  border-radius: 5px;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table {
+  width: 100%;
+  min-width: 600px; /* Минимальная ширина для горизонтального скролла */
+  border-collapse: collapse;
+}
+
+/* Остальные существующие стили остаются без изменений */
+
+/* @media (max-width: 768px) {
+
+  .table-action {
+    width: 50px;
+}
+
+  .action-table-button  {
+    display: none;
+  }
+
+  .action-table-button-phone {
+    display: block;
+  background: oklch(0.65 0.22 267 / 0.16);
+  font-weight: 600; 
+  font-size: 12px;
+  padding: 6px;
+  color: oklch(0.4 0.18 267 / 0.86);
+  margin-right: 10px;
+  gap: 6px;
+  transition: all 0.25s;
+  border-radius: 5px;
+  margin-right: -3px;
+}
+
+  .table-step {
+  width: 50px;
+}
+
+.table-sub {
+  width: 80px;
+}
+
+.table-login {
+  width: 150px;
+}
+} */
+
+/* Адаптивные высоты для разных размеров экрана */
+@media (max-height: 920px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 660px) {
+  .table-container {
+    height: 78vh;
+  }
+}
+
+@media (max-height: 600px) {
+  .table-container {
+    height: 76vh;
+  }
+}
+
+@media (max-height: 550px) {
+  .table-container {
+    height: 74vh;
+  }
+}
+
+@media (max-height: 500px) {
+  .table-container {
+    height: 70vh;
+  }
+}
+
+@media (max-height: 450px) {
+  .table-container {
+    height: 66vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-view {
+    display: none;
+  }
+  
+  .mobile-cards,
+  .mobile-states {
+    display: block;
+  }
+  
+  .mobile-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .account-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    min-width: 0;
+    position: relative;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+    min-width: 0;
+    gap: 8px;
+  }
+  
+  .account-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .account-login {
+    font-weight: 600;
+    font-size: 16px;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  
+  .action-gear {
+    background: oklch(0.65 0.22 267 / 0.1);
+    border: none;
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .action-gear:hover {
+    background: oklch(0.65 0.22 267 / 0.2);
+  }
+  
+  .action-gear svg {
+    width: 16px;
+    height: 16px;
+    color: #5a4fc1;
+  }
+  
+  .card-content {
+    flex: 1;
+    margin-bottom: 12px;
+    min-width: 0;
+  }
+  
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    min-width: 0;
+    gap: 8px;
+  }
+  
+  .label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  .value {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+    text-align: right;
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .subscription-date {
+    font-size: 14px;
+    color: #059669;
+    word-break: break-word;
+    line-height: 1.3;
+    min-width: 0;
+    text-align: right;
+  }
+  
+  .card-payment {
+    margin-top: auto;
+  }
+  
+  .payment-btn {
+    width: 100%;
+    background: #6732ff;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .payment-btn:hover {
+    background: #5a2ae0;
+  }
+  
+  .payment-btn:active {
+    background: #4d24c0;
+  }
+}
+
+@media (max-width: 640px) {
+  
+  .account-card {
+    min-height: 180px;
+    padding: 14px;
+  }
+  
+  .account-login {
+    font-size: 15px;
+  }
+  
+  .label {
+    font-size: 13px;
+  }
+  
+  .value {
+    font-size: 13px;
+  }
+  
+  .subscription-date {
+    font-size: 13px;
+  }
+  
+  .payment-btn {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+ 
+  .account-card {
+    padding: 12px;
+    min-height: 170px;
+  }
+  
+  .account-login {
+    font-size: 14px;
+  }
+  
+  .label {
+    font-size: 12px;
+  }
+  
+  .value {
+    font-size: 12px;
+  }
+  
+  .payment-btn {
+    padding: 9px;
+    font-size: 14px;
+  }
+}
+
+/* Анимация для активных карточек */
+.account-card.active {
+  animation: pulse-card 2s ease-in-out;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+@keyframes pulse-card {
+  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+/* Состояния для мобильной версии */
+.mobile-states {
+  padding: 20px;
+}
+
+.mobile-states .none-account-cont,
+.mobile-states .load-cont {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-states .none-account-cont h2 {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
 </style>

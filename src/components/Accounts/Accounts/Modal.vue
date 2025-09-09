@@ -4,73 +4,96 @@
     <transition name="fade">
       <div
         class="action-list"
-        :style="{
+        :class="{ 'mobile-fullscreen': isMobile }"
+        :style="isMobile ? {} : {
           top: modalPosition.top + 'px',
           left: modalPosition.left + 'px',
         }"
       >
-        <span class="action" @click="handleSubmit">{{
-          t("modalAccount.settings")
-        }}</span>
+        <!-- Мобильный заголовок -->
+        <div v-if="isMobile" class="mobile-header">
+          <div class="account-info-mobile">
+            <AccountIcon :item="selectedItem" />
+            <span class="account-login-mobile">{{ selectedItem.login || '-' }}</span>
+          </div>
+          <button class="close-button" @click="closeModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
         <span
-          v-if="selectedItem.source != 'telegram'"
           class="action"
-          @click="changeGetScreenStation"
+          v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
+          @click="openTariff"
+          >Продлить</span
+        >
+        <span
+          class="action"
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          @click="handleSubmit"
+          >{{ t("modalAccount.settings") }}</span
+        >
+        <span
+          v-if="
+            selectedItem.source != 'telegram' &&
+            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
+          "
+          class="action"
+          @click="openScreen"
           >{{ t("modalAccount.screen") }}</span
         >
-        <span class="action action-on" @click="changeEnableStation">{{
-          t("modalAccount.on")
-        }}</span>
-        <span class="action" @click="forceStopActive">{{
-          t("modalAccount.off")
-        }}</span>
-        <span class="action" @click="openTariff">Тарифы</span>
-        <span class="action action-throw" @click="ChangeconfirmStationReset">{{
-          t("modalAccount.change")
-        }}</span>
-        <!-- <span
-          class="action-loading"
-          :class="{ 'flash-red': isFlashing }"
-          v-if="chatsStation === 'loading'"
-          @click.stop="handleDisabledChat"
-          >{{ t("modalAccount.chat") }}
-          <LoadingBalance />
-        </span> -->
-        <!-- <span
-          class="action-chat-false"
-          :class="{ 'flash-red': isFlashing }"
-          v-if="chatsStation === false"
-          @click.stop="handleDisabledChat"
-          >{{ t("modalAccount.chat") }}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 32 32"
-          >
-            <path
-              fill="currentColor"
-              d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14s14-6.3 14-14S23.7 2 16 2m-1.1 6h2.2v11h-2.2zM16 25c-.8 0-1.5-.7-1.5-1.5S15.2 22 16 22s1.5.7 1.5 1.5S16.8 25 16 25"
-            />
-          </svg>
-        </span> -->
-        <!-- <span
+        <span
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          class="action action-on"
+          @click="changeEnableStation"
+          >{{ t("modalAccount.on") }}</span
+        >
+        <span
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
           class="action"
-          v-if="chatsStation === true"
-          @click="connectToDatabaseAndNavigate"
-          >{{ t("modalAccount.chat") }}</span
-        > -->
-        <span class="action" @click="getNewProxy">{{
-          t("modalAccount.changeProxy")
-        }}</span>
-        <!-- <span class="action" @click="startEnableByQR('whatsapp')"
-          >Связать через QR</span
-        > -->
-        <!-- <span class="action" @click="handleSubmitCode">Связать через код</span> -->
+          @click="forceStopActive"
+          >{{ t("modalAccount.off") }}</span
+        >
+
+        <span
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          class="action action-throw"
+          @click="ChangeconfirmStationReset"
+          >{{ t("modalAccount.change") }}</span
+        >
+        <span
+        v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) && 
+              ['telegram', 'whatsapp'].includes(selectedItem.source) && 
+              chatsStation === 'loading'"
+        class="action-loading"
+      >
+        Чат <LoadingBalance/>
+      </span>
+      
+      <!-- Чат доступный для клика -->
+      <span
+        v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) && 
+              ['telegram', 'whatsapp'].includes(selectedItem.source) && 
+              (chatsStation === true || chatsStation === false)"
+        class="action"
+        @click="openChat"
+      >
+        Чат
+      </span>
+        <span
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          class="action"
+          @click="getNewProxy"
+          >{{ t("modalAccount.changeProxy") }}</span
+        >
         <span
           class="action action-delete"
           @click="ChangeconfirmStation"
           v-if="
+            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
             !(
               selectedItem.storage === 'binder' &&
               selectedItem.type === 'touchapi'
@@ -81,6 +104,22 @@
             )
           "
           >{{ t("modalAccount.deleteAccount") }}</span
+        >
+        <span
+          v-if="['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          class="action"
+          @click="updateAccountButton"
+          >Обновить аккаунт</span
+        >
+       
+        <span
+          v-if="
+            selectedItem.source != 'telegram' &&
+            ['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
+          "
+          class="action"
+          @click="deleteAccountButton"
+          >Удалить аккаунт</span
         >
       </div>
     </transition>
@@ -104,7 +143,6 @@
     :errorStationOff="errorStationOff"
     :loadingStop="loadingStop"
   />
-
   <ConfirmReset
     :loadingStart="loadingStart"
     :ChangeconfirmStationReset="ChangeconfirmStationReset"
@@ -113,8 +151,10 @@
     :changeStationLoadingModal="changeStationLoadingModal"
     :errorStationOn="errorStationOn"
     :errorStationOff="errorStationOff"
+    :changeForceStopItemData="changeForceStopItemData"
     :loadingStop="loadingStop"
   />
+  <ChatStation v-if="chatsStationModal" :close="changeChatsStationModal" :error="errorValueChat"/>
 </template>
 
 <script setup>
@@ -128,6 +168,7 @@ import {
   watch,
   computed,
 } from "vue";
+import ChatStation from "./ModalAccount/ChatStation.vue"
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
@@ -187,6 +228,9 @@ const props = defineProps({
   changeForceStopItemData: {
     type: Function,
   },
+  getAccounts: {
+    type: Function,
+  },
 });
 
 import { storeToRefs } from "pinia";
@@ -211,6 +255,54 @@ const handleSubmit = () => {
   props.closeModal();
 };
 const isFlashing = ref(false);
+
+const chatsStationModal = ref(false)
+
+const changeChatsStationModal = () => {
+  chatsStationModal.value = !chatsStationModal.value
+}
+
+const errorValueChat = ref('')
+
+const isMobile = computed(() => window.innerWidth <= 768);
+
+const navigateTo = (page, queryParams = {}) => {
+  router.push({
+    path: page,
+    query: queryParams
+  });
+};
+
+const openChat = () => {
+  console.log(chatsStation.value)
+  if (selectedItem.value.subscription_dt_to === null) {
+    chatsStationModal.value = true
+    errorValueChat.value = "tariff"
+  } else if (chatsStation.value === false) {
+    errorValueChat.value = 'noStarted'
+    chatsStationModal.value = true
+  } else {
+
+    navigateTo('/UserChats', { 
+      login: selectedItem.value.login, 
+      uuid: selectedItem.value.uuid,
+      type: selectedItem.value.type,
+      storage: selectedItem.value.storage,
+      source: selectedItem.value.source,
+      mode: "mailing"
+});
+  }
+}
+
+const openScreen = () => {
+  if (!selectedItem.value.step) {
+    errorValueChat.value = 'noStarted'
+    changeChatsStationModal()
+    return
+  }
+
+  props.changeGetScreenStation()
+}
 
 const openTariff = () => {
   props.changeTariffStation(selectedItem.value);
@@ -420,6 +512,98 @@ const createRequest = async (request) => {
     }, 5000);
     if (error.response) {
       console.error("error", error.response.data);
+    }
+  }
+};
+
+const updateAccountButton = async () => {
+  const { source, login, type, storage } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      `https://bapi88.developtech.ru/api/v1/vendors/updateAccount`,
+      {
+        source: source,
+        login: login,
+        type: type,
+        storage: storage,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (response.data.ok === true) {
+      stationLoading.loading = false;
+      setLoadingStatus(true, "success");
+      console.log("true responce");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    console.log("Огиька level1");
+    console.error(`error`, error);
+    stationLoading.loading = false;
+    setLoadingStatus(true, "error");
+
+    if (error.response) {
+      console.log("Огиька level 2");
+      console.error("error", error.response.data);
+      stationLoading.loading = false;
+      setLoadingStatus(true, "error");
+    }
+  }
+};
+
+const deleteAccountButton = async () => {
+  const { source, login, type, storage } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      `https://bapi88.developtech.ru/api/v1/vendors/deleteAccount`,
+      {
+        source: source,
+        login: login,
+        type: type,
+        storage: storage,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if ((response.data.ok = true)) {
+      chatStore.removeChat(login, source);
+      stationLoading.loading = false;
+      props.getAccounts();
+      setLoadingStatus(true, "success");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    console.log("Огиька level1");
+    console.error(`error`, error);
+    stationLoading.loading = false;
+    setLoadingStatus(true, "error");
+
+    if (error.response) {
+      console.log("Огиька level 2");
+      console.error("error", error.response.data);
+      stationLoading.loading = false;
     }
   }
 };
@@ -668,7 +852,7 @@ const resetAccount = async () => {
 <style scoped>
 .black-fon {
   position: fixed;
-  z-index: 5;
+  z-index: 1000;
   width: 100%;
   height: 100vh;
   background: rgba(117, 117, 117, 0.3);
@@ -676,35 +860,28 @@ const resetAccount = async () => {
   left: 0;
 }
 
-.action-chat-false {
-  font-weight: 400;
-  font-size: 14px;
-  color: #616161;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  cursor: not-allowed;
-  gap: 6px;
-}
-
+/* Стили для десктопной версии */
 .action-list {
   border-radius: 10px;
   width: 150px;
   height: auto;
   background: #ffffff;
-  position: sticky;
-  z-index: 20;
+  position: absolute;
+  z-index: 1010;
   display: flex;
   justify-content: center;
   flex-direction: column;
   margin: 12px;
   padding: 10px 0px 10px 10px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
+
 .action-list.fade-enter-active,
 .action-list.fade-leave-active {
   transition: opacity 0.5s ease;
 }
+
 .action-list.fade-enter,
 .action-list.fade-leave-to {
   opacity: 0;
@@ -725,6 +902,110 @@ const resetAccount = async () => {
   }
 }
 
+/* Стили для мобильной версии */
+.action-list.mobile-fullscreen {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  margin: 0;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: mobileFadeIn 0.3s forwards;
+}
+
+@keyframes mobileFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 16px 16px 0 0;
+}
+
+.account-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-login-mobile {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: #e5e7eb;
+}
+
+.close-button svg {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+/* Контент модалки для мобильных */
+.action-list.mobile-fullscreen .action,
+.action-list.mobile-fullscreen .action-loading {
+  padding: 16px;
+  font-size: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  margin: 0;
+}
+
+.action-list.mobile-fullscreen .action:last-child,
+.action-list.mobile-fullscreen .action-loading:last-child {
+  border-bottom: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.action-list.mobile-fullscreen .action:hover,
+.action-list.mobile-fullscreen .action-loading:hover {
+  background-color: #f3f4f6;
+  border-radius: 0;
+}
+
+/* Общие стили для действий */
+.action-chat-false {
+  font-weight: 400;
+  font-size: 14px;
+  color: #616161;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  cursor: not-allowed;
+  gap: 6px;
+}
+
 .action {
   font-weight: 400;
   font-size: 14px;
@@ -743,9 +1024,6 @@ const resetAccount = async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.action-loading {
   cursor: not-allowed;
   opacity: 0.6;
   transition: background-color 0.3s;
@@ -797,5 +1075,27 @@ const resetAccount = async () => {
 .action-throw:hover,
 .action-delete:hover {
   color: rgb(255, 0, 0);
+}
+
+/* Медиа-запрос для скрытия десктопной версии на мобильных */
+@media (max-width: 768px){
+  .action-list:not(.mobile-fullscreen) {
+    display: none;
+  }
+  
+  .action-list.mobile-fullscreen {
+    display: flex;
+  }
+}
+
+/* Медиа-запрос для скрытия мобильной версии на десктопе */
+@media (min-width: 769px) {
+  .action-list.mobile-fullscreen {
+    display: none;
+  }
+  
+  .action-list:not(.mobile-fullscreen) {
+    display: flex;
+  }
 }
 </style>

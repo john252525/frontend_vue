@@ -1,7 +1,7 @@
 <template>
   <div @click="AccountMenuStationOn" class="black-fon"></div>
-  <section class="account-menu-section">
-    <h2 class="email-user">{{ storedData }}</h2>
+  <section class="account-menu-section" :style="{ width: menuWidth }">
+    <h2 class="email-user">{{ email }}</h2>
     <div class="line"></div>
     <h2 class="out-account-button" @click="leaveAccount">
       {{ t("personalAccount.out") }}
@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 const router = useRouter();
@@ -19,22 +19,32 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const storedData = computed(() => accountStore.getAccountData);
 
-// Функция для обрезки длинных email
-const truncatedEmail = computed(() => {
-  const email = storedData.value;
-  if (!email) return "";
+const email = storedData.value;
+const menuWidth = ref('auto');
 
-  const maxLength = 20;
-  if (email.length <= maxLength) return email;
+// Функция для расчета ширины меню на основе длины email
+const calculateMenuWidth = () => {
+  if (!email) return 'auto';
+  
+  // Базовые отступы и padding
+  const basePadding = 40; // padding + margin
+  const charWidth = 10; // примерная ширина одного символа (можно настроить)
+  
+  // Рассчитываем ширину на основе длины email
+  const calculatedWidth = email.length * charWidth + basePadding;
+  
+  // Устанавливаем минимальную и максимальную ширину
+  return `min(max(${calculatedWidth}px, 200px), 90vw)`;
+};
 
-  const [username, domain] = email.split("@");
-  const usernameLength = Math.floor(maxLength / 2) - 3; // -3 для троеточия
-  const domainLength = maxLength - usernameLength - 3 - 1; // -1 для @
+// Обновляем ширину при изменении email
+watch(() => storedData.value, () => {
+  menuWidth.value = calculateMenuWidth();
+});
 
-  return `${username.substring(0, usernameLength)}...@${domain.substring(
-    0,
-    domainLength
-  )}`;
+// Инициализируем ширину при монтировании компонента
+onMounted(() => {
+  menuWidth.value = calculateMenuWidth();
 });
 
 const { t } = useI18n();
@@ -66,9 +76,10 @@ const leaveAccount = () => {
   right: 0;
   top: 65px;
   border-radius: 5px 0 0 5px;
-  width: 260px;
   background: var(--bg);
-  padding: 12px 0;
+  padding: 12px;
+  min-width: 200px; /* Минимальная ширина */
+  max-width: 90vw; /* Максимальная ширина */
 }
 
 .account-menu-section,
@@ -109,7 +120,6 @@ const leaveAccount = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90%;
   margin: 0 auto;
   padding: 0 10px;
 }
@@ -139,9 +149,8 @@ const leaveAccount = () => {
 
 @media (max-width: 1000px) {
   .account-menu-section {
-    width: 200px;
     background: #fff;
-    padding: 12px 0;
+    padding: 12px;
     border-radius: 10px 0 0 10px;
   }
 

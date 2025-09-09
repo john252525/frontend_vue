@@ -40,7 +40,10 @@ import { ref, computed } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import { useAccountStore } from "@/stores/accountStore";
+import { useBalanceStore } from "@/stores/balanceStore"; // Добавляем импорт store баланса
+
 const accountStore = useAccountStore();
+const balanceStore = useBalanceStore(); // Используем store баланса
 const token = computed(() => accountStore.getAccountToken);
 const apiUrl = import.meta.env.VITE_PAY_URL;
 
@@ -245,7 +248,7 @@ const buyTariff = async () => {
         domain: window.location.hostname,
         entity: "vendor",
         category: "tariff",
-        entity_uuid: selectTariff.value.uuid,
+        entity_uuid: selectedItem.value.uuid,
       },
       {
         headers: {
@@ -256,6 +259,10 @@ const buyTariff = async () => {
 
     if (response.data.success) {
       loadingPay.value = false;
+
+      // ОБНОВЛЯЕМ БАЛАНС ПОСЛЕ УСПЕШНОЙ ПОКУПКИ
+      await balanceStore.refreshBalance();
+
       props.changePaymentsStation(true, "success");
     } else {
       console.log("jib,r");

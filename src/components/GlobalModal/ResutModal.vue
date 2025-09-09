@@ -35,7 +35,7 @@
         </h2>
       </section>
       <section v-else class="loading-section-error">
-        <h2 class="title-error">
+        <h2 v-if="!stationLoading.text" class="title-error">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -48,6 +48,25 @@
             />
           </svg>
           {{ t("resultModal.messageFalse") }}
+          <img
+            @click="changeStationLoadingModal"
+            src="/account/close-error.svg"
+            alt=""
+          />
+        </h2>
+        <h2 v-else class="title-error">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+            />
+          </svg>
+          {{ stationLoading.text }}
           <img
             @click="changeStationLoadingModal"
             src="/account/close-error.svg"

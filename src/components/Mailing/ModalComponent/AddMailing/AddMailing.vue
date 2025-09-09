@@ -240,9 +240,16 @@ async function createWhatsAppBroadcast() {
       "error",
       error.response ? error.response.data : error.message
     );
-    changeStationLoading();
-    props.changeAddMailing();
-    setLoadingStatus(true, "error");
+    console.log(error.response.data.errors[0]);
+    if (error.response.data.errors[0] === "No active subscription found") {
+      setLoadingStatus(true, "error", "Ошибка! Тариф не куплен");
+      props.changeAddMailing();
+      changeStationLoading();
+    } else {
+      changeStationLoading();
+      props.changeAddMailing();
+      setLoadingStatus(true, "error");
+    }
   }
 }
 

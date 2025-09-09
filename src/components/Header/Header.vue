@@ -9,7 +9,10 @@
           alt="Меню для телефона"
         /> -->
 
-        <h2 class="logo-header">
+        <h2
+          v-if="!stationDomain.cosmetics.additionallyLogo"
+          class="logo-header"
+        >
           <img
             :src="stationDomain.cosmetics.urlLogo"
             class="logo-img"
@@ -17,24 +20,39 @@
           />
           {{ stationDomain.cosmetics.titleLogo }}
         </h2>
+        <div v-else class="img-logo">
+          <img
+            :src="stationDomain.cosmetics.urlLogo"
+            class="logo-img"
+            alt="Logo"
+          />
+          <img
+            :src="stationDomain.cosmetics.additionallyLogo"
+            class="logo-img"
+            alt="Logo"
+          />
+        </div>
       </article>
       <article class="user-cont">
         <h2
-          v-if="(balance || balance === 0) && !balanceError"
+          v-if="
+            (balanceStore.balance || balanceStore.balance === 0) &&
+            !balanceStore.balanceError
+          "
           @click="toggleBalanceStation"
           class="balance-user"
         >
-          {{ removeDecimalZeros(balance) }} ₽
+          {{ balanceStore.formattedBalance }}
         </h2>
         <h2
-          v-if="balanceLoading"
+          v-if="balanceStore.balanceLoading"
           @click="toggleBalanceStation"
           class="balance-user"
         >
           <LoadingBalance />
         </h2>
         <h2
-          v-if="balanceError"
+          v-if="balanceStore.balanceError"
           @click="toggleBalanceStation"
           class="balance-user"
         >
@@ -104,34 +122,16 @@
 </template>
 
 <script setup>
-import axios from "axios";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
-import TogleTheme from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomain";
+import { useBalanceStore } from "@/stores/balanceStore";
+
 const { stationDomain } = useDomain();
-
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
-
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-    // Optionally, update the error message ref
-  }
-};
-
-const balanceError = ref(false);
-const balanceLoading = ref(false);
+const balanceStore = useBalanceStore();
 
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
@@ -141,12 +141,6 @@ const props = defineProps({
     type: Function,
   },
 });
-
-const apiUrl = import.meta.env.VITE_PAY_URL;
-
-function removeDecimalZeros(value) {
-  return value.toString().replace(/\.00$/, "");
-}
 
 const balanseStation = ref(false);
 const AccountMenuStation = ref(false);
@@ -159,81 +153,14 @@ function toggleAccountMenu() {
   AccountMenuStation.value = !AccountMenuStation.value;
 }
 
-const balance = ref("");
-
-const regBalanceUser = async () => {
-  try {
-    balanceLoading.value = true;
-
-    const response = await axios.post(
-      `${apiUrl}/createUser`, // URL вашего бэкенда
-      {}, // Тело запроса, если не нужно отправлять дополнительные данные
-      {
-        headers: {
-          "Content-Type": "application/json", // Убедитесь, что заголовок указан
-          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "balance",
-        "get-payment-sum",
-        null,
-        response.data,
-        response.data
-      );
-    }
-    if (response.data.success) {
-      getBalance();
-    }
-  } catch (err) {
-    balanceLoading.value = false;
-    balanceError.value = true;
-    console.error("error", err.response ? err.response.data : err.message);
-  }
-};
-
-const getBalance = async () => {
-  try {
-    balanceLoading.value = true;
-
-    const response = await axios.post(
-      `${apiUrl}/getUserBalance`, // URL вашего бэкенда
-      {}, // Тело запроса, если не нужно отправлять дополнительные данные
-      {
-        headers: {
-          "Content-Type": "application/json", // Убедитесь, что заголовок указан
-          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "balance",
-        "get-payment-sum",
-        null,
-        response.data,
-        response.data
-      );
-    }
-    balanceLoading.value = false;
-    balance.value = response.data.balance;
-  } catch (err) {
-    balanceLoading.value = false;
-    balanceError.value = true;
-    console.error("error", err.response ? err.response.data : err.message);
-  }
-};
-
 const route = useRoute();
 const isChatPage = computed(() => {
-  return route.name === "Chats"; // Ensure "Chats" matches the route name for the chat page
+  return route.name === "Chats";
 });
 
-onMounted(regBalanceUser);
+onMounted(() => {
+  balanceStore.regBalanceUser();
+});
 </script>
 
 <style scoped>
@@ -261,6 +188,12 @@ onMounted(regBalanceUser);
   align-items: center;
   gap: 16px;
   width: 120px;
+}
+
+.img-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .balance-user {

@@ -83,7 +83,7 @@ onMounted(() => {
   script.onload = () => {
     window.google.accounts.id.initialize({
       client_id:
-        "536063598199-18bggcm8gcrsf1o92jejfkfmktt73c9g.apps.googleusercontent.com",
+        "821406194953-sieipujqvnkftu6ka4tbccsom45h0srr.apps.googleusercontent.com",
       callback: handleCredentialResponse,
       ux_mode: "popup",
     });

@@ -1,40 +1,52 @@
 <template>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section class="telegram-code-section">
-    <LoadingModal :stationLoading="station.loading" />
-    <ResultModalTrue v-if="station.resultTrue" />
-    <section v-if="station.code" class="auth-code">
+  <div class="code-component">
+    <div class="code-header">
+      <h3 class="code-title">Код подтверждения</h3>
+      <button class="code-close" @click="handleClose">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="code-body">
       <div class="input-cont">
-        <label for="code"> {{ t("enable.ChallengeRequired.code") }}</label>
+        <label for="code">Введите код подтверждения</label>
         <input
-          class="num-input"
+          class="code-input"
           type="number"
           v-model="formData.code"
           required
+          placeholder="000000"
         />
       </div>
+    </div>
+    
+    <div class="code-footer">
       <button
         @click="solveChallenge"
         v-if="station.error.challengeRequired"
-        class="next-button"
+        class="code-button"
       >
-        {{ t("enable.ChallengeRequired.next") }}
+        Подтвердить
       </button>
       <button
         @click="twoFactorAuth"
         v-if="station.error.twoFactor"
-        class="next-button"
+        class="code-button"
       >
-        {{ t("enable.ChallengeRequired.next") }}
+        Подтвердить
       </button>
-    </section>
-  </section>
+    </div>
+
+    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+    <LoadingModal :stationLoading="station.loading" />
+    <ResultModalTrue v-if="station.resultTrue" />
+  </div>
 </template>
-<!--   {{ t("personalAccount.out") }} -->
+
 <script setup>
 import { inject, reactive, ref, onMounted, computed } from "vue";
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -64,7 +76,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -81,6 +92,10 @@ const station = reactive({
 const formData = reactive({
   code: null,
 });
+
+const handleClose = () => {
+  // Логика закрытия компонента
+};
 
 const forceStop = async () => {
   let params = {
@@ -322,58 +337,151 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.auth-code {
+.code-component {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 20px;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+}
+
+.code-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.code-close {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.code-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.code-body {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.num-input {
-  border-radius: 5px;
-  width: 200px;
-  height: 70px;
-  font-weight: 400;
-  font-size: 26px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
-  text-align: center;
-}
-
-.num-input-error {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 300px;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #be2424;
-  background: #ffeaea;
-}
-
 .input-cont {
   display: flex;
-  align-self: flex-start;
   flex-direction: column;
+  gap: 12px;
+  width: 100%;
 }
 
 label {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
-  margin-bottom: 16px;
-  color: rgb(78, 78, 78);
+  color: #495057;
+  text-align: center;
 }
 
-.next-button {
+.code-input {
+  border-radius: 8px;
   width: 100%;
-  height: 40px;
-  border-radius: 5px;
-  background-color: #4950ca;
+  height: 60px;
+  font-weight: 500;
+  font-size: 20px;
+  color: #000;
+  border: 1px solid #e9ecef;
+  background: #f8f9fa;
+  text-align: center;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: #4950ca;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(73, 80, 202, 0.1);
+}
+
+.code-input::placeholder {
+  color: #adb5bd;
+  font-weight: 400;
+}
+
+.code-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.code-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #4950ca;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
   font-size: 14px;
-  color: rgb(255, 255, 255);
   font-weight: 600;
-  margin-top: 20px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.code-button:hover {
+  background: #3a40a0;
+}
+
+.code-button:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  .code-component {
+    gap: 16px;
+  }
+  
+  .code-input {
+    height: 54px;
+    font-size: 18px;
+    padding: 0 14px;
+  }
+  
+  .code-button {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .code-input {
+    height: 50px;
+    font-size: 16px;
+  }
+  
+  .code-title {
+    font-size: 16px;
+  }
 }
 </style>

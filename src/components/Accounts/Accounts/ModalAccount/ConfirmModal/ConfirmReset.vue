@@ -67,6 +67,9 @@ const props = defineProps({
   loadingStop: {
     type: Function,
   },
+  changeForceStopItemData: {
+    type: Function,
+  },
 });
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
@@ -117,6 +120,7 @@ const createRequest = async (request) => {
       if (request === "getNewProxy") {
         setLoadingStatus(true, "success");
         props.loadingStop();
+        props.changeForceStopItemData(selectedItem.value);
       } else {
         console.log(`${request} - Успешно`);
       }

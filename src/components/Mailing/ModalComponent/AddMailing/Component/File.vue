@@ -1,215 +1,208 @@
 <template>
-  <div class="mailing-creator">
-    <div class="creator-body">
-      <div class="blocks-container">
-        <!-- Блок контактов -->
-        <div class="creator-block">
-          <div class="block-header">
-            <div class="block-number">1</div>
-            <h2>Контакты</h2>
-          </div>
-
-          <div class="block-content">
-            <div class="form-group">
-              <label>Введите номера:</label>
-              <textarea
-                v-model="inputText"
-                class="form-control"
-                :class="{ 'input-error': messageContactError }"
-                rows="4"
-                placeholder="По одному номеру на строку"
-              ></textarea>
-              <div v-if="messageContactError" class="error-message">
-                Необходимо указать номера
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Колонка в базе:</label>
-              <select v-model="selectedLetter" class="form-control">
-                <option
-                  v-for="letter in alphabet"
-                  :key="letter"
-                  :value="letter"
-                >
-                  {{ letter }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Или загрузите файл:</label>
-              <div class="file-upload-wrapper">
-                <label
-                  class="file-upload-label"
-                  :class="{ 'input-error': errorFile }"
-                >
-                  {{ otherFile ? otherFile.name : "Выберите файл" }}
-                  <input
-                    type="file"
-                    @change="handleOtherFileUpload"
-                    class="file-input"
-                  />
-                </label>
-                <button
-                  v-if="otherFile"
-                  @click="otherFile = null"
-                  class="file-clear-btn"
-                >
-                  &times;
-                </button>
-              </div>
-              <div v-if="errorFile" class="error-message">
-                Необходим файл или номера
-              </div>
-            </div>
-            <div class="creator-footer">
-              <button @click="cancelMailing" class="btn-cancel">
-                Отменить
-              </button>
-              <button @click="createMailing" class="btn-submit">
-                Создать рассылку
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Блок сообщения -->
-        <div class="creator-block">
-          <div class="block-header">
-            <div class="block-number">2</div>
-            <h2>Сообщение</h2>
-          </div>
-
-          <div class="block-content">
-            <div class="form-group">
-              <label>Введите текст сообщения:</label>
-              <textarea
-                v-model="messageText"
-                class="form-control"
-                :class="{ 'input-error': messageError }"
-                rows="6"
-                placeholder="Текст сообщения"
-              ></textarea>
-              <div v-if="messageError" class="error-message">
-                Введите текст сообщения
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Добавить вложение:</label>
-              <div class="file-upload-wrapper">
-                <label class="file-upload-label">
-                  {{ imageFile ? imageFile.name : "Выберите изображение" }}
-                  <input
-                    type="file"
-                    @change="handleImageUpload"
-                    accept="image/*"
-                    class="file-input"
-                  />
-                </label>
-                <button
-                  v-if="imageFile"
-                  @click="imageFile = null"
-                  class="file-clear-btn"
-                >
-                  &times;
-                </button>
-              </div>
-              <div v-if="imagePreview" class="image-preview">
-                <img :src="imagePreview" alt="Превью" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Блок настроек -->
-        <div class="creator-block">
-          <div class="block-header">
-            <div class="block-number">3</div>
-            <h2>Настройки</h2>
-          </div>
-
-          <div class="block-content">
-            <div class="form-group">
-              <label>Название:</label>
+  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+  <section class="file-section">
+    <section class="message-section">
+      <article class="alphabet-comp">
+        <h2 class="title">{{ t("addMailing.poleNumber") }}:</h2>
+        <select
+          v-model="selectedLetter"
+          class="alphabet-select"
+          @change="selectAlphavit(selectedLetter)"
+        >
+          <option v-for="letter in alphabet" :key="letter" :value="letter">
+            {{ letter }}
+          </option>
+        </select>
+      </article>
+      <article class="textarea-comp">
+        <div class="textextarea-cont">
+          <textarea
+            :placeholder="t('addMailing.placeContact')"
+            :class="{ error: messageContactError }"
+            v-model="inputText"
+            @input="updateArray"
+            class="message-text"
+            name="text"
+            id="text"
+          ></textarea>
+          <div class="file-upload-container">
+            <div class="file-cont">
+              <h2 class="title">{{ t("addMailing.number") }}:</h2>
+              <label
+                for="other-upload"
+                class="file-upload-label"
+                :class="{ error: errorFile }"
+                >{{ t("addMailing.loadFile") }}</label
+              >
               <input
-                v-model="nameMailing"
-                type="text"
-                class="form-control"
-                placeholder="Название рассылки"
+                type="file"
+                id="other-upload"
+                @change="handleOtherFileUpload"
+                class="file-input"
+              />
+              <div v-if="otherFile" class="file-preview">
+                <p class="file-name">{{ otherFile.name }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="textextarea-cont">
+          <textarea
+            v-model="messageText"
+            class="message-text"
+            :placeholder="t('addMailing.placeMessage')"
+            :class="{ error: messageError }"
+            name="text"
+            id="text"
+          ></textarea>
+          <div class="file-upload-container">
+            <div class="file-cont">
+              <h2 class="title">{{ t("addMailing.investment") }}:</h2>
+              <label for="image-upload" class="file-upload-label">{{
+                t("addMailing.loadFile")
+              }}</label>
+              <input
+                type="file"
+                id="image-upload"
+                @change="handleImageUpload"
+                accept="image/*"
+                class="file-input"
               />
             </div>
-
-            <div class="form-group">
-              <label>Дни отправки:</label>
-              <div class="days-container">
-                <label
-                  v-for="(day, index) in days"
-                  :key="index"
-                  class="day-item"
-                  :class="{ active: selectedDays.includes(index + 1) }"
-                >
-                  <input
-                    type="checkbox"
-                    :value="index + 1"
-                    v-model="selectedDays"
-                    class="day-checkbox"
-                  />
-                  {{ day }}
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Время отправки:</label>
-              <div class="time-range">
-                <input type="time" v-model="startTime" class="time-input" />
-                <span class="time-separator">—</span>
-                <input type="time" v-model="endTime" class="time-input" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Интервал (мин):</label>
-              <div class="interval-range">
-                <select v-model="startNum" class="interval-select">
-                  <option v-for="minute in minutes" :value="minute">
-                    {{ minute }}
-                  </option>
-                </select>
-                <span class="interval-separator">—</span>
-                <select v-model="endNum" class="interval-select">
-                  <option v-for="minute in minutes" :value="minute">
-                    {{ minute }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Доп. настройки:</label>
-              <div class="options-list">
-                <label class="option-item">
-                  <input type="checkbox" v-model="removeDuplicates" />
-                  <span class="option-checkmark"></span>
-                  Удалять дубликаты
-                </label>
-                <label class="option-item">
-                  <input type="checkbox" v-model="sendOnlyExistingDialogs" />
-                  <span class="option-checkmark"></span>
-                  Только диалоги
-                </label>
-                <label class="option-item">
-                  <input type="checkbox" v-model="sendMessagesRandomOrder" />
-                  <span class="option-checkmark"></span>
-                  Случайный порядок
-                </label>
-              </div>
+            <div v-if="imageFile" class="file-preview">
+              <p class="file-name">{{ imageFile.name }}</p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+      </article>
+    </section>
+    <section class="info-section">
+      <article class="name-comp">
+        <h2 class="title">{{ t("addMailing.name") }}:</h2>
+        <input v-model="nameMailing" type="text" class="name-input" />
+      </article>
+
+      <article class="days-comp">
+        <h2 class="title">{{ t("addMailing.weekDay") }}:</h2>
+        <div class="checkbox-group">
+          <div
+            v-for="(day, index) in days"
+            :key="index"
+            class="checkbox-container"
+          >
+            <input
+              type="checkbox"
+              :id="'day-' + (index + 1)"
+              :value="index + 1"
+              v-model="selectedDays"
+              @change="updateSelectedDays"
+            />
+            <label class="day-text" :for="'day-' + (index + 1)">
+              <span class="custom-checkbox"></span>
+              {{ day }}
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <article class="title-comp">
+        <h2 class="title">{{ t("addMailing.time") }}:</h2>
+        <div class="time-cont">
+          <div class="time-selection">
+            <label class="label-time" for="start-time">{{
+              t("addMailing.c")
+            }}</label>
+            <input
+              type="time"
+              id="start-time"
+              v-model="startTime"
+              @change="updateTimes"
+            />
+          </div>
+          <div class="time-selection">
+            <label class="label-time" for="end-time">{{
+              t("addMailing.po")
+            }}</label>
+            <input
+              type="time"
+              id="end-time"
+              v-model="endTime"
+              @change="updateTimes"
+            />
+          </div>
+        </div>
+      </article>
+      <article class="time-comp">
+        <h2 class="title-mess">{{ t("addMailing.timeout") }}:</h2>
+        <div class="time-cont">
+          <div class="time-selection">
+            <label class="label-time" for="start-num">{{
+              t("addMailing.ot")
+            }}</label>
+            <select class="time-select" id="start-num" v-model="startNum">
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
+          </div>
+          <div class="time-selection">
+            <label class="label-time" for="end-num">{{
+              t("addMailing.do")
+            }}</label>
+            <select class="time-select" id="end-num" v-model="endNum">
+              <option v-for="minute in minutes" :key="minute" :value="minute">
+                {{ minute }}
+              </option>
+            </select>
+            <p class="min">{{ t("addMailing.min") }}.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="settings-section">
+      <article class="remove-duplicates-comp">
+        <div class="checkbox-container">
+          <input
+            type="checkbox"
+            id="remove-duplicates"
+            v-model="removeDuplicates"
+          />
+          <label class="settings-text" for="remove-duplicates">
+            <span class="custom-checkbox"></span>
+            {{ t("addMailing.checkbox.one") }}
+          </label>
+        </div>
+
+        <div class="checkbox-container">
+          <input
+            type="checkbox"
+            id="existing-dialogs"
+            v-model="sendOnlyExistingDialogs"
+          />
+          <label class="settings-text" for="existing-dialogs">
+            <span class="custom-checkbox"></span>
+            {{ t("addMailing.checkbox.two") }}
+          </label>
+        </div>
+
+        <div class="checkbox-container">
+          <input
+            type="checkbox"
+            id="random-order"
+            v-model="sendMessagesRandomOrder"
+          />
+          <label class="settings-text" for="random-order">
+            <span class="custom-checkbox"></span>
+            {{ t("addMailing.checkbox.three") }}
+          </label>
+        </div>
+      </article>
+    </section>
+    <button @click="createMailing" class="create">
+      {{ t("addMailing.button") }}
+    </button>
+  </section>
+  <LoadMoadal :stationLoading="stationLoading" />
 </template>
 
 <script setup>
@@ -430,486 +423,418 @@ const createMailing = () => {
 </script>
 
 <style scoped>
-/* Основные стили */
-.mailing-creator {
-  height: 100%;
+.message-text {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--input);
+  padding-left: 10px;
+  padding-top: 10px;
+  max-width: 400px;
+  min-width: 400px;
+  max-height: 80px;
+  min-height: 80px;
+  color: var(--text);
+}
+
+.message-text.error {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f6f6f6;
+  padding-left: 10px;
+  padding-top: 10px;
+  max-width: 400px;
+  min-width: 400px;
+  max-height: 80px;
+  min-height: 80px;
+  border: 1px solid #fa7171;
+}
+
+.message-text.active {
+  max-width: 255px;
+  min-width: 255px;
+  max-height: 97px;
+  min-height: 97px;
+}
+
+.textextarea-cont {
   display: flex;
+  align-items: flex-start;
   flex-direction: column;
+  gap: 8px;
 }
 
-.creator-header {
-  padding: 24px 32px;
-  background: white;
-  border-bottom: 1px solid #e1e5eb;
-}
-
-.creator-header h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #2d3748;
-}
-
-.creator-body {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.blocks-container {
-  --min-block-width: 400px;
-  --gap: 20px;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  /* grid-template-columns: repeat(auto-fit, minmax(var(--min-block-width), 1fr)); */
-  gap: 20px;
-  height: 100%;
-
-  /* Для широких экранов - 3 колонки */
-  /* @media (min-width: 1500px) {
-    grid-template-columns: repeat(3, minmax(var(--min-block-width), 1fr));
-    overflow: visible;
-  } */
-
-  /* Средние экраны - горизонтальный скролл */
-  /* @media (max-width: 1499px) and (min-width: 1001px) {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 15px; 
-  } */
-
-  /* Узкие экраны - 2 колонки */
-  @media (max-width: 1000px) and (min-width: 769px) {
-    grid-template-columns: repeat(2, 1fr);
-    overflow-y: auto;
-  }
-
-  /* Мобильные - 1 колонка */
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    overflow-y: auto;
-  }
-}
-
-/* Блоки */
-.creator-block {
-  height: 100%;
+.file-section {
   display: flex;
-  flex-direction: column;
-  min-height: 0;
-
-  /* @media (max-width: 1499px) and (min-width: 1001px) {
-    min-width: calc(1500 - 20);
-    scroll-snap-align: start;
-    flex: 0 0 auto;
-  } */
-}
-
-.block-header {
-  display: flex;
-  align-items: center;
-  padding: 20px 24px;
-  background: #f8fafc;
-  border-bottom: 1px solid #edf2f7;
-}
-
-.block-number {
-  width: 28px;
-  height: 28px;
-  background: #4950ca;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin-right: 16px;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 0px;
 }
 
-.block-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
-}
-
-.block-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px; /* Место для кнопок */
-}
-/* Формы */
-.form-group {
-  margin-bottom: 0;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.form-control {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.2s;
-  background: #f8fafc;
-}
-
-.form-control:focus {
-  border-color: #4950ca;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(73, 80, 202, 0.1);
-  background: white;
-}
-
-.input-error {
-  border-color: #f56565 !important;
-}
-
-.error-message {
-  color: #f56565;
-  font-size: 13px;
-  margin-top: 8px;
-}
-
-textarea.form-control {
-  min-height: 120px;
-  width: 400px;
-  box-sizing: border-box;
-  resize: vertical;
-}
-
-/* Загрузка файлов */
-.file-upload-wrapper {
+.message-section {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.file-upload-label {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px dashed #cbd5e0;
-  border-radius: 8px;
-  background: #f8fafc;
-  font-size: 14px;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-upload-label:hover {
-  border-color: #a0aec0;
-  background: #edf2f7;
-}
-
-.file-input {
-  display: none;
-}
-
-.file-clear-btn {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 0 6px;
-  line-height: 1;
-}
-
-.file-clear-btn:hover {
-  color: #718096;
-}
-
-.image-preview {
-  margin-top: 12px;
-  max-width: 100%;
-  max-height: 180px;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-/* Дни недели */
-.days-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.day-item {
-  padding: 10px;
-  text-align: center;
-  border-radius: 6px;
-  background: #f8fafc;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.day-item.active {
-  background: #4950ca;
-  color: white;
-}
-
-.day-checkbox {
-  display: none;
-}
-
-/* Время и интервал */
-.time-range,
-.interval-range {
+.remove-duplicates-comp {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
 }
 
-.time-input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  background: #f8fafc;
-}
-
-.time-separator {
-  color: #a0aec0;
-  font-size: 14px;
-}
-
-.interval-select {
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
-  background: #f8fafc;
-  flex: 1;
-}
-
-.interval-separator {
-  color: #a0aec0;
-  font-size: 14px;
-}
-
-/* Опции */
-.options-list {
+.info-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.option-item {
+.days-comp {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #4a5568;
-  cursor: pointer;
+  gap: 14px;
 }
 
-.option-checkmark {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
+.title {
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.title-mess {
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-container {
+  display: flex;
   position: relative;
-  transition: all 0.2s;
+  margin: 10px 0;
 }
 
-.option-item input:checked + .option-checkmark {
-  background: #4950ca;
-  border-color: #4950ca;
+input[type="checkbox"] {
+  display: none; /* Скрываем стандартный чекбокс */
 }
 
-.option-item input:checked + .option-checkmark::after {
+label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  position: relative;
+}
+
+.settings-text {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  position: relative;
+}
+
+.label-time {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  position: relative;
+}
+
+.custom-checkbox {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  border-radius: 4px; /* Скругление углов */
+  background-color: #d9d9d9; /* Цвет фона */
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+input[type="checkbox"]:checked + label .custom-checkbox {
+  background: oklch(0.541 0.198 267);
+}
+
+input[type="checkbox"]:checked + label .custom-checkbox::after {
   content: "";
   position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
+  left: 6px;
+  top: 2.5px;
+  width: 3px;
+  height: 7px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-@media (hover: hover) {
-  .blocks-container {
-    scroll-behavior: smooth;
-  }
+.time-selection {
+  display: flex;
+  align-items: center;
 }
 
-/* Кнопки */
-.creator-footer {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  padding: 20px 0;
-  margin-top: auto;
-  border-top: 1px solid #e1e5eb;
+.title-comp {
+  display: flex;
+  align-items: center;
 }
 
-.btn-cancel,
-.btn-submit {
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
+.time-cont {
+  display: flex;
+  align-items: center;
+}
+
+input[type="time"] {
+  padding: 4px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  outline: none;
+  font-size: 12px;
+  transition: border-color 0.3s;
+  margin-left: 6px;
+}
+
+input[type="time"]:focus {
+  border-color: #0056b3;
+}
+
+.time-comp {
+  display: flex;
+  align-items: center;
+}
+
+.time-select {
+  padding: 4px;
+  font-size: 14px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.3s;
+  margin-left: 6px;
+}
+
+.min {
+  margin-left: 6px;
+}
+
+.upload-file-comp {
+  display: flex;
+  align-items: center;
+}
+
+.file-upload-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.file-cont {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.file-upload-label {
+  margin-right: 10px;
+}
+
+.file-input {
+  display: none; /* Скрываем стандартный input */
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 4px 8px;
+  background: oklch(0.541 0.198 267);
+  color: var(--text);
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.3s;
+  font-size: 12px;
 }
 
-.btn-cancel {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #4a5568;
+.file-upload-label.error {
+  background: red;
 }
 
-.btn-cancel:hover {
-  background: #f8fafc;
-  border-color: #cbd5e0;
+.file-upload-label.error {
+  background-color: #e65f5f;
 }
 
-.btn-submit {
-  background: #4950ca;
-  border: none;
-  color: white;
+.file-upload-label:hover {
+  background-color: #3748a1;
 }
 
-.btn-submit:hover {
-  background: #3a40b0;
+.file-preview {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
 }
 
-/* @media (max-width: 1500px) {
-  textarea.form-control {
-    min-height: 120px;
-    width: 350px;
-    box-sizing: border-box;
-    resize: vertical;
+.image-preview {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.file-name {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.alphabet-comp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.alphabet-select {
+  padding: 4px;
+  font-size: 12px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.alphabet-select:focus {
+  border-color: #0056b3;
+}
+
+.create {
+  border-radius: 5px;
+  width: 100%;
+  height: 34px;
+  background: oklch(0.541 0.198 267);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+  transition: all 0.25s;
+  margin-bottom: 36px;
+}
+
+.name-comp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.name-input {
+  border: 1px solid #000;
+  border-radius: 3px;
+  padding: 4px 8px;
+  width: 80px;
+  height: 14px;
+}
+
+.textarea-comp {
+  display: flex;
+  align-items: center;
+  /* flex-direction: column; */
+  gap: 10px;
+}
+
+@media (max-width: 1150px) {
+  .message-text {
+    max-width: 250px;
+    min-width: 250px;
+    max-height: 80px;
+    min-height: 80px;
   }
 
-  .creator-block {
-    height: 100%;
-    width: 350px;
-    display: flex;
+  .message-text.error {
+    max-width: 250px;
+    min-width: 250px;
+    max-height: 80px;
+    min-height: 80px;
+    border: 1px solid #fa7171;
+  }
+}
+
+@media (max-width: 800px) {
+  .message-text {
+    max-width: 200px;
+    min-width: 200px;
+    max-height: 80px;
+    min-height: 80px;
+  }
+
+  .message-text.error {
+    max-width: 200px;
+    min-width: 200px;
+    max-height: 80px;
+    min-height: 80px;
+    border: 1px solid #fa7171;
+  }
+}
+
+@media (max-width: 570px) {
+  .title-mess {
+    width: 130px;
+  }
+
+  .days-comp {
+    align-items: flex-start;
+    gap: 4px;
     flex-direction: column;
-    min-height: 0;
   }
 }
 
-@media (max-width: 1360px) {
-  textarea.form-control {
-    min-height: 120px;
-    width: 300px;
-    box-sizing: border-box;
-    resize: vertical;
+@media (max-width: 450px) {
+  .message-text {
+    max-width: 300px;
+    min-width: 300px;
   }
 
-  .creator-block {
-    height: 100%;
-    width: 300px;
-    display: flex;
+  .message-text.error {
+    max-width: 300px;
+    min-width: 300px;
+  }
+  .title-mess {
+    width: 130px;
+  }
+
+  .days-comp {
+    align-items: flex-start;
+    gap: 4px;
     flex-direction: column;
-    min-height: 0;
-  }
-} */
-
-@media (max-width: 1200px) {
-  textarea.form-control {
-    min-height: 120px;
-    width: 300px;
-    box-sizing: border-box;
-    resize: vertical;
   }
 
-  .creator-block {
-    height: 100%;
-    width: 300px;
-    display: flex;
+  .title-comp {
     flex-direction: column;
-    min-height: 0;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .blocks-container {
-    /* width: 300px; */
-    gap: 20px;
-  }
-}
-
-@media (max-width: 1000px) {
-  textarea.form-control {
-    min-height: 120px;
-    width: 300px;
-    box-sizing: border-box;
-    resize: vertical;
-  }
-
-  .block-content {
-    padding-bottom: 0px; /* Место для кнопок */
-  }
-
-  .creator-block {
-    height: 100%;
-    width: 300px;
-    display: flex;
+  .time-comp {
     flex-direction: column;
-    min-height: 0;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .label-time {
+    padding-left: 0px;
+  }
+
+  .time-cont {
+    gap: 14px;
+  }
+  .settings-text {
+    font-size: 16px;
+    width: 200px;
+  }
+
+  .day-text {
+    font-size: 12px;
   }
 }
-
-@media (max-width: 768px) {
-  .creator-header {
-    padding: 20px 24px;
-  }
-
-  .creator-body {
-    padding: 20px;
-  }
-
-  .days-container {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .creator-footer {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .btn-cancel,
-  .btn-submit {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .days-container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .block-content {
-    padding: 20px;
-  }
-
-  .creator-header {
-    padding: 16px 20px;
-  }
-
-  .creator-body {
-    padding: 16px;
-  }
-}
-</style
+</style>

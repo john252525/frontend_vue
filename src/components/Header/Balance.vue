@@ -117,7 +117,19 @@ const getBalance = async () => {
 
 const navigateTo = (page) => {
   props.balanceStationOn();
-  router.push(page);
+  
+  if (typeof page === 'object' && page.query) {
+    // Если page - объект с query, добавляем параметр
+    page.query.payment = 'create';
+    router.push(page);
+  } else if (typeof page === 'string') {
+    // Если page - строка, добавляем параметр к URL
+    const separator = page.includes('?') ? '&' : '?';
+    router.push(`${page}${separator}payment=create`);
+  } else {
+    // Для других случаев
+    router.push(page);
+  }
 };
 
 onMounted(getBalance);

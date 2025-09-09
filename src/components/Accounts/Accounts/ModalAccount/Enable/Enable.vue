@@ -2,15 +2,28 @@
   <div @click="allStop" class="black-fon"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
-    <QrCode ref="subComponentRef" v-if="station.qrCode" />
+    <QrCode
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeForceStopItemData="changeForceStopItemData"
+      ref="subComponentRef"
+      v-if="station.qrCode"
+      :changeEnableStation="changeEnableStation"
+    />
     <GetCode ref="subComponent" v-if="station.getCode" />
-    <ChallengeRequired v-if="station.ChallengeRequired" />
+    <ChallengeRequired :openEnableMenuTrue="openEnableMenuTrue" :changeChallengeRequired="changeChallengeRequired" v-if="station.ChallengeRequired" />
     <LoadingModal
       :textLoadin="station.text"
       :stationLoading="station.stationLoading"
+      :showCancelButton="true"
+      :closeBoolean="true"
+      :close="changeEnableStation"
     />
     <ResultModal v-if="station.result" />
-    <ResultModalTrue v-if="station.resultTrue" />
+    <ResultModalTrue
+      :changeEnableStation="changeEnableStation"
+      :changeChallengeRequired="changeChallengeRequired"
+      v-if="station.resultTrue"
+    />
   </section>
 </template>
 
@@ -67,6 +80,16 @@ const station = reactive({
   resultTrue: false,
   text: "",
 });
+
+const changeChallengeRequired = ( ) => {
+  station.ChallengeRequired = false
+}
+
+const openEnableMenuTrue = () => {
+  station.resultTrue = !station.resultTrue;
+  station.qrCode = false;
+  station.ChallengeRequired = false
+};
 
 const subComponent = ref(null);
 const subComponentRef = ref(null);
@@ -247,6 +270,9 @@ const setState = async (request) => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
+    } else {
+      station.result = true;
+      station.stationLoading = false;
     }
   } catch (error) {
     console.error(`error`, error);
