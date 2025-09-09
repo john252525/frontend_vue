@@ -6,7 +6,34 @@
   />
   <section class="login-section">
     <form>
-      <h2 class="title">{{ t("login.title") }}</h2>
+      <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
+        {{ t("login.title") }} 
+        <div class="logo-cont">
+          в
+          <img
+            class="url-img-logo"
+            :src="stationDomain.cosmetics.urlLogo"
+            alt=""
+          />
+          <img
+            class="url-img-logo-text"
+            :src="stationDomain.cosmetics.additionallyLogo"
+            alt=""
+          />
+        </div>
+      </h2>
+      <h2 class="title" v-else>
+        {{ t("login.title") }} 
+        <div class="logo-cont">
+          в
+          <img
+            class="url-img-logo"
+            :src="stationDomain.cosmetics.urlLogo"
+            alt=""
+          />
+          <h2 class="b-logo">{{ stationDomain.cosmetics.titleLogo }}</h2>
+        </div>
+      </h2>
       <div class="input-cont">
         <label class="name-input" for="name">{{ t("login.mail") }}</label>
         <input
@@ -60,6 +87,7 @@
         }}</span>
       </p>
     </form>
+    <!-- <LoginForGoogle class="login-for-google" /> -->
   </section>
 </template>
 
@@ -71,7 +99,11 @@ import { useAccountStore } from "@/stores/accountStore";
 import { useI18n } from "vue-i18n";
 import { useThemeStore } from "@/stores/theme";
 import axios from "axios";
+import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import useFrontendLogger from "@/composables/useFrontendLogger";
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
 
 const { t } = useI18n();
 const router = useRouter();
@@ -308,6 +340,29 @@ const navigateTo = (page) => {
   color: var(--text);
   text-align: left;
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.b-logo {
+  font-weight: 600;
+  font-size: 28px;
+  text-align: left;
+}
+
+.logo-cont {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.url-img-logo-text {
+  width: 80px;
+}
+
+.url-img-logo {
+  width: 40px;
 }
 
 .fade-enter-active,
@@ -438,6 +493,10 @@ input {
 }
 
 @media (max-width: 450px) {
+  .logo-cont {
+    display: none;
+  }
+
   .login-section {
     width: 350px;
     height: 504px;

@@ -7,7 +7,34 @@
   <section v-if="!sendEmail" class="registration-section">
     <form @submit.prevent="logAccoutn">
       <div class="title-cont">
-        <h2 class="title">{{ t("registration.title") }}</h2>
+        <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
+         Регистрация 
+          <div class="logo-cont">
+            в
+            <img
+              class="url-img-logo"
+              :src="stationDomain.cosmetics.urlLogo"
+              alt=""
+            />
+            <img
+              class="url-img-logo-text"
+              :src="stationDomain.cosmetics.additionallyLogo"
+              alt=""
+            />
+          </div>
+        </h2>
+        <h2 class="title" v-else>
+          Регистрация
+          <div class="logo-cont">
+            в
+            <img
+              class="url-img-logo"
+              :src="stationDomain.cosmetics.urlLogo"
+              alt=""
+            />
+            <h2 class="b-logo">{{ stationDomain.cosmetics.titleLogo }}</h2>
+          </div>
+        </h2>
       </div>
 
       <div class="input-cont">
@@ -146,6 +173,7 @@ import { useStationLoading } from "@/composables/useStationLoading";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useI18n } from "vue-i18n";
 
+
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
@@ -165,6 +193,9 @@ const emailError = ref("");
 const passwordError = ref("");
 const passwordConfirmationError = ref("");
 const checkboxError = ref("");
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
 
 const inputStyle = reactive({
   incorrectPassword: false,
@@ -295,8 +326,8 @@ const loginAccount = async () => {
       `https://bapi88.developtech.ru/api/v1/auth/register`,
       {
         email: formData.login,
+        ref_id: route.query.ref,
         password: formData.password,
-        type: "frontend_vue",
       },
       {
         headers: {
@@ -324,7 +355,7 @@ const loginAccount = async () => {
 
     if (response.data.data.result === true) {
       sendEmail.value = true;
-      loginRefAccount();
+      // loginRefAccount();
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
@@ -448,11 +479,35 @@ const logAccoutn = () => {
   transform: translate(-50%, -50%);
 }
 
+.b-logo {
+  font-weight: 600;
+  font-size: 28px;
+  text-align: left;
+}
+
 .title {
   font-weight: 600;
   font-size: 28px;
   color: var(--text);
   text-align: left;
+  /* margin-bottom: 24px; */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-cont {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.url-img-logo-text {
+  width: 80px;
+}
+
+.url-img-logo {
+  width: 40px;
 }
 
 .input-cont {
@@ -582,6 +637,10 @@ const logAccoutn = () => {
 }
 
 @media (max-width: 450px) {
+  .logo-cont {
+    display: none;
+  }
+
   .registration-section {
     width: 350px;
     height: 550px;
