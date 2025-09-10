@@ -269,10 +269,16 @@ const loginAccount = async () => {
       navigateTo("/");
     } else {
       inputStyle.incorrectPassword = true;
+      setTimeout(() => {
+        inputStyle.incorrectPassword = false;
+      }, 5000);
       inputStyle.incorrectPasswordMessage = "Ошибка при авторизации";
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
+    setTimeout(() => {
+      inputStyle.incorrectPassword = false;
+    }, 5000);
     if (error.response) {
       if (error.response.data.errors[0] === "Wrong password or login.") {
         inputStyle.incorrectPasswordMessage = "Неверный логин или пароль";

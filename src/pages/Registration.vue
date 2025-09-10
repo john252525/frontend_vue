@@ -348,6 +348,9 @@ const loginAccount = async () => {
 
     if (response.data.ok != true) {
       inputStyle.incorrectPassword = true;
+      setTimeout(() => {
+        inputStyle.incorrectPassword = false;
+      }, 5000);
       inputStyle.incorrectPasswordMessage =
         response.data.error_message || "Ошибка регистрации";
       return;
@@ -359,6 +362,9 @@ const loginAccount = async () => {
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
+    setTimeout(() => {
+      inputStyle.incorrectPassword = false;
+    }, 5000);
     if (error.response) {
       if (
         error.response.data?.errors[0] ===
