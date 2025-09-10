@@ -8,7 +8,7 @@
     <form @submit.prevent="logAccoutn">
       <div class="title-cont">
         <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
-         Регистрация 
+          Регистрация
           <div class="logo-cont">
             в
             <img
@@ -165,6 +165,7 @@
 <script setup>
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 import { reactive, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
@@ -172,7 +173,6 @@ import { useAccountStore } from "@/stores/accountStore";
 import { useStationLoading } from "@/composables/useStationLoading";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useI18n } from "vue-i18n";
-
 
 const { t } = useI18n();
 const router = useRouter();
@@ -323,7 +323,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 const loginAccount = async () => {
   try {
     const response = await axios.post(
-      `https://bapi88.developtech.ru/api/v1/auth/register`,
+      `${FRONTEND_URL_AUTH}register`,
       {
         email: formData.login,
         ref_id: route.query.ref,

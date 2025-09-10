@@ -112,7 +112,7 @@ const theme = useThemeStore();
 const { sendLog } = useFrontendLogger();
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 
 const formData = reactive({
   login: "",
@@ -242,7 +242,7 @@ const loginAccount = async () => {
   // accountStore.setAccountStationText("Telegram");
   // navigateTo("/");
   try {
-    const response = await axios.post(`${FRONTEND_URL_USERS}login`, {
+    const response = await axios.post(`${FRONTEND_URL_AUTH}login`, {
       email: formData.login,
       password: formData.password,
       withCredentials: false,

@@ -1,16 +1,24 @@
 <template>
   <div class="modal-overlay" @click="changeInfoMailing"></div>
-  
+
   <section v-if="!station.message" class="info-modal">
-    <div  class="modal-content">
+    <div class="modal-content">
       <!-- Заголовок с кнопкой закрытия -->
       <div class="modal-header">
         <h2 class="modal-title">
           {{ t("information.title") }}
         </h2>
         <button class="close-btn" @click="changeInfoMailing" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
@@ -37,14 +45,16 @@
         <div class="info-item">
           <span class="info-label">{{ t("information.time") }}</span>
           <span class="info-value">
-            {{ selectedItem.options.hours.min }}-{{ selectedItem.options.hours.max }}
+            {{ selectedItem.options.hours.min }} -
+            {{ selectedItem.options.hours.max }}
           </span>
         </div>
 
         <div class="info-item">
           <span class="info-label">{{ t("information.timeout.title") }}</span>
           <span class="info-value">
-            {{ formattedDelayInterval }} {{ t("information.timeout.min") }}
+            {{ selectedItem?.options?.delay.min }} -
+            {{ selectedItem?.options?.delay.max }}
           </span>
         </div>
 
@@ -61,13 +71,12 @@
         {{ t("information.button") }}
       </button>
     </div>
-    
   </section>
   <MessageLise
-      v-if="station.message"
-      :changeStationMessage="changeStationMessage"
-      :selectedItem="selectedItem"
-    />
+    v-if="station.message"
+    :changeStationMessage="changeStationMessage"
+    :selectedItem="selectedItem"
+  />
 </template>
 
 <script setup>
@@ -79,15 +88,15 @@ const { t } = useI18n();
 const props = defineProps({
   selectedItem: {
     type: Object,
-    required: true
+    required: true,
   },
   changeInfoMailing: {
     type: Function,
-    required: true
+    required: true,
   },
   changeisEditMailing: {
     type: Function,
-    required: true
+    required: true,
   },
 });
 
@@ -100,29 +109,38 @@ const changeStationMessage = () => {
 };
 
 const weekDaysMap = {
-  1: "пн", 2: "вт", 3: "ср", 4: "чт", 
-  5: "пт", 6: "сб", 7: "вс"
+  1: "пн",
+  2: "вт",
+  3: "ср",
+  4: "чт",
+  5: "пт",
+  6: "сб",
+  7: "вс",
+};
+
+const getDelay = () => {
+  return `${props.selectedItem?.options?.delay.min} - ${props.selectedItem?.options?.delay.min}`;
 };
 
 // Computed properties
 const formattedWeekDays = computed(() => {
   if (!props.selectedItem?.options?.days) return "";
-  
+
   const days = Object.keys(props.selectedItem.options.days)
     .map(Number)
     .sort((a, b) => a - b)
-    .map(day => weekDaysMap[day]);
-  
+    .map((day) => weekDaysMap[day]);
+
   return days.join(", ");
 });
 
 const formattedDelayInterval = computed(() => {
   if (!props.selectedItem?.options?.delay) return "";
-  
+
   const { min, max } = props.selectedItem.options.delay;
   const minMinutes = Math.round(min / 60);
   const maxMinutes = Math.round(max / 60);
-  
+
   return `${minMinutes} - ${maxMinutes}`;
 });
 
@@ -130,14 +148,17 @@ const statusText = computed(() => {
   const states = {
     0: t("information.status.noActive"),
     1: t("information.status.active"),
-    2: t("mailingList.status.completed")
+    2: t("mailingList.status.completed"),
   };
-  return states[props.selectedItem.state] || '';
+  return states[props.selectedItem.state] || "";
 });
 
 const statusClass = computed(() => {
-  return props.selectedItem.state === 0 ? 'status-inactive' : 
-         props.selectedItem.state === 1 ? 'status-active' : 'status-completed';
+  return props.selectedItem.state === 0
+    ? "status-inactive"
+    : props.selectedItem.state === 1
+    ? "status-active"
+    : "status-completed";
 });
 </script>
 
@@ -309,34 +330,34 @@ const statusClass = computed(() => {
     max-width: none;
     border-radius: 10px;
   }
-  
+
   .modal-content {
     padding: 16px;
   }
-  
+
   .modal-header {
     margin-bottom: 16px;
     padding-bottom: 12px;
   }
-  
+
   .modal-title {
     font-size: 16px;
   }
-  
+
   .info-item {
     grid-template-columns: 1fr;
     gap: 6px;
     padding: 8px 0;
   }
-  
+
   .info-value {
     text-align: left;
   }
-  
+
   .message-btn {
     text-align: left;
   }
-  
+
   .edit-btn {
     padding: 10px 16px;
     font-size: 13px;
@@ -353,23 +374,23 @@ const statusClass = computed(() => {
     left: 0;
     transform: none;
   }
-  
+
   .modal-content {
     padding: 20px 16px;
   }
-  
+
   .info-grid {
     gap: 10px;
   }
-  
+
   .info-label {
     font-size: 13px;
   }
-  
+
   .info-value {
     font-size: 13px;
   }
-  
+
   .status-badge {
     font-size: 10px;
     padding: 3px 8px;
@@ -381,11 +402,11 @@ const statusClass = computed(() => {
   .modal-content {
     padding: 16px 12px;
   }
-  
+
   .modal-title {
     font-size: 15px;
   }
-  
+
   .info-label,
   .info-value {
     font-size: 12px;
