@@ -15,7 +15,8 @@ export const domainConfigMap = domains.reduce((map, domain, index) => {
       logo: logos[index] || "",
       titleLogo: titleLogos[index] || "",
       urlLogo: urlLogos[index] || "",
-      additionallyLogo: additionalLogos[index] || "",
+      additionallyLogo:
+        additionalLogos[index] === "EMPTY" ? "" : additionalLogos[index] || "",
     },
   };
   return map;
@@ -30,7 +31,7 @@ export function getDomainConfig(hostname) {
 export function getDefaultConfig() {
   return {
     navigate: {
-      value: "touchapi", // или другое значение по умолчанию
+      value: "touchapi",
     },
     cosmetics: {
       logo: "Default",
