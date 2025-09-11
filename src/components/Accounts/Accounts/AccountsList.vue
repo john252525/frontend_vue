@@ -5,7 +5,7 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">{{ t("accountList.login") }}</th>
+            <th class="table-login">АККАУНТ</th>
             <th class="table-step">СТАТУС</th>
             <th class="table-sub">ПОДПИСКА</th>
             <th class="table-action">
@@ -23,9 +23,10 @@
             v-for="(item, index) in instanceData"
             :key="index"
           >
-            <td v-if="item.login" class="table-text-number">
+            <td class="table-text-number">
               <AccountIcon :item="item" />
-              {{ item.login }}
+              <span v-if="item.name">{{ item.name }}</span>
+              <span v-else>{{ item.login }}</span>
             </td>
             <td v-else class="table-text">-</td>
             <td
@@ -118,8 +119,16 @@
                 class="action-table-button-phone"
                 @click="openModal($event, item)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                  <path fill="#5a4fc1" d="M13.82 22h-3.64a1 1 0 0 1-.977-.786l-.407-1.884a8.002 8.002 0 0 1-1.535-.887l-1.837.585a1 1 0 0 1-1.17-.453L2.43 15.424a1.006 1.006 0 0 1 .193-1.239l1.425-1.3a8.1 8.1 0 0 1 0-1.772L2.623 9.816a1.006 1.006 0 0 1-.193-1.24l1.82-3.153a1 1 0 0 1 1.17-.453l1.837.585c.244-.18.498-.348.76-.5c.253-.142.513-.271.779-.386l.408-1.882A1 1 0 0 1 10.18 2h3.64a1 1 0 0 1 .976.787l.412 1.883a8.192 8.192 0 0 1 1.535.887l1.838-.585a1 1 0 0 1 1.169.453l1.82 3.153c.232.407.152.922-.193 1.239l-1.425 1.3a8.1 8.1 0 0 1 0 1.772l1.425 1.3c.345.318.425.832.193 1.239l-1.82 3.153a1 1 0 0 1-1.17.453l-1.837-.585a7.98 7.98 0 0 1-1.534.886l-.413 1.879a1 1 0 0 1-.976.786ZM11.996 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8Z"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="#5a4fc1"
+                    d="M13.82 22h-3.64a1 1 0 0 1-.977-.786l-.407-1.884a8.002 8.002 0 0 1-1.535-.887l-1.837.585a1 1 0 0 1-1.17-.453L2.43 15.424a1.006 1.006 0 0 1 .193-1.239l1.425-1.3a8.1 8.1 0 0 1 0-1.772L2.623 9.816a1.006 1.006 0 0 1-.193-1.24l1.82-3.153a1 1 0 0 1 1.17-.453l1.837.585c.244-.18.498-.348.76-.5c.253-.142.513-.271.779-.386l.408-1.882A1 1 0 0 1 10.18 2h3.64a1 1 0 0 1 .976.787l.412 1.883a8.192 8.192 0 0 1 1.535.887l1.838-.585a1 1 0 0 1 1.169.453l1.82 3.153c.232.407.152.922-.193 1.239l-1.425 1.3a8.1 8.1 0 0 1 0 1.772l1.425 1.3c.345.318.425.832.193 1.239l-1.82 3.153a1 1 0 0 1-1.17.453l-1.837-.585a7.98 7.98 0 0 1-1.534.886l-.413 1.879a1 1 0 0 1-.976.786ZM11.996 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8Z"
+                  />
                 </svg>
               </button>
             </td>
@@ -154,7 +163,7 @@
 
     <!-- Мобильные карточки -->
     <div class="mobile-cards" v-if="dataStation && instanceData.length > 0">
-      <div 
+      <div
         class="account-card"
         :class="{ active: item.isPay }"
         v-for="(item, index) in instanceData"
@@ -164,16 +173,26 @@
         <div class="card-header">
           <div class="account-info">
             <AccountIcon :item="item" />
-            <span class="account-login">{{ item.login || '-' }}</span>
+            <span class="account-login">{{ item.login || "-" }}</span>
           </div>
-          <button 
+          <button
             class="action-gear"
             @click="openMobileModal($event, item)"
             v-if="isActionAvailable(item)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              ></path>
             </svg>
           </button>
         </div>
@@ -187,10 +206,16 @@
               <span v-if="item.loading && accountStation != 'crm'">
                 <LoadingAccount />
               </span>
-              <span v-else-if="item.step && item.type != 'amocrm' && item.source != 'bitrix'">
+              <span
+                v-else-if="
+                  item.step && item.type != 'amocrm' && item.source != 'bitrix'
+                "
+              >
                 {{ item.step.value }}
               </span>
-              <span v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'">
+              <span
+                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
+              >
                 {{ item.enable }}
               </span>
               <span v-else-if="accountStation === 'crm'">
@@ -204,9 +229,7 @@
           <div class="card-row">
             <span class="label">Подписка:</span>
             <span class="value">
-              <span v-if="item.subscription_dt_to === null">
-                -
-              </span>
+              <span v-if="item.subscription_dt_to === null"> - </span>
               <span v-else class="subscription-date">
                 До {{ formatSubscriptionDate(item.subscription_dt_to) }}
               </span>
@@ -215,11 +238,11 @@
         </div>
 
         <!-- Кнопка оплаты на всю ширину -->
-        <div class="card-payment" v-if="item.type != 'amocrm' && item.type != 'bitrix24'">
-          <button 
-            class="payment-btn"
-            @click="changeTariffStation(item)"
-          >
+        <div
+          class="card-payment"
+          v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
+        >
+          <button class="payment-btn" @click="changeTariffStation(item)">
             Оплатить
           </button>
         </div>
@@ -229,13 +252,13 @@
     <!-- Состояния загрузки и ошибок для мобильной версии -->
     <div class="mobile-states">
       <div class="none-account-cont" v-if="dataStationNone">
-       <NoData type="accounts"/>
+        <NoData type="accounts" />
       </div>
-      
+
       <div class="load-cont" v-if="loadDataStation">
         <LoadAccount />
       </div>
-      
+
       <div class="load-cont" v-if="errorAccountBolean && !loadDataStation">
         <errorAccount />
       </div>
@@ -337,7 +360,6 @@ const typeGroup = computed(() => accountStore.getType);
 const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-
 
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
@@ -441,14 +463,14 @@ const changeForceStopItemData = async (item) => {
 };
 
 const formatSubscriptionDate = (dateString) => {
-  if (!dateString) return '-';
-  
+  if (!dateString) return "-";
+
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   } catch (e) {
     return dateString;
@@ -504,8 +526,8 @@ const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
 };
 
-const closeScreen= () => {
-  getScreenStation.value = false
+const closeScreen = () => {
+  getScreenStation.value = false;
 };
 
 const errorBlock = ref(false);
@@ -692,45 +714,44 @@ const updateUserInfo = (event) => {
   userInfoStore.setUserInfo(event);
 };
 
-
 const openModal = (event, item) => {
   selectedItem.value = item;
   isModalOpen.value = true;
   updateUserInfo(JSON.stringify(selectedItem.value));
   getInfo();
-  
+
   const rect = event.currentTarget.getBoundingClientRect();
   const modalWidth = 160;
   const edgeMargin = 10; // Минимальный отступ от краев
-  
+
   // Базовая позиция - сразу под кнопкой с небольшим отступом
   let left = rect.left + window.scrollX;
   let top = rect.bottom + window.scrollY + 2; // Всего 2px от кнопки
-  
+
   // Проверяем правую границу (только если действительно выходит)
   if (left + modalWidth > window.innerWidth + window.scrollX - edgeMargin) {
     left = window.innerWidth + window.scrollX - modalWidth - edgeMargin;
   }
-  
+
   // Проверяем левую границу (только если действительно выходит)
   if (left < window.scrollX + edgeMargin) {
     left = window.scrollX + edgeMargin;
   }
-  
+
   // Проверяем нижнюю границу только если модалка сильно выходит
   const modalHeight = 300;
   const bottomEdge = window.innerHeight + window.scrollY;
-  
+
   if (top + modalHeight > bottomEdge - edgeMargin) {
     // Показываем над кнопкой, но тоже близко
     top = rect.top + window.scrollY - modalHeight - 2; // Всего 2px от кнопки
-    
+
     // Если не помещается и сверху, немного сдвигаем вниз
     if (top < window.scrollY + edgeMargin) {
       top = window.scrollY + edgeMargin;
     }
   }
-  
+
   modalPosition.value = {
     top: Math.round(top),
     left: Math.round(left),
@@ -787,13 +808,13 @@ const tooltipStyle = ref({});
 
 const isActionAvailable = (item) => {
   return (
-    (item.storage === 'local' && item.type === 'undefined') ||
-    (item.storage === 'binder' && item.type === 'touchapi') ||
-    (item.storage === 'undefined' && item.type === 'whatsapi') ||
-    (item.storage === 'whatsapi' && item.type === 'undefined') ||
-    item.type === 'bulk' ||
-    item.type === 'amocrm' ||
-    item.type === 'bitrix24'
+    (item.storage === "local" && item.type === "undefined") ||
+    (item.storage === "binder" && item.type === "touchapi") ||
+    (item.storage === "undefined" && item.type === "whatsapi") ||
+    (item.storage === "whatsapi" && item.type === "undefined") ||
+    item.type === "bulk" ||
+    item.type === "amocrm" ||
+    item.type === "bitrix24"
   );
 };
 
@@ -986,7 +1007,6 @@ provide("changeEnableStation", { changeEnableStation });
   justify-content: center;
   flex-direction: column;
 }
-
 
 .table-login {
   text-align: left;
@@ -1295,19 +1315,19 @@ tr:not(:last-child):after {
   .desktop-view {
     display: none;
   }
-  
+
   .mobile-cards,
   .mobile-states {
     display: block;
   }
-  
+
   .mobile-cards {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     padding: 16px;
   }
-  
+
   .account-card {
     background: white;
     border-radius: 12px;
@@ -1320,7 +1340,7 @@ tr:not(:last-child):after {
     min-width: 0;
     position: relative;
   }
-  
+
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -1331,7 +1351,7 @@ tr:not(:last-child):after {
     min-width: 0;
     gap: 8px;
   }
-  
+
   .account-info {
     display: flex;
     align-items: center;
@@ -1339,7 +1359,7 @@ tr:not(:last-child):after {
     min-width: 0;
     flex: 1;
   }
-  
+
   .account-login {
     font-weight: 600;
     font-size: 16px;
@@ -1349,7 +1369,7 @@ tr:not(:last-child):after {
     text-overflow: ellipsis;
     min-width: 0;
   }
-  
+
   .action-gear {
     background: oklch(0.65 0.22 267 / 0.1);
     border: none;
@@ -1362,23 +1382,23 @@ tr:not(:last-child):after {
     flex-shrink: 0;
     transition: all 0.2s ease;
   }
-  
+
   .action-gear:hover {
     background: oklch(0.65 0.22 267 / 0.2);
   }
-  
+
   .action-gear svg {
     width: 16px;
     height: 16px;
     color: #5a4fc1;
   }
-  
+
   .card-content {
     flex: 1;
     margin-bottom: 12px;
     min-width: 0;
   }
-  
+
   .card-row {
     display: flex;
     justify-content: space-between;
@@ -1387,7 +1407,7 @@ tr:not(:last-child):after {
     min-width: 0;
     gap: 8px;
   }
-  
+
   .label {
     font-size: 14px;
     color: #6b7280;
@@ -1395,7 +1415,7 @@ tr:not(:last-child):after {
     white-space: nowrap;
     flex-shrink: 0;
   }
-  
+
   .value {
     font-size: 14px;
     color: #374151;
@@ -1407,7 +1427,7 @@ tr:not(:last-child):after {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .subscription-date {
     font-size: 14px;
     color: #059669;
@@ -1416,11 +1436,11 @@ tr:not(:last-child):after {
     min-width: 0;
     text-align: right;
   }
-  
+
   .card-payment {
     margin-top: auto;
   }
-  
+
   .payment-btn {
     width: 100%;
     background: #6732ff;
@@ -1433,39 +1453,38 @@ tr:not(:last-child):after {
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  
+
   .payment-btn:hover {
     background: #5a2ae0;
   }
-  
+
   .payment-btn:active {
     background: #4d24c0;
   }
 }
 
 @media (max-width: 640px) {
-  
   .account-card {
     min-height: 180px;
     padding: 14px;
   }
-  
+
   .account-login {
     font-size: 15px;
   }
-  
+
   .label {
     font-size: 13px;
   }
-  
+
   .value {
     font-size: 13px;
   }
-  
+
   .subscription-date {
     font-size: 13px;
   }
-  
+
   .payment-btn {
     padding: 10px;
     font-size: 15px;
@@ -1479,24 +1498,23 @@ tr:not(:last-child):after {
     padding: 10px;
   }
 
- 
   .account-card {
     padding: 12px;
     min-height: 170px;
   }
-  
+
   .account-login {
     font-size: 14px;
   }
-  
+
   .label {
     font-size: 12px;
   }
-  
+
   .value {
     font-size: 12px;
   }
-  
+
   .payment-btn {
     padding: 9px;
     font-size: 14px;
@@ -1510,9 +1528,15 @@ tr:not(:last-child):after {
 }
 
 @keyframes pulse-card {
-  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.3); }
-  50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
 }
 
 /* Состояния для мобильной версии */
@@ -1535,5 +1559,4 @@ tr:not(:last-child):after {
   color: #6b7280;
   margin: 0;
 }
-
 </style>
