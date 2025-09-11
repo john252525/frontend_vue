@@ -53,7 +53,7 @@
         <span
           class="action"
           v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          @click="handleSubmit"
+          @click="changeName"
           >Сменить имя</span
         >
         <span
