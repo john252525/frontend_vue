@@ -49,14 +49,28 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, toRefs, onUnmounted } from "vue";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 const props = defineProps({
   currentName: {
     type: String,
     default: "",
   },
+  selectedItem: {
+    type: Object,
+  },
+  stateLoading: {
+    type: Function,
+  },
 });
+
+import { useStationLoading } from "@/composables/useStationLoading";
+const { setLoadingStatus } = useStationLoading();
+
+import axios from "axios";
+
+const { selectedItem } = toRefs(props);
 
 const emit = defineEmits(["close", "save"]);
 
@@ -66,6 +80,45 @@ const error = ref("");
 const isFormValid = computed(() => {
   return newName.value.trim() && newName.value.trim() !== props.currentName;
 });
+
+const changeName = async () => {
+  const { uuid } = selectedItem.value;
+
+  props.stateLoading(true);
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}updateInstanceName`,
+      {
+        name: newName.value,
+        uuid: uuid,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if ((response.data.ok = true)) {
+      props.stateLoading(false);
+      props.getAccounts();
+      setLoadingStatus(true, "success");
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    console.log("Огиька level1");
+    console.error(`error`, error);
+    props.stateLoading(false);
+    setLoadingStatus(true, "error");
+
+    if (error.response) {
+      console.log("Огиька level 2");
+      console.error("error", error.response.data);
+      props.stateLoading(false);
+    }
+  }
+};
 
 const validateInput = () => {
   error.value = "";
@@ -91,7 +144,7 @@ const validateInput = () => {
 const saveName = () => {
   if (!validateInput()) return;
 
-  emit("save", newName.value.trim());
+  changeName();
   closeModal();
 };
 

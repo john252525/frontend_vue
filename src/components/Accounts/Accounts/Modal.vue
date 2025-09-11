@@ -184,7 +184,12 @@
     :error="errorValueChat"
   />
 
-  <EditNameModal v-if="editNameModal" />
+  <EditNameModal
+    v-if="editNameModal"
+    :selectedItem="selectedItem"
+    :stateLoading="stateLoading"
+    :close="changeEditNameModal"
+  />
 </template>
 
 <script setup>
@@ -382,6 +387,14 @@ const stationLoading = reactive({
 
 const changeStationLoading = () => {
   stationLoading.loading = !stationLoading.loading;
+};
+
+const stateLoading = (value) => {
+  if (value === true) {
+    stationLoading.loading = true;
+  } else {
+    stationLoading.loading = false;
+  }
 };
 
 const errorBlock = ref(false);
