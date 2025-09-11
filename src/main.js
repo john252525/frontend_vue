@@ -24,7 +24,7 @@ import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import { useAccountStore } from "@/stores/accountStore";
+// import { useAccountStore } from "@/stores/accountStore";
 // import { hookManager } from "@/hooks/HookManager";
 import { useRequestsStore } from "@/stores/requests";
 import axios from "axios";
@@ -32,6 +32,12 @@ import Support from "./pages/Support.vue";
 import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
+
+import { computed } from "vue";
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const storedData = computed(() => accountStore.getAccountData);
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -51,132 +57,86 @@ if ("Notification" in window) {
   }
 }
 
+// ==================== ПЕРЕХВАТЧИК AXIOS ДЛЯ ОБНОВЛЕНИЯ ТОКЕНА ====================
 const setupAxiosInterceptors = () => {
-  console.log("🔄 Настройка перехватчиков axios...");
+  console.log(storedData.value);
+  let isRefreshing = false;
+  let failedQueue = [];
 
-  // Интерсептор для запросов
-  axios.interceptors.request.use(
-    (config) => {
-      // Генерируем уникальный ID для запроса
-      const requestId = Math.random().toString(36).substr(2, 9);
-      config.metadata = {
-        requestId,
-        startTime: Date.now(),
-        timestamp: new Date().toISOString(),
-      };
-
-      // Логируем запрос
-      console.group(`📤 AXIOS REQUEST [${requestId}]`);
-      console.log("URL:", config.url);
-      console.log("Method:", config.method?.toUpperCase());
-      console.log("Headers:", config.headers);
-      if (config.data) {
-        console.log("Request Body:", config.data);
+  const processQueue = (error, token = null) => {
+    failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token);
       }
-      console.log("Timestamp:", config.metadata.timestamp);
-      console.groupEnd();
-
-      return config;
-    },
-    (error) => {
-      console.error("❌ AXIOS REQUEST ERROR:", error);
-      return Promise.reject(error);
-    }
-  );
+    });
+    failedQueue = [];
+  };
 
   // Интерсептор для ответов
   axios.interceptors.response.use(
     (response) => {
-      const { requestId, startTime } = response.config.metadata;
-      const duration = Date.now() - startTime;
-      const timestamp = new Date().toISOString();
-
-      // Логируем успешный ответ
-      console.group(`✅ AXIOS RESPONSE [${requestId}]`);
-      console.log("URL:", response.config.url);
-      console.log("Method:", response.config.method?.toUpperCase());
-      console.log("Status:", response.status, response.statusText);
-      console.log("Duration:", duration + "ms");
-      console.log("Response:", response.data);
-      console.log("Headers:", response.headers);
-      console.log("Timestamp:", timestamp);
-      console.groupEnd();
-
-      // Сохраняем в хранилище (если нужно)
-      const requestsStore = useRequestsStore();
-      if (requestsStore) {
-        requestsStore.addRequest({
-          id: requestId,
-          url: response.config.url,
-          method: response.config.method?.toUpperCase(),
-          status: response.status,
-          statusText: response.statusText,
-          duration: duration,
-          timestamp: timestamp,
-          requestHeaders: response.config.headers,
-          requestBody: response.config.data,
-          responseHeaders: response.headers,
-          responseBody: response.data,
-        });
-      }
-
       return response;
     },
-    (error) => {
-      if (error.config?.metadata) {
-        const { requestId, startTime } = error.config.metadata;
-        const duration = Date.now() - startTime;
-        const timestamp = new Date().toISOString();
+    async (error) => {
+      const originalRequest = error.config;
 
-        // Логируем ошибку
-        console.group(`❌ AXIOS ERROR [${requestId}]`);
-        console.log("URL:", error.config.url);
-        console.log("Method:", error.config.method?.toUpperCase());
-
-        if (error.response) {
-          console.log(
-            "Status:",
-            error.response.status,
-            error.response.statusText
-          );
-          console.log("Error Response:", error.response.data);
-          console.log("Error Headers:", error.response.headers);
-        } else {
-          console.log("Error:", error.message);
+      // Если статус 401 и это не повторная попытка
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        if (isRefreshing) {
+          // Если уже происходит обновление токена, добавляем запрос в очередь
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return axios(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
         }
 
-        console.log("Duration:", duration + "ms");
-        console.log("Timestamp:", timestamp);
-        console.groupEnd();
+        originalRequest._retry = true;
+        isRefreshing = true;
 
-        // Сохраняем в хранилище (если нужно)
-        const requestsStore = useRequestsStore();
-        if (requestsStore && error.response) {
-          requestsStore.addRequest({
-            id: requestId,
-            url: error.config.url,
-            method: error.config.method?.toUpperCase(),
-            status: error.response.status,
-            statusText: error.response.statusText,
-            duration: duration,
-            timestamp: timestamp,
-            requestHeaders: error.config.headers,
-            requestBody: error.config.data,
-            responseHeaders: error.response.headers,
-            responseBody: error.response.data,
-            isError: true,
-            errorMessage: error.message,
+        try {
+          // ЗАГЛУШКИ - замените на свою логику получения токенов
+          const refreshToken = "your_refresh_token_here"; // useAccountStore().getRefreshToken
+          const email = "user@example.com"; // useAccountStore().getAccountEmail
+
+          // Запрос на обновление токена
+          const response = await axios.post("/api/v1/auth/refreshToken", {
+            refresh_token: refreshToken,
+            email: email,
           });
+
+          if (response.data.ok) {
+            const newToken = response.data.data.token;
+
+            // ЗАГЛУШКА - замените на свою логику сохранения токена
+            // useAccountStore().setAccountToken(newToken);
+
+            // Обновляем заголовок и повторяем запрос
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            processQueue(null, newToken);
+
+            return axios(originalRequest);
+          } else {
+            throw new Error("Token refresh failed");
+          }
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
-      } else {
-        console.error("❌ AXIOS ERROR (no config):", error);
       }
 
       return Promise.reject(error);
     }
   );
-
-  console.log("✅ Перехватчики axios настроены");
 };
 
 // Вызываем настройку перехватчиков
