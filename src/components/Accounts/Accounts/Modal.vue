@@ -188,6 +188,7 @@
     v-if="editNameModal"
     :selectedItem="selectedItem"
     :stateLoading="stateLoading"
+    :getAccounts="getAccounts"
     :close="changeEditNameModal"
   />
 </template>

@@ -63,6 +63,13 @@ const props = defineProps({
   stateLoading: {
     type: Function,
   },
+  getAccounts: {
+    type: Function,
+  },
+
+  close: {
+    type: Function,
+  },
 });
 
 import { useStationLoading } from "@/composables/useStationLoading";
@@ -149,16 +156,16 @@ const saveName = () => {
   if (!validateInput()) return;
 
   changeName();
-  closeModal();
+  props.close();
 };
 
 const closeModal = () => {
-  emit("close");
+  props.close();
 };
 
 const handleEscape = (event) => {
   if (event.key === "Escape") {
-    closeModal();
+    props.close();
   }
 };
 
