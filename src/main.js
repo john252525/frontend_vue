@@ -32,6 +32,7 @@ import Support from "./pages/Support.vue";
 import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 
 import { computed } from "vue";
 
@@ -271,20 +272,26 @@ const setupAxiosInterceptors = () => {
           const email = "user@example.com"; // useAccountStore().getAccountEmail
 
           // Запрос на обновление токена
-          const response = await axios.post("/api/v1/auth/refreshToken", {
-            refresh_token: refreshToken,
-            email: email,
-          });
+          const response = await axios.post(
+            `${FRONTEND_URL_AUTH}refreshToken`,
+            {
+              refresh_token: getAccountRefreshToken.value,
+              email: storedData.value,
+            }
+          );
 
           if (response.data.ok) {
             const newToken = response.data.data.token;
 
-            // ЗАГЛУШКА - замените на свою логику сохранения токена
-            // useAccountStore().setAccountToken(newToken);
+            accountStore.setAccountRefreshToken(
+              response.data.data.refresh_token
+            );
+            accountStore.setAccountToken(response.data.data.token);
+            location.reload();
 
             // Обновляем заголовок и повторяем запрос
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            processQueue(null, newToken);
+            // originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            // processQueue(null, newToken);
 
             return axios(originalRequest);
           } else {

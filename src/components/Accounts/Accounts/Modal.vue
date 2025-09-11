@@ -51,6 +51,12 @@
           >{{ t("modalAccount.settings") }}</span
         >
         <span
+          class="action"
+          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+          @click="handleSubmit"
+          >Сменить имя</span
+        >
+        <span
           v-if="
             selectedItem.source != 'telegram' &&
             !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
@@ -720,6 +726,49 @@ const disablePhoneAuth = async () => {
     console.error("error", error);
     if (error.response) {
       console.error("error", error.response.data);
+    }
+  }
+};
+
+const changeName = async () => {
+  const { uuid } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}updateInstanceName`,
+      {
+        instance_name: "test_name",
+        uuid: uuid,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if ((response.data.ok = true)) {
+      stationLoading.loading = false;
+      props.getAccounts();
+      setLoadingStatus(true, "success");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    console.log("Огиька level1");
+    console.error(`error`, error);
+    stationLoading.loading = false;
+    setLoadingStatus(true, "error");
+
+    if (error.response) {
+      console.log("Огиька level 2");
+      console.error("error", error.response.data);
+      stationLoading.loading = false;
     }
   }
 };
