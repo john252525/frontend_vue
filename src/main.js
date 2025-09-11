@@ -51,6 +51,137 @@ if ("Notification" in window) {
   }
 }
 
+const setupAxiosInterceptors = () => {
+  console.log("🔄 Настройка перехватчиков axios...");
+
+  // Интерсептор для запросов
+  axios.interceptors.request.use(
+    (config) => {
+      // Генерируем уникальный ID для запроса
+      const requestId = Math.random().toString(36).substr(2, 9);
+      config.metadata = {
+        requestId,
+        startTime: Date.now(),
+        timestamp: new Date().toISOString(),
+      };
+
+      // Логируем запрос
+      console.group(`📤 AXIOS REQUEST [${requestId}]`);
+      console.log("URL:", config.url);
+      console.log("Method:", config.method?.toUpperCase());
+      console.log("Headers:", config.headers);
+      if (config.data) {
+        console.log("Request Body:", config.data);
+      }
+      console.log("Timestamp:", config.metadata.timestamp);
+      console.groupEnd();
+
+      return config;
+    },
+    (error) => {
+      console.error("❌ AXIOS REQUEST ERROR:", error);
+      return Promise.reject(error);
+    }
+  );
+
+  // Интерсептор для ответов
+  axios.interceptors.response.use(
+    (response) => {
+      const { requestId, startTime } = response.config.metadata;
+      const duration = Date.now() - startTime;
+      const timestamp = new Date().toISOString();
+
+      // Логируем успешный ответ
+      console.group(`✅ AXIOS RESPONSE [${requestId}]`);
+      console.log("URL:", response.config.url);
+      console.log("Method:", response.config.method?.toUpperCase());
+      console.log("Status:", response.status, response.statusText);
+      console.log("Duration:", duration + "ms");
+      console.log("Response:", response.data);
+      console.log("Headers:", response.headers);
+      console.log("Timestamp:", timestamp);
+      console.groupEnd();
+
+      // Сохраняем в хранилище (если нужно)
+      const requestsStore = useRequestsStore();
+      if (requestsStore) {
+        requestsStore.addRequest({
+          id: requestId,
+          url: response.config.url,
+          method: response.config.method?.toUpperCase(),
+          status: response.status,
+          statusText: response.statusText,
+          duration: duration,
+          timestamp: timestamp,
+          requestHeaders: response.config.headers,
+          requestBody: response.config.data,
+          responseHeaders: response.headers,
+          responseBody: response.data,
+        });
+      }
+
+      return response;
+    },
+    (error) => {
+      if (error.config?.metadata) {
+        const { requestId, startTime } = error.config.metadata;
+        const duration = Date.now() - startTime;
+        const timestamp = new Date().toISOString();
+
+        // Логируем ошибку
+        console.group(`❌ AXIOS ERROR [${requestId}]`);
+        console.log("URL:", error.config.url);
+        console.log("Method:", error.config.method?.toUpperCase());
+
+        if (error.response) {
+          console.log(
+            "Status:",
+            error.response.status,
+            error.response.statusText
+          );
+          console.log("Error Response:", error.response.data);
+          console.log("Error Headers:", error.response.headers);
+        } else {
+          console.log("Error:", error.message);
+        }
+
+        console.log("Duration:", duration + "ms");
+        console.log("Timestamp:", timestamp);
+        console.groupEnd();
+
+        // Сохраняем в хранилище (если нужно)
+        const requestsStore = useRequestsStore();
+        if (requestsStore && error.response) {
+          requestsStore.addRequest({
+            id: requestId,
+            url: error.config.url,
+            method: error.config.method?.toUpperCase(),
+            status: error.response.status,
+            statusText: error.response.statusText,
+            duration: duration,
+            timestamp: timestamp,
+            requestHeaders: error.config.headers,
+            requestBody: error.config.data,
+            responseHeaders: error.response.headers,
+            responseBody: error.response.data,
+            isError: true,
+            errorMessage: error.message,
+          });
+        }
+      } else {
+        console.error("❌ AXIOS ERROR (no config):", error);
+      }
+
+      return Promise.reject(error);
+    }
+  );
+
+  console.log("✅ Перехватчики axios настроены");
+};
+
+// Вызываем настройку перехватчиков
+setupAxiosInterceptors();
+
 const routes = [
   {
     path: "/Accounts",
