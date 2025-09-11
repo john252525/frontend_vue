@@ -68,6 +68,10 @@ const props = defineProps({
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 import axios from "axios";
 
 const { selectedItem } = toRefs(props);
