@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 
 export const useAccountStore = defineStore("accountStore", {
   state: () => ({
+    accountRefreshToken: "",
     accountSourse: "",
     accountData: "",
     accountStation: "",
@@ -19,7 +20,7 @@ export const useAccountStore = defineStore("accountStore", {
       crm: true,
       amocrm: true,
       bitrix24: true,
-      bulk: true
+      bulk: true,
     },
   }),
   getters: {
@@ -27,6 +28,7 @@ export const useAccountStore = defineStore("accountStore", {
     getAccountData: (state) => state.accountData,
     getAccountStation: (state) => state.accountStation,
     getAccountStationText: (state) => state.accountStationText,
+    getAccountRefreshToken: (state) => state.accountRefreshToken,
     getAccountToken: (state) => state.accountToken,
     getCrmPlatform: (state) => state.crmPlatform,
     getCrmPlatformText: (state) => state.crmPlatformText,
@@ -55,6 +57,10 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStation = accountInfo.accountStation;
       this.accountStationText = accountInfo.accountStationText;
       this.accountToken = accountInfo.accountToken;
+    },
+
+    setAccountRefreshToken(value) {
+      this.accountRefreshToken = value;
     },
 
     setAllSource(allSource) {

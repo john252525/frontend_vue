@@ -35,10 +35,6 @@ import UserChats from "./pages/UserChats.vue";
 
 import { computed } from "vue";
 
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-const storedData = computed(() => accountStore.getAccountData);
-
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
@@ -56,91 +52,6 @@ if ("Notification" in window) {
     console.error("[main.js] Ошибка в Notification API:", error);
   }
 }
-
-// ==================== ПЕРЕХВАТЧИК AXIOS ДЛЯ ОБНОВЛЕНИЯ ТОКЕНА ====================
-const setupAxiosInterceptors = () => {
-  console.log(storedData.value);
-  let isRefreshing = false;
-  let failedQueue = [];
-
-  const processQueue = (error, token = null) => {
-    failedQueue.forEach((prom) => {
-      if (error) {
-        prom.reject(error);
-      } else {
-        prom.resolve(token);
-      }
-    });
-    failedQueue = [];
-  };
-
-  // Интерсептор для ответов
-  axios.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    async (error) => {
-      const originalRequest = error.config;
-
-      // Если статус 401 и это не повторная попытка
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        if (isRefreshing) {
-          // Если уже происходит обновление токена, добавляем запрос в очередь
-          return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          })
-            .then((token) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              return axios(originalRequest);
-            })
-            .catch((err) => {
-              return Promise.reject(err);
-            });
-        }
-
-        originalRequest._retry = true;
-        isRefreshing = true;
-
-        try {
-          // ЗАГЛУШКИ - замените на свою логику получения токенов
-          const refreshToken = "your_refresh_token_here"; // useAccountStore().getRefreshToken
-          const email = "user@example.com"; // useAccountStore().getAccountEmail
-
-          // Запрос на обновление токена
-          const response = await axios.post("/api/v1/auth/refreshToken", {
-            refresh_token: refreshToken,
-            email: email,
-          });
-
-          if (response.data.ok) {
-            const newToken = response.data.data.token;
-
-            // ЗАГЛУШКА - замените на свою логику сохранения токена
-            // useAccountStore().setAccountToken(newToken);
-
-            // Обновляем заголовок и повторяем запрос
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            processQueue(null, newToken);
-
-            return axios(originalRequest);
-          } else {
-            throw new Error("Token refresh failed");
-          }
-        } catch (refreshError) {
-          processQueue(refreshError, null);
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
-      }
-
-      return Promise.reject(error);
-    }
-  );
-};
-
-// Вызываем настройку перехватчиков
-setupAxiosInterceptors();
 
 const routes = [
   {
@@ -296,6 +207,104 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+const app = createApp(App);
+app.use(pinia);
+app.use(router);
+app.use(i18n);
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const storedData = computed(() => accountStore.getAccountData);
+const getAccountRefreshToken = computed(
+  () => accountStore.getAccountRefreshToken
+);
+
+// ==================== ПЕРЕХВАТЧИК AXIOS ДЛЯ ОБНОВЛЕНИЯ ТОКЕНА ====================
+const setupAxiosInterceptors = () => {
+  console.log(storedData.value, "email");
+  console.log(getAccountRefreshToken.value, "token");
+  let isRefreshing = false;
+  let failedQueue = [];
+
+  const processQueue = (error, token = null) => {
+    failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token);
+      }
+    });
+    failedQueue = [];
+  };
+
+  // Интерсептор для ответов
+  axios.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
+
+      // Если статус 401 и это не повторная попытка
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        if (isRefreshing) {
+          // Если уже происходит обновление токена, добавляем запрос в очередь
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return axios(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          // ЗАГЛУШКИ - замените на свою логику получения токенов
+          const refreshToken = "your_refresh_token_here"; // useAccountStore().getRefreshToken
+          const email = "user@example.com"; // useAccountStore().getAccountEmail
+
+          // Запрос на обновление токена
+          const response = await axios.post("/api/v1/auth/refreshToken", {
+            refresh_token: refreshToken,
+            email: email,
+          });
+
+          if (response.data.ok) {
+            const newToken = response.data.data.token;
+
+            // ЗАГЛУШКА - замените на свою логику сохранения токена
+            // useAccountStore().setAccountToken(newToken);
+
+            // Обновляем заголовок и повторяем запрос
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            processQueue(null, newToken);
+
+            return axios(originalRequest);
+          } else {
+            throw new Error("Token refresh failed");
+          }
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Вызываем настройку перехватчиков
+setupAxiosInterceptors();
 
 // Конфигурация ограничений по доменам
 const DOMAIN_CONFIG = {
@@ -547,15 +556,9 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-const app = createApp(App);
-
 app.config.errorHandler = (err) => {
   console.error("[main.js] Global error:", err);
 };
-
-app.use(pinia);
-app.use(router);
-app.use(i18n);
 
 const themeStore = useThemeStore();
 document.documentElement.setAttribute(

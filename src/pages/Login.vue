@@ -265,6 +265,7 @@ const loginAccount = async () => {
       accountStore.setAccountToken(response.data.data.token);
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
+      accountStore.setAccountRefreshToken(response.data.data.refresh_token);
       accountStore.setAccountStationText("Telegram");
       navigateTo("/");
     } else {
