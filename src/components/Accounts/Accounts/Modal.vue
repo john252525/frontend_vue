@@ -53,7 +53,7 @@
         <span
           class="action"
           v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          @click="changeName"
+          @click="changeEditNameModal"
           >Сменить имя</span
         >
         <span
@@ -183,6 +183,8 @@
     :close="changeChatsStationModal"
     :error="errorValueChat"
   />
+
+  <EditNameModal v-if="editNameModal" />
 </template>
 
 <script setup>
@@ -204,6 +206,7 @@ import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
+import EditNameModal from "./ModalAccount/EditNameModal/EditNameModal.vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
 import GetScreen from "./ModalAccount/GetScreen.vue";
@@ -300,6 +303,12 @@ const navigateTo = (page, queryParams = {}) => {
     path: page,
     query: queryParams,
   });
+};
+
+const editNameModal = ref(false);
+
+const changeEditNameModal = () => {
+  editNameModal.value = !editNameModal.value;
 };
 
 const openChat = () => {
