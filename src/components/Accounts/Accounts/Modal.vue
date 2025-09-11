@@ -736,7 +736,7 @@ const changeName = async () => {
     const response = await axios.post(
       `${FRONTEND_URL}updateInstanceName`,
       {
-        instance_name: "test_name",
+        name: "test_name",
         uuid: uuid,
       },
       {
