@@ -23,7 +23,7 @@
             v-for="(item, index) in instanceData"
             :key="index"
           >
-            <td class="table-text-number">
+            <td v-if="item.name && item.login" class="table-text-number">
               <AccountIcon :item="item" />
               <span v-if="item.name">{{ item.name }}</span>
               <span v-else>{{ item.login }}</span>
