@@ -55,7 +55,7 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 
-const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
+const VITE_FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
