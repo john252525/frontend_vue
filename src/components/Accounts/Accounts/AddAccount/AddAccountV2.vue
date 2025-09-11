@@ -283,9 +283,7 @@ const typeSelect = ref(null);
 const fetchFormStructure = async () => {
   stationLoading.loading = true;
   try {
-    const response = await axios.get(
-      `${FRONTEND_URL_FORMS}getForm?referer=https://app2.touch-api.com/`
-    );
+    const response = await axios.get(`${FRONTEND_URL_FORMS}getForm`);
 
     if (response.data.ok) {
       formElements.value = response.data.data;
