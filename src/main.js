@@ -11,6 +11,7 @@ import test from "./pages/test.vue";
 import MainPage from "./pages/MainPage.vue";
 import Mailing from "./pages/Mailing.vue";
 import Chats from "./pages/Chats.vue";
+import ViewChats from "./pages/ViewChats.vue";
 import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
@@ -84,6 +85,12 @@ const routes = [
     name: "Support",
     component: Support,
     meta: { title: "Тех. поддержка" },
+  },
+  {
+    path: "/viewСhats",
+    name: "viewСhats",
+    component: ViewChats,
+    meta: { title: "Чаты" },
   },
   {
     path: "/close",

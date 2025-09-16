@@ -69,7 +69,6 @@
         <p class="data-error-message">Для загрузки чата нет нужных данных</p>
       </div>
 
-      <!-- Чат -->
       <iframe
         v-else-if="chatUrl"
         :src="chatUrl"
@@ -110,7 +109,7 @@ const fetchChatUrl = async () => {
     }
 
     const response = await axios.post(
-      "https://chats.developtech.ru/account/get-url",
+      "https://chats.apitter.com/account/get-url",
       {
         login: route.query?.login,
         source: route.query?.source,
