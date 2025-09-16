@@ -1,9 +1,5 @@
 <template>
-  <div class="accounts-container">
-    <div class="accounts-header">
-      <h2 class="title">Аккаунты</h2>
-    </div>
-
+  <div class="simple-accounts-container">
     <!-- Состояние загрузки -->
     <div v-if="loading" class="loading">
       <p>Загрузка аккаунтов...</p>
@@ -30,10 +26,6 @@
           <div class="account-info">
             <h3 class="account-name">{{ account.name || account.login }}</h3>
             <p class="account-source">{{ account.source }}</p>
-            <p class="account-login">{{ account.login }}</p>
-            <p v-if="account.connectedPhone" class="account-phone">
-              {{ account.connectedPhone }}
-            </p>
           </div>
 
           <div class="account-actions">
@@ -53,6 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 
@@ -122,6 +115,7 @@ async function fetchAccountsInfo(allAccounts) {
   // Ждем завершения всех запросов
   const accountsInfo = await Promise.all(promises)
   accounts.value = accountsInfo
+  // Фильтруем только аккаунты с step=5
   filteredAccounts.value = accountsInfo.filter(account => account.step?.value === 5)
 }
 
@@ -139,23 +133,8 @@ function openChat(account) {
 </script>
 
 <style scoped>
-.accounts-container {
+.simple-accounts-container {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.accounts-header {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.title {
-  font-weight: 500;
-  font-size: 24px;
-  color: #333;
-  margin: 0;
 }
 
 .loading, .error, .no-accounts {
@@ -178,61 +157,37 @@ function openChat(account) {
 
 .accounts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
   margin-top: 20px;
 }
 
 .account-card {
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+  padding: 15px;
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
-}
-
-.account-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  align-items: center;
 }
 
 .account-info {
-  margin-bottom: 15px;
+  flex: 1;
 }
 
 .account-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
 }
 
 .account-source {
   font-size: 14px;
   color: #666;
-  margin: 0 0 5px 0;
-  text-transform: capitalize;
-}
-
-.account-login {
-  font-size: 14px;
-  color: #888;
-  margin: 0 0 5px 0;
-}
-
-.account-phone {
-  font-size: 14px;
-  color: #007bff;
   margin: 0;
-}
-
-.account-actions {
-  display: flex;
-  justify-content: flex-end;
+  text-transform: capitalize;
 }
 
 .chat-button {
@@ -244,7 +199,6 @@ function openChat(account) {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.2s;
 }
 
 .chat-button:hover {
@@ -254,14 +208,6 @@ function openChat(account) {
 @media (max-width: 768px) {
   .accounts-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .accounts-container {
-    padding: 15px;
-  }
-  
-  .title {
-    font-size: 20px;
   }
 }
 </style>
