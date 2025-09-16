@@ -87,8 +87,8 @@ const routes = [
     meta: { title: "Тех. поддержка" },
   },
   {
-    path: "/viewСhats",
-    name: "viewСhats",
+    path: "/ViewChats",
+    name: "ViewChats",
     component: ViewChats,
     meta: { title: "Чаты" },
   },
