@@ -86,11 +86,11 @@ const routes = [
     component: Support,
     meta: { title: "Тех. поддержка" },
   },
-  {
-    path: "/ViewChats",
-    name: "ViewChats",
+   {
+    path: "/view-chats", // Изменил путь чтобы избежать конфликта
+    name: "ViewChatsPage", // Изменил имя чтобы избежать конфликта
     component: ViewChats,
-    meta: { title: "Чаты" },
+    meta: { title: "Просмотр чатов" }, // Добавил meta для консистентности
   },
   {
     path: "/close",
