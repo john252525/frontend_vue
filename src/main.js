@@ -86,7 +86,7 @@ const routes = [
     component: Support,
     meta: { title: "Тех. поддержка" },
   },
-   {
+  {
     path: "/view-chats", // Изменил путь чтобы избежать конфликта
     name: "ViewChatsPage", // Изменил имя чтобы избежать конфликта
     component: ViewChats,
@@ -316,6 +316,159 @@ const setupAxiosInterceptors = () => {
     }
   );
 };
+
+// // ==================== ФУНКЦИЯ ДЛЯ ОТПРАВКИ ЛОГОВ ====================
+// const sendLogToServer = async (logData) => {
+//   try {
+//     // Пропускаем логирование самих логов, чтобы избежать цикла
+//     if (logData.endpoint && logData.endpoint.includes("/api/createLog")) {
+//       console.log("[Log] Пропускаем логирование запроса логов");
+//       return;
+//     }
+
+//     const accountStore = useAccountStore();
+//     const token = accountStore.getAccountToken;
+
+//     // Формируем payload только с данными, которые отправил пользователь
+//     const payloadData = {
+//       request: {
+//         body: logData.requestBody, // Только тело запроса пользователя
+//       },
+//     };
+
+//     const logPayload = {
+//       level: logData.status >= 400 ? "ERROR" : "SUCCESS",
+//       payload: payloadData,
+//       error: logData.error || null,
+//       message: logData.message || "",
+//       method: logData.method,
+//       endpoint: logData.endpoint,
+//       status: logData.status,
+//       domain: "frontend_vue",
+//     };
+
+//     const config = {
+//       headers: {
+//         "Content-Type": "application/json",
+//         ...(token && { Authorization: `Bearer ${token}` }),
+//       },
+//     };
+
+//     await axios.post(
+//       "https://api28.apitter.com/api/createLog",
+//       logPayload,
+//       config
+//     );
+//     console.log("[Log] Лог успешно отправлен на сервер");
+//   } catch (error) {
+//     console.error("[Log] Ошибка отправки лога:", error);
+//   }
+// };
+
+// // ==================== ПЕРЕХВАТЧИКИ AXIOS ====================
+// axios.interceptors.request.use((config) => {
+//   config.metadata = {
+//     startTime: Date.now(),
+//     url: config.url,
+//     method: config.method?.toUpperCase() || "GET",
+//     isLogRequest: config.url?.includes("/api/createLog"), // Помечаем запросы логов
+//   };
+//   if (config.data) {
+//     config.metadata.requestBody = config.data;
+//   }
+//   return config;
+// });
+
+// axios.interceptors.response.use(
+//   async (response) => {
+//     // Пропускаем логирование запросов самих логов
+//     if (response.config.metadata.isLogRequest) {
+//       return response;
+//     }
+
+//     const endTime = Date.now();
+//     const duration = endTime - response.config.metadata.startTime;
+
+//     const requestData = {
+//       url: response.config.url,
+//       method: response.config.method.toUpperCase(),
+//       status: response.status,
+//       duration: duration,
+//       timestamp: Date.now(),
+//       requestBody: response.config.metadata.requestBody, // Только тело запроса
+//       endpoint: response.config.url,
+//       message: `Request completed in ${duration}ms`,
+//     };
+
+//     // Локальное хранение
+//     const requestsStore = useRequestsStore();
+//     requestsStore.addRequest({
+//       ...requestData,
+//       responseHeaders: response.headers,
+//       responseBody: response.data,
+//       statusText: response.statusText,
+//       requestHeaders: response.config.headers,
+//     });
+
+//     // Отправка лога на сервер
+//     await sendLogToServer(requestData);
+
+//     return response;
+//   },
+//   async (error) => {
+//     // Пропускаем логирование ошибок запросов самих логов
+//     if (error.config?.metadata?.isLogRequest) {
+//       return Promise.reject(error);
+//     }
+
+//     if (error.response) {
+//       const endTime = Date.now();
+//       const duration = endTime - error.config.metadata.startTime;
+
+//       const requestData = {
+//         url: error.config.url,
+//         method: error.config.method.toUpperCase(),
+//         status: error.response.status,
+//         duration: duration,
+//         timestamp: Date.now(),
+//         requestBody: error.config.metadata?.requestBody, // Только тело запроса
+//         endpoint: error.config.url,
+//         message: error.response.statusText || "Request failed",
+//         error: error.message,
+//       };
+
+//       // Локальное хранение
+//       const requestsStore = useRequestsStore();
+//       requestsStore.addRequest({
+//         ...requestData,
+//         responseHeaders: error.response.headers,
+//         responseBody: error.response.data,
+//         statusText: error.response.statusText,
+//         requestHeaders: error.config.headers,
+//       });
+
+//       // Отправка лога на сервер
+//       await sendLogToServer(requestData);
+//     } else {
+//       // Обработка сетевых ошибок
+//       const requestData = {
+//         url: error.config?.url || "unknown",
+//         method: error.config?.method?.toUpperCase() || "UNKNOWN",
+//         status: 0,
+//         duration: 0,
+//         timestamp: Date.now(),
+//         requestBody: error.config?.metadata?.requestBody, // Только тело запроса
+//         endpoint: error.config?.url || "unknown",
+//         message: "Network error",
+//         error: error.message,
+//       };
+
+//       await sendLogToServer(requestData);
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
 
 // Вызываем настройку перехватчиков
 setupAxiosInterceptors();
