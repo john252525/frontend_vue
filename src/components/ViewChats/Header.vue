@@ -3,11 +3,15 @@
     <section class="account-section">
       <h2 class="title">Ваши чаты</h2>
     </section>
-    <section class="account-section">загрузка....</section>
+    <section class="account-section">
+      <List />
+    </section>
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import List from "./List.vue";
+</script>
 
 <style scoped>
 header {
