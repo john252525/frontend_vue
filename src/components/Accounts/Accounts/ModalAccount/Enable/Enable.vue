@@ -9,8 +9,16 @@
       v-if="station.qrCode"
       :changeEnableStation="changeEnableStation"
     />
-    <GetCode ref="subComponent" v-if="station.getCode" />
-    <ChallengeRequired :openEnableMenuTrue="openEnableMenuTrue" :changeChallengeRequired="changeChallengeRequired" v-if="station.ChallengeRequired" />
+    <GetCode
+      :openEnableMenuTrue="openEnableMenuTrue"
+      ref="subComponent"
+      v-if="station.getCode"
+    />
+    <ChallengeRequired
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeChallengeRequired="changeChallengeRequired"
+      v-if="station.ChallengeRequired"
+    />
     <LoadingModal
       :textLoadin="station.text"
       :stationLoading="station.stationLoading"
@@ -81,14 +89,15 @@ const station = reactive({
   text: "",
 });
 
-const changeChallengeRequired = ( ) => {
-  station.ChallengeRequired = false
-}
+const changeChallengeRequired = () => {
+  station.ChallengeRequired = false;
+};
 
 const openEnableMenuTrue = () => {
   station.resultTrue = !station.resultTrue;
   station.qrCode = false;
-  station.ChallengeRequired = false
+  station.ChallengeRequired = false;
+  station.getCode = false;
 };
 
 const subComponent = ref(null);

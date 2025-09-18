@@ -1,7 +1,10 @@
 <template>
   <section>
-    <Telegram v-if="source === 'telegram'" />
-    <WhatsApp ref="child" v-else />
+    <Telegram
+      :openEnableMenuTrue="openEnableMenuTrue"
+      v-if="source === 'telegram'"
+    />
+    <WhatsApp :openEnableMenuTrue="openEnableMenuTrue" ref="child" v-else />
   </section>
 </template>
 
@@ -12,6 +15,18 @@ import WhatsApp from "./WhatsApp.vue";
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const qrStateBolean = ref(false);
+
+const props = defineProps({
+  changeForceStopItemData: {
+    type: Function,
+  },
+  openEnableMenuTrue: {
+    type: Function,
+  },
+  changeEnableStation: {
+    type: Function,
+  },
+});
 
 const child = ref(null);
 
