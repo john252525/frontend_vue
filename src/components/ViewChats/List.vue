@@ -2,10 +2,52 @@
   <div class="simple-accounts-container">
     <!-- Заголовок -->
 
-    <!-- Состояние загрузки (всегда показываем, если идет загрузка) -->
-    <div v-if="loading" class="loading-container">
-      <div class="loader"></div>
-      <p>Загрузка аккаунтов...</p>
+    <!-- Состояние загрузки -->
+    <div v-if="loading" class="loading-section">
+      <LoadAccount v-if="filteredAccounts.length === 0" />
+
+      <div v-else class="accounts-with-loading">
+        <!-- Уже найденные аккаунты -->
+        <div class="accounts-grid">
+          <div
+            v-for="account in filteredAccounts"
+            :key="account.uuid || account.id"
+            class="account-card"
+          >
+            <div class="account-info">
+              <div class="account-header">
+                <h3 class="account-name">
+                  {{ account.name || account.login }}
+                </h3>
+                <span class="account-status-badge">✓</span>
+              </div>
+              <p class="account-source">{{ formatSource(account.source) }}</p>
+              <p class="account-type">{{ formatType(account.type) }}</p>
+            </div>
+
+            <div class="account-actions">
+              <button @click="openChat(account)" class="chat-button">
+                Чат
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Псевдо-аккаунт загрузки -->
+        <div class="account-card loading-account">
+          <div class="account-info">
+            <div class="account-header">
+              <div class="account-name-skeleton"></div>
+              <div class="status-skeleton"></div>
+            </div>
+            <div class="source-skeleton"></div>
+            <div class="type-skeleton"></div>
+          </div>
+          <div class="account-actions">
+            <div class="button-skeleton"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Состояние ошибки -->
@@ -14,42 +56,32 @@
       <button @click="fetchAccounts" class="retry-button">Повторить</button>
     </div>
 
-    <!-- Список аккаунтов (показываем даже во время загрузки, если есть найденные аккаунты) -->
-    <div v-if="filteredAccounts.length > 0" class="accounts-section">
-      <h2 class="accounts-subtitle">Доступные аккаунты</h2>
-      <div class="accounts-grid">
+    <!-- Список аккаунтов после загрузки -->
+    <div v-if="!loading && !error">
+      <div v-if="filteredAccounts.length === 0" class="no-accounts">
+        <LoadAccount />
+      </div>
+
+      <div v-else class="accounts-grid">
         <div
           v-for="account in filteredAccounts"
           :key="account.uuid || account.id"
           class="account-card"
         >
-          <div class="account-cover">
-            <div class="account-avatar">
-              {{ getAccountInitial(account) }}
-            </div>
-          </div>
-
           <div class="account-info">
-            <h3 class="account-name">{{ account.name || account.login }}</h3>
+            <div class="account-header">
+              <h3 class="account-name">{{ account.name || account.login }}</h3>
+              <span class="account-status-badge">✓</span>
+            </div>
             <p class="account-source">{{ formatSource(account.source) }}</p>
-            <p class="account-status">✓ Готов к работе</p>
+            <p class="account-type">{{ formatType(account.type) }}</p>
           </div>
 
           <div class="account-actions">
-            <button @click="openChat(account)" class="chat-button">
-              Открыть чат
-            </button>
+            <button @click="openChat(account)" class="chat-button">Чат</button>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Сообщение если нет аккаунтов после завершения загрузки -->
-    <div
-      v-if="!loading && !error && filteredAccounts.length === 0"
-      class="no-accounts"
-    >
-      <p>Нет аккаунтов с шагом 5</p>
     </div>
   </div>
 </template>
@@ -59,6 +91,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import LoadAccount from "@/components/Accounts/Accounts/LoadAccount.vue";
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const router = useRouter();
@@ -77,7 +110,7 @@ onMounted(() => {
 async function fetchAccounts() {
   loading.value = true;
   error.value = null;
-  filteredAccounts.value = []; // Сбрасываем найденные аккаунты
+  filteredAccounts.value = [];
 
   try {
     const response = await axios.post(
@@ -105,7 +138,7 @@ async function fetchAccounts() {
     error.value = err.message || "Произошла ошибка при загрузке данных";
     console.error("Ошибка при получении аккаунтов:", err);
   } finally {
-    // loading.value = false // Не останавливаем загрузку сразу
+    loading.value = false;
   }
 }
 
@@ -149,9 +182,7 @@ async function fetchAccountsInfo(allAccounts) {
     }
   });
 
-  // Ждем завершения всех запросов
   accounts.value = await Promise.all(promises);
-  loading.value = false; // Завершаем загрузку только когда все аккаунты проверены
 }
 
 function openChat(account) {
@@ -165,11 +196,6 @@ function openChat(account) {
   });
 }
 
-function getAccountInitial(account) {
-  const name = account.name || account.login || "";
-  return name.charAt(0).toUpperCase();
-}
-
 function formatSource(source) {
   const sources = {
     telegram: "Telegram",
@@ -177,6 +203,15 @@ function formatSource(source) {
     crm: "CRM",
   };
   return sources[source] || source;
+}
+
+function formatType(type) {
+  const types = {
+    amocrm: "AmoCRM",
+    bitrix24: "Bitrix24",
+    bulk: "Bulk",
+  };
+  return types[type] || type;
 }
 </script>
 
@@ -196,57 +231,160 @@ function formatSource(source) {
   padding: 0;
 }
 
-.accounts-subtitle {
-  text-align: left;
-  font-size: 20px;
-  font-weight: 600;
-  color: #34495e;
-  margin: 0 0 20px 0;
-}
-
-/* Стили для загрузчика */
-.loading-container {
+/* Стили для загрузки с аккаунтами */
+.accounts-with-loading {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  margin: 20px 0;
+  gap: 15px;
 }
 
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e3e3e3;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+.loading-account {
+  opacity: 0.7;
+  animation: pulse 1.5s infinite;
 }
 
-@keyframes spin {
+@keyframes pulse {
   0% {
-    transform: rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
   }
   100% {
-    transform: rotate(360deg);
+    opacity: 0.7;
   }
 }
 
-.loading-container p {
+.account-name-skeleton,
+.status-skeleton,
+.source-skeleton,
+.type-skeleton,
+.button-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.account-name-skeleton {
+  width: 120px;
+  height: 20px;
+}
+
+.status-skeleton {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.source-skeleton {
+  width: 80px;
+  height: 14px;
+  margin: 5px 0;
+}
+
+.type-skeleton {
+  width: 60px;
+  height: 14px;
+}
+
+.button-skeleton {
+  width: 60px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+/* Стили аккаунтов */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.account-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.account-info {
+  flex: 1;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.account-name {
   font-size: 16px;
-  color: #7f8c8d;
+  font-weight: 600;
+  color: #333;
   margin: 0;
 }
 
+.account-status-badge {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.account-source {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 5px 0;
+  text-transform: capitalize;
+}
+
+.account-type {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.account-actions {
+  margin-left: 15px;
+}
+
+.chat-button {
+  padding: 8px 16px;
+  background: #4950ca;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.chat-button:hover {
+  background: #3a41b8;
+}
+
+/* Состояния ошибки и пустого списка */
 .error,
 .no-accounts {
   text-align: center;
   padding: 40px 20px;
   background: #f8f9fa;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 20px 0;
 }
 
@@ -257,7 +395,7 @@ function formatSource(source) {
 
 .retry-button {
   padding: 12px 24px;
-  background: #3498db;
+  background: #4950ca;
   color: white;
   border: none;
   border-radius: 8px;
@@ -268,102 +406,7 @@ function formatSource(source) {
 }
 
 .retry-button:hover {
-  background: #2980b9;
-}
-
-.accounts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.account-card {
-  background: white;
-  border: 1px solid #e1e8ed;
-  border-radius: 16px;
-  padding: 0;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.account-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.account-cover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  height: 80px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.account-avatar {
-  width: 60px;
-  height: 60px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #667eea;
-  border: 3px solid white;
-  position: absolute;
-  bottom: -30px;
-}
-
-.account-info {
-  padding: 40px 20px 20px 20px;
-  text-align: center;
-}
-
-.account-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 8px 0;
-}
-
-.account-source {
-  font-size: 14px;
-  color: #7f8c8d;
-  margin: 0 0 8px 0;
-  text-transform: capitalize;
-}
-
-.account-status {
-  font-size: 12px;
-  color: #27ae60;
-  font-weight: 500;
-  margin: 0;
-}
-
-.account-actions {
-  padding: 0 20px 20px 20px;
-  text-align: center;
-}
-
-.chat-button {
-  width: 100%;
-  padding: 12px 16px;
-  background: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-.chat-button:hover {
-  background: #219a52;
+  background: #3a41b8;
 }
 
 @media (max-width: 768px) {
@@ -378,6 +421,20 @@ function formatSource(source) {
   .page-title {
     font-size: 24px;
     margin-bottom: 20px;
+  }
+
+  .account-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .account-actions {
+    margin-left: 0;
+    align-self: stretch;
+  }
+
+  .chat-button {
+    width: 100%;
   }
 }
 </style>

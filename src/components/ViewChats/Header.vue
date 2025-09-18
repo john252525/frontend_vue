@@ -3,23 +3,28 @@
     <section class="account-section">
       <h2 class="title">Ваши чаты</h2>
     </section>
-    <section class="account-section">
-      <List />
-    </section>
   </header>
+  <List />
 </template>
 
 <script setup>
 import List from "./List.vue";
+import LoadAccount from "@/components/Accounts/Accounts/LoadAccount.vue";
 </script>
 
 <style scoped>
 header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  /* justify-content: space-between; */
+  flex-direction: column;
   margin: 18px 12px 18px 18px;
   box-sizing: border-box;
+}
+
+.block {
+  width: 50px;
+  height: 50px;
 }
 
 .account-section {
