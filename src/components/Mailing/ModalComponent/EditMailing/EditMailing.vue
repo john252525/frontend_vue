@@ -1,7 +1,7 @@
 <template>
   <div class="modal-overlay" @click="changeisEditMailing"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  
+
   <section class="info-modal">
     <div v-if="!load" class="modal-content">
       <!-- Заголовок с кнопкой закрытия -->
@@ -9,9 +9,21 @@
         <h2 class="modal-title">
           {{ t("editMailing.title") }}
         </h2>
-        <button class="close-btn" @click="changeisEditMailing" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
+        <button
+          class="close-btn"
+          @click="changeisEditMailing"
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
@@ -70,10 +82,7 @@
         <div class="timeout-grid">
           <div class="timeout-input-group">
             <label for="start-num">{{ t("editMailing.timeout.ot") }}</label>
-            <select
-              id="start-num"
-              v-model="items.options.delay.min"
-            >
+            <select id="start-num" v-model="items.options.delay.min">
               <option v-for="minute in minutes" :key="minute" :value="minute">
                 {{ minute }}
               </option>
@@ -81,10 +90,7 @@
           </div>
           <div class="timeout-input-group">
             <label for="end-num">{{ t("editMailing.timeout.do") }}</label>
-            <select
-              id="end-num"
-              v-model="items.options.delay.max"
-            >
+            <select id="end-num" v-model="items.options.delay.max">
               <option v-for="minute in minutes" :key="minute" :value="minute">
                 {{ minute }}
               </option>
@@ -141,7 +147,7 @@
         {{ t("editMailing.button") }}
       </button>
     </div>
-    
+
     <LoadModal v-else :text="'Сохраняем данные'" />
   </section>
 </template>
@@ -212,8 +218,8 @@ async function editWhatsAppBroadcast() {
     days: daysObject,
     time_from: items.value.options.hours.min,
     time_to: items.value.options.hours.max,
-    delay_from: items.value.options.delay.min,
-    delay_to: items.value.options.delay.max,
+    delay_from: items.value.options.delay.min * 60,
+    delay_to: items.value.options.delay.max * 60,
     uniq: items.value.options.uniq,
     exist: items.value.options.exist,
     random: items.value.options.random,
@@ -276,8 +282,7 @@ watch(
         !Array.isArray(newVal.options.days)
       ) {
         selectedDays.value = Object.keys(newVal.options.days).map(Number);
-      }
-      else if (Array.isArray(newVal.options.days)) {
+      } else if (Array.isArray(newVal.options.days)) {
         selectedDays.value = [...newVal.options.days];
       }
     }
@@ -424,25 +429,29 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   transform: rotate(45deg);
 }
 
-.time-grid, .timeout-grid {
+.time-grid,
+.timeout-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-.time-input-group, .timeout-input-group {
+.time-input-group,
+.timeout-input-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.time-input-group label, .timeout-input-group label {
+.time-input-group label,
+.timeout-input-group label {
   font-size: 13px;
   color: var(--text-secondary, #666);
   padding-left: 0;
 }
 
-.time-input-group input, .timeout-input-group select {
+.time-input-group input,
+.timeout-input-group select {
   padding: 8px 10px;
   border: 1px solid var(--border-color, #e0e0e0);
   border-radius: 6px;
@@ -498,29 +507,30 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
     max-width: none;
     border-radius: 10px;
   }
-  
+
   .modal-content {
     padding: 16px;
   }
-  
+
   .modal-header {
     margin-bottom: 16px;
     padding-bottom: 12px;
   }
-  
+
   .modal-title {
     font-size: 16px;
   }
-  
+
   .checkbox-group {
     gap: 10px;
   }
-  
-  .time-grid, .timeout-grid {
+
+  .time-grid,
+  .timeout-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .edit-btn {
     padding: 10px 16px;
     font-size: 13px;
@@ -537,24 +547,25 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
     left: 0;
     transform: none;
   }
-  
+
   .modal-content {
     padding: 20px 16px;
   }
-  
+
   .edit-label {
     font-size: 13px;
   }
-  
+
   label {
     font-size: 13px;
   }
-  
-  .time-input-group input, .timeout-input-group select {
+
+  .time-input-group input,
+  .timeout-input-group select {
     font-size: 13px;
     padding: 7px 10px;
   }
-  
+
   .min-text {
     font-size: 11px;
     bottom: 7px;
@@ -566,25 +577,25 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   .modal-content {
     padding: 16px 12px;
   }
-  
+
   .modal-title {
     font-size: 15px;
   }
-  
+
   .checkbox-group {
     gap: 8px;
   }
-  
+
   label {
     font-size: 12px;
     padding-left: 22px;
   }
-  
+
   .custom-checkbox {
     width: 16px;
     height: 16px;
   }
-  
+
   input[type="checkbox"]:checked + label .custom-checkbox::after {
     left: 5px;
     top: 1px;
