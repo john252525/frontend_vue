@@ -422,29 +422,29 @@ const totalPages = computed(() => {
   return Math.ceil(sortedTariffs.value.length / itemsPerPage);
 });
 
-const paginatedTariffs = computed(() => {
-  const start = currentPage.value * itemsPerPage;
-  const end = start + itemsPerPage;
-  return [
-    {
-      id: "7",
-      code: "whatsapi-bulk",
-      period: "1m",
-      limits: "",
-      name: "Whatsapi 1 Month",
-      price: "2000",
-      currency: "RUB",
-      enable: "1",
-      final_price: 1000,
-    },
-  ];
-});
-
 // const paginatedTariffs = computed(() => {
 //   const start = currentPage.value * itemsPerPage;
 //   const end = start + itemsPerPage;
-//   return sortedTariffs.value.slice(start, end);
+//   return [
+//     {
+//       id: "7",
+//       code: "whatsapi-bulk",
+//       period: "1m",
+//       limits: "",
+//       name: "Whatsapi 1 Month",
+//       price: "2000",
+//       currency: "RUB",
+//       enable: "1",
+//       final_price: 1000,
+//     },
+//   ];
 // });
+
+const paginatedTariffs = computed(() => {
+  const start = currentPage.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  return sortedTariffs.value.slice(start, end);
+});
 
 const prevPage = () => {
   if (currentPage.value > 0) {
