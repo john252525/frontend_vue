@@ -34,7 +34,7 @@
               @mouseover="showMessage($event, item.step.message)"
               @mouseleave="hideMessage"
               v-if="
-                item.step && item.type != 'amocrm' && item.source != 'bitrix'
+                item.step && item.type != 'amocrm' && item.type != 'bitrix24'
               "
             >
               {{ item.step.value }}
@@ -42,7 +42,9 @@
 
             <td
               class="table-text"
-              v-else-if="item.loading && accountStation != 'crm'"
+              v-else-if="
+                item.loading && item.type != 'amocrm' && item.type != 'bitrix24'
+              "
             >
               <LoadingAccount />
             </td>
