@@ -1,6 +1,5 @@
 <template>
   <div class="accounts-page">
-    <!-- Заголовок -->
     <header class="page-header">
       <section class="account-section">
         <h2 class="title">Ваши чаты</h2>
@@ -230,11 +229,13 @@ async function fetchAccountsInfo(allAccounts) {
 
 function openChat(account) {
   router.push({
-    name: "Chats",
+    name: "UserChats",
     query: {
-      source: account.source,
       login: account.login,
+      uuid: account.uuid,
       type: account.type,
+      storage: account.storage,
+      source: account.source,
     },
   });
 }

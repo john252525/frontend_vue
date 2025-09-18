@@ -228,7 +228,6 @@ const getAccountRefreshToken = computed(
   () => accountStore.getAccountRefreshToken
 );
 
-// ==================== ПЕРЕХВАТЧИК AXIOS ДЛЯ ОБНОВЛЕНИЯ ТОКЕНА ====================
 const setupAxiosInterceptors = () => {
   console.log(storedData.value, "email");
   console.log(getAccountRefreshToken.value, "token");
