@@ -592,7 +592,7 @@ const updateAccountButton = async () => {
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
-        localStorage.removeItem("accountToken");
+        localStorage.removeItem("accountStore");
         router.push("/login");
       }, 2000);
     } else {
