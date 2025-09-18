@@ -131,7 +131,9 @@ import { useDomain } from "@/composables/getDomain";
 import { useBalanceStore } from "@/stores/balanceStore";
 
 const { stationDomain } = useDomain();
-const balanceStore = useBalanceStore();
+
+// Правильное использование - внутри computed или функций
+const balanceStore = computed(() => useBalanceStore());
 
 const logo = import.meta.env.VITE_TITLE_LOGO;
 const logoUrl = import.meta.env.VITE_URL_LOGO;
@@ -159,7 +161,7 @@ const isChatPage = computed(() => {
 });
 
 onMounted(() => {
-  balanceStore.regBalanceUser();
+  balanceStore.value.regBalanceUser();
 });
 </script>
 

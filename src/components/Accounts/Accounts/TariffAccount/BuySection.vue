@@ -6,9 +6,24 @@
   <Loading v-if="loadingPay" />
   <div v-else class="tariff-content">
     <div class="tariff-price">
-      <div class="price-amount">
-        {{ selectTariff.price }}
-        <span class="currency">{{ selectTariff.currency }}</span>
+      <div v-if="hasDiscount" class="price-with-discount">
+        <div class="original-price-wrapper">
+          <span class="original-price">{{
+            formatPrice(selectTariff.price)
+          }}</span>
+          <span class="original-currency">{{ selectTariff.currency }}</span>
+        </div>
+        <div class="final-price-wrapper">
+          <span class="final-price">{{ formatPrice(finalPrice) }}</span>
+          <span class="final-currency">{{ selectTariff.currency }}</span>
+        </div>
+        <div class="discount-badge">-{{ discountPercent }}%</div>
+      </div>
+      <div v-else class="price-without-discount">
+        <div class="price-amount">
+          {{ formatPrice(finalPrice) }}
+          <span class="currency">{{ selectTariff.currency }}</span>
+        </div>
       </div>
       <div class="price-period">
         за {{ getPeriodText(selectTariff.period) }}
@@ -30,20 +45,22 @@
       </div>
     </div>
 
-    <button class="buy-button" @click="buyTariff">Купить тариф</button>
+    <button class="buy-button" @click="buyTariff">
+      Купить за {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+    </button>
   </div>
 </template>
 
 <script setup>
-import { toRefs } from "vue";
-import { ref, computed } from "vue";
+import { toRefs, computed } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import { useAccountStore } from "@/stores/accountStore";
-import { useBalanceStore } from "@/stores/balanceStore"; // Добавляем импорт store баланса
+import { useBalanceStore } from "@/stores/balanceStore";
 
 const accountStore = useAccountStore();
-const balanceStore = useBalanceStore(); // Используем store баланса
+const balanceStore = useBalanceStore();
 const token = computed(() => accountStore.getAccountToken);
 const apiUrl = import.meta.env.VITE_PAY_URL;
 
@@ -66,6 +83,33 @@ const props = defineProps({
 
 const loadingPay = ref(false);
 const { selectTariff, selectedItem } = toRefs(props);
+
+// Вычисляемые свойства для работы со скидкой
+const hasDiscount = computed(() => {
+  return (
+    selectTariff.value.final_price &&
+    selectTariff.value.final_price != selectTariff.value.price
+  );
+});
+
+const finalPrice = computed(() => {
+  return hasDiscount.value
+    ? selectTariff.value.final_price
+    : selectTariff.value.price;
+});
+
+const discountPercent = computed(() => {
+  if (!hasDiscount.value) return 0;
+  const discount =
+    ((selectTariff.value.price - selectTariff.value.final_price) /
+      selectTariff.value.price) *
+    100;
+  return Math.round(discount);
+});
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat("ru-RU").format(price);
+};
 
 const emit = defineEmits(["buy"]);
 
@@ -120,12 +164,10 @@ const getTariffValue = (period) => {
     "4w": "4 недели",
   };
 
-  // Если период есть в мапе - возвращаем его
   if (periodMap[period]) {
     return periodMap[period];
   }
 
-  // Если период в формате типа "30d" - пытаемся разобрать
   const match = period.match(/^(\d+)([dmyw])$/);
   if (match) {
     const num = parseInt(match[1]);
@@ -134,72 +176,60 @@ const getTariffValue = (period) => {
     let unitText;
     switch (unit) {
       case "d":
-        unitText = "день";
+        if (num % 10 === 1 && num % 100 !== 11) {
+          unitText = "день";
+        } else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        ) {
+          unitText = "дня";
+        } else {
+          unitText = "дней";
+        }
         break;
       case "m":
-        unitText = "месяц";
+        if (num % 10 === 1 && num % 100 !== 11) {
+          unitText = "месяц";
+        } else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        ) {
+          unitText = "месяца";
+        } else {
+          unitText = "месяцев";
+        }
         break;
       case "y":
-        unitText = "год";
+        if (num % 10 === 1 && num % 100 !== 11) {
+          unitText = "год";
+        } else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        ) {
+          unitText = "года";
+        } else {
+          unitText = "лет";
+        }
         break;
       case "w":
-        unitText = "неделя";
+        if (num % 10 === 1 && num % 100 !== 11) {
+          unitText = "неделя";
+        } else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        ) {
+          unitText = "недели";
+        } else {
+          unitText = "недель";
+        }
         break;
       default:
         unitText = "";
     }
 
-    // Формируем правильное окончание
-    if (unit === "d") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "день";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "дня";
-      } else {
-        unitText = "дней";
-      }
-    } else if (unit === "m") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "месяц";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "месяца";
-      } else {
-        unitText = "месяцев";
-      }
-    } else if (unit === "y") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "год";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "года";
-      } else {
-        unitText = "лет";
-      }
-    } else if (unit === "w") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "неделя";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "недели";
-      } else {
-        unitText = "недель";
-      }
-    }
-
     return `${num} ${unitText}`;
   }
 
-  // Если не смогли разобрать - возвращаем как есть
   return period;
 };
 
@@ -214,7 +244,6 @@ const encodeTariff = (tariffCode, id) => {
     const randomSalt = Math.random().toString(36).substring(2, 8);
     const str = `${prefix}${tariffCode}|${id}|${timestamp}|${randomSalt}`;
 
-    // Двойное кодирование для дополнительной безопасности
     const firstPass = btoa(unescape(encodeURIComponent(str)));
     const secondPass = btoa(
       unescape(encodeURIComponent(firstPass.split("").reverse().join("")))
@@ -232,7 +261,6 @@ const buyTariff = async () => {
   console.log(selectTariff.value);
 
   try {
-    // Кодируем идентификатор тарифа перед отправкой
     const encodedTariff = encodeTariff(
       selectTariff.value.code,
       selectTariff.value.id
@@ -241,14 +269,16 @@ const buyTariff = async () => {
     const response = await axios.post(
       `${apiUrl}/buy`,
       {
-        amount: selectTariff.value.price,
+        amount: finalPrice.value, // Используем finalPrice вместо selectTariff.value.price
         tariff_id: selectTariff.value.id,
-        tariff: encodedTariff, // Добавляем закодированный тариф
+        tariff: encodedTariff,
         currency: selectTariff.value.currency,
         domain: window.location.hostname,
         entity: "vendor",
         category: "tariff",
         entity_uuid: selectedItem.value.uuid,
+        original_price: selectTariff.value.price, // Добавляем оригинальную цену для отслеживания
+        discount_percent: discountPercent.value, // Добавляем процент скидки
       },
       {
         headers: {
@@ -259,20 +289,20 @@ const buyTariff = async () => {
 
     if (response.data.success) {
       loadingPay.value = false;
-
-      // ОБНОВЛЯЕМ БАЛАНС ПОСЛЕ УСПЕШНОЙ ПОКУПКИ
       await balanceStore.refreshBalance();
-
       props.changePaymentsStation(true, "success");
     } else {
-      console.log("jib,r");
+      console.log("Ошибка при покупке");
       props.changePaymentsStation(true, "error");
     }
   } catch (error) {
     console.error("error", error);
-    console.log(error.response.data);
     loadingPay.value = false;
-    props.changePaymentsStation(true, "error", error.response.data.message);
+    props.changePaymentsStation(
+      true,
+      "error",
+      error.response?.data?.message || "Ошибка при покупке"
+    );
   }
 };
 </script>
@@ -322,13 +352,6 @@ const buyTariff = async () => {
   background: #f5f5f5;
 }
 
-.close-button svg {
-  fill: #666;
-  transition: fill 0.2s;
-  width: 20px;
-  height: 20px;
-}
-
 .tariff-content {
   /* padding: 25px; */
 }
@@ -336,24 +359,80 @@ const buyTariff = async () => {
 .tariff-price {
   text-align: center;
   margin-bottom: 30px;
+  position: relative;
 }
 
-.price-amount {
+.price-with-discount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.original-price-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.original-price {
+  font-size: 24px;
+  text-decoration: line-through;
+  color: #9e9e9e;
+  font-weight: 500;
+}
+
+.original-currency {
+  font-size: 16px;
+  color: #9e9e9e;
+}
+
+.final-price-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.final-price {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff3b30;
+  line-height: 1;
+}
+
+.final-currency {
+  font-size: 24px;
+  color: #ff3b30;
+  font-weight: 600;
+}
+
+.discount-badge {
+  background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.price-without-discount .price-amount {
   font-size: 48px;
   font-weight: 700;
   color: #4a6cf7;
   line-height: 1;
 }
 
-.price-amount .currency {
+.price-without-discount .currency {
   font-size: 24px;
   font-weight: 500;
+  color: #4a6cf7;
 }
 
 .price-period {
   font-size: 16px;
   color: #666;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .tariff-features {
@@ -364,11 +443,6 @@ const buyTariff = async () => {
   display: flex;
   align-items: center;
   padding: 12px 0;
-  /* border-bottom: 1px solid #f5f5f5; */
-}
-
-.feature-item:last-child {
-  border-bottom: none;
 }
 
 .feature-icon {
@@ -379,43 +453,60 @@ const buyTariff = async () => {
 
 .buy-button {
   width: 100%;
-  padding: 11px;
-  background: #4a6cf7;
+  padding: 16px;
+  background: linear-gradient(135deg, #4a6cf7 0%, #6b8cff 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(74, 108, 247, 0.3);
 }
 
 .buy-button:hover {
-  background: #3a5ce4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 108, 247, 0.4);
+  background: linear-gradient(135deg, #3a5ce4 0%, #5b7cff 100%);
 }
 
-.tariff-meta {
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 8px;
+@media (max-width: 768px) {
+  .final-price {
+    font-size: 36px;
+  }
+
+  .price-without-discount .price-amount {
+    font-size: 36px;
+  }
+
+  .original-price {
+    font-size: 20px;
+  }
+
+  .buy-button {
+    padding: 14px;
+    font-size: 16px;
+  }
 }
 
-.meta-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
+@media (max-width: 480px) {
+  .final-price {
+    font-size: 32px;
+  }
 
-.meta-item:last-child {
-  margin-bottom: 0;
-}
+  .price-without-discount .price-amount {
+    font-size: 32px;
+  }
 
-.meta-label {
-  color: #666;
-}
+  .original-price {
+    font-size: 18px;
+  }
 
-.meta-value {
-  font-weight: 500;
+  .discount-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
 }
 </style>

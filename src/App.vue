@@ -4,7 +4,10 @@
   </div>
 
   <div v-else>
-    <Header v-if="!isAuthPage && !isWidgetMode && !isMailingMode" :phoneMenuOn="phoneMenuOn" />
+    <Header
+      v-if="!isAuthPage && !isWidgetMode && !isMailingMode"
+      :phoneMenuOn="phoneMenuOn"
+    />
     <div class="page-container" v-if="!isAuthPage">
       <Navigation
         v-if="isWidgetMode || isMailingMode"
@@ -43,7 +46,15 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, reactive, provide, nextTick } from "vue"; // Добавили nextTick
+import {
+  ref,
+  watch,
+  computed,
+  onMounted,
+  reactive,
+  provide,
+  nextTick,
+} from "vue"; // Добавили nextTick
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -76,8 +87,8 @@ const checkChatStation = () => {
 };
 
 const isAuthPage = computed(() => {
-  const routeName = route?.name?.toString();
-  if (!routeName) return false;
+  if (!route.name) return true; // Пока роутер не инициализирован, считаем auth страницей
+  const routeName = route.name.toString();
   return [
     "Login",
     "Registration",
@@ -118,7 +129,7 @@ onMounted(async () => {
 
   // Ждем следующего тика для инициализации
   await nextTick();
-  
+
   // Даем дополнительное время для полной инициализации роутера
   setTimeout(() => {
     isLoading.value = false;
@@ -126,14 +137,18 @@ onMounted(async () => {
 });
 
 // Альтернативно: используем watch для отслеживания готовности роутера
-watch(() => route?.fullPath, (newPath) => {
-  if (newPath) {
-    // Роутер готов, скрываем лоадер
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 100);
-  }
-}, { immediate: true });
+watch(
+  () => route?.fullPath,
+  (newPath) => {
+    if (newPath) {
+      // Роутер готов, скрываем лоадер
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 100);
+    }
+  },
+  { immediate: true }
+);
 
 function getDomen() {
   return currentDomain.value;

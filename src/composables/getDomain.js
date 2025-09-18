@@ -17,9 +17,11 @@ const stationDomain = reactive({
 export function useDomain() {
   onMounted(() => {
     currentDomain.value = window.location.hostname;
+    console.log(currentDomain);
 
     // Получаем конфигурацию для текущего домена
     const config = getDomainConfig(currentDomain.value);
+    console.log(config, "config");
 
     // Обновляем stationDomain
     Object.assign(stationDomain, config);

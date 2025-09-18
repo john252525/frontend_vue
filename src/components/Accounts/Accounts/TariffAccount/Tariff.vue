@@ -68,57 +68,101 @@
             @mouseenter="hoverIndex = currentPage * itemsPerPage + index"
             @mouseleave="hoverIndex = -1"
             :class="{
-              hovered: hoverIndex === currentPage * itemsPerPage + index,
+              'tariff-card--hovered':
+                hoverIndex === currentPage * itemsPerPage + index,
+              'tariff-card--discount': hasDiscount(tariff),
             }"
           >
-            <div class="tariff-header">
-              <div class="price-container">
-                <div class="price">
-                  <span class="amount">{{ formatPrice(tariff.price) }}</span>
-                  <span class="currency">{{ tariff.currency }}</span>
-                </div>
-                <div class="period">/{{ getPeriodText(tariff.period) }}</div>
+            <!-- Бейдж скидки -->
+            <div v-if="hasDiscount(tariff)" class="discount-badge">
+              <span class="discount-badge__text"
+                >-{{ calculateDiscountPercent(tariff) }}%</span
+              >
+            </div>
 
-                <!-- Улучшенный расчет и отображение ежемесячной стоимости -->
+            <div class="tariff-card__header">
+              <div class="price-block">
+                <div class="price-display">
+                  <div v-if="hasDiscount(tariff)" class="price-with-discount">
+                    <div class="original-price-wrapper">
+                      <span class="original-price">{{
+                        formatPrice(tariff.price)
+                      }}</span>
+                      <span class="original-currency">{{
+                        tariff.currency
+                      }}</span>
+                    </div>
+                    <div class="final-price-wrapper">
+                      <span class="final-price">{{
+                        formatPrice(tariff.final_price)
+                      }}</span>
+                      <span class="final-currency">{{ tariff.currency }}</span>
+                    </div>
+                  </div>
+                  <div v-else class="price-without-discount">
+                    <span class="regular-price">{{
+                      formatPrice(tariff.price)
+                    }}</span>
+                    <span class="regular-currency">{{ tariff.currency }}</span>
+                  </div>
+                </div>
+
+                <div class="period-text">
+                  /{{ getPeriodText(tariff.period) }}
+                </div>
+
+                <!-- Ежемесячная стоимость -->
                 <div
                   v-if="shouldShowMonthlyPrice(tariff)"
-                  class="monthly-price"
+                  class="monthly-price-block"
                 >
-                  {{ calculateMonthlyEquivalent(tariff) }} ₽/мес
-                  <span
+                  <div class="monthly-price">
+                    {{ calculateMonthlyEquivalent(tariff) }} ₽/мес
+                  </div>
+                  <div
                     v-if="calculateSavings(tariff) > 0"
-                    class="savings-text"
+                    class="savings-badge"
                   >
-                    (Экономия {{ calculateSavings(tariff) }}%)
-                  </span>
+                    Экономия {{ calculateSavings(tariff) }}%
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="tariff-features">
-              <div class="feature" v-if="tariff.limits">
-                <svg class="feature-icon" viewBox="0 0 24 24">
-                  <path
-                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                  />
-                </svg>
-                <span>{{ tariff.limits || "Без ограничений" }}</span>
+            <div class="tariff-card__features">
+              <div class="feature-item" v-if="tariff.limits">
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path
+                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                    />
+                  </svg>
+                </div>
+                <span class="feature-text">{{
+                  tariff.limits || "Без ограничений"
+                }}</span>
               </div>
-              <div class="feature">
-                <svg class="feature-icon" viewBox="0 0 24 24">
-                  <path
-                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                  />
-                </svg>
-                <span>Доступ на {{ getPeriodText(tariff.period) }}</span>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path
+                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                    />
+                  </svg>
+                </div>
+                <span class="feature-text"
+                  >Доступ на {{ getPeriodText(tariff.period) }}</span
+                >
               </div>
-              <div class="feature">
-                <svg class="feature-icon" viewBox="0 0 24 24">
-                  <path
-                    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                  />
-                </svg>
-                <span>Техническая поддержка 24/7</span>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path
+                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+                    />
+                  </svg>
+                </div>
+                <span class="feature-text">Техническая поддержка 24/7</span>
               </div>
             </div>
 
@@ -126,7 +170,8 @@
               @click="clickSelectTariff(tariff)"
               class="select-button"
               :class="{
-                hovered: hoverIndex === currentPage * itemsPerPage + index,
+                'select-button--hovered':
+                  hoverIndex === currentPage * itemsPerPage + index,
               }"
             >
               Выбрать тариф
@@ -244,22 +289,31 @@ const nullTariff = ref(false);
 const currentPage = ref(0);
 const itemsPerPage = 3;
 
+// Новые методы для работы со скидками
+const hasDiscount = (tariff) => {
+  return tariff.final_price && tariff.final_price != tariff.price;
+};
+
+const calculateDiscountPercent = (tariff) => {
+  if (!hasDiscount(tariff)) return 0;
+
+  const discount = ((tariff.price - tariff.final_price) / tariff.price) * 100;
+  return Math.round(discount);
+};
+
 const shouldShowMonthlyPrice = (tariff) => {
-  // Не показываем для периодов меньше месяца
   if (tariff.period.endsWith("d") || tariff.period.endsWith("w")) {
     return false;
   }
-  // Показываем для всех остальных периодов
   return true;
 };
 
 const calculateMonthlyEquivalent = (tariff) => {
   const period = tariff.period;
-  const price = tariff.price;
+  const price = hasDiscount(tariff) ? tariff.final_price : tariff.price;
 
-  // Разбираем период на число и единицу измерения
   const match = period.match(/^(\d+)([dmyw])$/);
-  if (!match) return price; // Если не распознано - возвращаем как есть
+  if (!match) return price;
 
   const num = parseInt(match[1]);
   const unit = match[2];
@@ -268,10 +322,10 @@ const calculateMonthlyEquivalent = (tariff) => {
 
   switch (unit) {
     case "d": // дни
-      monthsEquivalent = num / 30; // ~30 дней в месяце
+      monthsEquivalent = num / 30;
       break;
     case "w": // недели
-      monthsEquivalent = num / 4.345; // ~4.345 недели в месяце
+      monthsEquivalent = num / 4.345;
       break;
     case "m": // месяцы
       monthsEquivalent = num;
@@ -281,13 +335,11 @@ const calculateMonthlyEquivalent = (tariff) => {
       break;
   }
 
-  // Округляем до 2 знаков после запятой
   const monthlyPrice = price / monthsEquivalent;
   return monthlyPrice.toFixed(2);
 };
 
 const calculateSavings = (tariff) => {
-  // Находим месячный тариф для сравнения
   const monthlyTariff = sortedTariffs.value.find(
     (t) => t.period === "1m" || t.period === "30d"
   );
@@ -295,7 +347,9 @@ const calculateSavings = (tariff) => {
   if (!monthlyTariff) return 0;
 
   const monthlyPrice = parseFloat(calculateMonthlyEquivalent(tariff));
-  const baseMonthlyPrice = monthlyTariff.price;
+  const baseMonthlyPrice = hasDiscount(monthlyTariff)
+    ? monthlyTariff.final_price
+    : monthlyTariff.price;
 
   if (monthlyPrice >= baseMonthlyPrice) return 0;
 
@@ -371,8 +425,26 @@ const totalPages = computed(() => {
 const paginatedTariffs = computed(() => {
   const start = currentPage.value * itemsPerPage;
   const end = start + itemsPerPage;
-  return sortedTariffs.value.slice(start, end);
+  return [
+    {
+      id: "7",
+      code: "whatsapi-bulk",
+      period: "1m",
+      limits: "",
+      name: "Whatsapi 1 Month",
+      price: "2000",
+      currency: "RUB",
+      enable: "1",
+      final_price: 1000,
+    },
+  ];
 });
+
+// const paginatedTariffs = computed(() => {
+//   const start = currentPage.value * itemsPerPage;
+//   const end = start + itemsPerPage;
+//   return sortedTariffs.value.slice(start, end);
+// });
 
 const prevPage = () => {
   if (currentPage.value > 0) {
@@ -392,7 +464,6 @@ const formatPrice = (price) => {
 
 const getPeriodText = (period) => {
   const periodMap = {
-    // Дни
     "1d": "1 день",
     "2d": "2 дня",
     "3d": "3 дня",
@@ -404,8 +475,6 @@ const getPeriodText = (period) => {
     "21d": "21 день",
     "28d": "28 дней",
     "30d": "30 дней",
-
-    // Месяцы
     "1m": "1 месяц",
     "2m": "2 месяца",
     "3m": "3 месяца",
@@ -421,8 +490,6 @@ const getPeriodText = (period) => {
     "14m": "14 месяцев",
     "18m": "18 месяцев",
     "24m": "24 месяца",
-
-    // Годы
     "1y": "1 год",
     "2y": "2 года",
     "3y": "3 года",
@@ -433,20 +500,16 @@ const getPeriodText = (period) => {
     "8y": "8 лет",
     "9y": "9 лет",
     "10y": "10 лет",
-
-    // Недели
     "1w": "1 неделя",
     "2w": "2 недели",
     "3w": "3 недели",
     "4w": "4 недели",
   };
 
-  // Если период есть в мапе - возвращаем его
   if (periodMap[period]) {
     return periodMap[period];
   }
 
-  // Если период в формате типа "30d" - пытаемся разобрать
   const match = period.match(/^(\d+)([dmyw])$/);
   if (match) {
     const num = parseInt(match[1]);
@@ -455,100 +518,49 @@ const getPeriodText = (period) => {
     let unitText;
     switch (unit) {
       case "d":
-        unitText = "день";
+        if (num % 10 === 1 && num % 100 !== 11) unitText = "день";
+        else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        )
+          unitText = "дня";
+        else unitText = "дней";
         break;
       case "m":
-        unitText = "месяц";
+        if (num % 10 === 1 && num % 100 !== 11) unitText = "месяц";
+        else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        )
+          unitText = "месяца";
+        else unitText = "месяцев";
         break;
       case "y":
-        unitText = "год";
+        if (num % 10 === 1 && num % 100 !== 11) unitText = "год";
+        else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        )
+          unitText = "года";
+        else unitText = "лет";
         break;
       case "w":
-        unitText = "неделя";
+        if (num % 10 === 1 && num % 100 !== 11) unitText = "неделя";
+        else if (
+          [2, 3, 4].includes(num % 10) &&
+          ![12, 13, 14].includes(num % 100)
+        )
+          unitText = "недели";
+        else unitText = "недель";
         break;
       default:
         unitText = "";
     }
 
-    // Формируем правильное окончание
-    if (unit === "d") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "день";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "дня";
-      } else {
-        unitText = "дней";
-      }
-    } else if (unit === "m") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "месяц";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "месяца";
-      } else {
-        unitText = "месяцев";
-      }
-    } else if (unit === "y") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "год";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "года";
-      } else {
-        unitText = "лет";
-      }
-    } else if (unit === "w") {
-      if (num % 10 === 1 && num % 100 !== 11) {
-        unitText = "неделя";
-      } else if (
-        [2, 3, 4].includes(num % 10) &&
-        ![12, 13, 14].includes(num % 100)
-      ) {
-        unitText = "недели";
-      } else {
-        unitText = "недель";
-      }
-    }
-
     return `${num} ${unitText}`;
   }
 
-  // Если не смогли разобрать - возвращаем как есть
   return period;
-};
-
-const calculateMonthlyPrice = (tariff) => {
-  const months = {
-    "1m": 1,
-    "3m": 3,
-    "6m": 6,
-    "12m": 12,
-    "1y": 12,
-  };
-  return Math.round(tariff.price / months[tariff.period]);
-};
-
-const calculateOriginalMonthly = (tariff) => {
-  const monthlyTariff = sortedTariffs.value.find((t) => t.period === "1m");
-  return monthlyTariff ? monthlyTariff.price : 1050;
-};
-
-const showMonthlyPrice = (tariff) => {
-  return tariff.period !== "1m";
-};
-
-const getTariffName = (tariff) => {
-  if (tariff.period === "1y") {
-    return "Годовой тариф";
-  }
-  return tariff.name.replace("Whatsapp", "").trim();
 };
 
 const closeModal = () => {
@@ -586,13 +598,13 @@ onMounted(fetchTariffs);
 
 .modal-container {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   width: 100%;
-  max-width: 900px;
-  padding: 25px;
+  max-width: 1000px;
+  padding: 30px;
   position: relative;
   animation: slideUp 0.4s ease;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   margin: auto;
   overflow: hidden;
 }
@@ -601,25 +613,26 @@ onMounted(fetchTariffs);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  padding-bottom: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 25px;
   border-bottom: 1px solid #f0f0f0;
 }
 
 .modal-header h2 {
-  font-size: clamp(20px, 4vw, 24px);
-  color: #333;
+  font-size: 28px;
+  color: #1a1a1a;
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .close-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
   border-radius: 50%;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -627,14 +640,15 @@ onMounted(fetchTariffs);
 }
 
 .close-button:hover {
-  background: #f5f5f5;
+  background: #f8f9ff;
+  transform: rotate(90deg);
 }
 
 .close-button svg {
   fill: #666;
-  transition: fill 0.2s;
-  width: 20px;
-  height: 20px;
+  transition: fill 0.3s ease;
+  width: 22px;
+  height: 22px;
 }
 
 .tariffs-wrapper {
@@ -642,216 +656,312 @@ onMounted(fetchTariffs);
 }
 
 .tariffs-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
   width: 100%;
-  overflow-x: hidden;
 }
 
 .tariff-card {
-  width: 280px; /* Фиксированная ширина */
   position: relative;
   background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(101, 52, 255, 0.08);
-  transition: all 0.3s ease;
+  border-radius: 16px;
+  padding: 28px;
+  border: 2px solid #f7f9fc;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   min-width: 0;
-  box-sizing: border-box; /* Чтобы padding не влиял на общую ширину */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.tariff-card.hovered {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.tariff-card--hovered {
+  transform: translateY(-8px);
+  border-color: #6732ff;
+  box-shadow: 0 25px 50px rgba(103, 50, 255, 0.12);
 }
 
-.tariff-header {
+.tariff-card--discount {
+  border-color: #ffebee;
+  background: linear-gradient(135deg, #fff 0%, #fffaf5 100%);
+}
+
+.discount-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+.discount-badge__text {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tariff-card__header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   position: relative;
-  padding-bottom: 15px;
+  padding-bottom: 20px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.savings-text {
-  color: #4caf50;
-  font-size: 0.85em;
-  margin-left: 5px;
-}
-
-.tariff-header h3 {
-  font-size: clamp(16px, 3vw, 20px);
-  color: #333;
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-.price-container {
-  margin-bottom: 5px;
-}
-
-.price {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-bottom: 5px;
-}
-
-.amount {
-  font-size: clamp(24px, 5vw, 32px);
-  font-weight: 700;
-  color: #6732ff;
-  line-height: 1;
-}
-
-.currency {
-  font-size: clamp(14px, 3vw, 18px);
-  margin-left: 3px;
-  color: #666;
-  align-self: flex-start;
-  line-height: 1.5;
-}
-
-.period {
-  font-size: clamp(12px, 2.5vw, 14px);
-  color: #888;
+.price-block {
   margin-bottom: 8px;
 }
 
+.price-display {
+  margin-bottom: 12px;
+}
+
+.price-with-discount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.original-price-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.original-price {
+  font-size: 20px;
+  text-decoration: line-through;
+  color: #9e9e9e;
+  font-weight: 500;
+}
+
+.original-currency {
+  font-size: 16px;
+  color: #9e9e9e;
+}
+
+.final-price-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.final-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ff3b30;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.final-currency {
+  font-size: 20px;
+  color: #ff3b30;
+  font-weight: 600;
+}
+
+.price-without-discount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  justify-content: center;
+}
+
+.regular-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: #6732ff;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.regular-currency {
+  font-size: 20px;
+  color: #6732ff;
+  font-weight: 600;
+}
+
+.period-text {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.monthly-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
 .monthly-price {
-  font-size: clamp(12px, 2.5vw, 14px);
+  font-size: 15px;
   color: #4caf50;
-  font-weight: 500;
-  margin-top: 5px;
+  font-weight: 600;
+  background: #f0fff4;
+  padding: 6px 12px;
+  border-radius: 12px;
 }
 
-.savings-text {
-  font-size: clamp(12px, 2.5vw, 14px);
-  color: #4caf50;
+.savings-badge {
+  font-size: 13px;
+  color: #2e7d32;
   font-weight: 500;
-  margin-top: 5px;
+  background: #e8f5e8;
+  padding: 4px 10px;
+  border-radius: 8px;
 }
 
-.tariff-features {
-  margin: 15px 0;
+.tariff-card__features {
+  margin: 20px 0;
   flex-grow: 1;
 }
 
-.feature {
+.feature-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 10px;
-  font-size: clamp(13px, 2.5vw, 14px);
+  margin-bottom: 16px;
+  font-size: 15px;
   color: #555;
-  line-height: 1.4;
+  line-height: 1.5;
+  gap: 12px;
 }
 
 .feature-icon {
-  width: 16px;
-  height: 16px;
-  fill: #6732ff;
-  margin-right: 8px;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: #f0f4ff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 2px;
+}
+
+.feature-icon svg {
+  fill: #6732ff;
+  width: 14px;
+  height: 14px;
+}
+
+.feature-text {
+  flex: 1;
+  font-weight: 500;
 }
 
 .select-button {
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   border: none;
-  border-radius: 8px;
-  background: #6732ff;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: clamp(14px, 3vw, 15px);
+  font-size: 16px;
   margin-top: auto;
+  box-shadow: 0 4px 15px rgba(103, 50, 255, 0.3);
 }
 
 .select-button:hover,
-.select-button.hovered {
-  background: #7a4aff;
+.select-button--hovered {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(103, 50, 255, 0.4);
+  background: linear-gradient(135deg, #7a4aff 0%, #9d7aff 100%);
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 300px;
 }
 
 .loader {
   border: 4px solid rgba(101, 52, 255, 0.1);
   border-radius: 50%;
   border-top: 4px solid #6732ff;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   animation: spin 1s linear infinite;
 }
 
 .error-message {
   text-align: center;
-  padding: 20px;
+  padding: 40px 20px;
   color: #ff5252;
   font-weight: 500;
-  font-size: clamp(14px, 3vw, 16px);
+  font-size: 16px;
 }
 
 .retry-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  background: #6732ff;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
-  font-size: clamp(13px, 2.5vw, 14px);
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .retry-button:hover {
-  background: #7a4aff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(103, 50, 255, 0.3);
 }
 
 .pagination-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
-  gap: 15px;
+  margin-top: 30px;
+  gap: 20px;
 }
 
 .pagination-button {
-  background: #6732ff;
+  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.3);
 }
 
 .pagination-button:disabled {
   background: #ccc;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .pagination-button:hover:not(:disabled) {
-  background: #7a4aff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(103, 50, 255, 0.4);
 }
 
 .page-indicator {
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
+  font-weight: 500;
 }
 
 @keyframes fadeIn {
@@ -866,7 +976,7 @@ onMounted(fetchTariffs);
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -884,50 +994,63 @@ onMounted(fetchTariffs);
 }
 
 @media (max-width: 768px) {
+  .modal-container {
+    padding: 24px;
+    margin: 20px;
+  }
+
   .tariffs-container {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .tariff-card {
-    width: 100%;
-    max-width: 320px;
+    padding: 24px;
   }
 
-  .pagination-controls {
-    flex-direction: column;
-    gap: 10px;
+  .final-price,
+  .regular-price {
+    font-size: 32px;
+  }
+
+  .modal-header h2 {
+    font-size: 24px;
   }
 }
 
 @media (max-width: 480px) {
   .modal-overlay {
     padding: 10px;
-    align-items: flex-start;
   }
 
   .modal-container {
-    padding: 20px 15px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin: 10px;
   }
 
   .tariff-card {
-    padding: 18px;
+    padding: 20px;
   }
 
-  .feature {
-    margin-bottom: 8px;
+  .final-price,
+  .regular-price {
+    font-size: 28px;
+  }
+
+  .feature-item {
+    font-size: 14px;
   }
 
   .select-button {
-    padding: 10px;
+    padding: 14px;
+    font-size: 15px;
   }
-}
 
-@supports (-webkit-touch-callout: none) {
-  .modal-overlay {
-    -webkit-overflow-scrolling: touch;
+  .discount-badge {
+    top: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 </style>
