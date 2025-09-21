@@ -5,6 +5,8 @@
 <script setup>
 import StartModal from "@/components/Accounts/Accounts/ModalAccount/EnableAccount/StartModal.vue";
 
+import { ref } from "vue";
+
 const selectedItem = ref({
   storage: "local",
   type: "undefined",
