@@ -36,12 +36,16 @@ const params = {
 
 const forceStop = async () => {
   try {
-    const response = await axios.post(`${FRONTEND_URL}forceStop`, params, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+    const response = await axios.post(
+      `${FRONTEND_URL}forceStop?referer=https://app.chatserv.ru/`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
 
     if (response.data.ok === true) {
     } else {
@@ -63,12 +67,16 @@ const setState = async () => {
   };
 
   try {
-    const response = await axios.post(`${FRONTEND_URL}setState`, paramsState, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+    const response = await axios.post(
+      `${FRONTEND_URL}setState?referer=https://app.chatserv.ru/`,
+      paramsState,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
 
     // props.changeForceStopItemData(selectedItem.value);
     // console.log(response.data.data);
