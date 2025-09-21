@@ -234,13 +234,13 @@ const clearPasswordError = () => {
 };
 
 const loginAccount = async () => {
-  accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTkiLCJlbWFpbCI6ImphdGlnbzI4NjlAY291cnNvcmEuY29tIiwiZXhwIjoxNzU0OTQ0NzE2fQ.vRy3-OkB1O3Ks1IC1Kaz1Bq-BOKEI4_Em48WplBeqr8"
-  );
-  accountStore.setAccountData("jatigo2869@coursora.com");
-  accountStore.setAccountStation("telegram");
-  accountStore.setAccountStationText("Telegram");
-  navigateTo("/");
+  // accountStore.setAccountToken(
+  // "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoidG91Y2hhcGkiLCJ1c2VyX2lkIjoiNTkiLCJlbWFpbCI6ImphdGlnbzI4NjlAY291cnNvcmEuY29tIiwiZXhwIjoxNzU0OTQ0NzE2fQ.vRy3-OkB1O3Ks1IC1Kaz1Bq-BOKEI4_Em48WplBeqr8"
+  // );
+  // accountStore.setAccountData("jatigo2869@coursora.com");
+  // accountStore.setAccountStation("telegram");
+  // accountStore.setAccountStationText("Telegram");
+  // navigateTo("/");
   try {
     const response = await axios.post(`${FRONTEND_URL_AUTH}login`, {
       email: formData.login,
