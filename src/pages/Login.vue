@@ -234,13 +234,13 @@ const clearPasswordError = () => {
 };
 
 const loginAccount = async () => {
-  accountStore.setAccountToken(
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoiY2hhdHNlcnYiLCJ1c2VyX2lkIjoiMyIsImVtYWlsIjoibWFrc2ltLmJpcnlrb3YuMjAwN0BtYWlsLnJ1IiwiZXhwIjoxNzU4NzU5MTc1fQ.t3TSE5bi5GGC0Um9N94jYH6q-Ib5rZ5kHStVfC9G9sQ"
-  );
-  accountStore.setAccountData("maksim.birykov.2007@mail.ru");
-  accountStore.setAccountStation("telegram");
-  accountStore.setAccountStationText("Telegram");
-  navigateTo("/");
+  // accountStore.setAccountToken(
+  //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoiY2hhdHNlcnYiLCJ1c2VyX2lkIjoiMyIsImVtYWlsIjoibWFrc2ltLmJpcnlrb3YuMjAwN0BtYWlsLnJ1IiwiZXhwIjoxNzU4NzU5MTc1fQ.t3TSE5bi5GGC0Um9N94jYH6q-Ib5rZ5kHStVfC9G9sQ"
+  // );
+  // accountStore.setAccountData("maksim.birykov.2007@mail.ru");
+  // accountStore.setAccountStation("telegram");
+  // accountStore.setAccountStationText("Telegram");
+  // navigateTo("/");
   try {
     const response = await axios.post(`${FRONTEND_URL_AUTH}login`, {
       email: formData.login,
