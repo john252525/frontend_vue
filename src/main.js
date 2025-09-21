@@ -494,6 +494,7 @@ const DOMAIN_CONFIG = {
   "app1.developtech.ru": {
     allowedRoutes: [
       "PersonalAccount",
+      "test",
       "Login",
       "Registration",
       "PasswordRecovery",
