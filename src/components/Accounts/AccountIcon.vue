@@ -167,8 +167,8 @@
 
   <svg
     v-if="item.type === 'bitrix24'"
-    width="31"
-    height="31"
+    width="22"
+    height="22"
     viewBox="0 0 31 31"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

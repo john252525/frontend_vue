@@ -4,6 +4,7 @@
   </div>
 
   <div v-else>
+    <DownloadsBox />
     <Header
       v-if="!isAuthPage && !isWidgetMode && !isMailingMode"
       :phoneMenuOn="phoneMenuOn"
@@ -59,6 +60,7 @@ import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 import ResultModal from "./components/GlobalModal/ResutModal.vue";
+import DownloadsBox from "./components/GlobalModal/GlobalLoadingBlock/DownloadsBox.vue";
 
 import { useStationLoading } from "@/composables/useStationLoading";
 const { stationLoading, setLoadingStatus } = useStationLoading();

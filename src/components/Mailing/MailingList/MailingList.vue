@@ -1,7 +1,7 @@
 <template>
   <section class="account-list-section">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-    
+
     <!-- Десктопная таблица -->
     <div class="table-container desktop-view">
       <table class="table">
@@ -26,15 +26,21 @@
             <td class="table-text">{{ item.dt_create }}</td>
             <td class="table-state-active" v-if="item.state === 1">
               {{ t("mailingList.status.active") }}
-              <span v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
+              <span v-if="item.state_text.length > 0" class="state-text">
+                {{ item.state_text }}</span
+              >
             </td>
             <td class="table-state" v-if="item.state === 0">
               {{ t("mailingList.status.noActive") }}
-              <span v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
+              <span v-if="item.state_text.length > 0" class="state-text">
+                {{ item.state_text }}</span
+              >
             </td>
             <td class="table-state-active" v-if="item.state === 2">
               {{ t("mailingList.status.completed") }}
-              <span  v-if="item.state_text.length > 0" class="state-text"> {{ item.state_text }}</span>
+              <span v-if="item.state_text.length > 0" class="state-text">
+                {{ item.state_text }}</span
+              >
             </td>
             <td
               class="table-state"
@@ -91,7 +97,7 @@
 
     <!-- Мобильные карточки -->
     <div class="mobile-cards" v-if="dataStation && mailingLists.length > 0">
-      <div 
+      <div
         class="mailing-card"
         v-for="(item, index) in mailingLists"
         :key="'mobile-' + index"
@@ -104,13 +110,20 @@
               <span v-else>{{ t("mailingList.name") }}</span>
             </span>
           </div>
-          <button 
-            class="action-gear"
-            @click="openMobileModal($event, item)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="action-gear" @click="openMobileModal($event, item)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              ></path>
             </svg>
           </button>
         </div>
@@ -146,15 +159,18 @@
     </div>
 
     <!-- Состояния для мобильной версии -->
-    <div class="mobile-states" v-if="!dataStation || dataStationNone || loadDataStation || errorMailing">
+    <div
+      class="mobile-states"
+      v-if="!dataStation || dataStationNone || loadDataStation || errorMailing"
+    >
       <div class="none-account-cont" v-if="dataStationNone">
-       <NoData type="campaigns"/>
+        <NoData type="campaigns" />
       </div>
-      
+
       <div class="load-cont" v-if="loadDataStation">
         <LoadAccount />
       </div>
-      
+
       <div class="load-cont" v-if="errorMailing">
         <ErrorAccount />
       </div>
@@ -263,13 +279,13 @@ const mailingLists = ref([]);
 const modalPosition = ref({ top: 0, left: 0 });
 
 const formatDate = (dateString) => {
-  if (!dateString) return '-';
+  if (!dateString) return "-";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   } catch (e) {
     return dateString;
@@ -278,19 +294,27 @@ const formatDate = (dateString) => {
 
 const getStatusText = (state) => {
   switch (state) {
-    case 1: return t("mailingList.status.active");
-    case 0: return t("mailingList.status.noActive");
-    case 2: return t("mailingList.status.completed");
-    default: return '-';
+    case 1:
+      return t("mailingList.status.active");
+    case 0:
+      return t("mailingList.status.noActive");
+    case 2:
+      return t("mailingList.status.completed");
+    default:
+      return "-";
   }
 };
 
 const getStatusClass = (state) => {
   switch (state) {
-    case 1: return 'status-active';
-    case 2: return 'status-completed';
-    case 0: return 'status-inactive';
-    default: return '';
+    case 1:
+      return "status-active";
+    case 2:
+      return "status-completed";
+    case 0:
+      return "status-inactive";
+    default:
+      return "";
   }
 };
 
@@ -298,43 +322,141 @@ const openMobileModal = (event, item) => {
   openModal(event, item);
 };
 
+// const getMailingLists = async () => {
+//   mailingLists.value = false;
+//   errorMailing.value = false;
+//   dataStationNone.value = false;
+//   loadDataStation.value = true;
+//   const apiUrlMethod = `${apiUrl}/list/`;
+//   try {
+//     const response = await axios.get(apiUrlMethod, {
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//         Authorization: `Bearer ${token.value}`,
+//       },
+//     });
+
+//     if (response.data) {
+//       await handleSendLog(
+//         "mailingList",
+//         "list",
+//         {
+//           "Content-Type": "application/x-www-form-urlencoded",
+//           Authorization: `Bearer ${token.value}`,
+//         },
+//         response.data.ok,
+//         response.data
+//       );
+//     }
+
+//     mailingLists.value = response.data.result.items;
+//     if (mailingLists.value.length === 0) {
+//       loadDataStation.value = false;
+//       dataStationNone.value = true;
+//     } else if (response.data === 401) {
+//       errorBlock.value = true;
+//       setTimeout(() => {
+//         localStorage.removeItem("accountToken");
+//         router.push("/login");
+//       }, 2000);
+//     } else {
+//       loadDataStation.value = false;
+//       dataStation.value = true;
+//     }
+//   } catch (error) {
+//     console.error("error", error.message);
+//     errorMailing.value = true;
+//     loadDataStation.value = false;
+//     dataStationNone.value = false;
+//   }
+// };
+
 const getMailingLists = async () => {
   mailingLists.value = false;
   errorMailing.value = false;
   dataStationNone.value = false;
   loadDataStation.value = true;
-  const apiUrlMethod = `${apiUrl}/list/`;
+
+  // Имитация загрузки в 2 секунды
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
   try {
-    const response = await axios.get(apiUrlMethod, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    if (response.data) {
-      await handleSendLog(
-        "mailingList",
-        "list",
+    // Используем ваши данные вместо API запроса
+    const mockData = {
+      count: 2,
+      items: [
         {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token.value}`,
+          id: 1,
+          state: 2,
+          state_text: "",
+          next_ts: 0,
+          name: "",
+          text: "еуые",
+          options: {
+            uniq: true,
+            exist: true,
+            random: false,
+            cascade: ["whatsapp"],
+            days: {
+              1: 1,
+              2: 2,
+              3: 3,
+              4: 4,
+              5: 5,
+            },
+            hours: {
+              min: "10:00",
+              max: "17:00",
+              timezone: 3,
+            },
+            delay: {
+              min: 9,
+              max: 19,
+            },
+          },
+          recipients: 1,
+          dt_create: "2025-09-18 21:16:13",
         },
-        response.data.ok,
-        response.data
-      );
-    }
+        {
+          id: 2,
+          state: 1,
+          state_text: "Отправка приостановлена из-за дня недели",
+          next_ts: 0,
+          name: "",
+          text: "test",
+          options: {
+            uniq: true,
+            exist: true,
+            random: false,
+            cascade: ["whatsapp"],
+            days: {
+              1: 1,
+              2: 2,
+              3: 3,
+              4: 4,
+              5: 5,
+            },
+            hours: {
+              min: "10:00",
+              max: "17:00",
+              timezone: 3,
+            },
+            delay: {
+              min: 10,
+              max: 30,
+            },
+          },
+          recipients: 1,
+          dt_create: "2025-09-20 20:20:50",
+        },
+      ],
+    };
 
-    mailingLists.value = response.data.result.items;
+    mailingLists.value = mockData.items;
+
     if (mailingLists.value.length === 0) {
       loadDataStation.value = false;
       dataStationNone.value = true;
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
     } else {
       loadDataStation.value = false;
       dataStation.value = true;
@@ -378,11 +500,14 @@ const openModal = (event, item) => {
 
   // Гарантируем невыход за правый и нижний края
   left = Math.min(left, window.innerWidth - modalWidth - offset);
-  top = Math.min(top, window.innerHeight - modalHeight - offset + window.scrollY);
+  top = Math.min(
+    top,
+    window.innerHeight - modalHeight - offset + window.scrollY
+  );
 
   modalPosition.value = {
     top: top,
-    left: left
+    left: left,
   };
 };
 
@@ -490,7 +615,6 @@ provide("selectedItem", { selectedItem });
   flex-direction: column;
 }
 
-
 .table-login {
   text-align: left;
   padding: 1rem;
@@ -537,7 +661,7 @@ provide("selectedItem", { selectedItem });
 
 .state-text {
   color: black;
-  
+
   font-weight: 400;
 }
 
@@ -667,24 +791,23 @@ tr:not(:last-child):after {
   }
 }
 
-
 @media (max-width: 768px) {
   .desktop-view {
     display: none;
   }
-  
+
   .mobile-cards,
   .mobile-states {
     display: block;
   }
-  
+
   .mobile-cards {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     padding: 16px;
   }
-  
+
   .mailing-card {
     background: white;
     border-radius: 12px;
@@ -696,7 +819,7 @@ tr:not(:last-child):after {
     min-height: 180px;
     min-width: 0;
   }
-  
+
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -707,14 +830,14 @@ tr:not(:last-child):after {
     min-width: 0;
     gap: 8px;
   }
-  
+
   .mailing-info {
     display: flex;
     align-items: center;
     min-width: 0;
     flex: 1;
   }
-  
+
   .mailing-name {
     font-weight: 600;
     font-size: 16px;
@@ -724,7 +847,7 @@ tr:not(:last-child):after {
     text-overflow: ellipsis;
     min-width: 0;
   }
-  
+
   .action-gear {
     background: oklch(0.65 0.22 267 / 0.1);
     border: none;
@@ -737,23 +860,23 @@ tr:not(:last-child):after {
     flex-shrink: 0;
     transition: all 0.2s ease;
   }
-  
+
   .action-gear:hover {
     background: oklch(0.65 0.22 267 / 0.2);
   }
-  
+
   .action-gear svg {
     width: 16px;
     height: 16px;
     color: #5a4fc1;
   }
-  
+
   .card-content {
     flex: 1;
     margin-bottom: 12px;
     min-width: 0;
   }
-  
+
   .card-row {
     display: flex;
     justify-content: space-between;
@@ -762,7 +885,7 @@ tr:not(:last-child):after {
     min-width: 0;
     gap: 8px;
   }
-  
+
   .label {
     font-size: 14px;
     color: #6b7280;
@@ -770,7 +893,7 @@ tr:not(:last-child):after {
     white-space: nowrap;
     flex-shrink: 0;
   }
-  
+
   .value {
     font-size: 14px;
     color: #374151;
@@ -782,19 +905,19 @@ tr:not(:last-child):after {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .status-active {
     color: rgb(32, 179, 40);
   }
-  
+
   .status-completed {
     color: rgb(32, 179, 40);
   }
-  
+
   .status-inactive {
     color: rgb(211, 59, 59);
   }
-  
+
   .state-text-mobile {
     display: block;
     font-size: 12px;
@@ -802,11 +925,11 @@ tr:not(:last-child):after {
     background-color: transparent;
     margin-top: 2px;
   }
-  
+
   .card-actions {
     margin-top: auto;
   }
-  
+
   .action-btn {
     width: 100%;
     background: oklch(0.65 0.22 267 / 0.16);
@@ -819,7 +942,7 @@ tr:not(:last-child):after {
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  
+
   .action-btn:hover {
     background: oklch(0.65 0.22 267 / 0.25);
   }
@@ -831,24 +954,24 @@ tr:not(:last-child):after {
     gap: 12px;
     padding: 12px;
   }
-  
+
   .mailing-card {
     min-height: 170px;
     padding: 14px;
   }
-  
+
   .mailing-name {
     font-size: 15px;
   }
-  
+
   .label {
     font-size: 13px;
   }
-  
+
   .value {
     font-size: 13px;
   }
-  
+
   .action-btn {
     padding: 10px;
     font-size: 13px;
@@ -860,24 +983,24 @@ tr:not(:last-child):after {
     padding: 10px;
     gap: 10px;
   }
-  
+
   .mailing-card {
     padding: 12px;
     min-height: 160px;
   }
-  
+
   .mailing-name {
     font-size: 14px;
   }
-  
+
   .label {
     font-size: 12px;
   }
-  
+
   .value {
     font-size: 12px;
   }
-  
+
   .action-btn {
     padding: 9px;
     font-size: 12px;

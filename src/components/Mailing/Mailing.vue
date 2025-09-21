@@ -30,7 +30,7 @@
 
 <script setup>
 import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
-import MailingList from "./MailingList/MailingList.vue";
+import MailingList from "./MailingList/MailingListV2.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";

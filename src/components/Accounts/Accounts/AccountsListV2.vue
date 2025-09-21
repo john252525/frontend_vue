@@ -6,6 +6,7 @@
       :dataStationNone="dataStationNone"
       :loadDataStation="loadDataStation"
       :errorAccountBolean="errorAccountBolean"
+      :changeEnableStartModal="changeEnableStartModal"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
@@ -87,7 +88,11 @@
       :selectedItem="selectedItem"
       :changeEnableStation="changeEnableStation"
     />
-
+    <StartModal
+      v-if="enableStartModal"
+      :item="selectedItem"
+      :closeModal="changeEnableStartModal"
+    />
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   </section>
 </template>
@@ -101,8 +106,9 @@ import MobileCardsView from "./AccountListComponents/MobileCardsView.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Modal from "./Modal.vue";
 import Enable from "./ModalAccount/Enable/Enable.vue";
-import SettignsModal from "./ModalAccount/settingsModal.vue";
+import SettignsModal from "./ModalAccount/SettingsModal/SettingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
+import StartModal from "./ModalAccount/EnableAccount/StartModal.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
@@ -156,9 +162,11 @@ const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
 const chatsStation = ref(null);
+const enableStartModal = ref(false);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 import False from "@/components/Chats/UserList/ResultModal/False.vue";
+import { compileScript } from "vue/compiler-sfc";
 const { sendLog } = useFrontendLogger();
 
 const changeForceStopItemData = async (item) => {
@@ -273,6 +281,12 @@ const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
 };
 
+const changeEnableStartModal = (item) => {
+  selectedItem.value = item;
+  console.log(selectedItem.value);
+  enableStartModal.value = !enableStartModal.value;
+};
+
 const closeScreen = () => {
   getScreenStation.value = false;
 };
@@ -308,28 +322,57 @@ const getAccounts = async () => {
         {
           storage: "local",
           type: "undefined",
+          login: "mizxoyjnmvsdcnq",
+          source: "whatsapp",
+          id: "3",
+          step: { value: 5 },
+          uuid: "20964f74-641c-4869-9ecf-eef76902ebe3",
+          domain: "",
+          subscription_dt_to: "2026-03-14 23:55:24",
+          name: "политех",
+        },
+        {
+          storage: "local",
+          type: "undefined",
           login: "mizxoyjnmm2wiyi",
           source: "whatsapp",
           id: "2",
           uuid: "e44f9d80-343b-40cb-8a6e-584195a44243",
           domain: "",
+          step: null,
           subscription_dt_to: "2026-01-15 01:00:27",
           name: "алабуга",
-          step: { value: 5, message: "Авторизован" },
-          loading: false,
         },
         {
-          storage: "local",
-          type: "undefined",
-          login: "mizxoyjnmvsdcnq",
-          source: "whatsapp",
-          id: "3",
-          uuid: "20964f74-641c-4869-9ecf-eef76902ebe3",
-          domain: "",
-          subscription_dt_to: "2026-03-14 23:55:24",
-          name: "политех",
-          step: { value: 3, message: "Ожидание QR-кода" },
-          loading: false,
+          id: "4",
+          uuid: "6936f66b-b336-430f-b4cd-c99850a9532a",
+          dt_ins: "2025-09-18 18:50:21",
+          type: "amocrm",
+          login: "еу",
+          source: "",
+          enable: 1,
+          subscription_dt_to: "2025-09-22 23:32:35",
+        },
+        {
+          id: "5",
+          uuid: "f49bf745-5221-4bc1-bbe1-46c41cb35e46",
+          dt_ins: "2025-09-18 19:21:20",
+          type: "bitrix24",
+          login: "4324324",
+          source: "4324324",
+          enable: 1,
+          subscription_dt_to: "2025-09-22 23:32:35",
+        },
+        {
+          id: "1",
+          uuid: "337734e4-05fe-4262-97e5-43d401b7c4de",
+          dt_ins: "2025-09-11 15:47:20",
+          type: "bulk",
+          token: "22e75215907b1984e7c117db09cb23bd",
+          login: "maksim.birykov.2007@mail.ru",
+          source: "whatsapi",
+          enable: 1,
+          subscription_dt_to: "2025-09-22 23:32:35",
         },
       ],
     },

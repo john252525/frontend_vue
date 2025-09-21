@@ -169,7 +169,7 @@
 </template>
 
 <script setup>
-import AccountList from "./Accounts/AccountsList.vue";
+import AccountList from "./Accounts/AccountsListV2.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import Filters from "./Filters.vue";
