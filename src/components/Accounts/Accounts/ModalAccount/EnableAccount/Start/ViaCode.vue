@@ -34,11 +34,16 @@ const params = {
   storage: storage,
 };
 
-const disablePhoneAuth = async () => {
+const enablePhoneAuth = async () => {
   try {
     const response = await axios.post(
-      `${FRONTEND_URL}disablePhoneAuth?referer=https://app.chatserv.ru/`,
-      params,
+      `${FRONTEND_URL}enablePhoneAuth?referer=https://app.chatserv.ru/`,
+      {
+        source: source,
+        login: login,
+        storage: storage,
+        phone: "79228556998",
+      },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -142,7 +147,7 @@ const setState = async () => {
 };
 
 const startFunction = async () => {
-  await disablePhoneAuth();
+  await enablePhoneAuth();
   await forceStop();
   await setState();
 };

@@ -127,7 +127,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 let authCodeInterval = null;
-let getInfoInterval = null; // Добавляем интервал для getInfo
+let getInfoInterval = null;
 const isRunning = ref(false);
 const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;

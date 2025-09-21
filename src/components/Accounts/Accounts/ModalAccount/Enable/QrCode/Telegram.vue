@@ -6,30 +6,53 @@
       <div class="header">
         <h2 class="title">Подключение Telegram</h2>
         <button @click="changeEnableStation" class="close-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </div>
-      
+
       <div class="qr-content">
         <div class="qr-wrapper">
           <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
           <div class="scan-line"></div>
         </div>
-        
+
         <p class="instruction">Отсканируйте QR-код через приложение Telegram</p>
-        
+
         <button @click="enableCode" class="phone-link-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 16.92V19.92C22 20.47 21.55 20.93 21 20.98C20.5 21.03 19.99 21.05 19.5 21C16.74 20.52 14.19 19.24 12.11 17.34C10.39 15.78 9.05 13.87 8.15 11.73C7.59 10.29 7.25 8.76 7.15 7.18C7.11 6.63 7.52 6.14 8.07 6.09C8.57 6.05 9.06 6 9.55 6.05H12.55C13.07 6.05 13.52 6.42 13.59 6.93C13.71 7.79 13.93 8.63 14.25 9.43C14.38 9.76 14.3 10.14 14.05 10.39L13.11 11.33C14.41 13.48 16.52 15.59 18.67 16.89L19.61 15.95C19.74 15.82 19.91 15.74 20.09 15.74C20.17 15.74 20.25 15.75 20.33 15.77C21.13 16.09 21.97 16.31 22.83 16.43C23.34 16.5 23.71 16.95 23.71 17.47V17.48H22.83H22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M22 16.92V19.92C22 20.47 21.55 20.93 21 20.98C20.5 21.03 19.99 21.05 19.5 21C16.74 20.52 14.19 19.24 12.11 17.34C10.39 15.78 9.05 13.87 8.15 11.73C7.59 10.29 7.25 8.76 7.15 7.18C7.11 6.63 7.52 6.14 8.07 6.09C8.57 6.05 9.06 6 9.55 6.05H12.55C13.07 6.05 13.52 6.42 13.59 6.93C13.71 7.79 13.93 8.63 14.25 9.43C14.38 9.76 14.3 10.14 14.05 10.39L13.11 11.33C14.41 13.48 16.52 15.59 18.67 16.89L19.61 15.95C19.74 15.82 19.91 15.74 20.09 15.74C20.17 15.74 20.25 15.75 20.33 15.77C21.13 16.09 21.97 16.31 22.83 16.43C23.34 16.5 23.71 16.95 23.71 17.47V17.48H22.83H22Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           Связать через телефон
         </button>
       </div>
     </article>
   </section>
-  
+
   <section v-if="station.phone" class="number-section">
     <div class="phone-input-container">
       <input
@@ -487,287 +510,287 @@ onBeforeUnmount(() => {
 });
 </script>
 
-
 <style scoped>
-  .qr-telegram-section {
-    /* background: #ffffff; */
-    border-radius: 16px;
-    /* padding: 20px; */
-    /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); */
-    max-width: 360px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    gap: 12px;
-  }
-  
-  .title {
-    font-weight: 600;
-    font-size: 18px;
-    color: #1a1a1a;
-    margin: 0;
-    line-height: 1.3;
-  }
-  
-  .close-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    color: #666;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  
-  .close-button:hover {
-    background-color: #f5f5f5;
-    color: #333;
-  }
-  
-  /* QR Code Section */
-  .qr-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .qr-wrapper {
-    position: relative;
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-  }
-  
-  .qr-code {
-    border-radius: 8px;
-    display: block;
-    width: 240px;
-    height: 240px;
-  }
-  
-  .scan-line {
-    position: absolute;
+.qr-telegram-section {
+  /* background: #ffffff; */
+  border-radius: 16px;
+  /* padding: 20px; */
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); */
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* QR Code Section */
+.qr-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.qr-wrapper {
+  position: relative;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.qr-code {
+  border-radius: 8px;
+  display: block;
+  width: 240px;
+  height: 240px;
+}
+
+.scan-line {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #0088cc, transparent);
+  animation: scan 2s ease-in-out infinite;
+  border-radius: 1px;
+}
+
+@keyframes scan {
+  0%,
+  100% {
     top: 16px;
-    left: 16px;
-    right: 16px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #0088cc, transparent);
-    animation: scan 2s ease-in-out infinite;
-    border-radius: 1px;
+    opacity: 0;
   }
-  
-  @keyframes scan {
-    0%, 100% {
-      top: 16px;
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    90% {
-      opacity: 1;
-    }
-    50% {
-      top: calc(100% - 16px);
-    }
+  10% {
+    opacity: 1;
   }
-  
+  90% {
+    opacity: 1;
+  }
+  50% {
+    top: calc(100% - 16px);
+  }
+}
+
+.instruction {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.phone-link-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.phone-link-button:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+/* СЕКЦИЯ С НОМЕРОМ - НЕ ТРОГАЕМ (оригинальные стили) */
+.number-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.num-input {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  flex-grow: 1;
+}
+
+.num-input-error {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
+  flex-grow: 1;
+}
+
+.next-button {
+  width: 100%;
+  height: 35px;
+  border-radius: 5px;
+  background-color: #4950ca;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  margin-top: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .qr-telegram-section {
+    padding: 16px;
+    border-radius: 12px;
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .qr-content {
+    gap: 16px;
+  }
+
+  .qr-wrapper {
+    padding: 12px;
+  }
+
+  .qr-code {
+    width: 200px;
+    height: 200px;
+  }
+
   .instruction {
-    font-size: 14px;
-    color: #666;
-    text-align: center;
-    margin: 0;
-    line-height: 1.4;
-    font-weight: 400;
+    font-size: 13px;
   }
-  
+
   .phone-link-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
-    color: #495057;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .qr-telegram-section {
+    padding: 14px;
+    margin: 8px;
+    max-width: calc(100% - 16px);
+  }
+
+  .title {
+    font-size: 15px;
+  }
+
+  .close-button {
+    padding: 4px;
+  }
+
+  .qr-code {
+    width: 180px;
+    height: 180px;
+  }
+
+  .instruction {
+    font-size: 12px;
+  }
+
+  .phone-link-button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 320px) {
+  .qr-code {
+    width: 160px;
+    height: 160px;
+  }
+
+  .title {
     font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    justify-content: center;
   }
-  
-  .phone-link-button:hover {
-    background: #e9ecef;
-    border-color: #dee2e6;
-  }
-  
-  /* СЕКЦИЯ С НОМЕРОМ - НЕ ТРОГАЕМ (оригинальные стили) */
+}
+
+/* Медиа-запросы для секции с номером (оригинальные) */
+@media (max-width: 500px) {
   .number-section {
-    display: flex;
-    flex-direction: column;
+    width: 300px;
   }
-  
-  .phone-input-container {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .num-input {
-    border-radius: 5px;
-    padding-left: 10px;
-    width: 280px;
-    height: 45px;
-    font-weight: 400;
-    font-size: 14px;
-    color: #000;
-    border: 0.5px solid #c1c1c1;
-    background: #fcfcfc;
-    flex-grow: 1;
-  }
-  
+
+  .num-input,
   .num-input-error {
-    border-radius: 5px;
-    padding-left: 10px;
-    width: 280px;
-    height: 45px;
-    font-weight: 400;
-    font-size: 14px;
-    color: #000;
-    border: 0.5px solid #be2424;
-    background: #ffeaea;
-    flex-grow: 1;
+    width: 220px;
   }
-  
-  .next-button {
-    width: 100%;
-    height: 35px;
-    border-radius: 5px;
-    background-color: #4950ca;
-    font-size: 14px;
-    color: rgb(255, 255, 255);
-    font-weight: 600;
-    margin-top: 20px;
-    border: none;
-    cursor: pointer;
+}
+
+@media (max-width: 400px) {
+  .number-section {
+    width: 250px;
   }
-  
-  /* Responsive Design */
-  @media (max-width: 480px) {
-    .qr-telegram-section {
-      padding: 16px;
-      border-radius: 12px;
-      margin: 12px;
-      max-width: calc(100% - 24px);
-    }
-    
-    .header {
-      margin-bottom: 20px;
-    }
-    
-    .title {
-      font-size: 16px;
-    }
-    
-    .qr-content {
-      gap: 16px;
-    }
-    
-    .qr-wrapper {
-      padding: 12px;
-    }
-    
-    .qr-code {
-      width: 200px;
-      height: 200px;
-    }
-    
-    .instruction {
-      font-size: 13px;
-    }
-    
-    .phone-link-button {
-      padding: 10px 16px;
-      font-size: 13px;
-    }
+
+  .num-input,
+  .num-input-error {
+    width: 170px;
   }
-  
-  @media (max-width: 360px) {
-    .qr-telegram-section {
-      padding: 14px;
-      margin: 8px;
-      max-width: calc(100% - 16px);
-    }
-    
-    .title {
-      font-size: 15px;
-    }
-    
-    .close-button {
-      padding: 4px;
-    }
-    
-    .qr-code {
-      width: 180px;
-      height: 180px;
-    }
-    
-    .instruction {
-      font-size: 12px;
-    }
-    
-    .phone-link-button {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-  }
-  
-  /* Для очень маленьких экранов */
-  @media (max-width: 320px) {
-    .qr-code {
-      width: 160px;
-      height: 160px;
-    }
-    
-    .title {
-      font-size: 14px;
-    }
-  }
-  
-  /* Медиа-запросы для секции с номером (оригинальные) */
-  @media (max-width: 500px) {
-    .number-section {
-      width: 300px;
-    }
-  
-    .num-input,
-    .num-input-error {
-      width: 220px;
-    }
-  }
-  
-  @media (max-width: 400px) {
-    .number-section {
-      width: 250px;
-    }
-  
-    .num-input,
-    .num-input-error {
-      width: 170px;
-    }
-  }
-  </style>
+}
+</style>

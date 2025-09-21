@@ -39,7 +39,7 @@
           </p>
 
           <div class="options-list">
-            <button class="option-button" @click="connectWithCode">
+            <button class="option-button" @click="changeViaCode">
               <div class="option-content">
                 <svg
                   class="option-icon"
@@ -76,7 +76,7 @@
               </svg>
             </button>
 
-            <button class="option-button" @click="connectWithQR">
+            <button class="option-button" @click="changeViaQrcode">
               <div class="option-content">
                 <svg
                   class="option-icon"
@@ -123,13 +123,22 @@
       </div>
     </div>
   </div>
-  <ViaQRcode :selectedItem="item" />
+  <ViaQRcode :selectedItem="item" v-if="viaQrcode" />
+  <ViaCode :selectedItem="item" v-if="viaCode" />
 </template>
 
 <script setup>
-import { computed, toRefs } from "vue";
+import { computed, ref, toRefs } from "vue";
 import AccountIcon from "@/components/Accounts/AccountIcon.vue";
 import ViaQRcode from "./Start/ViaQRcode.vue";
+import ViaCode from "./Start/ViaCode.vue";
+
+const viaCode = ref(false);
+
+const viaQrcode = ref(false);
+
+const changeViaCode = () => (viaCode.value = !viaCode.value);
+const changeViaQRcode = () => (viaQrcode.value = !viaQrcode.value);
 
 const props = defineProps({
   item: {
