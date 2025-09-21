@@ -76,7 +76,7 @@
               </svg>
             </button>
 
-            <button class="option-button" @click="changeViaQrcode">
+            <button class="option-button" @click="changeViaCode">
               <div class="option-content">
                 <svg
                   class="option-icon"
