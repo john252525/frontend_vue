@@ -322,141 +322,43 @@ const openMobileModal = (event, item) => {
   openModal(event, item);
 };
 
-// const getMailingLists = async () => {
-//   mailingLists.value = false;
-//   errorMailing.value = false;
-//   dataStationNone.value = false;
-//   loadDataStation.value = true;
-//   const apiUrlMethod = `${apiUrl}/list/`;
-//   try {
-//     const response = await axios.get(apiUrlMethod, {
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//         Authorization: `Bearer ${token.value}`,
-//       },
-//     });
-
-//     if (response.data) {
-//       await handleSendLog(
-//         "mailingList",
-//         "list",
-//         {
-//           "Content-Type": "application/x-www-form-urlencoded",
-//           Authorization: `Bearer ${token.value}`,
-//         },
-//         response.data.ok,
-//         response.data
-//       );
-//     }
-
-//     mailingLists.value = response.data.result.items;
-//     if (mailingLists.value.length === 0) {
-//       loadDataStation.value = false;
-//       dataStationNone.value = true;
-//     } else if (response.data === 401) {
-//       errorBlock.value = true;
-//       setTimeout(() => {
-//         localStorage.removeItem("accountToken");
-//         router.push("/login");
-//       }, 2000);
-//     } else {
-//       loadDataStation.value = false;
-//       dataStation.value = true;
-//     }
-//   } catch (error) {
-//     console.error("error", error.message);
-//     errorMailing.value = true;
-//     loadDataStation.value = false;
-//     dataStationNone.value = false;
-//   }
-// };
-
 const getMailingLists = async () => {
   mailingLists.value = false;
   errorMailing.value = false;
   dataStationNone.value = false;
   loadDataStation.value = true;
-
-  // Имитация загрузки в 2 секунды
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
+  const apiUrlMethod = `${apiUrl}/list/`;
   try {
-    // Используем ваши данные вместо API запроса
-    const mockData = {
-      count: 2,
-      items: [
-        {
-          id: 1,
-          state: 2,
-          state_text: "",
-          next_ts: 0,
-          name: "",
-          text: "еуые",
-          options: {
-            uniq: true,
-            exist: true,
-            random: false,
-            cascade: ["whatsapp"],
-            days: {
-              1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-              5: 5,
-            },
-            hours: {
-              min: "10:00",
-              max: "17:00",
-              timezone: 3,
-            },
-            delay: {
-              min: 9,
-              max: 19,
-            },
-          },
-          recipients: 1,
-          dt_create: "2025-09-18 21:16:13",
-        },
-        {
-          id: 2,
-          state: 1,
-          state_text: "Отправка приостановлена из-за дня недели",
-          next_ts: 0,
-          name: "",
-          text: "test",
-          options: {
-            uniq: true,
-            exist: true,
-            random: false,
-            cascade: ["whatsapp"],
-            days: {
-              1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-              5: 5,
-            },
-            hours: {
-              min: "10:00",
-              max: "17:00",
-              timezone: 3,
-            },
-            delay: {
-              min: 10,
-              max: 30,
-            },
-          },
-          recipients: 1,
-          dt_create: "2025-09-20 20:20:50",
-        },
-      ],
-    };
+    const response = await axios.get(apiUrlMethod, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-    mailingLists.value = mockData.items;
+    if (response.data) {
+      await handleSendLog(
+        "mailingList",
+        "list",
+        {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token.value}`,
+        },
+        response.data.ok,
+        response.data
+      );
+    }
 
+    mailingLists.value = response.data.result.items;
     if (mailingLists.value.length === 0) {
       loadDataStation.value = false;
       dataStationNone.value = true;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
     } else {
       loadDataStation.value = false;
       dataStation.value = true;
@@ -468,6 +370,104 @@ const getMailingLists = async () => {
     dataStationNone.value = false;
   }
 };
+
+// const getMailingLists = async () => {
+//   mailingLists.value = false;
+//   errorMailing.value = false;
+//   dataStationNone.value = false;
+//   loadDataStation.value = true;
+
+//   // Имитация загрузки в 2 секунды
+//   await new Promise((resolve) => setTimeout(resolve, 2000));
+
+//   try {
+//     // Используем ваши данные вместо API запроса
+//     const mockData = {
+//       count: 2,
+//       items: [
+//         {
+//           id: 1,
+//           state: 2,
+//           state_text: "",
+//           next_ts: 0,
+//           name: "",
+//           text: "еуые",
+//           options: {
+//             uniq: true,
+//             exist: true,
+//             random: false,
+//             cascade: ["whatsapp"],
+//             days: {
+//               1: 1,
+//               2: 2,
+//               3: 3,
+//               4: 4,
+//               5: 5,
+//             },
+//             hours: {
+//               min: "10:00",
+//               max: "17:00",
+//               timezone: 3,
+//             },
+//             delay: {
+//               min: 9,
+//               max: 19,
+//             },
+//           },
+//           recipients: 1,
+//           dt_create: "2025-09-18 21:16:13",
+//         },
+//         {
+//           id: 2,
+//           state: 1,
+//           state_text: "Отправка приостановлена из-за дня недели",
+//           next_ts: 0,
+//           name: "",
+//           text: "test",
+//           options: {
+//             uniq: true,
+//             exist: true,
+//             random: false,
+//             cascade: ["whatsapp"],
+//             days: {
+//               1: 1,
+//               2: 2,
+//               3: 3,
+//               4: 4,
+//               5: 5,
+//             },
+//             hours: {
+//               min: "10:00",
+//               max: "17:00",
+//               timezone: 3,
+//             },
+//             delay: {
+//               min: 10,
+//               max: 30,
+//             },
+//           },
+//           recipients: 1,
+//           dt_create: "2025-09-20 20:20:50",
+//         },
+//       ],
+//     };
+
+//     mailingLists.value = mockData.items;
+
+//     if (mailingLists.value.length === 0) {
+//       loadDataStation.value = false;
+//       dataStationNone.value = true;
+//     } else {
+//       loadDataStation.value = false;
+//       dataStation.value = true;
+//     }
+//   } catch (error) {
+//     console.error("error", error.message);
+//     errorMailing.value = true;
+//     loadDataStation.value = false;
+//     dataStationNone.value = false;
+//   }
+// };
 
 const changeStatusMailing = (item, state) => {
   const index = mailingLists.value.findIndex(

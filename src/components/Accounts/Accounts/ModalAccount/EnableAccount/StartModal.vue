@@ -1,6 +1,6 @@
 <template>
   <div class="modal-overlay">
-    <div @click="closeModal" class="modal-backdrop"></div>
+    <div class="modal-backdrop"></div>
 
     <div class="modal-content">
       <div class="modal-header">
@@ -33,88 +33,106 @@
         </div>
 
         <div class="connection-options">
-          <h3 class="section-title">Способы подключения</h3>
-          <p class="section-description">
-            Выберите способ для активации аккаунта
-          </p>
+          <AccoutnEnableLoadingOptions v-if="enableStation.loading" />
+          <div v-if="enableStation.start">
+            <h3 class="section-title">Способы подключения</h3>
+            <p class="section-description">
+              Выберите способ для активации аккаунта
+            </p>
 
-          <div class="options-list">
-            <button class="option-button" @click="changeViaCode">
-              <div class="option-content">
+            <div class="options-list">
+              <button class="option-button" @click="changeViaCode">
+                <div class="option-content">
+                  <svg
+                    class="option-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 7l-10 10"></path>
+                    <path d="M8 7l9 0l0 9"></path>
+                  </svg>
+                  <div class="option-text">
+                    <span class="option-title">Связать через код</span>
+                    <span class="option-description"
+                      >Введите код подтверждения из приложения</span
+                    >
+                  </div>
+                </div>
                 <svg
-                  class="option-icon"
+                  class="arrow-icon"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <path d="M17 7l-10 10"></path>
-                  <path d="M8 7l9 0l0 9"></path>
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5l7 7-7 7"></path>
                 </svg>
-                <div class="option-text">
-                  <span class="option-title">Связать через код</span>
-                  <span class="option-description"
-                    >Введите код подтверждения из приложения</span
-                  >
-                </div>
-              </div>
-              <svg
-                class="arrow-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M5 12h14"></path>
-                <path d="m12 5l7 7-7 7"></path>
-              </svg>
-            </button>
+              </button>
 
-            <button class="option-button" @click="changeViaCode">
-              <div class="option-content">
+              <button class="option-button" @click="changeQRcode">
+                <div class="option-content">
+                  <svg
+                    class="option-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="3" y="3" width="6" height="6"></rect>
+                    <rect x="15" y="3" width="6" height="6"></rect>
+                    <rect x="3" y="15" width="6" height="6"></rect>
+                    <rect x="15" y="15" width="6" height="6"></rect>
+                  </svg>
+                  <div class="option-text">
+                    <span class="option-title">Связать через QR-код</span>
+                    <span class="option-description"
+                      >Отсканируйте QR-код в приложении</span
+                    >
+                  </div>
+                </div>
                 <svg
-                  class="option-icon"
+                  class="arrow-icon"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <rect x="3" y="3" width="6" height="6"></rect>
-                  <rect x="15" y="3" width="6" height="6"></rect>
-                  <rect x="3" y="15" width="6" height="6"></rect>
-                  <rect x="15" y="15" width="6" height="6"></rect>
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5l7 7-7 7"></path>
                 </svg>
-                <div class="option-text">
-                  <span class="option-title">Связать через QR-код</span>
-                  <span class="option-description"
-                    >Отсканируйте QR-код в приложении</span
-                  >
-                </div>
-              </div>
-              <svg
-                class="arrow-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M5 12h14"></path>
-                <path d="m12 5l7 7-7 7"></path>
-              </svg>
-            </button>
+              </button>
+            </div>
           </div>
+          <ViaQRcode
+            :startFunction="startFunction"
+            :selectedItem="item"
+            v-if="enableStation.QRcode"
+          />
+          <ViaCode
+            :startFunction="startFunction"
+            :selectedItem="item"
+            v-if="enableStation.code"
+          />
+          <Modals
+            :typeError="enableStation.typeError"
+            :success="enableStation.success"
+            :error="enableStation.error"
+          />
         </div>
       </div>
 
@@ -123,22 +141,21 @@
       </div>
     </div>
   </div>
-  <ViaQRcode :selectedItem="item" v-if="viaQrcode" />
-  <ViaCode :selectedItem="item" v-if="viaCode" />
 </template>
 
 <script setup>
-import { computed, ref, toRefs } from "vue";
+import axios from "axios";
+import { computed, reactive, ref, toRefs } from "vue";
 import AccountIcon from "@/components/Accounts/AccountIcon.vue";
 import ViaQRcode from "./Start/ViaQRcode.vue";
 import ViaCode from "./Start/ViaCode.vue";
+import Modals from "./ServerResponsesModal/Modals.vue";
+import AccoutnEnableLoadingOptions from "@/components/GlobalModal/DownloadOptions/AccoutnEnableLoadingOptions.vue";
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
-const viaCode = ref(false);
-
-const viaQrcode = ref(false);
-
-const changeViaCode = () => (viaCode.value = !viaCode.value);
-const changeViaQRcode = () => (viaQrcode.value = !viaQrcode.value);
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 const props = defineProps({
   item: {
@@ -159,6 +176,119 @@ const props = defineProps({
   },
 });
 const { item } = toRefs(props);
+
+const enableStation = reactive({
+  start: false,
+  QRcode: false,
+  code: false,
+  loading: false,
+  success: false,
+  error: true,
+  typeError: "qrCode",
+});
+
+const changeLoading = () => (enableStation.loading = !enableStation.loading);
+const changeQRcode = () => (enableStation.qrCode = !enableStation.qrCode);
+const changeCode = () => (enableStation.code = !enableStation.code);
+const changeError = () => (enableStation.error = !enableStation.error);
+const changeSuccess = () => (enableStation.success = !enableStation.success);
+
+const { source, login, storage, type } = item.value;
+
+const forceStop = async () => {
+  const paramsStop = {
+    source: source,
+    login: login,
+    storage: storage,
+    setState: true,
+  };
+
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}forceStop?referer=https://app.chatserv.ru/`,
+      paramsStop,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.ok === true) {
+    } else {
+    }
+  } catch (error) {
+    console.error(`error`, error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const setState = async () => {
+  const paramsState = {
+    source: source,
+    login: login,
+    storage: storage,
+    setState: true,
+  };
+
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}setState?referer=https://app.chatserv.ru/`,
+      paramsState,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    // props.changeForceStopItemData(selectedItem.value);
+    // console.log(response.data.data);
+
+    if (response.data.status === "ok") {
+      station.stationLoading = false;
+      station.resultTrue = true;
+    } else if (response.data.error) {
+      setTimeout(() => {
+        station.stationLoading = false;
+      }, 1000);
+      if (response.data.error.message === "QR received") {
+        station.qrCode = true;
+      } else if (response.data.error.message === "Challenge required") {
+        station.stationLoading = false;
+        station.ChallengeRequired = true;
+      } else if (response.data.error.message === "QR code received") {
+        station.qrCode = true;
+      } else if (response.data.error.message === "Auth code received") {
+        station.getCode = true;
+      } else {
+        setTimeout(() => {
+          station.result = true;
+        }, 1000);
+      }
+    } else {
+      station.result = true;
+      station.stationLoading = false;
+    }
+  } catch (error) {
+    console.error(`error`, error);
+
+    station.result = true;
+    station.stationLoading = false;
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const startFunction = async () => {
+  await forceStop();
+  await setState();
+};
 
 const displayName = computed(() => {
   console.log(item);
@@ -271,7 +401,7 @@ const displayName = computed(() => {
 }
 
 .connection-options {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .section-title {

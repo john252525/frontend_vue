@@ -139,7 +139,7 @@
         <span
           v-if="
             selectedItem.source != 'telegram' &&
-            ['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
+            ['amocrm', 'bitrix24'].includes(selectedItem.type)
           "
           class="action"
           @click="deleteAccountButton"

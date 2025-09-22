@@ -22,6 +22,9 @@ const props = defineProps({
   changeForceStopItemData: {
     type: Function,
   },
+  startFunction: {
+    type: Function,
+  },
 });
 
 const { selectedItem } = toRefs(props);
@@ -63,96 +66,12 @@ const enablePhoneAuth = async () => {
   }
 };
 
-const forceStop = async () => {
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}forceStop?referer=https://app.chatserv.ru/`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data.ok === true) {
-    } else {
-    }
-  } catch (error) {
-    console.error(`error`, error);
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
-  }
-};
-
-const setState = async () => {
-  const paramsState = {
-    source: source,
-    login: login,
-    storage: storage,
-    setState: true,
-  };
-
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}setState?referer=https://app.chatserv.ru/`,
-      paramsState,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    // props.changeForceStopItemData(selectedItem.value);
-    // console.log(response.data.data);
-
-    if (response.data.status === "ok") {
-      station.stationLoading = false;
-      station.resultTrue = true;
-    } else if (response.data.error) {
-      setTimeout(() => {
-        station.stationLoading = false;
-      }, 1000);
-      if (response.data.error.message === "QR received") {
-        station.qrCode = true;
-      } else if (response.data.error.message === "Challenge required") {
-        station.stationLoading = false;
-        station.ChallengeRequired = true;
-      } else if (response.data.error.message === "QR code received") {
-        station.qrCode = true;
-      } else if (response.data.error.message === "Auth code received") {
-        station.getCode = true;
-      } else {
-        setTimeout(() => {
-          station.result = true;
-        }, 1000);
-      }
-    } else {
-      station.result = true;
-      station.stationLoading = false;
-    }
-  } catch (error) {
-    console.error(`error`, error);
-
-    station.result = true;
-    station.stationLoading = false;
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
-  }
-};
-
-const startFunction = async () => {
+const func = async () => {
   await enablePhoneAuth();
-  await forceStop();
-  await setState();
+  await props.startFunction();
 };
 
-onMounted(startFunction);
+onMounted(func);
 </script>
 
 <style scoped></style>
