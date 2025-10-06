@@ -2,6 +2,7 @@
   <section>
     <Telegram
       :openEnableMenuTrue="openEnableMenuTrue"
+      :changeEnableStation="changeEnableStation"
       v-if="source === 'telegram'"
     />
     <WhatsApp :openEnableMenuTrue="openEnableMenuTrue" ref="child" v-else />

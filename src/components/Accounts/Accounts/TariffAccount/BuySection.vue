@@ -1,53 +1,105 @@
 <template>
-  <div class="modal-header">
-    <h2>{{ selectTariff.name }} {{ getTariffValue(selectTariff.period) }}</h2>
-    <button class="close-button" @click="close">Назад</button>
-  </div>
-  <Loading v-if="loadingPay" />
-  <div v-else class="tariff-content">
-    <div class="tariff-price">
-      <div v-if="hasDiscount" class="price-with-discount">
-        <div class="original-price-wrapper">
-          <span class="original-price">{{
-            formatPrice(selectTariff.price)
-          }}</span>
-          <span class="original-currency">{{ selectTariff.currency }}</span>
-        </div>
-        <div class="final-price-wrapper">
-          <span class="final-price">{{ formatPrice(finalPrice) }}</span>
-          <span class="final-currency">{{ selectTariff.currency }}</span>
-        </div>
-        <div class="discount-badge">-{{ discountPercent }}%</div>
-      </div>
-      <div v-else class="price-without-discount">
-        <div class="price-amount">
-          {{ formatPrice(finalPrice) }}
-          <span class="currency">{{ selectTariff.currency }}</span>
-        </div>
-      </div>
-      <div class="price-period">
-        за {{ getPeriodText(selectTariff.period) }}
-      </div>
+  <div class="buy-section">
+    <div class="modal-header">
+      <button class="back-button" @click="close">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+        Назад к тарифам
+      </button>
+      <h2>Оформление подписки</h2>
     </div>
 
-    <div class="tariff-features">
-      <div class="feature-item">
-        <svg class="feature-icon" viewBox="0 0 24 24" width="20" height="20">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-        </svg>
-        <span>Полный доступ к функционалу</span>
+    <Loading v-if="loadingPay" />
+    
+    <div v-else class="tariff-content">
+      <!-- Карточка тарифа -->
+      <div class="tariff-card">
+        <div class="tariff-header">
+          <div class="tariff-badges">
+            <span class="tariff-name">{{ selectTariff.name }}</span>
+            <div v-if="hasDiscount" class="discount-badge">-{{ discountPercent }}%</div>
+          </div>
+          <div class="tariff-period">на {{ getPeriodText(selectTariff.period) }}</div>
+        </div>
+
+        <!-- Цена -->
+        <div class="price-section">
+          <div v-if="hasDiscount" class="price-with-discount">
+            <div class="original-price">
+              {{ formatPrice(selectTariff.price) }} {{ selectTariff.currency }}
+            </div>
+            <div class="final-price">
+              {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+            </div>
+          </div>
+          <div v-else class="price-regular">
+            {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+          </div>
+        </div>
+
+        <!-- Лимиты тарифа -->
+        <div class="limits-section" v-if="selectTariff.limits">
+          <h4>Что включено:</h4>
+          <div class="limits-grid">
+            <div class="limit-item">
+              <div class="limit-icon">💬</div>
+              <div class="limit-info">
+                <span class="limit-value">{{ formatLimit(selectTariff.limits.dialogs) }}</span>
+                <span class="limit-label">диалогов</span>
+              </div>
+            </div>
+            <div class="limit-item">
+              <div class="limit-icon">📨</div>
+              <div class="limit-info">
+                <span class="limit-value">{{ formatLimit(selectTariff.limits.messages) }}</span>
+                <span class="limit-label">сообщений</span>
+              </div>
+            </div>
+            <div class="limit-item" v-if="selectTariff.limits.write_first">
+              <div class="limit-icon">👆</div>
+              <div class="limit-info">
+                <span class="limit-value">Да</span>
+                <span class="limit-label">первое сообщение</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Бонусы -->
+        <div class="bonuses-section" v-if="hasBonuses">
+          <h4>🎁 Ваши бонусы:</h4>
+          <div class="bonuses-list">
+            <div v-for="bonus in activeBonuses" :key="bonus.mod_id" class="bonus-item">
+              <div class="bonus-icon">+</div>
+              <div class="bonus-text">
+                {{ getBonusDescription(bonus) }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="feature-item">
-        <svg class="feature-icon" viewBox="0 0 24 24" width="20" height="20">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-        </svg>
-        <span>Техническая поддержка 24/7</span>
+
+      <!-- Кнопка покупки -->
+      <div class="purchase-section">
+        <div class="total-price">
+          <span class="total-label">К оплате:</span>
+          <span class="total-amount">{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span>
+        </div>
+        
+        <button class="buy-button" @click="buyTariff">
+          <span class="button-text">Оплатить подписку</span>
+          <span class="button-price">{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span>
+        </button>
+        
+        <div class="security-notice">
+          <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+          </svg>
+          <span>Платежи защищены SSL-шифрованием</span>
+        </div>
       </div>
     </div>
-
-    <button class="buy-button" @click="buyTariff">
-      Купить за {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
-    </button>
   </div>
 </template>
 
@@ -84,157 +136,54 @@ const props = defineProps({
 const loadingPay = ref(false);
 const { selectTariff, selectedItem } = toRefs(props);
 
-// Вычисляемые свойства для работы со скидкой
+// Вычисляемые свойства
 const hasDiscount = computed(() => {
-  return (
-    selectTariff.value.final_price &&
-    selectTariff.value.final_price != selectTariff.value.price
-  );
+  return selectTariff.value.final_price && selectTariff.value.final_price < selectTariff.value.price;
 });
 
 const finalPrice = computed(() => {
-  return hasDiscount.value
-    ? selectTariff.value.final_price
-    : selectTariff.value.price;
+  return hasDiscount.value ? selectTariff.value.final_price : selectTariff.value.price;
 });
 
 const discountPercent = computed(() => {
   if (!hasDiscount.value) return 0;
-  const discount =
-    ((selectTariff.value.price - selectTariff.value.final_price) /
-      selectTariff.value.price) *
-    100;
+  const discount = ((selectTariff.value.price - selectTariff.value.final_price) / selectTariff.value.price) * 100;
   return Math.round(discount);
 });
 
+const hasBonuses = computed(() => {
+  return selectTariff.value.bonuses && selectTariff.value.bonuses.length > 0;
+});
+
+const activeBonuses = computed(() => {
+  if (!selectTariff.value.bonuses) return [];
+  return selectTariff.value.bonuses.filter(bonus => bonus.multiplier > 0);
+});
+
+// Вспомогательные функции
 const formatPrice = (price) => {
   return new Intl.NumberFormat("ru-RU").format(price);
 };
 
-const emit = defineEmits(["buy"]);
-
-const getTariffValue = (period) => {
-  const periodMap = {
-    // Дни
-    "1d": "1 день",
-    "2d": "2 дня",
-    "3d": "3 дня",
-    "4d": "4 дня",
-    "5d": "5 дней",
-    "6d": "6 дней",
-    "7d": "7 дней",
-    "14d": "14 дней",
-    "21d": "21 день",
-    "28d": "28 дней",
-    "30d": "30 дней",
-
-    // Месяцы
-    "1m": "1 месяц",
-    "2m": "2 месяца",
-    "3m": "3 месяца",
-    "4m": "4 месяца",
-    "5m": "5 месяцев",
-    "6m": "6 месяцев",
-    "7m": "7 месяцев",
-    "8m": "8 месяцев",
-    "9m": "9 месяцев",
-    "10m": "10 месяцев",
-    "11m": "11 месяцев",
-    "12m": "12 месяцев",
-    "14m": "14 месяцев",
-    "18m": "18 месяцев",
-    "24m": "24 месяца",
-
-    // Годы
-    "1y": "1 год",
-    "2y": "2 года",
-    "3y": "3 года",
-    "4y": "4 года",
-    "5y": "5 лет",
-    "6y": "6 лет",
-    "7y": "7 лет",
-    "8y": "8 лет",
-    "9y": "9 лет",
-    "10y": "10 лет",
-
-    // Недели
-    "1w": "1 неделя",
-    "2w": "2 недели",
-    "3w": "3 недели",
-    "4w": "4 недели",
-  };
-
-  if (periodMap[period]) {
-    return periodMap[period];
-  }
-
-  const match = period.match(/^(\d+)([dmyw])$/);
-  if (match) {
-    const num = parseInt(match[1]);
-    const unit = match[2];
-
-    let unitText;
-    switch (unit) {
-      case "d":
-        if (num % 10 === 1 && num % 100 !== 11) {
-          unitText = "день";
-        } else if (
-          [2, 3, 4].includes(num % 10) &&
-          ![12, 13, 14].includes(num % 100)
-        ) {
-          unitText = "дня";
-        } else {
-          unitText = "дней";
-        }
-        break;
-      case "m":
-        if (num % 10 === 1 && num % 100 !== 11) {
-          unitText = "месяц";
-        } else if (
-          [2, 3, 4].includes(num % 10) &&
-          ![12, 13, 14].includes(num % 100)
-        ) {
-          unitText = "месяца";
-        } else {
-          unitText = "месяцев";
-        }
-        break;
-      case "y":
-        if (num % 10 === 1 && num % 100 !== 11) {
-          unitText = "год";
-        } else if (
-          [2, 3, 4].includes(num % 10) &&
-          ![12, 13, 14].includes(num % 100)
-        ) {
-          unitText = "года";
-        } else {
-          unitText = "лет";
-        }
-        break;
-      case "w":
-        if (num % 10 === 1 && num % 100 !== 11) {
-          unitText = "неделя";
-        } else if (
-          [2, 3, 4].includes(num % 10) &&
-          ![12, 13, 14].includes(num % 100)
-        ) {
-          unitText = "недели";
-        } else {
-          unitText = "недель";
-        }
-        break;
-      default:
-        unitText = "";
-    }
-
-    return `${num} ${unitText}`;
-  }
-
-  return period;
+const formatLimit = (limit) => {
+  if (limit === -1) return "∞";
+  return new Intl.NumberFormat('ru-RU').format(limit);
 };
 
-const getPeriodText = (tariff) => {
-  return getTariffValue(tariff).toLowerCase();
+const getPeriodText = (period) => {
+  const periodMap = {
+    "1d": "1 день", "7d": "7 дней", "14d": "14 дней", "30d": "30 дней",
+    "1m": "1 месяц", "3m": "3 месяца", "6m": "6 месяцев", "12m": "12 месяцев",
+    "1y": "1 год"
+  };
+  return periodMap[period] || period;
+};
+
+const getBonusDescription = (bonus) => {
+  if (bonus.multiplier === 0) return "Бонус недоступен";
+  const periodText = getPeriodText(bonus.tariff_period || '1m');
+  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} × ` : '';
+  return `${multiplierText}${bonus.tariff_code} на ${periodText}`;
 };
 
 const encodeTariff = (tariffCode, id) => {
@@ -245,9 +194,7 @@ const encodeTariff = (tariffCode, id) => {
     const str = `${prefix}${tariffCode}|${id}|${timestamp}|${randomSalt}`;
 
     const firstPass = btoa(unescape(encodeURIComponent(str)));
-    const secondPass = btoa(
-      unescape(encodeURIComponent(firstPass.split("").reverse().join("")))
-    );
+    const secondPass = btoa(unescape(encodeURIComponent(firstPass.split("").reverse().join(""))));
 
     return secondPass;
   } catch (error) {
@@ -258,18 +205,14 @@ const encodeTariff = (tariffCode, id) => {
 
 const buyTariff = async () => {
   loadingPay.value = true;
-  console.log(selectTariff.value);
 
   try {
-    const encodedTariff = encodeTariff(
-      selectTariff.value.code,
-      selectTariff.value.id
-    );
+    const encodedTariff = encodeTariff(selectTariff.value.code, selectTariff.value.id);
 
     const response = await axios.post(
       `${apiUrl}/buy`,
       {
-        amount: finalPrice.value, // Используем finalPrice вместо selectTariff.value.price
+        amount: finalPrice.value,
         tariff_id: selectTariff.value.id,
         tariff: encodedTariff,
         currency: selectTariff.value.currency,
@@ -277,8 +220,8 @@ const buyTariff = async () => {
         entity: "vendor",
         category: "tariff",
         entity_uuid: selectedItem.value.uuid,
-        original_price: selectTariff.value.price, // Добавляем оригинальную цену для отслеживания
-        discount_percent: discountPercent.value, // Добавляем процент скидки
+        original_price: selectTariff.value.price,
+        discount_percent: discountPercent.value,
       },
       {
         headers: {
@@ -292,7 +235,6 @@ const buyTariff = async () => {
       await balanceStore.refreshBalance();
       props.changePaymentsStation(true, "success");
     } else {
-      console.log("Ошибка при покупке");
       props.changePaymentsStation(true, "error");
     }
   } catch (error) {
@@ -308,205 +250,336 @@ const buyTariff = async () => {
 </script>
 
 <style scoped>
-.tariff-modal {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 100%;
-  overflow: hidden;
+.buy-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px 0px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.modal-header h2 {
-  font-size: clamp(20px, 4vw, 24px);
-  color: #333;
-  margin: 0;
-  font-weight: 600;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: background 0.2s;
+.back-button {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 16px;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px;
   font-weight: 500;
 }
 
-.close-button:hover {
+.back-button:hover {
   background: #f5f5f5;
+  color: #333;
+}
+
+.back-button svg {
+  fill: currentColor;
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 }
 
 .tariff-content {
-  /* padding: 25px; */
-}
-
-.tariff-price {
-  text-align: center;
-  margin-bottom: 30px;
-  position: relative;
-}
-
-.price-with-discount {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 20px;
 }
 
-.original-price-wrapper {
+.tariff-card {
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tariff-header {
+  margin-bottom: 20px;
+}
+
+.tariff-badges {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-.original-price {
-  font-size: 24px;
-  text-decoration: line-through;
-  color: #9e9e9e;
-  font-weight: 500;
-}
-
-.original-currency {
-  font-size: 16px;
-  color: #9e9e9e;
-}
-
-.final-price-wrapper {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.final-price {
-  font-size: 48px;
-  font-weight: 700;
-  color: #ff3b30;
-  line-height: 1;
-}
-
-.final-currency {
-  font-size: 24px;
-  color: #ff3b30;
+.tariff-name {
+  font-size: 18px;
   font-weight: 600;
+  color: #1a1a1a;
 }
 
 .discount-badge {
   background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
   color: white;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 700;
-  margin-top: 5px;
 }
 
-.price-without-discount .price-amount {
-  font-size: 48px;
+.tariff-period {
+  font-size: 14px;
+  color: #666;
+}
+
+.price-section {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9ff;
+  border-radius: 8px;
+}
+
+.price-with-discount {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.original-price {
+  font-size: 16px;
+  text-decoration: line-through;
+  color: #9e9e9e;
+  font-weight: 500;
+}
+
+.final-price {
+  font-size: 32px;
   font-weight: 700;
-  color: #4a6cf7;
+  color: #ff3b30;
   line-height: 1;
 }
 
-.price-without-discount .currency {
-  font-size: 24px;
-  font-weight: 500;
-  color: #4a6cf7;
+.price-regular {
+  font-size: 32px;
+  font-weight: 700;
+  color: #6732ff;
+  line-height: 1;
 }
 
-.price-period {
-  font-size: 16px;
-  color: #666;
-  margin-top: 10px;
+.limits-section h4,
+.bonuses-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
 }
 
-.tariff-features {
-  margin-bottom: 30px;
+.limits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.feature-item {
+.limit-item {
   display: flex;
   align-items: center;
-  padding: 12px 0;
+  gap: 8px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
-.feature-icon {
-  fill: #4a6cf7;
-  margin-right: 12px;
-  flex-shrink: 0;
+.limit-icon {
+  font-size: 16px;
+}
+
+.limit-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.limit-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.limit-label {
+  font-size: 11px;
+  color: #666;
+}
+
+.bonuses-section {
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.bonuses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bonus-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0fff4;
+  border-radius: 6px;
+  border: 1px solid #e8f5e8;
+}
+
+.bonus-icon {
+  color: #4caf50;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.bonus-text {
+  font-size: 13px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.purchase-section {
+  margin-top: auto;
+  padding: 16px;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+}
+
+.total-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.total-label {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
+
+.total-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
 .buy-button {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #4a6cf7 0%, #6b8cff 100%);
+  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 18px;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 25px;
-  box-shadow: 0 4px 15px rgba(74, 108, 247, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.3);
 }
 
 .buy-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(74, 108, 247, 0.4);
-  background: linear-gradient(135deg, #3a5ce4 0%, #5b7cff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(103, 50, 255, 0.4);
+}
+
+.button-text {
+  font-size: 15px;
+}
+
+.button-price {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.security-notice svg {
+  fill: #4caf50;
 }
 
 @media (max-width: 768px) {
-  .final-price {
-    font-size: 36px;
+  .modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .price-without-discount .price-amount {
-    font-size: 36px;
+  .back-button {
+    align-self: flex-start;
   }
 
-  .original-price {
-    font-size: 20px;
+  .tariff-card {
+    padding: 16px;
+  }
+
+  .final-price,
+  .price-regular {
+    font-size: 28px;
+  }
+
+  .limits-grid {
+    grid-template-columns: 1fr;
   }
 
   .buy-button {
     padding: 14px;
-    font-size: 16px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .button-text,
+  .button-price {
+    font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
-  .final-price {
-    font-size: 32px;
-  }
-
-  .price-without-discount .price-amount {
-    font-size: 32px;
-  }
-
-  .original-price {
+  .modal-header h2 {
     font-size: 18px;
   }
 
-  .discount-badge {
-    font-size: 12px;
-    padding: 4px 10px;
+  .tariff-name {
+    font-size: 16px;
+  }
+
+  .final-price,
+  .price-regular {
+    font-size: 24px;
+  }
+
+  .total-amount {
+    font-size: 18px;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div @click="changeGetScreenStation" class="black-fon">
+  <div @click="handleBackdropClick" class="black-fon">
     <!-- <ErrorBlock
       v-if="showError"
       :errorMessage="errorMessage"
@@ -7,6 +7,33 @@
     /> -->
     <LoadingModal :text="loadingText" :stationLoading="isLoading" />
     <section v-if="showScreen" class="screen-section">
+      <div class="screen-header">
+        <h2 class="screen-title">Скриншот аккаунта</h2>
+        <button @click="closeScreen" class="close-button">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
       <img class="screen-img" :src="screenImage" alt="screenshot" />
       <!-- <button @click="closeScreen" class="close">
         {{ t("GetScreen.close") }}
@@ -44,7 +71,7 @@ const props = defineProps({
   selectedItem: Object,
   getScreenStation: Boolean,
   changeGetScreenStation: Function,
-  closeScreen: Function
+  closeScreen: Function,
 });
 
 const decodeBase64Response = (base64String) => {
@@ -152,12 +179,49 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.screen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.screen-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .screen-img {
   width: 600px;
-  max-height: 80vh;
+  max-height: 70vh;
   object-fit: contain;
+  border-radius: 4px;
 }
 
 .close {
@@ -180,14 +244,31 @@ onMounted(() => {
 }
 
 @media (max-width: 600px) {
+  .screen-section {
+    padding: 20px;
+    margin: 20px;
+  }
+
   .screen-img {
     width: 400px;
+  }
+
+  .screen-title {
+    font-size: 16px;
   }
 }
 
 @media (max-width: 500px) {
+  .screen-section {
+    padding: 15px;
+  }
+
   .screen-img {
     width: 300px;
+  }
+
+  .screen-title {
+    font-size: 15px;
   }
 }
 </style>

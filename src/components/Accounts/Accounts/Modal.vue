@@ -84,17 +84,6 @@
           @click="ChangeconfirmStationReset"
           >{{ t("modalAccount.change") }}</span
         >
-        <span
-          v-if="
-            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
-            ['telegram', 'whatsapp'].includes(selectedItem.source) &&
-            chatsStation === 'loading'
-          "
-          class="action-loading"
-        >
-          Чат <LoadingBalance />
-        </span>
-
         <!-- Чат доступный для клика -->
         <span
           v-if="

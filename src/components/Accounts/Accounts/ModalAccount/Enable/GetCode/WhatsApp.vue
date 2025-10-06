@@ -134,6 +134,207 @@ const { source, login, storage } = selectedItem.value;
 const userCode = ref(null);
 const isCopied = ref(false);
 
+const copyCode = async () => {
+  if (!userCode.value) return;
+
+  try {
+    await navigator.clipboard.writeText(userCode.value);
+    isCopied.value = true;
+    setTimeout(() => {
+      isCopied.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error("Failed to copy:", err);
+  }
+};
+
+const formatPhone = () => {
+  const cleaned = phone.value.replace(/\D/g, "");
+
+  if (cleaned.length === 0) {
+    phone.value = "7 ";
+    return;
+  }
+
+  const match = cleaned.match(/^(7)?(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+  if (match) {
+    phone.value = `7 (${match[2]}) ${match[3]}${
+      match[4] ? "-" + match[4] : ""
+    }`;
+  }
+};
+
+const getInternationalFormat = () => {
+  return phone.value.replace(/\D/g, "");
+};
+
+const forceStop = async () => {
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}forceStop`,
+      {
+        source: source,
+        login: login,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (response.data.status === "ok") {
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+    }
+  } catch (error) {
+    console.error(`error`, error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const enablePhoneAuth = async () => {
+  const phone = getInternationalFormat();
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}enablePhoneAuth`,
+      {
+        source: source,
+        login: login,
+        phone: phone,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (response.data.status === "ok") {
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+    }
+  } catch (error) {
+    console.error("error", error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error:", err);
+  }
+};
+
+const disablePhoneAuth = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomain.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+    };
+  }
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}disablePhoneAuth`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data) {
+      await handleSendLog(
+        "getCode",
+        "disablePhoneAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
+    if (response.data.status === "ok") {
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+    }
+  } catch (error) {
+    console.error("error", error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const setState = async () => {
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}setState`,
+      {
+        source: source,
+        login: login,
+        setState: true,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+    if (response.data.status === "ok") {
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+    }
+  } catch (error) {
+    console.error("error", error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
 // Остальные функции без изменений...
 
 // Новая функция для запроса getInfo
@@ -177,6 +378,46 @@ const getInfo = async () => {
   }
 };
 
+const getAuthCode = async () => {
+  let params = {
+    source: source,
+    login: login,
+
+    storage: storage,
+  };
+
+  try {
+    const response = await axios.post(`${FRONTEND_URL}getAuthCode`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    if (response.data.status === "ok") {
+      station.stationLoading = false;
+      station.code = true;
+      userCode.value = response.data.authCode;
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else if (response.data.error?.message === "Auth code is undefined") {
+      station.error = true;
+      clearInterval(authCodeInterval);
+      station.stationLoading = false;
+      station.code = false;
+
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error in getInfo:", error);
+    return null;
+  }
+};
+
 // Функция для остановки всех интервалов
 const stopAllRequests = () => {
   if (authCodeInterval) {
@@ -193,7 +434,7 @@ const stopAllRequests = () => {
 // Модифицируем nextButton для запуска обоих интервалов
 const nextButton = () => {
   station.phone = false;
-  station.stationLoading = true;
+  // station.stationLoading = true;
 
   isRunning.value = true;
 
@@ -208,7 +449,7 @@ const nextButton = () => {
   }, 20000);
 
   // Выполняем первый запрос сразу
-  sendCode();
+  getAuthCode();
   getInfo(); // Первый запрос getInfo
 
   setTimeout(() => {

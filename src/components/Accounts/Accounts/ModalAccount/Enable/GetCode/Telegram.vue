@@ -2,13 +2,18 @@
   <div class="code-component">
     <div class="code-header">
       <h3 class="code-title">Код подтверждения</h3>
-      <button class="code-close" @click="handleClose">
+      <button class="code-close" @click="changeEnableStation">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path
+            d="M12 4L4 12M4 4L12 12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
       </button>
     </div>
-    
+
     <div class="code-body">
       <div class="input-cont">
         <label for="code">Введите код подтверждения</label>
@@ -21,7 +26,7 @@
         />
       </div>
     </div>
-    
+
     <div class="code-footer">
       <button
         @click="solveChallenge"
@@ -63,6 +68,18 @@ const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
+
+const props = defineProps({
+  changeForceStopItemData: {
+    type: Function,
+  },
+  openEnableMenuTrue: {
+    type: Function,
+  },
+  changeEnableStation: {
+    type: Function,
+  },
+});
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -457,18 +474,18 @@ label {
   .code-component {
     gap: 16px;
   }
-  
+
   .code-input {
     height: 54px;
     font-size: 18px;
     padding: 0 14px;
   }
-  
+
   .code-button {
     padding: 12px 16px;
     font-size: 13px;
   }
-  
+
   label {
     font-size: 13px;
   }
@@ -479,7 +496,7 @@ label {
     height: 50px;
     font-size: 16px;
   }
-  
+
   .code-title {
     font-size: 16px;
   }

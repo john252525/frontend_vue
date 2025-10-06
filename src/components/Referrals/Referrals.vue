@@ -3,6 +3,23 @@
     <section class="account-section">
       <h2 class="title">{{ t("referrals.title") }}</h2>
     </section>
+
+    <!-- Блоки статистики -->
+    <section class="stats-section">
+      <div class="stat-block">
+        <span class="stat-title">Итого заработано</span>
+        <span class="stat-value">0</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-title">Итого выплачено</span>
+        <span class="stat-value">0</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-title">Привлеченных пользователей</span>
+        <span class="stat-value">{{ usersCount }}</span>
+      </div>
+    </section>
+
     <section class="account-section">
       <span class="link-title">Ваша ссылка для привлечения клиентов</span>
       <button @click="copyReferralLink" class="add-account-button">
@@ -32,7 +49,7 @@
       </button>
     </section>
   </header>
-  <ReferralsList />
+  <ReferralsList :changeUsersCount="changeUsersCount" />
 </template>
 
 <script setup>
@@ -43,6 +60,10 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+
+const usersCount = ref(0);
+
+const changeUsersCount = (item) => (usersCount.value = item);
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 
@@ -139,6 +160,36 @@ header {
   align-items: flex-start;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Стили для секции статистики */
+.stats-section {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--headerAccount);
+  border-radius: 8px;
+  min-width: 120px;
+}
+
+.stat-title {
+  font-size: 14px;
+  color: #585858;
+  font-weight: 400;
+}
+
+.stat-value {
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 600;
 }
 
 .title {
@@ -350,6 +401,16 @@ header {
     gap: 12px;
   }
 
+  .stats-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stat-block {
+    min-width: auto;
+    width: 100%;
+  }
+
   .platform-list {
     left: 20px;
     top: 180px;
@@ -366,3 +427,4 @@ header {
   }
 }
 </style>
+

@@ -1,49 +1,108 @@
 <template>
   <section class="account-list-section">
     <div class="table-container">
-      <table class="table">
+      <!-- Десктопная таблица -->
+      <table class="table" v-if="accounts.length > 0">
         <thead class="table-header">
           <tr>
             <th class="table-login">{{ t("accountList.login") }}</th>
+            <th class="table-status">СТАТУС</th>
+            <th class="table-date">ДАТА РЕГИСТРАЦИИ</th>
+            <th class="table-active">АКТИВЕН</th>
           </tr>
         </thead>
         <tbody class="tbody">
-          <template v-if="accounts.length > 0">
-            <tr v-for="(item, index) in accounts" :key="index">
-              <td class="table-text-number">{{ item.email }}</td>
-            </tr>
-          </template>
-          <template v-else>
-            <tr v-if="!loadDataStation && !errorAccountBolean">
-              <td colspan="2">
-                <div class="none-account-cont">
-                  <h2>{{ t("accountList.accountNone") }}</h2>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="loadDataStation">
-              <td colspan="2">
-                <div class="load-cont">
-                  <LoadAccount />
-                </div>
-              </td>
-            </tr>
-            <tr v-if="errorAccountBolean && !loadDataStation">
-              <td colspan="2">
-                <div class="load-cont">
-                  <errorAccount />
-                </div>
-              </td>
-            </tr>
-          </template>
+          <tr v-for="(item, index) in accounts" :key="index">
+            <td class="table-text-number">{{ item.email }}</td>
+            <td class="table-text">
+              <span
+                :class="[
+                  'status-badge',
+                  item.is_verified === '1' ? 'verified' : 'not-verified',
+                ]"
+              >
+                {{
+                  item.is_verified === "1" ? "Подтвержден" : "Не подтвержден"
+                }}
+              </span>
+            </td>
+            <td class="table-text">{{ formatDate(item.dt_ins) }}</td>
+            <td class="table-text">
+              <span
+                :class="[
+                  'status-badge',
+                  item.enable === '1' ? 'active' : 'inactive',
+                ]"
+              >
+                {{ item.enable === "1" ? "Да" : "Нет" }}
+              </span>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">{{
-        tooltipMessage
-      }}</span>
-    </div>
 
-    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+      <!-- Мобильные карточки -->
+      <div class="mobile-cards" v-if="accounts.length > 0">
+        <div
+          v-for="(item, index) in accounts"
+          :key="'mobile-' + index"
+          class="mobile-card"
+        >
+          <div class="card-row">
+            <span class="card-label">Email:</span>
+            <span class="card-value">{{ item.email }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Статус:</span>
+            <span class="card-value">
+              <span
+                :class="[
+                  'status-badge',
+                  item.is_verified === '1' ? 'verified' : 'not-verified',
+                ]"
+              >
+                {{
+                  item.is_verified === "1" ? "Подтвержден" : "Не подтвержден"
+                }}
+              </span>
+            </span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Дата регистрации:</span>
+            <span class="card-value">{{ formatDate(item.dt_ins) }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Активен:</span>
+            <span class="card-value">
+              <span
+                :class="[
+                  'status-badge',
+                  item.enable === '1' ? 'active' : 'inactive',
+                ]"
+              >
+                {{ item.enable === "1" ? "Да" : "Нет" }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Состояния загрузки и пустого списка -->
+      <div v-if="loadDataStation" class="load-cont">
+        <LoadAccount />
+      </div>
+
+      <div v-if="errorAccountBolean && !loadDataStation" class="load-cont">
+        <errorAccount />
+      </div>
+
+      <div
+        v-if="!loadDataStation && !errorAccountBolean && accounts.length === 0"
+        class="none-account-cont"
+      >
+        <h2>{{ t("accountList.accountNone") }}</h2>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -53,6 +112,12 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
+
+const props = defineProps({
+  changeUsersCount: {
+    type: Function,
+  },
+});
 
 import LoadingAccount from "../Accounts/Accounts/LoadingMoadal/LoadingAccount.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
@@ -132,55 +197,119 @@ function decodeJWT(token) {
   }
 }
 
-console.log(decodeJWT(token.value).vendor_id);
-
-const getIds = async () => {
-  loadDataStation.value = true;
-  errorAccountBolean.value = false;
+// Функция для форматирования даты
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
 
   try {
-    const response = await axios.post(
-      `${VITE_FRONTEND_URL_VENDORS}${
-        decodeJWT(token.value).vendor_id
-      }/getAllReferrals`,
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data.ok) {
-      // accounts.value = response.data.data.referral_ids;
-      getAccounts(response.data.data.referral_ids);
-    }
-  } catch (error) {
-    console.error("Error fetching accounts:", error);
-    errorAccountBolean.value = true;
-  } finally {
-    loadDataStation.value = false;
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (e) {
+    console.error("Date formatting error:", e);
+    return dateString;
   }
 };
+
+// const getAccounts = async () => {
+//   loadDataStation.value = true;
+//   errorAccountBolean.value = false;
+
+//   // ЗАГЛУШКА - используем моковые данные
+//   console.log("Using mock data for referrals");
+
+//   // Имитируем задержку сети
+//   await new Promise((resolve) => setTimeout(resolve, 1000));
+
+//   const mockData = {
+//     ok: true,
+//     message: "Referrals received",
+//     data: {
+//       referrals: [
+//         {
+//           email: "entitled3265@tiffincrane.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-24 19:48:30",
+//           enable: "1",
+//         },
+//         {
+//           email: "entitled3265@tiffincrane.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-24 19:48:30",
+//           enable: "1",
+//         },
+//         {
+//           email: "entitled3265@tiffincrane.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-24 19:48:30",
+//           enable: "1",
+//         },
+//         {
+//           email: "entitled3265@tiffincrane.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-24 19:48:30",
+//           enable: "1",
+//         },
+//         {
+//           email: "entitled3265@tiffincrane.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-24 19:48:30",
+//           enable: "1",
+//         },
+//         {
+//           email: "testuser1@example.com",
+//           is_verified: "0",
+//           dt_ins: "2025-09-23 14:20:15",
+//           enable: "1",
+//         },
+//         {
+//           email: "john.doe@mail.com",
+//           is_verified: "1",
+//           dt_ins: "2025-09-22 10:05:45",
+//           enable: "0",
+//         },
+//       ],
+//       referrals_count: 3,
+//     },
+//   };
+
+//   if (mockData.ok) {
+//     accounts.value = mockData.data.referrals || [];
+//     console.log("Mock referrals data loaded:", accounts.value.length, "items");
+//   } else {
+//     console.error("Mock data error:", mockData.message);
+//     errorAccountBolean.value = true;
+//   }
+
+//   loadDataStation.value = false;
+// };
 
 const getAccounts = async () => {
   loadDataStation.value = true;
   errorAccountBolean.value = false;
-  console.log(token.value);
+
   try {
-    const response = await axios.get(
-      `${FRONTEND_URL_USERS}getAllReferrals?referer=https://app2.touch-api.com/`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.get(`${FRONTEND_URL_USERS}getAllReferrals`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data.ok) {
-      accounts.value = response.data.data.referrals;
+      // Теперь данные приходят в response.data.data.referrals
+
+      props.changeUsersCount(response.data.data.referrals_count);
+      accounts.value = response.data.data.referrals || [];
+      console.log("Referrals data:", accounts.value);
+    } else {
+      console.error("API response not OK:", response.data.message);
+      errorAccountBolean.value = true;
     }
   } catch (error) {
     console.error("Error fetching accounts:", error);
@@ -267,13 +396,178 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.table-container {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-width: 100%;
-  height: 80vh;
+.account-list-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 50vh; /* Фиксированная высота */
 }
 
+.table-container {
+  flex: 1;
+  overflow: auto;
+  min-height: 0; /* Важно для flex-контейнеров */
+}
+
+/* Стили таблицы */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+.table-login {
+  width: 35%;
+  padding: 1rem;
+  text-align: left;
+}
+.table-status {
+  width: 20%;
+  padding: 1rem;
+  text-align: left;
+}
+.table-date {
+  width: 25%;
+  padding: 1rem;
+  text-align: left;
+}
+.table-active {
+  width: 20%;
+  padding: 1rem;
+  text-align: left;
+}
+
+th {
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 12px;
+  color: #374151;
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 1rem;
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Стили статусов */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+}
+
+.status-badge.verified {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.not-verified {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.inactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Мобильные карточки */
+.mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.mobile-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.card-row:last-child {
+  border-bottom: none;
+}
+
+.card-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 100px;
+}
+
+.card-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  text-align: right;
+  flex: 1;
+}
+
+.card-value .status-badge {
+  min-width: 80px;
+  font-size: 11px;
+}
+
+/* Состояния загрузки */
+.load-cont,
+.none-account-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.none-account-cont {
+  background-color: var(--noAccountTableBg);
+  border-radius: 5px;
+}
+
+.none-account-cont h2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--noAccountTableText);
+}
+
+/* Скролл */
 .table-container::-webkit-scrollbar {
   width: 6px;
 }
@@ -287,176 +581,19 @@ onMounted(async () => {
   border-radius: 5px;
 }
 
-.tooltip {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  z-index: 10;
-}
-
-.table-header {
-  top: 0;
-  z-index: 1;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.bi-list {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  margin-bottom: -4px;
-  margin-right: 6px;
-}
-
-.load-cont {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: -10px;
-}
-
-.none-account-cont {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  margin-top: 0px;
-  height: 50px;
-  width: 100%;
-  background-color: var(--noAccountTableBg);
-  border-radius: 5px;
-}
-
-.none-account-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--noAccountTableText);
-  margin-left: 10px;
-}
-
-.table-login {
-  text-align: left;
-  padding: 1rem;
-  width: 200px;
-}
-
-.table-step {
-  text-align: left;
-  padding: 1rem;
-  width: 220px;
-}
-
-.table-action {
-  text-align: right;
-  padding: 1rem;
-  padding-right: 15px;
-}
-
-.table-text-number {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-sizing: border-box;
-}
-
-.table-text {
-  padding: 1rem;
-}
-
-.table-action-text {
-  padding: 1rem;
-  text-align: right;
-}
-
-.action-table-button {
-  background: oklch(0.65 0.22 267 / 0.16);
-  font-weight: 600;
-  font-size: 12px;
-  padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
-  margin-right: 10px;
-  gap: 6px;
-  transition: all 0.25s;
-  border-radius: 5px;
-  margin-right: -3px;
-}
-
-.action-table-button:hover {
-  background: rgba(23, 30, 162, 0.2);
-  transition: all 0.15s;
-}
-
-.action-table-button:active {
-  background: rgba(0, 4, 78, 0.2);
-  transition: all 0.15s;
-}
-
-th,
-td {
-  padding: 1rem;
-  font-weight: 500;
-  font-size: 11px;
-  color: #6b7280;
-}
-
-td {
-  font-weight: 500;
-  font-size: 14px;
-  color: #000;
-  text-align: left;
-}
-
-tr:not(:last-child):after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background-color: #ebebeb;
-}
-
-@media (max-height: 900px) {
-  .table-container {
-    height: 74vh;
+/* Медиа-запросы */
+@media (max-width: 768px) {
+  .table {
+    display: none;
   }
-}
 
-@media (max-height: 660px) {
-  .table-container {
-    height: 78vh;
+  .mobile-cards {
+    display: flex;
   }
-}
 
-@media (max-height: 600px) {
-  .table-container {
-    height: 76vh;
-  }
-}
-
-@media (max-height: 550px) {
-  .table-container {
-    height: 74vh;
-  }
-}
-
-@media (max-height: 500px) {
-  .table-container {
-    height: 70vh;
-  }
-}
-
-@media (max-height: 450px) {
-  .table-container {
-    height: 66vh;
+  .account-list-section {
+    height: 60vh; /* Чуть больше на мобилках */
   }
 }
 </style>
+

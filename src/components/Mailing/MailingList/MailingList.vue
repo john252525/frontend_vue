@@ -73,7 +73,7 @@
           <tr v-else-if="dataStationNone">
             <td colspan="4">
               <div class="none-account-cont">
-                <h2>{{ t("mailingList.noneMailing") }}</h2>
+                <NoData type="mailing" />
               </div>
             </td>
           </tr>

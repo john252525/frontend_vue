@@ -375,6 +375,7 @@ axios.interceptors.request.use((config) => {
     url: config.url,
     method: config.method?.toUpperCase() || "GET",
     isLogRequest: config.url?.includes("/api/createLog"), // Помечаем запросы логов
+    isRefreshToken: config.url?.includes("refreshToken"), // Добавляем проверку на refreshToken
   };
   if (config.data) {
     config.metadata.requestBody = config.data;
@@ -384,8 +385,11 @@ axios.interceptors.request.use((config) => {
 
 axios.interceptors.response.use(
   (response) => {
-    // Пропускаем логирование запросов самих логов
-    if (response.config.metadata.isLogRequest) {
+    // Пропускаем логирование запросов самих логов И refreshToken
+    if (
+      response.config.metadata.isLogRequest ||
+      response.config.metadata.isRefreshToken
+    ) {
       return response;
     }
 
@@ -398,7 +402,7 @@ axios.interceptors.response.use(
       status: response.status,
       duration: duration,
       timestamp: Date.now(),
-      requestBody: response.config.metadata.requestBody, // Только тело запроса
+      requestBody: response.config.metadata.requestBody,
       endpoint: response.config.url,
       message: `Request completed in ${duration}ms`,
     };
@@ -423,8 +427,11 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Пропускаем логирование ошибок запросов самих логов
-    if (error.config?.metadata?.isLogRequest) {
+    // Пропускаем логирование ошибок запросов самих логов И refreshToken
+    if (
+      error.config?.metadata?.isLogRequest ||
+      error.config?.metadata?.isRefreshToken
+    ) {
       return Promise.reject(error);
     }
 
@@ -438,7 +445,7 @@ axios.interceptors.response.use(
         status: error.response.status,
         duration: duration,
         timestamp: Date.now(),
-        requestBody: error.config.metadata?.requestBody, // Только тело запроса
+        requestBody: error.config.metadata?.requestBody,
         endpoint: error.config.url,
         message: error.response.statusText || "Request failed",
         error: error.message,
@@ -468,7 +475,7 @@ axios.interceptors.response.use(
         status: 0,
         duration: 0,
         timestamp: Date.now(),
-        requestBody: error.config?.metadata?.requestBody, // Только тело запроса
+        requestBody: error.config?.metadata?.requestBody,
         endpoint: error.config?.url || "unknown",
         message: "Network error",
         error: error.message,

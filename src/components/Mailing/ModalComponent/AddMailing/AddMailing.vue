@@ -1,5 +1,51 @@
 <template>
-  <div v-if="!stationLoading.loading" class="modal-overlay">
+  <!-- Компонент проверки подписки -->
+  <div v-if="subscriptionCheck.loading" class="subscription-check-overlay">
+    <div class="subscription-check-container">
+      <div class="subscription-check-content">
+        <div class="subscription-spinner">
+          <div class="spinner"></div>
+        </div>
+        <h3 class="subscription-check-title">Проверка подписки</h3>
+        <p class="subscription-check-text">
+          Проверяем статус вашей подписки...
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Компонент ошибки подписки -->
+  <div v-else-if="subscriptionCheck.error" class="subscription-check-overlay">
+    <div class="subscription-check-container">
+      <div class="subscription-check-content error">
+        <div class="subscription-icon error">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <h3 class="subscription-check-title">Подписка не активна</h3>
+
+        <div class="subscription-actions">
+          <button @click="closeModal" class="btn-secondary">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основной компонент создания рассылки -->
+  <div v-else-if="!stationLoading.loading" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
         <h2 class="modal-title">
@@ -64,6 +110,7 @@
       </div>
     </div>
   </div>
+
   <LoadMoadal
     :changeStationLoading="changeStationLoading"
     :textLoadin="'Создание рассылки'"
@@ -72,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, provide, computed } from "vue";
+import { ref, reactive, provide, computed, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -96,6 +143,14 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+});
+
+// Состояние проверки подписки
+const subscriptionCheck = reactive({
+  loading: true,
+  error: false,
+  message: "",
+  status: "",
 });
 
 const stationLoading = reactive({
@@ -131,6 +186,68 @@ const formData = reactive({
   sendOnlyExistingDialogs: true,
   sendMessagesRandomOrder: false,
 });
+
+// Проверка подписки при монтировании компонента
+onMounted(async () => {
+  await checkSubscription();
+});
+
+// Метод проверки подписки
+async function checkSubscription() {
+  subscriptionCheck.loading = true;
+  subscriptionCheck.error = false;
+
+  try {
+    const response = await axios.get(
+      "https://bapi88.apitter.com/api/v1/bulk/check",
+      {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.ok === true && response.data.data.status === "active") {
+      // Подписка активна - разрешаем создание рассылки
+      subscriptionCheck.loading = false;
+    } else {
+      // Подписка не активна
+      subscriptionCheck.loading = false;
+      subscriptionCheck.error = true;
+      subscriptionCheck.message =
+        response.data.message ||
+        "Для создания рассылки требуется активная подписка";
+      subscriptionCheck.status = response.data.errors?.status || "inactive";
+    }
+  } catch (error) {
+    console.error("Ошибка при проверке подписки:", error);
+    subscriptionCheck.loading = false;
+    subscriptionCheck.error = true;
+    subscriptionCheck.message =
+      "Ошибка при проверке подписки. Пожалуйста, попробуйте позже.";
+
+    // Логируем ошибку
+    await sendLog(
+      "subscription_check",
+      "error",
+      { error: error.response?.data || error.message },
+      false,
+      error.response?.data
+    );
+  }
+}
+
+// Перенаправление на страницу подписки
+function redirectToSubscription() {
+  // Здесь укажите путь к странице покупки подписки
+  router.push("/subscription");
+  closeModal();
+}
+
+// Закрытие модального окна
+function closeModal() {
+  props.changeAddMailing();
+}
 
 const isStepAvailable = computed(() => (index) => {
   if (index === currentStep.value) return true;
@@ -179,7 +296,6 @@ const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function createWhatsAppBroadcast() {
   const url = `${apiUrl}/new/`;
-  // setLoadingStatus(true, "loading");
 
   const formDataToSend = new FormData();
   formDataToSend.append("name", formData.nameMailing);
@@ -269,6 +385,138 @@ provide("currentStep", currentStep);
 </script>
 
 <style scoped>
+/* Стили для проверки подписки */
+.subscription-check-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  padding: 20px;
+}
+
+.subscription-check-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+.subscription-check-content {
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.subscription-check-content.error {
+  padding: 32px;
+}
+
+.subscription-spinner {
+  margin-bottom: 20px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e1e5eb;
+  border-top: 4px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.subscription-icon {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.subscription-icon.error svg {
+  color: #ef4444;
+}
+
+.subscription-check-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.subscription-check-text {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 140px;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 140px;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Существующие стили модального окна */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -443,6 +691,27 @@ provide("currentStep", currentStep);
 }
 
 @media (max-width: 768px) {
+  .subscription-check-container {
+    max-width: 90%;
+  }
+
+  .subscription-check-content {
+    padding: 24px 20px;
+  }
+
+  .subscription-check-content.error {
+    padding: 20px;
+  }
+
+  .subscription-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    min-width: 100%;
+  }
+
   .modal-container {
     max-height: 95vh;
   }

@@ -138,7 +138,7 @@
           <tr v-else-if="dataStationNone">
             <td colspan="4">
               <div class="none-account-cont">
-                <h2>{{ t("accountList.accountNone") }}</h2>
+                <NoData type="accounts" />
               </div>
             </td>
           </tr>
@@ -485,13 +485,11 @@ const changePayDataForAccounts = (item) => {
   );
 
   if (index !== -1) {
-    // Добавляем флаг isPay и обновляем дату подписки
     instanceData.value[index] = {
       ...instanceData.value[index],
-      isPay: true, // флаг для анимации
+      isPay: true,
     };
 
-    // Через 3 секунды убираем анимацию
     setTimeout(() => {
       instanceData.value[index] = {
         ...instanceData.value[index],
@@ -687,6 +685,8 @@ const getAccounts = async () => {
     console.error("Error:", error);
   }
 };
+
+const checkStatusBulkAccount = () => {};
 
 const getInfoWhats = async (source, login, type, storage) => {
   try {

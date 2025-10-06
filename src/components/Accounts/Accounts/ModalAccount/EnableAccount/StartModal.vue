@@ -41,7 +41,7 @@
             </p>
 
             <div class="options-list">
-              <button class="option-button" @click="changeViaCode">
+              <button class="option-button" @click="changeUserPhone">
                 <div class="option-content">
                   <svg
                     class="option-icon"
@@ -78,7 +78,7 @@
                 </svg>
               </button>
 
-              <button class="option-button" @click="changeQRcode">
+              <button class="option-button" @click="connectViaQRcode">
                 <div class="option-content">
                   <svg
                     class="option-icon"
@@ -133,6 +133,11 @@
             :success="enableStation.success"
             :error="enableStation.error"
           />
+          <PhoneInputComponent
+            v-if="enableStation.userPhone"
+            :startFunction="startFunction"
+            :selectedItem="item"
+          />
         </div>
       </div>
 
@@ -150,6 +155,7 @@ import AccountIcon from "@/components/Accounts/AccountIcon.vue";
 import ViaQRcode from "./Start/ViaQRcode.vue";
 import ViaCode from "./Start/ViaCode.vue";
 import Modals from "./ServerResponsesModal/Modals.vue";
+import PhoneInputComponent from "./Components/PhoneInputComponent.vue";
 import AccoutnEnableLoadingOptions from "@/components/GlobalModal/DownloadOptions/AccoutnEnableLoadingOptions.vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
@@ -178,15 +184,18 @@ const props = defineProps({
 const { item } = toRefs(props);
 
 const enableStation = reactive({
-  start: false,
+  start: true,
   QRcode: false,
   code: false,
   loading: false,
+  userPhone: false,
   success: false,
-  error: true,
+  error: false,
   typeError: "qrCode",
 });
 
+const changeUserPhone = () =>
+  (enableStation.userPhone = !enableStation.userPhone);
 const changeLoading = () => (enableStation.loading = !enableStation.loading);
 const changeQRcode = () => (enableStation.qrCode = !enableStation.qrCode);
 const changeCode = () => (enableStation.code = !enableStation.code);
@@ -257,14 +266,17 @@ const setState = async () => {
         station.stationLoading = false;
       }, 1000);
       if (response.data.error.message === "QR received") {
-        station.qrCode = true;
+        enableStation.QRcode = true;
       } else if (response.data.error.message === "Challenge required") {
         station.stationLoading = false;
         station.ChallengeRequired = true;
       } else if (response.data.error.message === "QR code received") {
-        station.qrCode = true;
+        enableStation.start = false;
+        enableStation.QRcode = true;
       } else if (response.data.error.message === "Auth code received") {
-        station.getCode = true;
+        enableStation.start = false;
+        enableStation.userPhone = false;
+        enableStation.code = true;
       } else {
         setTimeout(() => {
           station.result = true;
@@ -285,9 +297,44 @@ const setState = async () => {
   }
 };
 
+const disablePhoneAuth = async () => {
+  try {
+    const params = {
+      source: source,
+      login: login,
+      ...(storage && { storage: storage }),
+    };
+
+    const response = await axios.post(
+      `${FRONTEND_URL}disablePhoneAuth`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.ok === true) {
+      console.log("Phone auth disabled successfully");
+    }
+  } catch (error) {
+    console.error("Error disabling phone auth:", error);
+    if (error.response) {
+      console.error("Error response:", error.response.data);
+    }
+  }
+};
+
 const startFunction = async () => {
   await forceStop();
   await setState();
+};
+
+const connectViaQRcode = async () => {
+  await disablePhoneAuth();
+  await startFunction();
 };
 
 const displayName = computed(() => {
