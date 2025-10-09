@@ -184,12 +184,12 @@ const props = defineProps({
 const { item } = toRefs(props);
 
 const enableStation = reactive({
-  start: false,
+  start: true,
   QRcode: false,
   code: false,
   loading: false,
   userPhone: false,
-  success: true,
+  success: false,
   error: false,
   typeError: "qrCode",
 });

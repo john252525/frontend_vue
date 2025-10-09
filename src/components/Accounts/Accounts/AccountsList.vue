@@ -432,6 +432,7 @@ const changeForceStopItemData = async (item) => {
       throw new Error("Invalid response structure");
     }
 
+    // Исправляем обработку шага
     const currentStep = infoResponse.data.step || { value: "-", message: "" };
 
     instanceData.value[accountIndex] = {
