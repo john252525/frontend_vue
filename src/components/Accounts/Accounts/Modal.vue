@@ -85,7 +85,7 @@
           >{{ t("modalAccount.change") }}</span
         >
         <!-- Чат доступный для клика -->
-        <span
+        <!-- <span
           v-if="
             !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
             ['telegram', 'whatsapp'].includes(selectedItem.source) &&
@@ -95,7 +95,7 @@
           @click="openChat"
         >
           Чат
-        </span>
+        </span> -->
         <span
           v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
           class="action"

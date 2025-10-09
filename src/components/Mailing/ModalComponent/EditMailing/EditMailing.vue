@@ -205,7 +205,7 @@ const selectedDays = ref([]);
 
 const items = ref("");
 
-const minutes = Array.from({ length: 1440 }, (_, index) => index + 1);
+const minutes = Array.from({ length: 60 }, (_, index) => index + 1);
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function editWhatsAppBroadcast() {

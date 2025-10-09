@@ -25,33 +25,150 @@ import { createPinia } from "pinia";
 import { useThemeStore } from "@/stores/theme";
 import Logs from "./pages/RequestLogger.vue";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-// import { useAccountStore } from "@/stores/accountStore";
-// import { hookManager } from "@/hooks/HookManager";
 import { useRequestsStore } from "@/stores/requests";
 import axios from "axios";
 import Support from "./pages/Support.vue";
 import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
+
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
+const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "all"; // off, all, error
 
 import { computed } from "vue";
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
+// ==================== СИСТЕМА ЛОГИРОВАНИЯ ====================
+class Logger {
+  constructor() {
+    this.settings = LOG_SETTINGS;
+    console.log(`[Logger] Инициализация с настройками: ${this.settings}`);
+  }
+
+  shouldLog(level = "info") {
+    if (this.settings === "off") return false;
+    if (this.settings === "error" && level !== "error") return false;
+    return true;
+  }
+
+  info(message, data = null) {
+    if (!this.shouldLog("info")) return;
+
+    const timestamp = new Date().toISOString();
+    const logMessage = `[INFO][${timestamp}] ${message}`;
+
+    if (data) {
+      console.log(logMessage, data);
+    } else {
+      console.log(logMessage);
+    }
+
+    this.sendToServer("INFO", message, data);
+  }
+
+  error(message, error = null) {
+    if (!this.shouldLog("error")) return;
+
+    const timestamp = new Date().toISOString();
+    const logMessage = `[ERROR][${timestamp}] ${message}`;
+
+    if (error) {
+      console.error(logMessage, error);
+    } else {
+      console.error(logMessage);
+    }
+
+    this.sendToServer("ERROR", message, error);
+  }
+
+  warn(message, data = null) {
+    if (!this.shouldLog("info")) return;
+
+    const timestamp = new Date().toISOString();
+    const logMessage = `[WARN][${timestamp}] ${message}`;
+
+    if (data) {
+      console.warn(logMessage, data);
+    } else {
+      console.warn(logMessage);
+    }
+
+    this.sendToServer("WARN", message, data);
+  }
+
+  debug(message, data = null) {
+    if (!this.shouldLog("info")) return;
+
+    const timestamp = new Date().toISOString();
+    const logMessage = `[DEBUG][${timestamp}] ${message}`;
+
+    if (data) {
+      console.debug(logMessage, data);
+    } else {
+      console.debug(logMessage);
+    }
+
+    this.sendToServer("DEBUG", message, data);
+  }
+
+  async sendToServer(level, message, data = null) {
+    // Пропускаем отправку если логирование отключено
+    if (this.settings === "off") return;
+
+    try {
+      const accountStore = useAccountStore();
+      const token = accountStore.getAccountToken;
+
+      const logPayload = {
+        level: level,
+        message: message,
+        data: data,
+        timestamp: new Date().toISOString(),
+        domain: "frontend_vue",
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+      };
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      };
+
+      // Отправляем лог в фоновом режиме без ожидания ответа
+      axios
+        .post("https://api28.apitter.com/api/createLog", logPayload, config)
+        .then(() => {
+          // Не логируем успешную отправку лога, чтобы избежать цикла
+        })
+        .catch((error) => {
+          // Только консольная ошибка, без повторной отправки
+          console.error(`[Logger] Ошибка отправки лога:`, error);
+        });
+    } catch (error) {
+      console.error(`[Logger] Ошибка подготовки лога:`, error);
+    }
+  }
+}
+
+// Создаем глобальный экземпляр логгера
+const logger = new Logger();
+
 // Запрос разрешения на уведомления
 if ("Notification" in window) {
   try {
     Notification.requestPermission()
       .then((permission) => {
-        console.log("[main.js] Разрешение на уведомления:", permission);
+        logger.info("Разрешение на уведомления:", permission);
       })
       .catch((error) => {
-        console.error("[main.js] Ошибка при запросе уведомлений:", error);
+        logger.error("Ошибка при запросе уведомлений:", error);
       });
   } catch (error) {
-    console.error("[main.js] Ошибка в Notification API:", error);
+    logger.error("Ошибка в Notification API:", error);
   }
 }
 
@@ -87,10 +204,10 @@ const routes = [
     meta: { title: "Тех. поддержка" },
   },
   {
-    path: "/view-chats", // Изменил путь чтобы избежать конфликта
-    name: "ViewChatsPage", // Изменил имя чтобы избежать конфликта
+    path: "/view-chats",
+    name: "ViewChatsPage",
     component: ViewChats,
-    meta: { title: "Просмотр чатов" }, // Добавил meta для консистентности
+    meta: { title: "Просмотр чатов" },
   },
   {
     path: "/close",
@@ -127,12 +244,11 @@ const routes = [
     redirect: (to) => {
       const accountStore = useAccountStore();
       const token = accountStore.getAccountToken;
-      console.log(
-        "[MainPage] Запрошенный URL:",
-        window.location.pathname,
-        "Токен:",
-        token
-      );
+      logger.info("Запрошенный URL:", {
+        path: window.location.pathname,
+        token: token ? "present" : "absent",
+      });
+
       if (token) {
         return { name: "PersonalAccount", query: to.query };
       }
@@ -221,6 +337,9 @@ app.use(pinia);
 app.use(router);
 app.use(i18n);
 
+// Делаем логгер доступным глобально
+app.config.globalProperties.$logger = logger;
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const storedData = computed(() => accountStore.getAccountData);
@@ -230,8 +349,11 @@ const getAccountRefreshToken = computed(
 
 // ==================== ПЕРЕХВАТЧИК AXIOS ДЛЯ ОБНОВЛЕНИЯ ТОКЕНА ====================
 const setupAxiosInterceptors = () => {
-  console.log(storedData.value, "email");
-  console.log(getAccountRefreshToken.value, "token");
+  logger.info("Настройка axios interceptors", {
+    email: storedData.value,
+    refreshToken: getAccountRefreshToken.value ? "present" : "absent",
+  });
+
   let isRefreshing = false;
   let failedQueue = [];
 
@@ -246,6 +368,24 @@ const setupAxiosInterceptors = () => {
     failedQueue = [];
   };
 
+  // Функция для очистки данных и выхода
+  const clearAuthDataAndRedirect = () => {
+    logger.info("Очистка данных и перенаправление на логин");
+
+    // Очищаем localStorage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Очищаем хранилище Pinia
+    const accountStore = useAccountStore();
+    accountStore.$reset();
+
+    // Перенаправляем на страницу логина
+    if (router.currentRoute.value.name !== "Login") {
+      router.push({ name: "Login" });
+    }
+  };
+
   // Интерсептор для ответов
   axios.interceptors.response.use(
     (response) => {
@@ -256,6 +396,13 @@ const setupAxiosInterceptors = () => {
 
       // Если статус 401 и это не повторная попытка
       if (error.response?.status === 401 && !originalRequest._retry) {
+        // Если это запрос на обновление токена - сразу выходим
+        if (originalRequest.url?.includes("refreshToken")) {
+          logger.error("Ошибка при обновлении токена - выход из системы");
+          clearAuthDataAndRedirect();
+          return Promise.reject(error);
+        }
+
         if (isRefreshing) {
           // Если уже происходит обновление токена, добавляем запрос в очередь
           return new Promise((resolve, reject) => {
@@ -274,9 +421,7 @@ const setupAxiosInterceptors = () => {
         isRefreshing = true;
 
         try {
-          // ЗАГЛУШКИ - замените на свою логику получения токенов
-          const refreshToken = "your_refresh_token_here"; // useAccountStore().getRefreshToken
-          const email = "user@example.com"; // useAccountStore().getAccountEmail
+          logger.info("Попытка обновления токена");
 
           // Запрос на обновление токена
           const response = await axios.post(
@@ -294,22 +439,32 @@ const setupAxiosInterceptors = () => {
               response.data.data.refresh_token
             );
             accountStore.setAccountToken(response.data.data.token);
-            location.reload();
 
             // Обновляем заголовок и повторяем запрос
-            // originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            // processQueue(null, newToken);
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            processQueue(null, newToken);
 
+            logger.info("Токен успешно обновлен");
             return axios(originalRequest);
           } else {
             throw new Error("Token refresh failed");
           }
         } catch (refreshError) {
+          logger.error("Не удалось обновить токен:", refreshError);
+
+          // При любой ошибке обновления токена очищаем данные и выходим
+          clearAuthDataAndRedirect();
           processQueue(refreshError, null);
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
+      }
+
+      // Если это другая 401 ошибка (не для обновления токена)
+      if (error.response?.status === 401) {
+        logger.error("Неавторизованный доступ - выход из системы");
+        clearAuthDataAndRedirect();
       }
 
       return Promise.reject(error);
@@ -319,10 +474,12 @@ const setupAxiosInterceptors = () => {
 
 // ==================== ФУНКЦИЯ ДЛЯ ОТПРАВКИ ЛОГОВ (НЕБЛОКИРУЮЩАЯ) ====================
 const sendLogToServer = async (logData) => {
+  // Пропускаем логирование если отключено
+  if (LOG_SETTINGS === "off") return;
+
   try {
     // Пропускаем логирование самих логов, чтобы избежать цикла
     if (logData.endpoint && logData.endpoint.includes("/api/createLog")) {
-      console.log("[Log] Пропускаем логирование запроса логов");
       return;
     }
 
@@ -332,7 +489,7 @@ const sendLogToServer = async (logData) => {
     // Формируем payload только с данными, которые отправил пользователь
     const payloadData = {
       request: {
-        body: logData.requestBody, // Только тело запроса пользователя
+        body: logData.requestBody,
       },
     };
 
@@ -345,6 +502,7 @@ const sendLogToServer = async (logData) => {
       endpoint: logData.endpoint,
       status: logData.status,
       domain: "frontend_vue",
+      timestamp: new Date().toISOString(),
     };
 
     const config = {
@@ -358,9 +516,10 @@ const sendLogToServer = async (logData) => {
     axios
       .post("https://api28.apitter.com/api/createLog", logPayload, config)
       .then(() => {
-        console.log("[Log] Лог успешно отправлен на сервер");
+        // Не логируем успешную отправку
       })
       .catch((error) => {
+        // Только консольная ошибка
         console.error("[Log] Ошибка отправки лога:", error);
       });
   } catch (error) {
@@ -374,8 +533,8 @@ axios.interceptors.request.use((config) => {
     startTime: Date.now(),
     url: config.url,
     method: config.method?.toUpperCase() || "GET",
-    isLogRequest: config.url?.includes("/api/createLog"), // Помечаем запросы логов
-    isRefreshToken: config.url?.includes("refreshToken"), // Добавляем проверку на refreshToken
+    isLogRequest: config.url?.includes("/api/createLog"),
+    isRefreshToken: config.url?.includes("refreshToken"),
   };
   if (config.data) {
     config.metadata.requestBody = config.data;
@@ -417,12 +576,43 @@ axios.interceptors.response.use(
       requestHeaders: response.config.headers,
     });
 
-    // Отправка лога на сервер (асинхронно, без ожидания)
-    setTimeout(() => {
-      sendLogToServer(requestData).catch((error) => {
-        console.error("[Log] Фоновая отправка лога не удалась:", error);
-      });
-    }, 0);
+    // Отправка лога на сервер только если логирование включено
+    if (LOG_SETTINGS !== "off") {
+      // Для режима 'error' отправляем только ошибки
+      if (
+        LOG_SETTINGS === "all" ||
+        (LOG_SETTINGS === "error" && response.status >= 400)
+      ) {
+        setTimeout(() => {
+          sendLogToServer(requestData).catch((error) => {
+            console.error("[Log] Фоновая отправка лога не удалась:", error);
+          });
+        }, 0);
+      }
+    }
+
+    // Логируем в консоль в зависимости от настроек
+    if (LOG_SETTINGS === "all") {
+      logger.info(
+        `HTTP ${response.status} ${response.config.method?.toUpperCase()} ${
+          response.config.url
+        }`,
+        {
+          duration: `${duration}ms`,
+          status: response.status,
+        }
+      );
+    } else if (LOG_SETTINGS === "error" && response.status >= 400) {
+      logger.error(
+        `HTTP ${response.status} ${response.config.method?.toUpperCase()} ${
+          response.config.url
+        }`,
+        {
+          duration: `${duration}ms`,
+          status: response.status,
+        }
+      );
+    }
 
     return response;
   },
@@ -461,12 +651,28 @@ axios.interceptors.response.use(
         requestHeaders: error.config.headers,
       });
 
-      // Отправка лога на сервер (асинхронно, без ожидания)
-      setTimeout(() => {
-        sendLogToServer(requestData).catch((error) => {
-          console.error("[Log] Фоновая отправка лога не удалась:", error);
-        });
-      }, 0);
+      // Отправка лога на сервер только если логирование включено
+      if (LOG_SETTINGS !== "off") {
+        setTimeout(() => {
+          sendLogToServer(requestData).catch((error) => {
+            console.error("[Log] Фоновая отправка лога не удалась:", error);
+          });
+        }, 0);
+      }
+
+      // Логируем ошибки в консоль
+      if (LOG_SETTINGS === "all" || LOG_SETTINGS === "error") {
+        logger.error(
+          `HTTP ${
+            error.response.status
+          } ${error.config.method?.toUpperCase()} ${error.config.url}`,
+          {
+            duration: `${duration}ms`,
+            error: error.message,
+            status: error.response.status,
+          }
+        );
+      }
     } else {
       // Обработка сетевых ошибок
       const requestData = {
@@ -481,12 +687,26 @@ axios.interceptors.response.use(
         error: error.message,
       };
 
-      // Отправка лога на сервер (асинхронно, без ожидания)
-      setTimeout(() => {
-        sendLogToServer(requestData).catch((error) => {
-          console.error("[Log] Фоновая отправка лога не удалась:", error);
-        });
-      }, 0);
+      // Отправка лога на сервер только если логирование включено
+      if (LOG_SETTINGS !== "off") {
+        setTimeout(() => {
+          sendLogToServer(requestData).catch((error) => {
+            console.error("[Log] Фоновая отправка лога не удалась:", error);
+          });
+        }, 0);
+      }
+
+      // Логируем сетевые ошибки
+      if (LOG_SETTINGS === "all" || LOG_SETTINGS === "error") {
+        logger.error(
+          `NETWORK ERROR ${error.config?.method?.toUpperCase()} ${
+            error.config?.url
+          }`,
+          {
+            error: error.message,
+          }
+        );
+      }
     }
 
     return Promise.reject(error);
@@ -549,9 +769,8 @@ const DOMAIN_CONFIG = {
 };
 
 const checkRouteAccess = (to, domain) => {
-  console.log(
-    `[checkRouteAccess] Проверка маршрута ${to.name} для домена ${domain}`
-  );
+  logger.info(`Проверка маршрута ${to.name} для домена ${domain}`);
+
   const publicPages = [
     "Login",
     "Registration",
@@ -559,18 +778,15 @@ const checkRouteAccess = (to, domain) => {
     "VerifyEmail",
     "ResetPassword",
   ];
+
   if (publicPages.includes(to.name)) {
-    console.log(
-      `[checkRouteAccess] Разрешен доступ к публичной странице ${to.name}`
-    );
+    logger.info(`Разрешен доступ к публичной странице ${to.name}`);
     return { allowed: true };
   }
 
   const config = DOMAIN_CONFIG[domain];
   if (!config) {
-    console.log(
-      `[checkRouteAccess] Конфигурация для домена ${domain} отсутствует`
-    );
+    logger.info(`Конфигурация для домена ${domain} отсутствует`);
     return { allowed: true };
   }
 
@@ -611,19 +827,17 @@ const updatePageMetadata = (title, logoUrl) => {
 
 router.beforeEach(async (to, from, next) => {
   try {
-    console.log(
-      "[main.js] Начало навигации. От:",
-      from.fullPath,
-      "К:",
-      to.fullPath
-    );
-    console.log("[main.js] Имя маршрута:", to.name);
-    console.log("[main.js] Query параметры:", to.query);
-    console.log("[main.js] Домен:", window.location.hostname);
+    logger.info("Начало навигации", {
+      from: from.fullPath,
+      to: to.fullPath,
+      routeName: to.name,
+      query: to.query,
+      domain: window.location.hostname,
+    });
 
     const accountStore = useAccountStore();
     const token = accountStore.getAccountToken;
-    console.log("[main.js] Токен:", token);
+    logger.info("Токен авторизации", { token: token ? "present" : "absent" });
 
     // Определяем публичные страницы
     const publicPages = [
@@ -636,26 +850,24 @@ router.beforeEach(async (to, from, next) => {
 
     // Пропускаем NotFound
     if (to.name === "NotFound") {
-      console.log("[main.js] Страница NotFound, пропускаем");
+      logger.info("Страница NotFound, пропускаем");
       return next();
     }
 
     // Разрешаем публичные страницы без проверки токена
     if (publicPages.includes(to.name)) {
-      console.log(`[main.js] Доступ к публичной странице ${to.name} разрешен`);
-      if (to.query.token) {
-        console.log(`[main.js] URL-токен:`, to.query.token);
-      } else {
-        console.log(`[main.js] URL-токен отсутствует`);
-      }
+      logger.info(`Доступ к публичной странице ${to.name} разрешен`, {
+        urlToken: to.query.token ? "present" : "absent",
+      });
 
       // Проверка доступа по домену
       const currentDomain = window.location.hostname;
       const access = checkRouteAccess(to, currentDomain);
-      console.log("[main.js] Результат проверки доступа:", access);
+      logger.info("Результат проверки доступа", access);
+
       if (!access.allowed) {
-        console.warn(
-          `[main.js] Доступ запрещен для ${currentDomain} на маршрут ${to.name}`
+        logger.warn(
+          `Доступ запрещен для ${currentDomain} на маршрут ${to.name}`
         );
         if (to.path !== access.redirect) {
           return next({ path: access.redirect || "/", query: to.query });
@@ -671,7 +883,7 @@ router.beforeEach(async (to, from, next) => {
           : to.meta.title || "Touch-API";
         updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
       } catch (error) {
-        console.error("[main.js] Ошибка метаданных:", error);
+        logger.error("Ошибка метаданных:", error);
         updatePageMetadata(to.meta.title);
       }
       return next();
@@ -679,26 +891,26 @@ router.beforeEach(async (to, from, next) => {
 
     // Проверка запрошенного URL для verify-email и reset-password
     const requestedPath = window.location.pathname;
-    console.log("[main.js] Запрошенный URL:", requestedPath);
+    logger.info("Запрошенный URL", { path: requestedPath });
+
     if (requestedPath.includes("/verify-email") && to.name !== "VerifyEmail") {
-      console.log("[main.js] Перенаправление на VerifyEmail");
+      logger.info("Перенаправление на VerifyEmail");
       return next({ name: "VerifyEmail", query: to.query });
     } else if (
       requestedPath.includes("/reset-password") &&
       to.name !== "ResetPassword"
     ) {
-      console.log("[main.js] Перенаправление на ResetPassword");
+      logger.info("Перенаправление на ResetPassword");
       return next({ name: "ResetPassword", query: to.query });
     }
 
     // Проверка доступа по домену для непубличных страниц
     const currentDomain = window.location.hostname;
     const access = checkRouteAccess(to, currentDomain);
-    console.log("[main.js] Результат проверки доступа:", access);
+    logger.info("Результат проверки доступа", access);
+
     if (!access.allowed) {
-      console.warn(
-        `[main.js] Доступ запрещен для ${currentDomain} на маршрут ${to.name}`
-      );
+      logger.warn(`Доступ запрещен для ${currentDomain} на маршрут ${to.name}`);
       if (to.path !== access.redirect) {
         return next({ path: access.redirect || "/", query: to.query });
       }
@@ -707,7 +919,7 @@ router.beforeEach(async (to, from, next) => {
 
     // Если нет токена и это не публичная страница, перенаправляем на логин
     if (!token && !publicPages.includes(to.name)) {
-      console.log("[main.js] Нет токена, перенаправление на Login");
+      logger.info("Нет токена, перенаправление на Login");
       if (to.name !== "Login") {
         return next({ name: "Login", query: to.query });
       }
@@ -720,7 +932,7 @@ router.beforeEach(async (to, from, next) => {
       publicPages.includes(to.name) &&
       !["VerifyEmail", "ResetPassword"].includes(to.name)
     ) {
-      console.log("[main.js] Есть токен, перенаправление на PersonalAccount");
+      logger.info("Есть токен, перенаправление на PersonalAccount");
       if (to.name !== "PersonalAccount") {
         return next({ name: "PersonalAccount", query: to.query });
       }
@@ -735,20 +947,20 @@ router.beforeEach(async (to, from, next) => {
         : to.meta.title || "Touch-API";
       updatePageMetadata(pageTitle, stationDomain?.cosmetics?.urlLogo);
     } catch (error) {
-      console.error("[main.js] Ошибка метаданных:", error);
+      logger.error("Ошибка метаданных:", error);
       updatePageMetadata(to.meta.title);
     }
 
-    console.log("[main.js] Переход разрешен на", to.name);
+    logger.info("Переход разрешен на", { route: to.name });
     next();
   } catch (error) {
-    console.error("[main.js] Ошибка в router.beforeEach:", error);
+    logger.error("Ошибка в router.beforeEach:", error);
     next({ name: "Login", query: to.query });
   }
 });
 
 app.config.errorHandler = (err) => {
-  console.error("[main.js] Global error:", err);
+  logger.error("Global error:", err);
 };
 
 const themeStore = useThemeStore();
@@ -757,6 +969,7 @@ document.documentElement.setAttribute(
   themeStore.isDark ? "dark" : "light"
 );
 
+// Дублирующие перехватчики (убрать если они дублируют функциональность выше)
 axios.interceptors.request.use((config) => {
   config.metadata = { startTime: Date.now() };
   if (config.data) {
@@ -815,3 +1028,5 @@ axios.interceptors.response.use(
 );
 
 app.mount("#app");
+
+export { logger };

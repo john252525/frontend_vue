@@ -275,6 +275,8 @@ const getQr = async () => {
 
     if (response.data.status === "ok") {
       qrCodeData.link = response.data.value;
+      // Сразу после получения QR-кода запрашиваем информацию
+      await getInfo();
     } else {
       // Если ошибка, продолжаем попытки
       console.log("Ошибка получения QR, пробуем снова...");
@@ -284,10 +286,40 @@ const getQr = async () => {
   }
 };
 
+const getInfo = async () => {
+  const params = {
+    source: source,
+    login: login,
+    storage: storage,
+  };
+
+  try {
+    const response = await axios.post(`${FRONTEND_URL}getInfo`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    if (response.data.status === "ok") {
+      console.log("Info received:", response.data);
+      if (response.data.step) {
+        if (response.data.step?.value === 5) {
+          console.log("Авторизован");
+          // Здесь можно добавить логику для обработки успешной авторизации
+          // Например, остановить таймеры и показать сообщение об успехе
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error in getInfo:", error);
+  }
+};
+
 const startEnableByQR = async () => {
   if (isRunning.value) return;
 
-  await getQr();
+  await getQr(); // Теперь getQr автоматически вызовет getInfo
   startTimer();
   startSessionTimer();
 
@@ -299,7 +331,7 @@ const startEnableByQR = async () => {
       clearInterval(intervalId.value);
       return;
     }
-    await getQr();
+    await getQr(); // И здесь тоже будет вызван getInfo
   }, 20000);
 };
 

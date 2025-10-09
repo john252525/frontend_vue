@@ -243,6 +243,11 @@ const getInfo = async () => {
 
     if (response.data.status === "ok") {
       console.log("Info received:", response.data);
+      if (response.data.step) {
+        if (response.data.step?.value === 5) {
+          console.log("Авторизован");
+        }
+      }
     }
   } catch (error) {
     console.error("Error in getInfo:", error);
@@ -258,7 +263,7 @@ const startTimer = () => {
       timerCount.value--;
     } else {
       timerCount.value = 20;
-      // Автоматически запрашиваем новый код
+
       getAuthCode();
     }
   }, 1000);
