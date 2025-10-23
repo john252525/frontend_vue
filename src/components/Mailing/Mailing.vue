@@ -3,12 +3,16 @@
     :changeStationLoadingModal="closeResultModal"
     :stationLoading="stationLoading"
   />
+  <AlertManager
+    v-if="showSubscriptionAlert"
+    :subscription-status="subscriptionStatus"
+  />
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("mailing.title") }}</h2>
     </section>
     <section class="account-section">
-      <button @click="changeAddMailing" class="add-account-button">
+      <button @click="handleAddMailing" class="add-account-button">
         <svg
           class="svg-icon"
           viewBox="0 0 20 20"
@@ -20,7 +24,11 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{ t("mailing.button") }}
+        {{
+          subscriptionCheck.loading
+            ? t("mailing.checking")
+            : t("mailing.button")
+        }}
       </button>
     </section>
   </header>
@@ -31,15 +39,106 @@
 <script setup>
 import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
+import AlertManager from "./ModalComponent/SubscriptionWarning/AlertManager.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
-import { ref, reactive } from "vue";
+import { computed, ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 const router = useRouter();
 
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+
+// Состояние проверки подписки
+const subscriptionCheck = reactive({
+  loading: false,
+  error: false,
+  message: "",
+  status: "",
+});
+
+const subscriptionStatus = reactive({
+  active: false,
+  message: "",
+});
+
+const showSubscriptionAlert = ref(false);
+
+// Токен авторизации (замените на ваш способ получения токена)
+
+// Функция проверки подписки
+async function checkSubscription() {
+  subscriptionCheck.loading = true;
+  subscriptionCheck.error = false;
+  showSubscriptionAlert.value = false;
+
+  try {
+    const response = await axios.get(
+      "https://bapi88.apitter.com/api/v1/bulk/check",
+      {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data.ok === true && response.data.data.status === "active") {
+      // Подписка активна
+      subscriptionCheck.loading = false;
+      subscriptionStatus.active = true;
+      subscriptionStatus.message = "";
+      showSubscriptionAlert.value = false;
+    } else {
+      // Подписка не активна
+      subscriptionCheck.loading = false;
+      subscriptionCheck.error = true;
+      subscriptionCheck.message =
+        response.data.message ||
+        "Для создания рассылки требуется активная подписка";
+      subscriptionCheck.status = response.data.errors?.status || "inactive";
+
+      subscriptionStatus.active = false;
+      subscriptionStatus.message = subscriptionCheck.message;
+      showSubscriptionAlert.value = true;
+    }
+  } catch (error) {
+    console.error("Ошибка при проверке подписки:", error);
+    subscriptionCheck.loading = false;
+    subscriptionCheck.error = true;
+    subscriptionCheck.message =
+      "Ошибка при проверке подписки. Пожалуйста, попробуйте позже.";
+
+    subscriptionStatus.active = false;
+    subscriptionStatus.message = subscriptionCheck.message;
+    showSubscriptionAlert.value = true;
+
+    // Логируем ошибку
+    await sendLog(
+      "subscription_check",
+      "error",
+      { error: error.response?.data || error.message },
+      false,
+      error.response?.data
+    );
+  }
+}
+
+// Функция для отправки логов (заглушка)
+async function sendLog(type, level, data, success, response) {
+  console.log("Log:", { type, level, data, success, response });
+  // Реализуйте отправку логов по необходимости
+}
+
+// Обработчик кнопки добавления рассылки
+const handleAddMailing = () => {
+  changeAddMailing();
+};
 
 const stationLoading = reactive({
   modalStation: false,
@@ -80,6 +179,11 @@ const addMailing = ref(false);
 const changeAddMailing = () => {
   addMailing.value = !addMailing.value;
 };
+
+// Проверяем подписку при загрузке компонента
+onMounted(() => {
+  checkSubscription();
+});
 </script>
 
 <style scoped>
@@ -173,14 +277,20 @@ header {
   padding: 8px 12px;
 }
 
-.add-account-button:hover {
+.add-account-button:hover:not(:disabled) {
   background: #565cc8;
   transition: all 0.25s;
 }
 
-.add-account-button:active {
+.add-account-button:active:not(:disabled) {
   background: #3e43ae;
   transition: all 0.25s;
+}
+
+.add-account-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .black-fon {

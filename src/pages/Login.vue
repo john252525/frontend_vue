@@ -4,7 +4,11 @@
     :errorMessage="inputStyle.incorrectPasswordMessage"
     :changeIncorrectPassword="changeIncorrectPassword"
   />
-  <section class="login-section">
+  <section v-if="loading" class="loading-section">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Авторизация</div>
+  </section>
+  <section v-else class="login-section">
     <form>
       <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
         {{ t("login.title") }}
@@ -45,6 +49,7 @@
           @blur="validateEmail"
           @input="clearEmailError"
           required
+          :disabled="loading"
         />
         <div class="error-container">
           <transition name="slide-fade">
@@ -65,6 +70,7 @@
           @blur="validatePassword"
           @input="clearPasswordError"
           required
+          :disabled="loading"
         />
         <div class="error-container">
           <transition name="slide-fade">
@@ -77,8 +83,14 @@
           {{ t("login.fogoutPassword") }}
         </p>
       </div>
-      <button @click="login" type="button" class="login-account-button">
-        {{ t("login.button") }}
+      <button
+        @click="login"
+        type="button"
+        class="login-account-button"
+        :disabled="loading"
+      >
+        <span v-if="loading" class="button-spinner"></span>
+        {{ loading ? t("login.loading") : t("login.button") }}
       </button>
       <p class="create-account-button">
         {{ t("login.noAccaunt") }}
@@ -101,6 +113,12 @@ import { useThemeStore } from "@/stores/theme";
 import axios from "axios";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import useFrontendLogger from "@/composables/useFrontendLogger";
+
+const loading = ref(false);
+
+const changeLoadin = () => {
+  loading.value = !loading.value;
+};
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
@@ -234,13 +252,7 @@ const clearPasswordError = () => {
 };
 
 const loginAccount = async () => {
-  // accountStore.setAccountToken(
-  //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJicmFuZF9zbHVnIjoiY2hhdHNlcnYiLCJ1c2VyX2lkIjoiMyIsImVtYWlsIjoibWFrc2ltLmJpcnlrb3YuMjAwN0BtYWlsLnJ1IiwiZXhwIjoxNzU4NzU5MTc1fQ.t3TSE5bi5GGC0Um9N94jYH6q-Ib5rZ5kHStVfC9G9sQ"
-  // );
-  // accountStore.setAccountData("maksim.birykov.2007@mail.ru");
-  // accountStore.setAccountStation("telegram");
-  // accountStore.setAccountStationText("Telegram");
-  // navigateTo("/");
+  loading.value = true;
   try {
     const response = await axios.post(`${FRONTEND_URL_AUTH}login`, {
       email: formData.login,
@@ -262,7 +274,6 @@ const loginAccount = async () => {
     }
 
     if (response.data.ok === true) {
-      // accountStore.setAccountToken("fake_token");
       accountStore.setAccountToken(response.data.data.token);
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
@@ -294,6 +305,8 @@ const loginAccount = async () => {
     } else {
       inputStyle.incorrectPasswordMessage = "Ошибка сервера";
     }
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -316,6 +329,30 @@ const navigateTo = (page) => {
 </script>
 
 <style scoped>
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4950ca;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--text);
+}
+
 .login-section {
   border-radius: 10px;
   width: 685px;
@@ -408,6 +445,12 @@ input {
   color: #000;
 }
 
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .error-container {
   min-height: 24px; /* Фиксированная высота для контейнера ошибок */
   position: relative;
@@ -455,15 +498,34 @@ input {
   font-size: 14px;
   color: #fff;
   transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
 }
 
-.login-account-button:hover {
+.login-account-button:hover:not(:disabled) {
   background: #595fd1;
   transition: all 0.25s;
 }
 
-.login-account-button:active {
+.login-account-button:active:not(:disabled) {
   background: #2f36af;
+}
+
+.login-account-button:disabled {
+  background: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .create-account-button {
@@ -477,6 +539,15 @@ input {
 .create-account-button span:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 700px) {

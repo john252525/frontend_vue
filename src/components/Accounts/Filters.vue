@@ -4,6 +4,23 @@
     <transition name="slide-fade">
       <div class="filters-wrapper">
         <div class="filters-list">
+          <!-- Переключатель для удаленных аккаунтов - ИЗМЕНЕННЫЙ -->
+          <div class="deleted-accounts-toggle">
+            <input
+              type="checkbox"
+              id="showDeleted"
+              v-model="showDeleted"
+              @change="handleDeletedToggle"
+              class="toggle-checkbox"
+            />
+            <label for="showDeleted" class="toggle-label">
+              <span class="toggle-icon">
+                <TrashIcon />
+              </span>
+              <span class="toggle-name">Удаленные</span>
+            </label>
+          </div>
+
           <div
             v-for="item in items"
             :key="item.id"
@@ -55,6 +72,7 @@
     </transition>
   </div>
 </template>
+
 <script setup>
 import { ref, reactive, watch } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
@@ -102,6 +120,9 @@ const crmSubItems = reactive([
   },
 ]);
 
+// Флаг для показа удаленных аккаунтов
+const showDeleted = ref(accountStore.getAddDeleted);
+
 const result = reactive({
   source: [...accountStore.source],
   group: [...accountStore.group],
@@ -140,6 +161,12 @@ const handleCrmSubItemChange = (subItem) => {
   handleSomeAction();
 };
 
+// Обработчик переключения показа удаленных аккаунтов
+const handleDeletedToggle = () => {
+  accountStore.setAddDeleted(showDeleted.value);
+  handleSomeAction();
+};
+
 const updateSources = () => {
   result.source = items.filter((item) => item.checked).map((item) => item.id);
   accountStore.setSource(result.source);
@@ -175,6 +202,7 @@ const updateFilterState = () => {
     crm: items.find((i) => i.id === "crm")?.checked || false,
     amocrm: crmSubItems.find((i) => i.id === "amocrm")?.checked || false,
     bitrix24: crmSubItems.find((i) => i.id === "bitrix24")?.checked || false,
+    bulk: items.find((i) => i.id === "bulk")?.checked || false,
   };
   accountStore.setFilterState(newFilterState);
 };
@@ -185,7 +213,19 @@ const handleSomeAction = () => {
   }
 };
 
-// Иконки (остаются без изменений)
+// Новая SVG иконка для корзины
+const TrashIcon = {
+  template: `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `,
+};
+
+// Остальные иконки (остаются без изменений)
 const TelegramIcon = {
   /* ... */
 };
@@ -247,7 +287,69 @@ const Bitrix24Icon = {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
-  width: 100px;
+  width: 140px; /* Немного увеличили ширину */
+}
+
+/* ИЗМЕНЕННЫЕ СТИЛИ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ УДАЛЕННЫХ АККАУНТОВ */
+.deleted-accounts-toggle {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: #fecaca;
+  color: #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.toggle-label:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  transition: all 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-label .toggle-icon {
+  color: #dc2626;
+  transform: scale(1.1);
+}
+
+.toggle-name {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-label .toggle-name {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.toggle-checkbox {
+  position: absolute;
+  opacity: 0;
 }
 
 .filter-item {
@@ -258,7 +360,6 @@ const Bitrix24Icon = {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* gap: 6px; */
   padding: 6px 3px;
   background-color: #f9fafb;
   border-radius: 6px;

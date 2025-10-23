@@ -11,6 +11,7 @@ export const useAccountStore = defineStore("accountStore", {
     crmPlatform: "amocrm",
     crmPlatformText: "AmoCRM",
     allSource: [],
+    add_deleted: false, // Флаг для показа удаленных аккаунтов
     source: ["telegram", "whatsapp", "crm"],
     group: ["messenger", "crm", "bulk"],
     type: ["amocrm", "bitrix24", "bulk"],
@@ -24,6 +25,7 @@ export const useAccountStore = defineStore("accountStore", {
     },
   }),
   getters: {
+    getAddDeleted: (state) => state.add_deleted,
     getAccountSource: (state) => state.accountSourse,
     getAccountData: (state) => state.accountData,
     getAccountStation: (state) => state.accountStation,
@@ -33,7 +35,6 @@ export const useAccountStore = defineStore("accountStore", {
     getCrmPlatform: (state) => state.crmPlatform,
     getCrmPlatformText: (state) => state.crmPlatformText,
     getAllSource: (state) => state.allSource,
-    // Новые геттеры
     getSource: (state) => state.source,
     getGroup: (state) => state.group,
     getType: (state) => state.type,
@@ -48,6 +49,7 @@ export const useAccountStore = defineStore("accountStore", {
       source: state.source,
       group: state.group,
       type: state.type,
+      add_deleted: state.add_deleted, // Добавляем в информацию об аккаунте
     }),
   },
   actions: {
@@ -57,6 +59,10 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStation = accountInfo.accountStation;
       this.accountStationText = accountInfo.accountStationText;
       this.accountToken = accountInfo.accountToken;
+    },
+
+    setAddDeleted(value) {
+      this.add_deleted = value;
     },
 
     setAccountRefreshToken(value) {
@@ -87,7 +93,6 @@ export const useAccountStore = defineStore("accountStore", {
     setAccountToken(accountToken) {
       this.accountToken = accountToken;
     },
-    // Новые actions для работы с фильтрами
     setSource(source) {
       this.source = source;
     },
@@ -112,7 +117,6 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStationText = "Telegram";
       this.accountToken = "86e0fb94-8f1f-4bfc-9764-320214c1e2f0";
     },
-    // Сброс фильтров
     resetFilters() {
       this.source = [];
       this.group = [];
@@ -124,6 +128,7 @@ export const useAccountStore = defineStore("accountStore", {
         amocrm: false,
         bitrix24: false,
       };
+      this.add_deleted = false; // Сбрасываем флаг при сбросе фильтров
     },
   },
   persist: true,

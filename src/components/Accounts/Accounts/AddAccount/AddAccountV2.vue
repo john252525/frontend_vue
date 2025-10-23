@@ -3,6 +3,54 @@
     :changeStationLoading="changeStationLoading"
     :stationLoading="stationLoading"
   />
+
+  <!-- Модальное окно подтверждения интеграции -->
+  <div v-if="showIntegrationModal" class="modal-overlay">
+    <div class="modal-container integration-modal">
+      <div class="modal-header">
+        <h2>Подтверждение интеграции</h2>
+      </div>
+      <div class="modal-content">
+        <p class="integration-question">
+          Интеграция ChatServ установлена в
+          <strong>{{ selectedCrmName }}</strong
+          >?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" @click="handleIntegrationNo">Нет</button>
+        <button class="submit-btn" @click="handleIntegrationYes">Да</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно предупреждения -->
+  <div v-if="showWarningModal" class="modal-overlay">
+    <div class="modal-container warning-modal">
+      <div class="modal-header">
+        <h2>Внимание</h2>
+      </div>
+      <div class="modal-content">
+        <div class="warning-message">
+          <p>
+            Если интеграция не установлена на вашем портале CRM, рекомендуем
+            сначала установить ее.
+          </p>
+          <p>
+            В противном случае не забудьте обновить настройки аккаунта
+            (Действия→Обновить) после ее установки на стороне CRM.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="submit-btn" @click="handleWarningConfirm">
+          Продолжить создание
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основное модальное окно добавления аккаунта -->
   <div v-if="!stationLoading.loading" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-header">
@@ -156,7 +204,7 @@
                   v-for="option in getOptions('type')"
                   :key="option.value"
                   class="option accounts-addAccounts-crmType-option"
-                  @click="selectOption('type', option.value)"
+                  @click="handleCrmSelect(option.value, option.text)"
                 >
                   {{ option.text }}
                 </div>
@@ -258,6 +306,11 @@ const stationLoading = reactive({
   loading: false,
 });
 
+// Модальные окна
+const showIntegrationModal = ref(false);
+const showWarningModal = ref(false);
+const selectedCrmName = ref("");
+
 const changeStationLoading = () => {
   stationLoading.loading = false;
 };
@@ -274,7 +327,7 @@ const dropdownOpen = reactive({
   type: false,
 });
 
-// Refs для элементов select (ДОБАВЛЕНО)
+// Refs для элементов select
 const groupSelect = ref(null);
 const messengerSelect = ref(null);
 const typeSelect = ref(null);
@@ -387,7 +440,33 @@ const selectOption = (name, value) => {
   dropdownOpen[name] = false;
 };
 
-// Получение стилей для позиционирования dropdown (ДОБАВЛЕНО)
+// Обработка выбора CRM
+const handleCrmSelect = (value, text) => {
+  selectedCrmName.value = text;
+  formValues.type = value;
+  dropdownOpen.type = false;
+
+  // Показываем модальное окно подтверждения интеграции
+  showIntegrationModal.value = true;
+};
+
+// Обработчики для модальных окон
+const handleIntegrationYes = () => {
+  showIntegrationModal.value = false;
+  // Продолжаем без предупреждения
+};
+
+const handleIntegrationNo = () => {
+  showIntegrationModal.value = false;
+  showWarningModal.value = true;
+};
+
+const handleWarningConfirm = () => {
+  showWarningModal.value = false;
+  // Пользователь подтвердил, что понимает риски
+};
+
+// Получение стилей для позиционирования dropdown
 const getDropdownStyle = (name) => {
   const selectRef =
     name === "group"
@@ -406,7 +485,7 @@ const getDropdownStyle = (name) => {
   };
 };
 
-// Handle clicks outside dropdowns (ИЗМЕНЕНО)
+// Handle clicks outside dropdowns
 const handleClickOutside = (event) => {
   // Проверяем, был ли клик вне dropdown
   const isClickInsideDropdown =
@@ -472,7 +551,58 @@ const submitForm = async () => {
   }
 };
 </script>
+
 <style scoped>
+/* Добавляем стили для новых модальных окон */
+.integration-modal,
+.warning-modal {
+  max-width: 400px;
+  z-index: 1002;
+}
+
+.integration-question {
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.integration-question strong {
+  color: #6366f1;
+}
+
+.warning-message {
+  background-color: #fef3cd;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 12px;
+  color: #92400e;
+}
+
+.warning-message p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.warning-message p:first-child {
+  margin-top: 0;
+}
+
+.warning-message p:last-child {
+  margin-bottom: 0;
+}
+
+/* Увеличиваем z-index для основного модального окна когда открыты дополнительные */
+.modal-overlay {
+  z-index: 1001;
+}
+
+.modal-overlay:has(.integration-modal),
+.modal-overlay:has(.warning-modal) {
+  z-index: 1002;
+}
+
+/* Остальные существующие стили остаются без изменений */
 /* Base styles */
 * {
   box-sizing: border-box;
@@ -489,7 +619,6 @@ const submitForm = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
   backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease-out;
   overflow-y: auto;

@@ -18,78 +18,85 @@
             class="table-row"
             :class="{
               active: item.isPay,
+              'disabled-account': item.enable === '0',
             }"
             v-if="dataStation"
             v-for="(item, index) in instanceData"
             :key="index"
           >
-            <td v-if="item.name || item.login" class="table-text-number">
-              <AccountIcon :item="item" />
-              <span v-if="item.name">{{ item.name }}</span>
-              <span v-else>{{ item.login }}</span>
+            <td class="table-text-number">
+              <div class="table-text-number" v-if="item.type === 'bulk'">
+                <AccountIcon :item="item" />
+                <div>Оплата рассылок</div>
+                <DeletedBadge v-if="item.enable === '0'" />
+              </div>
+              <div class="table-text-number" v-else>
+                <AccountIcon :item="item" />
+                <span>{{ item.name || item.login || "-" }}</span>
+                <DeletedBadge v-if="item.enable === '0'" />
+              </div>
             </td>
-            <td v-else class="table-text">-</td>
-            <td
-              class="table-text"
-              @mouseover="showMessage($event, item.step.message)"
-              @mouseleave="hideMessage"
-              v-if="
-                item.step && item.type != 'amocrm' && item.type != 'bitrix24'
-              "
-            >
-              {{ item.step.value }}
-            </td>
-
-            <td
-              class="table-text"
-              v-else-if="
-                item.loading && item.type != 'amocrm' && item.type != 'bitrix24'
-              "
-            >
-              <LoadingAccount />
-            </td>
-            <td
-              class="table-text"
-              v-if="
-                item.type != 'amocrm' &&
-                item.type != 'bitrix24' &&
-                !item.loading &&
-                !item.step
-              "
-            >
-              -
-            </td>
-            <td
-              class="table-text"
-              v-if="item.type === 'amocrm' || item.type === 'bitrix24'"
-            >
-              {{ item.enable }}
+            <td class="table-text">
+              <span v-if="item.enable === '0'">
+                <StatusBadge status="deleted" type="account" />
+              </span>
+              <span v-else-if="item.type === 'bulk'">
+                <StatusBadge type="bulk" />
+              </span>
+              <span
+                v-else-if="
+                  item.step && item.type != 'amocrm' && item.type != 'bitrix24'
+                "
+                @mouseover="showMessage($event, item.step.message)"
+                @mouseleave="hideMessage"
+              >
+                <StatusBadge :status="item.step.value" type="account" />
+              </span>
+              <span
+                v-else-if="
+                  item.loading &&
+                  item.type != 'amocrm' &&
+                  item.type != 'bitrix24'
+                "
+              >
+                <LoadingAccount />
+              </span>
+              <span
+                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
+              >
+                <StatusBadge :status="item.enable" type="crm" />
+              </span>
+              <span v-else>
+                <StatusBadge :status="null" type="account" />
+              </span>
             </td>
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
             <td v-if="item.subscription_dt_to === null">
               <button
-                v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
+                v-if="
+                  item.type != 'amocrm' &&
+                  item.type != 'bitrix24' &&
+                  item.enable !== '0'
+                "
                 class="open-tariff-button"
                 @click="changeTariffStation(item)"
               >
                 Продлить
               </button>
-              <span v-else>-</span>
+              <span
+                v-else-if="
+                  (item.type === 'amocrm' || item.type === 'bitrix24') &&
+                  item.enable !== '0'
+                "
+                >Не требуется</span
+              >
+              <span v-else></span>
             </td>
             <td v-if="item.subscription_dt_to !== null">
               До {{ item.subscription_dt_to }}
             </td>
             <td class="table-action-text">
               <button
-                v-if="
-                  (item.storage === 'local' && item.type === 'undefined') ||
-                  (item.storage === 'binder' && item.type === 'touchapi') ||
-                  (item.storage === 'undefined' && item.type === 'whatsapi') ||
-                  (item.storage === 'whatsapi' && item.type === 'undefined') ||
-                  item.type === 'bulk' ||
-                  item.type === 'amocrm' ||
-                  item.type === 'bitrix24'
-                "
                 class="action-table-button"
                 @click="openModal($event, item)"
               >
@@ -109,15 +116,6 @@
                 {{ t("accountList.actionButton") }}
               </button>
               <button
-                v-if="
-                  (item.storage === 'local' && item.type === 'undefined') ||
-                  (item.storage === 'binder' && item.type === 'touchapi') ||
-                  (item.storage === 'undefined' && item.type === 'whatsapi') ||
-                  (item.storage === 'whatsapi' && item.type === 'undefined') ||
-                  item.type === 'bulk' ||
-                  item.type === 'amocrm' ||
-                  item.type === 'bitrix24'
-                "
                 class="action-table-button-phone"
                 @click="openModal($event, item)"
               >
@@ -167,7 +165,10 @@
     <div class="mobile-cards" v-if="dataStation && instanceData.length > 0">
       <div
         class="account-card"
-        :class="{ active: item.isPay }"
+        :class="{
+          active: item.isPay,
+          'disabled-account': item.enable === '0',
+        }"
         v-for="(item, index) in instanceData"
         :key="'mobile-' + index"
       >
@@ -175,13 +176,10 @@
         <div class="card-header">
           <div class="account-info">
             <AccountIcon :item="item" />
-            <span class="account-login">{{ item.login || "-" }}</span>
+            <span>{{ item.name || item.login || "-" }}</span>
+            <DeletedBadge v-if="item.enable === '0'" />
           </div>
-          <button
-            class="action-gear"
-            @click="openMobileModal($event, item)"
-            v-if="isActionAvailable(item)"
-          >
+          <button class="action-gear" @click="openMobileModal($event, item)">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -205,25 +203,30 @@
           <div class="card-row">
             <span class="label">Статус:</span>
             <span class="value">
-              <span v-if="item.loading && accountStation != 'crm'">
+              <span v-if="item.enable === '0'">
+                <StatusBadge status="deleted" type="account" />
+              </span>
+              <span v-else-if="item.loading && accountStation != 'crm'">
                 <LoadingAccount />
+              </span>
+              <span v-else-if="item.type === 'bulk'">
+                <StatusBadge type="bulk" />
               </span>
               <span
                 v-else-if="
                   item.step && item.type != 'amocrm' && item.source != 'bitrix'
                 "
               >
-                {{ item.step.value }}
+                <StatusBadge :status="item.step.value" type="account" />
               </span>
               <span
                 v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
               >
-                {{ item.enable }}
+                <StatusBadge :status="item.enable" type="crm" />
               </span>
-              <span v-else-if="accountStation === 'crm'">
-                {{ item.type }}
+              <span v-else>
+                <StatusBadge :status="null" type="account" />
               </span>
-              <span v-else>-</span>
             </span>
           </div>
 
@@ -242,7 +245,11 @@
         <!-- Кнопка оплаты на всю ширину -->
         <div
           class="card-payment"
-          v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
+          v-if="
+            item.type != 'amocrm' &&
+            item.type != 'bitrix24' &&
+            item.enable !== '0'
+          "
         >
           <button class="payment-btn" @click="changeTariffStation(item)">
             Оплатить
@@ -293,6 +300,7 @@
       :chatsStation="chatsStation"
       :changeForceStopItemData="changeForceStopItemData"
       :getAccounts="getAccounts"
+      :openSupport="changeSendSupport"
     />
 
     <SettignsModal
@@ -331,6 +339,12 @@
       :changeEnableStation="changeEnableStation"
     />
 
+    <SendSupport
+      v-if="sendSupportStation"
+      :close="changeSendSupport"
+      :selectedItem="selectedItem"
+    />
+
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   </section>
 </template>
@@ -353,11 +367,14 @@ import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import NoData from "@/components/GlobalModal/StationList/NoData.vue";
+import StatusBadge from "./StatusBadge.vue";
+import SendSupport from "./ModalAccount/SendSupport.vue";
 
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 const sourceGroup = computed(() => accountStore.getSource);
+const addDeleted = computed(() => accountStore.getAddDeleted);
 const typeGroup = computed(() => accountStore.getType);
 const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
@@ -402,6 +419,7 @@ const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
 const chatsStation = ref(null);
+const sendSupportStation = ref(false);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 import False from "@/components/Chats/UserList/ResultModal/False.vue";
@@ -548,6 +566,14 @@ const changeTariffStation = (item) => {
   tariffStation.value = !tariffStation.value;
 };
 
+const DeletedBadge = {
+  template: `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="deleted-badge">
+      <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  `,
+};
+
 const getAccounts = async () => {
   dataStationNone.value = false;
   errorAccountBolean.value = false;
@@ -565,12 +591,16 @@ const getAccounts = async () => {
       source: sourceGroup.value,
       type: typeGroup.value,
       group: allGroup.value,
+      add_deleted: addDeleted.value,
     };
   }
 
   if (stationDomain.navigate.value === "whatsapi") {
     params = {
-      skipDetails: true,
+      source: sourceGroup.value,
+      type: typeGroup.value,
+      group: allGroup.value,
+      add_deleted: addDeleted.value,
     };
   }
 
@@ -612,9 +642,11 @@ const getAccounts = async () => {
           accountStation.value === "whatsapp" ||
           accountStation.value === "telegram"
         ) {
+          // Фильтруем аккаунты для получения чатов, исключая bulk, amocrm, bitrix24
           const accountsToFetch = instanceData.value.filter(
             (instance) =>
               instance.step?.value === 5 &&
+              !["bulk", "amocrm", "bitrix24"].includes(instance.type) &&
               ((instance.storage === "binder" &&
                 instance.type !== "touchapi") ||
                 (instance.storage === "whatsapi" &&
@@ -642,8 +674,20 @@ const getAccounts = async () => {
             }
           }
 
+          // Создаем промисы только для аккаунтов, которым нужны запросы getInfo
           const promises = instanceData.value.map(async (instance) => {
             const login = instance.login;
+
+            // Пропускаем запросы для bulk, amocrm и bitrix24 аккаунтов
+            if (
+              instance.type === "bulk" ||
+              instance.type === "amocrm" ||
+              instance.type === "bitrix24"
+            ) {
+              instance.loading = false;
+              return;
+            }
+
             if (
               (instance.storage === "binder" && instance.type !== "touchapi") ||
               (instance.storage === "whatsapi" && instance.type === "whatsapi")
@@ -672,6 +716,11 @@ const getAccounts = async () => {
 
           await Promise.all(promises);
           chatsLoadingChange();
+        } else {
+          // Для других станций просто отключаем loading для всех аккаунтов
+          instanceData.value.forEach((instance) => {
+            instance.loading = false;
+          });
         }
       }
     } else if (response.data === 401) {
@@ -799,6 +848,9 @@ const updateSelectedItems = (newValue) => {
 const updateqrCodeData = (newValue) => {
   qrCodeData.value = newValue;
 };
+
+const changeSendSupport = () =>
+  (sendSupportStation.value = !sendSupportStation.value);
 
 const updateLoading = (newValue) => {
   loadingStation.value = newValue;
@@ -994,6 +1046,50 @@ provide("changeEnableStation", { changeEnableStation });
   margin-top: -10px;
 }
 
+/* Стили для удаленных аккаунтов */
+.disabled-account {
+  opacity: 0.6;
+  background-color: #f9f9f9 !important;
+}
+
+.disabled-account td {
+  color: #999 !important;
+}
+
+.deleted-badge {
+  color: #ef4444;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.deleted-text {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.deleted-text-mobile {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px;
+}
+
+/* Для мобильных карточек */
+.account-card.disabled-account {
+  background: #f8f8f8;
+  border-color: #e5e5e5;
+}
+
+.account-card.disabled-account .account-info span {
+  color: #999;
+}
+
+.account-card.disabled-account .card-content {
+  opacity: 0.7;
+}
+
 .settings-svg {
   display: flex;
   align-items: center;
@@ -1035,11 +1131,9 @@ provide("changeEnableStation", { changeEnableStation });
 }
 
 .table-text-number {
-  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 4px;
-  box-sizing: border-box;
 }
 
 .table-text {
@@ -1358,8 +1452,6 @@ tr:not(:last-child):after {
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 0;
-    flex: 1;
   }
 
   .account-login {

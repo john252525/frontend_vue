@@ -21,6 +21,7 @@
             <span class="account-login-mobile">{{
               selectedItem.login || "-"
             }}</span>
+            <DeletedBadge v-if="isAccountDisabled" />
           </div>
           <button class="close-button" @click="closeModal">
             <svg
@@ -38,102 +39,100 @@
           </button>
         </div>
 
-        <span
-          class="action"
-          v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
-          @click="openTariff"
-          >Продлить</span
-        >
-        <span
-          class="action"
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          @click="handleSubmit"
-          >{{ t("modalAccount.settings") }}</span
-        >
-        <span
-          class="action"
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          @click="changeEditNameModal"
-          >Сменить имя</span
-        >
-        <span
-          v-if="
-            selectedItem.source != 'telegram' &&
-            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
-          "
-          class="action"
-          @click="openScreen"
-          >{{ t("modalAccount.screen") }}</span
-        >
-        <span
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          class="action action-on"
-          @click="changeEnableStation"
-          >{{ t("modalAccount.on") }}</span
-        >
-        <span
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          class="action"
-          @click="forceStopActive"
-          >{{ t("modalAccount.off") }}</span
-        >
+        <template v-if="isAccountDisabled">
+          <span class="action action-support" @click="openSupport">
+            Написать в ТП
+          </span>
+        </template>
 
-        <span
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          class="action action-throw"
-          @click="ChangeconfirmStationReset"
-          >{{ t("modalAccount.change") }}</span
-        >
-        <!-- Чат доступный для клика -->
-        <!-- <span
-          v-if="
-            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
-            ['telegram', 'whatsapp'].includes(selectedItem.source) &&
-            (chatsStation === true || chatsStation === false)
-          "
-          class="action"
-          @click="openChat"
-        >
-          Чат
-        </span> -->
-        <span
-          v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          class="action"
-          @click="getNewProxy"
-          >{{ t("modalAccount.changeProxy") }}</span
-        >
-        <span
-          class="action action-delete"
-          @click="ChangeconfirmStation"
-          v-if="
-            !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
-            !(
-              selectedItem.storage === 'binder' &&
-              selectedItem.type === 'touchapi'
-            ) &&
-            !(
-              selectedItem.storage === 'whatsapi' &&
-              selectedItem.type === 'undefined'
-            )
-          "
-          >{{ t("modalAccount.deleteAccount") }}</span
-        >
-        <span
-          v-if="['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-          class="action"
-          @click="updateAccountButton"
-          >Обновить аккаунт</span
-        >
+        <!-- Для активных аккаунтов показываем полный список действий -->
+        <template v-else>
+          <span
+            class="action"
+            v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
+            @click="openTariff"
+            >Продлить</span
+          >
+          <span
+            class="action"
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            @click="handleSubmit"
+            >{{ t("modalAccount.settings") }}</span
+          >
+          <span
+            class="action"
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            @click="changeEditNameModal"
+            >Сменить имя</span
+          >
+          <span
+            v-if="
+              selectedItem.source != 'telegram' &&
+              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
+            "
+            class="action"
+            @click="openScreen"
+            >{{ t("modalAccount.screen") }}</span
+          >
+          <span
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            class="action action-on"
+            @click="changeEnableStation"
+            >{{ t("modalAccount.on") }}</span
+          >
+          <span
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            class="action"
+            @click="forceStopActive"
+            >{{ t("modalAccount.off") }}</span
+          >
 
-        <span
-          v-if="
-            selectedItem.source != 'telegram' &&
-            ['amocrm', 'bitrix24'].includes(selectedItem.type)
-          "
-          class="action"
-          @click="deleteAccountButton"
-          >Удалить аккаунт</span
-        >
+          <span
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            class="action action-throw"
+            @click="ChangeconfirmStationReset"
+            >{{ t("modalAccount.change") }}</span
+          >
+
+          <span
+            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            class="action"
+            @click="getNewProxy"
+            >{{ t("modalAccount.changeProxy") }}</span
+          >
+          <span
+            class="action action-delete"
+            @click="ChangeconfirmStation"
+            v-if="
+              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
+              !(
+                selectedItem.storage === 'binder' &&
+                selectedItem.type === 'touchapi'
+              ) &&
+              !(
+                selectedItem.storage === 'whatsapi' &&
+                selectedItem.type === 'undefined'
+              )
+            "
+            >{{ t("modalAccount.deleteAccount") }}</span
+          >
+          <span
+            v-if="['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            class="action"
+            @click="updateAccountButton"
+            >Обновить аккаунт</span
+          >
+
+          <span
+            v-if="
+              selectedItem.source != 'telegram' &&
+              ['amocrm', 'bitrix24'].includes(selectedItem.type)
+            "
+            class="action"
+            @click="deleteAccountButton"
+            >Удалить аккаунт</span
+          >
+        </template>
       </div>
     </transition>
   </div>
@@ -234,6 +233,9 @@ const props = defineProps({
   changeStationSettingsModal: {
     type: Function,
   },
+  openSupport: {
+    type: Function,
+  },
   changeStationQrModal: {
     type: Function,
   },
@@ -276,6 +278,13 @@ const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
 const qrData = ref([]);
 const router = useRouter();
+
+// Добавляем computed для проверки статуса аккаунта
+const isAccountDisabled = computed(() => {
+  const item = selectedItem.value;
+  return item && (item.enable === "0" || item.enable === 0);
+});
+
 const handleSubmit = () => {
   emit("update:selectedItems", selectedItem.value);
   props.changeStationSettingsModal();
@@ -304,6 +313,16 @@ const editNameModal = ref(false);
 
 const changeEditNameModal = () => {
   editNameModal.value = !editNameModal.value;
+};
+
+// Функция для обращения в техподдержку
+const contactSupport = () => {
+  // Здесь можно добавить логику для открытия чата с ТП
+  // или перенаправления на страницу поддержки
+  console.log("Обращение в техподдержку для аккаунта:", selectedItem.value);
+  // Например, открыть ссылку на Telegram или email
+  window.open("https://t.me/your_support_bot", "_blank");
+  props.closeModal();
 };
 
 const openChat = () => {
@@ -895,6 +914,7 @@ const EnablebyQR = async (value) => {
 };
 
 import { useI18n } from "vue-i18n";
+import { type } from "os";
 const { t } = useI18n();
 
 const startEnableByQR = async (value) => {
@@ -930,6 +950,15 @@ const resetAccount = async () => {
   await createRequest("clearSession");
   await createRequest("getNewProxy");
 };
+
+// Добавляем компонент бейджа
+const DeletedBadge = {
+  template: `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="deleted-badge">
+      <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  `,
+};
 </script>
 
 <style scoped>
@@ -943,26 +972,24 @@ const resetAccount = async () => {
   left: 0;
 }
 
-/* Стили для десктопной версии */
+/* Базовые стили для десктопной версии */
 .action-list {
   border-radius: 10px;
   width: 150px;
-  height: auto;
   background: #ffffff;
   position: absolute;
   z-index: 1010;
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  margin: 12px;
   padding: 10px 0px 10px 10px;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .action-list.fade-enter-active,
 .action-list.fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
 }
 
 .action-list.fade-enter,
@@ -970,56 +997,90 @@ const resetAccount = async () => {
   opacity: 0;
 }
 
-.action-list {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Стили для мобильной версии */
-.action-list.mobile-fullscreen {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 400px;
-  max-height: 80vh;
-  margin: 0;
-  padding: 0;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: mobileFadeIn 0.3s forwards;
-}
-
-@keyframes mobileFadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -40%);
-  }
-  to {
-    opacity: 1;
+/* Мобильная версия через media queries */
+@media (max-width: 768px) {
+  .action-list {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
     transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    margin: 0;
+    padding: 0;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: mobileFadeIn 0.3s forwards;
+  }
+
+  @keyframes mobileFadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -40%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  /* Показываем мобильный заголовок только на мобилках */
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 16px 16px 0 0;
+  }
+
+  /* Стили для действий на мобилках */
+  .action-list .action,
+  .action-list .action-support {
+    padding: 16px;
+    font-size: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    margin: 0;
+  }
+
+  .action-list .action:last-child,
+  .action-list .action-support:last-child {
+    border-bottom: none;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .action-list .action:hover,
+  .action-list .action-support:hover {
+    background-color: #f3f4f6;
+    border-radius: 0;
   }
 }
 
+/* Десктопная версия */
+@media (min-width: 769px) {
+  .mobile-header {
+    display: none;
+  }
+
+  .action-list .action,
+  .action-list .action-support {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin: 0;
+    border-radius: 5px;
+  }
+
+  .action-list .action:hover,
+  .action-list .action-support:hover {
+    background-color: #eeeeee;
+    border-radius: 5px;
+  }
+}
+
+/* Общие стили для мобильного заголовка */
 .mobile-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 16px 16px 0 0;
+  display: none; /* По умолчанию скрыт, показывается через media query */
 }
 
 .account-info-mobile {
@@ -1055,25 +1116,23 @@ const resetAccount = async () => {
   color: #6b7280;
 }
 
-/* Контент модалки для мобильных */
-.action-list.mobile-fullscreen .action,
-.action-list.mobile-fullscreen .action-loading {
-  padding: 16px;
-  font-size: 16px;
-  border-bottom: 1px solid #f3f4f6;
-  margin: 0;
+/* Бейдж удаленного аккаунта */
+.deleted-badge {
+  color: #ef4444;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
-.action-list.mobile-fullscreen .action:last-child,
-.action-list.mobile-fullscreen .action-loading:last-child {
-  border-bottom: none;
-  border-radius: 0 0 16px 16px;
+/* Стиль для кнопки поддержки */
+.action-support {
+  font-weight: 400;
+  font-size: 14px;
+  color: #6732ff;
+  cursor: pointer;
 }
 
-.action-list.mobile-fullscreen .action:hover,
-.action-list.mobile-fullscreen .action-loading:hover {
-  background-color: #f3f4f6;
-  border-radius: 0;
+.action-support:hover {
+  color: #5a2ae0;
 }
 
 /* Общие стили для действий */
@@ -1082,7 +1141,6 @@ const resetAccount = async () => {
   font-size: 14px;
   color: #616161;
   cursor: pointer;
-  padding: 4px;
   display: flex;
   align-items: center;
   cursor: not-allowed;
@@ -1094,7 +1152,6 @@ const resetAccount = async () => {
   font-size: 14px;
   color: #000;
   cursor: pointer;
-  padding: 4px;
 }
 
 .action-loading {
@@ -1103,7 +1160,6 @@ const resetAccount = async () => {
   color: #5f5f5f;
   cursor: pointer;
   animation: shimmer 1s infinite;
-  padding: 4px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1141,16 +1197,6 @@ const resetAccount = async () => {
   }
 }
 
-.action-loading:hover {
-  background-color: #eeeeee;
-  border-radius: 5px 0px 0px 5px;
-}
-
-.action:hover {
-  background-color: #eeeeee;
-  border-radius: 5px 0px 0px 5px;
-}
-
 .action-on:hover {
   color: green;
 }
@@ -1158,27 +1204,5 @@ const resetAccount = async () => {
 .action-throw:hover,
 .action-delete:hover {
   color: rgb(255, 0, 0);
-}
-
-/* Медиа-запрос для скрытия десктопной версии на мобильных */
-@media (max-width: 768px) {
-  .action-list:not(.mobile-fullscreen) {
-    display: none;
-  }
-
-  .action-list.mobile-fullscreen {
-    display: flex;
-  }
-}
-
-/* Медиа-запрос для скрытия мобильной версии на десктопе */
-@media (min-width: 769px) {
-  .action-list.mobile-fullscreen {
-    display: none;
-  }
-
-  .action-list:not(.mobile-fullscreen) {
-    display: flex;
-  }
 }
 </style>

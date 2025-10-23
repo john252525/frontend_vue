@@ -65,11 +65,11 @@
             class="tariff-card"
             v-for="(tariff, index) in paginatedTariffs"
             :key="tariff.id"
-            @mouseenter="hoverIndex = currentPage * itemsPerPage + index"
+            @mouseenter="hoverIndex = currentPage * dynamicItemsPerPage + index"
             @mouseleave="hoverIndex = -1"
             :class="{
               'tariff-card--hovered':
-                hoverIndex === currentPage * itemsPerPage + index,
+                hoverIndex === currentPage * dynamicItemsPerPage + index,
               'tariff-card--discount': hasDiscount(tariff),
             }"
           >
@@ -182,9 +182,9 @@
               </div>
 
               <!-- Бонусы -->
-              <div 
-                class="feature-item bonus-item" 
-                v-for="bonus in getActiveBonuses(tariff)" 
+              <div
+                class="feature-item bonus-item"
+                v-for="bonus in getActiveBonuses(tariff)"
                 :key="bonus.mod_id"
               >
                 <div class="feature-icon bonus-icon">
@@ -205,7 +205,7 @@
               class="select-button"
               :class="{
                 'select-button--hovered':
-                  hoverIndex === currentPage * itemsPerPage + index,
+                  hoverIndex === currentPage * dynamicItemsPerPage + index,
               }"
             >
               Выбрать
@@ -213,7 +213,10 @@
           </div>
         </div>
 
-        <div v-if="totalPages > 1" class="pagination-controls">
+        <div
+          v-if="totalPages > 1 && (windowWidth >= 768 || totalPages > 1)"
+          class="pagination-controls"
+        >
           <button
             @click="prevPage"
             :disabled="currentPage === 0"
@@ -249,7 +252,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, toRefs } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  reactive,
+  toRefs,
+  watch,
+  onUnmounted,
+} from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 import CreatePayments from "./CreatePayments.vue";
@@ -321,12 +332,28 @@ const tariffsData = ref([]);
 const error = ref(null);
 const nullTariff = ref(false);
 const currentPage = ref(0);
-const itemsPerPage = 4; // Увеличили до 4 тарифов на странице
 
-// Методы остаются без изменений
+// Реактивная ширина окна
+const windowWidth = ref(window.innerWidth);
+
+const updateWidth = () => {
+  windowWidth.value = window.innerWidth;
+};
+
+// Адаптивное количество тарифов на странице
+const dynamicItemsPerPage = computed(() => {
+  if (windowWidth.value < 768) {
+    return 1; // 1 тариф на мобилках
+  } else if (windowWidth.value < 1024) {
+    return 2; // 2 тарифа на планшетах
+  } else {
+    return 3; // 3 тарифа на десктопах
+  }
+});
+
 const formatLimit = (limit) => {
   if (limit === -1) return "безлимит";
-  return new Intl.NumberFormat('ru-RU').format(limit);
+  return new Intl.NumberFormat("ru-RU").format(limit);
 };
 
 const hasBonuses = (tariff) => {
@@ -335,20 +362,20 @@ const hasBonuses = (tariff) => {
 
 const getActiveBonuses = (tariff) => {
   if (!tariff.bonuses) return [];
-  return tariff.bonuses.filter(bonus => bonus.multiplier > 0);
+  return tariff.bonuses.filter((bonus) => bonus.multiplier > 0);
 };
 
 const getAppliedMods = (tariff) => {
   if (!tariff.mods) return [];
-  return tariff.mods.filter(mod => mod.is_applied);
+  return tariff.mods.filter((mod) => mod.is_applied);
 };
 
 const getBonusDescription = (tariff, bonus) => {
   if (bonus.multiplier === 0) return "Бонус недоступен";
-  
-  const periodText = getPeriodText(bonus.tariff_period || '1m');
-  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} x ` : '';
-  
+
+  const periodText = getPeriodText(bonus.tariff_period || "1m");
+  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} x ` : "";
+
   return `+ ${multiplierText}${bonus.tariff_code} на ${periodText}`;
 };
 
@@ -447,7 +474,7 @@ const fetchTariffs = async () => {
       tariffsData.value = Array.isArray(response.data.data)
         ? response.data.data
         : [response.data.data];
-        
+
       if (tariffsData.value.length === 0) {
         nullTariff.value = true;
         error.value = "Тарифы не найдены";
@@ -479,11 +506,18 @@ const clickSelectTariff = (tariff) => {
 };
 
 const sortedTariffs = computed(() => {
-  const periodOrder = { 
-    "1d": 1, "7d": 2, "14d": 3, "30d": 4, 
-    "1m": 5, "3m": 6, "6m": 7, "12m": 8, "1y": 9 
+  const periodOrder = {
+    "1d": 1,
+    "7d": 2,
+    "14d": 3,
+    "30d": 4,
+    "1m": 5,
+    "3m": 6,
+    "6m": 7,
+    "12m": 8,
+    "1y": 9,
   };
-  
+
   return [...tariffsData.value]
     .filter((tariff) => tariff.enable !== false)
     .sort((a, b) => {
@@ -494,12 +528,12 @@ const sortedTariffs = computed(() => {
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(sortedTariffs.value.length / itemsPerPage);
+  return Math.ceil(sortedTariffs.value.length / dynamicItemsPerPage.value);
 });
 
 const paginatedTariffs = computed(() => {
-  const start = currentPage.value * itemsPerPage;
-  const end = start + itemsPerPage;
+  const start = currentPage.value * dynamicItemsPerPage.value;
+  const end = start + dynamicItemsPerPage.value;
   return sortedTariffs.value.slice(start, end);
 });
 
@@ -521,9 +555,15 @@ const formatPrice = (price) => {
 
 const getPeriodText = (period) => {
   const periodMap = {
-    "1d": "1 день", "7d": "7 дней", "14d": "14 дней", "30d": "30 дней",
-    "1m": "1 месяц", "3m": "3 месяца", "6m": "6 месяцев", "12m": "12 месяцев",
-    "1y": "1 год"
+    "1d": "1 день",
+    "7d": "7 дней",
+    "14d": "14 дней",
+    "30d": "30 дней",
+    "1m": "1 месяц",
+    "3m": "3 месяца",
+    "6m": "6 месяцев",
+    "12m": "12 месяцев",
+    "1y": "1 год",
   };
   return periodMap[period] || period;
 };
@@ -539,6 +579,31 @@ const changePaymentsStationModal = () => {
 const chaneMinimumAmount = (value) => {
   minimumAmount.value = value;
 };
+
+// Отслеживание изменения ширины окна
+onMounted(() => {
+  window.addEventListener("resize", updateWidth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateWidth);
+});
+
+// Watcher для сброса страницы при изменении размера окна
+watch(windowWidth, (newWidth) => {
+  console.log("Текущая ширина окна:", newWidth);
+
+  // Сбрасываем текущую страницу при изменении размера
+  currentPage.value = 0;
+
+  if (newWidth < 768) {
+    console.log("Мобильная ширина - показываем 1 тариф");
+  } else if (newWidth < 1024) {
+    console.log("Планшетная ширина - показываем 2 тарифа");
+  } else {
+    console.log("Десктопная ширина - показываем 3 тарифа");
+  }
+});
 
 onMounted(fetchTariffs);
 </script>
@@ -945,8 +1010,12 @@ onMounted(fetchTariffs);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -961,8 +1030,12 @@ onMounted(fetchTariffs);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1021,7 +1094,7 @@ onMounted(fetchTariffs);
     padding: 3px 8px;
     font-size: 10px;
   }
-  
+
   .bonus-badge {
     left: 8px;
     right: auto;

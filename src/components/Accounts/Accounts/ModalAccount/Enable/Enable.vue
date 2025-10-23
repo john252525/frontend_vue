@@ -15,6 +15,8 @@
       v-if="station.getCode"
     />
     <ChallengeRequired
+      :openError="errorTrue"
+      :close="changeEnableStation"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeChallengeRequired="changeChallengeRequired"
       v-if="station.ChallengeRequired"
@@ -98,6 +100,10 @@ const openEnableMenuTrue = () => {
   station.qrCode = false;
   station.ChallengeRequired = false;
   station.getCode = false;
+};
+
+const errorTrue = () => {
+  (station.result = true), (station.ChallengeRequired = false);
 };
 
 const subComponent = ref(null);
@@ -244,7 +250,7 @@ const setState = async (request) => {
       );
     }
     props.changeForceStopItemData(selectedItem.value);
-    // console.log(response.data.data);
+
     const newLoginData = {
       login,
       source,
@@ -297,7 +303,7 @@ const setState = async (request) => {
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const startFunc = async () => {
-  isRunning = true; // Устанавливаем флаг, что функция запущена
+  isRunning = true;
   station.stationLoading = true;
   station.result = false;
   station.text = t("globalLoading.checkAccoutn");

@@ -15,8 +15,14 @@
     </div>
 
     <div class="code-body">
+      <!-- Индикатор синхронизации -->
+      <div v-if="isSyncing" class="sync-indicator">
+        <div class="sync-loader"></div>
+        <span class="sync-text">Синхронизация с сервером...</span>
+      </div>
+
       <div class="code-display">
-        <div class="code-value">{{ userCode }}</div>
+        <div class="code-value">{{ userCode || "—" }}</div>
         <button
           class="code-copy"
           :class="{ 'code-copy-copied': isCopied }"
@@ -133,6 +139,10 @@ const { selectedItem, startFunc, offQrQrStation } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
 const userCode = ref(null);
 const isCopied = ref(false);
+
+// Добавляем состояние синхронизации
+const isSyncing = ref(false);
+let syncTimeout = null;
 
 const copyCode = async () => {
   if (!userCode.value) return;
@@ -335,15 +345,67 @@ const setState = async () => {
   }
 };
 
-// Остальные функции без изменений...
+// Обновленная функция getAuthCode с индикацией синхронизации
+const getAuthCode = async () => {
+  let params = {
+    source: source,
+    login: login,
+    storage: storage,
+  };
 
-// Новая функция для запроса getInfo
+  // Показываем индикатор синхронизации
+  isSyncing.value = true;
+
+  try {
+    const response = await axios.post(`${FRONTEND_URL}getAuthCode`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    if (response.data.status === "ok") {
+      station.stationLoading = false;
+      station.code = true;
+      userCode.value = response.data.authCode;
+
+      // Скрываем индикатор через короткую задержку для плавности
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        isSyncing.value = false;
+      }, 500);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      isSyncing.value = false;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else if (response.data.error?.message === "Auth code is undefined") {
+      station.error = true;
+      clearInterval(authCodeInterval);
+      station.stationLoading = false;
+      station.code = false;
+      isSyncing.value = false;
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error in getInfo:", error);
+    isSyncing.value = false;
+    return null;
+  }
+};
+
+// Обновленная функция getInfo с индикацией синхронизации
 const getInfo = async () => {
   let params = {
     source: source,
     login: login,
     storage: storage,
   };
+
+  // Показываем индикатор синхронизации
+  isSyncing.value = true;
 
   try {
     const response = await axios.post(`${FRONTEND_URL}getInfo`, params, {
@@ -362,58 +424,26 @@ const getInfo = async () => {
         response.data
       );
 
-      // Проверяем, если step.value === 5, то останавливаем все запросы
-      if (response.data.step && response.data.step.value === 5) {
-        console.log("Step 5 detected, stopping all requests and closing page");
-        // stopAllRequests();
+      // Проверяем, если step.value === 4 или 5, то включаем аккаунт и вызываем функцию
+      if (response.data.step.value === 5 || response.data.step.value === 4) {
+        console.log(
+          "Step 4 or 5 detected, account enabled - calling openEnableMenuTrue"
+        );
         props.openEnableMenuTrue();
-        // handleClose();
+        stopAllRequests();
       }
     }
+
+    // Скрываем индикатор через короткую задержку для плавности
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+      isSyncing.value = false;
+    }, 500);
 
     return response.data;
   } catch (error) {
     console.error("Error in getInfo:", error);
-    return null;
-  }
-};
-
-const getAuthCode = async () => {
-  let params = {
-    source: source,
-    login: login,
-
-    storage: storage,
-  };
-
-  try {
-    const response = await axios.post(`${FRONTEND_URL}getAuthCode`, params, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    if (response.data.status === "ok") {
-      station.stationLoading = false;
-      station.code = true;
-      userCode.value = response.data.authCode;
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
-    } else if (response.data.error?.message === "Auth code is undefined") {
-      station.error = true;
-      clearInterval(authCodeInterval);
-      station.stationLoading = false;
-      station.code = false;
-
-      return response.data;
-    }
-  } catch (error) {
-    console.error("Error in getInfo:", error);
+    isSyncing.value = false;
     return null;
   }
 };
@@ -428,14 +458,17 @@ const stopAllRequests = () => {
     clearInterval(getInfoInterval);
     getInfoInterval = null;
   }
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    syncTimeout = null;
+  }
   isRunning.value = false;
+  isSyncing.value = false;
 };
 
 // Модифицируем nextButton для запуска обоих интервалов
 const nextButton = () => {
   station.phone = false;
-  // station.stationLoading = true;
-
   isRunning.value = true;
 
   // Запускаем интервал для getAuthCode каждые 20 секунд
@@ -530,6 +563,55 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
   gap: 12px;
 }
 
+/* Стили для индикатора синхронизации */
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+.sync-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.sync-text {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .code-display {
   display: flex;
   align-items: center;
@@ -553,6 +635,12 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.code-value:empty::before {
+  content: "—";
+  color: #adb5bd;
 }
 
 .code-copy {
@@ -623,6 +711,20 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
     gap: 14px;
   }
 
+  .sync-indicator {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .sync-text {
+    font-size: 13px;
+  }
+
+  .sync-loader {
+    width: 14px;
+    height: 14px;
+  }
+
   .code-display {
     flex-direction: column;
     gap: 10px;
@@ -669,6 +771,14 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
   .code-title {
     font-size: 16px;
   }
+
+  .sync-indicator {
+    padding: 8px 12px;
+  }
+
+  .sync-text {
+    font-size: 12px;
+  }
 }
 
 /* Планшеты */
@@ -681,6 +791,10 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
   .code-copy {
     padding: 14px;
     height: 58px;
+  }
+
+  .sync-indicator {
+    padding: 14px 18px;
   }
 }
 </style>

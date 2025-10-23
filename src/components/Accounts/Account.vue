@@ -78,11 +78,7 @@
       />
     </section>
     <section class="account-section">
-      <button
-        v-if="stationDomain.navigate.value != 'whatsapi'"
-        @click="openPlatformChoice"
-        class="account-list-button"
-      >
+      <button @click="openPlatformChoice" class="account-list-button">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="bi bi-view-list"

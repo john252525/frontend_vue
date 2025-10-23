@@ -1,22 +1,14 @@
 <template>
   <transition name="fade">
-    <div 
-      v-if="stationLoading" 
-      class="loading-overlay"
-      @click="handleOverlayClick"
-    >
-      <div class="loading-content" @click.stop>
+    <div v-if="stationLoading" class="loading-overlay">
+      <div class="loading-content">
         <div class="spinner"></div>
         <p v-if="textLoadin" class="loading-text">
           {{ textLoadin }}
         </p>
-        
+
         <!-- Кнопка отмены -->
-        <button 
-          v-if="showCancelButton" 
-          @click="handleCancel"
-          class="cancel-button"
-        >
+        <button v-if="showCancelButton" @click="close" class="cancel-button">
           {{ cancelButtonText }}
         </button>
       </div>
@@ -30,34 +22,34 @@ import { defineProps, defineEmits } from "vue";
 const props = defineProps({
   stationLoading: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  textLoadin: { 
+  textLoadin: {
     type: String,
-    default: "Загрузка..."
+    default: "Загрузка...",
   },
   close: {
-    type: Function
+    type: Function,
   },
   closeBoolean: {
     type: Boolean,
-    default: false // по умолчанию можно закрывать кликом по оверлею
+    default: false, // по умолчанию можно закрывать кликом по оверлею
   },
   showCancelButton: {
     type: Boolean,
-    default: false // показывать ли кнопку отмены
+    default: false, // показывать ли кнопку отмены
   },
   cancelButtonText: {
     type: String,
-    default: "Отмена"
-  }
+    default: "Отмена",
+  },
 });
 
-const emit = defineEmits(['update:stationLoading', 'cancel']);
+const emit = defineEmits(["update:stationLoading", "cancel"]);
 
 // Обработка клика по оверлею
 const handleOverlayClick = () => {
-  console.log('closeBoolean:', props.closeBoolean);
+  console.log("closeBoolean:", props.closeBoolean);
   if (!props.closeBoolean) {
     props.close?.();
   }
@@ -65,8 +57,8 @@ const handleOverlayClick = () => {
 
 // Обработка клика по кнопке отмены
 const handleCancel = () => {
-  emit('update:stationLoading', false);
-  emit('cancel');
+  emit("update:stationLoading", false);
+  emit("cancel");
 };
 </script>
 
@@ -134,8 +126,12 @@ const handleCancel = () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .fade-enter-active,
