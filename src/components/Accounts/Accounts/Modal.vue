@@ -914,7 +914,6 @@ const EnablebyQR = async (value) => {
 };
 
 import { useI18n } from "vue-i18n";
-import { type } from "os";
 const { t } = useI18n();
 
 const startEnableByQR = async (value) => {

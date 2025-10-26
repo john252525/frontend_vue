@@ -1,5 +1,5 @@
 <template>
-  <section class="account-list-section">
+  <section class="mailing-list-section">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
 
     <!-- Десктопная таблица -->

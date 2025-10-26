@@ -10,6 +10,20 @@
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("mailing.title") }}</h2>
+      <button @click="changeMailingTourModal" class="help-button">
+        <svg
+          class="help-icon"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Как пользоваться
+      </button>
     </section>
     <section class="account-section">
       <button @click="handleAddMailing" class="add-account-button">
@@ -24,16 +38,18 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{
-          subscriptionCheck.loading
-            ? t("mailing.checking")
-            : t("mailing.button")
-        }}
+        {{ subscriptionCheck.loading ? "Проверка.." : "Добавить" }}
       </button>
     </section>
   </header>
   <MailingList :changeResultModal="changeResultModal" />
   <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
+  <MailingTour ref="mailingTour" />
+  <MailingsTourModal
+    :startTour="startMailingTour"
+    v-if="mailingTourModal"
+    :close="changeMailingTourModal"
+  />
 </template>
 
 <script setup>
@@ -41,21 +57,27 @@ import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingList.vue";
 import AlertManager from "./ModalComponent/SubscriptionWarning/AlertManager.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
-import { computed, ref, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import MailingTour from "../../components/tours/MailingsTour.vue";
+import MailingsTourModal from "../GlobalModal/TourModal/Mailings/MailingsTourModal.vue";
 import axios from "axios";
 
+import { computed, ref, reactive, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
+import { useI18n } from "vue-i18n";
+
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
 const router = useRouter();
-
-import { useI18n } from "vue-i18n";
+const route = useRoute();
 
 const { t } = useI18n();
 
-// Состояние проверки подписки
+const mailingTour = ref(null);
+const mailingTourModal = ref(null);
+const showSubscriptionAlert = ref(false);
+
 const subscriptionCheck = reactive({
   loading: false,
   error: false,
@@ -68,15 +90,24 @@ const subscriptionStatus = reactive({
   message: "",
 });
 
-const showSubscriptionAlert = ref(false);
+const startMailingTour = () => {
+  if (mailingTour.value) {
+    mailingTour.value.startTour();
+  }
+};
 
-// Токен авторизации (замените на ваш способ получения токена)
+const changeMailingTourModal = () => {
+  mailingTourModal.value = !mailingTourModal.value;
+};
 
-// Функция проверки подписки
 async function checkSubscription() {
   subscriptionCheck.loading = true;
   subscriptionCheck.error = false;
   showSubscriptionAlert.value = false;
+
+  if (route.query.tour === "true") {
+    return;
+  }
 
   try {
     const response = await axios.get(
@@ -183,6 +214,16 @@ const changeAddMailing = () => {
 // Проверяем подписку при загрузке компонента
 onMounted(() => {
   checkSubscription();
+
+  if (route.query.tour === "true") {
+    if (mailingTour.value) {
+      mailingTour.value.startTour();
+    }
+  }
+});
+
+defineExpose({
+  startMailingTour,
 });
 </script>
 
@@ -198,6 +239,7 @@ header {
 .account-section {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .title {
@@ -206,6 +248,47 @@ header {
   color: var(--text);
   flex: 1;
   margin-right: 8px;
+}
+
+.help-button {
+  background: oklch(0.65 0.22 267 / 0.16);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headerAccountButtonColor);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: rgba(0, 13, 255, 0.2);
+  transition: all 0.25s;
+}
+
+.help-button:active {
+  background: rgba(17, 21, 93, 0.2);
+  transition: all 0.25s;
+}
+
+.help-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: currentColor;
+  opacity: 0.8;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+  transition: all 0.25s ease;
+}
+
+.help-button:hover .help-icon {
+  opacity: 1;
+  transform: scale(1.05);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .account {
@@ -261,11 +344,11 @@ header {
 }
 
 .svg-icon {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  margin-right: 0.25rem; /* 4px */
-  margin-left: -0.25rem; /* -4px */
-  fill: currentColor; /* Заполнение текущим цветом */
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+  margin-left: -0.25rem;
+  fill: currentColor;
 }
 
 .add-account-button {
@@ -275,6 +358,7 @@ header {
   color: #fff;
   transition: all 0.25s;
   padding: 8px 12px;
+  border: none;
 }
 
 .add-account-button:hover:not(:disabled) {
@@ -365,11 +449,9 @@ header {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    /* transform: translateY(5px); */
   }
   to {
     opacity: 1;
-    /* transform: translateY(0); */
   }
 }
 
@@ -399,9 +481,18 @@ header {
     gap: 12px;
   }
 
+  .account-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .platform-list {
     left: 20px;
     top: 180px;
+  }
+
+  .help-button {
+    margin-right: 0;
   }
 }
 </style>

@@ -7,40 +7,20 @@
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("account.accounts") }}</h2>
-      <!-- <h2
-        v-if="
-          stationDomain.navigate.value != 'whatsapi' &&
-          platformStationText != 'CRM'
-        "
-        class="account"
-      >
-        {{ platformStationText }}
-      </h2>
-
-      <div
-        @click="openCrmPlatform"
-        v-if="
-          stationDomain.navigate.value != 'whatsapi' &&
-          platformStationText === 'CRM'
-        "
-        class="crm-platform-cont"
-      >
-        <h2>
-          {{ crmText }}
-        </h2>
+      <button @click="changeTourMenu" class="help-button">
         <svg
+          class="help-icon"
+          viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 16 16"
         >
           <path
-            fill="currentColor"
             fill-rule="evenodd"
-            d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+            clip-rule="evenodd"
           />
         </svg>
-      </div> -->
+        Как пользоваться?
+      </button>
       <div
         v-if="setPlatformStation"
         @click="openCrmPlatform"
@@ -90,58 +70,6 @@
         </svg>
         Фильтры
       </button>
-      <!-- <article v-if="platformStation">
-        <div @click="openPlatformChoice" class="black-fon"></div>
-        <ul
-          v-if="platformStationText === 'Telegram'"
-          class="platform-list-telegram"
-        >
-          <li
-            @click="choiceNetWork('telegram', 'Telegram')"
-            class="platform"
-            :class="{ active: platformStationText === 'Telegram' }"
-          >
-            Telegram
-          </li>
-          <li
-            @click="choiceNetWork('whatsapp', 'WhatsApp')"
-            :class="{ active: platformStationText === 'WhatsApp' }"
-            class="platform"
-          >
-            WhatsApp
-          </li>
-          <li
-            @click="choiceNetWork('crm', 'CRM')"
-            class="platform"
-            :class="{ active: platformStationText === 'CRM' }"
-          >
-            CRM
-          </li>
-        </ul>
-        <ul v-else class="platform-list-whatsapp">
-          <li
-            @click="choiceNetWork('telegram', 'Telegram')"
-            :class="{ active: platformStationText === 'Telegram' }"
-            class="platform"
-          >
-            Telegram
-          </li>
-          <li
-            @click="choiceNetWork('whatsapp', 'WhatsApp')"
-            :class="{ active: platformStationText === 'WhatsApp' }"
-            class="platform"
-          >
-            WhatsApp
-          </li>
-          <li
-            @click="choiceNetWork('crm', 'CRM')"
-            class="platform"
-            :class="{ active: platformStationText === 'CRM' }"
-          >
-            CRM
-          </li>
-        </ul>
-      </article> -->
       <button @click="openAddAccount" class="add-account-button">
         <svg
           class="svg-icon"
@@ -162,36 +90,54 @@
     ref="accountListRef"
     :platformStationTextValue="platformStationTextValue"
   />
+  <AccountsTour ref="accountTour" />
+  <AccountTourModal
+    v-if="tourMenu"
+    :startTour="startAccountTour"
+    :close="changeTourMenu"
+  />
 </template>
 
 <script setup>
 import AccountList from "./Accounts/AccountsList.vue";
+import AccountTourModal from "../GlobalModal/TourModal/Accounts/AccountTourModal.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
-import { useAccountStore } from "@/stores/accountStore";
 import Filters from "./Filters.vue";
-const accountStore = useAccountStore();
+import AccountsTour from "../tours/AccountsTour.vue";
 
 import { ref, onMounted } from "vue";
-const platformStationTextValue = ref("telegram");
-const openAddAccountStation = ref(false);
-const platformStationText = accountStore.getAccountStationText;
-const crmText = accountStore.getCrmPlatformText;
-const platformStation = ref(false);
+import { useRoute } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
 import { useI18n } from "vue-i18n";
+
+const accountStore = useAccountStore();
+const route = useRoute();
 const { t } = useI18n();
 
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
-
+const platformStationTextValue = ref("telegram");
+const crmText = accountStore.getCrmPlatformText;
+const openAddAccountStation = ref(false);
 const setPlatformStation = ref(false);
-
+const platformStation = ref(false);
+const accountTour = ref(null);
 const accountListRef = ref(null);
+const tourMenu = ref(false);
 
 const getAccountListMethod = () => {
   if (accountListRef.value) {
     accountListRef.value.getAccounts();
   }
 };
+
+const startAccountTour = () => {
+  if (accountTour.value) {
+    accountTour.value.startTour();
+  }
+};
+
+function changeTourMenu() {
+  tourMenu.value = !tourMenu.value;
+}
 
 function openCrmPlatform() {
   setPlatformStation.value = !setPlatformStation.value;
@@ -201,6 +147,10 @@ function openPlatformChoice() {
   platformStation.value = !platformStation.value;
 }
 
+function openAddAccount() {
+  openAddAccountStation.value = !openAddAccountStation.value;
+}
+
 function changeCrmPlatform(value, valueTwo) {
   accountStore.setCrmPlatform(value);
   accountStore.setCrmPlatformText(valueTwo);
@@ -208,16 +158,13 @@ function changeCrmPlatform(value, valueTwo) {
   location.reload();
 }
 
-function choiceNetWork(value, valueTwo) {
-  location.reload();
-  accountStore.setAccountStation(value);
-  accountStore.setAccountStationText(valueTwo);
-  platformStation.value = !platformStation.value;
-}
-
-function openAddAccount() {
-  openAddAccountStation.value = !openAddAccountStation.value;
-}
+onMounted(() => {
+  if (route.query.tour === "true") {
+    if (accountTour.value) {
+      accountTour.value.startTour();
+    }
+  }
+});
 </script>
 
 <style scoped>
@@ -232,6 +179,7 @@ header {
 .account-section {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .title {
@@ -240,6 +188,47 @@ header {
   color: var(--text);
   flex: 1;
   margin-right: 8px;
+}
+
+.help-button {
+  background: oklch(0.65 0.22 267 / 0.16);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headerAccountButtonColor);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: rgba(0, 13, 255, 0.2);
+  transition: all 0.25s;
+}
+
+.help-button:active {
+  background: rgba(17, 21, 93, 0.2);
+  transition: all 0.25s;
+}
+
+.help-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: currentColor;
+  opacity: 0.8;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+  transition: all 0.25s ease;
+}
+
+.help-button:hover .help-icon {
+  opacity: 1;
+  transform: scale(1.05);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .account {
@@ -277,11 +266,11 @@ header {
   font-size: 12px;
   padding: 10px 12px;
   color: var(--headerAccountButtonColor);
-  margin-right: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
   transition: all 0.25s;
+  border: none;
 }
 
 .account-list-button:hover {
@@ -295,11 +284,11 @@ header {
 }
 
 .svg-icon {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  margin-right: 0.25rem; /* 4px */
-  margin-left: -0.25rem; /* -4px */
-  fill: currentColor; /* Заполнение текущим цветом */
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+  margin-left: -0.25rem;
+  fill: currentColor;
 }
 
 .add-account-button {
@@ -309,6 +298,7 @@ header {
   color: #fff;
   transition: all 0.25s;
   padding: 8px 12px;
+  border: none;
 }
 
 .crm-platform-cont {
@@ -422,11 +412,9 @@ header {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    /* transform: translateY(5px); */
   }
   to {
     opacity: 1;
-    /* transform: translateY(0); */
   }
 }
 
@@ -495,6 +483,11 @@ header {
     gap: 12px;
   }
 
+  .account-section {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .platform-list {
     left: 20px;
     top: 180px;
@@ -508,6 +501,10 @@ header {
   .platform-list-whatsapp {
     left: 16px;
     top: 160px;
+  }
+
+  .help-button {
+    margin-right: 0;
   }
 }
 </style>

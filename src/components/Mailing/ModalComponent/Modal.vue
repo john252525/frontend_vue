@@ -2,84 +2,87 @@
   <div @click="closeModal" v-if="isModalOpen" class="black-fon">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <transition name="fade">
-      <!-- Десктопная версия -->
-      <div
-        class="action-list desktop-version"
-        :style="{
-          top: modalPosition.top + 'px',
-          left: modalPosition.left + 'px',
-        }"
-      >
-        <span
-          @click="updateStatus(1)"
-          v-if="selectedItem.state === 0"
-          class="action action-on"
-          >{{ t("modalMailing.on") }}</span
+      <div v-if="isModalOpen" :key="isMobile ? 'mobile' : 'desktop'">
+        <!-- Десктопная версия -->
+        <div
+          v-if="!isMobile"
+          class="action-list desktop-version"
+          :style="{
+            top: modalPosition.top + 'px',
+            left: modalPosition.left + 'px',
+          }"
         >
-        <span
-          @click="updateStatus(0)"
-          v-if="selectedItem.state === 1"
-          class="action action-off"
-          >{{ t("modalMailing.off") }}</span
-        >
-        <span @click="changeInfoMailing" class="action">{{
-          t("modalMailing.info")
-        }}</span>
-        <span @click="changeStationMessage" class="action">Сообщения</span>
-        <span @click="changeisEditMailing" class="action">{{
-          t("modalMailing.edit")
-        }}</span>
-        <span class="action action-delete" @click="changeDeleteMailing">{{
-          t("modalMailing.delete")
-        }}</span>
-      </div>
-
-      <!-- Мобильная версия -->
-      <div class="action-list mobile-version">
-        <div class="mobile-header">
-          <div class="mailing-info-mobile">
-            <span class="mailing-name-mobile">{{
-              selectedItem.name || "-"
-            }}</span>
-          </div>
-          <button class="close-button" @click="closeModal">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+          <span
+            @click="updateStatus(1)"
+            v-if="selectedItem.state === 0"
+            class="action action-on"
+            >{{ t("modalMailing.on") }}</span
+          >
+          <span
+            @click="updateStatus(0)"
+            v-if="selectedItem.state === 1"
+            class="action action-off"
+            >{{ t("modalMailing.off") }}</span
+          >
+          <span @click="changeInfoMailing" class="action">{{
+            t("modalMailing.info")
+          }}</span>
+          <span @click="changeStationMessage" class="action">Сообщения</span>
+          <span @click="changeisEditMailing" class="action">{{
+            t("modalMailing.edit")
+          }}</span>
+          <span class="action action-delete" @click="changeDeleteMailing">{{
+            t("modalMailing.delete")
+          }}</span>
         </div>
 
-        <span
-          @click="updateStatus(1)"
-          v-if="selectedItem.state === 0"
-          class="action action-on"
-          >{{ t("modalMailing.on") }}</span
-        >
-        <span
-          @click="updateStatus(0)"
-          v-if="selectedItem.state === 1"
-          class="action action-off"
-          >{{ t("modalMailing.off") }}</span
-        >
-        <span @click="changeInfoMailing" class="action">{{
-          t("modalMailing.info")
-        }}</span>
-        <span @click="changeStationMessage" class="action">Сообщения</span>
-        <span @click="changeisEditMailing" class="action">{{
-          t("modalMailing.edit")
-        }}</span>
-        <span class="action action-delete" @click="changeDeleteMailing">{{
-          t("modalMailing.delete")
-        }}</span>
+        <!-- Мобильная версия -->
+        <div v-else class="action-list mobile-version">
+          <div class="mobile-header">
+            <div class="mailing-info-mobile">
+              <span class="mailing-name-mobile">{{
+                selectedItem.name || "-"
+              }}</span>
+            </div>
+            <button class="close-button" @click="closeModal">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <span
+            @click="updateStatus(1)"
+            v-if="selectedItem.state === 0"
+            class="action action-on"
+            >{{ t("modalMailing.on") }}</span
+          >
+          <span
+            @click="updateStatus(0)"
+            v-if="selectedItem.state === 1"
+            class="action action-off"
+            >{{ t("modalMailing.off") }}</span
+          >
+          <span @click="changeInfoMailing" class="action">{{
+            t("modalMailing.info")
+          }}</span>
+          <span @click="changeStationMessage" class="action">Сообщения</span>
+          <span @click="changeisEditMailing" class="action">{{
+            t("modalMailing.edit")
+          }}</span>
+          <span class="action action-delete" @click="changeDeleteMailing">{{
+            t("modalMailing.delete")
+          }}</span>
+        </div>
       </div>
     </transition>
   </div>
@@ -148,7 +151,21 @@ const props = defineProps({
   },
 });
 
-// Убрали вычисление isMobile через JavaScript
+// Добавляем определение isMobile
+const isMobile = ref(false);
+
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkIsMobile);
+});
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -177,7 +194,7 @@ const { selectedItem } = toRefs(props);
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
+  errorBlock.value = !errorBlock.value; // Исправлено: добавил переключение
 };
 
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
@@ -228,6 +245,7 @@ const updateStatus = async (state) => {
       "error",
       error.response ? error.response.data : error.message
     );
+    stationLoading.loading = false; // Добавлено: сброс состояния при ошибке
   }
 };
 
@@ -326,13 +344,14 @@ const getMessages = async () => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.action-list.fade-enter-active,
-.action-list.fade-leave-active {
+/* Анимации для transition */
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
 
-.action-list.fade-enter,
-.action-list.fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -457,24 +476,16 @@ const getMessages = async () => {
   color: rgb(255, 0, 0);
 }
 
-/* Медиа-запросы для переключения между версиями */
+/* Медиа-запросы теперь используются как fallback */
 @media (max-width: 768px) {
   .action-list.desktop-version {
     display: none !important;
-  }
-
-  .action-list.mobile-version {
-    display: flex;
   }
 }
 
 @media (min-width: 769px) {
   .action-list.mobile-version {
     display: none !important;
-  }
-
-  .action-list.desktop-version {
-    display: flex;
   }
 }
 </style>

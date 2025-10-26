@@ -4,6 +4,7 @@
   </div>
 
   <div v-else>
+    <HelpModal />
     <DownloadsBox />
     <Header
       v-if="!isAuthPage && !isWidgetMode && !isMailingMode"
@@ -61,6 +62,7 @@ import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
 import ResultModal from "./components/GlobalModal/ResutModal.vue";
 import DownloadsBox from "./components/GlobalModal/GlobalLoadingBlock/DownloadsBox.vue";
+import HelpModal from "./components/GlobalModal/HeplModal/HelpModal.vue";
 
 import { useStationLoading } from "@/composables/useStationLoading";
 const { stationLoading, setLoadingStatus } = useStationLoading();
