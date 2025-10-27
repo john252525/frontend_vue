@@ -61,6 +61,7 @@ import MailingTour from "../../components/tours/MailingsTour.vue";
 import MailingsTourModal from "../GlobalModal/TourModal/Mailings/MailingsTourModal.vue";
 import axios from "axios";
 
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 import { computed, ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
@@ -110,14 +111,11 @@ async function checkSubscription() {
   }
 
   try {
-    const response = await axios.get(
-      "https://bapi88.apitter.com/api/v1/bulk/check",
-      {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.get(`${apiUrl}/check`, {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data.ok === true && response.data.data.status === "active") {
       // Подписка активна
