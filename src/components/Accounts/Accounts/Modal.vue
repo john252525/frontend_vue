@@ -124,6 +124,13 @@
           >
 
           <span
+            v-if="['amocrm'].includes(selectedItem.type)"
+            class="action"
+            @click="changeBindingStation"
+            >Привязать</span
+          >
+
+          <span
             v-if="
               selectedItem.source != 'telegram' &&
               ['amocrm', 'bitrix24'].includes(selectedItem.type)
@@ -223,6 +230,9 @@ const props = defineProps({
   },
   selectedItems: {
     type: Object,
+  },
+  changeBindingStation: {
+    type: Function,
   },
   qrCodeData: {
     type: Object,

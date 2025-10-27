@@ -301,6 +301,7 @@
       :changeForceStopItemData="changeForceStopItemData"
       :getAccounts="getAccounts"
       :openSupport="changeSendSupport"
+      :changeBindingStation="changeBindingStation"
     />
 
     <SettignsModal
@@ -346,6 +347,13 @@
     />
 
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+
+    <Binding
+      v-if="bindingStation"
+      :close="changeBindingStation"
+      :getAllAccounts="getAllAccounts"
+      :selectedItem="selectedItem"
+    />
   </section>
 </template>
 
@@ -369,6 +377,7 @@ import { useAccountStore } from "@/stores/accountStore";
 import NoData from "@/components/GlobalModal/StationList/NoData.vue";
 import StatusBadge from "./StatusBadge.vue";
 import SendSupport from "./ModalAccount/SendSupport.vue";
+import Binding from "./ModalAccount/AmoCrm/Binding.vue";
 
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
@@ -420,6 +429,7 @@ const selectedItems = ref(null);
 const loadingStation = ref(false);
 const chatsStation = ref(null);
 const sendSupportStation = ref(false);
+const bindingStation = ref(false);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 import False from "@/components/Chats/UserList/ResultModal/False.vue";
@@ -547,6 +557,9 @@ const changeGetScreenStation = () => {
 const closeScreen = () => {
   getScreenStation.value = false;
 };
+
+const changeBindingStation = () =>
+  (bindingStation.value = !bindingStation.value);
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -763,6 +776,10 @@ const getInfoWhats = async (source, login, type, storage) => {
 
 const updateUserInfo = (event) => {
   userInfoStore.setUserInfo(event);
+};
+
+const getAllAccounts = () => {
+  return instanceData.value;
 };
 
 const openModal = (event, item) => {
