@@ -15,7 +15,7 @@ export const useAccountStore = defineStore("accountStore", {
     add_deleted: false,
     source: ["telegram", "whatsapp", "crm"],
     group: ["messenger", "crm", "bulk"],
-    type: ["amocrm", "bitrix24", "bulk"],
+    type: ["amocrm", "bitrix24", "uon", "bulk"],
     filterState: {
       telegram: true,
       whatsapp: true,
