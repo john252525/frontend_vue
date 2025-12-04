@@ -10,8 +10,12 @@
             <span class="loading-text">Загрузка...</span>
           </div>
 
-          <!-- Переключатель для удаленных аккаунтов -->
-          <div class="deleted-accounts-toggle" :class="{ disabled: isLoading }">
+          <!-- Переключатель удаленных аккаунтов -->
+          <div
+            v-if="domainConfig.showDeletedToggle"
+            class="deleted-accounts-toggle"
+            :class="{ disabled: isLoading }"
+          >
             <input
               type="checkbox"
               id="showDeleted"
@@ -22,14 +26,51 @@
             />
             <label for="showDeleted" class="toggle-label">
               <span class="toggle-icon">
-                <TrashIcon />
+                <!-- ИКОНКА УДАЛЕНИЯ (Trash) -->
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 6H5H21"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10 11V17"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14 11V17"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
               </span>
               <span class="toggle-name">Удаленные</span>
             </label>
           </div>
 
+          <!-- Основные фильтры -->
           <div
-            v-for="item in items"
+            v-for="item in visibleItems"
             :key="item.id"
             class="filter-item"
             :class="{
@@ -47,16 +88,18 @@
             />
             <label :for="item.id" class="filter-label">
               <span class="filter-icon">
-                <component :is="getIconComponent(item.id)" />
+                <!-- ИКОНКА TELEGRAM -->
+
+                <!-- ИКОНКА CRM -->
               </span>
               <span class="filter-name">{{ item.name }}</span>
             </label>
 
-            <!-- Подфильтры CRM слева -->
+            <!-- Подфильтры CRM -->
             <transition name="subitem-slide">
               <div v-if="item.id === 'crm' && item.checked" class="sub-filters">
                 <div
-                  v-for="subItem in crmSubItems"
+                  v-for="subItem in visibleCrmSubItems"
                   :key="subItem.id"
                   class="sub-filter-item"
                   :class="{ active: subItem.checked, disabled: isLoading }"
@@ -70,9 +113,7 @@
                     :disabled="isLoading"
                   />
                   <label :for="subItem.id" class="sub-filter-label">
-                    <span class="sub-filter-icon">
-                      <component :is="getIconComponent(subItem.id)" />
-                    </span>
+                    <span class="sub-filter-icon"> </span>
                     <span class="sub-filter-name">{{ subItem.name }}</span>
                   </label>
                 </div>
@@ -89,7 +130,10 @@
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useAccountsCache } from "@/composables/useAccountsCache";
+import { useDomain } from "@/composables/getDomain";
+import { getFilterConfigForDomain } from "@/config/filterConfig";
 
+const { stationDomain } = useDomain();
 const accountStore = useAccountStore();
 const { invalidateCache: invalidateCacheComposable } = useAccountsCache();
 
@@ -108,25 +152,19 @@ const props = defineProps({
   },
 });
 
+// --- ЛОГИКА КОНФИГУРАЦИИ ДОМЕНА ---
+const domainConfig = computed(() => {
+  const domain = stationDomain.value?.navigate?.value || "whatsapi";
+  return getFilterConfigForDomain(domain);
+});
+
+// --- ЛОГИКА ЗАГРУЗКИ ---
 const isLoading = computed(() => {
   const loading = accountStore.isLoading;
-  console.log("📊 Filters: computed isLoading =", loading);
   return loading;
 });
 
-watch(
-  isLoading,
-  (newVal, oldVal) => {
-    console.log("🔍 Filters: isLoading изменился с", oldVal, "на", newVal);
-  },
-  { immediate: true }
-);
-
-onMounted(() => {
-  console.log("🎯 Filters mounted, текущий isLoading:", isLoading.value);
-});
-
-// Инициализация состояний из store
+// --- ДАННЫЕ ФИЛЬТРОВ ---
 const items = reactive([
   {
     id: "telegram",
@@ -138,11 +176,7 @@ const items = reactive([
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,
   },
-  {
-    id: "bulk",
-    name: "Рассылки",
-    checked: accountStore.filterState.bulk,
-  },
+  { id: "bulk", name: "Рассылки", checked: accountStore.filterState.bulk },
   { id: "crm", name: "CRM", checked: accountStore.filterState.crm },
 ]);
 
@@ -153,12 +187,30 @@ const crmSubItems = reactive([
     name: "Bitrix24",
     checked: accountStore.filterState.bitrix24,
   },
-  {
-    id: "uon",
-    name: "U-ON",
-    checked: accountStore.filterState.uon,
-  },
+  { id: "uon", name: "U-ON", checked: accountStore.filterState.uon },
 ]);
+
+// --- ВЫЧИСЛЯЕМЫЕ СПИСКИ ---
+const visibleItems = computed(() => {
+  const config = domainConfig.value;
+  return items.filter((item) => {
+    const filterConfig = config.filters.find((f) => f.id === item.id);
+    return filterConfig?.enabled !== false;
+  });
+});
+
+const visibleCrmSubItems = computed(() => {
+  const config = domainConfig.value;
+  const crmConfig = config.filters.find((f) => f.id === "crm");
+  if (!crmConfig?.subFilters) return [];
+
+  return crmSubItems.filter((subItem) => {
+    const subFilterConfig = crmConfig.subFilters.find(
+      (sf) => sf.id === subItem.id
+    );
+    return subFilterConfig?.enabled !== false;
+  });
+});
 
 const showDeleted = ref(accountStore.getAddDeleted);
 
@@ -168,28 +220,8 @@ const result = reactive({
   type: [...accountStore.type],
 });
 
-// Методы
-const getIconComponent = (id) => {
-  switch (id) {
-    case "telegram":
-      return TelegramIcon;
-    case "whatsapp":
-      return WhatsAppIcon;
-    case "crm":
-      return CrmIcon;
-    case "amocrm":
-      return AmoCrmIcon;
-    case "bitrix24":
-      return Bitrix24Icon;
-    case "uon":
-      return UonIcon;
-    default:
-      return null;
-  }
-};
-
+// --- МЕТОДЫ ---
 const handleCheckboxChange = (item) => {
-  console.log("🎯 Filters: изменение чекбокса", item.id);
   updateSources();
   updateGroups();
   updateCrmTypes();
@@ -198,34 +230,31 @@ const handleCheckboxChange = (item) => {
 };
 
 const handleCrmSubItemChange = (subItem) => {
-  console.log("🎯 Filters: изменение CRM подфильтра", subItem.id);
   updateCrmTypes();
   updateFilterState();
   applyFilters();
 };
 
 const handleDeletedToggle = () => {
-  console.log(
-    "🎯 Filters: переключение удаленных аккаунтов",
-    showDeleted.value
-  );
   accountStore.setAddDeleted(showDeleted.value);
   applyFilters();
 };
 
 const updateSources = () => {
-  result.source = items.filter((item) => item.checked).map((item) => item.id);
+  result.source = visibleItems.value
+    .filter((item) => item.checked)
+    .map((item) => item.id);
   accountStore.setSource(result.source);
-  console.log("🔄 Filters: источники обновлены", result.source);
 };
 
 const updateGroups = () => {
-  const messengerSelected = items.some(
+  const messengerSelected = visibleItems.value.some(
     (item) => (item.id === "telegram" || item.id === "whatsapp") && item.checked
   );
-  const crmSelected = items.find((item) => item.id === "crm")?.checked || false;
+  const crmSelected =
+    visibleItems.value.find((item) => item.id === "crm")?.checked || false;
   const bulkSelected =
-    items.find((item) => item.id === "bulk")?.checked || false;
+    visibleItems.value.find((item) => item.id === "bulk")?.checked || false;
 
   result.group = [];
   if (messengerSelected) result.group.push("messenger");
@@ -233,15 +262,13 @@ const updateGroups = () => {
   if (bulkSelected) result.group.push("bulk");
 
   accountStore.setGroup(result.group);
-  console.log("🔄 Filters: группы обновлены", result.group);
 };
 
 const updateCrmTypes = () => {
-  result.type = crmSubItems
+  result.type = visibleCrmSubItems.value
     .filter((subItem) => subItem.checked)
     .map((subItem) => subItem.id);
   accountStore.setType(result.type);
-  console.log("🔄 Filters: типы CRM обновлены", result.type);
 };
 
 const updateFilterState = () => {
@@ -255,76 +282,26 @@ const updateFilterState = () => {
     bulk: items.find((i) => i.id === "bulk")?.checked || false,
   };
   accountStore.setFilterState(newFilterState);
-  console.log("🔄 Filters: состояние фильтров обновлено", newFilterState);
 };
 
-// ✅ КЛЮЧЕВОЙ МЕТОД - применение фильтров
 const applyFilters = async () => {
-  console.log("🔥 Filters: применение фильтров");
-
-  // 1. Инвалидируем кеш (используем пропс, если передан, иначе composable)
   if (props.invalidateCache) {
-    console.log("   - Инвалидация через props");
     props.invalidateCache();
   } else {
-    console.log("   - Инвалидация через composable");
     invalidateCacheComposable();
   }
-
-  // 2. Загружаем новые данные
   if (props.getAccounts) {
-    console.log("   - Загрузка новых аккаунтов");
     await props.getAccounts();
-  } else {
-    console.error("❌ Filters: getAccounts не передан в props");
   }
-};
-
-// Иконки (ваши существующие)
-const TrashIcon = {
-  template: `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  `,
-};
-
-const TelegramIcon = {
-  template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.78 5.42-.9 6.8-.06.67-.36.89-.89.56-2.45-1.83-3.57-2.98-5.79-4.78-.54-.45-.92-.68-.89-1.07.03-.38.42-.55.98-.4 3.95 1.54 6.33 2.5 9.05 3.64.47.19.75.09.87-.5.33-1.64 1.11-5.2 1.4-6.67.06-.29-.08-.43-.47-.35-1.92.67-5.36 1.89-7.45 2.56-.58.19-.98.28-1.18.27-.3-.02-.83-.16-1.24-.29-.5-.16-.9-.24-.87-.51.02-.17.25-.34.7-.52z"/></svg>`,
-};
-
-const WhatsAppIcon = {
-  template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.41.2.46.3.06.11.04.61-.21 1.18-.2.56-1.24 1.1-1.7 1.12-.46.02-.47.36-2.96-.73-2.49-1.09-3.99-3.75-4.11-3.92-.12-.17-.96-1.38-.92-2.61.05-1.22.69-1.8.95-2.04.24-.26.51-.29.68-.26h.47c.15 0 .36-.06.55.45l.69 1.87c.06.13.1.28.01.44l-.27.41-.39.42c-.12.12-.26.25-.12.5.12.26.62 1.09 1.32 1.78.91.88 1.71 1.17 1.95 1.3.24.14.39.12.54-.04l.81-.94c.19-.25.35-.19.58-.11l1.67.88M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10c-1.97 0-3.8-.57-5.35-1.55L2 22l1.55-4.65A9.969 9.969 0 0 1 2 12 10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8c0 1.72.54 3.31 1.46 4.61L4.5 19.5l2.89-.96A7.95 7.95 0 0 0 12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8z"/></svg>`,
-};
-
-const CrmIcon = {
-  template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`,
-};
-
-const AmoCrmIcon = {
-  template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
-};
-
-const Bitrix24Icon = {
-  template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
-};
-
-const UonIcon = {
-  template: `<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="64" cy="64" r="60.846" fill="#ef496a"/>
-                <path fill="#fff" d="m33.24 27.435h2.648v5.121q0 .762-.24 1.441-.234.674-.744 1.184-.504.504-1.06.709-.774.287-1.858.287-.627 0-1.371-.088-.738-.088-1.236-.346-.498-.264-.914-.744-.41-.48-.562-.99-.246-.82-.246-1.453v-5.121h2.648v5.244q0 .703.387 1.102.392.392 1.084.392.686 0 1.072-.387.393-.392.393-1.107z" transform="matrix(8.5147 0 0 8.5147 -205.84 -202.89)"/>
-              </svg>`,
 };
 </script>
 
 <style scoped>
+/* Ваши стили (без изменений) */
 .filter-container {
   font-size: 13px;
 }
-
+/* ... скопируйте остальные стили из вашего оригинального файла ... */
 .filter-trigger {
   display: inline-flex;
   align-items: center;
@@ -368,7 +345,6 @@ const UonIcon = {
   position: relative;
 }
 
-/* Стили для состояния загрузки */
 .filters-list {
   position: relative;
 }
@@ -433,7 +409,6 @@ const UonIcon = {
   cursor: not-allowed;
 }
 
-/* ИЗМЕНЕННЫЕ СТИЛИ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ УДАЛЕННЫХ АККАУНТОВ */
 .deleted-accounts-toggle {
   margin-bottom: 8px;
   padding-bottom: 8px;

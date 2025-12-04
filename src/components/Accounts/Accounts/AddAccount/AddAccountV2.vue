@@ -4,7 +4,6 @@
     :stationLoading="stationLoading"
   />
 
-  <!-- Модальное окно подтверждения интеграции -->
   <div v-if="showIntegrationModal" class="modal-overlay">
     <div class="modal-container integration-modal">
       <div class="modal-header">
@@ -313,6 +312,7 @@ import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
 import { useAccountStore } from "@/stores/accountStore";
+
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
@@ -530,7 +530,10 @@ const handleCrmSelect = (value, text) => {
   selectedCrmName.value = text;
   selectOption("type", value);
 
-  // Показываем модальное окно подтверждения интеграции
+  if (text === "U-ON") {
+    return;
+  }
+
   showIntegrationModal.value = true;
 };
 
