@@ -4,6 +4,7 @@ export const useAccountStore = defineStore("accountStore", {
   state: () => ({
     accountRefreshToken: "",
     accountSourse: "",
+    loading: false, // ИЗМЕНИЛ: было isLoading, стало loading
     accountData: "",
     accountStation: "",
     accountStationText: "",
@@ -11,6 +12,7 @@ export const useAccountStore = defineStore("accountStore", {
     crmPlatform: "amocrm",
     crmPlatformText: "AmoCRM",
     allSource: [],
+    add_deleted: false,
     source: ["telegram", "whatsapp", "crm"],
     group: ["messenger", "crm", "bulk"],
     type: ["amocrm", "bitrix24", "bulk"],
@@ -24,6 +26,7 @@ export const useAccountStore = defineStore("accountStore", {
     },
   }),
   getters: {
+    getAddDeleted: (state) => state.add_deleted,
     getAccountSource: (state) => state.accountSourse,
     getAccountData: (state) => state.accountData,
     getAccountStation: (state) => state.accountStation,
@@ -33,11 +36,12 @@ export const useAccountStore = defineStore("accountStore", {
     getCrmPlatform: (state) => state.crmPlatform,
     getCrmPlatformText: (state) => state.crmPlatformText,
     getAllSource: (state) => state.allSource,
-    // Новые геттеры
     getSource: (state) => state.source,
     getGroup: (state) => state.group,
     getType: (state) => state.type,
     getFilterState: (state) => state.filterState,
+    // ИЗМЕНИЛ: геттер для состояния загрузки
+    isLoading: (state) => state.loading,
 
     getAccountInfo: (state) => ({
       accountSourse: state.accountSourse,
@@ -48,6 +52,7 @@ export const useAccountStore = defineStore("accountStore", {
       source: state.source,
       group: state.group,
       type: state.type,
+      add_deleted: state.add_deleted,
     }),
   },
   actions: {
@@ -57,6 +62,16 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStation = accountInfo.accountStation;
       this.accountStationText = accountInfo.accountStationText;
       this.accountToken = accountInfo.accountToken;
+    },
+
+    // ИЗМЕНИЛ: action для управления состоянием загрузки
+    setLoading(loading) {
+      console.log("🏪 Store: setLoading(", loading, ")");
+      this.loading = loading; // ИЗМЕНИЛ: было this.isLoading
+    },
+
+    setAddDeleted(value) {
+      this.add_deleted = value;
     },
 
     setAccountRefreshToken(value) {
@@ -87,7 +102,6 @@ export const useAccountStore = defineStore("accountStore", {
     setAccountToken(accountToken) {
       this.accountToken = accountToken;
     },
-    // Новые actions для работы с фильтрами
     setSource(source) {
       this.source = source;
     },
@@ -112,7 +126,6 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStationText = "Telegram";
       this.accountToken = "86e0fb94-8f1f-4bfc-9764-320214c1e2f0";
     },
-    // Сброс фильтров
     resetFilters() {
       this.source = [];
       this.group = [];
@@ -124,6 +137,7 @@ export const useAccountStore = defineStore("accountStore", {
         amocrm: false,
         bitrix24: false,
       };
+      this.add_deleted = false;
     },
   },
   persist: true,

@@ -1,20 +1,106 @@
 <template>
-  <div @click="ChangeconfirmStation" class="black-fon"></div>
+  <div @click="ChangeconfirmStation" class="overlay"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <transition name="fade">
+  <transition name="modal">
     <section class="confirm-modal">
-      <article class="circle">
-        <span>!</span>
-      </article>
-      <h2 class="title">{{ t("confirmMoadal.delete.message") }}</h2>
-      <article class="button-cont">
-        <button class="confirm-button" @click="confirm">
-          {{ t("confirmMoadal.delete.continue") }}
+      <div class="modal-header">
+        <div class="icon-wrapper">
+          <svg
+            class="danger-icon"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <h2 class="modal-title">Удаление аккаунта</h2>
+        <p class="modal-subtitle">Это действие нельзя будет отменить</p>
+      </div>
+
+      <div class="modal-content">
+        <!-- Блок предупреждения о подписке -->
+        <article v-if="hasSubscription" class="subscription-alert">
+          <div class="alert-header">
+            <svg
+              class="alert-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 6V10M10 14H10.01M19 10C19 14.4183 15.4183 18 11 18C6.58172 18 3 14.4183 3 10C3 5.58172 6.58172 2 11 2C15.4183 2 19 5.58172 19 10Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="alert-title">Активная подписка</span>
+          </div>
+          <p class="alert-description">
+            При удалении аккаунта ваша подписка будет
+            <strong>безвозвратно утеряна</strong>. Для переноса подписки на
+            другой аккаунт обратитесь в службу поддержки.
+          </p>
+        </article>
+
+        <div class="account-info">
+          <div class="info-item">
+            <span class="info-label">Аккаунт:</span>
+            <span class="info-value">{{ selectedItem.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Логин:</span>
+            <span class="info-value">{{ selectedItem.login }}</span>
+          </div>
+          <div v-if="hasSubscription" class="info-item">
+            <span class="info-label">Подписка до:</span>
+            <span class="info-value highlight">{{
+              formatDate(selectedItem.subscription_dt_to)
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" @click="ChangeconfirmStation">
+          Отменить
         </button>
-        <button class="cansel-button" @click="ChangeconfirmStation">
-          {{ t("confirmMoadal.delete.cancel") }}
+        <button
+          class="btn-danger"
+          @click="confirm"
+          :class="{ 'with-subscription': hasSubscription }"
+        >
+          <svg
+            class="btn-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 2H10M2 4H14M12.6667 4L12.1991 11.0129C12.129 12.065 12.0939 12.5911 11.8667 12.99C11.6666 13.3412 11.3648 13.6235 11.0011 13.7998C10.588 14 10.0607 14 9.00623 14H6.99377C5.93927 14 5.41202 14 4.99889 13.7998C4.63517 13.6235 4.33339 13.3412 4.13332 12.99C3.90607 12.5911 3.87098 12.065 3.80086 11.0129L3.33333 4M6.66667 7V11.3333M9.33333 7V11.3333"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Удалить аккаунт
         </button>
-      </article>
+      </div>
     </section>
   </transition>
 </template>
@@ -38,12 +124,10 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
 const router = useRouter();
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -73,9 +157,28 @@ const props = defineProps({
 
 const { selectedItem } = toRefs(props);
 
+// Проверяем наличие активной подписки
+const hasSubscription = computed(() => {
+  return (
+    selectedItem.value?.subscription_dt_to !== undefined &&
+    selectedItem.value?.subscription_dt_to !== null
+  );
+});
+
+// Форматирование даты
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
+  errorBlock.value = !errorBlock.value;
 };
 
 import { useDomain } from "@/composables/getDomain";
@@ -123,7 +226,6 @@ const createRequest = async (request) => {
         props.loadingStop();
         setLoadingStatus(true, "success");
         location.reload();
-      } else {
       }
     } else if (response.data === 401) {
       errorBlock.value = true;
@@ -152,110 +254,273 @@ const createRequest = async (request) => {
 
 const confirm = async () => {
   await props.ChangeconfirmStation();
-  await props.loadingStart(t("globalLoading.delete"));
+  await props.loadingStart("Удаление аккаунта...");
   await createRequest("forceStop");
   await createRequest("deleteAccount");
 };
 </script>
 
 <style scoped>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
 .confirm-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
-  border-radius: 5px;
-  width: 389px;
-  height: 208px;
+  z-index: 1000;
+  border-radius: 20px;
+  width: 440px;
   background: #fff;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16);
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 32px 32px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #fef2f2 0%, #fef7f7 100%);
+  border-bottom: 1px solid #fee2e2;
+}
+
+.icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fee2e2;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  margin: 0 auto 16px;
+  border: 2px solid #fecaca;
 }
 
-.circle {
-  border: 2px solid #b73131;
-  border-radius: 199px;
-  width: 51px;
-  height: 51px;
+.danger-icon {
+  color: #dc2626;
+  width: 32px;
+  height: 32px;
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.modal-subtitle {
+  font-weight: 400;
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.modal-content {
+  padding: 24px 32px;
+}
+
+.subscription-alert {
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.alert-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 22px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.circle span {
-  font-weight: 500;
-  font-size: 18px;
-  color: #b73131;
+.alert-icon {
+  color: #d97706;
 }
 
-.title {
-  font-weight: 500;
-  font-size: 16px;
-  color: #8b8b8b;
-  margin-bottom: 28px;
-}
-
-.button-cont {
-  display: flex;
-  align-self: center;
-  gap: 16px;
-}
-
-.confirm-button {
-  border-radius: 5px;
-  width: 119px;
-  height: 36px;
-  background: #b73131;
+.alert-title {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.alert-description {
+  font-weight: 400;
+  font-size: 13px;
+  color: #b45309;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.alert-description strong {
+  color: #92400e;
+}
+
+.account-info {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.info-item:not(:last-child) {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.info-label {
+  font-weight: 500;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.info-value {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.info-value.highlight {
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  padding: 24px 32px 32px;
+  background: #fafafa;
+  border-top: 1px solid #e8e8e8;
+}
+
+.btn-secondary {
+  flex: 1;
+  height: 44px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  font-weight: 600;
+  font-size: 14px;
   color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
-.cansel-button {
-  border: 0.5px solid #c3c3c3;
-  border-radius: 5px;
-  width: 119px;
-  height: 36px;
-  font-weight: 600;
-  font-size: 12px;
-  color: #000;
-  background-color: transparent;
+.btn-danger:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
-.confirm-modal.fade-enter-active,
-.confirm-modal.fade-leave-active {
-  transition: opacity 0.5s ease;
+.btn-danger.with-subscription {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4), 0 0 0 2px #fecaca;
 }
-.confirm-modal.fade-enter,
-.confirm-modal.fade-leave-to {
+
+.btn-danger.with-subscription:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.5), 0 0 0 2px #fecaca;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Анимации */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-enter-from,
+.modal-leave-to {
   opacity: 0;
+  transform: translate(-50%, -48%) scale(0.95);
 }
 
-.confirm-modal {
-  animation: fadeIn 0.5s forwards;
+.modal-enter-to,
+.modal-leave-from {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -48%);
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .confirm-modal {
-    width: 330px;
+    width: 90%;
+    max-width: 380px;
+    margin: 0 16px;
+    border-radius: 16px;
   }
 
-  .title {
-    font-size: 15px;
+  .modal-header {
+    padding: 24px 24px 20px;
+  }
+
+  .modal-content {
+    padding: 20px 24px;
+  }
+
+  .modal-actions {
+    padding: 20px 24px 24px;
+    flex-direction: column-reverse;
+  }
+
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .modal-title {
+    font-size: 18px;
   }
 }
 </style>

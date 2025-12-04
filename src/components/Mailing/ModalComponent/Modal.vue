@@ -2,49 +2,87 @@
   <div @click="closeModal" v-if="isModalOpen" class="black-fon">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <transition name="fade">
-      <div
-        class="action-list"
-        :class="{ 'mobile-fullscreen': isMobile }"
-        :style="isMobile ? {} : {
-          top: modalPosition.top + 'px',
-          left: modalPosition.left + 'px',
-        }"
-      >
-        <!-- Мобильный заголовок (только для мобильных) -->
-        <div v-if="isMobile" class="mobile-header">
-          <div class="mailing-info-mobile">
-            <span class="mailing-name-mobile">{{ selectedItem.name || '-' }}</span>
-          </div>
-          <button class="close-button" @click="closeModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+      <div v-if="isModalOpen" :key="isMobile ? 'mobile' : 'desktop'">
+        <!-- Десктопная версия -->
+        <div
+          v-if="!isMobile"
+          class="action-list desktop-version"
+          :style="{
+            top: modalPosition.top + 'px',
+            left: modalPosition.left + 'px',
+          }"
+        >
+          <span
+            @click="updateStatus(1)"
+            v-if="selectedItem.state === 0"
+            class="action action-on"
+            >{{ t("modalMailing.on") }}</span
+          >
+          <span
+            @click="updateStatus(0)"
+            v-if="selectedItem.state === 1"
+            class="action action-off"
+            >{{ t("modalMailing.off") }}</span
+          >
+          <span @click="changeInfoMailing" class="action">{{
+            t("modalMailing.info")
+          }}</span>
+          <span @click="changeStationMessage" class="action">Сообщения</span>
+          <span @click="changeisEditMailing" class="action">{{
+            t("modalMailing.edit")
+          }}</span>
+          <span class="action action-delete" @click="changeDeleteMailing">{{
+            t("modalMailing.delete")
+          }}</span>
         </div>
 
-        <span
-          @click="updateStatus(1)"
-          v-if="selectedItem.state === 0"
-          class="action action-on"
-          >{{ t("modalMailing.on") }}</span
-        >
-        <span
-          @click="updateStatus(0)"
-          v-if="selectedItem.state === 1"
-          class="action action-off"
-          >{{ t("modalMailing.off") }}</span
-        >
-        <span @click="changeInfoMailing" class="action">{{
-          t("modalMailing.info")
-        }}</span>
-        <span @click="changeStationMessage" class="action">Сообщения</span>
-        <span @click="changeisEditMailing" class="action">{{
-          t("modalMailing.edit")
-        }}</span>
-        <span class="action action-delete" @click="changeDeleteMailing">{{
-          t("modalMailing.delete")
-        }}</span>
+        <!-- Мобильная версия -->
+        <div v-else class="action-list mobile-version">
+          <div class="mobile-header">
+            <div class="mailing-info-mobile">
+              <span class="mailing-name-mobile">{{
+                selectedItem.name || "-"
+              }}</span>
+            </div>
+            <button class="close-button" @click="closeModal">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <span
+            @click="updateStatus(1)"
+            v-if="selectedItem.state === 0"
+            class="action action-on"
+            >{{ t("modalMailing.on") }}</span
+          >
+          <span
+            @click="updateStatus(0)"
+            v-if="selectedItem.state === 1"
+            class="action action-off"
+            >{{ t("modalMailing.off") }}</span
+          >
+          <span @click="changeInfoMailing" class="action">{{
+            t("modalMailing.info")
+          }}</span>
+          <span @click="changeStationMessage" class="action">Сообщения</span>
+          <span @click="changeisEditMailing" class="action">{{
+            t("modalMailing.edit")
+          }}</span>
+          <span class="action action-delete" @click="changeDeleteMailing">{{
+            t("modalMailing.delete")
+          }}</span>
+        </div>
       </div>
     </transition>
   </div>
@@ -56,7 +94,16 @@
 </template>
 
 <script setup>
-import { toRefs, ref, computed, defineProps, reactive, watch, onMounted, onUnmounted } from "vue";
+import {
+  toRefs,
+  ref,
+  computed,
+  defineProps,
+  reactive,
+  watch,
+  onMounted,
+  onUnmounted,
+} from "vue";
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import axios from "axios";
@@ -104,8 +151,21 @@ const props = defineProps({
   },
 });
 
-// Определяем мобильные устройства (только ширина экрана <= 550px)
-const isMobile = computed(() => window.innerWidth <= 768);
+// Добавляем определение isMobile
+const isMobile = ref(false);
+
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  checkIsMobile();
+  window.addEventListener("resize", checkIsMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkIsMobile);
+});
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -134,7 +194,7 @@ const { selectedItem } = toRefs(props);
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
+  errorBlock.value = !errorBlock.value; // Исправлено: добавил переключение
 };
 
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
@@ -185,6 +245,7 @@ const updateStatus = async (state) => {
       "error",
       error.response ? error.response.data : error.message
     );
+    stationLoading.loading = false; // Добавлено: сброс состояния при ошибке
   }
 };
 
@@ -248,35 +309,58 @@ const getMessages = async () => {
   left: 0;
 }
 
-/* Стили для десктопной версии (как было) */
+/* Базовые стили для обеих версий */
 .action-list {
   border-radius: 10px;
-  width: 150px;
-  height: auto;
   background: #ffffff;
   position: absolute;
   z-index: 1010;
   display: flex;
   justify-content: center;
   flex-direction: column;
-  margin: 12px;
-  padding: 10px 0px 10px 10px;
   max-height: 80vh;
   overflow-y: auto;
 }
 
-.action-list.fade-enter-active,
-.action-list.fade-leave-active {
+/* Стили для десктопной версии */
+.action-list.desktop-version {
+  width: 150px;
+  height: auto;
+  margin: 12px;
+  padding: 10px 0px 10px 10px;
+}
+
+/* Стили для мобильной версии */
+.action-list.mobile-version {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 400px;
+  margin: 0;
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Анимации для transition */
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
 
-.action-list.fade-enter,
-.action-list.fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
-.action-list {
+.action-list.desktop-version {
   animation: fadeIn 0.5s forwards;
+}
+
+.action-list.mobile-version {
+  animation: mobileFadeIn 0.3s forwards;
 }
 
 @keyframes fadeIn {
@@ -290,22 +374,6 @@ const getMessages = async () => {
   }
 }
 
-/* Стили для мобильной версии (только при isMobile) */
-.action-list.mobile-fullscreen {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 400px;
-  max-height: 80vh;
-  margin: 0;
-  padding: 0;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: mobileFadeIn 0.3s forwards;
-}
-
 @keyframes mobileFadeIn {
   from {
     opacity: 0;
@@ -317,6 +385,7 @@ const getMessages = async () => {
   }
 }
 
+/* Мобильный заголовок */
 .mobile-header {
   display: flex;
   justify-content: space-between;
@@ -360,26 +429,8 @@ const getMessages = async () => {
   color: #6b7280;
 }
 
-/* Контент модалки для мобильных */
-.action-list.mobile-fullscreen .action {
-  padding: 16px;
-  font-size: 16px;
-  border-bottom: 1px solid #f3f4f6;
-  margin: 0;
-}
-
-.action-list.mobile-fullscreen .action:last-child {
-  border-bottom: none;
-  border-radius: 0 0 16px 16px;
-}
-
-.action-list.mobile-fullscreen .action:hover {
-  background-color: #f3f4f6;
-  border-radius: 0;
-}
-
-/* Общие стили для действий */
-.action {
+/* Стили для действий в десктопной версии */
+.action-list.desktop-version .action {
   font-weight: 400;
   font-size: 14px;
   color: #000;
@@ -387,11 +438,32 @@ const getMessages = async () => {
   padding: 4px;
 }
 
-.action:hover {
+.action-list.desktop-version .action:hover {
   background-color: #eeeeee;
   border-radius: 5px 0px 0px 5px;
 }
 
+/* Стили для действий в мобильной версии */
+.action-list.mobile-version .action {
+  padding: 16px;
+  font-size: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  margin: 0;
+  cursor: pointer;
+  color: #000;
+}
+
+.action-list.mobile-version .action:last-child {
+  border-bottom: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.action-list.mobile-version .action:hover {
+  background-color: #f3f4f6;
+  border-radius: 0;
+}
+
+/* Общие стили для действий */
 .action-on:hover {
   color: green;
 }
@@ -404,25 +476,16 @@ const getMessages = async () => {
   color: rgb(255, 0, 0);
 }
 
-/* Медиа-запрос для скрытия десктопной версии на мобильных */
+/* Медиа-запросы теперь используются как fallback */
 @media (max-width: 768px) {
-  .action-list:not(.mobile-fullscreen) {
-    display: none;
-  }
-  
-  .action-list.mobile-fullscreen {
-    display: flex;
+  .action-list.desktop-version {
+    display: none !important;
   }
 }
 
-/* Медиа-запрос для скрытия мобильной версии на десктопе */
 @media (min-width: 769px) {
-  .action-list.mobile-fullscreen {
-    display: none;
-  }
-  
-  .action-list:not(.mobile-fullscreen) {
-    display: flex;
+  .action-list.mobile-version {
+    display: none !important;
   }
 }
 </style>

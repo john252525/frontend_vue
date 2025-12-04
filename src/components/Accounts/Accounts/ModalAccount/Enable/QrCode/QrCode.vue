@@ -4,10 +4,12 @@
       :changeForceStopItemData="changeForceStopItemData"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeEnableStation="changeEnableStation"
+      :updateLoadingStatus="updateLoadingStatus"
       v-if="source === 'telegram'"
     />
     <WhatsApp
       :changeForceStopItemData="changeForceStopItemData"
+      :updateLoadingStatus="updateLoadingStatus"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeEnableStation="changeEnableStation"
       ref="childComponentRef"
@@ -28,13 +30,16 @@ const props = defineProps({
   changeForceStopItemData: {
     type: Function,
   },
+  updateLoadingStatus: {
+    type: Function,
+  },
   openEnableMenuTrue: {
     type: Function,
   },
   changeEnableStation: {
-    type: Function
-  }
-}); 
+    type: Function,
+  },
+});
 
 const getChild = () => {
   return childComponentRef.value;

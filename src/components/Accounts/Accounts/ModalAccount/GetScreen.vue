@@ -1,5 +1,5 @@
 <template>
-  <div @click="handleBackdropClick" class="black-fon">
+  <div class="black-fon">
     <!-- <ErrorBlock
       v-if="showError"
       :errorMessage="errorMessage"

@@ -21,7 +21,12 @@
     </section>
 
     <section class="account-section">
-      <span class="link-title">Ваша ссылка для привлечения клиентов</span>
+      <div class="link-section">
+        <span class="link-title">Ваша ссылка для привлечения клиентов</span>
+        <button @click="openHelpModal" class="start-earning-button">
+          Начать зарабатывать
+        </button>
+      </div>
       <button @click="copyReferralLink" class="add-account-button">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -44,30 +49,44 @@
             />
           </g>
         </svg>
-
         {{ textButton }}
       </button>
     </section>
   </header>
+
   <ReferralsList :changeUsersCount="changeUsersCount" />
+
+  <!-- Модальное окно -->
+  <HelpModal v-if="showHelpModal" @close="closeHelpModal" />
 </template>
 
 <script setup>
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 import ReferralsList from "./ReferralsList.vue";
+import HelpModal from "./HelpModal.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const usersCount = ref(0);
+const showHelpModal = ref(false);
 
 const changeUsersCount = (item) => (usersCount.value = item);
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 
 const textButton = ref(`https://${window.location.hostname}/Registration...`);
+
+// Функции для управления модальным окном
+const openHelpModal = () => {
+  showHelpModal.value = true;
+};
+
+const closeHelpModal = () => {
+  showHelpModal.value = false;
+};
 
 function decodeJWT(token) {
   try {
@@ -90,16 +109,12 @@ const refId = ref("");
 
 const getRefId = async () => {
   try {
-    const response = await axios.get(
-      `${FRONTEND_URL_USERS}getRefId`,
-
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accountStore.accountToken}`,
-        },
-      }
-    );
+    const response = await axios.get(`${FRONTEND_URL_USERS}getRefId`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accountStore.accountToken}`,
+      },
+    });
 
     if (response.data.ok) {
       refId.value = response.data.data.ref_id;
@@ -114,7 +129,6 @@ const copyReferralLink = async () => {
 
   try {
     await navigator.clipboard.writeText(referralLink);
-
     console.log("Ссылка скопирована в буфер обмена:", referralLink);
     textButton.value = t("referrals.link");
     setTimeout(() => {
@@ -122,7 +136,6 @@ const copyReferralLink = async () => {
     }, 3000);
   } catch (err) {
     console.error("Не удалось скопировать ссылку:", err);
-    // Альтернативный способ для старых браузеров
     const textArea = document.createElement("textarea");
     textArea.value = referralLink;
     document.body.appendChild(textArea);
@@ -160,6 +173,40 @@ header {
   align-items: flex-start;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+}
+
+.link-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+/* Стили для кнопки "Начать зарабатывать" */
+.start-earning-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.start-earning-button:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.start-earning-button:active {
+  transform: translateY(0);
 }
 
 /* Стили для секции статистики */
@@ -258,11 +305,11 @@ header {
 }
 
 .svg-icon {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  margin-right: 0.25rem; /* 4px */
-  margin-left: -0.25rem; /* -4px */
-  fill: currentColor; /* Заполнение текущим цветом */
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+  margin-left: -0.25rem;
+  fill: currentColor;
 }
 
 .add-account-button {
@@ -275,6 +322,8 @@ header {
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .add-account-button:hover {
@@ -359,11 +408,9 @@ header {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    /* transform: translateY(5px); */
   }
   to {
     opacity: 1;
-    /* transform: translateY(0); */
   }
 }
 
@@ -425,6 +472,16 @@ header {
     left: 16px;
     top: 160px;
   }
+
+  .link-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .start-earning-button {
+    margin-left: 0;
+    align-self: flex-start;
+  }
 }
 </style>
-

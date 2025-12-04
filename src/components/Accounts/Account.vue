@@ -6,41 +6,7 @@
   />
   <header>
     <section class="account-section">
-      <h2 class="title">{{ t("account.accounts") }}</h2>
-      <!-- <h2
-        v-if="
-          stationDomain.navigate.value != 'whatsapi' &&
-          platformStationText != 'CRM'
-        "
-        class="account"
-      >
-        {{ platformStationText }}
-      </h2>
-
-      <div
-        @click="openCrmPlatform"
-        v-if="
-          stationDomain.navigate.value != 'whatsapi' &&
-          platformStationText === 'CRM'
-        "
-        class="crm-platform-cont"
-      >
-        <h2>
-          {{ crmText }}
-        </h2>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill="currentColor"
-            fill-rule="evenodd"
-            d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4"
-          />
-        </svg>
-      </div> -->
+      <h2 class="title">Аккаунты</h2>
       <div
         v-if="setPlatformStation"
         @click="openCrmPlatform"
@@ -73,13 +39,21 @@
       </div>
       <Filters
         :getAccounts="getAccountListMethod"
+        :invalidateCache="invalidateCache"
         :close="openPlatformChoice"
         :isOpen="platformStation"
       />
     </section>
     <section class="account-section">
+      <TabToggle
+        :modelValue="activeTab"
+        :getAccounts="getAccountListMethod"
+        :availableAccounts="availableAccounts"
+        @update:modelValue="changeActiveTab($event)"
+      />
+
       <button
-        v-if="stationDomain.navigate.value != 'whatsapi'"
+        v-if="activeTab === 'accounts'"
         @click="openPlatformChoice"
         class="account-list-button"
       >
@@ -94,59 +68,11 @@
         </svg>
         Фильтры
       </button>
-      <!-- <article v-if="platformStation">
-        <div @click="openPlatformChoice" class="black-fon"></div>
-        <ul
-          v-if="platformStationText === 'Telegram'"
-          class="platform-list-telegram"
-        >
-          <li
-            @click="choiceNetWork('telegram', 'Telegram')"
-            class="platform"
-            :class="{ active: platformStationText === 'Telegram' }"
-          >
-            Telegram
-          </li>
-          <li
-            @click="choiceNetWork('whatsapp', 'WhatsApp')"
-            :class="{ active: platformStationText === 'WhatsApp' }"
-            class="platform"
-          >
-            WhatsApp
-          </li>
-          <li
-            @click="choiceNetWork('crm', 'CRM')"
-            class="platform"
-            :class="{ active: platformStationText === 'CRM' }"
-          >
-            CRM
-          </li>
-        </ul>
-        <ul v-else class="platform-list-whatsapp">
-          <li
-            @click="choiceNetWork('telegram', 'Telegram')"
-            :class="{ active: platformStationText === 'Telegram' }"
-            class="platform"
-          >
-            Telegram
-          </li>
-          <li
-            @click="choiceNetWork('whatsapp', 'WhatsApp')"
-            :class="{ active: platformStationText === 'WhatsApp' }"
-            class="platform"
-          >
-            WhatsApp
-          </li>
-          <li
-            @click="choiceNetWork('crm', 'CRM')"
-            class="platform"
-            :class="{ active: platformStationText === 'CRM' }"
-          >
-            CRM
-          </li>
-        </ul>
-      </article> -->
-      <button @click="openAddAccount" class="add-account-button">
+      <button
+        v-if="activeTab === 'accounts'"
+        @click="openAddAccount"
+        class="add-account-button"
+      >
         <svg
           class="svg-icon"
           viewBox="0 0 20 20"
@@ -158,42 +84,107 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{ t("account.addButton") }}
+        Добавить аккаунт
       </button>
     </section>
   </header>
-  <AccountList
-    ref="accountListRef"
-    :platformStationTextValue="platformStationTextValue"
-  />
+
+  <div class="content-wrapper">
+    <AccountList
+      v-if="activeTab === 'accounts'"
+      ref="accountListRef"
+      :platformStationTextValue="platformStationTextValue"
+      :changeAllAccounts="changeAllAccounts"
+    />
+
+    <GroupsList
+      v-if="activeTab === 'groups'"
+      :getAccounts="getAccountListMethod"
+    />
+  </div>
 </template>
 
 <script setup>
 import AccountList from "./Accounts/AccountsList.vue";
+import GroupsList from "./Groups/GroupsList.vue";
+import TabToggle from "./Groups/TabToggle.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
 import { useAccountStore } from "@/stores/accountStore";
+import { useAccountsCache } from "@/composables/useAccountsCache";
 import Filters from "./Filters.vue";
-const accountStore = useAccountStore();
+import { ref, computed, watch } from "vue";
 
-import { ref, onMounted } from "vue";
+const accountStore = useAccountStore();
+const { accountsCache, setAccounts, getAccounts, invalidateCache } =
+  useAccountsCache();
+
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
 const platformStationText = accountStore.getAccountStationText;
 const crmText = accountStore.getCrmPlatformText;
 const platformStation = ref(false);
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
-
 const setPlatformStation = ref(false);
-
 const accountListRef = ref(null);
 
-const getAccountListMethod = () => {
-  if (accountListRef.value) {
-    accountListRef.value.getAccounts();
+const allAccounts = ref([]);
+const activeTab = ref("accounts");
+const accountsList = ref([]);
+const hasLoadedAccounts = ref(false);
+
+const changeAllAccounts = (items) => {
+  console.log("✅ Аккаунты получены из AccountList:", items?.length);
+  allAccounts.value = items;
+  setAccounts(items); // Сохраняем в глобальный кеш
+};
+
+const changeActiveTab = (value) => {
+  activeTab.value = value;
+};
+
+const availableAccounts = computed(() => {
+  const accounts =
+    accountsCache.value.length > 0 ? accountsCache.value : accountsList.value;
+  const filtered = accounts.filter((account) =>
+    ["whatsapp", "telegram"].includes(account.source || account.type)
+  );
+  console.log("📊 availableAccounts computed:", filtered.length);
+  return filtered;
+});
+
+const getAccountListMethod = async () => {
+  console.log("🚀 Вызван getAccountListMethod");
+  console.log("   - Кеш:", accountsCache.value.length, "аккаунтов");
+  console.log("   - accountListRef существует:", !!accountListRef.value);
+
+  try {
+    // Если есть кеш, возвращаем его
+    if (accountsCache.value.length > 0) {
+      console.log(
+        "📦 Используем кешированные аккаунты:",
+        accountsCache.value.length
+      );
+      accountsList.value = accountsCache.value;
+      return accountsCache.value;
+    }
+
+    // Если AccountList смонтирован, вызываем его метод
+    if (accountListRef.value && accountListRef.value.getAccounts) {
+      console.log("🔍 Загружаем аккаунты через AccountList");
+      const result = await accountListRef.value.getAccounts();
+      console.log("✅ Получено аккаунтов:", result?.length);
+
+      setAccounts(result || []); // Сохраняем в кеш
+      accountsList.value = result || [];
+      hasLoadedAccounts.value = true;
+
+      return result;
+    }
+
+    console.warn("⚠️ AccountList не смонтирован, возвращаем пустой массив");
+    return [];
+  } catch (error) {
+    console.error("❌ Ошибка в getAccountListMethod:", error);
+    return accountsCache.value; // Возвращаем кеш при ошибке
   }
 };
 
@@ -212,16 +203,18 @@ function changeCrmPlatform(value, valueTwo) {
   location.reload();
 }
 
-function choiceNetWork(value, valueTwo) {
-  location.reload();
-  accountStore.setAccountStation(value);
-  accountStore.setAccountStationText(valueTwo);
-  platformStation.value = !platformStation.value;
-}
-
 function openAddAccount() {
   openAddAccountStation.value = !openAddAccountStation.value;
 }
+
+watch(allAccounts, (newValue) => {
+  if (newValue) {
+    console.log("👀 Watch: новые аккаунты", newValue.length);
+    hasLoadedAccounts.value = true;
+    accountsList.value = newValue;
+    setAccounts(newValue);
+  }
+});
 </script>
 
 <style scoped>
@@ -236,6 +229,7 @@ header {
 .account-section {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .title {
@@ -244,19 +238,7 @@ header {
   color: var(--text);
   flex: 1;
   margin-right: 8px;
-}
-
-.account {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--headerAccountText);
-  background: var(--headerAccount);
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
+  margin: 0;
 }
 
 .account-list-button,
@@ -286,24 +268,19 @@ header {
   align-items: center;
   gap: 6px;
   transition: all 0.25s;
+  border: none;
 }
 
 .account-list-button:hover {
   background: rgba(0, 13, 255, 0.2);
-  transition: all 0.25s;
-}
-
-.account-list-button:active {
-  background: rgba(17, 21, 93, 0.2);
-  transition: all 0.25s;
 }
 
 .svg-icon {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  margin-right: 0.25rem; /* 4px */
-  margin-left: -0.25rem; /* -4px */
-  fill: currentColor; /* Заполнение текущим цветом */
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+  margin-left: -0.25rem;
+  fill: currentColor;
 }
 
 .add-account-button {
@@ -313,29 +290,15 @@ header {
   color: #fff;
   transition: all 0.25s;
   padding: 8px 12px;
-}
-
-.crm-platform-cont {
-  font-weight: 700;
-  font-size: 12px;
-  color: var(--headerAccountText);
-  background: var(--headerAccount);
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
+  border: none;
 }
 
 .add-account-button:hover {
   background: #565cc8;
-  transition: all 0.25s;
 }
 
 .add-account-button:active {
   background: #3e43ae;
-  transition: all 0.25s;
 }
 
 .black-fon {
@@ -347,22 +310,6 @@ header {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.platform-list-telegram {
-  position: absolute;
-  z-index: 10;
-  right: 122px;
-  top: 120px;
-  border-radius: 10px;
-  width: 100px;
-  height: 100px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .crm-list {
@@ -381,66 +328,6 @@ header {
   gap: 2px;
 }
 
-.platform-list-whatsapp {
-  position: absolute;
-  z-index: 10;
-  right: 122px;
-  top: 120px;
-  border-radius: 10px;
-  width: 108px;
-  height: 100px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.platform-list-telegram .fade-enter-active,
-.platform-list-telegram .fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.platform-list-telegram .fade-enter,
-.platform-list-telegram .fade-leave-to {
-  opacity: 0;
-}
-
-.platform-list-telegram {
-  animation: fadeIn 0.5s forwards;
-}
-
-.platform-list-whatsapp.fade-enter-active,
-.platform-list-whatsapp.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.platform-list-whatsapp.fade-enter,
-.platform-list-whatsapp.fade-leave-to {
-  opacity: 0;
-}
-
-.platform-list-whatsapp {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    /* transform: translateY(5px); */
-  }
-  to {
-    opacity: 1;
-    /* transform: translateY(0); */
-  }
-}
-
-.platform {
-  padding: 4px;
-  transition: all 0.1s;
-  cursor: pointer;
-  font-size: 14px;
-}
-
 .crm-platform {
   padding: 4px;
   transition: all 0.1s;
@@ -453,44 +340,23 @@ header {
 }
 
 .crm-platform:hover {
-  text-align: center;
-  width: 80px;
   background-color: #eeeeee;
   border-radius: 5px;
-  transition: all 0.2s;
 }
 
 .crm-platform.active {
-  text-align: center;
-  width: 80px;
   background-color: #eeeeee;
   border-radius: 5px;
-  transition: all 0.2s;
 }
 
-.platform:hover {
-  text-align: center;
-  width: 80px;
-  background-color: #eeeeee;
-  border-radius: 5px;
-  transition: all 0.2s;
-}
-
-.platform.active {
-  text-align: center;
-  width: 80px;
-  background-color: #eeeeee;
-  border-radius: 5px;
-  transition: all 0.2s;
+.content-wrapper {
+  margin: 18px 12px 18px 18px;
 }
 
 @media (max-width: 768px) {
   .crm-list {
     left: 120px;
     top: 120px;
-  }
-  .account {
-    display: none;
   }
 
   header {
@@ -499,19 +365,22 @@ header {
     gap: 12px;
   }
 
-  .platform-list {
-    left: 20px;
-    top: 180px;
+  .account-section {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
-  .platform-list-telegram {
-    left: 17px;
-    top: 160px;
+  .account-section:first-child {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .platform-list-whatsapp {
-    left: 16px;
-    top: 160px;
+  .title {
+    width: 100%;
+  }
+
+  .account-section:last-child {
+    width: 100%;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <section class="account-list-section">
+  <section class="mailing-list-section">
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
 
     <!-- Десктопная таблица -->
@@ -482,33 +482,102 @@ const changeStatusMailing = (item, state) => {
 const openModal = (event, item) => {
   selectedItem.value = item;
   station.isModalOpen = true;
+  
   const rect = event.currentTarget.getBoundingClientRect();
   const modalWidth = 150;
-  const modalHeight = 200;
-  const offset = 4; // Минимальный отступ
+  const edgeMargin = 10;
 
-  let left = rect.right + window.scrollX + offset;
-  let top = rect.bottom + window.scrollY + offset;
+  // Динамически рассчитываем высоту модалки на основе количества действий
+  const actionCount = getMailingActionCount(item);
+  const itemHeight = 32; // Высота одного пункта меню
+  const padding = 16; // Внутренние отступы
+  const estimatedModalHeight = actionCount * itemHeight + padding;
 
-  if (left + modalWidth > window.innerWidth) {
-    left = rect.left + window.scrollX - modalWidth - offset;
+  if (window.innerWidth <= 768) {
+    // Для мобильных - позиционируем снизу экрана
+    modalPosition.value = {
+      top: 'auto',
+      bottom: '10px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '90%',
+      maxWidth: '400px'
+    };
+  } else {
+    // Для десктопа - умное позиционирование
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 5;
+
+    // Проверяем правую границу
+    if (left + modalWidth > window.innerWidth - edgeMargin) {
+      left = window.innerWidth - modalWidth - edgeMargin;
+    }
+    
+    // Проверяем левую границу
+    if (left < edgeMargin) {
+      left = edgeMargin;
+    }
+
+    // Проверяем, помещается ли модалка снизу
+    const spaceBelow = window.innerHeight - rect.bottom - 15;
+    const spaceAbove = rect.top - 15;
+    
+    // Для модалок с 1-2 элементами ВСЕГДА показываем снизу (если хватает места)
+    if (actionCount <= 2) {
+      // Для маленьких модалок всегда предпочитаем позицию снизу
+      if (spaceBelow < estimatedModalHeight) {
+        // Если снизу не хватает места, ограничиваем высоту или показываем сверху
+        if (spaceAbove > spaceBelow) {
+          top = rect.top + window.scrollY - estimatedModalHeight - 5;
+        } else {
+          // Если и сверху мало места, ограничиваем позицию снизу
+          top = window.innerHeight - estimatedModalHeight - edgeMargin;
+        }
+      }
+    } else {
+      // Для больших модалок используем стандартную логику
+      if (spaceBelow < estimatedModalHeight && spaceAbove > spaceBelow) {
+        top = rect.top + window.scrollY - estimatedModalHeight - 5;
+      }
+    }
+
+    // Финальная проверка границ
+    if (top < edgeMargin) {
+      top = edgeMargin;
+    }
+    
+    if (top + estimatedModalHeight > window.innerHeight - edgeMargin) {
+      top = window.innerHeight - estimatedModalHeight - edgeMargin;
+    }
+
+    modalPosition.value = {
+      top: Math.max(edgeMargin, Math.round(top)),
+      left: Math.max(edgeMargin, Math.round(left))
+    };
   }
+};
 
-  // Гарантируем минимальный отступ 4px
-  left = Math.max(offset, left);
-  top = Math.max(offset, top);
+// Функция для подсчета количества действий в модалке рассылки
+const getMailingActionCount = (item) => {
+  if (!item) return 4; // Значение по умолчанию
+  
+  let count = 0;
 
-  // Гарантируем невыход за правый и нижний края
-  left = Math.min(left, window.innerWidth - modalWidth - offset);
-  top = Math.min(
-    top,
-    window.innerHeight - modalHeight - offset + window.scrollY
-  );
+  // Базовые действия для всех рассылок
+  count++; // Информация
+  count++; // Сообщения
+  
+  // Действия в зависимости от статуса
+  if (item.state === 1) { // Активная
+    count++; // Остановить
+  } else if (item.state === 0) { // Неактивная
+    count++; // Запустить
+  }
+  
+  count++; // Редактировать
+  count++; // Удалить
 
-  modalPosition.value = {
-    top: top,
-    left: left,
-  };
+  return Math.max(1, count); // Всегда минимум 1 действие
 };
 
 const stationMessage = ref(false);

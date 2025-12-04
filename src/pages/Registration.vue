@@ -35,6 +35,7 @@
                 required
                 :class="{ error: error.login }"
                 class="input-reg"
+                :disabled="loading"
               />
               <div class="error-container">
                 <p v-if="error.login" class="error-message">{{ emailError }}</p>
@@ -51,6 +52,7 @@
                   @input="handlePhoneInput"
                   required
                   class="input-reg phone-input"
+                  :disabled="loading"
                 />
               </div>
             </div>
@@ -63,12 +65,14 @@
                 v-for="channel in availableChannels"
                 :key="channel.value"
                 class="messenger-label"
+                :class="{ disabled: loading }"
               >
                 <input
                   type="checkbox"
                   :value="channel.value"
                   v-model="formData.contact_preferred_channels"
                   class="messenger-checkbox"
+                  :disabled="loading"
                 />
                 <span class="messenger-text">{{ channel.label }}</span>
               </label>
@@ -87,6 +91,7 @@
                 :class="{ error: error.password }"
                 required
                 class="input-reg"
+                :disabled="loading"
               />
               <div class="error-container">
                 <p v-if="error.password" class="error-message">
@@ -106,6 +111,7 @@
                 required
                 :class="{ error: error.fogoutPassword }"
                 class="input-reg"
+                :disabled="loading"
               />
               <div class="error-container">
                 <p v-if="error.fogoutPassword" class="error-message">
@@ -121,10 +127,11 @@
               id="checkbox"
               v-model="formData.check"
               required
+              :disabled="loading"
             />
             <label
               class="name-checkbox"
-              :class="{ error: error.check }"
+              :class="{ error: error.check, disabled: loading }"
               for="checkbox"
             >
               Принимаю
@@ -143,8 +150,13 @@
             </div>
           </div>
 
-          <button type="submit" class="registration-account-button">
-            Зарегистрироваться
+          <button
+            type="submit"
+            class="registration-account-button"
+            :disabled="loading"
+          >
+            <span v-if="loading" class="button-spinner"></span>
+            {{ loading ? "Регистрация..." : "Зарегистрироваться" }}
           </button>
 
           <p class="login-account-button">
@@ -165,6 +177,14 @@
         На ваш E-mail отправлено письмо для подтверждения
       </p>
     </div>
+
+    <!-- Полноэкранный лоадер -->
+    <div v-if="loading" class="fullscreen-loader">
+      <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Регистрация...</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -182,6 +202,7 @@ const { stationDomain } = useDomain();
 const router = useRouter();
 const route = useRoute();
 const sendEmail = ref(false);
+const loading = ref(false);
 
 const formData = reactive({
   login: "",
@@ -290,6 +311,8 @@ const changeIncorrectPassword = () => (inputStyle.incorrectPassword = false);
 const navigateTo = (page) => router.push(page);
 
 const loginAccount = async () => {
+  loading.value = true;
+
   try {
     const requestData = {
       email: formData.login,
@@ -344,6 +367,8 @@ const loginAccount = async () => {
         ? "Пользователь уже существует"
         : "Ошибка";
     setTimeout(() => (inputStyle.incorrectPassword = false), 5000);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -371,6 +396,7 @@ const logAccoutn = () => {
   align-items: center;
   justify-content: center;
   padding: 8px;
+  position: relative;
 }
 
 .registration-section {
@@ -462,6 +488,12 @@ const logAccoutn = () => {
   background: #ffeaea;
 }
 
+.input-reg:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .phone-input-container {
   position: relative;
   display: flex;
@@ -505,9 +537,18 @@ const logAccoutn = () => {
   min-height: 26px;
 }
 
+.messenger-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .messenger-checkbox {
   margin: 0;
   transform: scale(0.8);
+}
+
+.messenger-checkbox:disabled {
+  cursor: not-allowed;
 }
 
 .checkbox-cont {
@@ -526,6 +567,11 @@ const logAccoutn = () => {
 
 .name-checkbox.error {
   color: #d33838;
+}
+
+.name-checkbox.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .terms-link {
@@ -548,10 +594,34 @@ const logAccoutn = () => {
   border: none;
   cursor: pointer;
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  transition: all 0.25s;
 }
 
-.registration-account-button:hover {
+.registration-account-button:hover:not(:disabled) {
   background: #595fd1;
+}
+
+.registration-account-button:active:not(:disabled) {
+  background: #2f36af;
+}
+
+.registration-account-button:disabled {
+  background: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .login-account-button {
@@ -590,6 +660,55 @@ const logAccoutn = () => {
   line-height: 1.3;
 }
 
+/* Полноэкранный лоадер */
+.fullscreen-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4950ca;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loader-text {
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--text);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 480px) {
   .registration-wrapper {
     padding: 4px;
@@ -620,6 +739,24 @@ const logAccoutn = () => {
   .input-reg {
     height: 32px;
     font-size: 12px;
+  }
+
+  .fullscreen-loader {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .loader-content {
+    padding: 20px;
+    margin: 16px;
+  }
+
+  .loader-spinner {
+    width: 32px;
+    height: 32px;
+  }
+
+  .loader-text {
+    font-size: 14px;
   }
 }
 

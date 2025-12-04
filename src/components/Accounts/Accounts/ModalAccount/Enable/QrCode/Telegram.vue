@@ -53,28 +53,82 @@
     </article>
   </section>
 
-  <section v-if="station.phone" class="number-section">
-    <div class="phone-input-container">
-      <input
-        :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-        :placeholder="
-          showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
-        "
-        @input="formatPhone"
-        @keydown.delete="handleBackspace"
-        class="num-input"
-        type="text"
-        id="phone"
-        v-model="phoneNumber"
-        ref="phoneInput"
-      />
+  <!-- ОБНОВЛЕННАЯ СЕКЦИЯ С ТЕЛЕФОНОМ -->
+  <section v-if="station.phone" class="phone-section">
+    <div class="phone-container">
+      <div class="phone-header">
+        <h2 class="phone-title">Подключение по телефону</h2>
+        <button @click="station.phone = false" class="phone-close-button">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="phone-content">
+        <p class="phone-description">
+          Введите номер телефона для подключения Telegram
+        </p>
+
+        <div class="phone-input-wrapper">
+          <div class="phone-input-container">
+            <input
+              :class="station.errorPhone ? 'num-input-error' : 'num-input'"
+              :placeholder="
+                showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
+              "
+              @input="formatPhone"
+              @keydown.delete="handleBackspace"
+              class="num-input"
+              type="text"
+              id="phone"
+              v-model="phoneNumber"
+              ref="phoneInput"
+            />
+          </div>
+
+          <div v-if="station.errorPhone" class="error-message">
+            Пожалуйста, введите корректный номер телефона
+          </div>
+        </div>
+
+        <button @click="getCode" class="phone-next-button">
+          {{ t("enable.next") }}
+        </button>
+
+        <button @click="station.phone = false" class="back-button">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 12H5M12 19L5 12L12 5"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Вернуться к QR-коду
+        </button>
+      </div>
     </div>
-    <button @click="getCode" class="next-button">
-      {{ t("enable.next") }}
-    </button>
   </section>
 </template>
-
 <script setup>
 import {
   inject,
@@ -108,6 +162,9 @@ const props = defineProps({
     type: Function,
   },
   openEnableMenuTrue: {
+    type: Function,
+  },
+  updateLoadingStatus: {
     type: Function,
   },
 });
@@ -328,7 +385,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
-      stationLoading.value = false;
+      props.updateLoadingStatus(false);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -358,19 +415,22 @@ const getInternationalFormat = () => {
 
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
-  stationLoading.value = true;
+  props.updateLoadingStatus(true, "Изменение статуса...");
   let params = {
+    token: token.value,
     source: source,
     login: login,
   };
   if (stationDomain.navigate.value != "whatsapi") {
     params = {
+      token: token.value,
       source: source,
       login: login,
       phone: internationalPhone,
     };
   } else {
     params = {
+      token: token.value,
       source: source,
       login: login,
       phone: internationalPhone,
@@ -383,7 +443,7 @@ const enablePhoneAuth = async () => {
       params,
       {
         headers: {
-          "Content-Type": "application/json; charset=utf-8",
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
       }
@@ -421,7 +481,6 @@ const EnablebyQR = async () => {
 
   let count = 0;
   intervalId = setInterval(async () => {
-    // Если уже вызвали stop (например, при step === 5), не продолжаем
     if (accountInfo.data?.step?.value === 5) {
       clearInterval(intervalId);
       return;
@@ -512,10 +571,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .qr-telegram-section {
-  /* background: #ffffff; */
   border-radius: 16px;
-  /* padding: 20px; */
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); */
   max-width: 360px;
   width: 100%;
   margin: 0 auto;
@@ -639,17 +695,83 @@ onBeforeUnmount(() => {
   border-color: #dee2e6;
 }
 
-/* СЕКЦИЯ С НОМЕРОМ - НЕ ТРОГАЕМ (оригинальные стили) */
-.number-section {
+/* НОВЫЕ СТИЛИ ДЛЯ СЕКЦИИ ТЕЛЕФОНА */
+.phone-section {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.phone-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
+}
+
+.phone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.phone-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.phone-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phone-close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.phone-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+.phone-description {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.phone-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .phone-input-container {
   display: flex;
-  gap: 10px;
+  justify-content: center;
 }
 
+/* ОРИГИНАЛЬНЫЕ СТИЛИ ДЛЯ ИНПУТА (НЕ МЕНЯТЬ) */
 .num-input {
   border-radius: 5px;
   padding-left: 10px;
@@ -676,6 +798,64 @@ onBeforeUnmount(() => {
   flex-grow: 1;
 }
 
+.error-message {
+  color: #d32f2f;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.phone-next-button {
+  width: 100%;
+  height: 45px;
+  border-radius: 10px;
+  background-color: #0088cc;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.phone-next-button:hover {
+  background-color: #0077b3;
+}
+
+.phone-next-button:active {
+  transform: translateY(1px);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.back-button:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+/* Старые стили для обратной совместимости */
+.number-section {
+  display: flex;
+  flex-direction: column;
+}
+
 .next-button {
   width: 100%;
   height: 35px;
@@ -689,7 +869,70 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-/* Responsive Design */
+/* Responsive Design для телефонной секции */
+@media (max-width: 500px) {
+  .phone-section {
+    padding: 16px;
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .phone-header {
+    margin-bottom: 20px;
+  }
+
+  .phone-title {
+    font-size: 16px;
+  }
+
+  .phone-content {
+    gap: 16px;
+  }
+
+  .num-input,
+  .num-input-error {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 400px) {
+  .phone-section {
+    padding: 14px;
+    margin: 8px;
+    max-width: calc(100% - 16px);
+  }
+
+  .phone-title {
+    font-size: 15px;
+  }
+
+  .phone-close-button {
+    padding: 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .phone-section {
+    padding: 12px;
+  }
+
+  .phone-title {
+    font-size: 14px;
+  }
+
+  .phone-description {
+    font-size: 13px;
+  }
+
+  .phone-next-button,
+  .back-button {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+}
+
+/* Оригинальные медиа-запросы для QR секции */
 @media (max-width: 480px) {
   .qr-telegram-section {
     padding: 16px;
@@ -771,7 +1014,7 @@ onBeforeUnmount(() => {
   }
 }
 
-/* Медиа-запросы для секции с номером (оригинальные) */
+/* Медиа-запросы для старой версии секции с номером */
 @media (max-width: 500px) {
   .number-section {
     width: 300px;

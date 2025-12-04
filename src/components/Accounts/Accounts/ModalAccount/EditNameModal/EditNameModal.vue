@@ -27,8 +27,11 @@
             class="name-input"
             :class="{ error: error }"
             placeholder="Введите новое имя"
+            maxlength="20"
             @keyup.enter="saveName"
+            @input="validateInput"
           />
+          <div class="character-counter">{{ newName.length }}/20</div>
           <p v-if="error" class="error-message">{{ error }}</p>
         </div>
 
@@ -89,7 +92,11 @@ const newName = ref(props.currentName);
 const error = ref("");
 
 const isFormValid = computed(() => {
-  return newName.value.trim() && newName.value.trim() !== props.currentName;
+  return (
+    newName.value.trim() &&
+    newName.value.trim() !== props.currentName &&
+    !error.value
+  );
 });
 
 const changeName = async () => {
@@ -139,13 +146,13 @@ const validateInput = () => {
     return false;
   }
 
-  if (newName.value.trim().length < 2) {
-    error.value = "Имя должно содержать минимум 2 символа";
+  if (newName.value.trim().length < 4) {
+    error.value = "Имя должно содержать минимум 4 символа";
     return false;
   }
 
-  if (newName.value.trim().length > 50) {
-    error.value = "Имя не может превышать 50 символов";
+  if (newName.value.trim().length > 20) {
+    error.value = "Имя не может превышать 20 символов";
     return false;
   }
 
@@ -287,6 +294,13 @@ onUnmounted(() => {
 
 .name-input.error:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.character-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
 .error-message {

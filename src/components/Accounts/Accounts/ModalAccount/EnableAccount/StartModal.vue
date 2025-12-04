@@ -194,13 +194,26 @@ const enableStation = reactive({
   typeError: "qrCode",
 });
 
-const changeUserPhone = () =>
-  (enableStation.userPhone = !enableStation.userPhone);
+const changeUserPhone = () => {
+  enableStation.userPhone = !enableStation.userPhone;
+  enableStation.start = false;
+};
+
+const startLoading = () => {
+  enableStation.start = false;
+  enableStation.loading = !enableStation.loading;
+};
+
 const changeLoading = () => (enableStation.loading = !enableStation.loading);
 const changeQRcode = () => (enableStation.qrCode = !enableStation.qrCode);
 const changeCode = () => (enableStation.code = !enableStation.code);
 const changeError = () => (enableStation.error = !enableStation.error);
-const changeSuccess = () => (enableStation.success = !enableStation.success);
+const changeSuccess = () => {
+  enableStation.success = !enableStation.success;
+  enableStation.start = false;
+  enableStation.QRcode = false;
+  enableStation.code = false;
+};
 
 const { source, login, storage, type } = item.value;
 
@@ -228,6 +241,8 @@ const forceStop = async () => {
     } else {
     }
   } catch (error) {
+    startLoading();
+    enableStation.error = true;
     console.error(`error`, error);
     if (error.response) {
       console.error("error", error.response.data);
@@ -242,7 +257,7 @@ const setState = async () => {
     storage: storage,
     setState: true,
   };
-
+  startLoading();
   try {
     const response = await axios.post(
       `${FRONTEND_URL}setState?referer=https://app.chatserv.ru/`,
@@ -259,9 +274,10 @@ const setState = async () => {
     // console.log(response.data.data);
 
     if (response.data.status === "ok") {
-      station.stationLoading = false;
-      station.resultTrue = true;
+      startLoading();
+      enableStation.success = true;
     } else if (response.data.error) {
+      startLoading();
       setTimeout(() => {
         station.stationLoading = false;
       }, 1000);
@@ -283,12 +299,13 @@ const setState = async () => {
         }, 1000);
       }
     } else {
-      station.result = true;
-      station.stationLoading = false;
+      enableStation.success = true;
+      startLoading();
     }
   } catch (error) {
     console.error(`error`, error);
-
+    startLoading();
+    enableStation.error = true;
     station.result = true;
     station.stationLoading = false;
     if (error.response) {
@@ -317,9 +334,12 @@ const disablePhoneAuth = async () => {
     );
 
     if (response.data.ok === true) {
+      startLoading();
       console.log("Phone auth disabled successfully");
     }
   } catch (error) {
+    startLoading();
+    enableStation.error = true;
     console.error("Error disabling phone auth:", error);
     if (error.response) {
       console.error("Error response:", error.response.data);
@@ -333,6 +353,7 @@ const startFunction = async () => {
 };
 
 const connectViaQRcode = async () => {
+  startLoading();
   await disablePhoneAuth();
   await startFunction();
 };

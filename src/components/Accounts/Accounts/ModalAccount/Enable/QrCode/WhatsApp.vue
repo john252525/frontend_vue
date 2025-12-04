@@ -10,45 +10,124 @@
       <div class="header">
         <h2 class="title">Подключение WhatsApp</h2>
         <button @click="changeEnableStation" class="close-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </div>
-      
+
       <div class="qr-content">
         <div class="qr-wrapper">
           <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
           <div class="scan-line"></div>
         </div>
-        
+
         <p class="instruction">Отсканируйте QR-код через приложение WhatsApp</p>
-        
+
         <button @click="stopEnableByQR" class="phone-link-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 16.92V19.92C22 20.47 21.55 20.93 21 20.98C20.5 21.03 19.99 21.05 19.5 21C16.74 20.52 14.19 19.24 12.11 17.34C10.39 15.78 9.05 13.87 8.15 11.73C7.59 10.29 7.25 8.76 7.15 7.18C7.11 6.63 7.52 6.14 8.07 6.09C8.57 6.05 9.06 6 9.55 6.05H12.55C13.07 6.05 13.52 6.42 13.59 6.93C13.71 7.79 13.93 8.63 14.25 9.43C14.38 9.76 14.3 10.14 14.05 10.39L13.11 11.33C14.41 13.48 16.52 15.59 18.67 16.89L19.61 15.95C19.74 15.82 19.91 15.74 20.09 15.74C20.17 15.74 20.25 15.75 20.33 15.77C21.13 16.09 21.97 16.31 22.83 16.43C23.34 16.5 23.71 16.95 23.71 17.47V17.48H22.83H22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M22 16.92V19.92C22 20.47 21.55 20.93 21 20.98C20.5 21.03 19.99 21.05 19.5 21C16.74 20.52 14.19 19.24 12.11 17.34C10.39 15.78 9.05 13.87 8.15 11.73C7.59 10.29 7.25 8.76 7.15 7.18C7.11 6.63 7.52 6.14 8.07 6.09C8.57 6.05 9.06 6 9.55 6.05H12.55C13.07 6.05 13.52 6.42 13.59 6.93C13.71 7.79 13.93 8.63 14.25 9.43C14.38 9.76 14.3 10.14 14.05 10.39L13.11 11.33C14.41 13.48 16.52 15.59 18.67 16.89L19.61 15.95C19.74 15.82 19.91 15.74 20.09 15.74C20.17 15.74 20.25 15.75 20.33 15.77C21.13 16.09 21.97 16.31 22.83 16.43C23.34 16.5 23.71 16.95 23.71 17.47V17.48H22.83H22Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           Связать через телефон
         </button>
       </div>
     </article>
   </section>
-  
-  <section v-if="station.phone" class="number-section">
-    <div class="phone-input-container">
-      <input
-        :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-        :placeholder="showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'"
-        @input="formatPhone"
-        @keydown.delete="handleBackspace"
-        class="num-input"
-        type="text"
-        id="phone"
-        v-model="phoneNumber"
-        ref="phoneInput"
-      />
+
+  <section v-if="station.phone" class="phone-section">
+    <div class="phone-container">
+      <div class="phone-header">
+        <h2 class="phone-title">Подключение по телефону</h2>
+        <button @click="changeEnableStation" class="phone-close-button">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="phone-content">
+        <p class="phone-description">
+          Введите номер телефона для подключения WhatsApp
+        </p>
+
+        <div class="phone-input-wrapper">
+          <div class="phone-input-container">
+            <input
+              :class="station.errorPhone ? 'num-input-error' : 'num-input'"
+              :placeholder="
+                showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
+              "
+              @input="formatPhone"
+              @keydown.delete="handleBackspace"
+              class="num-input"
+              type="text"
+              id="phone"
+              v-model="phoneNumber"
+              ref="phoneInput"
+            />
+          </div>
+
+          <div v-if="station.errorPhone" class="error-message">
+            Пожалуйста, введите корректный номер телефона
+          </div>
+        </div>
+
+        <button @click="getCode" class="phone-next-button">Получить код</button>
+
+        <button @click="station.phone = false" class="back-button">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 12H5M12 19L5 12L12 5"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Вернуться к QR-коду
+        </button>
+      </div>
     </div>
-    <button @click="getCode" class="next-button">Продолжить</button>
   </section>
 </template>
 
@@ -78,6 +157,9 @@ const props = defineProps({
     type: Function,
   },
   openEnableMenuTrue: {
+    type: Function,
+  },
+  updateLoadingStatus: {
     type: Function,
   },
 });
@@ -301,7 +383,6 @@ let previousLink = "";
 
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
-  station.loading = true;
   let params = {
     source: source,
     login: login,
@@ -400,7 +481,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link;
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
-      station.loading = false;
+      props.updateLoadingStatus(false);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -432,11 +513,9 @@ const getQr = async () => {
 };
 
 const startEnableByQR = async () => {
-  if (isRunning.value) return; // Если уже работает, не запускаем снова
+  if (isRunning.value) return;
 
-  stationLoading.value = true;
-  station.loading = true;
-  station.text = "Генерируем QR-код...";
+  props.updateLoadingStatus(true, "Генерирация QR-кода");
   await getQr();
 
   let count = 0;
@@ -476,6 +555,7 @@ const getCode = async () => {
     station.errorPhone = true;
     return;
   }
+  props.updateLoadingStatus(true, "Изменение статуса...");
   await enablePhoneAuth();
   await offQrCodeStation();
   await startFunc();
@@ -491,10 +571,7 @@ defineExpose({ stopEnableByQR });
 
 <style scoped>
 .qr-whatsapp-section {
-  /* background: #ffffff; */
   border-radius: 16px;
-  /* padding: 20px; */
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); */
   max-width: 360px;
   width: 100%;
   margin: 0 auto;
@@ -541,7 +618,6 @@ defineExpose({ stopEnableByQR });
   color: #333;
 }
 
-/* QR Code Section */
 .qr-content {
   display: flex;
   flex-direction: column;
@@ -570,13 +646,14 @@ defineExpose({ stopEnableByQR });
   left: 16px;
   right: 16px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #25D366, transparent);
+  background: linear-gradient(90deg, transparent, #25d366, transparent);
   animation: scan 2s ease-in-out infinite;
   border-radius: 1px;
 }
 
 @keyframes scan {
-  0%, 100% {
+  0%,
+  100% {
     top: 16px;
     opacity: 0;
   }
@@ -622,12 +699,7 @@ defineExpose({ stopEnableByQR });
   border-color: #dee2e6;
 }
 
-/* Phone Number Section - ОРИГИНАЛЬНАЯ ВЕРСТКА */
-.phone-input-container {
-  display: flex;
-  gap: 10px;
-}
-
+/* ОРИГИНАЛЬНЫЕ СТИЛИ ДЛЯ ИНПУТА И КНОПКИ */
 .num-input {
   border-radius: 5px;
   padding-left: 10px;
@@ -667,7 +739,198 @@ defineExpose({ stopEnableByQR });
   cursor: pointer;
 }
 
-/* Responsive Design */
+/* НОВЫЕ СТИЛИ ДЛЯ СЕКЦИИ ТЕЛЕФОНА */
+.phone-section {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.phone-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.phone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.phone-title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.phone-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.phone-close-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.phone-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+.phone-description {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.phone-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phone-input-container {
+  display: flex;
+  justify-content: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.phone-next-button {
+  width: 100%;
+  height: 45px;
+  border-radius: 10px;
+  background-color: #25d366;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.phone-next-button:hover {
+  background-color: #1da851;
+}
+
+.phone-next-button:active {
+  transform: translateY(1px);
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.back-button:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+/* Responsive Design для телефонной секции */
+@media (max-width: 500px) {
+  .phone-section {
+    padding: 16px;
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .phone-header {
+    margin-bottom: 20px;
+  }
+
+  .phone-title {
+    font-size: 16px;
+  }
+
+  .phone-content {
+    gap: 16px;
+  }
+
+  .num-input,
+  .num-input-error {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 400px) {
+  .phone-section {
+    padding: 14px;
+    margin: 8px;
+    max-width: calc(100% - 16px);
+  }
+
+  .phone-title {
+    font-size: 15px;
+  }
+
+  .phone-close-button {
+    padding: 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .phone-section {
+    padding: 12px;
+  }
+
+  .phone-title {
+    font-size: 14px;
+  }
+
+  .phone-description {
+    font-size: 13px;
+  }
+
+  .phone-next-button,
+  .back-button {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+}
+
+/* Остальные существующие медиа-запросы */
 @media (max-width: 500px) {
   .number-section {
     width: 300px;
@@ -697,32 +960,32 @@ defineExpose({ stopEnableByQR });
     margin: 12px;
     max-width: calc(100% - 24px);
   }
-  
+
   .header {
     margin-bottom: 16px;
   }
-  
+
   .title {
     font-size: 16px;
   }
-  
+
   .qr-content {
     gap: 16px;
   }
-  
+
   .qr-wrapper {
     padding: 12px;
   }
-  
+
   .qr-code {
     width: 200px;
     height: 200px;
   }
-  
+
   .instruction {
     font-size: 13px;
   }
-  
+
   .phone-link-button {
     padding: 10px 16px;
     font-size: 13px;
@@ -735,37 +998,36 @@ defineExpose({ stopEnableByQR });
     margin: 8px;
     max-width: calc(100% - 16px);
   }
-  
+
   .title {
     font-size: 15px;
   }
-  
+
   .close-button {
     padding: 4px;
   }
-  
+
   .qr-code {
     width: 180px;
     height: 180px;
   }
-  
+
   .instruction {
     font-size: 12px;
   }
-  
+
   .phone-link-button {
     padding: 8px 12px;
     font-size: 12px;
   }
 }
 
-/* Для очень маленьких экранов */
 @media (max-width: 320px) {
   .qr-code {
     width: 160px;
     height: 160px;
   }
-  
+
   .title {
     font-size: 14px;
   }

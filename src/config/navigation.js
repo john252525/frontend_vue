@@ -1,14 +1,25 @@
+// src/config/navigation.js
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { useHelpModalStore } from "@/stores/helpModalStore"; // Импортируем стор напрямую
 
 export const useNavigationConfig = () => {
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
 
+  // Инициализируем стор здесь
+  const helpModalStore = useHelpModalStore();
+
   const isActive = (routeName) => {
     return route.name === routeName;
+  };
+
+  // Функция для открытия модалки помощи
+  const openHelpModal = () => {
+    console.log("Opening help modal from navigation config");
+    helpModalStore.openModal();
   };
 
   const navConfig = ref({
@@ -359,6 +370,7 @@ export const useNavigationConfig = () => {
         //   text: computed(() => t("navigation.help")),
         //   condition: true,
         //   isActive: computed(() => isActive("Help")),
+        //   action: openHelpModal,
         // },
       ],
     },

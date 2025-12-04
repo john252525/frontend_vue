@@ -1,11 +1,9 @@
 <template>
-  <!-- Desktop Menu -->
   <aside
     class="pc-menu"
     v-if="stationDomain.navigate.value && !isMailingMode && !isWidgetMode"
   >
     <nav v-if="!isWidgetMode">
-      <!-- Основные секции меню -->
       <div
         v-for="(section, sectionName) in navSections"
         :key="sectionName"
@@ -18,7 +16,7 @@
             :key="item.name"
             class="list"
             :class="{ active: item.isActive }"
-            @click="item.action ? item.action() : navigateTo(item.name)"
+            @click="handleItemClick(item)"
           >
             <img
               :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
@@ -63,7 +61,7 @@
             :key="item.name"
             class="list"
             :class="{ active: item.isActive }"
-            @click="item.action ? item.action() : navigateTo(item.name)"
+            @click="handleItemClick(item)"
           >
             <img
               :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
@@ -93,7 +91,7 @@
             :key="item.name"
             class="list-mailing"
             :class="{ active: item.isActive }"
-            @click="item.action ? item.action() : navigateTo(item.name)"
+            @click="handleItemClick(item)"
           >
             <img
               :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
@@ -235,35 +233,35 @@
       v-if="!mobileMenuOpen"
       @click="toggleMobileMenu"
     >
-    <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M3 12H21"
-      stroke="var(--text)"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3 6H21"
-      stroke="var(--text)"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3 18H21"
-      stroke="var(--text)"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 12H21"
+          stroke="var(--text)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M3 6H21"
+          stroke="var(--text)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M3 18H21"
+          stroke="var(--text)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
     </button>
   </div>
 </template>
@@ -279,6 +277,8 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const { stationDomain } = useDomain();
 const { navConfig } = useNavigationConfig();
+import { useHelpModalStore } from "@/stores/helpModalStore"; // Добавьте этот импорт
+const helpModalStore = useHelpModalStore(); // Инициализируем стор
 
 const props = defineProps({
   isMailingMode: Boolean,
@@ -307,15 +307,19 @@ onMounted(() => {
   window.addEventListener("resize", checkMobile);
 });
 
-// Остальные функции без изменений
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value;
+// Обработчик клика для десктопного меню
+const handleItemClick = (item) => {
+  console.log("Navigation: Clicked item:", item.name);
+
+  if (item.action) {
+    console.log("Navigation: Calling item action");
+    item.action();
+  } else {
+    navigateTo(item.name);
+  }
 };
 
-const testbtn = () => {
-  window.location.href = "mailto:maksim.test@mail.ru";
-};
-
+// Обработчик клика для мобильного меню
 const handleMobileItemClick = (item) => {
   if (item.action) {
     item.action();
@@ -324,6 +328,15 @@ const handleMobileItemClick = (item) => {
   }
   toggleMobileMenu(); // Закрываем меню после клика
 };
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const testbtn = () => {
+  window.location.href = "mailto:maksim.test@mail.ru";
+};
+
 const navSections = computed(() => {
   const currentNav = stationDomain?.navigate?.value;
   if (!currentNav || !navConfig.value?.[currentNav]) return {};

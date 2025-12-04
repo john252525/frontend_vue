@@ -5,7 +5,12 @@
       :changeEnableStation="changeEnableStation"
       v-if="source === 'telegram'"
     />
-    <WhatsApp :openEnableMenuTrue="openEnableMenuTrue" ref="child" v-else />
+    <WhatsApp
+      :updateLoadingStatus="updateLoadingStatus"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      ref="child"
+      v-else
+    />
   </section>
 </template>
 
@@ -19,6 +24,9 @@ const qrStateBolean = ref(false);
 
 const props = defineProps({
   changeForceStopItemData: {
+    type: Function,
+  },
+  updateLoadingStatus: {
     type: Function,
   },
   openEnableMenuTrue: {

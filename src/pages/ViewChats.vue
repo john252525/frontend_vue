@@ -13,7 +13,6 @@
         <LoadAccount v-if="filteredAccounts.length === 0" />
 
         <div v-else class="accounts-with-loading">
-          <!-- Уже найденные аккаунты -->
           <div class="accounts-grid">
             <div
               v-for="account in filteredAccounts"
@@ -85,8 +84,29 @@
 
       <!-- Список аккаунтов после загрузки -->
       <div v-if="!loading && !error">
-        <div v-if="filteredAccounts.length === 0" class="no-accounts">
-          <LoadAccount />
+        <!-- Состояние "аккаунты не найдено" -->
+        <div
+          v-if="filteredAccounts.length === 0 && accounts.length === 0"
+          class="no-accounts-found"
+        >
+          <div class="empty-state">
+            <div class="empty-icon">📱</div>
+            <h3 class="empty-title">Аккаунты не найдены</h3>
+            <p class="empty-description">
+              У вас пока нет подключенных аккаунтов для работы с чатами.
+            </p>
+            <button @click="fetchAccounts" class="refresh-button">
+              Обновить список
+            </button>
+          </div>
+        </div>
+
+        <!-- Состояние "нет готовых аккаунтов" -->
+        <div
+          v-else-if="filteredAccounts.length === 0 && accounts.length > 0"
+          class="no-ready-accounts"
+        >
+          <NoData type="chats" />
         </div>
 
         <div v-else class="accounts-grid">
@@ -134,6 +154,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 import LoadAccount from "@/components/Accounts/Accounts/LoadAccount.vue";
+import NoData from "@/components/GlobalModal/StationList/NoData.vue";
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const router = useRouter();
@@ -558,6 +579,70 @@ function formatType(type) {
   background: #3a41b8;
 }
 
+/* Состояния "нет аккаунтов" */
+.no-accounts-found,
+.no-ready-accounts {
+  padding: 60px 20px;
+}
+
+.empty-state {
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  padding: 60px 40px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 16px 0;
+}
+
+.empty-description {
+  font-size: 16px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.accounts-count {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.refresh-button {
+  padding: 12px 32px;
+  background: #4950ca;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.refresh-button:hover {
+  background: #3a41b8;
+  transform: translateY(-1px);
+}
+
 .no-accounts {
   padding: 40px 20px;
 }
@@ -581,6 +666,18 @@ function formatType(type) {
   .title {
     font-size: 20px;
   }
+
+  .empty-state {
+    padding: 40px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+  }
+
+  .empty-title {
+    font-size: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -590,6 +687,10 @@ function formatType(type) {
 
   .accounts-content {
     padding: 12px;
+  }
+
+  .empty-state {
+    padding: 30px 15px;
   }
 }
 </style>

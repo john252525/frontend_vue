@@ -100,7 +100,7 @@
         v-if="!loadDataStation && !errorAccountBolean && accounts.length === 0"
         class="none-account-cont"
       >
-        <h2>{{ t("accountList.accountNone") }}</h2>
+        <h2>У вас пока нет рефералов</h2>
       </div>
     </div>
   </section>
@@ -596,4 +596,3 @@ tr:hover {
   }
 }
 </style>
-
