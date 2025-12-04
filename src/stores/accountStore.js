@@ -4,6 +4,7 @@ export const useAccountStore = defineStore("accountStore", {
   state: () => ({
     accountRefreshToken: "",
     accountSourse: "",
+    loading: false, // ИЗМЕНИЛ: было isLoading, стало loading
     accountData: "",
     accountStation: "",
     accountStationText: "",
@@ -11,7 +12,7 @@ export const useAccountStore = defineStore("accountStore", {
     crmPlatform: "amocrm",
     crmPlatformText: "AmoCRM",
     allSource: [],
-    add_deleted: false, // Флаг для показа удаленных аккаунтов
+    add_deleted: false,
     source: ["telegram", "whatsapp", "crm"],
     group: ["messenger", "crm", "bulk"],
     type: ["amocrm", "bitrix24", "bulk"],
@@ -39,6 +40,8 @@ export const useAccountStore = defineStore("accountStore", {
     getGroup: (state) => state.group,
     getType: (state) => state.type,
     getFilterState: (state) => state.filterState,
+    // ИЗМЕНИЛ: геттер для состояния загрузки
+    isLoading: (state) => state.loading,
 
     getAccountInfo: (state) => ({
       accountSourse: state.accountSourse,
@@ -49,7 +52,7 @@ export const useAccountStore = defineStore("accountStore", {
       source: state.source,
       group: state.group,
       type: state.type,
-      add_deleted: state.add_deleted, // Добавляем в информацию об аккаунте
+      add_deleted: state.add_deleted,
     }),
   },
   actions: {
@@ -59,6 +62,12 @@ export const useAccountStore = defineStore("accountStore", {
       this.accountStation = accountInfo.accountStation;
       this.accountStationText = accountInfo.accountStationText;
       this.accountToken = accountInfo.accountToken;
+    },
+
+    // ИЗМЕНИЛ: action для управления состоянием загрузки
+    setLoading(loading) {
+      console.log("🏪 Store: setLoading(", loading, ")");
+      this.loading = loading; // ИЗМЕНИЛ: было this.isLoading
     },
 
     setAddDeleted(value) {
@@ -128,7 +137,7 @@ export const useAccountStore = defineStore("accountStore", {
         amocrm: false,
         bitrix24: false,
       };
-      this.add_deleted = false; // Сбрасываем флаг при сбросе фильтров
+      this.add_deleted = false;
     },
   },
   persist: true,

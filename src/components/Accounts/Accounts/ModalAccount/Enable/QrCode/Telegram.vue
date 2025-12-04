@@ -164,6 +164,9 @@ const props = defineProps({
   openEnableMenuTrue: {
     type: Function,
   },
+  updateLoadingStatus: {
+    type: Function,
+  },
 });
 
 import { useAccountStore } from "@/stores/accountStore";
@@ -382,7 +385,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
-      stationLoading.value = false;
+      props.updateLoadingStatus(false);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -411,11 +414,8 @@ const getInternationalFormat = () => {
 };
 
 const enablePhoneAuth = async () => {
-  console.log("tok", token.value);
-  console.log("tok", token);
-  console.log(token.value);
   const internationalPhone = getInternationalFormat();
-  stationLoading.value = true;
+  props.updateLoadingStatus(true, "Изменение статуса...");
   let params = {
     token: token.value,
     source: source,
@@ -481,7 +481,6 @@ const EnablebyQR = async () => {
 
   let count = 0;
   intervalId = setInterval(async () => {
-    // Если уже вызвали stop (например, при step === 5), не продолжаем
     if (accountInfo.data?.step?.value === 5) {
       clearInterval(intervalId);
       return;
@@ -556,8 +555,6 @@ const getCode = async () => {
     station.errorPhone = true;
     return;
   }
-  console.log("tok", token.value);
-  console.log("tok", token);
   await enablePhoneAuth();
   await offQrCodeStation();
   await startFunc();

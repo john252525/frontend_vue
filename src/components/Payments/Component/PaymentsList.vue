@@ -5,6 +5,7 @@
         <thead class="table-header">
           <tr>
             <th class="table-login">ID</th>
+            <th class="table-type">{{ t("paymentList.type") }}</th>
             <th class="table-step">{{ t("paymentList.sum") }}</th>
             <th class="table-status">{{ t("paymentList.date") }}</th>
             <th class="table-action">{{ t("paymentList.status.table") }}</th>
@@ -17,30 +18,38 @@
             :key="index"
           >
             <td class="name-pay">{{ getPaymentSystem(item.public_id) }}</td>
+            <td class="table-type-text" :class="getTypeClass(item.type)">
+              {{ getTypeText(item.type) }}
+            </td>
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td class="table-text">{{ formatDate(item.dt_ins) }}</td>
             <td
               class="table-status-text"
-              :class="getStatusClass(item.public_status)"
+              :class="getStatusClass(item.public_status, item.type)"
             >
-              {{ getStatusText(item.public_status) }}
+              <template v-if="item.type === 'c' && item.public_status">
+                <button
+                  class="check-button"
+                  @click="openCheck(item.public_status)"
+                  :title="item.public_status"
+                >
+                  Открыть чек
+                </button>
+              </template>
+              <template v-else>
+                {{ getStatusText(item.public_status, item.type) }}
+              </template>
             </td>
-            <!-- <td
-              class="table-status-text"
-              :class="getStatusClass(item.public_status)"
-            >
-              {{ item.public_status }}
-            </td> -->
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
-            <td colspan="4">
+            <td colspan="5">
               <div class="none-account-cont">
                 <h2>Tранзакций нет</h2>
               </div>
             </td>
           </tr>
           <tr v-if="paymentsLoadingStation.loadDataStation">
-            <td colspan="4">
+            <td colspan="5">
               <div class="load-cont">
                 <LoadAccount />
               </div>
@@ -102,6 +111,16 @@ const fetchPayments = async () => {
   }
 };
 
+// Функция для открытия чека
+function openCheck(url) {
+  if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+    window.open(url, "_blank");
+  } else if (url) {
+    // Если URL без протокола, добавляем https://
+    window.open(`https://${url}`, "_blank");
+  }
+}
+
 function removeDecimalZeros(value) {
   return value.toString().replace(/\.00$/, "");
 }
@@ -121,12 +140,56 @@ function formatDate(dateString) {
 function getPaymentSystem(system) {
   const systems = {
     yookassa: "YooKassa",
+    check: "Чек",
     // Добавьте другие платежные системы по мере необходимости
   };
   return systems[system] || system;
 }
 
-function getStatusClass(state) {
+// Функция для получения текста типа транзакции через switch case
+function getTypeText(type) {
+  switch (type) {
+    case "+":
+      return "Пополнение";
+    case "-":
+      return "Списание";
+    case "c":
+      return "Чек";
+    // Добавьте другие типы по мере необходимости
+    // case "transfer":
+    //   return "Перевод";
+    // case "refund":
+    //   return "Возврат";
+    default:
+      return "Неизвестно";
+  }
+}
+
+// Функция для получения класса типа транзакции через switch case
+function getTypeClass(type) {
+  switch (type) {
+    case "+":
+      return "type-income";
+    case "-":
+      return "type-outcome";
+    case "c":
+      return "type-check";
+    // Добавьте другие типы по мере необходимости
+    // case "transfer":
+    //   return "type-transfer";
+    // case "refund":
+    //   return "type-refund";
+    default:
+      return "type-unknown";
+  }
+}
+
+// Обновленная функция для получения класса статуса
+function getStatusClass(state, type) {
+  if (type === "c") {
+    return "check-status";
+  }
+
   switch (state) {
     case "Пополнение завершено": // Успешный платеж
       return "succeeded";
@@ -143,7 +206,12 @@ function getStatusClass(state) {
   }
 }
 
-function getStatusText(state) {
+// Обновленная функция для получения текста статуса
+function getStatusText(state, type) {
+  if (type === "c") {
+    return "Чек создан";
+  }
+
   switch (state) {
     case "Пополнение завершено":
       return t("paymentList.status.succeeded");
@@ -228,6 +296,11 @@ onMounted(fetchPayments);
   padding: 1rem;
 }
 
+.table-type {
+  text-align: left;
+  padding: 1rem;
+}
+
 .load-cont {
   display: flex;
   align-items: center;
@@ -255,6 +328,38 @@ onMounted(fetchPayments);
   padding-right: 15px;
 }
 
+/* Стили для типов транзакций */
+.type-income {
+  color: rgb(39, 146, 39);
+  font-weight: 500;
+}
+
+.type-outcome {
+  color: rgb(253, 86, 86);
+  font-weight: 500;
+}
+
+.type-check {
+  color: rgb(65, 105, 225);
+  font-weight: 500;
+}
+
+.type-transfer {
+  color: rgb(65, 105, 225);
+  font-weight: 500;
+}
+
+.type-refund {
+  color: rgb(255, 165, 0);
+  font-weight: 500;
+}
+
+.type-unknown {
+  color: gray;
+  font-weight: 500;
+}
+
+/* Стили для статусов */
 .canceled {
   color: rgb(253, 86, 86);
 }
@@ -267,12 +372,41 @@ onMounted(fetchPayments);
   color: gray;
 }
 
+.check-status {
+  color: rgb(65, 105, 225);
+}
+
+/* Стиль для кнопки открытия чека */
+.check-button {
+  background: rgb(65, 105, 225);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.check-button:hover {
+  background: rgb(54, 88, 189);
+}
+
+.check-button:active {
+  background: rgb(45, 74, 158);
+}
+
 .table-login {
-  width: 30%;
+  width: 25%;
+}
+
+.table-type {
+  width: 15%;
 }
 
 .table-step {
-  width: 25%;
+  width: 20%;
 }
 
 .table-status {
@@ -280,7 +414,7 @@ onMounted(fetchPayments);
 }
 
 .table-action {
-  width: 25%;
+  width: 20%;
 }
 
 .table-text-number {
@@ -314,6 +448,11 @@ onMounted(fetchPayments);
 }
 
 .table-status-text {
+  text-align: left;
+}
+
+.table-type-text {
+  padding: 1rem;
   text-align: left;
 }
 
@@ -412,16 +551,25 @@ tr:hover {
     width: 20%;
   }
 
+  .table-type {
+    width: 15%;
+  }
+
   .table-step {
     width: 15%;
   }
 
   .table-status {
-    width: 40%;
+    width: 30%;
   }
 
   .table-action {
-    width: 25%;
+    width: 20%;
+  }
+
+  .check-button {
+    padding: 4px 8px;
+    font-size: 11px;
   }
 }
 </style>

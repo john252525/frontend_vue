@@ -1,5 +1,5 @@
 <template>
-  <div @click="allStop" class="black-fon"></div>
+  <div class="black-fon"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
     <QrCode
@@ -7,9 +7,11 @@
       :changeForceStopItemData="changeForceStopItemData"
       ref="subComponentRef"
       v-if="station.qrCode"
+      :updateLoadingStatus="updateLoadingStatus"
       :changeEnableStation="changeEnableStation"
     />
     <GetCode
+      :updateLoadingStatus="updateLoadingStatus"
       :openEnableMenuTrue="openEnableMenuTrue"
       ref="subComponent"
       v-if="station.getCode"
@@ -19,6 +21,7 @@
       :close="changeEnableStation"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeChallengeRequired="changeChallengeRequired"
+      :updateLoadingStatus="updateLoadingStatus"
       v-if="station.ChallengeRequired"
     />
     <LoadingModal
@@ -134,12 +137,30 @@ const allStop = () => {
   isRunning = false;
 };
 
+const updateLoadingStatus = (status, text) => {
+  if (status === true) {
+    station.stationLoading = true;
+  } else {
+    station.stationLoading = false;
+  }
+
+  if (text) {
+    station.text = text;
+  }
+};
+
 const offQrCodeStation = () => {
   station.qrCode = false;
 };
 
 const offQrQrStation = () => {
   station.getCode = false;
+};
+
+const resetAllStation = async () => {
+  station.QrCode = false;
+  station.getCode = false;
+  station.ChallengeRequired = false;
 };
 
 const code = ref(null);
@@ -160,6 +181,8 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const forceStop = async () => {
+  await resetAllStation();
+  station.text = "Подготовка входа...";
   const { source, login, storage } = selectedItem.value;
   let params = {
     source: source,
@@ -213,7 +236,41 @@ const forceStop = async () => {
 };
 
 const setState = async (request) => {
+  station.text = "Проверка статуса...";
   const { source, login, storage, type } = selectedItem.value;
+
+  let loadingTextTimer;
+  const LOADING_TEXT_CHANGE_DELAY = 2000; // 8 секунд
+  const LOADING_TEXTS = [
+    "Проверка статуса...",
+    "Ожидание ответа...",
+    "Почти готово...",
+    "Завершаем подключение...",
+  ];
+  let currentLoadingTextIndex = 0;
+
+  const startLoadingTextRotation = () => {
+    loadingTextTimer = setInterval(() => {
+      currentLoadingTextIndex++;
+      if (currentLoadingTextIndex >= LOADING_TEXTS.length) {
+        currentLoadingTextIndex = 1; // Возвращаемся ко второму элементу, чтобы не повторять первый
+      }
+      station.text = LOADING_TEXTS[currentLoadingTextIndex];
+    }, LOADING_TEXT_CHANGE_DELAY);
+  };
+
+  const stopLoadingTextRotation = () => {
+    if (loadingTextTimer) {
+      clearInterval(loadingTextTimer);
+      loadingTextTimer = null;
+    }
+  };
+
+  // Запускаем таймер для смены текста
+  const initialTextTimer = setTimeout(() => {
+    startLoadingTextRotation();
+  }, LOADING_TEXT_CHANGE_DELAY);
+
   let params = {
     source: source,
     login: login,
@@ -232,13 +289,19 @@ const setState = async (request) => {
       setState: true,
     };
   }
+
   try {
     const response = await axios.post(`${FRONTEND_URL}setState`, params, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         Authorization: `Bearer ${token.value}`,
       },
+      timeout: 60000, // 60 секунд таймаут для запроса
     });
+
+    // Останавливаем все таймеры
+    clearTimeout(initialTextTimer);
+    stopLoadingTextRotation();
 
     if (response.data) {
       await handleSendLog(
@@ -266,6 +329,7 @@ const setState = async (request) => {
         station.stationLoading = false;
       }, 1000);
       if (response.data.error.message === "QR received") {
+        station.text = "Генерация QR-кода...";
         station.qrCode = true;
       } else if (response.data.error.message === "Challenge required") {
         station.stationLoading = false;
@@ -292,6 +356,10 @@ const setState = async (request) => {
   } catch (error) {
     console.error(`error`, error);
 
+    // Останавливаем все таймеры при ошибке
+    clearTimeout(initialTextTimer);
+    stopLoadingTextRotation();
+
     station.result = true;
     station.stationLoading = false;
     if (error.response) {
@@ -306,7 +374,7 @@ const startFunc = async () => {
   isRunning = true;
   station.stationLoading = true;
   station.result = false;
-  station.text = t("globalLoading.checkAccoutn");
+  // station.text = t("globalLoading.checkAccoutn");
 
   await forceStop();
   if (isRunning) {

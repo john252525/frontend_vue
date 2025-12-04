@@ -34,6 +34,29 @@
                 <AccountIcon :item="item" />
                 <span>{{ item.name || item.login || "-" }}</span>
                 <DeletedBadge v-if="item.enable === '0'" />
+
+                <!-- Предупреждение о подписке для десктопа -->
+                <div
+                  v-if="showSubscriptionWarning(item)"
+                  class="subscription-warning-desktop"
+                  @click="openSubscriptionModal(item)"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53216 19 5.07183 19Z"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
               </div>
             </td>
             <td class="table-text">
@@ -72,17 +95,22 @@
             </td>
             <td v-if="accountStation === 'crm'">{{ item.type }}</td>
             <td v-if="item.subscription_dt_to === null">
-              <button
+              <div
                 v-if="
                   item.type != 'amocrm' &&
                   item.type != 'bitrix24' &&
                   item.enable !== '0'
                 "
-                class="open-tariff-button"
-                @click="changeTariffStation(item)"
+                class="subscription-status"
               >
-                Продлить
-              </button>
+                <button
+                  class="open-tariff-button"
+                  @click="changeTariffStation(item)"
+                >
+                  Активировать
+                </button>
+                <!-- Предупреждение о подписке в колонке подписки -->
+              </div>
               <span
                 v-else-if="
                   (item.type === 'amocrm' || item.type === 'bitrix24') &&
@@ -176,8 +204,33 @@
         <div class="card-header">
           <div class="account-info">
             <AccountIcon :item="item" />
-            <span>{{ item.name || item.login || "-" }}</span>
+            <span class="account-login">{{
+              item.name || item.login || "-"
+            }}</span>
             <DeletedBadge v-if="item.enable === '0'" />
+
+            <!-- Предупреждение о подписке для мобильной версии -->
+            <div
+              v-if="showSubscriptionWarning(item)"
+              class="subscription-warning-mobile"
+              @click="openSubscriptionModal(item)"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53216 19 5.07183 19Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
           </div>
           <button class="action-gear" @click="openMobileModal($event, item)">
             <svg
@@ -234,7 +287,15 @@
           <div class="card-row">
             <span class="label">Подписка:</span>
             <span class="value">
-              <span v-if="item.subscription_dt_to === null"> - </span>
+              <span v-if="item.subscription_dt_to === null">
+                <span
+                  v-if="showSubscriptionWarning(item)"
+                  class="no-subscription-text"
+                >
+                  Не активирована
+                </span>
+                <span v-else>-</span>
+              </span>
               <span v-else class="subscription-date">
                 До {{ formatSubscriptionDate(item.subscription_dt_to) }}
               </span>
@@ -252,7 +313,7 @@
           "
         >
           <button class="payment-btn" @click="changeTariffStation(item)">
-            Оплатить
+            Активировать
           </button>
         </div>
       </div>
@@ -273,6 +334,14 @@
       </div>
     </div>
 
+    <!-- Модалка предупреждения о подписке -->
+    <WarningAccount
+      v-if="showWarningModal"
+      :item="selectedWarningItem"
+      @close="closeWarningModal"
+    />
+
+    <!-- Остальные модалки без изменений -->
     <Tariff
       v-if="tariffStation"
       :selectedItem="selectedItem"
@@ -373,12 +442,20 @@ import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
 import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
-import { useAccountStore } from "@/stores/accountStore";
+
+const props = defineProps({
+  changeAllAccounts: {
+    type: Function,
+  },
+});
+
 import NoData from "@/components/GlobalModal/StationList/NoData.vue";
 import StatusBadge from "./StatusBadge.vue";
 import SendSupport from "./ModalAccount/SendSupport.vue";
 import Binding from "./ModalAccount/AmoCrm/Binding.vue";
+import WarningAccount from "./WarningAccount.vue";
 
+import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
@@ -588,164 +665,193 @@ const DeletedBadge = {
 };
 
 const getAccounts = async () => {
-  dataStationNone.value = false;
-  errorAccountBolean.value = false;
-  console.log(sourceGroup.value);
-  instanceData.value = [];
-  let params = {
-    source: accountStation.value,
-    skipDetails: true,
-    group: "messenger",
-  };
+  console.log("🔄 AccountList: начало загрузки");
 
-  if (stationDomain.navigate.value === "touchapi") {
-    console.log("touch");
-    params = {
-      source: sourceGroup.value,
-      type: typeGroup.value,
-      group: allGroup.value,
-      add_deleted: addDeleted.value,
-    };
+  if (!accountStore || typeof accountStore.setLoading !== "function") {
+    console.error("❌ AccountList: store или setLoading не доступны");
+    return [];
   }
 
-  if (stationDomain.navigate.value === "whatsapi") {
-    params = {
-      source: sourceGroup.value,
-      type: typeGroup.value,
-      group: allGroup.value,
-      add_deleted: addDeleted.value,
-    };
-  }
-
-  loadDataStation.value = true;
   try {
-    const response = await axios.post(`${FRONTEND_URL}getInfoByToken`, params, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+    console.log("🔄 AccountList: устанавливаем loading = true");
+    accountStore.setLoading(true);
 
-    if (response.data.ok === true) {
-      await handleSendLog(
-        "accountList",
-        "getInfoByToken",
+    dataStationNone.value = false;
+    errorAccountBolean.value = false;
+    instanceData.value = [];
+    let params = {
+      source: accountStation.value,
+      skipDetails: true,
+      group: "messenger",
+    };
+
+    if (stationDomain.navigate.value === "touchapi") {
+      params = {
+        source: sourceGroup.value,
+        type: typeGroup.value,
+        group: allGroup.value,
+        add_deleted: addDeleted.value,
+      };
+    }
+
+    if (stationDomain.navigate.value === "whatsapi") {
+      params = {
+        source: sourceGroup.value,
+        type: typeGroup.value,
+        group: allGroup.value,
+        add_deleted: addDeleted.value,
+      };
+    }
+
+    loadDataStation.value = true;
+    console.log("Параметры отправки", params);
+    try {
+      const response = await axios.post(
+        `${FRONTEND_URL}getInfoByToken`,
         params,
-        response.data.ok,
-        response.data
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.value}`,
+          },
+        }
       );
 
-      accounts.value = response.data;
-      instanceData.value = accounts.value.data.instances.map((instance) => ({
-        ...instance,
-        step: instance.step === null ? "Н/Д" : instance.step,
-        loading: true,
-        storage: instance.storage || "undefined",
-        type: instance.type || "undefined",
-      }));
+      if (response.data.ok === true) {
+        accounts.value = response.data;
+        instanceData.value = accounts.value.data.instances.map((instance) => ({
+          ...instance,
+          step: instance.step === null ? "Н/Д" : instance.step,
+          loading: true,
+          storage: instance.storage || "undefined",
+          type: instance.type || "undefined",
+        }));
 
-      if (instanceData.value.length === 0) {
-        loadDataStation.value = false;
-        dataStationNone.value = true;
-      } else {
-        loadDataStation.value = false;
-        dataStation.value = true;
+        await props.changeAllAccounts(instanceData.value);
 
-        if (
-          accountStation.value === "whatsapp" ||
-          accountStation.value === "telegram"
-        ) {
-          // Фильтруем аккаунты для получения чатов, исключая bulk, amocrm, bitrix24
-          const accountsToFetch = instanceData.value.filter(
-            (instance) =>
-              instance.step?.value === 5 &&
-              !["bulk", "amocrm", "bitrix24"].includes(instance.type) &&
-              ((instance.storage === "binder" &&
-                instance.type !== "touchapi") ||
-                (instance.storage === "whatsapi" &&
-                  instance.type === "whatsapi"))
-          );
-
-          if (accountsToFetch.length > 0) {
-            try {
-              await new Promise((resolve) =>
-                setTimeout(resolve, 200 * accountsToFetch.length)
-              );
-              const result = await fetchChats({
-                token: token.value,
-                accounts: accountsToFetch,
-              });
-              if (result.error) {
-                console.error("Ошибка пакетного запроса чатов:", result.error);
-              }
-            } catch (e) {
-              console.error("Ошибка при сохранении аккаунтов:", e);
-            } finally {
-              accountsToFetch.forEach((instance) => {
-                instance.loading = false;
-              });
-            }
-          }
-
-          // Создаем промисы только для аккаунтов, которым нужны запросы getInfo
-          const promises = instanceData.value.map(async (instance) => {
-            const login = instance.login;
-
-            // Пропускаем запросы для bulk, amocrm и bitrix24 аккаунтов
-            if (
-              instance.type === "bulk" ||
-              instance.type === "amocrm" ||
-              instance.type === "bitrix24"
-            ) {
-              instance.loading = false;
-              return;
-            }
-
-            if (
-              (instance.storage === "binder" && instance.type !== "touchapi") ||
-              (instance.storage === "whatsapi" && instance.type === "whatsapi")
-            ) {
-              instance.loading = false;
-              return;
-            }
-
-            try {
-              const infoResponse = await getInfoWhats(
-                instance.source,
-                login,
-                instance.type,
-                instance.storage
-              );
-
-              if (infoResponse?.data?.step) {
-                instance.step = infoResponse.data.step;
-              }
-            } catch (error) {
-              console.error(`Error for ${login}:`, error);
-            } finally {
-              instance.loading = false;
-            }
-          });
-
-          await Promise.all(promises);
-          chatsLoadingChange();
+        if (instanceData.value.length === 0) {
+          loadDataStation.value = false;
+          dataStationNone.value = true;
         } else {
-          // Для других станций просто отключаем loading для всех аккаунтов
-          instanceData.value.forEach((instance) => {
-            instance.loading = false;
-          });
+          loadDataStation.value = false;
+          dataStation.value = true;
+
+          if (
+            accountStation.value === "whatsapp" ||
+            accountStation.value === "telegram"
+          ) {
+            const accountsToFetch = instanceData.value.filter(
+              (instance) =>
+                instance.step?.value === 5 &&
+                !["bulk", "amocrm", "bitrix24"].includes(instance.type) &&
+                ((instance.storage === "binder" &&
+                  instance.type !== "touchapi") ||
+                  (instance.storage === "whatsapi" &&
+                    instance.type === "whatsapi"))
+            );
+
+            if (accountsToFetch.length > 0) {
+              try {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 200 * accountsToFetch.length)
+                );
+                const result = await fetchChats({
+                  token: token.value,
+                  accounts: accountsToFetch,
+                });
+              } catch (e) {
+                console.error("Ошибка при сохранении аккаунтов:", e);
+              }
+            }
+
+            const promises = instanceData.value.map(async (instance) => {
+              const login = instance.login;
+
+              if (
+                instance.type === "bulk" ||
+                instance.type === "amocrm" ||
+                instance.type === "bitrix24"
+              ) {
+                instance.loading = false;
+                return;
+              }
+
+              if (
+                (instance.storage === "binder" &&
+                  instance.type !== "touchapi") ||
+                (instance.storage === "whatsapi" &&
+                  instance.type === "whatsapi")
+              ) {
+                instance.loading = false;
+                return;
+              }
+
+              try {
+                const infoResponse = await getInfoWhats(
+                  instance.source,
+                  login,
+                  instance.type,
+                  instance.storage
+                );
+
+                if (infoResponse?.data?.step) {
+                  instance.step = infoResponse.data.step;
+                }
+              } catch (error) {
+                console.error(`Error for ${login}:`, error);
+              } finally {
+                instance.loading = false;
+              }
+            });
+
+            await Promise.all(promises);
+            chatsLoadingChange();
+          } else {
+            instanceData.value.forEach((instance) => {
+              instance.loading = false;
+            });
+          }
         }
       }
-    } else if (response.data === 401) {
-      errorBlock.value = true;
+    } catch (error) {
       loadDataStation.value = false;
       errorAccountBolean.value = true;
+      console.error("Error:", error);
     }
   } catch (error) {
-    loadDataStation.value = false;
-    errorAccountBolean.value = true;
-    console.error("Error:", error);
+    console.error("❌ AccountList: ошибка в основном блоке:", error);
+  } finally {
+    console.log("✅ AccountList: устанавливаем loading = false");
+    console.log("✅ AccountList: возвращаем аккаунты:", instanceData.value);
+    accountStore.setLoading(false);
+    return instanceData.value;
   }
+};
+
+// Добавьте эти переменные
+// Добавьте эти переменные в начало script setup
+const showWarningModal = ref(false);
+const selectedWarningItem = ref(null);
+
+// Добавьте эти методы
+const showSubscriptionWarning = (item) => {
+  return (
+    item.subscription_dt_to === null &&
+    item.type !== "amocrm" &&
+    item.type !== "bitrix24" &&
+    item.enable !== "0" &&
+    item.type !== "bulk"
+  );
+};
+
+const openSubscriptionModal = (item) => {
+  selectedWarningItem.value = item;
+  showWarningModal.value = true;
+};
+
+const closeWarningModal = () => {
+  showWarningModal.value = false;
+  selectedWarningItem.value = null;
 };
 
 const checkStatusBulkAccount = () => {};
@@ -779,6 +885,7 @@ const updateUserInfo = (event) => {
 };
 
 const getAllAccounts = () => {
+  console.log("📦 getAllAccounts вызван, возвращаем:", instanceData.value);
   return instanceData.value;
 };
 
@@ -790,40 +897,135 @@ const openModal = (event, item) => {
 
   const rect = event.currentTarget.getBoundingClientRect();
   const modalWidth = 160;
-  const edgeMargin = 10; // Минимальный отступ от краев
+  const edgeMargin = 10;
 
-  // Базовая позиция - сразу под кнопкой с небольшим отступом
-  let left = rect.left + window.scrollX;
-  let top = rect.bottom + window.scrollY + 2; // Всего 2px от кнопки
+  // Динамически рассчитываем высоту модалки на основе количества действий
+  const actionCount = getActionCount(item);
+  const itemHeight = 32; // Высота одного пункта меню
+  const padding = 16; // Внутренние отступы
+  const estimatedModalHeight = actionCount * itemHeight + padding;
 
-  // Проверяем правую границу (только если действительно выходит)
-  if (left + modalWidth > window.innerWidth + window.scrollX - edgeMargin) {
-    left = window.innerWidth + window.scrollX - modalWidth - edgeMargin;
+  if (window.innerWidth <= 768) {
+    // Для мобильных - позиционируем снизу экрана
+    modalPosition.value = {
+      top: "auto",
+      bottom: "10px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "90%",
+      maxWidth: "400px",
+    };
+  } else {
+    // Для десктопа - умное позиционирование
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 5;
+
+    // Проверяем правую границу
+    if (left + modalWidth > window.innerWidth - edgeMargin) {
+      left = window.innerWidth - modalWidth - edgeMargin;
+    }
+
+    // Проверяем левую границу
+    if (left < edgeMargin) {
+      left = edgeMargin;
+    }
+
+    // Проверяем, помещается ли модалка снизу
+    const spaceBelow = window.innerHeight - rect.bottom - 15; // + отступ
+    const spaceAbove = rect.top - 15;
+
+    // Для модалок с 1-2 элементами ВСЕГДА показываем снизу (если хватает места)
+    if (actionCount <= 2) {
+      // Для маленьких модалок всегда предпочитаем позицию снизу
+      if (spaceBelow < estimatedModalHeight) {
+        // Если снизу не хватает места, ограничиваем высоту или показываем сверху
+        if (spaceAbove > spaceBelow) {
+          top = rect.top + window.scrollY - estimatedModalHeight - 5;
+        } else {
+          // Если и сверху мало места, ограничиваем позицию снизу
+          top = window.innerHeight - estimatedModalHeight - edgeMargin;
+        }
+      }
+    } else {
+      // Для больших модалок используем стандартную логику
+      if (spaceBelow < estimatedModalHeight && spaceAbove > spaceBelow) {
+        top = rect.top + window.scrollY - estimatedModalHeight - 5;
+      }
+    }
+
+    // Финальная проверка границ
+    if (top < edgeMargin) {
+      top = edgeMargin;
+    }
+
+    if (top + estimatedModalHeight > window.innerHeight - edgeMargin) {
+      top = window.innerHeight - estimatedModalHeight - edgeMargin;
+    }
+
+    modalPosition.value = {
+      top: Math.max(edgeMargin, Math.round(top)),
+      left: Math.max(edgeMargin, Math.round(left)),
+    };
+  }
+};
+
+// Функция для точного подсчета количества действий в модалке
+const getActionCount = (item) => {
+  if (!item) return 1;
+
+  // Для отключенных аккаунтов - только "Написать в ТП"
+  if (item.enable === "0") {
+    return 1;
   }
 
-  // Проверяем левую границу (только если действительно выходит)
-  if (left < window.scrollX + edgeMargin) {
-    left = window.scrollX + edgeMargin;
-  }
+  let count = 0;
 
-  // Проверяем нижнюю границу только если модалка сильно выходит
-  const modalHeight = 300;
-  const bottomEdge = window.innerHeight + window.scrollY;
+  // Обычные аккаунты (не CRM, не bulk)
+  if (!["amocrm", "bitrix24", "bulk"].includes(item.type)) {
+    // Подписка
+    if (!["amocrm", "bitrix24"].includes(item.type)) count++;
 
-  if (top + modalHeight > bottomEdge - edgeMargin) {
-    // Показываем над кнопкой, но тоже близко
-    top = rect.top + window.scrollY - modalHeight - 2; // Всего 2px от кнопки
+    // Настройки + смена имени
+    count += 2;
 
-    // Если не помещается и сверху, немного сдвигаем вниз
-    if (top < window.scrollY + edgeMargin) {
-      top = window.scrollY + edgeMargin;
+    // Скриншот (только не для telegram)
+    if (item.source !== "telegram") count++;
+
+    // Включить/Выключить/Сбросить
+    count += 3;
+
+    // Смена прокси
+    count++;
+
+    // Удаление (если доступно)
+    if (
+      !(
+        (item.storage === "binder" && item.type === "touchapi") ||
+        (item.storage === "whatsapi" && item.type === "undefined")
+      )
+    ) {
+      count++;
     }
   }
+  // CRM аккаунты
+  else if (["amocrm", "bitrix24"].includes(item.type)) {
+    count++; // Обновить аккаунт
 
-  modalPosition.value = {
-    top: Math.round(top),
-    left: Math.round(left),
-  };
+    if (item.type === "amocrm") {
+      count++; // Привязать (только для amoCRM)
+    }
+
+    if (item.source !== "telegram") {
+      count++; // Удалить аккаунт (только не для telegram)
+    }
+  }
+  // Bulk аккаунты
+  else if (item.type === "bulk") {
+    // Для bulk аккаунтов обычно только подписка и базовые действия
+    count += 2; // Подписка + базовые настройки
+  }
+
+  return Math.max(1, count); // Всегда минимум 1 действие
 };
 
 function formatPhoneNumber(phoneNumber) {
@@ -890,6 +1092,7 @@ const isActionAvailable = (item) => {
 };
 
 const openMobileModal = (event, item) => {
+  // Для мобильных используем тот же подход, что и в openModal
   openModal(event, item);
 };
 
@@ -972,6 +1175,7 @@ onMounted(async () => {
 
 defineExpose({
   getAccounts,
+  getAllAccounts,
 });
 
 provide("selectedItems", { selectedItems });
@@ -1025,7 +1229,11 @@ provide("changeEnableStation", { changeEnableStation });
 }
 
 .open-tariff-button {
-  width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  width: 96px;
   padding: 8px;
   border: none;
   border-radius: 8px;
@@ -1233,6 +1441,147 @@ provide("changeEnableStation", { changeEnableStation });
   );
   animation: highlight 3s ease-in-out forwards;
   z-index: -1;
+}
+
+/* Стили для предупреждения о подписке */
+.subscription-warning-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.subscription-warning-desktop:hover {
+  color: #d97706;
+  transform: scale(1.1);
+}
+
+.subscription-warning-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 6px;
+}
+
+.subscription-warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+}
+
+.no-subscription-text {
+  color: #dc2626;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Компонент WarningIcon */
+.warning-icon-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Стили для предупреждения о подписке */
+.subscription-warning-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.subscription-warning-desktop:hover {
+  color: #d97706;
+  transform: scale(1.1);
+}
+
+.subscription-warning-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.subscription-warning-mobile:hover {
+  color: #d97706;
+  transform: scale(1.1);
+}
+
+.subscription-warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.subscription-warning-icon:hover {
+  color: #d97706;
+  transform: scale(1.1);
+}
+
+.subscription-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.no-subscription-text {
+  color: #dc2626;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Для мобильных карточек - улучшаем отображение */
+.account-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.account-login {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
 @keyframes highlight {

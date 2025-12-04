@@ -313,7 +313,7 @@ const addAccount = async () => {
       );
     }
 
-    if (response.data.data.status != "error") {
+    if (response.data.ok === true) {
       loading.value = false;
       setLoadingStatus(true, "success");
       props.openAddAccountStation();

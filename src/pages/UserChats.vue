@@ -86,6 +86,8 @@ import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRoute } from "vue-router";
 
+const FRONTEND_URL = import.meta.env.VITE_CHATS_URL;
+
 const dataError = ref(false);
 const loading = ref(true);
 const error = ref(null);
@@ -109,7 +111,7 @@ const fetchChatUrl = async () => {
     }
 
     const response = await axios.post(
-      "https://chats.apitter.com/account/get-url",
+      `${FRONTEND_URL}get-url`,
       {
         login: route.query?.login,
         source: route.query?.source,

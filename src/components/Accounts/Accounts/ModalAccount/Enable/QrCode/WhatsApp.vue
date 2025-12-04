@@ -159,6 +159,9 @@ const props = defineProps({
   openEnableMenuTrue: {
     type: Function,
   },
+  updateLoadingStatus: {
+    type: Function,
+  },
 });
 
 const countries = ref([
@@ -380,7 +383,6 @@ let previousLink = "";
 
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
-  station.loading = true;
   let params = {
     source: source,
     login: login,
@@ -479,7 +481,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link;
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
-      station.loading = false;
+      props.updateLoadingStatus(false);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -511,11 +513,9 @@ const getQr = async () => {
 };
 
 const startEnableByQR = async () => {
-  if (isRunning.value) return; // Если уже работает, не запускаем снова
+  if (isRunning.value) return;
 
-  stationLoading.value = true;
-  station.loading = true;
-  station.text = "Генерируем QR-код...";
+  props.updateLoadingStatus(true, "Генерирация QR-кода");
   await getQr();
 
   let count = 0;
@@ -555,6 +555,7 @@ const getCode = async () => {
     station.errorPhone = true;
     return;
   }
+  props.updateLoadingStatus(true, "Изменение статуса...");
   await enablePhoneAuth();
   await offQrCodeStation();
   await startFunc();

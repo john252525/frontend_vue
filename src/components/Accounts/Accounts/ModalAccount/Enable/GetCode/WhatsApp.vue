@@ -127,6 +127,9 @@ const props = defineProps({
   changeEnableStation: {
     type: Function,
   },
+  updateLoadingStatus: {
+    type: Function,
+  },
 });
 
 import { useAccountStore } from "@/stores/accountStore";
@@ -365,7 +368,7 @@ const getAuthCode = async () => {
     });
 
     if (response.data.status === "ok") {
-      station.stationLoading = false;
+      props.updateLoadingStatus(false);
       station.code = true;
       userCode.value = response.data.authCode;
 
@@ -384,7 +387,7 @@ const getAuthCode = async () => {
     } else if (response.data.error?.message === "Auth code is undefined") {
       station.error = true;
       clearInterval(authCodeInterval);
-      station.stationLoading = false;
+      props.updateLoadingStatus(false);
       station.code = false;
       isSyncing.value = false;
       return response.data;
@@ -500,6 +503,7 @@ const handleClose = () => {
 // Модифицируем getQr для остановки всех запросов
 const getQr = async () => {
   stopAllRequests();
+  props.updateLoadingStatus(true, "Изменение статуса...");
   await disablePhoneAuth();
   await offQrQrStation();
   await startFunc();

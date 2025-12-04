@@ -51,7 +51,7 @@
             class="action"
             v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
             @click="openTariff"
-            >Продлить</span
+            >Подписка</span
           >
           <span
             class="action"
@@ -117,7 +117,7 @@
             >{{ t("modalAccount.deleteAccount") }}</span
           >
           <span
-            v-if="['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="['amocrm', 'bitrix24'].includes(selectedItem.type)"
             class="action"
             @click="updateAccountButton"
             >Обновить аккаунт</span
@@ -127,7 +127,7 @@
             v-if="['amocrm'].includes(selectedItem.type)"
             class="action"
             @click="changeBindingStation"
-            >Привязать</span
+            >Воронки</span
           >
 
           <span
@@ -196,6 +196,7 @@ import {
   reactive,
   onMounted,
   inject,
+  onUnmounted,
   watch,
   computed,
 } from "vue";

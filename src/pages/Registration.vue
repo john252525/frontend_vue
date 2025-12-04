@@ -340,7 +340,7 @@ const loginAccount = async () => {
         "login",
         {
           username: formData.login,
-          phone: "+7" + formData.phone,
+          phone: formData.phone,
           channels: formData.contact_preferred_channels,
         },
         response.data.ok,

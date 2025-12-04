@@ -540,6 +540,7 @@ const submitForm = async () => {
       setLoadingStatus(true, "success");
       changeStationLoading();
       props.openModal();
+      location.reload();
     } else {
       setLoadingStatus(true, "error");
       changeStationLoading();

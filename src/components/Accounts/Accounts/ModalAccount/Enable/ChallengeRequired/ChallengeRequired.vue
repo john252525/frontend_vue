@@ -1,4 +1,11 @@
 <template>
+  <LoadingModal
+    :textLoadin="'Загрузка кода'"
+    :station-loading="station.loading"
+  />
+
+  <CodeWarningModal :isOpen="isWarningModalOpen" @close="closeWarningModal" />
+
   <div class="code-auth-container">
     <div class="code-auth-modal">
       <div class="code-auth-header">
@@ -18,7 +25,7 @@
       <div class="code-auth-body">
         <div class="code-input-section">
           <p class="code-description">
-            Введите 6-значный код подтверждения, отправленный на ваш телефон
+            Введите 5-значный код подтверждения, отправленный на ваш телефон
           </p>
 
           <div class="code-input-container">
@@ -26,7 +33,7 @@
               class="code-input"
               type="text"
               v-model="code"
-              maxlength="6"
+              maxlength="5"
               required
               placeholder="000000"
               @input="formatCode"
@@ -35,7 +42,7 @@
             <div class="code-input-underline"></div>
           </div>
 
-          <div class="code-hint">
+          <div class="code-hint clickable" @click="openWarningModal">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
@@ -44,7 +51,7 @@
                 stroke-linecap="round"
               />
             </svg>
-            Код действителен в течение 5 минут
+            Код не пришел?
           </div>
         </div>
       </div>
@@ -91,32 +98,28 @@
     </div>
 
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-
-    <LoadingModal :station-loading="station.loading" />
   </div>
 </template>
 
 <script setup>
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
 import axios from "axios";
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import ResultModal from "../ResultModal.vue";
-import ResultModalTrue from "../ResultModalTrue.vue";
+import CodeWarningModal from "./CodeWarningModal.vue";
 import LoadingModal from "../LoadingModal.vue";
+
 import { ref, inject, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
-
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
+import useFrontendLogger from "@/composables/useFrontendLogger";
 
 const props = defineProps({
   changeChallengeRequired: {
     type: Function,
   },
   openEnableMenuTrue: {
+    type: Function,
+  },
+  updateLoadingStatus: {
     type: Function,
   },
   openError: {
@@ -127,11 +130,18 @@ const props = defineProps({
   },
 });
 
-const router = useRouter();
-const code = ref("");
-const { selectedItem, offQrQrStation, startFunc } = inject("accountItems");
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
+const { sendLog } = useFrontendLogger();
+
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
+
+const { selectedItem, startFunc } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
-const { changeEnableStation } = inject("changeEnableStation");
 
 const station = reactive({
   station: undefined,
@@ -140,15 +150,23 @@ const station = reactive({
   resultTrue: false,
 });
 
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
+const router = useRouter();
+
+const code = ref("");
 const errorBlock = ref(false);
+const isWarningModalOpen = ref(false);
+
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
 };
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
+const openWarningModal = () => {
+  isWarningModalOpen.value = true;
+};
+
+const closeWarningModal = () => {
+  isWarningModalOpen.value = false;
+};
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
@@ -158,9 +176,8 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-// Валидация кода
 const isCodeValid = computed(() => {
-  return code.value.length === 6 && /^\d+$/.test(code.value);
+  return code.value.length === 5 && /^\d+$/.test(code.value);
 });
 
 // Форматирование кода
@@ -168,8 +185,8 @@ const formatCode = () => {
   // Удаляем все нецифровые символы
   code.value = code.value.replace(/\D/g, "");
   // Ограничиваем длину 6 символами
-  if (code.value.length > 6) {
-    code.value = code.value.slice(0, 6);
+  if (code.value.length > 5) {
+    code.value = code.value.slice(0, 5);
   }
 };
 
@@ -191,7 +208,7 @@ const solveChallenge = async () => {
   console.log("Token value:", token.value);
   console.log("Token type:", typeof token.value);
 
-  station.loading = true;
+  props.updateLoadingStatus(true, "Проверка кода...");
   station.code = false;
 
   let params = {
@@ -236,7 +253,7 @@ const solveChallenge = async () => {
 
     if (response.data.status === "ok") {
       props.openEnableMenuTrue();
-      station.loading = false;
+      props.updateLoadingStatus(false);
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -245,7 +262,7 @@ const solveChallenge = async () => {
       }, 2000);
     } else {
       props.openError();
-      station.loading = false;
+      props.updateLoadingStatus(false);
     }
   } catch (error) {
     console.error("Request error:", error);
@@ -278,7 +295,7 @@ const disablePhoneAuth = async () => {
     if (response.data.status === "ok") {
     } else {
       props.openError();
-      station.loading = false;
+      updateLoadingStatus(false);
     }
   } catch (error) {
     console.error("Disable phone auth error:", error);
@@ -290,9 +307,8 @@ const disablePhoneAuth = async () => {
 };
 
 const getQr = async () => {
-  station.loading = true;
+  props.updateLoadingStatus(true, "Смена статуса...");
   await disablePhoneAuth();
-  await changeEnableStation();
   await startFunc();
 };
 </script>
@@ -491,6 +507,15 @@ const getQr = async () => {
 .code-switch-method:hover {
   background: #f8f9fa;
   border-color: #4950ca;
+  color: #4950ca;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.clickable:hover {
   color: #4950ca;
 }
 

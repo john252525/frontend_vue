@@ -6,21 +6,7 @@
   />
   <header>
     <section class="account-section">
-      <h2 class="title">{{ t("account.accounts") }}</h2>
-      <button @click="changeTourMenu" class="help-button">
-        <svg
-          class="help-icon"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Как пользоваться?
-      </button>
+      <h2 class="title">Аккаунты</h2>
       <div
         v-if="setPlatformStation"
         @click="openCrmPlatform"
@@ -53,12 +39,24 @@
       </div>
       <Filters
         :getAccounts="getAccountListMethod"
+        :invalidateCache="invalidateCache"
         :close="openPlatformChoice"
         :isOpen="platformStation"
       />
     </section>
     <section class="account-section">
-      <button @click="openPlatformChoice" class="account-list-button">
+      <TabToggle
+        :modelValue="activeTab"
+        :getAccounts="getAccountListMethod"
+        :availableAccounts="availableAccounts"
+        @update:modelValue="changeActiveTab($event)"
+      />
+
+      <button
+        v-if="activeTab === 'accounts'"
+        @click="openPlatformChoice"
+        class="account-list-button"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="bi bi-view-list"
@@ -70,7 +68,11 @@
         </svg>
         Фильтры
       </button>
-      <button @click="openAddAccount" class="add-account-button">
+      <button
+        v-if="activeTab === 'accounts'"
+        @click="openAddAccount"
+        class="add-account-button"
+      >
         <svg
           class="svg-icon"
           viewBox="0 0 20 20"
@@ -82,62 +84,109 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{ t("account.addButton") }}
+        Добавить аккаунт
       </button>
     </section>
   </header>
-  <AccountList
-    ref="accountListRef"
-    :platformStationTextValue="platformStationTextValue"
-  />
-  <AccountsTour ref="accountTour" />
-  <AccountTourModal
-    v-if="tourMenu"
-    :startTour="startAccountTour"
-    :close="changeTourMenu"
-  />
+
+  <div class="content-wrapper">
+    <AccountList
+      v-if="activeTab === 'accounts'"
+      ref="accountListRef"
+      :platformStationTextValue="platformStationTextValue"
+      :changeAllAccounts="changeAllAccounts"
+    />
+
+    <GroupsList
+      v-if="activeTab === 'groups'"
+      :getAccounts="getAccountListMethod"
+    />
+  </div>
 </template>
 
 <script setup>
 import AccountList from "./Accounts/AccountsList.vue";
-import AccountTourModal from "../GlobalModal/TourModal/Accounts/AccountTourModal.vue";
+import GroupsList from "./Groups/GroupsList.vue";
+import TabToggle from "./Groups/TabToggle.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
-import Filters from "./Filters.vue";
-import AccountsTour from "../tours/AccountsTour.vue";
-
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
-import { useI18n } from "vue-i18n";
+import { useAccountsCache } from "@/composables/useAccountsCache";
+import Filters from "./Filters.vue";
+import { ref, computed, watch } from "vue";
 
 const accountStore = useAccountStore();
-const route = useRoute();
-const { t } = useI18n();
+const { accountsCache, setAccounts, getAccounts, invalidateCache } =
+  useAccountsCache();
 
 const platformStationTextValue = ref("telegram");
-const crmText = accountStore.getCrmPlatformText;
 const openAddAccountStation = ref(false);
-const setPlatformStation = ref(false);
+const platformStationText = accountStore.getAccountStationText;
+const crmText = accountStore.getCrmPlatformText;
 const platformStation = ref(false);
-const accountTour = ref(null);
+const setPlatformStation = ref(false);
 const accountListRef = ref(null);
-const tourMenu = ref(false);
 
-const getAccountListMethod = () => {
-  if (accountListRef.value) {
-    accountListRef.value.getAccounts();
-  }
+const allAccounts = ref([]);
+const activeTab = ref("accounts");
+const accountsList = ref([]);
+const hasLoadedAccounts = ref(false);
+
+const changeAllAccounts = (items) => {
+  console.log("✅ Аккаунты получены из AccountList:", items?.length);
+  allAccounts.value = items;
+  setAccounts(items); // Сохраняем в глобальный кеш
 };
 
-const startAccountTour = () => {
-  if (accountTour.value) {
-    accountTour.value.startTour();
-  }
+const changeActiveTab = (value) => {
+  activeTab.value = value;
 };
 
-function changeTourMenu() {
-  tourMenu.value = !tourMenu.value;
-}
+const availableAccounts = computed(() => {
+  const accounts =
+    accountsCache.value.length > 0 ? accountsCache.value : accountsList.value;
+  const filtered = accounts.filter((account) =>
+    ["whatsapp", "telegram"].includes(account.source || account.type)
+  );
+  console.log("📊 availableAccounts computed:", filtered.length);
+  return filtered;
+});
+
+const getAccountListMethod = async () => {
+  console.log("🚀 Вызван getAccountListMethod");
+  console.log("   - Кеш:", accountsCache.value.length, "аккаунтов");
+  console.log("   - accountListRef существует:", !!accountListRef.value);
+
+  try {
+    // Если есть кеш, возвращаем его
+    if (accountsCache.value.length > 0) {
+      console.log(
+        "📦 Используем кешированные аккаунты:",
+        accountsCache.value.length
+      );
+      accountsList.value = accountsCache.value;
+      return accountsCache.value;
+    }
+
+    // Если AccountList смонтирован, вызываем его метод
+    if (accountListRef.value && accountListRef.value.getAccounts) {
+      console.log("🔍 Загружаем аккаунты через AccountList");
+      const result = await accountListRef.value.getAccounts();
+      console.log("✅ Получено аккаунтов:", result?.length);
+
+      setAccounts(result || []); // Сохраняем в кеш
+      accountsList.value = result || [];
+      hasLoadedAccounts.value = true;
+
+      return result;
+    }
+
+    console.warn("⚠️ AccountList не смонтирован, возвращаем пустой массив");
+    return [];
+  } catch (error) {
+    console.error("❌ Ошибка в getAccountListMethod:", error);
+    return accountsCache.value; // Возвращаем кеш при ошибке
+  }
+};
 
 function openCrmPlatform() {
   setPlatformStation.value = !setPlatformStation.value;
@@ -147,10 +196,6 @@ function openPlatformChoice() {
   platformStation.value = !platformStation.value;
 }
 
-function openAddAccount() {
-  openAddAccountStation.value = !openAddAccountStation.value;
-}
-
 function changeCrmPlatform(value, valueTwo) {
   accountStore.setCrmPlatform(value);
   accountStore.setCrmPlatformText(valueTwo);
@@ -158,11 +203,16 @@ function changeCrmPlatform(value, valueTwo) {
   location.reload();
 }
 
-onMounted(() => {
-  if (route.query.tour === "true") {
-    if (accountTour.value) {
-      accountTour.value.startTour();
-    }
+function openAddAccount() {
+  openAddAccountStation.value = !openAddAccountStation.value;
+}
+
+watch(allAccounts, (newValue) => {
+  if (newValue) {
+    console.log("👀 Watch: новые аккаунты", newValue.length);
+    hasLoadedAccounts.value = true;
+    accountsList.value = newValue;
+    setAccounts(newValue);
   }
 });
 </script>
@@ -179,7 +229,7 @@ header {
 .account-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .title {
@@ -188,60 +238,7 @@ header {
   color: var(--text);
   flex: 1;
   margin-right: 8px;
-}
-
-.help-button {
-  background: oklch(0.65 0.22 267 / 0.16);
-  border: none;
-  border-radius: 5px;
-  padding: 10px 12px;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--headerAccountButtonColor);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.25s;
-  flex-shrink: 0;
-}
-
-.help-button:hover {
-  background: rgba(0, 13, 255, 0.2);
-  transition: all 0.25s;
-}
-
-.help-button:active {
-  background: rgba(17, 21, 93, 0.2);
-  transition: all 0.25s;
-}
-
-.help-icon {
-  width: 0.875rem;
-  height: 0.875rem;
-  fill: currentColor;
-  opacity: 0.8;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
-  transition: all 0.25s ease;
-}
-
-.help-button:hover .help-icon {
-  opacity: 1;
-  transform: scale(1.05);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-.account {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--headerAccountText);
-  background: var(--headerAccount);
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
+  margin: 0;
 }
 
 .account-list-button,
@@ -266,6 +263,7 @@ header {
   font-size: 12px;
   padding: 10px 12px;
   color: var(--headerAccountButtonColor);
+  margin-right: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -275,12 +273,6 @@ header {
 
 .account-list-button:hover {
   background: rgba(0, 13, 255, 0.2);
-  transition: all 0.25s;
-}
-
-.account-list-button:active {
-  background: rgba(17, 21, 93, 0.2);
-  transition: all 0.25s;
 }
 
 .svg-icon {
@@ -301,27 +293,12 @@ header {
   border: none;
 }
 
-.crm-platform-cont {
-  font-weight: 700;
-  font-size: 12px;
-  color: var(--headerAccountText);
-  background: var(--headerAccount);
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
 .add-account-button:hover {
   background: #565cc8;
-  transition: all 0.25s;
 }
 
 .add-account-button:active {
   background: #3e43ae;
-  transition: all 0.25s;
 }
 
 .black-fon {
@@ -333,22 +310,6 @@ header {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.platform-list-telegram {
-  position: absolute;
-  z-index: 10;
-  right: 122px;
-  top: 120px;
-  border-radius: 10px;
-  width: 100px;
-  height: 100px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .crm-list {
@@ -367,64 +328,6 @@ header {
   gap: 2px;
 }
 
-.platform-list-whatsapp {
-  position: absolute;
-  z-index: 10;
-  right: 122px;
-  top: 120px;
-  border-radius: 10px;
-  width: 108px;
-  height: 100px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.platform-list-telegram .fade-enter-active,
-.platform-list-telegram .fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.platform-list-telegram .fade-enter,
-.platform-list-telegram .fade-leave-to {
-  opacity: 0;
-}
-
-.platform-list-telegram {
-  animation: fadeIn 0.5s forwards;
-}
-
-.platform-list-whatsapp.fade-enter-active,
-.platform-list-whatsapp.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.platform-list-whatsapp.fade-enter,
-.platform-list-whatsapp.fade-leave-to {
-  opacity: 0;
-}
-
-.platform-list-whatsapp {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.platform {
-  padding: 4px;
-  transition: all 0.1s;
-  cursor: pointer;
-  font-size: 14px;
-}
-
 .crm-platform {
   padding: 4px;
   transition: all 0.1s;
@@ -437,44 +340,23 @@ header {
 }
 
 .crm-platform:hover {
-  text-align: center;
-  width: 80px;
   background-color: #eeeeee;
   border-radius: 5px;
-  transition: all 0.2s;
 }
 
 .crm-platform.active {
-  text-align: center;
-  width: 80px;
   background-color: #eeeeee;
   border-radius: 5px;
-  transition: all 0.2s;
 }
 
-.platform:hover {
-  text-align: center;
-  width: 80px;
-  background-color: #eeeeee;
-  border-radius: 5px;
-  transition: all 0.2s;
-}
-
-.platform.active {
-  text-align: center;
-  width: 80px;
-  background-color: #eeeeee;
-  border-radius: 5px;
-  transition: all 0.2s;
+.content-wrapper {
+  margin: 18px 12px 18px 18px;
 }
 
 @media (max-width: 768px) {
   .crm-list {
     left: 120px;
     top: 120px;
-  }
-  .account {
-    display: none;
   }
 
   header {
@@ -485,26 +367,20 @@ header {
 
   .account-section {
     width: 100%;
-    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
-  .platform-list {
-    left: 20px;
-    top: 180px;
+  .account-section:first-child {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .platform-list-telegram {
-    left: 17px;
-    top: 160px;
+  .title {
+    width: 100%;
   }
 
-  .platform-list-whatsapp {
-    left: 16px;
-    top: 160px;
-  }
-
-  .help-button {
-    margin-right: 0;
+  .account-section:last-child {
+    width: 100%;
   }
 }
 </style>

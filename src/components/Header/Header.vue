@@ -28,7 +28,7 @@
           />
           <img
             :src="stationDomain.cosmetics.additionallyLogo"
-            class="logo-img"
+            class="logo-img-title"
             alt="Logo"
           />
         </div>
@@ -178,6 +178,10 @@ onMounted(() => {
 
 .logo-img {
   height: 2rem;
+}
+
+.logo-img-title {
+  height: 1rem;
 }
 
 .user-icon {
