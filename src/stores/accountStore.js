@@ -22,6 +22,7 @@ export const useAccountStore = defineStore("accountStore", {
       crm: true,
       amocrm: true,
       bitrix24: true,
+      uon: true,
       bulk: true,
     },
   }),
@@ -136,6 +137,7 @@ export const useAccountStore = defineStore("accountStore", {
         crm: false,
         amocrm: false,
         bitrix24: false,
+        uon: false,
       };
       this.add_deleted = false;
     },

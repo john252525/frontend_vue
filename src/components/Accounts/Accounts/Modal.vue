@@ -49,53 +49,53 @@
         <template v-else>
           <span
             class="action"
-            v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             @click="openTariff"
             >Подписка</span
           >
           <span
             class="action"
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             @click="handleSubmit"
             >{{ t("modalAccount.settings") }}</span
           >
           <span
             class="action"
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             @click="changeEditNameModal"
             >Сменить имя</span
           >
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
             "
             class="action"
             @click="openScreen"
             >{{ t("modalAccount.screen") }}</span
           >
           <span
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             class="action action-on"
             @click="changeEnableStation"
             >{{ t("modalAccount.on") }}</span
           >
           <span
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             class="action"
             @click="forceStopActive"
             >{{ t("modalAccount.off") }}</span
           >
 
           <span
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             class="action action-throw"
             @click="ChangeconfirmStationReset"
             >{{ t("modalAccount.change") }}</span
           >
 
           <span
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
+            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
             class="action"
             @click="getNewProxy"
             >{{ t("modalAccount.changeProxy") }}</span
@@ -104,7 +104,7 @@
             class="action action-delete"
             @click="ChangeconfirmStation"
             v-if="
-              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type) &&
               !(
                 selectedItem.storage === 'binder' &&
                 selectedItem.type === 'touchapi'
@@ -117,7 +117,7 @@
             >{{ t("modalAccount.deleteAccount") }}</span
           >
           <span
-            v-if="['amocrm', 'bitrix24'].includes(selectedItem.type)"
+            v-if="['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             class="action"
             @click="updateAccountButton"
             >Обновить аккаунт</span
@@ -133,7 +133,7 @@
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-              ['amocrm', 'bitrix24'].includes(selectedItem.type)
+              ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)
             "
             class="action"
             @click="deleteAccountButton"

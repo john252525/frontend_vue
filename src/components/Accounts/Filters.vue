@@ -153,6 +153,11 @@ const crmSubItems = reactive([
     name: "Bitrix24",
     checked: accountStore.filterState.bitrix24,
   },
+  {
+    id: "uon",
+    name: "U-ON",
+    checked: accountStore.filterState.uon,
+  },
 ]);
 
 const showDeleted = ref(accountStore.getAddDeleted);
@@ -176,6 +181,8 @@ const getIconComponent = (id) => {
       return AmoCrmIcon;
     case "bitrix24":
       return Bitrix24Icon;
+    case "uon":
+      return UonIcon;
     default:
       return null;
   }
@@ -244,6 +251,7 @@ const updateFilterState = () => {
     crm: items.find((i) => i.id === "crm")?.checked || false,
     amocrm: crmSubItems.find((i) => i.id === "amocrm")?.checked || false,
     bitrix24: crmSubItems.find((i) => i.id === "bitrix24")?.checked || false,
+    uon: crmSubItems.find((i) => i.id === "uon")?.checked || false,
     bulk: items.find((i) => i.id === "bulk")?.checked || false,
   };
   accountStore.setFilterState(newFilterState);
@@ -302,6 +310,13 @@ const AmoCrmIcon = {
 
 const Bitrix24Icon = {
   template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
+};
+
+const UonIcon = {
+  template: `<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="64" cy="64" r="60.846" fill="#ef496a"/>
+                <path fill="#fff" d="m33.24 27.435h2.648v5.121q0 .762-.24 1.441-.234.674-.744 1.184-.504.504-1.06.709-.774.287-1.858.287-.627 0-1.371-.088-.738-.088-1.236-.346-.498-.264-.914-.744-.41-.48-.562-.99-.246-.82-.246-1.453v-5.121h2.648v5.244q0 .703.387 1.102.392.392 1.084.392.686 0 1.072-.387.393-.392.393-1.107z" transform="matrix(8.5147 0 0 8.5147 -205.84 -202.89)"/>
+              </svg>`,
 };
 </script>
 

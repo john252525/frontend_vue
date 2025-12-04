@@ -68,7 +68,7 @@
               </span>
               <span
                 v-else-if="
-                  item.step && item.type != 'amocrm' && item.type != 'bitrix24'
+                  item.step && item.type != 'amocrm' && item.type != 'bitrix24' && item.type != 'uon'
                 "
                 @mouseover="showMessage($event, item.step.message)"
                 @mouseleave="hideMessage"
@@ -79,13 +79,14 @@
                 v-else-if="
                   item.loading &&
                   item.type != 'amocrm' &&
-                  item.type != 'bitrix24'
+                  item.type != 'bitrix24' &&
+                  item.type != 'uon'
                 "
               >
                 <LoadingAccount />
               </span>
               <span
-                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
+                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24' || item.type === 'uon'"
               >
                 <StatusBadge :status="item.enable" type="crm" />
               </span>
@@ -99,6 +100,7 @@
                 v-if="
                   item.type != 'amocrm' &&
                   item.type != 'bitrix24' &&
+                  item.type != 'uon' &&
                   item.enable !== '0'
                 "
                 class="subscription-status"
@@ -113,7 +115,7 @@
               </div>
               <span
                 v-else-if="
-                  (item.type === 'amocrm' || item.type === 'bitrix24') &&
+                  (item.type === 'amocrm' || item.type === 'bitrix24' || item.type === 'uon') &&
                   item.enable !== '0'
                 "
                 >Не требуется</span
@@ -273,7 +275,7 @@
                 <StatusBadge :status="item.step.value" type="account" />
               </span>
               <span
-                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
+                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24' || item.type === 'uon'"
               >
                 <StatusBadge :status="item.enable" type="crm" />
               </span>
@@ -309,6 +311,7 @@
           v-if="
             item.type != 'amocrm' &&
             item.type != 'bitrix24' &&
+            item.type != 'uon' &&
             item.enable !== '0'
           "
         >
@@ -685,6 +688,9 @@ const getAccounts = async () => {
       group: "messenger",
     };
 
+    console.debug(stationDomain.navigate.value, 'stationDomain navigate value');
+    console.debug(typeGroup.value, 'typeGroup');
+
     if (stationDomain.navigate.value === "touchapi") {
       params = {
         source: sourceGroup.value,
@@ -702,6 +708,8 @@ const getAccounts = async () => {
         add_deleted: addDeleted.value,
       };
     }
+
+    console.debug(params, 'Params before requesting accounts');
 
     loadDataStation.value = true;
     console.log("Параметры отправки", params);
@@ -743,7 +751,7 @@ const getAccounts = async () => {
             const accountsToFetch = instanceData.value.filter(
               (instance) =>
                 instance.step?.value === 5 &&
-                !["bulk", "amocrm", "bitrix24"].includes(instance.type) &&
+                !["bulk", "amocrm", "bitrix24", "uon"].includes(instance.type) &&
                 ((instance.storage === "binder" &&
                   instance.type !== "touchapi") ||
                   (instance.storage === "whatsapi" &&
@@ -770,7 +778,8 @@ const getAccounts = async () => {
               if (
                 instance.type === "bulk" ||
                 instance.type === "amocrm" ||
-                instance.type === "bitrix24"
+                instance.type === "bitrix24" ||
+                instance.type === "uon"
               ) {
                 instance.loading = false;
                 return;
@@ -839,6 +848,7 @@ const showSubscriptionWarning = (item) => {
     item.subscription_dt_to === null &&
     item.type !== "amocrm" &&
     item.type !== "bitrix24" &&
+    item.type !== "uon" &&
     item.enable !== "0" &&
     item.type !== "bulk"
   );
@@ -981,9 +991,9 @@ const getActionCount = (item) => {
   let count = 0;
 
   // Обычные аккаунты (не CRM, не bulk)
-  if (!["amocrm", "bitrix24", "bulk"].includes(item.type)) {
+  if (!["amocrm", "bitrix24", "uon", "bulk"].includes(item.type)) {
     // Подписка
-    if (!["amocrm", "bitrix24"].includes(item.type)) count++;
+    if (!["amocrm", "bitrix24", "uon"].includes(item.type)) count++;
 
     // Настройки + смена имени
     count += 2;
@@ -1008,7 +1018,7 @@ const getActionCount = (item) => {
     }
   }
   // CRM аккаунты
-  else if (["amocrm", "bitrix24"].includes(item.type)) {
+  else if (["amocrm", "bitrix24", "uon"].includes(item.type)) {
     count++; // Обновить аккаунт
 
     if (item.type === "amocrm") {
@@ -1087,7 +1097,8 @@ const isActionAvailable = (item) => {
     (item.storage === "whatsapi" && item.type === "undefined") ||
     item.type === "bulk" ||
     item.type === "amocrm" ||
-    item.type === "bitrix24"
+    item.type === "bitrix24" ||
+    item.type === "uon"
   );
 };
 
