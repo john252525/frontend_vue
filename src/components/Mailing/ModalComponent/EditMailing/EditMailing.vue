@@ -223,7 +223,7 @@ async function editWhatsAppBroadcast() {
     uniq: items.value.options.uniq,
     exist: items.value.options.exist,
     random: items.value.options.random,
-    cascade: "whatsapp",
+    cascade: "telegram,whatsapp",
   };
   load.value = true;
   try {

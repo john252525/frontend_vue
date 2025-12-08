@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup-env:dev": "node scripts/setup-env.js development",
+    "setup-env:prod": "node scripts/setup-env.js production",
+    "setup-env": "node scripts/setup-env.js"
   },
   "dependencies": {
     "@joeattardi/emoji-button": "^4.6.4",

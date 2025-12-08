@@ -131,6 +131,8 @@ import MessageStep from "./Steps/MessageStep.vue";
 import SettingsStep from "./Steps/SettingsStep.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 
+const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
+
 const { t } = useI18n();
 const router = useRouter();
 const { sendLog } = useFrontendLogger();
@@ -199,7 +201,7 @@ async function checkSubscription() {
 
   try {
     const response = await axios.get(
-      "https://bapi88.apitter.com/api/v1/bulk/check",
+      `${apiUrl}/check`,
       {
         headers: {
           Authorization: `Bearer ${token.value}`,
@@ -292,7 +294,7 @@ const updateStepCompletion = (index, isCompleted) => {
   }
 };
 
-const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
+//const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 async function createWhatsAppBroadcast() {
   const url = `${apiUrl}/new/`;
@@ -309,7 +311,7 @@ async function createWhatsAppBroadcast() {
   formDataToSend.append("uniq", formData.removeDuplicates);
   formDataToSend.append("exist", formData.sendOnlyExistingDialogs);
   formDataToSend.append("random", formData.sendMessagesRandomOrder);
-  formDataToSend.append("cascade", "whatsapp");
+  formDataToSend.append("cascade", "telegram,whatsapp");
   formDataToSend.append("ph_col", formData.selectedLetter);
 
   if (formData.otherFile) {
