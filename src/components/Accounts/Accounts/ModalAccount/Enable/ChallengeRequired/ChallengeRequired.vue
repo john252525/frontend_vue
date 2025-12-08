@@ -25,7 +25,7 @@
       <div class="code-auth-body">
         <div class="code-input-section">
           <p class="code-description">
-            Введите 6-значный код подтверждения, отправленный на ваш телефон
+            Введите 5-значный код подтверждения, отправленный на ваш телефон
           </p>
 
           <div class="code-input-container">
@@ -33,7 +33,7 @@
               class="code-input"
               type="text"
               v-model="code"
-              maxlength="6"
+              maxlength="5"
               required
               placeholder="000000"
               @input="formatCode"
@@ -177,7 +177,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const isCodeValid = computed(() => {
-  return code.value.length === 6 && /^\d+$/.test(code.value);
+  return code.value.length === 5 && /^\d+$/.test(code.value);
 });
 
 // Форматирование кода
@@ -185,8 +185,8 @@ const formatCode = () => {
   // Удаляем все нецифровые символы
   code.value = code.value.replace(/\D/g, "");
   // Ограничиваем длину 6 символами
-  if (code.value.length > 6) {
-    code.value = code.value.slice(0, 6);
+  if (code.value.length > 5) {
+    code.value = code.value.slice(0, 5);
   }
 };
 
