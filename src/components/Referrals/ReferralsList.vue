@@ -1,7 +1,49 @@
 <template>
-  <section class="account-list-section">
-    <div class="table-container">
-      <!-- Десктопная таблица -->
+  <section class="referral-section">
+    <!-- Кнопки переключения -->
+    <div class="tab-switcher">
+      <button
+        @click="activeTab = 'referrals'"
+        :class="['tab-button', { active: activeTab === 'referrals' }]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Рефералы
+      </button>
+      <button
+        @click="activeTab = 'payments'"
+        :class="['tab-button', { active: activeTab === 'payments' }]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+          <path d="M1 10h22" />
+        </svg>
+        Платежи
+      </button>
+    </div>
+
+    <!-- Таблица рефералов -->
+    <div class="table-container" v-if="activeTab === 'referrals'">
       <table class="table" v-if="accounts.length > 0">
         <thead class="table-header">
           <tr>
@@ -41,7 +83,6 @@
         </tbody>
       </table>
 
-      <!-- Мобильные карточки -->
       <div class="mobile-cards" v-if="accounts.length > 0">
         <div
           v-for="(item, index) in accounts"
@@ -87,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Состояния загрузки и пустого списка -->
       <div v-if="loadDataStation" class="load-cont">
         <LoadAccount />
       </div>
@@ -103,15 +143,101 @@
         <h2>У вас пока нет рефералов</h2>
       </div>
     </div>
+
+    <!-- Таблица платежей -->
+    <div class="table-container" v-if="activeTab === 'payments'">
+      <table class="table" v-if="payments.length > 0">
+        <thead class="table-header">
+          <tr>
+            <th class="table-email">EMAIL</th>
+            <th class="table-amount">СУММА</th>
+            <th class="table-status">СТАТУС</th>
+            <th class="table-date">ДАТА</th>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          <tr v-for="(item, index) in payments" :key="index">
+            <td class="table-text">{{ item.email }}</td>
+            <td class="table-text">
+              {{ formatCurrency(item.reward_amount) }}
+            </td>
+            <td class="table-text">
+              <span
+                :class="['status-badge', getPaymentStatusClass(item.status)]"
+              >
+                {{ getPaymentStatusText(item.status) }}
+              </span>
+            </td>
+            <td class="table-text">{{ formatDate(item.created_at) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mobile-cards" v-if="payments.length > 0">
+        <div
+          v-for="(item, index) in payments"
+          :key="'mobile-payment-' + index"
+          class="mobile-card"
+        >
+          <div class="card-row">
+            <span class="card-label">Email:</span>
+            <span class="card-value">{{ item.email }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Сумма:</span>
+            <span class="card-value">{{
+              formatCurrency(item.reward_amount)
+            }}</span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Статус:</span>
+            <span class="card-value">
+              <span
+                :class="['status-badge', getPaymentStatusClass(item.status)]"
+              >
+                {{ getPaymentStatusText(item.status) }}
+              </span>
+            </span>
+          </div>
+          <div class="card-row">
+            <span class="card-label">Дата:</span>
+            <span class="card-value">{{ formatDate(item.created_at) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="loadPayments" class="load-cont">
+        <LoadAccount />
+      </div>
+
+      <div v-if="errorPaymentsBolean && !loadPayments" class="load-cont">
+        <errorAccount />
+      </div>
+
+      <div
+        v-if="!loadPayments && !errorPaymentsBolean && payments.length === 0"
+        class="none-account-cont"
+      >
+        <h2>У вас пока нет платежей</h2>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, inject, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import axios from "axios";
-import { useRouter } from "vue-router";
+import { useAccountStore } from "@/stores/accountStore";
+import { useI18n } from "vue-i18n";
+import LoadAccount from "../Accounts/Accounts/LoadAccount.vue";
+import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
+
+const { t } = useI18n();
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
-const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
+const API_URL = "https://api22.developtech.ru/api";
 
 const props = defineProps({
   changeUsersCount: {
@@ -119,85 +245,20 @@ const props = defineProps({
   },
 });
 
-import LoadingAccount from "../Accounts/Accounts/LoadingMoadal/LoadingAccount.vue";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
-import LoadAccount from "../Accounts/Accounts/LoadAccount.vue";
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
-const accountStation = computed(() => accountStore.getAccountStation);
+// Состояние вкладок
+const activeTab = ref("referrals");
 
-import { storeToRefs } from "pinia";
-import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
-const chatStore = useLoginWhatsAppChatsStepStore();
-const allAcoount = computed(() => chatStore.getLoginWhatsAppChatsStep);
-
-import { useUserInfoStore } from "@/stores/userInfoStore";
-const userInfoStore = useUserInfoStore();
-const { userInfo } = storeToRefs(userInfoStore);
-
-import { fetchChats } from "@/utils/getChats";
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
-
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-
-const router = useRouter();
-
-const forceStopItemData = ref({});
-const chatsLoadingChange = inject("chatsLoadingChange");
-const dataStationNone = ref(false);
-const dataStation = ref(false);
+// Рефералы
+const accounts = ref([]);
 const loadDataStation = ref(false);
 const errorAccountBolean = ref(false);
-const qrCodeData = ref([]);
-const enableStation = ref(false);
-const getByCodeStation = ref(false);
-const getScreenStation = ref(false);
-const qrModalStation = ref(false);
-const settingsModalStation = ref(false);
-const instanceData = ref([]);
-const accounts = ref([]);
-const isModalOpen = ref(false);
-const modalPosition = ref({ top: 0, left: 0 });
-const selectedItem = ref(null);
-const selectedItems = ref(null);
-const loadingStation = ref(false);
-const chatsStation = ref(null);
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-import False from "@/components/Chats/UserList/ResultModal/False.vue";
-const { sendLog } = useFrontendLogger();
+// Платежи
+const payments = ref([]);
+const loadPayments = ref(false);
+const errorPaymentsBolean = ref(false);
 
-const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = !errorBlock.value;
-};
-
-function decodeJWT(token) {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("Invalid JWT format");
-
-    const payload = parts[1];
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    console.error("JWT decode error:", e);
-    return null;
-  }
-}
-
-// Функция для форматирования даты
+// Форматирование даты
 const formatDate = (dateString) => {
   if (!dateString) return "-";
 
@@ -216,79 +277,38 @@ const formatDate = (dateString) => {
   }
 };
 
-// const getAccounts = async () => {
-//   loadDataStation.value = true;
-//   errorAccountBolean.value = false;
+// Форматирование валюты
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    minimumFractionDigits: 2,
+  }).format(value);
+};
 
-//   // ЗАГЛУШКА - используем моковые данные
-//   console.log("Using mock data for referrals");
+// Получение текста статуса платежа
+const getPaymentStatusText = (status) => {
+  const statusMap = {
+    applied: "Применен",
+    pending: "Ожидание",
+    rejected: "Отклонен",
+    completed: "Завершен",
+  };
+  return statusMap[status] || status;
+};
 
-//   // Имитируем задержку сети
-//   await new Promise((resolve) => setTimeout(resolve, 1000));
+// Получение класса статуса платежа
+const getPaymentStatusClass = (status) => {
+  const classMap = {
+    applied: "applied",
+    pending: "pending",
+    rejected: "rejected",
+    completed: "completed",
+  };
+  return classMap[status] || "pending";
+};
 
-//   const mockData = {
-//     ok: true,
-//     message: "Referrals received",
-//     data: {
-//       referrals: [
-//         {
-//           email: "entitled3265@tiffincrane.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-24 19:48:30",
-//           enable: "1",
-//         },
-//         {
-//           email: "entitled3265@tiffincrane.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-24 19:48:30",
-//           enable: "1",
-//         },
-//         {
-//           email: "entitled3265@tiffincrane.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-24 19:48:30",
-//           enable: "1",
-//         },
-//         {
-//           email: "entitled3265@tiffincrane.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-24 19:48:30",
-//           enable: "1",
-//         },
-//         {
-//           email: "entitled3265@tiffincrane.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-24 19:48:30",
-//           enable: "1",
-//         },
-//         {
-//           email: "testuser1@example.com",
-//           is_verified: "0",
-//           dt_ins: "2025-09-23 14:20:15",
-//           enable: "1",
-//         },
-//         {
-//           email: "john.doe@mail.com",
-//           is_verified: "1",
-//           dt_ins: "2025-09-22 10:05:45",
-//           enable: "0",
-//         },
-//       ],
-//       referrals_count: 3,
-//     },
-//   };
-
-//   if (mockData.ok) {
-//     accounts.value = mockData.data.referrals || [];
-//     console.log("Mock referrals data loaded:", accounts.value.length, "items");
-//   } else {
-//     console.error("Mock data error:", mockData.message);
-//     errorAccountBolean.value = true;
-//   }
-
-//   loadDataStation.value = false;
-// };
-
+// Получение рефералов
 const getAccounts = async () => {
   loadDataStation.value = true;
   errorAccountBolean.value = false;
@@ -302,8 +322,6 @@ const getAccounts = async () => {
     });
 
     if (response.data.ok) {
-      // Теперь данные приходят в response.data.data.referrals
-
       props.changeUsersCount(response.data.data.referrals_count);
       accounts.value = response.data.data.referrals || [];
       console.log("Referrals data:", accounts.value);
@@ -319,97 +337,112 @@ const getAccounts = async () => {
   }
 };
 
-const updateUserInfo = (event) => {
-  userInfoStore.setUserInfo(event);
-};
+// Получение платежей
+const getPayments = async () => {
+  loadPayments.value = true;
+  errorPaymentsBolean.value = false;
 
-function formatPhoneNumber(phoneNumber) {
-  const regex = /^8(\d{3})(\d{3})(\d{2})(\d{2})$/;
-  const match = phoneNumber.match(regex);
+  try {
+    const response = await axios.post(
+      `${API_URL}/referrals/history`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
 
-  if (!match) {
-    return phoneNumber;
+    if (response.data.success) {
+      payments.value = response.data.data || [];
+      console.log("Payments data:", payments.value);
+    } else {
+      console.error("API response not OK:", response.data.message);
+      errorPaymentsBolean.value = true;
+    }
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    errorPaymentsBolean.value = true;
+  } finally {
+    loadPayments.value = false;
   }
-
-  return `+7 (${match[1]}) ${match[2]}-${match[3]}-${match[4]}`;
-}
-
-const changeStationSettingsModal = () => {
-  settingsModalStation.value = !settingsModalStation.value;
-};
-
-const changeStationQrModal = () => {
-  qrModalStation.value = !qrModalStation.value;
-};
-
-const changeStationQrModalOn = () => {
-  qrModalStation.value = true;
-};
-
-const changeStationGetByCode = () => {
-  getByCodeStation.value = !getByCodeStation.value;
-};
-
-const closeModal = () => {
-  isModalOpen.value = false;
-  chatsStation.value = false;
-};
-
-const updateSelectedItems = (newValue) => {
-  selectedItems.value = newValue;
-};
-
-const updateqrCodeData = (newValue) => {
-  qrCodeData.value = newValue;
-};
-
-const updateLoading = (newValue) => {
-  loadingStation.value = newValue;
-};
-
-const messageVisible = ref(false);
-const tooltipMessage = ref("");
-const tooltipStyle = ref({});
-
-const showMessage = (event, step) => {
-  tooltipMessage.value = `Текущий шаг: ${step}`;
-  messageVisible.value = true;
-  const tooltipWidth = 100;
-  const tooltipHeight = 30;
-  const rect = event.currentTarget.getBoundingClientRect();
-  tooltipStyle.value = {
-    top: `${rect.bottom + window.scrollY}px`,
-    left: `${rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2}px`,
-    width: `${tooltipWidth}px`,
-    height: `${tooltipHeight}px`,
-  };
-};
-
-const hideMessage = () => {
-  messageVisible.value = false;
 };
 
 onMounted(async () => {
-  await chatStore.init();
   await getAccounts();
+  await getPayments();
 });
 </script>
 
 <style scoped>
-.account-list-section {
+.referral-section {
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 50vh; /* Фиксированная высота */
+  height: 50vh;
+  gap: 16px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+/* Переключатель вкладок */
+.tab-switcher {
+  display: flex;
+  gap: 8px;
+  width: fit-content;
+  background: white;
+  box-sizing: border-box;
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.tab-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Таблица */
 .table-container {
   flex: 1;
   overflow: auto;
-  min-height: 0; /* Важно для flex-контейнеров */
+  min-height: 0;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Стили таблицы */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -422,80 +455,78 @@ onMounted(async () => {
   z-index: 2;
 }
 
-.table-login {
-  width: 35%;
-  padding: 1rem;
-  text-align: left;
-}
-.table-status {
-  width: 20%;
-  padding: 1rem;
-  text-align: left;
-}
-.table-date {
-  width: 25%;
-  padding: 1rem;
-  text-align: left;
-}
-.table-active {
-  width: 20%;
-  padding: 1rem;
-  text-align: left;
-}
-
 th {
-  padding: 1rem;
-  font-weight: 600;
-  font-size: 12px;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 11px;
   color: #374151;
   background-color: #f9fafb;
   border-bottom: 2px solid #e5e7eb;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  text-align: left;
 }
 
 td {
-  padding: 1rem;
+  padding: 14px 16px;
   font-weight: 500;
   font-size: 14px;
   color: #000;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #f3f4f6;
 }
 
-tr:hover {
-  background-color: #f9fafb;
+tbody tr:hover {
+  background-color: #fafbff;
 }
 
-/* Стили статусов */
+.table-login,
+.table-email {
+  width: 35%;
+}
+
+.table-status,
+.table-amount {
+  width: 20%;
+}
+
+.table-date {
+  width: 25%;
+}
+
+.table-active {
+  width: 20%;
+}
+
+/* Статусы */
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   display: inline-block;
   text-align: center;
   min-width: 100px;
 }
 
-.status-badge.verified {
-  background-color: #d1fae5;
-  color: #065f46;
+.status-badge.verified,
+.status-badge.applied,
+.status-badge.completed,
+.status-badge.active {
+  background-color: #dcfce7;
+  color: #15803d;
 }
 
-.status-badge.not-verified {
+.status-badge.not-verified,
+.status-badge.rejected,
+.status-badge.inactive {
   background-color: #fee2e2;
   color: #991b1b;
 }
 
-.status-badge.active {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.status-badge.inactive {
-  background-color: #f3f4f6;
-  color: #6b7280;
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 /* Мобильные карточки */
@@ -504,21 +535,22 @@ tr:hover {
   flex-direction: column;
   gap: 12px;
   padding: 16px;
+  overflow-y: auto;
 }
 
 .mobile-card {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #f3f4f6;
 }
 
@@ -528,22 +560,17 @@ tr:hover {
 
 .card-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #6b7280;
-  min-width: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .card-value {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #000;
   text-align: right;
-  flex: 1;
-}
-
-.card-value .status-badge {
-  min-width: 80px;
-  font-size: 11px;
 }
 
 /* Состояния загрузки */
@@ -554,34 +581,50 @@ tr:hover {
   justify-content: center;
   height: 100%;
   width: 100%;
-}
-
-.none-account-cont {
-  background-color: var(--noAccountTableBg);
-  border-radius: 5px;
+  background-color: #fafbff;
 }
 
 .none-account-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--noAccountTableText);
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
 }
 
 /* Скролл */
 .table-container::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .table-container::-webkit-scrollbar-track {
-  background-color: var(--scrolBg);
+  background-color: #f3f4f6;
 }
 
 .table-container::-webkit-scrollbar-thumb {
-  background: var(--scrolColor);
-  border-radius: 5px;
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* Медиа-запросы */
+@media (max-width: 1024px) {
+  .referral-section {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .tab-switcher {
+    width: 100%;
+  }
+
+  .tab-button {
+    flex: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .table {
     display: none;
@@ -591,8 +634,91 @@ tr:hover {
     display: flex;
   }
 
-  .account-list-section {
-    height: 60vh; /* Чуть больше на мобилках */
+  .referral-section {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .tab-switcher {
+    width: 100%;
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .tab-button {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .tab-button svg {
+    display: none;
+  }
+
+  th {
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+
+  td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .mobile-card {
+    padding: 12px;
+  }
+
+  .card-label {
+    font-size: 11px;
+  }
+
+  .card-value {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .referral-section {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .tab-switcher {
+    width: 100%;
+  }
+
+  .tab-button {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .mobile-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .card-row {
+    padding: 8px 0;
+  }
+
+  .card-label {
+    font-size: 10px;
+  }
+
+  .card-value {
+    font-size: 12px;
+  }
+
+  .none-account-cont h2 {
+    font-size: 14px;
   }
 }
 </style>

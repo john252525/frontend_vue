@@ -1,0 +1,136 @@
+{
+    "ok": true,
+    "message": "Form elements",
+    "data": [
+      {
+        "parent_id": null,
+        "id": "1",
+        "element": "label",
+        "for": "group",
+        "text_content": "Выберите вид аккаунта"
+      },
+      {
+        "parent_id": null,
+        "id": "2",
+        "element": "select",
+        "name": "group"
+      },
+      {
+        "parent_id": "2",
+        "id": "3",
+        "element": "option",
+        "value": "messenger",
+        "text_content": "Messenger"
+      },
+      {
+        "parent_id": "2",
+        "id": "4",
+        "element": "option",
+        "value": "crm",
+        "text_content": "CRM"
+      },
+      {
+        "parent_id": "3",
+        "id": "5",
+        "element": "label",
+        "for": "messenger",
+        "text_content": "Выберите мессенджер"
+      },
+      {
+        "parent_id": "3",
+        "id": "6",
+        "element": "select",
+        "name": "messenger"
+      },
+      {
+        "parent_id": "6",
+        "id": "7",
+        "element": "option",
+        "value": "whatsapp",
+        "text_content": "Whatsapp"
+      },
+      {
+        "parent_id": "6",
+        "id": "8",
+        "element": "option",
+        "value": "telegram",
+        "text_content": "Telegram"
+      },
+      {
+        "parent_id": "7",
+        "id": "9",
+        "element": "p",
+        "text_content": "Привязать номер своего Whatsapp можно будет после создания аккаунта"
+      },
+      {
+        "parent_id": "8",
+        "id": "10",
+        "element": "p",
+        "text_content": "Привязать свой аккаунт Telegram можно будет после создания аккаунта"
+      },
+      {
+        "parent_id": "4",
+        "id": "11",
+        "element": "label",
+        "for": "type",
+        "text_content": "Выберите CRM"
+      },
+      {
+        "parent_id": "4",
+        "id": "12",
+        "element": "select",
+        "name": "type"
+      },
+      {
+        "parent_id": "12",
+        "id": "13",
+        "element": "option",
+        "value": "amocrm",
+        "text_content": "Amocrm"
+      },
+      {
+        "parent_id": "12",
+        "id": "14",
+        "element": "option",
+        "value": "bitrix24",
+        "text_content": "Bitrix24"
+      },
+      {
+        "parent_id": "12",
+        "id": "15",
+        "element": "label",
+        "for": "domain",
+        "text_content": "Адрес аккаунта"
+      },
+      {
+        "parent_id": "13",
+        "id": "16",
+        "element": "input",
+        "name": "domain",
+        "placeholder": "account.amocrm.ru",
+        "required": true
+      },
+      {
+        "parent_id": "14",
+        "id": "17",
+        "element": "input",
+        "name": "domain",
+        "placeholder": "account.bitrix24.ru",
+        "required": true
+      },
+      {
+        "parent_id": "2",
+        "id": "18",
+        "element": "option",
+        "value": "sms",
+        "text_content": "SMS"
+      },
+      {
+        "parent_id": "18",
+        "id": "19",
+        "element": "p",
+        "text_content": "Внимание! Если у вас нет телефона на ОС Android (не ниже версии 7.0), вы не сможете подключить канал СМС"
+      }
+    ]
+  }
+  

@@ -4,8 +4,16 @@
     :stationLoading="stationLoading"
   />
 
-  <div v-if="showIntegrationModal" class="modal-overlay">
-    <div class="modal-container integration-modal">
+  <!-- Модальное окно подтверждения интеграции -->
+  <div
+    v-if="showIntegrationModal"
+    class="modal-overlay"
+    data-testid="integration-modal-overlay"
+  >
+    <div
+      class="modal-container integration-modal"
+      data-testid="integration-modal"
+    >
       <div class="modal-header">
         <h2>Подтверждение интеграции</h2>
       </div>
@@ -17,15 +25,31 @@
         </p>
       </div>
       <div class="modal-footer">
-        <button class="cancel-btn" @click="handleIntegrationNo">Нет</button>
-        <button class="submit-btn" @click="handleIntegrationYes">Да</button>
+        <button
+          class="cancel-btn"
+          @click="handleIntegrationNo"
+          data-testid="integration-no-btn"
+        >
+          Нет
+        </button>
+        <button
+          class="submit-btn"
+          @click="handleIntegrationYes"
+          data-testid="integration-yes-btn"
+        >
+          Да
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Модальное окно предупреждения -->
-  <div v-if="showWarningModal" class="modal-overlay">
-    <div class="modal-container warning-modal">
+  <div
+    v-if="showWarningModal"
+    class="modal-overlay"
+    data-testid="warning-modal-overlay"
+  >
+    <div class="modal-container warning-modal" data-testid="warning-modal">
       <div class="modal-header">
         <h2>Внимание</h2>
       </div>
@@ -42,7 +66,11 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="submit-btn" @click="handleWarningConfirm">
+        <button
+          class="submit-btn"
+          @click="handleWarningConfirm"
+          data-testid="warning-confirm-btn"
+        >
           Продолжить создание
         </button>
       </div>
@@ -50,13 +78,20 @@
   </div>
 
   <!-- Основное модальное окно добавления аккаунта -->
-  <div v-if="!stationLoading.loading" class="modal-overlay">
-    <div class="modal-container">
+  <div
+    v-if="!stationLoading.loading"
+    class="modal-overlay"
+    data-testid="main-modal-overlay"
+  >
+    <div class="modal-container" data-testid="main-modal-container">
       <div class="modal-header">
-        <h2 class="accounts-addAccounts-title-text">Настройка интеграции</h2>
+        <h2 class="accounts-addAccounts-title-text" data-testid="modal-title">
+          Настройка интеграции
+        </h2>
         <button
           class="close-btn accounts-addAccounts-close-button"
           @click="openModal"
+          data-testid="modal-close-btn"
         >
           &times;
         </button>
@@ -68,12 +103,19 @@
           <label
             v-if="getLabel('group')"
             class="accounts-addAccounts-group-label"
-            >{{ getLabel("group") }}</label
+            data-testid="group-label"
           >
-          <div class="custom-select" ref="groupSelect">
+            {{ getLabel("group") }}
+          </label>
+          <div
+            class="custom-select"
+            ref="groupSelect"
+            data-testid="group-select"
+          >
             <div
               class="selected-option accounts-addAccounts-group-select"
               @click="toggleDropdown('group')"
+              data-testid="group-select-button"
             >
               <span>{{ getSelectedText("group") || "Выберите тип" }}</span>
               <svg
@@ -98,12 +140,14 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-group-dropdown"
                 :style="getDropdownStyle('group')"
+                data-testid="group-dropdown"
               >
                 <div
                   v-for="option in getOptions('group')"
                   :key="option.value"
                   class="option accounts-addAccounts-group-option"
                   @click="selectOption('group', option.value)"
+                  :data-testid="`group-option-${option.value}`"
                 >
                   {{ option.text }}
                 </div>
@@ -117,12 +161,19 @@
           <label
             v-if="getLabel('messenger')"
             class="accounts-addAccounts-messenger-label"
-            >{{ getLabel("messenger") }}</label
+            data-testid="messenger-label"
           >
-          <div class="custom-select" ref="messengerSelect">
+            {{ getLabel("messenger") }}
+          </label>
+          <div
+            class="custom-select"
+            ref="messengerSelect"
+            data-testid="messenger-select"
+          >
             <div
               class="selected-option accounts-addAccounts-messenger-select"
               @click="toggleDropdown('messenger')"
+              data-testid="messenger-select-button"
             >
               <span>{{
                 getSelectedText("messenger") || "Выберите мессенджер"
@@ -149,12 +200,14 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-messenger-dropdown"
                 :style="getDropdownStyle('messenger')"
+                data-testid="messenger-dropdown"
               >
                 <div
                   v-for="option in getOptions('messenger')"
                   :key="option.value"
                   class="option accounts-addAccounts-messenger-option"
                   @click="selectOption('messenger', option.value)"
+                  :data-testid="`messenger-option-${option.value}`"
                 >
                   {{ option.text }}
                 </div>
@@ -168,12 +221,15 @@
           <label
             v-if="getLabel('type')"
             class="accounts-addAccounts-crmType-label"
-            >{{ getLabel("type") }}</label
+            data-testid="type-label"
           >
-          <div class="custom-select" ref="typeSelect">
+            {{ getLabel("type") }}
+          </label>
+          <div class="custom-select" ref="typeSelect" data-testid="type-select">
             <div
               class="selected-option accounts-addAccounts-crmType-select"
               @click="toggleDropdown('type')"
+              data-testid="type-select-button"
             >
               <span>{{ getSelectedText("type") || "Выберите CRM" }}</span>
               <svg
@@ -198,12 +254,14 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-crmType-dropdown"
                 :style="getDropdownStyle('type')"
+                data-testid="type-dropdown"
               >
                 <div
                   v-for="option in getOptions('type')"
                   :key="option.value"
                   class="option accounts-addAccounts-crmType-option"
                   @click="handleCrmSelect(option.value, option.text)"
+                  :data-testid="`type-option-${option.value}`"
                 >
                   {{ option.text }}
                 </div>
@@ -212,14 +270,17 @@
           </div>
         </div>
 
-        <!-- Dynamic CRM Fields (Domain for AmoCRM/Bitrix, API Key for U-ON) -->
+        <!-- Dynamic CRM Fields -->
         <template v-if="formValues.group === 'crm' && formValues.type">
           <div
             v-for="field in getCrmFields(formValues.type)"
             :key="field.name"
             class="form-field"
           >
-            <label :class="`accounts-addAccounts-${field.name}-label`">
+            <label
+              :class="`accounts-addAccounts-${field.name}-label`"
+              :data-testid="`${field.name}-label`"
+            >
               {{ field.label }}
             </label>
             <input
@@ -228,8 +289,15 @@
               :placeholder="field.placeholder"
               :required="field.required"
               :class="`accounts-addAccounts-${field.name}-input`"
+              :data-testid="`${field.name}-input`"
             />
-            <p v-if="field.hint" class="field-hint">{{ field.hint }}</p>
+            <p
+              v-if="field.hint"
+              class="field-hint"
+              :data-testid="`${field.name}-hint`"
+            >
+              {{ field.hint }}
+            </p>
           </div>
         </template>
 
@@ -240,6 +308,7 @@
             formValues.messenger === 'whatsapp'
           "
           class="info-message accounts-addAccounts-whatsapp-info"
+          data-testid="whatsapp-info"
         >
           <p>
             Привязать номер своего Whatsapp можно будет после создания аккаунта
@@ -252,6 +321,7 @@
             formValues.messenger === 'telegram'
           "
           class="info-message accounts-addAccounts-telegram-info"
+          data-testid="telegram-info"
         >
           <p>
             Привязать свой аккаунт Telegram можно будет после создания аккаунта
@@ -262,6 +332,7 @@
         <div
           v-if="formValues.group === 'sms'"
           class="info-message accounts-addAccounts-sms-warning"
+          data-testid="sms-warning"
         >
           <p>
             Внимание! Если у вас нет телефона на ОС Android (не ниже версии
@@ -274,6 +345,7 @@
         <button
           class="cancel-btn accounts-addAccounts-cancel-button"
           @click="openModal"
+          data-testid="cancel-btn"
         >
           Отмена
         </button>
@@ -281,6 +353,7 @@
           class="submit-btn accounts-addAccounts-submit-button"
           @click="submitForm"
           :disabled="!isFormValid"
+          data-testid="submit-btn"
         >
           Сохранить
         </button>

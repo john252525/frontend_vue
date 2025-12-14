@@ -72,6 +72,7 @@
                 v-if="!formData.cascade.includes('telegram')"
                 type="button"
                 @click="addCascadeItem('telegram')"
+                id="telegram-button"
                 class="cascade-btn cascade-btn-telegram"
               >
                 <span class="btn-badge badge-telegram"></span>
@@ -79,6 +80,7 @@
               </button>
               <button
                 v-if="!formData.cascade.includes('whatsapp')"
+                id="whatsapp-button"
                 type="button"
                 @click="addCascadeItem('whatsapp')"
                 class="cascade-btn cascade-btn-whatsapp"

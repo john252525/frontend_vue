@@ -1,0 +1,1314 @@
+{
+  "config": {
+    "configFile": "/var/www/frontend_vue/playwright.config.js",
+    "rootDir": "/var/www/frontend_vue/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/var/www/frontend_vue/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/var/www/frontend_vue/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run preview",
+      "url": "https://webest.developtech.ru",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "addAccount.spec.js",
+      "file": "addAccount.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "AddAccount Modal - E2E тесты с data-testid селекторами",
+          "file": "addAccount.spec.js",
+          "line": 5,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Загрузка и отображение компонента",
+              "file": "addAccount.spec.js",
+              "line": 43,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "должен отобразить модальное окно",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 27,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:13.736Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-fbc07eabe22d0d92020a",
+                  "file": "addAccount.spec.js",
+                  "line": 44,
+                  "column": 5
+                },
+                {
+                  "title": "должен показать заголовок \"Настройка интеграции\"",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 1,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 33,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:17.331Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-6f073c8cee03831b9206",
+                  "file": "addAccount.spec.js",
+                  "line": 49,
+                  "column": 5
+                },
+                {
+                  "title": "должен показать кнопку закрытия",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 2,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 30,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:21.185Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-7e443b7c2a5b947a32ca",
+                  "file": "addAccount.spec.js",
+                  "line": 57,
+                  "column": 5
+                },
+                {
+                  "title": "должен загрузить и показать основной dropdown",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 3,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 26,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:24.824Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-5b36b4346fa2bb442793",
+                  "file": "addAccount.spec.js",
+                  "line": 62,
+                  "column": 5
+                },
+                {
+                  "title": "должен показать кнопки Отмена и Сохранить",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 4,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 38,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:28.563Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-f032b56b6332afc9c13a",
+                  "file": "addAccount.spec.js",
+                  "line": 67,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Dropdown функциональность (группа интеграций)",
+              "file": "addAccount.spec.js",
+              "line": 80,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "должен открыть dropdown при клике",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 5,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 30,
+                          "error": {
+                            "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+                            "stack": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                          },
+                          "errors": [
+                            {
+                              "message": "Error: browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     npx playwright install-deps                      ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     apt-get install libxdamage1\\                     ║\n║         libgtk-3-0t64\\                               ║\n║         libpangocairo-1.0-0\\                         ║\n║         libpango-1.0-0\\                              ║\n║         libatk1.0-0t64\\                              ║\n║         libcairo-gobject2\\                           ║\n║         libcairo2\\                                   ║\n║         libasound2t64                                ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝"
+                            }
+                          ],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:32.727Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-6b418d43aeb03221ab67",
+                  "file": "addAccount.spec.js",
+                  "line": 81,
+                  "column": 5
+                },
+                {
+                  "title": "должен отобразить все три опции",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [
+                        {
+                          "workerIndex": 6,
+                          "parallelIndex": 0,
+                          "status": "skipped",
+                          "duration": 2,
+                          "errors": [],
+                          "stdout": [],
+                          "stderr": [],
+                          "retry": 0,
+                          "startTime": "2025-12-14T13:46:36.827Z",
+                          "annotations": [],
+                          "attachments": []
+                        }
+                      ],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-6caa151ccb40d058d7fc",
+                  "file": "addAccount.spec.js",
+                  "line": 88,
+                  "column": 5
+                },
+                {
+                  "title": "должен выбрать опцию и закрыть dropdown",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-5174e6da42274db2594a",
+                  "file": "addAccount.spec.js",
+                  "line": 97,
+                  "column": 5
+                },
+                {
+                  "title": "должен закрыть dropdown при клике вне его",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-1a88f52c4031682b145b",
+                  "file": "addAccount.spec.js",
+                  "line": 105,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Интеграция: Messenger",
+              "file": "addAccount.spec.js",
+              "line": 123,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "при выборе Messenger должен показать dropdown мессенджеров",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-0dfbe5ccc57ecc5cd287",
+                  "file": "addAccount.spec.js",
+                  "line": 124,
+                  "column": 5
+                },
+                {
+                  "title": "dropdown мессенджеров должен содержать Whatsapp и Telegram",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-c9b199b216d464a0b4c4",
+                  "file": "addAccount.spec.js",
+                  "line": 134,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе Whatsapp должно показать инфо сообщение",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-de33555523630244168a",
+                  "file": "addAccount.spec.js",
+                  "line": 147,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе Telegram должно показать инфо сообщение",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-def70c4aaf222750b60d",
+                  "file": "addAccount.spec.js",
+                  "line": 163,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка Сохранить должна быть активна при выборе Whatsapp",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-be1286346ecc49d2bd6e",
+                  "file": "addAccount.spec.js",
+                  "line": 179,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка Сохранить должна быть активна при выборе Telegram",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-2efedc9e68ffbc2b5044",
+                  "file": "addAccount.spec.js",
+                  "line": 192,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Интеграция: CRM",
+              "file": "addAccount.spec.js",
+              "line": 210,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "при выборе CRM должен показать dropdown типов CRM",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-4158ada8ed100b905d94",
+                  "file": "addAccount.spec.js",
+                  "line": 211,
+                  "column": 5
+                },
+                {
+                  "title": "dropdown CRM должен содержать Amocrm и Bitrix24",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-6c87040f2ac8b1da8de2",
+                  "file": "addAccount.spec.js",
+                  "line": 221,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе Amocrm должно появиться поле ввода домена",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-173116c2e466ab28d0ea",
+                  "file": "addAccount.spec.js",
+                  "line": 234,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе Bitrix24 должно появиться поле ввода домена",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-a14e07440a3279d99d23",
+                  "file": "addAccount.spec.js",
+                  "line": 250,
+                  "column": 5
+                },
+                {
+                  "title": "должна показать label \"Адрес аккаунта\"",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-7b69368a23e8296a749a",
+                  "file": "addAccount.spec.js",
+                  "line": 266,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка Сохранить должна быть отключена если домен не заполнен",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-bb92cef70b5203eec5f2",
+                  "file": "addAccount.spec.js",
+                  "line": 278,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка Сохранить должна быть активна если домен заполнен",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-694853eb5a4ca3750612",
+                  "file": "addAccount.spec.js",
+                  "line": 291,
+                  "column": 5
+                },
+                {
+                  "title": "должно заполнить поле домена для AmoCRM",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-60b20d6124d12d4dec7a",
+                  "file": "addAccount.spec.js",
+                  "line": 306,
+                  "column": 5
+                },
+                {
+                  "title": "должно заполнить поле домена для Bitrix24",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-a96e405c3081ac9463b9",
+                  "file": "addAccount.spec.js",
+                  "line": 319,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Интеграция: SMS",
+              "file": "addAccount.spec.js",
+              "line": 337,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "при выборе SMS должно показать warning сообщение",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-141b5126be9cefa57516",
+                  "file": "addAccount.spec.js",
+                  "line": 338,
+                  "column": 5
+                },
+                {
+                  "title": "SMS warning должен содержать правильный текст",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-9d543e438e946338a8f0",
+                  "file": "addAccount.spec.js",
+                  "line": 348,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка Сохранить должна быть активна при выборе SMS",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-b0d850b2dfc374e1d58c",
+                  "file": "addAccount.spec.js",
+                  "line": 358,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе SMS не должно быть других dropdown",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-73db063b7d8f620561ad",
+                  "file": "addAccount.spec.js",
+                  "line": 368,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Изменение выбора интеграции",
+              "file": "addAccount.spec.js",
+              "line": 386,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "при смене с CRM на Messenger должны исчезнуть поля CRM",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-21234a66fb57f7ff6946",
+                  "file": "addAccount.spec.js",
+                  "line": 387,
+                  "column": 5
+                },
+                {
+                  "title": "при смене с Messenger на SMS должны исчезнуть поля Messenger",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-ad374943bcdfb8e7da0e",
+                  "file": "addAccount.spec.js",
+                  "line": 413,
+                  "column": 5
+                },
+                {
+                  "title": "при выборе другого типа CRM должны очиститься поля",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-ef59cc981fd224575423",
+                  "file": "addAccount.spec.js",
+                  "line": 438,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Закрытие модального окна",
+              "file": "addAccount.spec.js",
+              "line": 466,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "должен закрыть модалку при клике на Отмена",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-f26321f6bb48d25d41ab",
+                  "file": "addAccount.spec.js",
+                  "line": 467,
+                  "column": 5
+                },
+                {
+                  "title": "должен закрыть модалку при клике на X",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-02d757d4b88cff6fef58",
+                  "file": "addAccount.spec.js",
+                  "line": 474,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Отправка формы на сервер",
+              "file": "addAccount.spec.js",
+              "line": 486,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "должен отправить Messenger + Whatsapp",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-105d089ec65b7f05d77e",
+                  "file": "addAccount.spec.js",
+                  "line": 487,
+                  "column": 5
+                },
+                {
+                  "title": "должен отправить Messenger + Telegram",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-a3daa3766c539ca1382a",
+                  "file": "addAccount.spec.js",
+                  "line": 509,
+                  "column": 5
+                },
+                {
+                  "title": "должен отправить CRM + Amocrm + домен",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-1463c0f7b0b00e16148f",
+                  "file": "addAccount.spec.js",
+                  "line": 531,
+                  "column": 5
+                },
+                {
+                  "title": "должен отправить CRM + Bitrix24 + домен",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-db42372948c4afa73821",
+                  "file": "addAccount.spec.js",
+                  "line": 556,
+                  "column": 5
+                },
+                {
+                  "title": "должен отправить SMS",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-e1a58d4bf260da864be8",
+                  "file": "addAccount.spec.js",
+                  "line": 581,
+                  "column": 5
+                },
+                {
+                  "title": "должен отправить с правильным Authorization header",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-0b21c56e79f237338627",
+                  "file": "addAccount.spec.js",
+                  "line": 599,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Валидация кнопки Сохранить",
+              "file": "addAccount.spec.js",
+              "line": 625,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "кнопка должна быть отключена при загрузке страницы",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-eed15df0d4c86df6c0e9",
+                  "file": "addAccount.spec.js",
+                  "line": 626,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка должна быть включена после выбора Messenger",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-fd160654716e35da0768",
+                  "file": "addAccount.spec.js",
+                  "line": 633,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка должна быть включена после выбора SMS",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-6a20187d6abc6a69c2af",
+                  "file": "addAccount.spec.js",
+                  "line": 643,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка должна быть отключена если выбран CRM без домена",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-69cdb155ca6c44308a80",
+                  "file": "addAccount.spec.js",
+                  "line": 651,
+                  "column": 5
+                },
+                {
+                  "title": "кнопка должна быть включена если выбран CRM с доменом",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-b94db2337d9f1e3c7c53",
+                  "file": "addAccount.spec.js",
+                  "line": 664,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Обработка ошибок API",
+              "file": "addAccount.spec.js",
+              "line": 684,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "должен обработать ошибку 400",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-66b5b948b9ef5d3d4d36",
+                  "file": "addAccount.spec.js",
+                  "line": 685,
+                  "column": 5
+                },
+                {
+                  "title": "должен обработать ошибку 500",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-fa5fd1332a95559d22e0",
+                  "file": "addAccount.spec.js",
+                  "line": 709,
+                  "column": 5
+                }
+              ]
+            },
+            {
+              "title": "Полный сценарий использования",
+              "file": "addAccount.spec.js",
+              "line": 732,
+              "column": 8,
+              "specs": [
+                {
+                  "title": "пользователь выбирает Messenger → Whatsapp → отправляет",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-7909714480fec5920b84",
+                  "file": "addAccount.spec.js",
+                  "line": 733,
+                  "column": 5
+                },
+                {
+                  "title": "пользователь выбирает CRM → Amocrm → заполняет домен → отправляет",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-7ad34387d318bb0dd41d",
+                  "file": "addAccount.spec.js",
+                  "line": 775,
+                  "column": 5
+                },
+                {
+                  "title": "пользователь выбирает SMS → отправляет",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 30000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "firefox",
+                      "projectName": "firefox",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "de1f6b9f55501cdad01b-2a509a73d58fcca2464e",
+                  "file": "addAccount.spec.js",
+                  "line": 817,
+                  "column": 5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-12-14T13:46:10.533Z",
+    "duration": 26357.691,
+    "expected": 0,
+    "skipped": 43,
+    "unexpected": 6,
+    "flaky": 0
+  }
+}

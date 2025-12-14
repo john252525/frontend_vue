@@ -3,7 +3,7 @@
     <div class="loader">Загрузка...</div>
   </div>
 
-  <div v-else>
+  <div v-else class="app-wrapper">
     <HelpModal />
     <DownloadsBox />
     <Header
@@ -35,7 +35,7 @@
         :changeStationLoadingModal="offModal"
         :stationLoading="stationLoading"
       />
-      <main>
+      <main class="main-content">
         <section>
           <router-view @routeChanged="checkChatStation"></router-view>
         </section>
@@ -56,7 +56,7 @@ import {
   reactive,
   provide,
   nextTick,
-} from "vue"; // Добавили nextTick
+} from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -91,7 +91,7 @@ const checkChatStation = () => {
 };
 
 const isAuthPage = computed(() => {
-  if (!route.name) return true; // Пока роутер не инициализирован, считаем auth страницей
+  if (!route.name) return true;
   const routeName = route.name.toString();
   return [
     "Login",
@@ -112,12 +112,9 @@ const isWidgetMode = computed(() => {
 
 const currentDomain = ref("");
 
-// Убрали дублирующий onMounted и улучшили логику
 onMounted(async () => {
-  // Получаем текущий домен
   currentDomain.value = window.location.hostname;
 
-  // Проверяем домены
   const myDomains = [
     "app1.developtech.ru",
     "app2.developtech.ru",
@@ -131,21 +128,17 @@ onMounted(async () => {
     console.log("Неизвестный домен:", currentDomain.value);
   }
 
-  // Ждем следующего тика для инициализации
   await nextTick();
 
-  // Даем дополнительное время для полной инициализации роутера
   setTimeout(() => {
     isLoading.value = false;
   }, 150);
 });
 
-// Альтернативно: используем watch для отслеживания готовности роутера
 watch(
   () => route?.fullPath,
   (newPath) => {
     if (newPath) {
-      // Роутер готов, скрываем лоадер
       setTimeout(() => {
         isLoading.value = false;
       }, 100);
@@ -163,28 +156,73 @@ provide("chatsLoadingChange", chatsLoadingChange);
 </script>
 
 <style scoped>
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.page-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 230px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-content > section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
 main {
   flex: 1;
   box-sizing: border-box;
   display: flex;
   overflow: hidden;
 }
+
 main > section {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.page-container {
-  display: flex;
+  overflow: auto;
 }
 
 .navigation-chat {
   width: 60px;
+  flex-shrink: 0;
+}
+
+.navigation-chat + .main-content {
+  margin-left: 60px;
 }
 
 .navigation {
   width: 230px;
+  flex-shrink: 0;
 }
 
 .auth-container {
@@ -206,5 +244,20 @@ main > section {
 .loader {
   font-size: 18px;
   color: var(--text-color);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .main-content > section {
+    overflow: auto;
+  }
+
+  .page-container {
+    flex-direction: column;
+  }
 }
 </style>

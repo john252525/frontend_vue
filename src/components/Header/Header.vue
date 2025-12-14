@@ -132,7 +132,6 @@ import { useBalanceStore } from "@/stores/balanceStore";
 
 const { stationDomain } = useDomain();
 
-// Правильное использование - внутри computed или функций
 const balanceStore = computed(() => useBalanceStore());
 
 const logo = import.meta.env.VITE_TITLE_LOGO;
@@ -161,7 +160,7 @@ const isChatPage = computed(() => {
 });
 
 onMounted(() => {
-  balanceStore.value.regBalanceUser();
+  balanceStore.value.initBalance();
 });
 </script>
 

@@ -53,7 +53,6 @@
     </article>
   </section>
 
-  <!-- ОБНОВЛЕННАЯ СЕКЦИЯ С ТЕЛЕФОНОМ -->
   <section v-if="station.phone" class="phone-section">
     <div class="phone-container">
       <div class="phone-header">

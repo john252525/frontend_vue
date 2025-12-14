@@ -1,5 +1,5 @@
 <template>
-  <div class="black-fon"></div>
+  <div @click="changeEnableStation" class="black-fon"></div>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
     <QrCode
@@ -16,9 +16,21 @@
       ref="subComponent"
       v-if="station.getCode"
     />
+    <Max
+      v-if="station.max"
+      :startFunc="startFunc"
+      :openError="errorTrue"
+      :close="changeEnableStation"
+      :source="selectedItem.source"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeChallengeRequired="changeChallengeRequired"
+      :updateLoadingStatus="updateLoadingStatus"
+      :user="selectedItem"
+    />
     <ChallengeRequired
       :openError="errorTrue"
       :close="changeEnableStation"
+      :source="selectedItem.source"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeChallengeRequired="changeChallengeRequired"
       :updateLoadingStatus="updateLoadingStatus"
@@ -31,7 +43,7 @@
       :closeBoolean="true"
       :close="changeEnableStation"
     />
-    <ResultModal v-if="station.result" />
+    <ResultModal :closeModal="changeEnableStation" v-if="station.result" />
     <ResultModalTrue
       :changeEnableStation="changeEnableStation"
       :changeChallengeRequired="changeChallengeRequired"
@@ -47,6 +59,7 @@ import GetCode from "./GetCode/GetCode.vue";
 import ResultModal from "./ResultModal.vue";
 import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
 import LoadingModal from "./LoadingModal.vue";
+import Max from "./Max/Max.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
@@ -87,6 +100,7 @@ let isRunning = false; // Флаг для отслеживания выполн�
 const station = reactive({
   qrCode: false,
   getCode: false,
+  max: false,
   ChallengeRequired: false,
   stationLoading: false,
   result: null,
@@ -103,6 +117,7 @@ const openEnableMenuTrue = () => {
   station.qrCode = false;
   station.ChallengeRequired = false;
   station.getCode = false;
+  station.max = false;
 };
 
 const errorTrue = () => {
@@ -161,6 +176,7 @@ const resetAllStation = async () => {
   station.QrCode = false;
   station.getCode = false;
   station.ChallengeRequired = false;
+  station.max = false;
 };
 
 const code = ref(null);
@@ -322,8 +338,12 @@ const setState = async (request) => {
     };
     if (response.data.status === "ok") {
       station.stationLoading = false;
-      chatStore.addOrUpdateChat(newLoginData);
-      station.resultTrue = true;
+      if (source === "max") {
+        station.max = true;
+      } else {
+        chatStore.addOrUpdateChat(newLoginData);
+        station.resultTrue = true;
+      }
     } else if (response.data.error) {
       setTimeout(() => {
         station.stationLoading = false;
@@ -338,6 +358,9 @@ const setState = async (request) => {
         station.qrCode = true;
       } else if (response.data.error.message === "Auth code received") {
         station.getCode = true;
+      } else if (response.data.error.message === "Auth phone not set") {
+        station.stationLoading = false;
+        station.max = true;
       } else {
         setTimeout(() => {
           station.result = true;
@@ -374,6 +397,7 @@ const startFunc = async () => {
   isRunning = true;
   station.stationLoading = true;
   station.result = false;
+  station.max = false;
   // station.text = t("globalLoading.checkAccoutn");
 
   await forceStop();

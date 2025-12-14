@@ -9,13 +9,20 @@
     "preview": "vite preview",
     "setup-env:dev": "node scripts/setup-env.js development",
     "setup-env:prod": "node scripts/setup-env.js production",
-    "setup-env": "node scripts/setup-env.js"
+    "setup-env": "node scripts/setup-env.js",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:chrome": "playwright test --project=chromium"
   },
   "dependencies": {
     "@joeattardi/emoji-button": "^4.6.4",
     "@vueframe/vueframe": "^3.0.7",
     "animate.css": "^4.1.1",
     "axios": "^1.7.7",
+    "chart.js": "^4.5.1",
+    "cypress": "^15.7.1",
     "dotenv": "^16.4.7",
     "driver.js": "^1.3.6",
     "google": "^2.1.0",
@@ -32,6 +39,7 @@
     "vue3-json-editor": "^1.1.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@vitejs/plugin-vue": "^5.1.4",
     "sass-embedded": "^1.83.4",
     "vite": "^5.4.10",

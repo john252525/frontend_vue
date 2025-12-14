@@ -172,6 +172,16 @@ const items = reactive([
     checked: accountStore.filterState.telegram,
   },
   {
+    id: "max",
+    name: "Max",
+    checked: accountStore.filterState.max,
+  },
+  {
+    id: "vk",
+    name: "VK",
+    checked: accountStore.filterState.vk,
+  },
+  {
     id: "whatsapp",
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,

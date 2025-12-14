@@ -12,6 +12,16 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "max",
+        name: "Max",
+        enabled: true,
+      },
+      {
+        id: "vk",
+        name: "VK",
+        enabled: true,
+      },
+      {
         id: "bulk",
         name: "Рассылки",
         enabled: true,
@@ -40,6 +50,11 @@ export const FILTER_CONFIG = {
       {
         id: "whatsapp",
         name: "WhatsApp",
+        enabled: true,
+      },
+      {
+        id: "max",
+        name: "Max",
         enabled: true,
       },
       {
