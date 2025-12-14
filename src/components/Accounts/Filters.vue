@@ -10,6 +10,7 @@
             <span class="loading-text">Загрузка...</span>
           </div>
 
+<<<<<<< HEAD
           <!-- Переключатель для удаленных аккаунтов -->
           <div class="deleted-accounts-toggle" :class="{ disabled: isLoading }">
             <input
@@ -28,8 +29,69 @@
             </label>
           </div>
 
+=======
+          <!-- Переключатель удаленных аккаунтов -->
+>>>>>>> dev
           <div
-            v-for="item in items"
+            v-if="domainConfig.showDeletedToggle"
+            class="deleted-accounts-toggle"
+            :class="{ disabled: isLoading }"
+          >
+            <input
+              type="checkbox"
+              id="showDeleted"
+              v-model="showDeleted"
+              @change="handleDeletedToggle"
+              class="toggle-checkbox"
+              :disabled="isLoading"
+            />
+            <label for="showDeleted" class="toggle-label">
+              <span class="toggle-icon">
+                <!-- ИКОНКА УДАЛЕНИЯ (Trash) -->
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 6H5H21"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M10 11V17"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M14 11V17"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <span class="toggle-name">Удаленные</span>
+            </label>
+          </div>
+
+          <!-- Основные фильтры -->
+          <div
+            v-for="item in visibleItems"
             :key="item.id"
             class="filter-item"
             :class="{
@@ -47,16 +109,18 @@
             />
             <label :for="item.id" class="filter-label">
               <span class="filter-icon">
-                <component :is="getIconComponent(item.id)" />
+                <!-- ИКОНКА TELEGRAM -->
+
+                <!-- ИКОНКА CRM -->
               </span>
               <span class="filter-name">{{ item.name }}</span>
             </label>
 
-            <!-- Подфильтры CRM слева -->
+            <!-- Подфильтры CRM -->
             <transition name="subitem-slide">
               <div v-if="item.id === 'crm' && item.checked" class="sub-filters">
                 <div
-                  v-for="subItem in crmSubItems"
+                  v-for="subItem in visibleCrmSubItems"
                   :key="subItem.id"
                   class="sub-filter-item"
                   :class="{ active: subItem.checked, disabled: isLoading }"
@@ -70,9 +134,7 @@
                     :disabled="isLoading"
                   />
                   <label :for="subItem.id" class="sub-filter-label">
-                    <span class="sub-filter-icon">
-                      <component :is="getIconComponent(subItem.id)" />
-                    </span>
+                    <span class="sub-filter-icon"> </span>
                     <span class="sub-filter-name">{{ subItem.name }}</span>
                   </label>
                 </div>
@@ -84,12 +146,23 @@
     </transition>
   </div>
 </template>
+<<<<<<< HEAD
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useAccountsCache } from "@/composables/useAccountsCache";
+=======
+>>>>>>> dev
 
+<script setup>
+import { ref, reactive, computed, onMounted, watch } from "vue";
+import { useAccountStore } from "@/stores/accountStore";
+import { useAccountsCache } from "@/composables/useAccountsCache";
+import { useDomain } from "@/composables/getDomain";
+import { getFilterConfigForDomain } from "@/config/filterConfig";
+
+const { stationDomain } = useDomain();
 const accountStore = useAccountStore();
 const { invalidateCache: invalidateCacheComposable } = useAccountsCache();
 
@@ -106,6 +179,7 @@ const props = defineProps({
   invalidateCache: {
     type: Function,
   },
+<<<<<<< HEAD
 });
 
 const isLoading = computed(() => {
@@ -124,9 +198,23 @@ watch(
 
 onMounted(() => {
   console.log("🎯 Filters mounted, текущий isLoading:", isLoading.value);
+=======
+>>>>>>> dev
 });
 
-// Инициализация состояний из store
+// --- ЛОГИКА КОНФИГУРАЦИИ ДОМЕНА ---
+const domainConfig = computed(() => {
+  const domain = stationDomain.value?.navigate?.value || "whatsapi";
+  return getFilterConfigForDomain(domain);
+});
+
+// --- ЛОГИКА ЗАГРУЗКИ ---
+const isLoading = computed(() => {
+  const loading = accountStore.isLoading;
+  return loading;
+});
+
+// --- ДАННЫЕ ФИЛЬТРОВ ---
 const items = reactive([
   {
     id: "telegram",
@@ -134,15 +222,21 @@ const items = reactive([
     checked: accountStore.filterState.telegram,
   },
   {
+    id: "max",
+    name: "Max",
+    checked: accountStore.filterState.max,
+  },
+  {
+    id: "vk",
+    name: "VK",
+    checked: accountStore.filterState.vk,
+  },
+  {
     id: "whatsapp",
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,
   },
-  {
-    id: "bulk",
-    name: "Рассылки",
-    checked: accountStore.filterState.bulk,
-  },
+  { id: "bulk", name: "Рассылки", checked: accountStore.filterState.bulk },
   { id: "crm", name: "CRM", checked: accountStore.filterState.crm },
 ]);
 
@@ -153,8 +247,34 @@ const crmSubItems = reactive([
     name: "Bitrix24",
     checked: accountStore.filterState.bitrix24,
   },
+  { id: "uon", name: "U-ON", checked: accountStore.filterState.uon },
 ]);
 
+<<<<<<< HEAD
+=======
+// --- ВЫЧИСЛЯЕМЫЕ СПИСКИ ---
+const visibleItems = computed(() => {
+  const config = domainConfig.value;
+  return items.filter((item) => {
+    const filterConfig = config.filters.find((f) => f.id === item.id);
+    return filterConfig?.enabled !== false;
+  });
+});
+
+const visibleCrmSubItems = computed(() => {
+  const config = domainConfig.value;
+  const crmConfig = config.filters.find((f) => f.id === "crm");
+  if (!crmConfig?.subFilters) return [];
+
+  return crmSubItems.filter((subItem) => {
+    const subFilterConfig = crmConfig.subFilters.find(
+      (sf) => sf.id === subItem.id
+    );
+    return subFilterConfig?.enabled !== false;
+  });
+});
+
+>>>>>>> dev
 const showDeleted = ref(accountStore.getAddDeleted);
 
 const result = reactive({
@@ -163,24 +283,7 @@ const result = reactive({
   type: [...accountStore.type],
 });
 
-// Методы
-const getIconComponent = (id) => {
-  switch (id) {
-    case "telegram":
-      return TelegramIcon;
-    case "whatsapp":
-      return WhatsAppIcon;
-    case "crm":
-      return CrmIcon;
-    case "amocrm":
-      return AmoCrmIcon;
-    case "bitrix24":
-      return Bitrix24Icon;
-    default:
-      return null;
-  }
-};
-
+// --- МЕТОДЫ ---
 const handleCheckboxChange = (item) => {
   console.log("🎯 Filters: изменение чекбокса", item.id);
   updateSources();
@@ -198,27 +301,33 @@ const handleCrmSubItemChange = (subItem) => {
 };
 
 const handleDeletedToggle = () => {
+<<<<<<< HEAD
   console.log(
     "🎯 Filters: переключение удаленных аккаунтов",
     showDeleted.value
   );
+=======
+>>>>>>> dev
   accountStore.setAddDeleted(showDeleted.value);
   applyFilters();
 };
 
 const updateSources = () => {
-  result.source = items.filter((item) => item.checked).map((item) => item.id);
+  result.source = visibleItems.value
+    .filter((item) => item.checked)
+    .map((item) => item.id);
   accountStore.setSource(result.source);
   console.log("🔄 Filters: источники обновлены", result.source);
 };
 
 const updateGroups = () => {
-  const messengerSelected = items.some(
+  const messengerSelected = visibleItems.value.some(
     (item) => (item.id === "telegram" || item.id === "whatsapp") && item.checked
   );
-  const crmSelected = items.find((item) => item.id === "crm")?.checked || false;
+  const crmSelected =
+    visibleItems.value.find((item) => item.id === "crm")?.checked || false;
   const bulkSelected =
-    items.find((item) => item.id === "bulk")?.checked || false;
+    visibleItems.value.find((item) => item.id === "bulk")?.checked || false;
 
   result.group = [];
   if (messengerSelected) result.group.push("messenger");
@@ -230,7 +339,7 @@ const updateGroups = () => {
 };
 
 const updateCrmTypes = () => {
-  result.type = crmSubItems
+  result.type = visibleCrmSubItems.value
     .filter((subItem) => subItem.checked)
     .map((subItem) => subItem.id);
   accountStore.setType(result.type);
@@ -244,12 +353,17 @@ const updateFilterState = () => {
     crm: items.find((i) => i.id === "crm")?.checked || false,
     amocrm: crmSubItems.find((i) => i.id === "amocrm")?.checked || false,
     bitrix24: crmSubItems.find((i) => i.id === "bitrix24")?.checked || false,
+<<<<<<< HEAD
+=======
+    uon: crmSubItems.find((i) => i.id === "uon")?.checked || false,
+>>>>>>> dev
     bulk: items.find((i) => i.id === "bulk")?.checked || false,
   };
   accountStore.setFilterState(newFilterState);
   console.log("🔄 Filters: состояние фильтров обновлено", newFilterState);
 };
 
+<<<<<<< HEAD
 // ✅ КЛЮЧЕВОЙ МЕТОД - применение фильтров
 const applyFilters = async () => {
   console.log("🔥 Filters: применение фильтров");
@@ -302,14 +416,26 @@ const AmoCrmIcon = {
 
 const Bitrix24Icon = {
   template: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
+=======
+const applyFilters = async () => {
+  if (props.invalidateCache) {
+    props.invalidateCache();
+  } else {
+    invalidateCacheComposable();
+  }
+  if (props.getAccounts) {
+    await props.getAccounts();
+  }
+>>>>>>> dev
 };
 </script>
 
 <style scoped>
+/* Ваши стили (без изменений) */
 .filter-container {
   font-size: 13px;
 }
-
+/* ... скопируйте остальные стили из вашего оригинального файла ... */
 .filter-trigger {
   display: inline-flex;
   align-items: center;
@@ -353,7 +479,10 @@ const Bitrix24Icon = {
   position: relative;
 }
 
+<<<<<<< HEAD
 /* Стили для состояния загрузки */
+=======
+>>>>>>> dev
 .filters-list {
   position: relative;
 }
@@ -418,7 +547,10 @@ const Bitrix24Icon = {
   cursor: not-allowed;
 }
 
+<<<<<<< HEAD
 /* ИЗМЕНЕННЫЕ СТИЛИ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ УДАЛЕННЫХ АККАУНТОВ */
+=======
+>>>>>>> dev
 .deleted-accounts-toggle {
   margin-bottom: 8px;
   padding-bottom: 8px;

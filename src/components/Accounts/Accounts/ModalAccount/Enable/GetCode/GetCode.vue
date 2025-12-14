@@ -3,7 +3,7 @@
     <Telegram
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeEnableStation="changeEnableStation"
-      v-if="source === 'telegram'"
+      v-if="source === 'telegram' || source === 'max'"
     />
     <WhatsApp
       :updateLoadingStatus="updateLoadingStatus"
@@ -11,6 +11,15 @@
       ref="child"
       v-else
     />
+<<<<<<< HEAD
+    <WhatsApp
+      :updateLoadingStatus="updateLoadingStatus"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      ref="child"
+      v-else
+    />
+=======
+>>>>>>> dev
   </section>
 </template>
 

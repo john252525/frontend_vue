@@ -32,6 +32,15 @@
     />
   </svg> -->
 
+<<<<<<< HEAD
+=======
+  <img
+    class="max-logo"
+    v-if="item.source === 'max'"
+    src="/maxlogo.svg"
+    alt="maxlogo"
+  />
+>>>>>>> dev
   <svg
     v-if="item.source === 'telegram'"
     width="24"
@@ -268,6 +277,24 @@
     />
   </svg>
 
+<<<<<<< HEAD
+=======
+  <svg
+    v-if="item.type === 'uon'"
+    width="24"
+    height="24"
+    viewBox="0 0 128 128"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="64" cy="64" r="60.846" fill="#ef496a" />
+    <path
+      fill="#fff"
+      d="m33.24 27.435h2.648v5.121q0 .762-.24 1.441-.234.674-.744 1.184-.504.504-1.06.709-.774.287-1.858.287-.627 0-1.371-.088-.738-.088-1.236-.346-.498-.264-.914-.744-.41-.48-.562-.99-.246-.82-.246-1.453v-5.121h2.648v5.244q0 .703.387 1.102.392.392 1.084.392.686 0 1.072-.387.393-.392.393-1.107z"
+      transform="matrix(8.5147 0 0 8.5147 -205.84 -202.89)"
+    />
+  </svg>
+
+>>>>>>> dev
   <!-- <svg
     v-if="item.type === 'bulk'"
     width="22"
@@ -325,5 +352,10 @@ const props = defineProps({
 <style scoped>
 .vk-svg {
   /* margin-top: -202px; */
+}
+
+.max-logo {
+  width: 24px;
+  height: 24px;
 }
 </style>

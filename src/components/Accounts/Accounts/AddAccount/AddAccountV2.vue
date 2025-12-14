@@ -5,6 +5,7 @@
   />
 
   <!-- Модальное окно подтверждения интеграции -->
+<<<<<<< HEAD
   <div v-if="showIntegrationModal" class="modal-overlay">
     <div class="modal-container integration-modal">
       <div class="modal-header">
@@ -53,11 +54,95 @@
   <!-- Основное модальное окно добавления аккаунта -->
   <div v-if="!stationLoading.loading" class="modal-overlay">
     <div class="modal-container">
+=======
+  <div
+    v-if="showIntegrationModal"
+    class="modal-overlay"
+    data-testid="integration-modal-overlay"
+  >
+    <div
+      class="modal-container integration-modal"
+      data-testid="integration-modal"
+    >
+>>>>>>> dev
       <div class="modal-header">
-        <h2 class="accounts-addAccounts-title-text">Настройка интеграции</h2>
+        <h2>Подтверждение интеграции</h2>
+      </div>
+      <div class="modal-content">
+        <p class="integration-question">
+          Интеграция установлена в
+          <strong>{{ selectedCrmName }}</strong
+          >?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="cancel-btn"
+          @click="handleIntegrationNo"
+          data-testid="integration-no-btn"
+        >
+          Нет
+        </button>
+        <button
+          class="submit-btn"
+          @click="handleIntegrationYes"
+          data-testid="integration-yes-btn"
+        >
+          Да
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно предупреждения -->
+  <div
+    v-if="showWarningModal"
+    class="modal-overlay"
+    data-testid="warning-modal-overlay"
+  >
+    <div class="modal-container warning-modal" data-testid="warning-modal">
+      <div class="modal-header">
+        <h2>Внимание</h2>
+      </div>
+      <div class="modal-content">
+        <div class="warning-message">
+          <p>
+            Если интеграция не установлена на вашем портале CRM, рекомендуем
+            сначала установить ее.
+          </p>
+          <p>
+            В противном случае не забудьте обновить настройки аккаунта
+            (Действия→Обновить) после ее установки на стороне CRM.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="submit-btn"
+          @click="handleWarningConfirm"
+          data-testid="warning-confirm-btn"
+        >
+          Продолжить создание
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основное модальное окно добавления аккаунта -->
+  <div
+    v-if="!stationLoading.loading"
+    class="modal-overlay"
+    data-testid="main-modal-overlay"
+  >
+    <div class="modal-container" data-testid="main-modal-container">
+      <div class="modal-header">
+        <h2 class="accounts-addAccounts-title-text" data-testid="modal-title">
+          Настройка интеграции
+        </h2>
         <button
           class="close-btn accounts-addAccounts-close-button"
           @click="openModal"
+          data-testid="modal-close-btn"
         >
           &times;
         </button>
@@ -69,12 +154,19 @@
           <label
             v-if="getLabel('group')"
             class="accounts-addAccounts-group-label"
-            >{{ getLabel("group") }}</label
+            data-testid="group-label"
           >
-          <div class="custom-select" ref="groupSelect">
+            {{ getLabel("group") }}
+          </label>
+          <div
+            class="custom-select"
+            ref="groupSelect"
+            data-testid="group-select"
+          >
             <div
               class="selected-option accounts-addAccounts-group-select"
               @click="toggleDropdown('group')"
+              data-testid="group-select-button"
             >
               <span>{{ getSelectedText("group") || "Выберите тип" }}</span>
               <svg
@@ -99,12 +191,14 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-group-dropdown"
                 :style="getDropdownStyle('group')"
+                data-testid="group-dropdown"
               >
                 <div
                   v-for="option in getOptions('group')"
                   :key="option.value"
                   class="option accounts-addAccounts-group-option"
                   @click="selectOption('group', option.value)"
+                  :data-testid="`group-option-${option.value}`"
                 >
                   {{ option.text }}
                 </div>
@@ -118,12 +212,19 @@
           <label
             v-if="getLabel('messenger')"
             class="accounts-addAccounts-messenger-label"
-            >{{ getLabel("messenger") }}</label
+            data-testid="messenger-label"
           >
-          <div class="custom-select" ref="messengerSelect">
+            {{ getLabel("messenger") }}
+          </label>
+          <div
+            class="custom-select"
+            ref="messengerSelect"
+            data-testid="messenger-select"
+          >
             <div
               class="selected-option accounts-addAccounts-messenger-select"
               @click="toggleDropdown('messenger')"
+              data-testid="messenger-select-button"
             >
               <span>{{
                 getSelectedText("messenger") || "Выберите мессенджер"
@@ -150,12 +251,14 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-messenger-dropdown"
                 :style="getDropdownStyle('messenger')"
+                data-testid="messenger-dropdown"
               >
                 <div
                   v-for="option in getOptions('messenger')"
                   :key="option.value"
                   class="option accounts-addAccounts-messenger-option"
                   @click="selectOption('messenger', option.value)"
+                  :data-testid="`messenger-option-${option.value}`"
                 >
                   {{ option.text }}
                 </div>
@@ -169,12 +272,15 @@
           <label
             v-if="getLabel('type')"
             class="accounts-addAccounts-crmType-label"
-            >{{ getLabel("type") }}</label
+            data-testid="type-label"
           >
-          <div class="custom-select" ref="typeSelect">
+            {{ getLabel("type") }}
+          </label>
+          <div class="custom-select" ref="typeSelect" data-testid="type-select">
             <div
               class="selected-option accounts-addAccounts-crmType-select"
               @click="toggleDropdown('type')"
+              data-testid="type-select-button"
             >
               <span>{{ getSelectedText("type") || "Выберите CRM" }}</span>
               <svg
@@ -199,12 +305,17 @@
               <div
                 class="dropdown-options-global accounts-addAccounts-crmType-dropdown"
                 :style="getDropdownStyle('type')"
+                data-testid="type-dropdown"
               >
                 <div
                   v-for="option in getOptions('type')"
                   :key="option.value"
                   class="option accounts-addAccounts-crmType-option"
                   @click="handleCrmSelect(option.value, option.text)"
+<<<<<<< HEAD
+=======
+                  :data-testid="`type-option-${option.value}`"
+>>>>>>> dev
                 >
                   {{ option.text }}
                 </div>
@@ -213,22 +324,36 @@
           </div>
         </div>
 
-        <!-- Domain input for CRM -->
-        <div
-          v-if="formValues.group === 'crm' && formValues.type"
-          class="form-field"
-        >
-          <label class="accounts-addAccounts-domain-label"
-            >Адрес аккаунта</label
+        <!-- Dynamic CRM Fields -->
+        <template v-if="formValues.group === 'crm' && formValues.type">
+          <div
+            v-for="field in getCrmFields(formValues.type)"
+            :key="field.name"
+            class="form-field"
           >
-          <input
-            v-model="formValues.domain"
-            type="text"
-            :placeholder="getDomainPlaceholder()"
-            required
-            class="accounts-addAccounts-domain-input"
-          />
-        </div>
+            <label
+              :class="`accounts-addAccounts-${field.name}-label`"
+              :data-testid="`${field.name}-label`"
+            >
+              {{ field.label }}
+            </label>
+            <input
+              v-model="formValues[field.name]"
+              type="text"
+              :placeholder="field.placeholder"
+              :required="field.required"
+              :class="`accounts-addAccounts-${field.name}-input`"
+              :data-testid="`${field.name}-input`"
+            />
+            <p
+              v-if="field.hint"
+              class="field-hint"
+              :data-testid="`${field.name}-hint`"
+            >
+              {{ field.hint }}
+            </p>
+          </div>
+        </template>
 
         <!-- Info messages -->
         <div
@@ -237,6 +362,7 @@
             formValues.messenger === 'whatsapp'
           "
           class="info-message accounts-addAccounts-whatsapp-info"
+          data-testid="whatsapp-info"
         >
           <p>
             Привязать номер своего Whatsapp можно будет после создания аккаунта
@@ -249,9 +375,22 @@
             formValues.messenger === 'telegram'
           "
           class="info-message accounts-addAccounts-telegram-info"
+          data-testid="telegram-info"
         >
           <p>
             Привязать свой аккаунт Telegram можно будет после создания аккаунта
+          </p>
+        </div>
+
+        <!-- SMS Warning -->
+        <div
+          v-if="formValues.group === 'sms'"
+          class="info-message accounts-addAccounts-sms-warning"
+          data-testid="sms-warning"
+        >
+          <p>
+            Внимание! Если у вас нет телефона на ОС Android (не ниже версии
+            7.0), вы не сможете подключить канал СМС
           </p>
         </div>
       </div>
@@ -260,6 +399,7 @@
         <button
           class="cancel-btn accounts-addAccounts-cancel-button"
           @click="openModal"
+          data-testid="cancel-btn"
         >
           Отмена
         </button>
@@ -267,6 +407,7 @@
           class="submit-btn accounts-addAccounts-submit-button"
           @click="submitForm"
           :disabled="!isFormValid"
+          data-testid="submit-btn"
         >
           Сохранить
         </button>
@@ -298,6 +439,7 @@ import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
 import { useAccountStore } from "@/stores/accountStore";
+
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
@@ -314,12 +456,14 @@ const selectedCrmName = ref("");
 const changeStationLoading = () => {
   stationLoading.loading = false;
 };
+
 const formElements = ref([]);
 const formValues = reactive({
   group: "",
   messenger: "",
   type: "",
   domain: "",
+  crm_api_key: "",
 });
 const dropdownOpen = reactive({
   group: false,
@@ -391,17 +535,73 @@ const getSelectedText = (selectName) => {
   return option?.text_content || "";
 };
 
+// 🔑 KEY FUNCTION: Get CRM fields based on selected CRM type
+const getCrmFields = (crmType) => {
+  // Find the option element for this CRM type
+  const crmOption = formElements.value.find(
+    (el) =>
+      el.element === "option" &&
+      el.value === crmType &&
+      el.parent_id === getSelectElement("type")?.id
+  );
+
+  if (!crmOption) return [];
+
+  // Find all fields that have this option as parent_id
+  const fields = formElements.value.filter(
+    (el) =>
+      el.parent_id === crmOption.id &&
+      (el.element === "input" || el.element === "label")
+  );
+
+  // Build field structure with labels and inputs
+  const fieldMap = {};
+
+  fields.forEach((field) => {
+    if (field.element === "label") {
+      fieldMap[field.for] = {
+        name: field.for,
+        label: field.text_content,
+        required: false,
+        placeholder: "",
+        hint: null,
+      };
+    } else if (field.element === "input") {
+      if (fieldMap[field.name]) {
+        fieldMap[field.name].required = field.required || false;
+        fieldMap[field.name].placeholder = field.placeholder || "";
+      } else {
+        fieldMap[field.name] = {
+          name: field.name,
+          label: "",
+          required: field.required || false,
+          placeholder: field.placeholder || "",
+          hint: null,
+        };
+      }
+    }
+  });
+
+  // Find hints (p elements)
+  const hints = formElements.value.filter(
+    (el) => el.parent_id === crmOption.id && el.element === "p"
+  );
+  hints.forEach((hint) => {
+    // Find associated field (usually the first input found for this CRM)
+    const firstField = Object.values(fieldMap)[0];
+    if (firstField) {
+      firstField.hint = hint.text_content;
+    }
+  });
+
+  return Object.values(fieldMap).filter((f) => f.name);
+};
+
 const showElement = (name) => {
   if (name === "group") return true;
   if (name === "messenger") return formValues.group === "messenger";
   if (name === "type") return formValues.group === "crm";
   return false;
-};
-
-const getDomainPlaceholder = () => {
-  if (formValues.type === "amocrm") return "account.amocrm.ru";
-  if (formValues.type === "bitrix24") return "account.bitrix24.ru";
-  return "Введите адрес аккаунта";
 };
 
 // Form validation
@@ -413,7 +613,13 @@ const isFormValid = computed(() => {
   }
 
   if (formValues.group === "crm") {
-    return !!formValues.type && !!formValues.domain;
+    if (!formValues.type) return false;
+
+    // Get required fields for this CRM
+    const requiredFields = getCrmFields(formValues.type);
+    return requiredFields.every((field) => {
+      return field.required ? !!formValues[field.name] : true;
+    });
   }
 
   return true;
@@ -435,6 +641,12 @@ const selectOption = (name, value) => {
     formValues.messenger = "";
     formValues.type = "";
     formValues.domain = "";
+    formValues.crm_api_key = "";
+  }
+
+  if (name === "type") {
+    formValues.domain = "";
+    formValues.crm_api_key = "";
   }
 
   dropdownOpen[name] = false;
@@ -443,17 +655,29 @@ const selectOption = (name, value) => {
 // Обработка выбора CRM
 const handleCrmSelect = (value, text) => {
   selectedCrmName.value = text;
+<<<<<<< HEAD
   formValues.type = value;
   dropdownOpen.type = false;
 
   // Показываем модальное окно подтверждения интеграции
+=======
+  selectOption("type", value);
+
+  if (text === "U-ON") {
+    return;
+  }
+
+>>>>>>> dev
   showIntegrationModal.value = true;
 };
 
 // Обработчики для модальных окон
 const handleIntegrationYes = () => {
   showIntegrationModal.value = false;
+<<<<<<< HEAD
   // Продолжаем без предупреждения
+=======
+>>>>>>> dev
 };
 
 const handleIntegrationNo = () => {
@@ -463,7 +687,10 @@ const handleIntegrationNo = () => {
 
 const handleWarningConfirm = () => {
   showWarningModal.value = false;
+<<<<<<< HEAD
   // Пользователь подтвердил, что понимает риски
+=======
+>>>>>>> dev
 };
 
 // Получение стилей для позиционирования dropdown
@@ -487,7 +714,6 @@ const getDropdownStyle = (name) => {
 
 // Handle clicks outside dropdowns
 const handleClickOutside = (event) => {
-  // Проверяем, был ли клик вне dropdown
   const isClickInsideDropdown =
     event.target.closest(".custom-select") ||
     event.target.closest(".dropdown-options-global");
@@ -517,8 +743,20 @@ const handleSomeAction = () => {
 
 const submitForm = async () => {
   const formData = {
-    ...formValues,
+    group: formValues.group,
+    messenger: formValues.messenger,
+    type: formValues.type,
   };
+
+  // Add relevant fields based on CRM type
+  if (formValues.group === "crm") {
+    const fields = getCrmFields(formValues.type);
+    fields.forEach((field) => {
+      if (formValues[field.name]) {
+        formData[field.name] = formValues[field.name];
+      }
+    });
+  }
 
   stationLoading.loading = true;
   try {
@@ -603,7 +841,10 @@ const submitForm = async () => {
   z-index: 1002;
 }
 
+<<<<<<< HEAD
 /* Остальные существующие стили остаются без изменений */
+=======
+>>>>>>> dev
 /* Base styles */
 * {
   box-sizing: border-box;
@@ -624,10 +865,6 @@ const submitForm = async () => {
   animation: fadeIn 0.3s ease-out;
   overflow-y: auto;
   padding: 20px;
-}
-
-.hidden-input {
-  display: none;
 }
 
 .modal-container {
@@ -757,14 +994,6 @@ const submitForm = async () => {
 }
 
 /* Form fields */
-.fields-group {
-  margin-bottom: 20px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 12px;
-  background-color: #f9fafb;
-}
-
 .form-field {
   margin-bottom: 20px;
 }
@@ -796,6 +1025,13 @@ const submitForm = async () => {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
+.field-hint {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
 /* Info message */
 .info-message {
   padding: 12px;
@@ -810,13 +1046,10 @@ const submitForm = async () => {
   margin: 0;
 }
 
-.link {
-  color: #1e40af;
-  text-decoration: underline;
-}
-
-.link:hover {
-  color: #1e3a8a;
+/* SMS warning */
+.accounts-addAccounts-sms-warning {
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
 /* Modal footer */

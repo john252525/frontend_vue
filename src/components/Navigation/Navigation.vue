@@ -374,12 +374,17 @@ const isChatPage = computed(() => {
 </script>
 
 <style scoped>
-/* Desktop Styles */
 .pc-menu {
   display: flex;
   width: 230px;
   box-sizing: border-box;
   background: var(--bg);
+  position: fixed;
+  left: 0;
+  top: 57px; /* Высота header, измените если нужно */
+  height: calc(100vh - 57px); /* Меню займет оставшуюся высоту */
+  overflow-y: auto;
+  z-index: 2;
 }
 
 nav {
@@ -391,16 +396,21 @@ nav {
   border-right: 1px solid black;
   background-color: white;
   width: 60px;
-  height: calc(100% - 57px);
+  height: calc(100vh - 57px); /* Меню займет оставшуюся высоту */
+  position: fixed;
+  left: 0;
+  top: 57px; /* Высота header */
+  overflow-y: auto;
+  z-index: 50;
 }
 
 .line-mailing {
   width: 0.5px;
   background-color: var(--line);
-  position: absolute;
+  position: fixed;
   z-index: 2;
-  top: 56px;
-  height: calc(100% - 57px);
+  top: 57px; /* Высота header */
+  height: calc(100vh - 57px);
   left: 60px;
 }
 
@@ -408,6 +418,9 @@ nav {
   width: 60px;
   position: fixed;
   left: 0;
+  top: 57px; /* Высота header */
+  height: calc(100vh - 57px);
+  overflow-y: auto;
 }
 
 .logo-header {
@@ -473,20 +486,21 @@ nav {
 .line {
   width: 0.5px;
   background-color: var(--line);
-  position: absolute;
+  position: fixed;
   z-index: 2;
-  top: 45px;
-  height: calc(100% - 57px);
+  top: 45px; /* Высота header */
+  height: calc(100vh - 45px);
   left: 230px;
 }
 
 .line-chat {
   width: 0.5px;
   background-color: var(--line);
-  position: absolute;
+  position: fixed;
   z-index: 2;
   left: 60px;
-  height: 100vh;
+  height: calc(100vh - 57px);
+  top: 57px; /* Высота header */
 }
 
 .logo-img {
@@ -519,16 +533,14 @@ nav {
   cursor: pointer;
 }
 
-.list-mailing {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-  padding: 8px 8px 8px 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.line-mailing {
+  width: 0.5px;
+  background-color: var(--line);
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  height: 100vh;
+  left: 60px;
 }
 
 .list-mailing:hover {
@@ -629,7 +641,7 @@ nav {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 50;
 }
 
 .mobile-menu-toggle {
@@ -644,7 +656,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 50;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -658,7 +670,7 @@ nav {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  z-index: 999;
+  z-index: 50;
 }
 
 .mobile-menu-overlay.active {
@@ -675,7 +687,7 @@ nav {
   height: 100%;
   background: var(--bg);
   transition: left 0.3s ease;
-  z-index: 1000;
+  z-index: 50;
   display: flex;
   flex-direction: column;
 }

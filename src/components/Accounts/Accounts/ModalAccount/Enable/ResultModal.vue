@@ -131,6 +131,12 @@ const { t } = useI18n();
 import axios from "axios";
 const { source, login, storage } = selectedItem.value;
 
+const props = defineProps({
+  changeEnableStation: {
+    type: Function,
+  },
+});
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);

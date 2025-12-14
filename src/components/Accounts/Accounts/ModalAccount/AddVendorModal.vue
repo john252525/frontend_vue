@@ -84,8 +84,11 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 
+<<<<<<< HEAD
 const GROUP_URL = import.meta.env.VITE_GROUP_URL;
 
+=======
+>>>>>>> dev
 const props = defineProps({
   group: Object,
   accountListRef: Object,
@@ -208,7 +211,11 @@ const handleAddMany = async () => {
   isLoading.value = true;
   try {
     await axios.post(
+<<<<<<< HEAD
       `${GROUP_URL}/addVendors`,
+=======
+      "https://bapi88.developtech.ru/api/v1/groups/addVendors",
+>>>>>>> dev
       {
         group_uuid: props.group.uuid,
         vendor_uuids: selectedVendorUuids.value,
