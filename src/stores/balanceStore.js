@@ -11,6 +11,7 @@ export const useBalanceStore = defineStore("balance", () => {
   const referrerId = ref(null);
 
   const apiUrl = import.meta.env.VITE_PAY_URL;
+  const VITE_FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
   const { sendLog } = useFrontendLogger();
 
   const accountStore = useAccountStore();
@@ -38,7 +39,7 @@ export const useBalanceStore = defineStore("balance", () => {
       balanceError.value = false;
 
       const response = await axios.post(
-        `https://bapi88.developtech.ru/api/v1/users/getReferrer`,
+        `${VITE_FRONTEND_URL_USERS}getReferrer`,
         {},
         {
           headers: {

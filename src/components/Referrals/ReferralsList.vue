@@ -141,8 +141,6 @@
         class="none-account-cont"
       >
         <h2>У вас пока нет рефералов</h2>
-<<<<<<< HEAD
-=======
       </div>
     </div>
 
@@ -221,7 +219,6 @@
         class="none-account-cont"
       >
         <h2>У вас пока нет платежей</h2>
->>>>>>> dev
       </div>
     </div>
   </section>

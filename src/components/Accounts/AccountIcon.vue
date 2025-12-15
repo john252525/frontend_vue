@@ -32,15 +32,13 @@
     />
   </svg> -->
 
-<<<<<<< HEAD
-=======
   <img
     class="max-logo"
     v-if="item.source === 'max'"
     src="/maxlogo.svg"
     alt="maxlogo"
   />
->>>>>>> dev
+
   <svg
     v-if="item.source === 'telegram'"
     width="24"
@@ -277,8 +275,6 @@
     />
   </svg>
 
-<<<<<<< HEAD
-=======
   <svg
     v-if="item.type === 'uon'"
     width="24"
@@ -294,7 +290,6 @@
     />
   </svg>
 
->>>>>>> dev
   <!-- <svg
     v-if="item.type === 'bulk'"
     width="22"

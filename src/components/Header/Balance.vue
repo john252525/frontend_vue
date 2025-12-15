@@ -4,9 +4,7 @@
     <article class="balance-info">
       <h2 class="balance-text">
         {{ t("personalAccount.balance") }}:
-        <span v-if="balance || balance === 0">{{
-          removeDecimalZeros(balance)
-        }}</span>
+        <span v-if="balance || balance === 0">{{ balance }}</span>
         <LoadingBalance v-if="balanceLoading" /> ₽
       </h2>
       <h2 v-if="balanceError" class="balance-text">
@@ -46,93 +44,45 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import LoadingBalance from "./Loading/LoadingBalance.vue";
-import { ref, onMounted, computed } from "vue";
+
 const router = useRouter();
+
+// Теперь все данные передаются через props
 const props = defineProps({
   balanceStationOn: {
     type: Function,
+    required: true,
+  },
+  balance: {
+    type: [Number, String],
+    default: 0,
+  },
+  balanceLoading: {
+    type: Boolean,
+    default: false,
+  },
+  balanceError: {
+    type: Boolean,
+    default: false,
   },
 });
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
-const balanceError = ref(false);
-const balanceLoading = ref(false);
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-    // Optionally, update the error message ref
-  }
-};
-
-function removeDecimalZeros(value) {
-  return value.toString().replace(/\.00$/, "");
-}
-const apiUrl = import.meta.env.VITE_PAY_URL;
-const balance = ref("");
-
-const getBalance = async () => {
-  try {
-    balanceLoading.value = true;
-
-    const response = await axios.post(
-      `${apiUrl}/getUserBalance`, // URL вашего бэкенда
-      {}, // Тело запроса, если не нужно отправлять дополнительные данные
-      {
-        headers: {
-          "Content-Type": "application/json", // Убедитесь, что заголовок указан
-          Authorization: `Bearer ${token.value}`, // Заголовок авторизации с токеном
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "balance",
-        "get-payment-sum",
-        null,
-        response.data,
-        response.data
-      );
-    }
-    balanceLoading.value = false;
-    balance.value = response.data.balance;
-  } catch (err) {
-    balanceLoading.value = false;
-    balanceError.value = true;
-    console.error("error", err.response ? err.response.data : err.message);
-  }
-};
-
-const navigateTo = (page) => {
+function navigateTo(page) {
   props.balanceStationOn();
-  
-  if (typeof page === 'object' && page.query) {
-    // Если page - объект с query, добавляем параметр
-    page.query.payment = 'create';
+
+  if (typeof page === "object" && page.query) {
+    page.query.payment = "create";
     router.push(page);
-  } else if (typeof page === 'string') {
-    // Если page - строка, добавляем параметр к URL
-    const separator = page.includes('?') ? '&' : '?';
+  } else if (typeof page === "string") {
+    const separator = page.includes("?") ? "&" : "?";
     router.push(`${page}${separator}payment=create`);
   } else {
-    // Для других случаев
     router.push(page);
   }
-};
-
-onMounted(getBalance);
+}
 </script>
 
 <style scoped>
@@ -151,15 +101,6 @@ onMounted(getBalance);
   justify-content: center;
   gap: 8px;
   padding: 12px;
-}
-
-.balance-user-section,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.balance-user-section,
-.fade-leave-to {
-  opacity: 0;
 }
 
 .balance-user-section {
@@ -215,5 +156,14 @@ onMounted(getBalance);
   font-size: 14px;
   color: var(--text);
   text-align: center;
+}
+
+.black-fon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
 }
 </style>
