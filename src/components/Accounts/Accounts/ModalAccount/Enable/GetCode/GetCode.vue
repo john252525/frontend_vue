@@ -11,15 +11,6 @@
       ref="child"
       v-else
     />
-<<<<<<< HEAD
-    <WhatsApp
-      :updateLoadingStatus="updateLoadingStatus"
-      :openEnableMenuTrue="openEnableMenuTrue"
-      ref="child"
-      v-else
-    />
-=======
->>>>>>> dev
   </section>
 </template>
 

@@ -16,46 +16,6 @@
             }}</span>
           </div>
 
-<<<<<<< HEAD
-    <section class="account-section">
-      <div class="link-section">
-        <span class="link-title">Ваша ссылка для привлечения клиентов</span>
-        <button @click="openHelpModal" class="start-earning-button">
-          Начать зарабатывать
-        </button>
-      </div>
-      <button @click="copyReferralLink" class="add-account-button">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-        >
-          <g
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-          >
-            <path
-              d="M8 4v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7.242a2 2 0 0 0-.602-1.43L16.083 2.57A2 2 0 0 0 14.685 2H10a2 2 0 0 0-2 2"
-            />
-            <path
-              d="M16 18v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2"
-            />
-          </g>
-        </svg>
-        {{ textButton }}
-      </button>
-    </section>
-  </header>
-
-  <ReferralsList :changeUsersCount="changeUsersCount" />
-
-  <!-- Модальное окно -->
-  <HelpModal v-if="showHelpModal" @close="closeHelpModal" />
-=======
           <div class="stat-block">
             <span class="stat-title">Привлечено пользователей</span>
             <span class="stat-value">{{ statistics.count || 0 }}</span>
@@ -133,7 +93,6 @@
     <ReferralsList :changeUsersCount="changeUsersCount" />
     <HelpModal v-if="showHelpModal" @close="closeHelpModal" />
   </div>
->>>>>>> dev
 </template>
 
 <script setup>
@@ -141,11 +100,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 import ReferralsList from "./ReferralsList.vue";
 import HelpModal from "./HelpModal.vue";
-<<<<<<< HEAD
-import { ref, onMounted } from "vue";
-=======
 import { ref, onMounted, nextTick } from "vue";
->>>>>>> dev
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 import Chart from "chart.js/auto";
@@ -154,40 +109,6 @@ const { t } = useI18n();
 
 const usersCount = ref(0);
 const showHelpModal = ref(false);
-<<<<<<< HEAD
-
-const changeUsersCount = (item) => (usersCount.value = item);
-
-const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
-
-const textButton = ref(`https://${window.location.hostname}/Registration...`);
-
-// Функции для управления модальным окном
-const openHelpModal = () => {
-  showHelpModal.value = true;
-};
-
-const closeHelpModal = () => {
-  showHelpModal.value = false;
-};
-
-function decodeJWT(token) {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      throw new Error("Invalid JWT token format");
-    }
-
-    const header = JSON.parse(atob(parts[0]));
-    const payload = JSON.parse(atob(parts[1]));
-    console.log(payload);
-    return payload.vendor_id;
-  } catch (error) {
-    console.error("Failed to decode JWT:", error);
-    return null;
-  }
-}
-=======
 const statistics = ref({
   balance: 0,
   count: 0,
@@ -201,7 +122,6 @@ const copyButtonText = ref("Скопировать");
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 const API_URL = "https://api22.developtech.ru/api";
->>>>>>> dev
 
 const refId = ref("");
 const refLink = ref(`https://${window.location.hostname}/Registration...`);
@@ -243,14 +163,6 @@ const initChart = () => {
   }
 
   try {
-<<<<<<< HEAD
-    const response = await axios.get(`${FRONTEND_URL_USERS}getRefId`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accountStore.accountToken}`,
-      },
-    });
-=======
     if (chartInstance) {
       chartInstance.destroy();
     }
@@ -355,7 +267,6 @@ const fetchStatistics = async () => {
         },
       }
     );
->>>>>>> dev
 
     if (response.data.success) {
       statistics.value = response.data.statistics;
@@ -395,36 +306,15 @@ const getRefId = async () => {
 
 const copyReferralLink = async () => {
   try {
-<<<<<<< HEAD
-    await navigator.clipboard.writeText(referralLink);
-    console.log("Ссылка скопирована в буфер обмена:", referralLink);
-    textButton.value = t("referrals.link");
-=======
     await navigator.clipboard.writeText(refLink.value);
     copyButtonText.value = "Скопировано!";
     console.log("✅ Ссылка скопирована");
 
->>>>>>> dev
     setTimeout(() => {
       copyButtonText.value = "Скопировать";
     }, 2000);
   } catch (err) {
-<<<<<<< HEAD
-    console.error("Не удалось скопировать ссылку:", err);
-    const textArea = document.createElement("textarea");
-    textArea.value = referralLink;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand("copy");
-      console.log("Ссылка скопирована (старый метод)");
-    } catch (err) {
-      console.error("Не удалось скопировать ссылку (старый метод):", err);
-    }
-    document.body.removeChild(textArea);
-=======
     console.error("❌ Ошибка копирования:", err);
->>>>>>> dev
   }
 };
 
@@ -455,49 +345,6 @@ header {
   display: flex;
   flex-direction: column;
   gap: 6px;
-<<<<<<< HEAD
-  width: 100%;
-}
-
-.link-section {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 6px;
-}
-
-/* Стили для кнопки "Начать зарабатывать" */
-.start-earning-button {
-  background: transparent;
-  border: 1px solid #3b82f6;
-  border-radius: 6px;
-  padding: 6px 12px;
-  color: #3b82f6;
-  font-weight: 500;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  margin-left: 12px;
-}
-
-.start-earning-button:hover {
-  background: #3b82f6;
-  color: white;
-  transform: translateY(-1px);
-}
-
-.start-earning-button:active {
-  transform: translateY(0);
-}
-
-/* Стили для секции статистики */
-.stats-section {
-  display: flex;
-  gap: 16px;
-=======
->>>>>>> dev
   width: 100%;
 }
 
@@ -508,102 +355,7 @@ header {
   margin: 0;
 }
 
-<<<<<<< HEAD
-.link-title {
-  font-size: 16px;
-  color: #585858;
-}
-
-.account {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--headerAccountText);
-  background: var(--headerAccount);
-  border-radius: 5px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.account-list-button,
-.add-account-button {
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-
-.bi-view-list {
-  width: 1rem;
-  height: 1rem;
-  fill: currentColor;
-}
-
-.account-list-button {
-  background: oklch(0.65 0.22 267 / 0.16);
-  font-weight: 600;
-  font-size: 12px;
-  padding: 10px 12px;
-  color: var(--headerAccountButtonColor);
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.25s;
-}
-
-.account-list-button:hover {
-  background: rgba(0, 13, 255, 0.2);
-  transition: all 0.25s;
-}
-
-.account-list-button:active {
-  background: rgba(17, 21, 93, 0.2);
-  transition: all 0.25s;
-}
-
-.svg-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-right: 0.25rem;
-  margin-left: -0.25rem;
-  fill: currentColor;
-}
-
-.add-account-button {
-  background: var(--textNavHover);
-  font-weight: 400;
-  font-size: 14px;
-  color: #585858;
-  transition: all 0.25s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
-  width: 100%;
-  justify-content: flex-start;
-}
-
-.add-account-button:hover {
-  background: #dfdfdf;
-  transition: all 0.25s;
-}
-
-.add-account-button:active {
-  background: rgb(201, 201, 201);
-  transition: all 0.25s;
-}
-
-.black-fon {
-  position: absolute;
-  z-index: 5;
-=======
 .stats-section {
->>>>>>> dev
   width: 100%;
 }
 
@@ -813,25 +565,10 @@ header {
   border-top: 1px solid #e5e7eb;
 }
 
-<<<<<<< HEAD
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.platform {
-  padding: 4px;
-  transition: all 0.1s;
-=======
 .legend-item {
   display: flex;
   align-items: center;
   gap: 10px;
->>>>>>> dev
   cursor: pointer;
   font-size: 14px;
   color: #6b7280;
@@ -1009,17 +746,6 @@ header {
   .chart-legend {
     gap: 16px;
     padding-top: 12px;
-  }
-
-  .link-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .start-earning-button {
-    margin-left: 0;
-    align-self: flex-start;
   }
 }
 </style>

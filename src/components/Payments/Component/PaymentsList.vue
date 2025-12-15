@@ -6,17 +6,10 @@
         <thead class="table-header">
           <tr>
             <th class="table-login">ID</th>
-<<<<<<< HEAD
-            <th class="table-type">{{ t("paymentList.type") }}</th>
-            <th class="table-step">{{ t("paymentList.sum") }}</th>
-            <th class="table-status">{{ t("paymentList.date") }}</th>
-            <th class="table-action">{{ t("paymentList.status.table") }}</th>
-=======
             <th class="table-type">Сумма</th>
             <th class="table-step">Тип операции</th>
             <th class="table-status">Статус</th>
             <th class="table-action">Действие</th>
->>>>>>> dev
           </tr>
         </thead>
         <tbody class="tbody">
@@ -25,14 +18,7 @@
             v-for="(item, index) in payments"
             :key="index"
           >
-<<<<<<< HEAD
-            <td class="name-pay">{{ getPaymentSystem(item.public_id) }}</td>
-            <td class="table-type-text" :class="getTypeClass(item.type)">
-              {{ getTypeText(item.type) }}
-            </td>
-=======
             <td class="name-pay">{{ item.public_id }}</td>
->>>>>>> dev
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td
               class="table-text"
@@ -42,22 +28,6 @@
             </td>
             <td
               class="table-status-text"
-<<<<<<< HEAD
-              :class="getStatusClass(item.public_status, item.type)"
-            >
-              <template v-if="item.type === 'c' && item.public_status">
-                <button
-                  class="check-button"
-                  @click="openCheck(item.public_status)"
-                  :title="item.public_status"
-                >
-                  Открыть чек
-                </button>
-              </template>
-              <template v-else>
-                {{ getStatusText(item.public_status, item.type) }}
-              </template>
-=======
               :class="getStatusClass(item.payment_type, item.public_status)"
             >
               {{ item.public_status }}
@@ -66,7 +36,6 @@
               <button class="details-button" @click="openPaymentModal(item)">
                 Детали
               </button>
->>>>>>> dev
             </td>
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
@@ -407,15 +376,6 @@ const fetchPayments = async () => {
   }
 };
 
-<<<<<<< HEAD
-// Функция для открытия чека
-function openCheck(url) {
-  if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
-    window.open(url, "_blank");
-  } else if (url) {
-    // Если URL без протокола, добавляем https://
-    window.open(`https://${url}`, "_blank");
-=======
 function openPaymentModal(payment) {
   selectedPayment.value = payment;
   showModal.value = true;
@@ -447,7 +407,6 @@ function goToPayment() {
     } else {
       window.location.href = `https://${url}`;
     }
->>>>>>> dev
   }
 }
 
@@ -467,13 +426,6 @@ function formatDate(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-<<<<<<< HEAD
-function getPaymentSystem(system) {
-  const systems = {
-    yookassa: "YooKassa",
-    check: "Чек",
-    // Добавьте другие платежные системы по мере необходимости
-=======
 function getOperationType(paymentType) {
   switch (paymentType) {
     case "up":
@@ -531,71 +483,11 @@ function getPeriodText(period) {
     "3m": "3 месяца",
     "6m": "6 месяцев",
     "1y": "1 год",
->>>>>>> dev
   };
 
   return periodMap[period] || period;
 }
 
-<<<<<<< HEAD
-// Функция для получения текста типа транзакции через switch case
-function getTypeText(type) {
-  switch (type) {
-    case "+":
-      return "Пополнение";
-    case "-":
-      return "Списание";
-    case "c":
-      return "Чек";
-    // Добавьте другие типы по мере необходимости
-    // case "transfer":
-    //   return "Перевод";
-    // case "refund":
-    //   return "Возврат";
-    default:
-      return "Неизвестно";
-  }
-}
-
-// Функция для получения класса типа транзакции через switch case
-function getTypeClass(type) {
-  switch (type) {
-    case "+":
-      return "type-income";
-    case "-":
-      return "type-outcome";
-    case "c":
-      return "type-check";
-    // Добавьте другие типы по мере необходимости
-    // case "transfer":
-    //   return "type-transfer";
-    // case "refund":
-    //   return "type-refund";
-    default:
-      return "type-unknown";
-  }
-}
-
-// Обновленная функция для получения класса статуса
-function getStatusClass(state, type) {
-  if (type === "c") {
-    return "check-status";
-  }
-
-  switch (state) {
-    case "Пополнение завершено": // Успешный платеж
-      return "succeeded";
-    case "Ошибка обработки платежа": // Ошибка
-      return "canceled";
-    case "Ожидание оплаты": // В обработке
-      return "pending";
-    case "Успешная покупка":
-      return "succeeded";
-    case "Недостаточно средств":
-      return "canceled";
-    default:
-      return "pending";
-=======
 const parsedTariffDetails = computed(() => {
   if (selectedPayment.value && selectedPayment.value.details) {
     try {
@@ -607,40 +499,15 @@ const parsedTariffDetails = computed(() => {
       console.error("Error parsing tariff details:", e);
       return {};
     }
->>>>>>> dev
   }
   return {};
 });
 
-<<<<<<< HEAD
-// Обновленная функция для получения текста статуса
-function getStatusText(state, type) {
-  if (type === "c") {
-    return "Чек создан";
-  }
-
-  switch (state) {
-    case "Пополнение завершено":
-      return t("paymentList.status.succeeded");
-    case "Платеж отменен":
-      return t("paymentList.status.canceled");
-    case "Ошибка обработки платежа":
-      return t("paymentList.status.error");
-    case "Успешная покупка":
-      return "Успешная покупка";
-    case "Недостаточно средств":
-      return "Недостаточно средств";
-    default:
-      return t("paymentList.status.pending");
-  }
-}
-=======
 const isPaymentActive = computed(() => {
   if (!selectedPayment.value) return false;
   const status = selectedPayment.value.public_status;
   return status.includes("Инициирован") || status.includes("Ожидание");
 });
->>>>>>> dev
 
 onMounted(fetchPayments);
 </script>
@@ -674,184 +541,6 @@ onMounted(fetchPayments);
   border-collapse: collapse;
 }
 
-<<<<<<< HEAD
-.bi-list {
-  width: 16px; /* Ширина и высота иконки */
-  height: 16px;
-  fill: currentColor; /* Использует текущий цвет текста */
-  margin-bottom: -4px;
-  margin-right: 6px;
-}
-
-.loading-data-text {
-  font-weight: 600;
-  font-size: 14px;
-  color: #000000;
-  margin-top: 20px;
-  text-align: center;
-  padding: 10px;
-  background-color: #efefef;
-  border-radius: 6px;
-}
-
-.none-account-cont {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  margin-top: 0px;
-  height: 50px;
-  width: 100%;
-  background-color: var(--noAccountTableBg);
-  border-radius: 5px;
-}
-
-.none-account-cont h2 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  margin-left: 10px;
-}
-
-.table-login {
-  text-align: left;
-  padding: 1rem;
-}
-
-.table-type {
-  text-align: left;
-  padding: 1rem;
-}
-
-.load-cont {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: -10px;
-}
-
-.accout-load-cont {
-  width: 100%;
-}
-
-.table-step {
-  text-align: left;
-  padding: 1rem;
-}
-
-.table-status {
-  text-align: left;
-  padding: 1rem;
-}
-
-.table-action {
-  text-align: left;
-  padding: 1rem;
-  padding-right: 15px;
-}
-
-/* Стили для типов транзакций */
-.type-income {
-  color: rgb(39, 146, 39);
-  font-weight: 500;
-}
-
-.type-outcome {
-  color: rgb(253, 86, 86);
-  font-weight: 500;
-}
-
-.type-check {
-  color: rgb(65, 105, 225);
-  font-weight: 500;
-}
-
-.type-transfer {
-  color: rgb(65, 105, 225);
-  font-weight: 500;
-}
-
-.type-refund {
-  color: rgb(255, 165, 0);
-  font-weight: 500;
-}
-
-.type-unknown {
-  color: gray;
-  font-weight: 500;
-}
-
-/* Стили для статусов */
-.canceled {
-  color: rgb(253, 86, 86);
-}
-
-.succeeded {
-  color: rgb(39, 146, 39);
-}
-
-.pending {
-  color: gray;
-}
-
-.check-status {
-  color: rgb(65, 105, 225);
-}
-
-/* Стиль для кнопки открытия чека */
-.check-button {
-  background: rgb(65, 105, 225);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.check-button:hover {
-  background: rgb(54, 88, 189);
-}
-
-.check-button:active {
-  background: rgb(45, 74, 158);
-}
-
-.table-login {
-  width: 25%;
-}
-
-.table-type {
-  width: 15%;
-}
-
-.table-step {
-  width: 20%;
-}
-
-.table-status {
-  width: 20%;
-}
-
-.table-action {
-  width: 20%;
-}
-
-.table-text-number {
-  padding: 1rem;
-}
-
-.load-cont {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: -10px;
-}
-
-=======
->>>>>>> dev
 .none-account-cont {
   display: flex;
   align-items: flex-start;
@@ -884,26 +573,7 @@ onMounted(fetchPayments);
   width: 20%;
 }
 
-<<<<<<< HEAD
-.table-type-text {
-  padding: 1rem;
-  text-align: left;
-}
-
-.table-text {
-  padding: 1rem;
-}
-
-.name-pay {
-  padding: 1rem;
-  font-weight: 500;
-}
-
-.table-state {
-  padding: 1rem;
-=======
 .table-type {
->>>>>>> dev
   text-align: left;
   padding: 1rem;
   width: 15%;
@@ -1396,31 +1066,18 @@ tr:hover {
     width: 12%;
   }
 
-  .table-type {
-    width: 15%;
-  }
-
   .table-step {
     width: 28%;
   }
 
   .table-status {
-<<<<<<< HEAD
-    width: 30%;
-=======
     width: 22%;
->>>>>>> dev
   }
 
   .table-action {
     width: 20%;
   }
 
-<<<<<<< HEAD
-  .check-button {
-    padding: 4px 8px;
-    font-size: 11px;
-=======
   .details-button {
     padding: 6px 12px;
     font-size: 12px;
@@ -1437,7 +1094,6 @@ tr:hover {
   .modal-close {
     top: 12px;
     right: 12px;
->>>>>>> dev
   }
 }
 </style>

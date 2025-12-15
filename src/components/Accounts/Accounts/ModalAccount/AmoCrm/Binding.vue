@@ -458,11 +458,7 @@ const error = ref(null);
 const showCrmInstallModal = ref(false);
 const crmInstalled = ref(false);
 
-<<<<<<< HEAD
-const API_BASE_URL = import.meta.env.VITE_BINDING_URL;
-=======
 const API_BASE_URL = "https://bapi88.developtech.ru/api/v1/crm";
->>>>>>> dev
 
 // Получаем отфильтрованные аккаунты (ТОЛЬКО telegram и whatsapp)
 const filteredAccounts = computed(() => {

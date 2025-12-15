@@ -1,11 +1,7 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 
-<<<<<<< HEAD
-const API_BASE_URL = "https://bapi88.apitter.com/api/v1/groups";
-=======
-const API_BASE_URL = "https://bapi88.developtech.ru/api/v1/groups";
->>>>>>> dev
+const API_BASE_URL = import.meta.env.VITE_GROUP_URL;
 
 export const useVendorGroups = (token) => {
   const groups = ref({});

@@ -2,10 +2,7 @@
   <div class="toggle-wrapper">
     <button
       @click="switchTab('accounts')"
-<<<<<<< HEAD
-=======
       id="togle-account"
->>>>>>> dev
       :class="['toggle-button', { active: currentTab === 'accounts' }]"
     >
       <svg
@@ -25,10 +22,7 @@
     </button>
     <button
       @click="handleGroupsClick"
-<<<<<<< HEAD
-=======
       id="togle-group"
->>>>>>> dev
       :class="['toggle-button', { active: currentTab === 'groups' }]"
       :disabled="isLoading"
     >

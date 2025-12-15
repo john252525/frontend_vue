@@ -1,9 +1,5 @@
 <template>
-<<<<<<< HEAD
-  <div class="black-fon"></div>
-=======
   <div @click="changeEnableStation" class="black-fon"></div>
->>>>>>> dev
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
     <QrCode
@@ -20,14 +16,6 @@
       ref="subComponent"
       v-if="station.getCode"
     />
-<<<<<<< HEAD
-    <ChallengeRequired
-      :openError="errorTrue"
-      :close="changeEnableStation"
-      :openEnableMenuTrue="openEnableMenuTrue"
-      :changeChallengeRequired="changeChallengeRequired"
-      :updateLoadingStatus="updateLoadingStatus"
-=======
     <Max
       v-if="station.max"
       :startFunc="startFunc"
@@ -46,7 +34,6 @@
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeChallengeRequired="changeChallengeRequired"
       :updateLoadingStatus="updateLoadingStatus"
->>>>>>> dev
       v-if="station.ChallengeRequired"
     />
     <LoadingModal
@@ -137,10 +124,6 @@ const errorTrue = () => {
   (station.result = true), (station.ChallengeRequired = false);
 };
 
-const errorTrue = () => {
-  (station.result = true), (station.ChallengeRequired = false);
-};
-
 const subComponent = ref(null);
 const subComponentRef = ref(null);
 const stopAuthCode = () => {
@@ -193,10 +176,7 @@ const resetAllStation = async () => {
   station.QrCode = false;
   station.getCode = false;
   station.ChallengeRequired = false;
-<<<<<<< HEAD
-=======
   station.max = false;
->>>>>>> dev
 };
 
 const code = ref(null);
@@ -417,10 +397,7 @@ const startFunc = async () => {
   isRunning = true;
   station.stationLoading = true;
   station.result = false;
-<<<<<<< HEAD
-=======
   station.max = false;
->>>>>>> dev
   // station.text = t("globalLoading.checkAccoutn");
 
   await forceStop();

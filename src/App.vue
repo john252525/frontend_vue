@@ -3,11 +3,7 @@
     <div class="loader">Загрузка...</div>
   </div>
 
-<<<<<<< HEAD
-  <div v-else>
-=======
   <div v-else class="app-wrapper">
->>>>>>> dev
     <HelpModal />
     <DownloadsBox />
     <Header

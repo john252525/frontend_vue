@@ -49,85 +49,65 @@
         <template v-else>
           <span
             class="action"
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24'].includes(selectedItem.type)"
-=======
             v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
->>>>>>> dev
             @click="openTariff"
             >Подписка</span
           >
           <span
             class="action"
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             @click="handleSubmit"
             >{{ t("modalAccount.settings") }}</span
           >
           <span
             class="action"
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             @click="changeEditNameModal"
             >Сменить имя</span
           >
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-<<<<<<< HEAD
-              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)
-=======
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
->>>>>>> dev
             "
             class="action"
             @click="openScreen"
             >{{ t("modalAccount.screen") }}</span
           >
           <span
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             class="action action-on"
             @click="changeEnableStation"
             >{{ t("modalAccount.on") }}</span
           >
           <span
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             class="action"
             @click="forceStopActive"
             >{{ t("modalAccount.off") }}</span
           >
 
           <span
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             class="action action-throw"
             @click="ChangeconfirmStationReset"
             >{{ t("modalAccount.change") }}</span
           >
 
           <span
-<<<<<<< HEAD
-            v-if="!['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type)"
-=======
-            v-if="!['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)"
->>>>>>> dev
+            v-if="
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+            "
             class="action"
             @click="getNewProxy"
             >{{ t("modalAccount.changeProxy") }}</span
@@ -136,11 +116,9 @@
             class="action action-delete"
             @click="ChangeconfirmStation"
             v-if="
-<<<<<<< HEAD
-              !['amocrm', 'bitrix24', 'bulk'].includes(selectedItem.type) &&
-=======
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type) &&
->>>>>>> dev
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type
+              ) &&
               !(
                 selectedItem.storage === 'binder' &&
                 selectedItem.type === 'touchapi'
@@ -153,11 +131,7 @@
             >{{ t("modalAccount.deleteAccount") }}</span
           >
           <span
-<<<<<<< HEAD
-            v-if="['amocrm', 'bitrix24'].includes(selectedItem.type)"
-=======
             v-if="['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
->>>>>>> dev
             class="action"
             @click="updateAccountButton"
             >Обновить аккаунт</span
@@ -167,21 +141,13 @@
             v-if="['amocrm'].includes(selectedItem.type)"
             class="action"
             @click="changeBindingStation"
-<<<<<<< HEAD
-            >Воронки</span
-=======
             >Привязать</span
->>>>>>> dev
           >
 
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-<<<<<<< HEAD
-              ['amocrm', 'bitrix24'].includes(selectedItem.type)
-=======
               ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)
->>>>>>> dev
             "
             class="action"
             @click="deleteAccountButton"
@@ -1017,12 +983,6 @@ const DeletedBadge = {
     </svg>
   `,
 };
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> dev
 </script>
 
 <style scoped>

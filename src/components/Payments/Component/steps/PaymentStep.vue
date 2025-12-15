@@ -5,11 +5,6 @@
         <div class="summary-header">
           <div class="summary-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-<<<<<<< HEAD
-              <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
-              <path d="M2 10h20" stroke="currentColor" stroke-width="2"/>
-              <path d="M6 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-=======
               <rect
                 x="2"
                 y="5"
@@ -26,7 +21,6 @@
                 stroke-width="2"
                 stroke-linecap="round"
               />
->>>>>>> dev
             </svg>
           </div>
           <h3 class="summary-title">Оплата через YooKassa</h3>
@@ -46,15 +40,11 @@
         <div class="payment-security">
           <div class="security-badge">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-<<<<<<< HEAD
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/>
-=======
               <path
                 d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
                 stroke="currentColor"
                 stroke-width="2"
               />
->>>>>>> dev
             </svg>
             <span>Безопасная оплата через YooKassa</span>
           </div>
@@ -66,27 +56,16 @@
       <!-- <button @click="$emit('back')" class="btn btn-outline" :disabled="isLoading">
         Назад
       </button> -->
-<<<<<<< HEAD
-      <button @click="processPayment" class="btn btn-primary" :disabled="isLoading">
-=======
       <button
         @click="processPayment"
         class="btn btn-primary"
         :disabled="isLoading"
       >
->>>>>>> dev
         <span v-if="isLoading" class="btn-loading">
           <div class="btn-spinner"></div>
           Переходим к оплате...
         </span>
-<<<<<<< HEAD
-        <span v-else class="btn-content">
-          Перейти к оплате
-         
-        </span>
-=======
         <span v-else class="btn-content"> Перейти к оплате </span>
->>>>>>> dev
       </button>
     </div>
 
@@ -96,9 +75,6 @@
         <div class="error-header">
           <div class="error-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-<<<<<<< HEAD
-              <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-=======
               <path
                 d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 stroke="currentColor"
@@ -106,22 +82,17 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
->>>>>>> dev
             </svg>
           </div>
           <h4 class="error-title">Ошибка оплаты</h4>
           <button @click="clearError" class="error-close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-<<<<<<< HEAD
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-=======
               <path
                 d="M18 6L6 18M6 6l12 12"
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
               />
->>>>>>> dev
             </svg>
           </button>
         </div>
@@ -139,18 +110,6 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
-import { ref } from 'vue'
-import axios from 'axios'
-import { useAccountStore } from '@/stores/accountStore'
-import useFrontendLogger from '@/composables/useFrontendLogger'
-
-const { sendLog } = useFrontendLogger()
-const accountStore = useAccountStore()
-const token = accountStore.getAccountToken
-
-const apiUrl = import.meta.env.VITE_PAY_URL
-=======
 import { ref } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
@@ -161,57 +120,10 @@ const accountStore = useAccountStore();
 const token = accountStore.getAccountToken;
 
 const apiUrl = import.meta.env.VITE_PAY_URL;
->>>>>>> dev
 
 const props = defineProps({
   amount: {
     type: Number,
-<<<<<<< HEAD
-    required: true
-  },
-  email: {
-    type: String,
-    required: true
-  },
-  isLoading: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['back', 'payment-success', 'payment-error'])
-
-const localError = ref('')
-const showRetry = ref(false)
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer)
-  } catch (err) {
-    console.error('error', err)
-  }
-}
-
-const clearError = () => {
-  localError.value = ''
-  showRetry.value = false
-}
-
-const processPayment = async () => {
-  clearError()
-  
-  // Валидация
-  if (!props.amount || props.amount < 10) {
-    localError.value = 'Минимальная сумма оплаты - 10 руб.'
-    showRetry.value = true
-    return
-  }
-
-  if (props.amount > 50000) {
-    localError.value = 'Максимальная сумма оплаты - 50,000 руб.'
-    showRetry.value = true
-    return
-=======
     required: true,
   },
   email: {
@@ -256,42 +168,20 @@ const processPayment = async () => {
     localError.value = "Максимальная сумма оплаты - 50,000 руб.";
     showRetry.value = true;
     return;
->>>>>>> dev
   }
 
   try {
     const response = await axios.post(
-<<<<<<< HEAD
-      `${apiUrl}/create_payment`,
-      {
-        amount: props.amount,
-        currency: 'RUB',
-        type: '+',
-=======
       `${apiUrl}/payment/create`,
       {
         amount: props.amount,
         currency: "RUB",
         type: "+",
->>>>>>> dev
         domain: `https://${window.location.hostname}/Payments`,
         email: props.email,
       },
       {
         headers: { Authorization: `Bearer ${token}` },
-<<<<<<< HEAD
-        timeout: 10000 // 10 секунд таймаут
-      }
-    )
-
-    if (response.data) {
-      await handleSendLog(
-        'payment',
-        'create_payment',
-        {
-          amount: props.amount,
-          currency: 'RUB',
-=======
         timeout: 10000, // 10 секунд таймаут
       }
     );
@@ -303,44 +193,10 @@ const processPayment = async () => {
         {
           amount: props.amount,
           currency: "RUB",
->>>>>>> dev
           email: props.email,
         },
         response.data,
         response.data
-<<<<<<< HEAD
-      )
-    }
-
-    if (response.data.success) {
-      const paymentUrl = response.data.confirmation_url
-      window.location.href = paymentUrl
-      emit('payment-success')
-    } else {
-      const errorMsg = response.data.message || 'Неизвестная ошибка при создании платежа'
-      localError.value = errorMsg
-      showRetry.value = true
-      emit('payment-error', errorMsg)
-    }
-  } catch (error) {
-    console.error('Payment error:', error)
-    
-    let errorMsg = 'Ошибка сети'
-    
-    if (error.code === 'ECONNABORTED') {
-      errorMsg = 'Превышено время ожидания. Проверьте соединение.'
-    } else if (error.response) {
-      errorMsg = error.response.data?.message || `Ошибка сервера: ${error.response.status}`
-    } else if (error.request) {
-      errorMsg = 'Не удалось соединиться с сервером. Проверьте интернет-соединение.'
-    }
-    
-    localError.value = errorMsg
-    showRetry.value = true
-    emit('payment-error', errorMsg)
-  }
-}
-=======
       );
     }
 
@@ -376,7 +232,6 @@ const processPayment = async () => {
     emit("payment-error", errorMsg);
   }
 };
->>>>>>> dev
 </script>
 
 <style scoped>
@@ -601,17 +456,12 @@ const processPayment = async () => {
 }
 
 @keyframes spin {
-<<<<<<< HEAD
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-=======
   0% {
     transform: rotate(0deg);
   }
   100% {
     transform: rotate(360deg);
   }
->>>>>>> dev
 }
 
 .slide-fade-enter-active {
@@ -631,8 +481,4 @@ const processPayment = async () => {
   opacity: 0;
   transform: translateY(8px);
 }
-<<<<<<< HEAD
 </style>
-=======
-</style>
->>>>>>> dev

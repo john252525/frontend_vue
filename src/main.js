@@ -33,11 +33,7 @@ import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
 
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
-<<<<<<< HEAD
-const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "all"; // off, all, error
-=======
 const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "off"; // off, all, error
->>>>>>> dev
 
 import { computed } from "vue";
 

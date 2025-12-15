@@ -5,56 +5,6 @@
   />
 
   <!-- Модальное окно подтверждения интеграции -->
-<<<<<<< HEAD
-  <div v-if="showIntegrationModal" class="modal-overlay">
-    <div class="modal-container integration-modal">
-      <div class="modal-header">
-        <h2>Подтверждение интеграции</h2>
-      </div>
-      <div class="modal-content">
-        <p class="integration-question">
-          Интеграция ChatServ установлена в
-          <strong>{{ selectedCrmName }}</strong
-          >?
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-btn" @click="handleIntegrationNo">Нет</button>
-        <button class="submit-btn" @click="handleIntegrationYes">Да</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Модальное окно предупреждения -->
-  <div v-if="showWarningModal" class="modal-overlay">
-    <div class="modal-container warning-modal">
-      <div class="modal-header">
-        <h2>Внимание</h2>
-      </div>
-      <div class="modal-content">
-        <div class="warning-message">
-          <p>
-            Если интеграция не установлена на вашем портале CRM, рекомендуем
-            сначала установить ее.
-          </p>
-          <p>
-            В противном случае не забудьте обновить настройки аккаунта
-            (Действия→Обновить) после ее установки на стороне CRM.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="submit-btn" @click="handleWarningConfirm">
-          Продолжить создание
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Основное модальное окно добавления аккаунта -->
-  <div v-if="!stationLoading.loading" class="modal-overlay">
-    <div class="modal-container">
-=======
   <div
     v-if="showIntegrationModal"
     class="modal-overlay"
@@ -64,7 +14,6 @@
       class="modal-container integration-modal"
       data-testid="integration-modal"
     >
->>>>>>> dev
       <div class="modal-header">
         <h2>Подтверждение интеграции</h2>
       </div>
@@ -312,10 +261,7 @@
                   :key="option.value"
                   class="option accounts-addAccounts-crmType-option"
                   @click="handleCrmSelect(option.value, option.text)"
-<<<<<<< HEAD
-=======
                   :data-testid="`type-option-${option.value}`"
->>>>>>> dev
                 >
                   {{ option.text }}
                 </div>
@@ -655,29 +601,18 @@ const selectOption = (name, value) => {
 // Обработка выбора CRM
 const handleCrmSelect = (value, text) => {
   selectedCrmName.value = text;
-<<<<<<< HEAD
-  formValues.type = value;
-  dropdownOpen.type = false;
-
-  // Показываем модальное окно подтверждения интеграции
-=======
   selectOption("type", value);
 
   if (text === "U-ON") {
     return;
   }
 
->>>>>>> dev
   showIntegrationModal.value = true;
 };
 
 // Обработчики для модальных окон
 const handleIntegrationYes = () => {
   showIntegrationModal.value = false;
-<<<<<<< HEAD
-  // Продолжаем без предупреждения
-=======
->>>>>>> dev
 };
 
 const handleIntegrationNo = () => {
@@ -687,10 +622,6 @@ const handleIntegrationNo = () => {
 
 const handleWarningConfirm = () => {
   showWarningModal.value = false;
-<<<<<<< HEAD
-  // Пользователь подтвердил, что понимает риски
-=======
->>>>>>> dev
 };
 
 // Получение стилей для позиционирования dropdown
@@ -841,10 +772,6 @@ const submitForm = async () => {
   z-index: 1002;
 }
 
-<<<<<<< HEAD
-/* Остальные существующие стили остаются без изменений */
-=======
->>>>>>> dev
 /* Base styles */
 * {
   box-sizing: border-box;

@@ -7,16 +7,10 @@
   <CodeWarningModal :isOpen="isWarningModalOpen" @close="closeWarningModal" />
 
   <div class="code-auth-container">
-<<<<<<< HEAD
-    <div class="code-auth-modal">
-      <div class="code-auth-header">
-        <h2 class="code-auth-title">Подтверждение входа</h2>
-=======
     <!-- ФАЗА 1: ВВОД ТЕЛЕФОНА (только для source === 'max') -->
     <div v-if="source === 'max' && !showCodeInput" class="code-auth-modal">
       <div class="code-auth-header">
         <h2 class="code-auth-title">Подключение по телефону</h2>
->>>>>>> dev
         <button class="code-auth-close" @click="close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -30,37 +24,6 @@
       </div>
 
       <div class="code-auth-body">
-<<<<<<< HEAD
-        <div class="code-input-section">
-          <p class="code-description">
-            Введите 5-значный код подтверждения, отправленный на ваш телефон
-          </p>
-
-          <div class="code-input-container">
-            <input
-              class="code-input"
-              type="text"
-              v-model="code"
-              maxlength="5"
-              required
-              placeholder="000000"
-              @input="formatCode"
-              @keypress="validateNumber"
-            />
-            <div class="code-input-underline"></div>
-          </div>
-
-          <div class="code-hint clickable" @click="openWarningModal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-            Код не пришел?
-=======
         <div class="phone-input-section">
           <p class="phone-description">
             Введите номер телефона для подключения
@@ -85,26 +48,17 @@
             <div v-if="station.errorPhone" class="error-message">
               Пожалуйста, введите корректный номер телефона
             </div>
->>>>>>> dev
           </div>
         </div>
       </div>
 
       <div class="code-auth-footer">
         <button
-<<<<<<< HEAD
-          @click="solveChallenge"
-          class="code-submit-button"
-          :disabled="!isCodeValid"
-        >
-          <span>Подтвердить</span>
-=======
           @click="submitPhoneNumber"
           class="code-submit-button"
           :disabled="!isPhoneValid"
         >
           <span>Далее</span>
->>>>>>> dev
           <svg
             v-if="station.loading"
             width="16"
@@ -121,24 +75,6 @@
           </svg>
         </button>
 
-<<<<<<< HEAD
-        <div class="code-auth-divider">
-          <span>или</span>
-        </div>
-
-        <button @click="getQr" class="code-switch-method">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M2 9V7C2 5.89543 2.89543 5 4 5H7M16 5H20C21.1046 5 22 5.89543 22 7V9M22 16V20C22 21.1046 21.1046 22 20 22H16M7 22H4C2.89543 22 2 21.1046 2 20V16"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-          Перейти к QR-коду
-        </button>
-      </div>
-=======
         <button @click="close" class="back-button">
           <svg
             width="16"
@@ -250,7 +186,6 @@
           Вернуться к номеру телефона
         </button>
       </div>
->>>>>>> dev
     </div>
 
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
@@ -258,17 +193,6 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
-import axios from "axios";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import CodeWarningModal from "./CodeWarningModal.vue";
-import LoadingModal from "../LoadingModal.vue";
-
-import { ref, inject, reactive, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useAccountStore } from "@/stores/accountStore";
-import useFrontendLogger from "@/composables/useFrontendLogger";
-=======
 import { ref, inject, reactive, computed, nextTick } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -278,7 +202,6 @@ import { useDomain } from "@/composables/getDomain";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import CodeWarningModal from "./CodeWarningModal.vue";
 import LoadingModal from "../LoadingModal.vue";
->>>>>>> dev
 
 const props = defineProps({
   changeChallengeRequired: {
@@ -287,12 +210,9 @@ const props = defineProps({
   openEnableMenuTrue: {
     type: Function,
   },
-<<<<<<< HEAD
-=======
   source: {
     type: String,
   },
->>>>>>> dev
   updateLoadingStatus: {
     type: Function,
   },
@@ -302,46 +222,6 @@ const props = defineProps({
   close: {
     type: Function,
   },
-<<<<<<< HEAD
-});
-
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-
-const { sendLog } = useFrontendLogger();
-
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
-
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
-
-const { selectedItem, startFunc } = inject("accountItems");
-const { source, login, storage } = selectedItem.value;
-
-const station = reactive({
-  station: undefined,
-  loading: false,
-  code: true,
-  resultTrue: false,
-});
-
-const router = useRouter();
-
-const code = ref("");
-const errorBlock = ref(false);
-const isWarningModalOpen = ref(false);
-
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
-};
-
-const openWarningModal = () => {
-  isWarningModalOpen.value = true;
-};
-
-const closeWarningModal = () => {
-  isWarningModalOpen.value = false;
-=======
 });
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -510,7 +390,6 @@ const formatPhone = () => {
 const getInternationalFormat = () => {
   const digits = phoneNumber.value.replace(/\D/g, "");
   return digits;
->>>>>>> dev
 };
 
 const handleSendLog = async (location, method, params, results, answer) => {
@@ -521,17 +400,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-<<<<<<< HEAD
-const isCodeValid = computed(() => {
-  return code.value.length === 5 && /^\d+$/.test(code.value);
-});
-
-// Форматирование кода
-const formatCode = () => {
-  // Удаляем все нецифровые символы
-  code.value = code.value.replace(/\D/g, "");
-  // Ограничиваем длину 6 символами
-=======
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
   props.updateLoadingStatus(true, "Отправка номера...");
@@ -616,16 +484,11 @@ const goBackToPhone = () => {
 
 const formatCode = () => {
   code.value = code.value.replace(/\D/g, "");
->>>>>>> dev
   if (code.value.length > 5) {
     code.value = code.value.slice(0, 5);
   }
 };
 
-<<<<<<< HEAD
-// Валидация ввода только цифр
-=======
->>>>>>> dev
 const validateNumber = (event) => {
   const charCode = event.which ? event.which : event.keyCode;
   if (charCode < 48 || charCode > 57) {
@@ -633,10 +496,6 @@ const validateNumber = (event) => {
   }
 };
 
-<<<<<<< HEAD
-const handleClose = () => {
-  // Логика закрытия компонента
-=======
 const openWarningModal = () => {
   isWarningModalOpen.value = true;
 };
@@ -647,22 +506,13 @@ const closeWarningModal = () => {
 
 const chaneErrorBlock = () => {
   errorBlock.value = !errorBlock.value;
->>>>>>> dev
 };
 
 const solveChallenge = async () => {
   if (!isCodeValid.value) return;
 
-<<<<<<< HEAD
-  console.log("Token value:", token.value);
-  console.log("Token type:", typeof token.value);
-
-  props.updateLoadingStatus(true, "Проверка кода...");
-  station.code = false;
-=======
   props.updateLoadingStatus(true, "Проверка кода...");
   station.loading = true;
->>>>>>> dev
 
   let params = {
     source: source.value,
@@ -670,29 +520,11 @@ const solveChallenge = async () => {
     code: `{{ ${code.value} }}`,
   };
 
-<<<<<<< HEAD
-  if (stationDomain.navigate.value != "whatsapi") {
-    params = {
-      source: source,
-      login: login,
-      code: `{{ ${code.value} }}`,
-    };
-  } else {
-    params = {
-      source: source,
-      login: login,
-      storage: storage,
-      code: `{{ ${code.value} }}`,
-    };
-=======
   if (stationDomain.navigate.value === "whatsapi") {
     params.storage = storage;
->>>>>>> dev
   }
 
   try {
-    console.log("Sending request with token:", token.value);
-
     const response = await axios.post(`${FRONTEND_URL}solveChallenge`, params, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
@@ -713,11 +545,7 @@ const solveChallenge = async () => {
     if (response.data.status === "ok") {
       props.openEnableMenuTrue();
       props.updateLoadingStatus(false);
-<<<<<<< HEAD
-    } else if (response.data === 401) {
-=======
     } else if (response.data.status === 401) {
->>>>>>> dev
       errorBlock.value = true;
       setTimeout(() => {
         localStorage.removeItem("accountToken");
@@ -728,67 +556,20 @@ const solveChallenge = async () => {
       props.updateLoadingStatus(false);
     }
   } catch (error) {
-<<<<<<< HEAD
-    console.error("Request error:", error);
-    console.error("Error config:", error.config);
-
-    if (error.response) {
-      console.error("Error response:", error.response);
-=======
     console.error("solveChallenge error:", error);
     props.openError();
     props.updateLoadingStatus(false);
 
     if (error.response) {
       console.error("error response:", error.response);
->>>>>>> dev
     }
   } finally {
     station.loading = false;
   }
 };
 
-<<<<<<< HEAD
-const disablePhoneAuth = async () => {
-  try {
-    console.log("Disable phone auth token:", token.value);
-
-    const response = await axios.post(
-      `${FRONTEND_URL}disablePhoneAuth`,
-      {
-        source: source,
-        login: login,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data.status === "ok") {
-    } else {
-      props.openError();
-      updateLoadingStatus(false);
-    }
-  } catch (error) {
-    console.error("Disable phone auth error:", error);
-
-    if (error.response) {
-      console.error("Error response:", error.response.data);
-    }
-  }
-};
-
-const getQr = async () => {
-  props.updateLoadingStatus(true, "Смена статуса...");
-  await disablePhoneAuth();
-  await startFunc();
-=======
 const handleClose = () => {
   goBackToPhone();
->>>>>>> dev
 };
 </script>
 
@@ -845,11 +626,8 @@ const handleClose = () => {
   margin-bottom: 24px;
 }
 
-<<<<<<< HEAD
-=======
 /* ===== СТИЛИ КОДА ===== */
 
->>>>>>> dev
 .code-input-section {
   text-align: center;
 }
@@ -917,14 +695,6 @@ const handleClose = () => {
   margin-top: 8px;
 }
 
-<<<<<<< HEAD
-.code-auth-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-=======
 /* ===== СТИЛИ ТЕЛЕФОНА ===== */
 
 .phone-input-section {
@@ -1000,7 +770,6 @@ const handleClose = () => {
   gap: 16px;
 }
 
->>>>>>> dev
 .code-submit-button {
   display: flex;
   align-items: center;
@@ -1070,40 +839,6 @@ const handleClose = () => {
   background: #f8f9fa;
   border-color: #4950ca;
   color: #4950ca;
-<<<<<<< HEAD
-}
-
-.clickable {
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.clickable:hover {
-  color: #4950ca;
-}
-
-/* Анимации */
-.code-auth-modal {
-  animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Мобильная адаптация */
-@media (max-width: 480px) {
-  .code-auth-container {
-    padding: 16px;
-  }
-=======
 }
 
 .back-button {
@@ -1160,7 +895,6 @@ const handleClose = () => {
   .code-auth-container {
     padding: 16px;
   }
->>>>>>> dev
 
   .code-auth-modal {
     padding: 20px;
@@ -1189,8 +923,6 @@ const handleClose = () => {
     padding: 12px 16px;
     font-size: 13px;
   }
-<<<<<<< HEAD
-=======
 
   .num-input,
   .num-input-error {
@@ -1201,7 +933,6 @@ const handleClose = () => {
   .phone-description {
     font-size: 13px;
   }
->>>>>>> dev
 }
 
 @media (max-width: 360px) {
@@ -1220,8 +951,6 @@ const handleClose = () => {
 
   .code-hint {
     font-size: 11px;
-<<<<<<< HEAD
-=======
   }
 
   .phone-description {
@@ -1240,7 +969,6 @@ const handleClose = () => {
     max-width: 250px;
     height: 42px;
     font-size: 13px;
->>>>>>> dev
   }
 }
 </style>
