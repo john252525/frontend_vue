@@ -187,6 +187,9 @@ const formData = reactive({
   removeDuplicates: true,
   sendOnlyExistingDialogs: true,
   sendMessagesRandomOrder: false,
+  // НОВЫЕ ПОЛЯ для каналов отправки
+  selectedChannels: ["telegram", "whatsapp"],
+  cascade: "telegram,whatsapp",
 });
 
 // Проверка подписки при монтировании компонента
@@ -200,14 +203,11 @@ async function checkSubscription() {
   subscriptionCheck.error = false;
 
   try {
-    const response = await axios.get(
-      `${apiUrl}/check`,
-      {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.get(`${apiUrl}/check`, {
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data.ok === true && response.data.data.status === "active") {
       // Подписка активна - разрешаем создание рассылки
@@ -294,8 +294,6 @@ const updateStepCompletion = (index, isCompleted) => {
   }
 };
 
-//const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
-
 async function createWhatsAppBroadcast() {
   const url = `${apiUrl}/new/`;
 
@@ -311,7 +309,8 @@ async function createWhatsAppBroadcast() {
   formDataToSend.append("uniq", formData.removeDuplicates);
   formDataToSend.append("exist", formData.sendOnlyExistingDialogs);
   formDataToSend.append("random", formData.sendMessagesRandomOrder);
-  formDataToSend.append("cascade", "telegram,whatsapp");
+  // ОБНОВЛЕНО: Используем динамический cascade из SettingsStep
+  formDataToSend.append("cascade", formData.cascade || "telegram,whatsapp");
   formDataToSend.append("ph_col", formData.selectedLetter);
 
   if (formData.otherFile) {

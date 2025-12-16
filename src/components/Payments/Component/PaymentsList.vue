@@ -684,24 +684,23 @@ tr:hover {
 
 /* Desktop Buttons */
 .details-button {
-  background: rgb(65, 105, 225);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
+  background: oklch(0.65 0.22 267 / 0.16);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 12px;
+  color: oklch(0.4 0.18 267 / 0.86);
+  transition: all 0.25s;
+  border-radius: 5px;
 }
 
 .details-button:hover {
-  background: rgb(54, 88, 189);
+  background: rgba(23, 30, 162, 0.2);
+  transition: all 0.15s;
 }
 
 .details-button:active {
-  background: rgb(45, 74, 158);
+  background: rgba(0, 4, 78, 0.2);
+  transition: all 0.15s;
 }
 
 /* Mobile View */

@@ -14,7 +14,7 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{ t("payment.button") }}
+        Пополнить баланс
       </button>
     </header>
     <PaymentsList />
@@ -35,22 +35,18 @@ const { t } = useI18n();
 
 const createPayments = ref(false);
 const route = useRoute();
-const router = useRouter()
-      
-      
+const router = useRouter();
 
 const changeCreatePayments = () => {
   createPayments.value = !createPayments.value;
-  if ( route.query.payment === 'create') {
-    router.push("/payments")
+  if (route.query.payment === "create") {
+    router.push("/payments");
     createPayments.value = !createPayments.value;
   }
 };
 </script>
 
 <style scoped>
-
-
 .title {
   font-weight: 500;
   font-size: 22px;

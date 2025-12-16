@@ -100,6 +100,63 @@
         </div>
       </div>
 
+      <!-- Выбор каналов отправки -->
+      <div class="edit-section">
+        <h3 class="edit-label">Каналы отправки:</h3>
+        <div class="channels-selector">
+          <label
+            v-for="channel in availableChannels"
+            :key="channel.id"
+            class="channel-item"
+            :class="{ active: selectedChannels.includes(channel.id) }"
+          >
+            <input
+              type="checkbox"
+              :value="channel.id"
+              v-model="selectedChannels"
+              class="channel-checkbox"
+              hidden
+              @change="handleChannelChange"
+            />
+            <span class="channel-text">{{ channel.name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Последовательность отправки -->
+      <div v-if="selectedChannels.length > 1" class="edit-section">
+        <h3 class="edit-label">Последовательность отправки:</h3>
+        <p class="sequence-info">Используйте стрелки для изменения порядка</p>
+        <div class="cascade-container">
+          <div
+            v-for="(channelId, index) in cascadeOrder"
+            :key="channelId"
+            class="cascade-item"
+          >
+            <div class="cascade-position">{{ index + 1 }}</div>
+            <div class="cascade-name">{{ getChannelName(channelId) }}</div>
+            <div class="cascade-buttons">
+              <button
+                v-if="index > 0"
+                @click="moveCascadeUp(index)"
+                class="btn-move"
+                title="Переместить выше"
+              >
+                ↑
+              </button>
+              <button
+                v-if="index < cascadeOrder.length - 1"
+                @click="moveCascadeDown(index)"
+                class="btn-move"
+                title="Переместить ниже"
+              >
+                ↓
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Настройки -->
       <div class="edit-section">
         <h3 class="edit-label">Дополнительные Настройки</h3>
@@ -208,12 +265,82 @@ const items = ref("");
 const minutes = Array.from({ length: 60 }, (_, index) => index + 1);
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
+// Доступные каналы
+const availableChannels = [
+  { id: "telegram", name: "Telegram" },
+  { id: "whatsapp", name: "WhatsApp" },
+  { id: "max", name: "MAX" },
+];
+
+// Инициализация выбранных каналов
+const selectedChannels = ref(["telegram", "whatsapp"]);
+
+// Порядок каскада
+const cascadeOrder = ref(["telegram", "whatsapp"]);
+
+/**
+ * Получить название канала по ID
+ */
+function getChannelName(channelId) {
+  const channel = availableChannels.find((c) => c.id === channelId);
+  return channel ? channel.name : channelId;
+}
+
+/**
+ * Обработка изменения выбранных каналов
+ */
+function handleChannelChange() {
+  const newOrder = cascadeOrder.value.filter((id) =>
+    selectedChannels.value.includes(id)
+  );
+
+  selectedChannels.value.forEach((id) => {
+    if (!newOrder.includes(id)) {
+      newOrder.push(id);
+    }
+  });
+
+  cascadeOrder.value = newOrder;
+}
+
+/**
+ * Переместить канал вверх в последовательности
+ */
+function moveCascadeUp(index) {
+  if (index > 0) {
+    const temp = cascadeOrder.value[index];
+    cascadeOrder.value[index] = cascadeOrder.value[index - 1];
+    cascadeOrder.value[index - 1] = temp;
+  }
+}
+
+/**
+ * Переместить канал вниз в последовательности
+ */
+function moveCascadeDown(index) {
+  if (index < cascadeOrder.value.length - 1) {
+    const temp = cascadeOrder.value[index];
+    cascadeOrder.value[index] = cascadeOrder.value[index + 1];
+    cascadeOrder.value[index + 1] = temp;
+  }
+}
+
 async function editWhatsAppBroadcast() {
+  // Проверка: выбран ли хотя бы один канал
+  if (selectedChannels.value.length === 0) {
+    alert("Выберите хотя бы один канал отправки!");
+    return;
+  }
+
   const url = `${apiUrl}/edit/${items.value.id}/`;
   const daysObject = {};
   selectedDays.value.forEach((day, index) => {
     daysObject[day] = day;
   });
+
+  // Формируем cascade из cascadeOrder
+  const cascadeString = cascadeOrder.value.join(",");
+
   const params = {
     days: daysObject,
     time_from: items.value.options.hours.min,
@@ -223,7 +350,7 @@ async function editWhatsAppBroadcast() {
     uniq: items.value.options.uniq,
     exist: items.value.options.exist,
     random: items.value.options.random,
-    cascade: "telegram,whatsapp",
+    cascade: cascadeString,
   };
   load.value = true;
   try {
@@ -269,8 +396,37 @@ async function editWhatsAppBroadcast() {
   }
 }
 
+/**
+ * Парсить cascade строку безопасно
+ */
+function parseCascade(cascadeValue) {
+  if (!cascadeValue) {
+    return ["telegram", "whatsapp"];
+  }
+
+  // Если это уже массив, вернуть его
+  if (Array.isArray(cascadeValue)) {
+    return cascadeValue;
+  }
+
+  // Если это строка, разделить по запятой
+  if (typeof cascadeValue === "string") {
+    return cascadeValue.split(",").map((c) => c.trim());
+  }
+
+  // В любом другом случае вернуть значение по умолчанию
+  return ["telegram", "whatsapp"];
+}
+
 if (selectedItem.value) {
   items.value = selectedItem.value;
+
+  // Инициализируем selectedChannels и cascadeOrder из items
+  if (items.value.options && items.value.options.cascade) {
+    const cascadeArray = parseCascade(items.value.options.cascade);
+    selectedChannels.value = cascadeArray;
+    cascadeOrder.value = [...cascadeArray];
+  }
 }
 
 watch(
@@ -285,6 +441,13 @@ watch(
       } else if (Array.isArray(newVal.options.days)) {
         selectedDays.value = [...newVal.options.days];
       }
+    }
+
+    // Инициализируем каналы из cascade с проверкой
+    if (newVal && newVal.options && newVal.options.cascade) {
+      const cascadeArray = parseCascade(newVal.options.cascade);
+      selectedChannels.value = cascadeArray;
+      cascadeOrder.value = [...cascadeArray];
     }
   },
   { immediate: true }
@@ -472,6 +635,141 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   color: var(--text-secondary, #666);
 }
 
+/* Выбор каналов */
+.channels-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8fafc;
+  user-select: none;
+}
+
+.channel-item:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.channel-item.active {
+  border-color: oklch(0.541 0.198 267);
+  background: #eef2ff;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.channel-checkbox {
+  display: none;
+}
+
+.channel-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  text-align: center;
+}
+
+.channel-item.active .channel-text {
+  color: oklch(0.541 0.198 267);
+  font-weight: 600;
+}
+
+/* Последовательность отправки */
+.sequence-info {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+.cascade-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.cascade-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.cascade-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.cascade-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: oklch(0.541 0.198 267);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cascade-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.cascade-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-move {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: white;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-move:hover {
+  background: #eef2ff;
+  border-color: oklch(0.541 0.198 267);
+  color: oklch(0.541 0.198 267);
+}
+
+.btn-move:active {
+  transform: scale(0.95);
+}
+
 .settings-grid {
   display: flex;
   flex-direction: column;
@@ -531,6 +829,40 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
     gap: 12px;
   }
 
+  .channels-selector {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .channel-item {
+    padding: 10px;
+  }
+
+  .channel-text {
+    font-size: 12px;
+  }
+
+  .cascade-item {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .cascade-position {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .cascade-name {
+    font-size: 13px;
+  }
+
+  .btn-move {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
   .edit-btn {
     padding: 10px 16px;
     font-size: 13px;
@@ -569,6 +901,14 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   .min-text {
     font-size: 11px;
     bottom: 7px;
+  }
+
+  .channels-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .cascade-item {
+    padding: 8px;
   }
 }
 

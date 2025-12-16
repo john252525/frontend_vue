@@ -38,7 +38,11 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{ subscriptionCheck.loading ? "Проверка.." : "Добавить" }}
+        {{
+          subscriptionCheck.loading
+            ? "Проверка подписки.."
+            : "Добавить рассылку"
+        }}
       </button>
     </section>
   </header>

@@ -144,7 +144,7 @@
                   width="16"
                   height="16"
                   fill="currentColor"
-                  class="bi bi-list"
+                  class="bi bi-list act-icon"
                   viewBox="0 0 16 16"
                 >
                   <path
@@ -1259,13 +1259,13 @@ provide("changeEnableStation", { changeEnableStation });
   align-items: center;
   gap: 6px;
   text-align: center;
-  width: 96px;
-  padding: 8px;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  background: #6732ff;
+  /* background: #6732ff; */
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1651,6 +1651,16 @@ tr:not(:last-child):after {
   bottom: 0;
   height: 1px;
   background-color: #ebebeb;
+}
+
+.act-icon {
+  display: block;
+}
+
+@media (max-height: 1200px) {
+  .act-icon {
+    display: none;
+  }
 }
 
 @media (max-height: 900px) {

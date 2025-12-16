@@ -226,7 +226,7 @@ const handleChangePassword = async () => {
 }
 
 .change-password-btn {
-  background: #667eea;
+  background: oklch(0.541 0.198 267);
   color: white;
   border: none;
   padding: 0.6rem;
@@ -239,7 +239,7 @@ const handleChangePassword = async () => {
 }
 
 .change-password-btn:hover:not(:disabled) {
-  background: #5a67d8;
+  background: #3e43ae;
 }
 
 .change-password-btn:disabled {

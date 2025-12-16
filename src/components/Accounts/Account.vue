@@ -350,7 +350,7 @@ header {
 }
 
 .content-wrapper {
-  margin: 18px 12px 18px 18px;
+  /* margin: 18px 12px 18px 18px; */
 }
 
 @media (max-width: 768px) {

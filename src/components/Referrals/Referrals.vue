@@ -32,7 +32,7 @@
                   height="32"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="oklch(0.541 0.198 267)"
                   stroke-width="2"
                 >
                   <path
@@ -400,8 +400,7 @@ header {
 }
 
 .stat-block.referral-block {
-  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-  border: 2px solid #bfdbfe;
+  background: oklch(0.65 0.22 267 / 0.16);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 20px;
 }
@@ -495,7 +494,7 @@ header {
 }
 
 .copy-button-primary {
-  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border: none;
   color: white;
   padding: 12px 20px;

@@ -127,7 +127,7 @@ const isLoading = computed(() => {
   display: flex;
   gap: 8px;
   background: #f5f5f5;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   width: fit-content;
 }
@@ -136,7 +136,7 @@ const isLoading = computed(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 16px;
   border: none;
   background: transparent;
   color: #666;

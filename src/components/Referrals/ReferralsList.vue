@@ -422,7 +422,7 @@ onMounted(async () => {
 }
 
 .tab-button.active {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: oklch(0.541 0.198 267);
   color: white;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
