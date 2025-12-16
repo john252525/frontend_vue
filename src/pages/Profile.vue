@@ -13,6 +13,10 @@
 
         <SecuritySettings @changePassword="changePassword" class="grid-item" />
 
+        <IntegrationSettings class="grid-item" />
+
+        <InnSettings class="grid-item" />
+
         <!-- <NotificationsSettings
           @updateNotifications="updateNotifications"
           class="grid-item"
@@ -34,6 +38,8 @@ import { ref } from "vue";
 import ProfileHeader from "@/components/Profile/ProfileHeader.vue";
 import UserInfo from "@/components/Profile/UserInfo.vue";
 import SecuritySettings from "@/components/Profile/SecuritySettings.vue";
+import IntegrationSettings from "@/components/Profile/IntegrationSettings.vue";
+import InnSettings from "@/components/Profile/InnSettings.vue";
 import NotificationsSettings from "@/components/Profile/NotificationsSettings.vue";
 import TariffInfo from "@/components/Profile/TariffInfo.vue";
 
@@ -86,14 +92,14 @@ const cancelSubscription = () => {
   margin: 0 auto;
   padding: 20px 1.5rem;
   box-sizing: border-box;
-  flex: 1; /* Занимает все доступное пространство */
+  flex: 1;
 }
 
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-  align-content: start; /* Выравниваем элементы по верху */
+  align-content: start;
 }
 
 .grid-item {
@@ -101,8 +107,8 @@ const cancelSubscription = () => {
   border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  height: auto; /* Убрал фиксированную высоту */
-  min-height: 180px; /* Уменьшил минимальную высоту */
+  height: auto;
+  min-height: 180px;
 }
 
 @media (max-width: 767px) {
@@ -117,7 +123,7 @@ const cancelSubscription = () => {
 
   .grid-item {
     padding: 1rem;
-    min-height: 150px; /* Еще меньше на мобильных */
+    min-height: 150px;
   }
 }
 
@@ -134,7 +140,7 @@ const cancelSubscription = () => {
   }
 
   .grid-item {
-    min-height: 200px; /* Немного увеличил для десктопа */
+    min-height: 200px;
   }
 }
 </style>

@@ -482,7 +482,7 @@ const changeStatusMailing = (item, state) => {
 const openModal = (event, item) => {
   selectedItem.value = item;
   station.isModalOpen = true;
-  
+
   const rect = event.currentTarget.getBoundingClientRect();
   const modalWidth = 150;
   const edgeMargin = 10;
@@ -496,12 +496,12 @@ const openModal = (event, item) => {
   if (window.innerWidth <= 768) {
     // Для мобильных - позиционируем снизу экрана
     modalPosition.value = {
-      top: 'auto',
-      bottom: '10px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '90%',
-      maxWidth: '400px'
+      top: "auto",
+      bottom: "10px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "90%",
+      maxWidth: "400px",
     };
   } else {
     // Для десктопа - умное позиционирование
@@ -512,7 +512,7 @@ const openModal = (event, item) => {
     if (left + modalWidth > window.innerWidth - edgeMargin) {
       left = window.innerWidth - modalWidth - edgeMargin;
     }
-    
+
     // Проверяем левую границу
     if (left < edgeMargin) {
       left = edgeMargin;
@@ -521,7 +521,7 @@ const openModal = (event, item) => {
     // Проверяем, помещается ли модалка снизу
     const spaceBelow = window.innerHeight - rect.bottom - 15;
     const spaceAbove = rect.top - 15;
-    
+
     // Для модалок с 1-2 элементами ВСЕГДА показываем снизу (если хватает места)
     if (actionCount <= 2) {
       // Для маленьких модалок всегда предпочитаем позицию снизу
@@ -545,14 +545,14 @@ const openModal = (event, item) => {
     if (top < edgeMargin) {
       top = edgeMargin;
     }
-    
+
     if (top + estimatedModalHeight > window.innerHeight - edgeMargin) {
       top = window.innerHeight - estimatedModalHeight - edgeMargin;
     }
 
     modalPosition.value = {
       top: Math.max(edgeMargin, Math.round(top)),
-      left: Math.max(edgeMargin, Math.round(left))
+      left: Math.max(edgeMargin, Math.round(left)),
     };
   }
 };
@@ -560,20 +560,22 @@ const openModal = (event, item) => {
 // Функция для подсчета количества действий в модалке рассылки
 const getMailingActionCount = (item) => {
   if (!item) return 4; // Значение по умолчанию
-  
+
   let count = 0;
 
   // Базовые действия для всех рассылок
   count++; // Информация
   count++; // Сообщения
-  
+
   // Действия в зависимости от статуса
-  if (item.state === 1) { // Активная
+  if (item.state === 1) {
+    // Активная
     count++; // Остановить
-  } else if (item.state === 0) { // Неактивная
+  } else if (item.state === 0) {
+    // Неактивная
     count++; // Запустить
   }
-  
+
   count++; // Редактировать
   count++; // Удалить
 
@@ -730,8 +732,9 @@ provide("selectedItem", { selectedItem });
 
 .state-text {
   color: black;
-
   font-weight: 400;
+  display: block; /* Добавить эту строку */
+  min-height: 16px; /* Опционально - зарезервировать место */
 }
 
 .table-action {
@@ -753,6 +756,7 @@ provide("selectedItem", { selectedItem });
   padding: 1rem;
   text-align: left;
   color: rgb(211, 59, 59);
+  min-height: 1px; /* Добавить - предотвращает схлопывание */
 }
 
 .table-state-active {
@@ -762,6 +766,7 @@ provide("selectedItem", { selectedItem });
   padding: 1rem;
   text-align: left;
   color: rgb(32, 179, 40);
+  min-height: 1px; /* Добавить - предотвращает схлопывание */
 }
 
 .table-action-text {

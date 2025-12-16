@@ -4,6 +4,60 @@
     :stationLoading="stationLoading"
   />
 
+  <!-- Модальное окно ошибки загрузки формы -->
+  <div
+    v-if="formLoadError"
+    class="modal-overlay error-overlay"
+    data-testid="form-error-overlay"
+  >
+    <div class="modal-container error-modal" data-testid="form-error-modal">
+      <div class="modal-header error-header">
+        <h2>Ошибка загрузки</h2>
+      </div>
+      <div class="modal-content error-content">
+        <div class="error-icon">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="24" cy="24" r="22" stroke="#ef4444" stroke-width="2" />
+            <path
+              d="M24 14V24M24 30H24.01"
+              stroke="#ef4444"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p class="error-message">{{ formLoadErrorMessage }}</p>
+        <p class="error-hint" v-if="retryCount > 0">
+          Попыток: {{ retryCount }}/{{ maxRetries }}
+        </p>
+      </div>
+      <div class="modal-footer error-footer">
+        <button
+          class="cancel-btn"
+          @click="closeFormError"
+          data-testid="error-close-btn"
+        >
+          Закрыть
+        </button>
+        <button
+          v-if="retryCount < maxRetries"
+          class="submit-btn"
+          @click="retryLoadForm"
+          data-testid="error-retry-btn"
+        >
+          Повторить
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Модальное окно подтверждения интеграции -->
   <div
     v-if="showIntegrationModal"
@@ -79,7 +133,7 @@
 
   <!-- Основное модальное окно добавления аккаунта -->
   <div
-    v-if="!stationLoading.loading"
+    v-if="!stationLoading.loading && !formLoadError"
     class="modal-overlay"
     data-testid="main-modal-overlay"
   >
@@ -394,6 +448,12 @@ const stationLoading = reactive({
   loading: false,
 });
 
+// Ошибка загрузки формы
+const formLoadError = ref(false);
+const formLoadErrorMessage = ref("");
+const retryCount = ref(0);
+const maxRetries = 3;
+
 // Модальные окна
 const showIntegrationModal = ref(false);
 const showWarningModal = ref(false);
@@ -425,17 +485,64 @@ const typeSelect = ref(null);
 // Fetch form structure from API
 const fetchFormStructure = async () => {
   stationLoading.loading = true;
+  formLoadError.value = false;
+  formLoadErrorMessage.value = "";
+
   try {
-    const response = await axios.get(`${FRONTEND_URL_FORMS}getForm`);
+    const response = await axios.get(`${FRONTEND_URL_FORMS}getForm`, {
+      timeout: 10000,
+    });
 
     if (response.data.ok) {
       formElements.value = response.data.data;
+      retryCount.value = 0;
+    } else {
+      throw new Error(
+        response.data.message || "Не удалось загрузить структуру формы"
+      );
     }
   } catch (error) {
+    formLoadError.value = true;
+
+    if (error.code === "ECONNABORTED") {
+      formLoadErrorMessage.value =
+        "Истекло время ожидания. Проверьте подключение к интернету";
+    } else if (error.response?.status === 401) {
+      formLoadErrorMessage.value =
+        "Ошибка авторизации. Попробуйте заново войти";
+    } else if (error.response?.status === 403) {
+      formLoadErrorMessage.value = "У вас нет доступа к этой функции";
+    } else if (error.response?.status === 404) {
+      formLoadErrorMessage.value = "Форма не найдена на сервере";
+    } else if (error.response?.status >= 500) {
+      formLoadErrorMessage.value = "Ошибка сервера. Попробуйте позже";
+    } else if (error.message === "Network Error") {
+      formLoadErrorMessage.value =
+        "Ошибка сети. Проверьте подключение к интернету";
+    } else {
+      formLoadErrorMessage.value = error.message || "Ошибка при загрузке формы";
+    }
+
     console.error("Error fetching form structure:", error);
   } finally {
     stationLoading.loading = false;
   }
+};
+
+const retryLoadForm = async () => {
+  if (retryCount.value < maxRetries) {
+    retryCount.value += 1;
+    await fetchFormStructure();
+  } else {
+    formLoadErrorMessage.value =
+      "Не удалось загрузить форму после нескольких попыток. Обновите страницу";
+  }
+};
+
+const closeFormError = () => {
+  formLoadError.value = false;
+  formLoadErrorMessage.value = "";
+  props.openModal();
 };
 
 // Helper functions
@@ -723,6 +830,71 @@ const submitForm = async () => {
 </script>
 
 <style scoped>
+/* Ошибка загрузки */
+.error-overlay {
+  z-index: 1003;
+}
+
+.error-modal {
+  max-width: 400px;
+  z-index: 1003;
+}
+
+.error-header {
+  border-bottom-color: #fee2e2;
+}
+
+.error-header h2 {
+  color: #dc2626;
+}
+
+.error-content {
+  text-align: center;
+  padding: 30px 20px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-icon {
+  margin-bottom: 8px;
+}
+
+.error-icon svg circle,
+.error-icon svg path {
+  stroke: #ef4444;
+}
+
+.error-message {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.error-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.error-footer {
+  gap: 12px;
+}
+
+.error-footer .submit-btn {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.error-footer .submit-btn:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+
 /* Добавляем стили для новых модальных окон */
 .integration-modal,
 .warning-modal {
