@@ -22,15 +22,15 @@
             <td class="table-text">{{ removeDecimalZeros(item.amount) }} ₽</td>
             <td
               class="table-text"
-              :class="getOperationTypeClass(item.payment_type)"
+              :class="getOperationTypeClass(item.payment_type, item.type)"
             >
-              {{ getOperationType(item.payment_type) }}
+              {{ getOperationType(item.payment_type, item.type) }}
             </td>
             <td
               class="table-status-text"
               :class="getStatusClass(item.payment_type, item.public_status)"
             >
-              {{ item.public_status }}
+              {{ getDisplayStatus(item.payment_type, item.public_status) }}
             </td>
             <td class="table-action-text">
               <button class="details-button" @click="openPaymentModal(item)">
@@ -72,7 +72,7 @@
             <div class="card-title">
               <span
                 class="card-amount"
-                :class="getAmountClass(item.payment_type)"
+                :class="getAmountClass(item.payment_type, item.type)"
               >
                 {{ removeDecimalZeros(item.amount) }} ₽
               </span>
@@ -84,9 +84,9 @@
               <span class="card-label">Тип операции:</span>
               <span
                 class="card-value"
-                :class="getOperationTypeClass(item.payment_type)"
+                :class="getOperationTypeClass(item.payment_type, item.type)"
               >
-                {{ getOperationType(item.payment_type) }}
+                {{ getOperationType(item.payment_type, item.type) }}
               </span>
             </div>
 
@@ -101,7 +101,7 @@
                 class="card-value"
                 :class="getStatusClass(item.payment_type, item.public_status)"
               >
-                {{ item.public_status }}
+                {{ getDisplayStatus(item.payment_type, item.public_status) }}
               </span>
             </div>
           </div>
@@ -137,8 +137,52 @@
         </div>
 
         <div class="modal-body">
+          <!-- Admin Payment Type -->
+          <template v-if="selectedPayment.payment_type === 'admin'">
+            <div class="detail-row">
+              <label>Тип операции:</label>
+              <span>{{
+                selectedPayment.type === "+" ? "Пополнение" : "Списание"
+              }}</span>
+            </div>
+
+            <div class="detail-row">
+              <label>Сумма:</label>
+              <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
+            </div>
+
+            <div class="detail-row">
+              <label>Предыдущий баланс:</label>
+              <span>{{ parsedAdminDetails.previous_balance }} ₽</span>
+            </div>
+
+            <div class="detail-row">
+              <label>Новый баланс:</label>
+              <span>{{ parsedAdminDetails.new_balance }} ₽</span>
+            </div>
+
+            <div class="detail-row">
+              <label>Дата:</label>
+              <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
+            </div>
+
+            <div class="detail-row">
+              <label>Изменено:</label>
+              <span>Администратором</span>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                class="action-button secondary"
+                @click="closePaymentModal"
+              >
+                Закрыть
+              </button>
+            </div>
+          </template>
+
           <!-- Check Payment Type -->
-          <template v-if="selectedPayment.payment_type === 'check'">
+          <template v-else-if="selectedPayment.payment_type === 'check'">
             <div class="detail-row">
               <label>Сумма:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
@@ -426,7 +470,12 @@ function formatDate(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function getOperationType(paymentType) {
+function getOperationType(paymentType, operationType) {
+  // Обработка админских изменений
+  if (paymentType === "admin") {
+    return operationType === "+" ? "Пополнение" : "Списание";
+  }
+
   switch (paymentType) {
     case "up":
       return "Пополнение баланса";
@@ -439,7 +488,14 @@ function getOperationType(paymentType) {
   }
 }
 
-function getOperationTypeClass(paymentType) {
+function getOperationTypeClass(paymentType, operationType) {
+  // Админские операции
+  if (paymentType === "admin") {
+    return operationType === "+"
+      ? "operation-admin-up"
+      : "operation-admin-down";
+  }
+
   switch (paymentType) {
     case "up":
       return "operation-up";
@@ -452,7 +508,12 @@ function getOperationTypeClass(paymentType) {
   }
 }
 
-function getAmountClass(paymentType) {
+function getAmountClass(paymentType, operationType) {
+  // Админские операции
+  if (paymentType === "admin") {
+    return operationType === "+" ? "amount-income" : "amount-outcome";
+  }
+
   switch (paymentType) {
     case "check":
       return "amount-neutral";
@@ -466,6 +527,10 @@ function getAmountClass(paymentType) {
 }
 
 function getStatusClass(paymentType, state) {
+  if (paymentType === "admin") {
+    return "admin-adjustment";
+  }
+
   if (state.includes("Успешн")) {
     return "succeeded";
   }
@@ -473,6 +538,13 @@ function getStatusClass(paymentType, state) {
     return "canceled";
   }
   return "pending";
+}
+
+function getDisplayStatus(paymentType, state) {
+  if (paymentType === "admin") {
+    return "Изменено администратором";
+  }
+  return state;
 }
 
 function getPeriodText(period) {
@@ -497,6 +569,21 @@ const parsedTariffDetails = computed(() => {
       return selectedPayment.value.details;
     } catch (e) {
       console.error("Error parsing tariff details:", e);
+      return {};
+    }
+  }
+  return {};
+});
+
+const parsedAdminDetails = computed(() => {
+  if (selectedPayment.value && selectedPayment.value.details) {
+    try {
+      if (typeof selectedPayment.value.details === "string") {
+        return JSON.parse(selectedPayment.value.details);
+      }
+      return selectedPayment.value.details;
+    } catch (e) {
+      console.error("Error parsing admin details:", e);
       return {};
     }
   }
@@ -664,6 +751,16 @@ tr:hover {
   font-weight: 500;
 }
 
+.operation-admin-up {
+  color: black;
+  font-weight: 500;
+}
+
+.operation-admin-down {
+  color: black;
+  font-weight: 500;
+}
+
 .operation-unknown {
   color: gray;
   font-weight: 500;
@@ -680,6 +777,10 @@ tr:hover {
 
 .pending {
   color: gray;
+}
+
+.admin-adjustment {
+  color: #000;
 }
 
 /* Desktop Buttons */

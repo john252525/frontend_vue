@@ -3,6 +3,14 @@
   <section v-if="!station.phone" class="qr-telegram-section">
     <LoadingModal :stationLoading="stationLoading" />
     <article v-if="qrCodeData.station" class="qr-container">
+      <!-- ПРОГРЕССБАР СВЕРХУ -->
+      <div class="session-timer-bar">
+        <div
+          class="session-progress"
+          :style="{ width: sessionProgress + '%' }"
+        ></div>
+      </div>
+
       <div class="header">
         <h2 class="title">Подключение Telegram</h2>
         <button @click="changeEnableStation" class="close-button">
@@ -24,12 +32,82 @@
       </div>
 
       <div class="qr-content">
-        <div class="qr-wrapper">
-          <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
-          <div class="scan-line"></div>
-        </div>
+        <!-- ЕСЛИ СЕССИЯ АКТИВНА - ПОКАЗЫВАЕМ QR -->
+        <template v-if="!sessionExpired">
+          <div class="qr-wrapper">
+            <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
+            <div class="scan-line"></div>
+          </div>
 
-        <p class="instruction">Отсканируйте QR-код через приложение Telegram</p>
+          <p class="instruction">
+            Отсканируйте QR-код через приложение Telegram
+          </p>
+
+          <!-- ТАЙМЕР ОСТАВШЕГОСЯ ВРЕМЕНИ -->
+          <div class="timer-display">
+            <span class="timer-text"
+              >Сессия истечет через {{ sessionTimeRemaining }}с</span
+            >
+          </div>
+        </template>
+
+        <!-- ЕСЛИ СЕССИЯ ИСТЕКЛА - ПОКАЗЫВАЕМ СООБЩЕНИЕ И КНОПКУ РЕГЕНЕРАЦИИ -->
+        <template v-else>
+          <div class="expired-state">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="expired-icon"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="M12 6V12L16 16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <p class="expired-text">Сессия истекла</p>
+            <p class="expired-description">
+              Пожалуйста, нажмите кнопку ниже для получения нового QR-кода
+            </p>
+            <button @click="regenerateQrCode" class="regenerate-button">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M23 4V10H17"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M20.49 15C19.9868 16.5022 18.9995 17.7217 17.7213 18.4629C16.4432 19.204 14.9229 19.4299 13.4819 19.1077C12.0409 18.7854 10.8044 17.9342 10.0322 16.7447C9.2599 15.5552 8.99856 14.0982 9.29298 12.6983"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Получить новый QR-код
+            </button>
+          </div>
+        </template>
 
         <button @click="enableCode" class="phone-link-button">
           <svg
@@ -53,10 +131,7 @@
     </article>
   </section>
 
-<<<<<<< HEAD
   <!-- ОБНОВЛЕННАЯ СЕКЦИЯ С ТЕЛЕФОНОМ -->
-=======
->>>>>>> dev
   <section v-if="station.phone" class="phone-section">
     <div class="phone-container">
       <div class="phone-header">
@@ -132,6 +207,7 @@
     </div>
   </section>
 </template>
+
 <script setup>
 import {
   inject,
@@ -155,6 +231,7 @@ const { selectedItem } = inject("accountItems");
 const { source, login, storage } = selectedItem.value;
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
@@ -206,8 +283,16 @@ const qrCodeData = reactive({
   station: false,
 });
 
-let intervalId = null; // Для хранения идентификатора интервала
-let previousLink = ""; // Для хранения предыдущей ссылки
+// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ТАЙМЕРА
+const SESSION_DURATION = 60; // 60 секунд
+const sessionTimeRemaining = ref(SESSION_DURATION);
+const sessionProgress = ref(100);
+const sessionExpired = ref(false);
+let sessionTimerId = null;
+let sessionProgressTimerId = null;
+
+let intervalId = null;
+let previousLink = "";
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();
@@ -218,21 +303,18 @@ const handleBackspace = (e) => {
 
   if (!showMask.value) return;
 
-  // Полное удаление +7 при нажатии Backspace на +7
   if (value === "+7" && cursorPosition <= 2) {
     phoneNumber.value = "";
     e.preventDefault();
     return;
   }
 
-  // Удаление +7 при курсоре после них
   if (value.startsWith("+7") && cursorPosition === 2) {
     phoneNumber.value = "";
     e.preventDefault();
     return;
   }
 
-  // Пропуск разделителей при удалении
   if (
     cursorPosition > 0 &&
     [" ", "(", ")", "-"].includes(value[cursorPosition - 1])
@@ -251,7 +333,6 @@ const formatPhone = () => {
     return;
   }
 
-  // Автодобавление +7 при вводе + или 7
   if (value === "+") {
     phoneNumber.value = "+7";
     nextTick(() => phoneInput.value.setSelectionRange(2, 2));
@@ -300,7 +381,6 @@ const formatPhone = () => {
       digits = digits.substring(1);
     }
 
-    // Форматирование по маске
     if (digits.length > 0) {
       formatted += " (" + digits.substring(0, 3);
       digits = digits.substring(3);
@@ -345,8 +425,43 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
+};
+
+// ФУНКЦИЯ ЗАПУСКА ТАЙМЕРА СЕССИИ
+const startSessionTimer = () => {
+  sessionTimeRemaining.value = SESSION_DURATION;
+  sessionProgress.value = 100;
+  sessionExpired.value = false;
+
+  // Таймер для отсчета времени
+  sessionTimerId = setInterval(() => {
+    sessionTimeRemaining.value--;
+    sessionProgress.value =
+      (sessionTimeRemaining.value / SESSION_DURATION) * 100;
+
+    if (sessionTimeRemaining.value <= 0) {
+      clearInterval(sessionTimerId);
+      sessionExpired.value = true;
+      clearInterval(intervalId); // Останавливаем запросы QR
+    }
+  }, 1000);
+};
+
+// ФУНКЦИЯ ОСТАНОВКИ ТАЙМЕРА
+const stopSessionTimer = () => {
+  if (sessionTimerId) {
+    clearInterval(sessionTimerId);
+    sessionTimerId = null;
+  }
+};
+
+// ФУНКЦИЯ РЕГЕНЕРАЦИИ QR-КОДА
+const regenerateQrCode = async () => {
+  sessionExpired.value = false;
+  stopSessionTimer();
+  clearInterval(intervalId);
+  await EnablebyQR();
 };
 
 const getQr = async () => {
@@ -385,7 +500,7 @@ const getQr = async () => {
     }
 
     if (response.data.status === "ok") {
-      previousLink = qrCodeData.link; // Сохраняем предыдущую ссылку
+      previousLink = qrCodeData.link;
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
       props.updateLoadingStatus(false);
@@ -396,10 +511,9 @@ const getQr = async () => {
         router.push("/login");
       }, 2000);
     } else {
-      // Если значение пустое, останавливаем запросы
       if (!response.data.value) {
         clearInterval(intervalId);
-        qrCodeData.link = previousLink; // Отображаем предыдущую ссылку
+        qrCodeData.link = previousLink;
         changeEnableStation();
       }
     }
@@ -482,10 +596,14 @@ const enablePhoneAuth = async () => {
 const EnablebyQR = async () => {
   await Promise.all([getQr(), getAccountInfo()]);
 
+  // ЗАПУСКАЕМ ТАЙМЕР СЕССИИ
+  startSessionTimer();
+
   let count = 0;
   intervalId = setInterval(async () => {
     if (accountInfo.data?.step?.value === 5) {
       clearInterval(intervalId);
+      stopSessionTimer();
       return;
     }
 
@@ -493,6 +611,8 @@ const EnablebyQR = async () => {
     count++;
     if (count >= 6) {
       clearInterval(intervalId);
+      stopSessionTimer();
+      sessionExpired.value = true;
       changeEnableStation();
     }
   }, 20000);
@@ -529,11 +649,11 @@ const getAccountInfo = async () => {
       );
 
       if (response.data.step?.value === 5) {
-        clearInterval(intervalId); // Останавливаем интервал
-        props.changeForceStopItemData(selectedItem.value); // Вызываем функцию из props
+        clearInterval(intervalId);
+        stopSessionTimer();
+        props.changeForceStopItemData(selectedItem.value);
         props.openEnableMenuTrue();
-        // changeEnableStation(); // Отключаем компонент (если нужно)
-        return; // Прекращаем дальнейшие действия
+        return;
       }
     }
   } catch (error) {
@@ -569,6 +689,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearInterval(intervalId);
+  stopSessionTimer();
 });
 </script>
 
@@ -581,12 +702,30 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
 }
 
+/* СТИЛЬ ДЛЯ ПРОГРЕССБАРА */
+.session-timer-bar {
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  margin: 0 0 24px 0;
+}
+
+.session-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #0088cc, #0066aa);
+  border-radius: 16px;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(0, 136, 204, 0.3);
+}
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   gap: 12px;
+  padding: 0 16px;
 }
 
 .title {
@@ -616,12 +755,12 @@ onBeforeUnmount(() => {
   color: #333;
 }
 
-/* QR Code Section */
 .qr-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 0 16px 16px 16px;
 }
 
 .qr-wrapper {
@@ -665,6 +804,78 @@ onBeforeUnmount(() => {
   50% {
     top: calc(100% - 16px);
   }
+}
+
+/* СТИЛЬ ДЛЯ ТАЙМЕРА */
+.timer-display {
+  width: 100%;
+  padding: 12px 16px;
+  background: #f0f7ff;
+  border: 1px solid #d4e6f7;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.timer-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0088cc;
+}
+
+/* СТИЛЬ ДЛЯ ИСТЕКШЕЙ СЕССИИ */
+.expired-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.expired-icon {
+  color: #be2424;
+  opacity: 0.8;
+}
+
+.expired-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.expired-description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.regenerate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #0088cc;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 280px;
+}
+
+.regenerate-button:hover {
+  background-color: #0077b3;
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.25);
+}
+
+.regenerate-button:active {
+  transform: translateY(1px);
 }
 
 .instruction {
@@ -774,7 +985,6 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-/* ОРИГИНАЛЬНЫЕ СТИЛИ ДЛЯ ИНПУТА (НЕ МЕНЯТЬ) */
 .num-input {
   border-radius: 5px;
   padding-left: 10px;
@@ -853,7 +1063,6 @@ onBeforeUnmount(() => {
   border-color: #dee2e6;
 }
 
-/* Старые стили для обратной совместимости */
 .number-section {
   display: flex;
   flex-direction: column;
@@ -872,8 +1081,36 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-/* Responsive Design для телефонной секции */
+/* Responsive Design */
 @media (max-width: 500px) {
+  .qr-telegram-section {
+    padding: 0;
+    border-radius: 12px;
+  }
+
+  .session-timer-bar {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .qr-content {
+    padding: 0 16px 16px 16px;
+    gap: 16px;
+  }
+
+  .qr-code {
+    width: 200px;
+    height: 200px;
+  }
+
   .phone-section {
     padding: 16px;
     margin: 12px;
@@ -913,9 +1150,27 @@ onBeforeUnmount(() => {
   .phone-close-button {
     padding: 4px;
   }
+
+  .qr-code {
+    width: 180px;
+    height: 180px;
+  }
 }
 
 @media (max-width: 360px) {
+  .qr-telegram-section {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .qr-code {
+    width: 160px;
+    height: 160px;
+  }
+
   .phone-section {
     padding: 12px;
   }
@@ -933,110 +1188,29 @@ onBeforeUnmount(() => {
     font-size: 13px;
     padding: 10px 16px;
   }
-}
 
-/* Оригинальные медиа-запросы для QR секции */
-@media (max-width: 480px) {
-  .qr-telegram-section {
-    padding: 16px;
-    border-radius: 12px;
-    margin: 12px;
-    max-width: calc(100% - 24px);
-  }
-
-  .header {
-    margin-bottom: 20px;
-  }
-
-  .title {
-    font-size: 16px;
-  }
-
-  .qr-content {
-    gap: 16px;
-  }
-
-  .qr-wrapper {
-    padding: 12px;
-  }
-
-  .qr-code {
-    width: 200px;
-    height: 200px;
-  }
-
-  .instruction {
+  .expired-description {
     font-size: 13px;
   }
 
-  .phone-link-button {
+  .regenerate-button {
+    font-size: 13px;
     padding: 10px 16px;
-    font-size: 13px;
   }
 }
 
-@media (max-width: 360px) {
-  .qr-telegram-section {
-    padding: 14px;
-    margin: 8px;
-    max-width: calc(100% - 16px);
-  }
-
-  .title {
-    font-size: 15px;
-  }
-
-  .close-button {
-    padding: 4px;
-  }
-
-  .qr-code {
-    width: 180px;
-    height: 180px;
-  }
-
-  .instruction {
-    font-size: 12px;
-  }
-
-  .phone-link-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-}
-
-/* Для очень маленьких экранов */
 @media (max-width: 320px) {
   .qr-code {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
   }
 
   .title {
-    font-size: 14px;
-  }
-}
-
-/* Медиа-запросы для старой версии секции с номером */
-@media (max-width: 500px) {
-  .number-section {
-    width: 300px;
+    font-size: 13px;
   }
 
-  .num-input,
-  .num-input-error {
-    width: 220px;
-  }
-}
-
-@media (max-width: 400px) {
-  .number-section {
-    width: 250px;
-  }
-
-  .num-input,
-  .num-input-error {
-    width: 170px;
+  .timer-text {
+    font-size: 12px;
   }
 }
 </style>

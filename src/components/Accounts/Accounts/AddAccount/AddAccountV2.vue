@@ -371,6 +371,16 @@
 
         <div
           v-if="
+            formValues.group === 'messenger' && formValues.messenger === 'max'
+          "
+          class="info-message accounts-addAccounts-whatsapp-info"
+          data-testid="whatsapp-info"
+        >
+          <p>Привязать номер своего Max можно будет после создания аккаунта</p>
+        </div>
+
+        <div
+          v-if="
             formValues.group === 'messenger' &&
             formValues.messenger === 'telegram'
           "

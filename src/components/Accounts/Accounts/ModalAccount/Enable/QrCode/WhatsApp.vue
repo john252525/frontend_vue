@@ -7,6 +7,14 @@
     />
     <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station && !station.error" class="qr-container">
+      <!-- ПРОГРЕССБАР СВЕРХУ -->
+      <div class="session-timer-bar">
+        <div 
+          class="session-progress" 
+          :style="{ width: sessionProgress + '%' }"
+        ></div>
+      </div>
+
       <div class="header">
         <h2 class="title">Подключение WhatsApp</h2>
         <button @click="changeEnableStation" class="close-button">
@@ -28,12 +36,72 @@
       </div>
 
       <div class="qr-content">
-        <div class="qr-wrapper">
-          <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
-          <div class="scan-line"></div>
-        </div>
+        <!-- ЕСЛИ СЕССИЯ АКТИВНА - ПОКАЗЫВАЕМ QR -->
+        <template v-if="!sessionExpired">
+          <div class="qr-wrapper">
+            <qrcode-vue :value="qrCodeData.link" :size="260" class="qr-code" />
+            <div class="scan-line"></div>
+          </div>
 
-        <p class="instruction">Отсканируйте QR-код через приложение WhatsApp</p>
+          <p class="instruction">Отсканируйте QR-код через приложение WhatsApp</p>
+
+          <!-- ТАЙМЕР ОСТАВШЕГОСЯ ВРЕМЕНИ -->
+          <div class="timer-display">
+            <span class="timer-text">Сессия истечет через {{ sessionTimeRemaining }}с</span>
+          </div>
+        </template>
+
+        <!-- ЕСЛИ СЕССИЯ ИСТЕКЛА - ПОКАЗЫВАЕМ СООБЩЕНИЕ И КНОПКУ РЕГЕНЕРАЦИИ -->
+        <template v-else>
+          <div class="expired-state">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="expired-icon"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <path
+                d="M12 6V12L16 16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <p class="expired-text">Сессия истекла</p>
+            <p class="expired-description">
+              Пожалуйста, нажмите кнопку ниже для получения нового QR-кода
+            </p>
+            <button @click="regenerateQrCode" class="regenerate-button">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M23 4V10H17"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M20.49 15C19.9868 16.5022 18.9995 17.7217 17.7213 18.4629C16.4432 19.204 14.9229 19.4299 13.4819 19.1077C12.0409 18.7854 10.8044 17.9342 10.0322 16.7447C9.2599 15.5552 8.99856 14.0982 9.29298 12.6983"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Получить новый QR-код
+            </button>
+          </div>
+        </template>
 
         <button @click="stopEnableByQR" class="phone-link-button">
           <svg
@@ -140,6 +208,7 @@ import {
   reactive,
   computed,
   onMounted,
+  onBeforeUnmount,
   nextTick,
   watch,
 } from "vue";
@@ -381,6 +450,13 @@ const intervalId = ref(null);
 const isRunning = ref(false);
 let previousLink = "";
 
+// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ТАЙМЕРА
+const SESSION_DURATION = 60; // 60 секунд
+const sessionTimeRemaining = ref(SESSION_DURATION);
+const sessionProgress = ref(100);
+const sessionExpired = ref(false);
+let sessionTimerId = null;
+
 const enablePhoneAuth = async () => {
   const internationalPhone = getInternationalFormat();
   let params = {
@@ -512,18 +588,57 @@ const getQr = async () => {
   }
 };
 
+// ФУНКЦИЯ ЗАПУСКА ТАЙМЕРА СЕССИИ
+const startSessionTimer = () => {
+  sessionTimeRemaining.value = SESSION_DURATION;
+  sessionProgress.value = 100;
+  sessionExpired.value = false;
+
+  // Таймер для отсчета времени
+  sessionTimerId = setInterval(() => {
+    sessionTimeRemaining.value--;
+    sessionProgress.value = (sessionTimeRemaining.value / SESSION_DURATION) * 100;
+
+    if (sessionTimeRemaining.value <= 0) {
+      clearInterval(sessionTimerId);
+      sessionExpired.value = true;
+      clearInterval(intervalId.value); // Останавливаем запросы QR
+      isRunning.value = false;
+    }
+  }, 1000);
+};
+
+// ФУНКЦИЯ ОСТАНОВКИ ТАЙМЕРА
+const stopSessionTimer = () => {
+  if (sessionTimerId) {
+    clearInterval(sessionTimerId);
+    sessionTimerId = null;
+  }
+};
+
+// ФУНКЦИЯ РЕГЕНЕРАЦИИ QR-КОДА
+const regenerateQrCode = async () => {
+  sessionExpired.value = false;
+  stopSessionTimer();
+  clearInterval(intervalId.value);
+  isRunning.value = false;
+  await startEnableByQR();
+};
+
 const startEnableByQR = async () => {
   if (isRunning.value) return;
 
   props.updateLoadingStatus(true, "Генерирация QR-кода");
   await getQr();
+  
+  // ЗАПУСКАЕМ ТАЙМЕР СЕССИИ
+  startSessionTimer();
 
   let count = 0;
   isRunning.value = true;
 
   intervalId.value = setInterval(async () => {
     if (!isRunning.value) {
-      // Добавляем проверку
       clearInterval(intervalId.value);
       return;
     }
@@ -532,7 +647,9 @@ const startEnableByQR = async () => {
     count++;
     if (count >= 6) {
       clearInterval(intervalId.value);
+      stopSessionTimer();
       isRunning.value = false;
+      sessionExpired.value = true;
       changeEnableStation();
     }
   }, 20000);
@@ -566,6 +683,11 @@ onMounted(() => {
   updatePhoneFormat();
 });
 
+onBeforeUnmount(() => {
+  clearInterval(intervalId.value);
+  stopSessionTimer();
+});
+
 defineExpose({ stopEnableByQR });
 </script>
 
@@ -576,6 +698,23 @@ defineExpose({ stopEnableByQR });
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+}
+
+/* СТИЛЬ ДЛЯ ПРОГРЕССБАРА */
+.session-timer-bar {
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+  margin: 0 0 24px 0;
+}
+
+.session-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #25d366, #1da851);
+  border-radius: 16px;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.3);
 }
 
 .number-section {
@@ -589,6 +728,7 @@ defineExpose({ stopEnableByQR });
   align-items: center;
   margin-bottom: 20px;
   gap: 12px;
+  padding: 0 16px;
 }
 
 .title {
@@ -623,6 +763,7 @@ defineExpose({ stopEnableByQR });
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 0 16px 16px 16px;
 }
 
 .qr-wrapper {
@@ -675,6 +816,78 @@ defineExpose({ stopEnableByQR });
   margin: 0;
   line-height: 1.4;
   font-weight: 400;
+}
+
+/* СТИЛЬ ДЛЯ ТАЙМЕРА */
+.timer-display {
+  width: 100%;
+  padding: 12px 16px;
+  background: #e8f7f0;
+  border: 1px solid #b3e5d8;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.timer-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #25d366;
+}
+
+/* СТИЛЬ ДЛЯ ИСТЕКШЕЙ СЕССИИ */
+.expired-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.expired-icon {
+  color: #be2424;
+  opacity: 0.8;
+}
+
+.expired-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.expired-description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.regenerate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #25d366;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 280px;
+}
+
+.regenerate-button:hover {
+  background-color: #1da851;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+}
+
+.regenerate-button:active {
+  transform: translateY(1px);
 }
 
 .phone-link-button {
@@ -869,6 +1082,20 @@ defineExpose({ stopEnableByQR });
 
 /* Responsive Design для телефонной секции */
 @media (max-width: 500px) {
+  .qr-whatsapp-section {
+    padding: 0;
+    border-radius: 12px;
+  }
+
+  .session-timer-bar {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
   .phone-section {
     padding: 16px;
     margin: 12px;
@@ -891,78 +1118,6 @@ defineExpose({ stopEnableByQR });
   .num-input-error {
     width: 100%;
     max-width: 280px;
-  }
-}
-
-@media (max-width: 400px) {
-  .phone-section {
-    padding: 14px;
-    margin: 8px;
-    max-width: calc(100% - 16px);
-  }
-
-  .phone-title {
-    font-size: 15px;
-  }
-
-  .phone-close-button {
-    padding: 4px;
-  }
-}
-
-@media (max-width: 360px) {
-  .phone-section {
-    padding: 12px;
-  }
-
-  .phone-title {
-    font-size: 14px;
-  }
-
-  .phone-description {
-    font-size: 13px;
-  }
-
-  .phone-next-button,
-  .back-button {
-    font-size: 13px;
-    padding: 10px 16px;
-  }
-}
-
-/* Остальные существующие медиа-запросы */
-@media (max-width: 500px) {
-  .number-section {
-    width: 300px;
-  }
-
-  .num-input,
-  .num-input-error {
-    width: 220px;
-  }
-}
-
-@media (max-width: 400px) {
-  .number-section {
-    width: 250px;
-  }
-
-  .num-input,
-  .num-input-error {
-    width: 170px;
-  }
-}
-
-@media (max-width: 480px) {
-  .qr-whatsapp-section {
-    padding: 16px;
-    border-radius: 12px;
-    margin: 12px;
-    max-width: calc(100% - 24px);
-  }
-
-  .header {
-    margin-bottom: 16px;
   }
 
   .title {
@@ -992,18 +1147,18 @@ defineExpose({ stopEnableByQR });
   }
 }
 
-@media (max-width: 360px) {
-  .qr-whatsapp-section {
+@media (max-width: 400px) {
+  .phone-section {
     padding: 14px;
     margin: 8px;
     max-width: calc(100% - 16px);
   }
 
-  .title {
+  .phone-title {
     font-size: 15px;
   }
 
-  .close-button {
+  .phone-close-button {
     padding: 4px;
   }
 
@@ -1011,25 +1166,62 @@ defineExpose({ stopEnableByQR });
     width: 180px;
     height: 180px;
   }
-
-  .instruction {
-    font-size: 12px;
-  }
-
-  .phone-link-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
 }
 
-@media (max-width: 320px) {
+@media (max-width: 360px) {
+  .qr-whatsapp-section {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
   .qr-code {
     width: 160px;
     height: 160px;
   }
 
-  .title {
+  .phone-section {
+    padding: 12px;
+  }
+
+  .phone-title {
     font-size: 14px;
+  }
+
+  .phone-description {
+    font-size: 13px;
+  }
+
+  .phone-next-button,
+  .back-button {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .expired-description {
+    font-size: 13px;
+  }
+
+  .regenerate-button {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 320px) {
+  .qr-code {
+    width: 140px;
+    height: 140px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .timer-text {
+    font-size: 12px;
   }
 }
 </style>

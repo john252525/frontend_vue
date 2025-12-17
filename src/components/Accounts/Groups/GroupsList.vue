@@ -272,7 +272,7 @@ onMounted(async () => {
 
 <style scoped>
 .groups-list-section {
-  padding: 0;
+  padding: 20px;
 }
 
 .groups-header {

@@ -7,97 +7,8 @@
   <CodeWarningModal :isOpen="isWarningModalOpen" @close="closeWarningModal" />
 
   <div class="code-auth-container">
-    <!-- ФАЗА 1: ВВОД ТЕЛЕФОНА (только для source === 'max') -->
-    <div v-if="source === 'max' && !showCodeInput" class="code-auth-modal">
-      <div class="code-auth-header">
-        <h2 class="code-auth-title">Подключение по телефону</h2>
-        <button class="code-auth-close" @click="close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <div class="code-auth-body">
-        <div class="phone-input-section">
-          <p class="phone-description">
-            Введите номер телефона для подключения
-          </p>
-
-          <div class="phone-input-wrapper">
-            <div class="phone-input-container">
-              <input
-                :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-                :placeholder="
-                  showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
-                "
-                @input="formatPhone"
-                @keydown.delete="handleBackspace"
-                type="text"
-                id="phone"
-                v-model="phoneNumber"
-                ref="phoneInput"
-              />
-            </div>
-
-            <div v-if="station.errorPhone" class="error-message">
-              Пожалуйста, введите корректный номер телефона
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-auth-footer">
-        <button
-          @click="submitPhoneNumber"
-          class="code-submit-button"
-          :disabled="!isPhoneValid"
-        >
-          <span>Далее</span>
-          <svg
-            v-if="station.loading"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <path
-              d="M12 2V6M12 18V22M6 12H2M22 12H18M19.0784 19.0784L16.25 16.25M19.0784 4.99994L16.25 7.82837M4.92157 19.0784L7.75 16.25M4.92157 4.99994L7.75 7.82837"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-
-        <button @click="close" class="back-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M19 12H5M12 19L5 12L12 5"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Вернуться
-        </button>
-      </div>
-    </div>
-
-    <!-- ФАЗА 2: ВВОД КОДА -->
-    <div v-if="showCodeInput" class="code-auth-modal">
+    <!-- ВВОД КОДА -->
+    <div class="code-auth-modal">
       <div class="code-auth-header">
         <h2 class="code-auth-title">Подтверждение входа</h2>
         <button class="code-auth-close" @click="handleClose">
@@ -169,12 +80,14 @@
           </svg>
         </button>
 
-        <div class="code-auth-divider">
-          <span>или</span>
-        </div>
-
-        <button @click="goBackToPhone" class="code-switch-method">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <button @click="handleClose" class="back-button">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M19 12H5M12 19L5 12L12 5"
               stroke="currentColor"
@@ -183,7 +96,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          Вернуться к номеру телефона
+          Вернуться
         </button>
       </div>
     </div>
@@ -193,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, inject, reactive, computed, nextTick } from "vue";
+import { ref, inject, reactive, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
@@ -232,7 +145,7 @@ const token = computed(() => accountStore.getAccountToken);
 const { stationDomain } = useDomain();
 const router = useRouter();
 
-const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
+const { selectedItem } = inject("accountItems");
 const { source: injectedSource, login, storage } = selectedItem.value;
 
 // Используем source из props или inject
@@ -241,244 +154,18 @@ const source = computed(() => props.source || injectedSource);
 // ===== СОСТОЯНИЕ =====
 const station = reactive({
   loading: false,
-  errorPhone: false,
 });
 
 const errorBlock = ref(false);
 const isWarningModalOpen = ref(false);
 
-// ===== ФАЗА 1: ТЕЛЕФОН =====
-const phoneNumber = ref("");
-const phoneInput = ref(null);
-const showMask = ref(true);
-
-// ===== ФАЗА 2: КОД =====
+// ===== КОД =====
 const code = ref("");
-const showCodeInput = ref(false);
 
 // ===== COMPUTED =====
-const isPhoneValid = computed(() => {
-  const digits = phoneNumber.value.replace(/\D/g, "");
-  return digits.length >= 8;
-});
-
 const isCodeValid = computed(() => {
   return code.value.length === 5 && /^\d+$/.test(code.value);
 });
-
-// ===== МЕТОДЫ: ТЕЛЕФОН =====
-
-const handleBackspace = (e) => {
-  const value = phoneNumber.value;
-  const cursorPosition = phoneInput.value.selectionStart;
-
-  if (!showMask.value) return;
-
-  if (value === "+7" && cursorPosition <= 2) {
-    phoneNumber.value = "";
-    e.preventDefault();
-    return;
-  }
-
-  if (value.startsWith("+7") && cursorPosition === 2) {
-    phoneNumber.value = "";
-    e.preventDefault();
-    return;
-  }
-
-  if (
-    cursorPosition > 0 &&
-    [" ", "(", ")", "-"].includes(value[cursorPosition - 1])
-  ) {
-    e.preventDefault();
-    phoneInput.value.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
-  }
-};
-
-const formatPhone = () => {
-  const value = phoneNumber.value;
-  const cursorPosition = phoneInput.value.selectionStart;
-
-  if (value === "") {
-    showMask.value = true;
-    return;
-  }
-
-  if (value === "+") {
-    phoneNumber.value = "+7";
-    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
-    return;
-  }
-
-  if (value === "7") {
-    phoneNumber.value = "+7";
-    nextTick(() => phoneInput.value.setSelectionRange(2, 2));
-    return;
-  }
-
-  let digits = value.replace(/[^\d+]/g, "");
-
-  if (digits.startsWith("+")) {
-    digits = "+" + digits.substring(1).replace(/\D/g, "");
-  } else {
-    digits = digits.replace(/\D/g, "");
-  }
-
-  const digitsCount = digits.startsWith("+")
-    ? digits.length - 1
-    : digits.length;
-
-  if (digitsCount > 11) {
-    showMask.value = false;
-    phoneNumber.value = digits;
-    return;
-  } else {
-    showMask.value = true;
-  }
-
-  if (showMask.value) {
-    let formatted = "";
-
-    if (digits.startsWith("+")) {
-      formatted = "+";
-      digits = digits.substring(1);
-    }
-
-    if (digits.length > 0) {
-      if (formatted === "+" && digits[0] !== "7") {
-        digits = "7" + digits;
-      }
-      formatted += digits[0];
-      digits = digits.substring(1);
-    }
-
-    if (digits.length > 0) {
-      formatted += " (" + digits.substring(0, 3);
-      digits = digits.substring(3);
-    }
-
-    if (digits.length > 0) {
-      formatted += ") " + digits.substring(0, 3);
-      digits = digits.substring(3);
-    }
-
-    if (digits.length > 0) {
-      formatted += "-" + digits.substring(0, 2);
-      digits = digits.substring(2);
-    }
-
-    if (digits.length > 0) {
-      formatted += "-" + digits.substring(0, 2);
-    }
-
-    phoneNumber.value = formatted;
-
-    nextTick(() => {
-      let newCursorPos = cursorPosition;
-      const changes = phoneNumber.value.length - value.length;
-
-      if (changes > 0) {
-        newCursorPos += changes;
-      }
-
-      newCursorPos = Math.min(newCursorPos, phoneNumber.value.length);
-      phoneInput.value.setSelectionRange(newCursorPos, newCursorPos);
-    });
-  }
-};
-
-const getInternationalFormat = () => {
-  const digits = phoneNumber.value.replace(/\D/g, "");
-  return digits;
-};
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-  }
-};
-
-const enablePhoneAuth = async () => {
-  const internationalPhone = getInternationalFormat();
-  props.updateLoadingStatus(true, "Отправка номера...");
-
-  let params = {
-    token: token.value,
-    source: source.value,
-    login: login,
-    phone: internationalPhone,
-  };
-
-  if (stationDomain.navigate.value === "whatsapi") {
-    params.storage = storage;
-  }
-
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}enablePhoneAuth`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "enablePhoneAuth",
-        "enablePhoneAuth",
-        params,
-        response.data.ok,
-        response.data
-      );
-    }
-
-    if (response.data.status === "ok") {
-      props.updateLoadingStatus(false);
-      station.errorPhone = false;
-      showCodeInput.value = true;
-      code.value = "";
-    } else if (response.data.status === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
-    } else {
-      station.errorPhone = true;
-      props.updateLoadingStatus(false);
-    }
-  } catch (error) {
-    console.error("enablePhoneAuth error:", error);
-    station.errorPhone = true;
-    props.updateLoadingStatus(false);
-
-    if (error.response) {
-      console.error("error response:", error.response.data);
-    }
-  }
-};
-
-const submitPhoneNumber = async () => {
-  if (!isPhoneValid.value) {
-    station.errorPhone = true;
-    return;
-  }
-
-  station.loading = true;
-  await enablePhoneAuth();
-  station.loading = false;
-};
-
-const goBackToPhone = () => {
-  showCodeInput.value = false;
-  code.value = "";
-  station.errorPhone = false;
-};
 
 // ===== МЕТОДЫ: КОД =====
 
@@ -506,6 +193,14 @@ const closeWarningModal = () => {
 
 const chaneErrorBlock = () => {
   errorBlock.value = !errorBlock.value;
+};
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+  }
 };
 
 const solveChallenge = async () => {
@@ -569,7 +264,7 @@ const solveChallenge = async () => {
 };
 
 const handleClose = () => {
-  goBackToPhone();
+  props.close();
 };
 </script>
 
@@ -695,73 +390,6 @@ const handleClose = () => {
   margin-top: 8px;
 }
 
-/* ===== СТИЛИ ТЕЛЕФОНА ===== */
-
-.phone-input-section {
-  text-align: center;
-}
-
-.phone-description {
-  font-size: 14px;
-  color: #666;
-  text-align: center;
-  margin: 0 0 24px 0;
-  line-height: 1.4;
-  font-weight: 400;
-}
-
-.phone-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.phone-input-container {
-  display: flex;
-  justify-content: center;
-}
-
-.num-input {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 280px;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
-  flex-grow: 1;
-  box-sizing: border-box;
-}
-
-.num-input-error {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 280px;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #be2424;
-  background: #ffeaea;
-  flex-grow: 1;
-  box-sizing: border-box;
-}
-
-.error-message {
-  color: #d32f2f;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 4px;
-}
-
-.num-input:focus,
-.num-input-error:focus {
-  outline: none;
-}
-
 /* ===== ФУТЕР ===== */
 
 .code-auth-footer {
@@ -800,45 +428,6 @@ const handleClose = () => {
   background: #adb5bd;
   cursor: not-allowed;
   transform: none;
-}
-
-.code-auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #8a8a8a;
-  font-size: 12px;
-}
-
-.code-auth-divider::before,
-.code-auth-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #e9ecef;
-}
-
-.code-switch-method {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: none;
-  border: 1px solid #e9ecef;
-  padding: 14px 20px;
-  border-radius: 12px;
-  cursor: pointer;
-  color: #495057;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.code-switch-method:hover {
-  background: #f8f9fa;
-  border-color: #4950ca;
-  color: #4950ca;
 }
 
 .back-button {
@@ -919,18 +508,8 @@ const handleClose = () => {
     font-size: 14px;
   }
 
-  .code-switch-method {
+  .back-button {
     padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .num-input,
-  .num-input-error {
-    width: 100%;
-    max-width: 280px;
-  }
-
-  .phone-description {
     font-size: 13px;
   }
 }
@@ -953,22 +532,10 @@ const handleClose = () => {
     font-size: 11px;
   }
 
-  .phone-description {
-    font-size: 12px;
-  }
-
   .code-submit-button,
   .back-button {
     font-size: 13px;
     padding: 10px 16px;
-  }
-
-  .num-input,
-  .num-input-error {
-    width: 100%;
-    max-width: 250px;
-    height: 42px;
-    font-size: 13px;
   }
 }
 </style>
