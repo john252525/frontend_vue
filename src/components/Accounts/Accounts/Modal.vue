@@ -139,7 +139,10 @@
           >
 
           <span
-            v-if="['uon'].includes(selectedItem.type)"
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
             class="action"
             @click="changeStationGetHistory"
             >История</span

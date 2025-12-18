@@ -448,21 +448,18 @@ const fetchHistory = async () => {
     loading.value = true;
     error.value = null;
 
-    const response = await axios.get(
-      "https://bapi88.developtech.ru/api/v1/queue/history",
-      {
-        params: {
-          type: "uon",
-          date_from: filters.value.date_from,
-          date_to: filters.value.date_to,
-          page: currentPage.value,
-          per_page: filters.value.per_page,
-        },
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
+    const response = await axios.get(`${BASE_URL}/queue/history`, {
+      params: {
+        type: "uon",
+        date_from: filters.value.date_from,
+        date_to: filters.value.date_to,
+        page: currentPage.value,
+        per_page: filters.value.per_page,
+      },
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
     if (response.data.ok === false) {
       error.value = {
