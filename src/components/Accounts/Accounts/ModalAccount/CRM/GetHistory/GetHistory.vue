@@ -248,6 +248,8 @@ const props = defineProps({
   },
 });
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const { item } = toRefs(props);
 
 const historyData = ref([]);
