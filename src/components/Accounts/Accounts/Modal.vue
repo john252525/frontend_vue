@@ -112,6 +112,7 @@
             @click="getNewProxy"
             >{{ t("modalAccount.changeProxy") }}</span
           >
+
           <span
             class="action action-delete"
             @click="ChangeconfirmStation"
@@ -135,6 +136,13 @@
             class="action"
             @click="updateAccountButton"
             >Обновить аккаунт</span
+          >
+
+          <span
+            v-if="['uon'].includes(selectedItem.type)"
+            class="action"
+            @click="changeStationGetHistory"
+            >История</span
           >
 
           <span
@@ -242,6 +250,9 @@ const props = defineProps({
   },
   selectedItem: {
     type: Object,
+  },
+  changeStationGetHistory: {
+    type: Function,
   },
   selectedItems: {
     type: Object,
@@ -975,7 +986,6 @@ const resetAccount = async () => {
   await createRequest("getNewProxy");
 };
 
-// Добавляем компонент бейджа
 const DeletedBadge = {
   template: `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="deleted-badge">

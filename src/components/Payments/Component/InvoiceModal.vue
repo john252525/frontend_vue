@@ -132,6 +132,8 @@ const saveStatus = ref({
   message: "",
 });
 
+const apiUrl = import.meta.env.VITE_PAY_URL;
+
 // Функция для сохранения чека в историю
 const saveCheckToHistory = async () => {
   saveStatus.value = {
@@ -143,7 +145,7 @@ const saveCheckToHistory = async () => {
 
   try {
     const response = await axios.post(
-      "https://api22.developtech.ru/api/saveCheck",
+      `${apiUrl}/saveCheck`,
       {
         amount: props.amount,
         checkUrl: props.invoiceLink,

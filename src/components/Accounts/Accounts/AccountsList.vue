@@ -366,7 +366,14 @@
       :changePayDataForAccounts="changePayDataForAccounts"
     />
 
+    <GetHistory
+      v-if="getHistoryModal"
+      :changeStationGetHistory="changeStationGetHistory"
+      :item="selectedItem"
+    />
+
     <Modal
+      :changeStationGetHistory="changeStationGetHistory"
       :changeTariffStation="changeTariffStation"
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
@@ -456,6 +463,7 @@ import QrModal from "./ModalAccount/qrModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
+import GetHistory from "./ModalAccount/CRM/GetHistory/GetHistory.vue";
 import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
 
@@ -523,6 +531,7 @@ const loadingStation = ref(false);
 const chatsStation = ref(null);
 const sendSupportStation = ref(false);
 const bindingStation = ref(false);
+const getHistoryModal = ref(false);
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 import False from "@/components/Chats/UserList/ResultModal/False.vue";
@@ -649,6 +658,10 @@ const changeGetScreenStation = () => {
 
 const closeScreen = () => {
   getScreenStation.value = false;
+};
+
+const changeStationGetHistory = () => {
+  getHistoryModal.value = !getHistoryModal.value;
 };
 
 const changeBindingStation = () =>
