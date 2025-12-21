@@ -59,7 +59,11 @@
               <div class="messenger-info">
                 <div class="messenger-badge" :class="`badge-${item}`"></div>
                 <span class="messenger-name">{{
-                  item === "telegram" ? "Telegram" : "WhatsApp"
+                  item === "telegram"
+                    ? "Telegram"
+                    : item === "whatsapp"
+                    ? "WhatsApp"
+                    : "Max"
                 }}</span>
               </div>
 
@@ -93,6 +97,15 @@
               >
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
+              </button>
+              <button
+                v-if="!formData.cascade.includes('max')"
+                type="button"
+                @click="addCascadeItem('max')"
+                class="cascade-btn cascade-btn-max"
+              >
+                <span class="btn-badge badge-max"></span>
+                Max
               </button>
             </div>
           </div>
@@ -394,6 +407,15 @@ const handleCreate = async () => {
   height: 24px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.badge-max {
+  background: #5b4ef5;
+}
+
+.cascade-btn-max:hover {
+  background: rgba(91, 78, 245, 0.05);
+  border-color: #c4b5fd;
 }
 
 .badge-telegram {

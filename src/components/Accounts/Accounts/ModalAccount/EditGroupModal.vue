@@ -50,7 +50,11 @@
               <div class="messenger-info">
                 <div class="messenger-badge" :class="`badge-${item}`"></div>
                 <span class="messenger-name">{{
-                  item === "telegram" ? "Telegram" : "WhatsApp"
+                  item === "telegram"
+                    ? "Telegram"
+                    : item === "whatsapp"
+                    ? "WhatsApp"
+                    : "Max"
                 }}</span>
               </div>
 
@@ -87,6 +91,16 @@
               >
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
+              </button>
+              <button
+                v-if="!formData.cascade.includes('max')"
+                id="max-button"
+                type="button"
+                @click="addCascadeItem('max')"
+                class="cascade-btn cascade-btn-max"
+              >
+                <span class="btn-badge badge-max"></span>
+                Max
               </button>
             </div>
           </div>
@@ -134,7 +148,7 @@ const formData = reactive({
 
 // Вычисляем доступные элементы
 const availableCascadeItems = computed(() => {
-  const allItems = ["telegram", "whatsapp"];
+  const allItems = ["telegram", "whatsapp", "max"]; // ← добавить "max"
   return allItems.filter((item) => !formData.cascade.includes(item));
 });
 
@@ -488,6 +502,15 @@ const handleUpdate = async () => {
   justify-content: center;
   gap: 8px;
   transition: all 0.25s;
+}
+
+.badge-max {
+  background: #5b4ef5; /* или любой другой цвет на твой выбор */
+}
+
+.cascade-btn-max:hover {
+  background: rgba(91, 78, 245, 0.05);
+  border-color: #c4b5fd;
 }
 
 .cascade-btn:hover {

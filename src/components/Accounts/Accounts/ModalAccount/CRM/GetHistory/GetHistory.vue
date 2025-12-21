@@ -2,7 +2,7 @@
   <div class="black-fon" @click="closeModal"></div>
   <div class="history-modal">
     <div class="modal-header">
-      <h2>Сообщения рассылки ({{ item.name }})</h2>
+      <h2>История уведомлений ({{ item.name }})</h2>
       <button class="close-btn" @click="closeModal">✕</button>
     </div>
 

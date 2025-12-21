@@ -149,6 +149,16 @@
           >
 
           <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
+            @click="changeRoutingSettings"
+            >Маршрутизации</span
+          >
+
+          <span
             v-if="['amocrm'].includes(selectedItem.type)"
             class="action"
             @click="changeBindingStation"
@@ -250,6 +260,9 @@ const props = defineProps({
   },
   isModalOpen: {
     type: Boolean,
+  },
+  changeRoutingSettings: {
+    type: Function,
   },
   selectedItem: {
     type: Object,
