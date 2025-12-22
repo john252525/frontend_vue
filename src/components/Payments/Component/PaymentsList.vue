@@ -171,6 +171,11 @@
               <span>Администратором</span>
             </div>
 
+            <div class="detail-row">
+              <label>Уточнение:</label>
+              <span>{{ selectedPayment.message }} </span>
+            </div>
+
             <div class="modal-actions">
               <button
                 class="action-button secondary"

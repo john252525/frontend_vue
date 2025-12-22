@@ -17,7 +17,8 @@
       <div class="modal-body">
         <p class="modal-description">
           Перед просмотром групп создайте хотя бы один аккаунт
-          <strong>WhatsApp</strong> или <strong>Telegram</strong>.
+          <strong>WhatsApp</strong> или <strong>Telegram</strong> или
+          <strong>Max</strong>.
         </p>
       </div>
 
