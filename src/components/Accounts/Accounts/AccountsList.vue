@@ -119,6 +119,7 @@
       :isOpen="showRoutingSettings"
       :close="changeRoutingSettings"
       :item="selectedItem"
+      :vendors="instanceData"
     />
 
     <Enable

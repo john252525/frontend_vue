@@ -6,23 +6,50 @@
         <div class="section-header compact">
           <div class="section-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <polyline
+                points="14,2 14,8 20,8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M16 13H8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <path
+                d="M16 17H8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <path
+                d="M10 9H8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </div>
-          <h3 class="section-title">Реквизиты для счета</h3>
+          <h3 class="section-title">{{ t("invoiceStep.invoiceDetails") }}</h3>
         </div>
 
         <div class="form-group compact">
-          <label class="form-label">ИНН организации или ИП</label>
+          <label class="form-label">{{ t("invoiceStep.innLabel") }}</label>
 
           <!-- Лоадер загрузки ИНН -->
           <div v-if="loadingInn" class="inn-loading compact">
             <div class="inn-loader"></div>
-            <span>Загрузка ИНН...</span>
+            <span>{{ t("invoiceStep.loadingInn") }}</span>
           </div>
 
           <!-- Если ИНН загружен и не редактируется -->
@@ -33,7 +60,7 @@
             <input
               v-model.trim="innValue"
               type="text"
-              placeholder="Введите 10 или 12 цифр"
+              :placeholder="t('invoiceStep.innPlaceholder')"
               maxlength="12"
               class="form-input compact"
               :disabled="true"
@@ -43,11 +70,26 @@
               @click="enableInnEditing"
               class="edit-inn-btn"
               :disabled="isLoading"
-              title="Изменить ИНН"
+              :title="t('invoiceStep.changeInn')"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" fill="none"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
               </svg>
             </button>
           </div>
@@ -57,7 +99,7 @@
             <input
               v-model.trim="innValue"
               type="text"
-              placeholder="Введите 10 или 12 цифр"
+              :placeholder="t('invoiceStep.innPlaceholder')"
               maxlength="12"
               class="form-input compact"
               :class="{ 'input-error': innError }"
@@ -68,14 +110,18 @@
 
           <div v-if="innError" class="error-text compact">{{ innError }}</div>
 
-          <div
-            v-if="innFromBackend && !isEditingInn"
-            class="inn-info compact"
-          >
+          <div v-if="innFromBackend && !isEditingInn" class="inn-info compact">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <path
+                d="M20 6L9 17l-5-5"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"
+              />
             </svg>
-            <span>ИНН загружен из профиля</span>
+            <span>{{ t("invoiceStep.innLoadedFromProfile") }}</span>
           </div>
 
           <div
@@ -83,9 +129,15 @@
             class="inn-empty-message compact"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <span>Введите и сохраните ИНН для генерации счета</span>
+            <span>{{ t("invoiceStep.enterAndSaveInn") }}</span>
           </div>
         </div>
 
@@ -99,13 +151,20 @@
         >
           <span v-if="savingInn" class="btn-loading">
             <div class="btn-spinner"></div>
-            Сохранение...
+            {{ t("invoiceStep.saving") }}
           </span>
           <span v-else class="btn-content">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path
+                d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+              />
             </svg>
-            {{ innFromBackend ? "Обновить" : "Сохранить" }}
+            {{
+              innFromBackend ? t("invoiceStep.update") : t("invoiceStep.save")
+            }}
           </span>
         </button>
       </section>
@@ -115,19 +174,27 @@
         <div class="summary-header compact">
           <div class="summary-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
-          <h3 class="summary-title">Детали счета</h3>
+          <h3 class="summary-title">
+            {{ t("invoiceStep.invoiceDetailsTitle") }}
+          </h3>
         </div>
 
         <div class="summary-details compact">
           <div class="detail-item compact">
-            <span class="detail-label">Сумма:</span>
+            <span class="detail-label">{{ t("invoiceStep.amount") }}:</span>
             <span class="detail-value">{{ amount }} ₽</span>
           </div>
           <div class="detail-item compact">
-            <span class="detail-label">ИНН:</span>
+            <span class="detail-label">{{ t("invoiceStep.inn") }}:</span>
             <span class="detail-value">{{ innValue }}</span>
           </div>
         </div>
@@ -135,23 +202,26 @@
     </div>
 
     <div class="step-actions">
-      <!-- <button @click="$emit('back')" class="btn btn-outline" :disabled="isLoading">
-        Назад
-      </button> -->
-      <button 
-        @click="generateInvoice" 
-        class="btn btn-primary" 
+      <button
+        @click="generateInvoice"
+        class="btn btn-primary"
         :disabled="!canGenerateInvoice || isLoading"
       >
         <span v-if="generatingInvoice" class="btn-loading">
           <div class="btn-spinner"></div>
-          Генерация...
+          {{ t("invoiceStep.generating") }}
         </span>
         <span v-else class="btn-content">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
-          Получить счет
+          {{ t("invoiceStep.getInvoice") }}
         </span>
       </button>
     </div>
@@ -162,13 +232,24 @@
         <div class="error-header">
           <div class="error-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path
+                d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
-          <h4 class="error-title">Ошибка генерации счета</h4>
+          <h4 class="error-title">{{ t("invoiceStep.errorGenerating") }}</h4>
           <button @click="clearError" class="error-close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -177,7 +258,7 @@
         </div>
         <div class="error-actions" v-if="showRetry">
           <button @click="generateInvoice" class="btn btn-sm btn-primary">
-            Попробовать снова
+            {{ t("invoiceStep.tryAgain") }}
           </button>
         </div>
       </div>
@@ -186,187 +267,191 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
-import { useAccountStore } from '@/stores/accountStore'
-import useFrontendLogger from '@/composables/useFrontendLogger'
+import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+import axios from "axios";
+import { useAccountStore } from "@/stores/accountStore";
+import useFrontendLogger from "@/composables/useFrontendLogger";
 
-const { sendLog } = useFrontendLogger()
-const accountStore = useAccountStore()
-const token = accountStore.getAccountToken
+const { t } = useI18n();
+const { sendLog } = useFrontendLogger();
+const accountStore = useAccountStore();
+const token = accountStore.getAccountToken;
 
-const FRONTEND_URL = import.meta.env.VITE_INVOICES_URL
+const FRONTEND_URL = import.meta.env.VITE_INVOICES_URL;
 
 const props = defineProps({
   amount: {
     type: Number,
-    required: true
+    required: true,
   },
   isLoading: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['back', 'invoice-generated', 'invoice-error'])
+const emit = defineEmits(["back", "invoice-generated", "invoice-error"]);
 
 // Состояния ИНН
-const innValue = ref('')
-const innError = ref('')
-const innFromBackend = ref(null)
-const isEditingInn = ref(false)
-const loadingInn = ref(false)
-const savingInn = ref(false)
-const generatingInvoice = ref(false)
-const innSaved = ref(false)
-const localError = ref('')
-const showRetry = ref(false)
+const innValue = ref("");
+const innError = ref("");
+const innFromBackend = ref(null);
+const isEditingInn = ref(false);
+const loadingInn = ref(false);
+const savingInn = ref(false);
+const generatingInvoice = ref(false);
+const innSaved = ref(false);
+const localError = ref("");
+const showRetry = ref(false);
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
-    await sendLog(location, method, params, results, answer)
+    await sendLog(location, method, params, results, answer);
   } catch (err) {
-    console.error('error', err)
+    console.error("error", err);
   }
-}
+};
 
 const clearError = () => {
-  localError.value = ''
-  showRetry.value = false
-}
+  localError.value = "";
+  showRetry.value = false;
+};
 
 // Валидация ИНН
 const validateInn = (inn) => {
-  if (!inn) return "ИНН обязателен для заполнения"
-  if (!/^\d+$/.test(inn)) return "ИНН должен содержать только цифры"
-  if (inn.length < 10) return "ИНН должен содержать минимум 10 цифр"
-  if (inn.length > 12) return "ИНН должен содержать максимум 12 цифр"
-  if (inn.length !== 10 && inn.length !== 12) return "ИНН должен содержать 10 или 12 цифр"
-  return ""
-}
+  if (!inn) return t("invoiceStep.errors.innRequired");
+  if (!/^\d+$/.test(inn)) return t("invoiceStep.errors.innOnlyDigits");
+  if (inn.length < 10) return t("invoiceStep.errors.innMinLength");
+  if (inn.length > 12) return t("invoiceStep.errors.innMaxLength");
+  if (inn.length !== 10 && inn.length !== 12)
+    return t("invoiceStep.errors.inn10or12");
+  return "";
+};
 
 const isInnValid = computed(() => {
-  return innValue.value && !validateInn(innValue.value)
-})
+  return innValue.value && !validateInn(innValue.value);
+});
 
 const validateInnOnInput = () => {
-  innError.value = validateInn(innValue.value)
-}
+  innError.value = validateInn(innValue.value);
+};
 
 const enableInnEditing = () => {
-  isEditingInn.value = true
-  innSaved.value = false
-}
+  isEditingInn.value = true;
+  innSaved.value = false;
+};
 
 const canGenerateInvoice = computed(() => {
-  return innSaved.value && innFromBackend.value && props.amount >= 10 && props.amount <= 50000
-})
+  return (
+    innSaved.value &&
+    innFromBackend.value &&
+    props.amount >= 10 &&
+    props.amount <= 50000
+  );
+});
 
 // API функции
 const loadInn = async () => {
-  loadingInn.value = true
+  loadingInn.value = true;
   try {
-    const response = await axios.get(
-      `${FRONTEND_URL}getInn`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 8000
-      }
-    )
+    const response = await axios.get(`${FRONTEND_URL}getInn`, {
+      headers: { Authorization: `Bearer ${token}` },
+      timeout: 8000,
+    });
 
     if (response.data.ok && response.data.data.inn) {
-      innValue.value = response.data.data.inn
-      innSaved.value = true
-      innFromBackend.value = response.data.data.inn
+      innValue.value = response.data.data.inn;
+      innSaved.value = true;
+      innFromBackend.value = response.data.data.inn;
     } else {
-      innFromBackend.value = ""
-      innSaved.value = false
-      isEditingInn.value = true
+      innFromBackend.value = "";
+      innSaved.value = false;
+      isEditingInn.value = true;
     }
   } catch (error) {
-    console.error('error', error)
-    innFromBackend.value = ""
-    innSaved.value = false
-    isEditingInn.value = true
-    
-    if (error.code === 'ECONNABORTED') {
-      localError.value = 'Время загрузки ИНН истекло'
+    console.error("error", error);
+    innFromBackend.value = "";
+    innSaved.value = false;
+    isEditingInn.value = true;
+
+    if (error.code === "ECONNABORTED") {
+      localError.value = t("invoiceStep.errors.innLoadTimeoutError");
     } else {
-      localError.value = 'Ошибка загрузки ИНН'
+      localError.value = t("invoiceStep.errors.innLoadError");
     }
-    showRetry.value = true
+    showRetry.value = true;
   } finally {
-    loadingInn.value = false
+    loadingInn.value = false;
   }
-}
+};
 
 const saveInn = async () => {
-  innError.value = validateInn(innValue.value)
-  if (innError.value) return
+  innError.value = validateInn(innValue.value);
+  if (innError.value) return;
 
-  savingInn.value = true
-  clearError()
-  
+  savingInn.value = true;
+  clearError();
+
   try {
-    const response = await axios.get(
-      `${FRONTEND_URL}saveInn`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { inn: innValue.value },
-        timeout: 8000
-      }
-    )
+    const response = await axios.get(`${FRONTEND_URL}saveInn`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { inn: innValue.value },
+      timeout: 8000,
+    });
 
     if (response.data.ok) {
-      innSaved.value = true
-      innFromBackend.value = innValue.value
-      isEditingInn.value = false
+      innSaved.value = true;
+      innFromBackend.value = innValue.value;
+      isEditingInn.value = false;
       await handleSendLog(
-        'payment',
-        'saveInn',
+        "payment",
+        "saveInn",
         { inn: innValue.value },
         response.data,
         response.data
-      )
+      );
     } else {
-      throw new Error(response.data.message || 'Ошибка сохранения')
+      throw new Error(
+        response.data.message || t("invoiceStep.errors.saveFailed")
+      );
     }
   } catch (error) {
-    console.error('error', error)
-    let errorMsg = 'Ошибка при сохранении ИНН'
-    
-    if (error.code === 'ECONNABORTED') {
-      errorMsg = 'Время сохранения истекло'
+    console.error("error", error);
+    let errorMsg = t("invoiceStep.errors.innSaveError");
+
+    if (error.code === "ECONNABORTED") {
+      errorMsg = t("invoiceStep.errors.innSaveTimeoutError");
     } else if (error.response) {
-      errorMsg = error.response.data?.message || errorMsg
+      errorMsg = error.response.data?.message || errorMsg;
     }
-    
-    localError.value = errorMsg
-    showRetry.value = true
-    emit('invoice-error', errorMsg)
+
+    localError.value = errorMsg;
+    showRetry.value = true;
+    emit("invoice-error", errorMsg);
   } finally {
-    savingInn.value = false
+    savingInn.value = false;
   }
-}
+};
 
 const generateInvoice = async () => {
-  if (!canGenerateInvoice.value) return
+  if (!canGenerateInvoice.value) return;
 
-  clearError()
+  clearError();
 
   if (!props.amount || props.amount < 10) {
-    localError.value = 'Минимальная сумма оплаты - 10 руб.'
-    showRetry.value = true
-    return
+    localError.value = t("invoiceStep.errors.minAmount");
+    showRetry.value = true;
+    return;
   }
 
   if (props.amount > 50000) {
-    localError.value = 'Максимальная сумма оплаты - 50,000 руб.'
-    showRetry.value = true
-    return
+    localError.value = t("invoiceStep.errors.maxAmount");
+    showRetry.value = true;
+    return;
   }
 
-  generatingInvoice.value = true
+  generatingInvoice.value = true;
   try {
     const response = await axios.post(
       `${FRONTEND_URL}generateInvoice`,
@@ -374,48 +459,52 @@ const generateInvoice = async () => {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        timeout: 15000
+        timeout: 15000,
       }
-    )
+    );
 
     if (response.data.ok) {
       await handleSendLog(
-        'payment',
-        'generateInvoice',
+        "payment",
+        "generateInvoice",
         { amount: props.amount },
         response.data,
         response.data
-      )
-      emit('invoice-generated', response.data.data)
+      );
+      emit("invoice-generated", response.data.data);
     } else {
-      throw new Error(response.data.message || 'Ошибка генерации счета')
+      throw new Error(
+        response.data.message || t("invoiceStep.errors.generateFailed")
+      );
     }
   } catch (error) {
-    console.error('Error in generateInvoice:', error)
-    
-    let errorMsg = 'Ошибка при генерации счета'
-    
-    if (error.code === 'ECONNABORTED') {
-      errorMsg = 'Время генерации счета истекло'
+    console.error("Error in generateInvoice:", error);
+
+    let errorMsg = t("invoiceStep.errors.generateError");
+
+    if (error.code === "ECONNABORTED") {
+      errorMsg = t("invoiceStep.errors.generateTimeoutError");
     } else if (error.response) {
-      errorMsg = error.response.data?.message || `Ошибка сервера: ${error.response.status}`
+      errorMsg =
+        error.response.data?.message ||
+        `${t("invoiceStep.errors.serverError")}: ${error.response.status}`;
     } else if (error.request) {
-      errorMsg = 'Не удалось соединиться с сервером'
+      errorMsg = t("invoiceStep.errors.connectionError");
     }
-    
-    localError.value = errorMsg
-    showRetry.value = true
-    emit('invoice-error', errorMsg)
+
+    localError.value = errorMsg;
+    showRetry.value = true;
+    emit("invoice-error", errorMsg);
   } finally {
-    generatingInvoice.value = false
+    generatingInvoice.value = false;
   }
-}
+};
 
 onMounted(() => {
-  loadInn()
-})
+  loadInn();
+});
 </script>
 
 <style scoped>
@@ -765,8 +854,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .slide-fade-enter-active {

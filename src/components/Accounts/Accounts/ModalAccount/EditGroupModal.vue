@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
+  <div class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="modal-title">Редактировать группу</h2>

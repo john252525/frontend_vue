@@ -11,7 +11,7 @@
         <form @submit.prevent="logAccoutn" class="registration-form">
           <div class="title-cont">
             <h2 class="title">
-              Регистрация в
+              {{ t("registration.title") }}
               <img
                 class="url-img-logo"
                 :src="stationDomain.cosmetics.urlLogo"
@@ -25,10 +25,10 @@
 
           <div class="input-row">
             <div class="input-cont">
-              <label class="name-input">Email</label>
+              <label class="name-input">{{ t("registration.mail") }}</label>
               <input
                 type="email"
-                placeholder="name@company.com"
+                :placeholder="t('registration.emailPlaceholder')"
                 v-model="formData.login"
                 @blur="validateEmail"
                 @input="clearEmailError"
@@ -42,24 +42,39 @@
               </div>
             </div>
 
+            <!-- ТЕЛЕФОН С ИСПОЛЬЗОВАНИЕМ УТИЛИТЫ -->
             <div class="input-cont">
-              <label class="name-input">Телефон</label>
+              <label class="name-input">{{ t("registration.phone") }}</label>
               <div class="phone-input-container">
                 <input
                   type="tel"
-                  placeholder="7 900 000 0000"
-                  v-model="formData.phone"
-                  @input="handlePhoneInput"
-                  required
+                  :placeholder="
+                    phoneFormatter.state.showMask
+                      ? '+7 (___) ___-__-__'
+                      : t('registration.phonePlaceholder')
+                  "
+                  @input="phoneFormatter.formatPhone"
+                  @keydown.delete="phoneFormatter.handleBackspace"
+                  :class="{ error: phoneFormatter.state.errorPhone }"
                   class="input-reg phone-input"
+                  v-model="phoneFormatter.state.phoneNumber"
+                  :ref="(el) => (phoneFormatter.phoneInput.value = el)"
                   :disabled="loading"
+                  required
                 />
+              </div>
+              <div class="error-container">
+                <p v-if="phoneFormatter.state.errorPhone" class="error-message">
+                  {{ t("registration.errorInvalidPhone") }}
+                </p>
               </div>
             </div>
           </div>
 
           <div class="input-cont compact-field">
-            <label class="name-input">Способы связи</label>
+            <label class="name-input">{{
+              t("registration.preferredChannels")
+            }}</label>
             <div class="messengers-cont">
               <label
                 v-for="channel in availableChannels"
@@ -81,9 +96,9 @@
 
           <div class="input-row">
             <div class="input-cont">
-              <label class="name-input">Пароль</label>
+              <label class="name-input">{{ t("registration.password") }}</label>
               <input
-                placeholder="••••••••"
+                :placeholder="t('registration.passwordPlaceholder')"
                 type="password"
                 v-model="formData.password"
                 @blur="validatePassword"
@@ -101,9 +116,11 @@
             </div>
 
             <div class="input-cont">
-              <label class="name-input">Подтверждение</label>
+              <label class="name-input">{{
+                t("registration.passwordConfirm")
+              }}</label>
               <input
-                placeholder="••••••••"
+                :placeholder="t('registration.passwordPlaceholder')"
                 type="password"
                 v-model="formData.fogoutPassword"
                 @blur="validatePasswordConfirmation"
@@ -134,13 +151,13 @@
               :class="{ error: error.check, disabled: loading }"
               for="checkbox"
             >
-              Принимаю
+              {{ t("registration.acceptTerms") }}
               <a
                 href="https://chatserv.ru/documents"
                 target="_blank"
                 class="terms-link"
               >
-                условия использования
+                {{ t("registration.termsLink") }}
               </a>
             </label>
             <div class="error-container">
@@ -156,11 +173,14 @@
             :disabled="loading"
           >
             <span v-if="loading" class="button-spinner"></span>
-            {{ loading ? "Регистрация..." : "Зарегистрироваться" }}
+            {{ loading ? t("registration.loading") : t("registration.button") }}
           </button>
 
           <p class="login-account-button">
-            Есть аккаунт? <span @click="navigateTo('/Login')">Войти</span>
+            {{ t("registration.haveAccount") }}
+            <span @click="navigateTo('/Login')">{{
+              t("registration.login")
+            }}</span>
           </p>
         </form>
       </div>
@@ -174,7 +194,7 @@
         />
       </svg>
       <p class="text-email-sent">
-        На ваш E-mail отправлено письмо для подтверждения
+        {{ t("registration.emailSent") }}
       </p>
     </div>
 
@@ -182,7 +202,7 @@
     <div v-if="loading" class="fullscreen-loader">
       <div class="loader-content">
         <div class="loader-spinner"></div>
-        <p class="loader-text">Регистрация...</p>
+        <p class="loader-text">{{ t("registration.loading") }}</p>
       </div>
     </div>
   </div>
@@ -193,16 +213,22 @@ import axios from "axios";
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 import { reactive, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useDomain } from "@/composables/getDomain";
 import useFrontendLogger from "@/composables/useFrontendLogger";
+import { usePhoneFormatter } from "@/composables/usePhoneFormatter";
 
+const { t } = useI18n();
 const { sendLog } = useFrontendLogger();
 const { stationDomain } = useDomain();
 const router = useRouter();
 const route = useRoute();
 const sendEmail = ref(false);
 const loading = ref(false);
+
+// Инициализируем утилиту форматирования телефона
+const phoneFormatter = usePhoneFormatter();
 
 const formData = reactive({
   login: "",
@@ -214,10 +240,10 @@ const formData = reactive({
 });
 
 const availableChannels = [
-  { value: "call", label: "Звонок" },
-  { value: "telegram", label: "Telegram" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "max", label: "Max" },
+  { value: "call", label: t("profileSection.channels.call") },
+  { value: "telegram", label: t("profileSection.channels.telegram") },
+  { value: "whatsapp", label: t("profileSection.channels.whatsapp") },
+  { value: "viber", label: t("profileSection.channels.viber") },
 ];
 
 const emailError = ref("");
@@ -239,20 +265,16 @@ const error = reactive({
   check: false,
 });
 
-const handlePhoneInput = () => {
-  formData.phone = formData.phone.replace(/\D/g, "");
-};
-
 const validateEmail = () => {
   const email = formData.login.trim();
   if (!email) {
-    emailError.value = "Введите email";
+    emailError.value = t("registration.errorEmailRequired");
     error.login = true;
     return false;
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    emailError.value = "Введите корректный email";
+    emailError.value = t("registration.errorInvalidEmail");
     error.login = true;
     return false;
   }
@@ -261,15 +283,24 @@ const validateEmail = () => {
   return true;
 };
 
+const validatePhone = () => {
+  if (!phoneFormatter.validatePhone()) {
+    error.phone = true;
+    return false;
+  }
+  error.phone = false;
+  return true;
+};
+
 const validatePassword = () => {
   const password = formData.password.trim();
   if (!password) {
-    passwordError.value = "Введите пароль";
+    passwordError.value = t("registration.errorPasswordRequired");
     error.password = true;
     return false;
   }
   if (password.length < 8) {
-    passwordError.value = "Минимум 8 символов";
+    passwordError.value = t("registration.errorPasswordTooShort");
     error.password = true;
     return false;
   }
@@ -280,7 +311,7 @@ const validatePassword = () => {
 
 const validatePasswordConfirmation = () => {
   if (formData.password !== formData.fogoutPassword) {
-    passwordConfirmationError.value = "Пароли не совпадают";
+    passwordConfirmationError.value = t("registration.errorPasswordsNotMatch");
     error.fogoutPassword = true;
     return false;
   }
@@ -291,7 +322,7 @@ const validatePasswordConfirmation = () => {
 
 const validateCheckbox = () => {
   if (!formData.check) {
-    checkboxError.value = "Примите условия";
+    checkboxError.value = t("registration.errorAcceptTerms");
     error.check = true;
     return false;
   }
@@ -314,9 +345,10 @@ const loginAccount = async () => {
   loading.value = true;
 
   try {
+    const internationalPhone = phoneFormatter.getInternationalFormat();
     const requestData = {
       email: formData.login,
-      phone: "+7" + formData.phone,
+      phone: "+7" + internationalPhone,
       ref_id: route.query.ref,
       password: formData.password,
     };
@@ -340,7 +372,7 @@ const loginAccount = async () => {
         "login",
         {
           username: formData.login,
-          phone: formData.phone,
+          phone: internationalPhone,
           channels: formData.contact_preferred_channels,
         },
         response.data.ok,
@@ -351,7 +383,7 @@ const loginAccount = async () => {
     if (!response.data.ok) {
       inputStyle.incorrectPassword = true;
       inputStyle.incorrectPasswordMessage =
-        response.data.error_message || "Ошибка";
+        response.data.error_message || t("registration.errorRegistration");
       setTimeout(() => (inputStyle.incorrectPassword = false), 5000);
       return;
     }
@@ -364,8 +396,8 @@ const loginAccount = async () => {
     inputStyle.incorrectPasswordMessage =
       error.response?.data?.errors?.[0] ===
       "User with this credentials already exists."
-        ? "Пользователь уже существует"
-        : "Ошибка";
+        ? t("registration.errorUserExists")
+        : t("registration.errorRegistration");
     setTimeout(() => (inputStyle.incorrectPassword = false), 5000);
   } finally {
     loading.value = false;
@@ -375,6 +407,7 @@ const loginAccount = async () => {
 const logAccoutn = () => {
   if (
     validateEmail() &&
+    validatePhone() &&
     validatePassword() &&
     validatePasswordConfirmation() &&
     validateCheckbox()
@@ -481,11 +514,23 @@ const logAccoutn = () => {
   font-size: 13px;
   color: var(--text);
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.input-reg:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.1);
 }
 
 .input-reg.error {
   border-color: #be2424;
   background: #ffeaea;
+}
+
+.input-reg.error:focus {
+  border-color: #be2424;
+  box-shadow: 0 0 0 2px rgba(190, 36, 36, 0.1);
 }
 
 .input-reg:disabled {
@@ -535,6 +580,12 @@ const logAccoutn = () => {
   font-size: 11px;
   background: var(--input);
   min-height: 26px;
+  transition: all 0.2s ease;
+}
+
+.messenger-label:hover:not(.disabled) {
+  border-color: #4299e1;
+  background: #f0f7ff;
 }
 
 .messenger-label.disabled {
@@ -545,10 +596,15 @@ const logAccoutn = () => {
 .messenger-checkbox {
   margin: 0;
   transform: scale(0.8);
+  cursor: pointer;
 }
 
 .messenger-checkbox:disabled {
   cursor: not-allowed;
+}
+
+.messenger-text {
+  white-space: nowrap;
 }
 
 .checkbox-cont {
@@ -563,6 +619,7 @@ const logAccoutn = () => {
   font-size: 11px;
   color: var(--text);
   line-height: 1.2;
+  cursor: pointer;
 }
 
 .name-checkbox.error {
@@ -773,6 +830,10 @@ const logAccoutn = () => {
     padding: 3px 4px;
     font-size: 10px;
     min-height: 24px;
+  }
+
+  .input-row {
+    gap: 4px;
   }
 }
 </style>

@@ -418,6 +418,8 @@
           @click="submitForm"
           :disabled="!isFormValid"
           data-testid="submit-btn"
+          @keydown.enter="submitForm"
+          tabindex="0"
         >
           Сохранить
         </button>

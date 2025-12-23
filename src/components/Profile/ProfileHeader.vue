@@ -1,8 +1,12 @@
 <template>
-  <h1 class="profile-title">Мой профиль</h1>
+  <h1 class="profile-title">{{ t("profilePage.title") }}</h1>
 </template>
 
-<script setup></script>
+<script setup>
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+</script>
 
 <style scoped>
 .profile-title {

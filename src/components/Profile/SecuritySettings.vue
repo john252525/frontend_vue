@@ -12,7 +12,7 @@
           d="M17 9V7A5 5 0 0 0 7 7v2a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3ZM9 7a3 3 0 0 1 6 0v2H9Zm9 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1Z"
         />
       </svg>
-      Безопасность
+      {{ t("securitySection.title") }}
     </h2>
 
     <div v-if="successMessage" class="success-message">
@@ -24,7 +24,7 @@
         <input
           type="password"
           v-model="currentPassword"
-          placeholder="Текущий пароль"
+          :placeholder="t('securitySection.currentPassword')"
           :class="{ 'input-error': errors.currentPassword }"
           @input="clearError('currentPassword')"
         />
@@ -36,7 +36,7 @@
         <input
           type="password"
           v-model="newPassword"
-          placeholder="Новый пароль"
+          :placeholder="t('securitySection.newPassword')"
           :class="{ 'input-error': errors.newPassword }"
           @input="clearError('newPassword')"
         />
@@ -49,8 +49,8 @@
         @click="handleChangePassword"
         :disabled="isLoading"
       >
-        <span v-if="!isLoading">Обновить пароль</span>
-        <span v-else>Обновление...</span>
+        <span v-if="!isLoading">{{ t("securitySection.updatePassword") }}</span>
+        <span v-else>{{ t("securitySection.updating") }}</span>
       </button>
     </div>
   </div>
@@ -58,7 +58,10 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
+
+const { t } = useI18n();
 
 const VITE_FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 
@@ -86,15 +89,17 @@ const validate = () => {
   errors.value = { currentPassword: "", newPassword: "" };
 
   if (!currentPassword.value.trim()) {
-    errors.value.currentPassword = "Введите текущий пароль";
+    errors.value.currentPassword = t(
+      "securitySection.errors.currentPasswordRequired"
+    );
     isValid = false;
   }
 
   if (!newPassword.value.trim()) {
-    errors.value.newPassword = "Введите новый пароль";
+    errors.value.newPassword = t("securitySection.errors.newPasswordRequired");
     isValid = false;
   } else if (newPassword.value.length < 8) {
-    errors.value.newPassword = "Пароль должен быть не менее 8 символов";
+    errors.value.newPassword = t("securitySection.errors.passwordMinLength");
     isValid = false;
   }
 
@@ -115,30 +120,34 @@ const handleChangePassword = async () => {
       },
       {
         headers: {
-          Authorization: `Bearer ${token.value}`, // если используется авторизация
+          Authorization: `Bearer ${token.value}`,
         },
       }
     );
 
     if (response.data.ok) {
-      successMessage.value = "Пароль успешно изменён!";
+      successMessage.value = t("securitySection.messages.passwordChanged");
       currentPassword.value = "";
       newPassword.value = "";
     } else {
-      throw new Error(response.data.message || "Ошибка при смене пароля");
+      throw new Error(
+        response.data.message || t("securitySection.errors.changeFailed")
+      );
     }
   } catch (error) {
     if (error.response) {
       // Обработка ошибок от сервера
       if (error.response.status === 401) {
-        errors.value.currentPassword = "Неверный текущий пароль";
+        errors.value.currentPassword = t(
+          "securitySection.errors.incorrectPassword"
+        );
       } else if (error.response.data?.message) {
         errors.value.currentPassword = error.response.data.message;
       } else {
-        errors.value.currentPassword = "Произошла ошибка при смене пароля";
+        errors.value.currentPassword = t("securitySection.errors.changeFailed");
       }
     } else {
-      errors.value.currentPassword = "Ошибка сети. Проверьте соединение.";
+      errors.value.currentPassword = t("securitySection.errors.networkError");
     }
   } finally {
     isLoading.value = false;

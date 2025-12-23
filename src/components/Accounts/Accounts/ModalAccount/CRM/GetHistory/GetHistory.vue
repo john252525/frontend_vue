@@ -255,6 +255,8 @@ const { item } = toRefs(props);
 const historyData = ref([]);
 const loading = ref(false);
 const error = ref(null);
+const noSend = ref(null);
+
 const currentPage = ref(1);
 const totalPages = ref(1);
 const isMobile = ref(window.innerWidth <= 768);
@@ -359,6 +361,7 @@ const getStatusType = (record) => {
   // State 1 - ошибка в процессе (нет результата)
   if (record.state == 1) return "error";
 
+  if (record.state == -2) return "noSend";
   // State 2 - завершена
   if (record.state == 2) {
     // Если есть результат - проверяем success
@@ -396,6 +399,7 @@ const getCardClass = (record) => {
   const statusType = getStatusType(record);
   if (statusType === "done") return { success: true };
   if (statusType === "error") return { error: true };
+  if (statusType === "noSend") return { error: true };
   return { wait: true };
 };
 
@@ -406,6 +410,10 @@ const getStateText = (record) => {
 
   if (statusType === "wait") {
     return "Ожидание отправки";
+  }
+
+  if (statusType === "noSend") {
+    return "Не отправлено";
   }
 
   if (statusType === "error") {
@@ -793,6 +801,11 @@ onBeforeUnmount(() => {
 .status-wait {
   background-color: #fff4cf;
   color: #b76a00;
+}
+
+.status-noSend {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
 }
 
 .status-done {

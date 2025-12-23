@@ -339,7 +339,7 @@ const setState = async (request) => {
     if (response.data.status === "ok") {
       station.stationLoading = false;
       if (source === "max") {
-        station.max = true;
+        station.qrCode = true;
       } else {
         chatStore.addOrUpdateChat(newLoginData);
         station.resultTrue = true;

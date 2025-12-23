@@ -136,11 +136,14 @@
 
 <script setup>
 import { reactive, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import AmountStep from "./steps/AmountStep.vue";
 import PaymentMethodStep from "./steps/PaymentMethodStep.vue";
 import PaymentStep from "./steps/PaymentStep.vue";
 import InvoiceStep from "./steps/InvoiceStep.vue";
 import InvoiceModal from "./InvoiceModal.vue";
+
+const { t } = useI18n();
 
 const props = defineProps({
   changeCreatePayments: {
@@ -165,9 +168,15 @@ const errorMessage = ref("");
 
 // Шаги процесса
 const steps = computed(() => [
-  { number: 1, label: "Сумма" },
-  { number: 2, label: "Способ оплаты" },
-  { number: 3, label: payments.value === "YooKassa" ? "Оплата" : "Счет" },
+  { number: 1, label: t("paymentModal.steps.amount") },
+  { number: 2, label: t("paymentModal.steps.method") },
+  {
+    number: 3,
+    label:
+      payments.value === "YooKassa"
+        ? t("paymentModal.steps.payment")
+        : t("paymentModal.steps.invoice"),
+  },
 ]);
 
 // Методы обновления данных

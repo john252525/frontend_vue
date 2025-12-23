@@ -61,6 +61,7 @@
             <button
               @click="openDeleteGroupModal(group)"
               class="action-button delete-button"
+              v-show="group.is_default != '1'"
               title="Удалить"
             >
               <svg viewBox="0 0 20 20">
@@ -105,7 +106,7 @@
 
           <!-- Add Vendor Button (если слот не полный) -->
           <button
-            v-if="Object.keys(group.vendors).length < 2"
+            v-if="Object.keys(group.vendors).length < 3"
             @click="openAddVendorModal(group)"
             class="add-vendor-button"
           >

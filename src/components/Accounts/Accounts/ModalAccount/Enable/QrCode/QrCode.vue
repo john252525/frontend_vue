@@ -7,6 +7,14 @@
       :updateLoadingStatus="updateLoadingStatus"
       v-if="source === 'telegram'"
     />
+    <Max
+      :changeForceStopItemData="changeForceStopItemData"
+      :updateLoadingStatus="updateLoadingStatus"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeEnableStation="changeEnableStation"
+      ref="childComponentRef"
+      v-else-if="source === 'max'"
+    />
     <WhatsApp
       :changeForceStopItemData="changeForceStopItemData"
       :updateLoadingStatus="updateLoadingStatus"
@@ -22,6 +30,7 @@
 import { inject, ref } from "vue";
 import Telegram from "./Telegram.vue";
 import WhatsApp from "./WhatsApp.vue";
+import Max from "./Max.vue";
 const { selectedItem } = inject("accountItems");
 const { source, login } = selectedItem.value;
 const childComponentRef = ref(null);

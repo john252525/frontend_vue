@@ -2,7 +2,9 @@
   <div v-if="isOpen" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Настройка маршрутизации сообщений</h2>
+        <div>
+          <h2>Менеджеры по умолчанию</h2>
+        </div>
         <button class="close-btn" @click="close">&times;</button>
       </div>
 
@@ -13,136 +15,169 @@
           менеджера.
         </p>
 
-        <div v-if="loading" class="loading">Загрузка данных...</div>
-
-        <div v-else-if="error" class="error">{{ error }}</div>
-
-        <div v-else class="messenger-card">
-          <div class="messenger-header">
-            <h3>{{ item.name }}</h3>
-            <span class="messenger-id">{{ item.source }}</span>
-          </div>
-
-          <!-- Офисы -->
-          <div class="form-group">
-            <label class="form-label">Выберите офис:</label>
-            <div class="offices-list">
-              <button
-                v-for="office in offices"
-                :key="office.id"
-                @click="selectOffice(office.id)"
-                :class="[
-                  'office-item',
-                  { active: selectedOffice == office.id },
-                ]"
-              >
-                <div class="office-name">{{ office.name }}</div>
-                <div class="office-city">{{ office.city }}</div>
-                <div class="office-phones">{{ office.phones }}</div>
-              </button>
-
-              <button
-                @click="selectOffice('')"
-                :class="[
-                  'office-item',
-                  'without-office',
-                  { active: selectedOffice === '' },
-                ]"
-              >
-                <div class="office-name">Без офиса</div>
-              </button>
-            </div>
-          </div>
-
-          <!-- Менеджеры -->
-          <div class="form-group">
-            <label class="form-label">Выберите менеджера:</label>
-
-            <!-- Менеджеры офиса -->
-            <div
-              v-if="selectedOffice && getManagersForOffice.length > 0"
-              class="managers-section"
-            >
-              <h4 class="section-title">Менеджеры офиса</h4>
-              <div class="managers-list">
-                <button
-                  v-for="manager in getManagersForOffice"
-                  :key="manager.u_id"
-                  @click="selectManager(manager.u_id)"
-                  :class="[
-                    'manager-item',
-                    { active: selectedManager == manager.u_id },
-                  ]"
-                >
-                  <div class="manager-avatar">
-                    {{ getInitials(manager.u_name, manager.u_surname) }}
-                  </div>
-                  <div class="manager-info">
-                    <div class="manager-name">
-                      {{ manager.u_name }} {{ manager.u_surname }}
-                    </div>
-                    <div class="manager-email">{{ manager.u_email }}</div>
-                  </div>
-                  <div v-if="selectedManager == manager.u_id" class="checkmark">
-                    ✓
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <!-- Менеджеры без офиса -->
-            <div
-              v-if="!selectedOffice || selectedOffice === ''"
-              class="managers-section"
-            >
-              <h4 class="section-title">Менеджеры без офиса</h4>
-              <div class="managers-list">
-                <button
-                  v-for="manager in managersWithoutOffice"
-                  :key="manager.u_id"
-                  @click="selectManager(manager.u_id)"
-                  :class="[
-                    'manager-item',
-                    { active: selectedManager == manager.u_id },
-                  ]"
-                >
-                  <div class="manager-avatar">
-                    {{ getInitials(manager.u_name, manager.u_surname) }}
-                  </div>
-                  <div class="manager-info">
-                    <div class="manager-name">
-                      {{ manager.u_name }} {{ manager.u_surname }}
-                    </div>
-                    <div class="manager-email">{{ manager.u_email }}</div>
-                  </div>
-                  <div v-if="selectedManager == manager.u_id" class="checkmark">
-                    ✓
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div
-              v-if="!getManagersForOffice.length && selectedOffice"
-              class="empty-state"
-            >
-              В этом офисе нет менеджеров
-            </div>
-          </div>
-
-          <button
-            @click="saveMessengerRouting"
-            :disabled="!selectedManager || isSaving"
-            class="btn btn-success"
-          >
-            <span v-if="isSaving">Сохранение...</span>
-            <span v-else>Сохранить</span>
-          </button>
-
-          <div v-if="successMessage" class="success-message">
-            {{ successMessage }}
-          </div>
+        <div v-if="loading" class="loading">
+          <span class="spinner"></span>
+          Загрузка данных...
         </div>
+
+        <div v-else-if="error" class="error-banner">
+          {{ error }}
+        </div>
+
+        <template v-else>
+          <!-- Выбор канала -->
+          <VendorList v-model="selectedVendor" :vendors="vendors" />
+
+          <!-- Основная форма -->
+          <div class="form-card">
+            <div class="form-header">
+              <h3>{{ item.name }}</h3>
+              <span class="form-id">{{ item.source }}</span>
+            </div>
+
+            <!-- Выбор офиса -->
+            <div class="form-group">
+              <label class="form-label">
+                <span class="step-badge">2</span>
+                Выберите офис:
+              </label>
+              <div class="options-list">
+                <button
+                  v-for="office in offices"
+                  :key="office.id"
+                  @click="selectOffice(office.id)"
+                  :class="[
+                    'option-item',
+                    { active: selectedOffice == office.id },
+                  ]"
+                >
+                  <div class="option-text">
+                    <div class="option-title">{{ office.name }}</div>
+                    <div class="option-meta">
+                      {{ office.city }} • {{ office.phones }}
+                    </div>
+                  </div>
+                  <div v-if="selectedOffice == office.id" class="option-check">
+                    ✓
+                  </div>
+                </button>
+
+                <button
+                  @click="selectOffice('')"
+                  :class="[
+                    'option-item',
+                    'option-alt',
+                    { active: selectedOffice === '' },
+                  ]"
+                >
+                  <div class="option-text">
+                    <div class="option-title">Без офиса</div>
+                  </div>
+                  <div v-if="selectedOffice === ''" class="option-check">✓</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Выбор менеджера -->
+            <div class="form-group">
+              <label class="form-label">
+                <span class="step-badge">3</span>
+                Выберите менеджера:
+              </label>
+
+              <!-- Менеджеры офиса -->
+              <div v-if="selectedOffice && getManagersForOffice.length > 0">
+                <div class="section-label">Менеджеры офиса</div>
+                <div class="options-list">
+                  <button
+                    v-for="manager in getManagersForOffice"
+                    :key="manager.u_id"
+                    @click="selectManager(manager.u_id)"
+                    :class="[
+                      'option-item',
+                      { active: selectedManager == manager.u_id },
+                    ]"
+                  >
+                    <div class="manager-avatar">
+                      {{ getInitials(manager.u_name, manager.u_surname) }}
+                    </div>
+                    <div class="option-text">
+                      <div class="option-title">
+                        {{ manager.u_name }} {{ manager.u_surname }}
+                      </div>
+                      <div class="option-meta">{{ manager.u_email }}</div>
+                    </div>
+                    <div
+                      v-if="selectedManager == manager.u_id"
+                      class="option-check"
+                    >
+                      ✓
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Менеджеры без офиса -->
+              <div v-if="!selectedOffice || selectedOffice === ''">
+                <div class="section-label">Менеджеры без офиса</div>
+                <div
+                  v-if="managersWithoutOffice.length > 0"
+                  class="options-list"
+                >
+                  <button
+                    v-for="manager in managersWithoutOffice"
+                    :key="manager.u_id"
+                    @click="selectManager(manager.u_id)"
+                    :class="[
+                      'option-item',
+                      { active: selectedManager == manager.u_id },
+                    ]"
+                  >
+                    <div class="manager-avatar">
+                      {{ getInitials(manager.u_name, manager.u_surname) }}
+                    </div>
+                    <div class="option-text">
+                      <div class="option-title">
+                        {{ manager.u_name }} {{ manager.u_surname }}
+                      </div>
+                      <div class="option-meta">{{ manager.u_email }}</div>
+                    </div>
+                    <div
+                      v-if="selectedManager == manager.u_id"
+                      class="option-check"
+                    >
+                      ✓
+                    </div>
+                  </button>
+                </div>
+                <div v-else class="empty-state">Нет менеджеров без офиса</div>
+              </div>
+
+              <div
+                v-if="!getManagersForOffice.length && selectedOffice"
+                class="empty-state"
+              >
+                В этом офисе нет менеджеров
+              </div>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="form-actions">
+              <button
+                @click="saveMessengerRouting"
+                :disabled="!selectedManager || isSaving"
+                class="btn btn-primary"
+              >
+                <span v-if="isSaving">Сохранение...</span>
+                <span v-else>Сохранить</span>
+              </button>
+            </div>
+
+            <div v-if="successMessage" class="success-message">
+              {{ successMessage }}
+            </div>
+          </div>
+        </template>
       </div>
 
       <div class="modal-footer">
@@ -156,6 +191,7 @@
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import VendorList from "./VendorList.vue";
 
 const props = defineProps({
   isOpen: {
@@ -168,6 +204,9 @@ const props = defineProps({
   item: {
     type: Object,
     required: true,
+  },
+  vendors: {
+    type: Object,
   },
 });
 
@@ -184,6 +223,7 @@ const offices = ref([]);
 const managersByOffice = ref({});
 const managersWithoutOffice = ref([]);
 
+const selectedVendor = ref("");
 const selectedOffice = ref("");
 const selectedManager = ref("");
 
@@ -258,14 +298,18 @@ const saveMessengerRouting = async () => {
   successMessage.value = "";
 
   try {
+    const payload = {
+      uuid: selectedVendor.value,
+      messenger_vendor_uuid: props.item.uuid,
+      office_id: parseInt(officeId),
+      manager_id: parseInt(managerId),
+    };
+
+    console.log(payload);
+
     const { data } = await axiosInstance.value.post(
       `${VITE_BASE_URL}uon-account/setAccountMessageRouting`,
-      {
-        uuid: props.item.uuid,
-        messenger_vendor_uuid: props.item.uuid,
-        office_id: parseInt(officeId),
-        manager_id: parseInt(managerId),
-      }
+      payload
     );
 
     if (data.ok) {
@@ -300,13 +344,14 @@ watch(
 </script>
 
 <style scoped>
+/* === MODAL === */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -316,253 +361,224 @@ watch(
 
 .modal-content {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
+  border-radius: 6px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 650px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
 }
 
+/* === HEADER === */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 16px;
+  border-bottom: 1px solid #e5e5e5;
   gap: 12px;
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 20px;
-  color: #1f2937;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
   flex: 1;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 28px;
-  color: #9ca3af;
+  font-size: 24px;
+  color: #999;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: color 0.2s;
 }
 
 .close-btn:hover {
-  color: #1f2937;
+  color: #333;
 }
 
+/* === BODY === */
 .modal-body {
-  padding: 20px;
+  padding: 16px;
 }
 
 .description {
-  background-color: #f3f4f6;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  color: #4b5563;
-  border-left: 4px solid #3b82f6;
-}
-
-.loading,
-.error {
-  padding: 16px;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 14px;
-}
-
-.loading {
-  background-color: #e0e7ff;
-  color: #3730a3;
-}
-
-.error {
-  background-color: #fee2e2;
-  color: #991b1b;
-  margin-bottom: 16px;
-}
-
-.success-message {
-  background-color: #d1fae5;
-  color: #065f46;
-  padding: 12px;
-  border-radius: 6px;
-  margin-top: 16px;
-  text-align: center;
-  font-size: 14px;
-  border: 1px solid #a7f3d0;
-}
-
-.messenger-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  background-color: #f9fafb;
-}
-
-.messenger-header {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.messenger-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: #1f2937;
-}
-
-.messenger-id {
-  font-size: 12px;
-  color: #9ca3af;
-  background-color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-/* Офисы список */
-.offices-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.office-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  background-color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-  min-width: 0;
-}
-
-.office-item:hover {
-  border-color: #3b82f6;
-  background-color: #f0f9ff;
-}
-
-.office-item.active {
-  border-color: #3b82f6;
-  background-color: #eff6ff;
-}
-
-.office-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 14px;
-  word-break: break-word;
-}
-
-.office-city {
-  font-size: 12px;
-  color: #6b7280;
-  word-break: break-word;
-}
-
-.office-phones {
-  font-size: 11px;
-  color: #9ca3af;
-  word-break: break-word;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: #555;
+  border-left: 3px solid #2563eb;
   line-height: 1.4;
 }
 
-.office-item.without-office {
-  font-style: italic;
-  color: #9ca3af;
-}
-
-/* Менеджеры список */
-.managers-section {
-  margin-bottom: 16px;
-}
-
-.section-title {
-  margin: 12px 0 8px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  word-break: break-word;
-}
-
-.managers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.manager-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  background-color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  min-width: 0;
-}
-
-.manager-item:hover {
-  border-color: #10b981;
-  background-color: #f0fdf4;
-}
-
-.manager-item.active {
-  border-color: #10b981;
-  background-color: #f0fdf4;
-}
-
-.manager-avatar {
+.loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 5px;
+  background-color: #f0f7ff;
+  color: #1e40af;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #dbeafe;
+  border-top-color: #2563eb;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-banner {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #fee2e2;
+  color: #991b1b;
+  margin-bottom: 14px;
+  font-size: 13px;
+  border-left: 3px solid #dc2626;
+}
+
+/* === STEP BADGE === */
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  background-color: #2563eb;
   color: white;
+  border-radius: 50%;
+  font-size: 11px;
   font-weight: 600;
-  font-size: 12px;
   flex-shrink: 0;
 }
 
-.manager-info {
+/* === FORM CARD === */
+.form-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 14px;
+  background-color: #fafafa;
+  margin-bottom: 14px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.form-id {
+  font-size: 11px;
+  color: white;
+  background-color: #2563eb;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* === FORM GROUPS === */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  margin-top: 10px;
+}
+
+.section-label:first-child {
+  margin-top: 0;
+}
+
+/* === OPTIONS LIST === */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  position: relative;
+  min-height: 44px;
+}
+
+.option-item:hover {
+  border-color: #2563eb;
+  background-color: #f9f9f9;
+}
+
+.option-item.active {
+  border-color: #2563eb;
+  background-color: #f0f7ff;
+}
+
+.option-item.option-alt {
+  color: #777;
+  font-style: italic;
+}
+
+.option-text {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -570,60 +586,99 @@ watch(
   min-width: 0;
 }
 
-.manager-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 14px;
+.option-title {
+  font-weight: 500;
+  color: #333;
+  font-size: 12px;
   word-break: break-word;
 }
 
-.manager-email {
-  font-size: 12px;
-  color: #9ca3af;
-  word-break: break-all;
+.option-meta {
+  font-size: 11px;
+  color: #999;
+  word-break: break-word;
 }
 
-.checkmark {
+.option-alt .option-title {
+  color: #777;
+}
+
+.manager-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.option-check {
   color: #10b981;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   flex-shrink: 0;
 }
 
 .empty-state {
-  padding: 16px;
+  padding: 12px;
   text-align: center;
-  color: #9ca3af;
-  font-size: 14px;
-  background-color: #f9fafb;
-  border-radius: 6px;
+  color: #999;
+  font-size: 12px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px dashed #d5d5d5;
 }
 
-/* Кнопки */
+/* === FORM ACTIONS === */
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .btn {
-  padding: 10px 16px;
+  padding: 10px 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-success {
+.btn-primary {
   background-color: #10b981;
   color: white;
   width: 100%;
-  padding: 12px 16px;
+  min-height: 40px;
 }
 
-.btn-success:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: #059669;
 }
 
-.btn-success:disabled {
-  background-color: #9ca3af;
+.btn-primary:disabled {
+  background-color: #d1d5db;
   cursor: not-allowed;
+}
+
+.success-message {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #d1fae5;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #a7f3d0;
+  text-align: center;
 }
 
 .btn-secondary {
@@ -635,110 +690,20 @@ watch(
   background-color: #4b5563;
 }
 
+/* === FOOTER === */
 .modal-footer {
-  padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  border-top: 1px solid #e5e5e5;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  background-color: #fafafa;
 }
 
-/* Мобильный адаптив */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 12px;
-  }
-
-  .modal-content {
-    width: 100%;
-    max-height: calc(100vh - 24px);
-  }
-
-  .modal-header {
-    padding: 16px;
-  }
-
-  .modal-header h2 {
-    font-size: 18px;
-  }
-
-  .close-btn {
-    font-size: 24px;
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-  .description {
-    padding: 10px;
-    font-size: 13px;
-  }
-
-  .office-item {
-    padding: 10px;
-  }
-
-  .office-name {
-    font-size: 13px;
-  }
-
-  .office-city {
-    font-size: 11px;
-  }
-
-  .office-phones {
-    font-size: 10px;
-  }
-
-  .manager-item {
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .manager-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 11px;
-  }
-
-  .manager-name {
-    font-size: 13px;
-  }
-
-  .manager-email {
-    font-size: 11px;
-  }
-
-  .form-label {
-    font-size: 13px;
-  }
-
-  .section-title {
-    font-size: 11px;
-  }
-
-  .btn {
-    font-size: 13px;
-    padding: 9px 12px;
-  }
-
-  .btn-success {
-    padding: 10px 12px;
-  }
-
-  .modal-footer {
-    padding: 12px 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-overlay {
-    padding: 8px;
-  }
-
-  .modal-content {
-    max-height: calc(100vh - 16px);
   }
 
   .modal-header {
@@ -756,30 +721,35 @@ watch(
   .description {
     padding: 8px;
     font-size: 12px;
+    margin-bottom: 12px;
   }
 
-  .messenger-card {
+  .form-card {
     padding: 12px;
+    margin-bottom: 12px;
   }
 
-  .office-item,
-  .manager-item {
-    padding: 8px;
+  .form-header h3 {
+    font-size: 13px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    margin-bottom: 7px;
+  }
+
+  .option-item {
+    padding: 7px;
+    min-height: 40px;
     gap: 8px;
   }
 
-  .office-name,
-  .manager-name {
-    font-size: 12px;
+  .option-title {
+    font-size: 11px;
   }
 
-  .office-city,
-  .manager-email {
+  .option-meta {
     font-size: 10px;
-  }
-
-  .office-phones {
-    font-size: 9px;
   }
 
   .manager-avatar {
@@ -788,35 +758,116 @@ watch(
     font-size: 10px;
   }
 
-  .checkmark {
-    font-size: 16px;
-  }
-
-  .form-label {
-    font-size: 12px;
-  }
-
-  .section-title {
-    font-size: 10px;
-    margin: 8px 0 6px 0;
-  }
-
-  .btn {
-    font-size: 12px;
-    padding: 8px 12px;
+  .form-group {
+    margin-bottom: 12px;
   }
 
   .modal-footer {
     padding: 10px 12px;
   }
+}
 
-  .messenger-header {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 8px;
   }
 
-  .messenger-id {
-    align-self: flex-start;
+  .modal-header {
+    padding: 10px;
+  }
+
+  .modal-header h2 {
+    font-size: 15px;
+  }
+
+  .close-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 20px;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .description {
+    padding: 8px;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .form-card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .form-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .form-header h3 {
+    font-size: 12px;
+  }
+
+  .form-id {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .form-label {
+    font-size: 11px;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    margin-bottom: 5px;
+    margin-top: 8px;
+  }
+
+  .option-item {
+    padding: 6px;
+    gap: 6px;
+    min-height: 36px;
+  }
+
+  .option-title {
+    font-size: 10px;
+  }
+
+  .option-meta {
+    font-size: 9px;
+  }
+
+  .manager-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 9px;
+  }
+
+  .option-check {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .modal-footer {
+    padding: 8px 10px;
+  }
+
+  .success-message {
+    padding: 8px;
+    font-size: 11px;
   }
 }
 </style>

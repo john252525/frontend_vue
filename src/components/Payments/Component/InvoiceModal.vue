@@ -3,7 +3,7 @@
   <section class="invoice-modal">
     <div class="invoice-modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Счет готов к оплате</h2>
+        <h2 class="modal-title">{{ t("invoiceModal.readyForPayment") }}</h2>
         <button @click="$emit('close')" class="close-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -31,18 +31,18 @@
           </svg>
         </div>
         <div class="success-message">
-          <h3>Счет успешно сгенерирован</h3>
-          <p>Вы можете просмотреть или скачать счет для оплаты</p>
+          <h3>{{ t("invoiceModal.invoiceGenerated") }}</h3>
+          <p>{{ t("invoiceModal.invoiceDescription") }}</p>
         </div>
       </div>
 
       <div class="invoice-details">
         <div class="detail-item">
-          <span class="detail-label">Сумма:</span>
+          <span class="detail-label">{{ t("invoiceModal.amount") }}:</span>
           <span class="detail-value">{{ amount }} ₽</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">Дата создания:</span>
+          <span class="detail-label">{{ t("invoiceModal.createdDate") }}:</span>
           <span class="detail-value">{{
             new Date().toLocaleDateString("ru-RU")
           }}</span>
@@ -97,7 +97,7 @@
               fill="none"
             />
           </svg>
-          Посмотреть счет
+          {{ t("invoiceModal.viewInvoice") }}
         </button>
       </div>
     </div>
@@ -106,8 +106,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+
+const { t } = useI18n();
 
 const accountStore = useAccountStore();
 const token = accountStore.getAccountToken;
@@ -140,7 +143,7 @@ const saveCheckToHistory = async () => {
     show: true,
     loading: true,
     type: "loading",
-    message: "Сохранение в историю...",
+    message: t("invoiceModal.savingToHistory"),
   };
 
   try {
@@ -163,7 +166,7 @@ const saveCheckToHistory = async () => {
       show: true,
       loading: false,
       type: "success",
-      message: "Сохранено в историю",
+      message: t("invoiceModal.savedToHistory"),
     };
 
     // Скрываем сообщение через 2 секунды
@@ -178,7 +181,7 @@ const saveCheckToHistory = async () => {
       show: true,
       loading: false,
       type: "error",
-      message: "Ошибка сохранения",
+      message: t("invoiceModal.saveError"),
     };
 
     // Скрываем сообщение через 3 секунды

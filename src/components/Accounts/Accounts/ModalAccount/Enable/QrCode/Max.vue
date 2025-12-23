@@ -1,8 +1,12 @@
 <template>
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <section v-if="!station.phone" class="qr-telegram-section">
-    <LoadingModal :stationLoading="stationLoading" />
-    <article v-if="qrCodeData.station" class="qr-container">
+  <section v-if="!station.phone" class="qr-whatsapp-section">
+    <LoadingModal
+      :textLoadin="station.text"
+      :stationLoading="station.loading"
+    />
+    <ResultModal v-if="station.error" />
+    <article v-if="qrCodeData.station && !station.error" class="qr-container">
       <!-- ПРОГРЕССБАР СВЕРХУ -->
       <div class="session-timer-bar">
         <div
@@ -12,7 +16,7 @@
       </div>
 
       <div class="header">
-        <h2 class="title">Подключение Telegram</h2>
+        <h2 class="title">Подключение Max</h2>
         <button @click="changeEnableStation" class="close-button">
           <svg
             width="20"
@@ -39,9 +43,7 @@
             <div class="scan-line"></div>
           </div>
 
-          <p class="instruction">
-            Отсканируйте QR-код через приложение Telegram
-          </p>
+          <p class="instruction">Отсканируйте QR-код через приложение Max</p>
 
           <!-- ТАЙМЕР ОСТАВШЕГОСЯ ВРЕМЕНИ -->
           <div class="timer-display">
@@ -108,134 +110,32 @@
             </button>
           </div>
         </template>
-
-        <button @click="enableCode" class="phone-link-button">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M22 16.92V19.92C22 20.47 21.55 20.93 21 20.98C20.5 21.03 19.99 21.05 19.5 21C16.74 20.52 14.19 19.24 12.11 17.34C10.39 15.78 9.05 13.87 8.15 11.73C7.59 10.29 7.25 8.76 7.15 7.18C7.11 6.63 7.52 6.14 8.07 6.09C8.57 6.05 9.06 6 9.55 6.05H12.55C13.07 6.05 13.52 6.42 13.59 6.93C13.71 7.79 13.93 8.63 14.25 9.43C14.38 9.76 14.3 10.14 14.05 10.39L13.11 11.33C14.41 13.48 16.52 15.59 18.67 16.89L19.61 15.95C19.74 15.82 19.91 15.74 20.09 15.74C20.17 15.74 20.25 15.75 20.33 15.77C21.13 16.09 21.97 16.31 22.83 16.43C23.34 16.5 23.71 16.95 23.71 17.47V17.48H22.83H22Z"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Связать через телефон
-        </button>
       </div>
     </article>
-  </section>
-
-  <!-- ОБНОВЛЕННАЯ СЕКЦИЯ С ТЕЛЕФОНОМ -->
-  <section v-if="station.phone" class="phone-section">
-    <div class="phone-container">
-      <div class="phone-header">
-        <h2 class="phone-title">Подключение по телефону</h2>
-        <button @click="station.phone = false" class="phone-close-button">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <div class="phone-content">
-        <p class="phone-description">
-          Введите номер телефона для подключения Telegram
-        </p>
-
-        <div class="phone-input-wrapper">
-          <div class="phone-input-container">
-            <input
-              :class="station.errorPhone ? 'num-input-error' : 'num-input'"
-              :placeholder="
-                showMask ? '+7 (___) ___-__-__' : 'Введите номер телефона'
-              "
-              @input="formatPhone"
-              @keydown.delete="handleBackspace"
-              class="num-input"
-              type="text"
-              id="phone"
-              v-model="phoneNumber"
-              ref="phoneInput"
-            />
-          </div>
-
-          <div v-if="station.errorPhone" class="error-message">
-            Пожалуйста, введите корректный номер телефона
-          </div>
-        </div>
-
-        <button @click="getCode" class="phone-next-button">
-          {{ t("enable.next") }}
-        </button>
-
-        <button @click="station.phone = false" class="back-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M19 12H5M12 19L5 12L12 5"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Вернуться к QR-коду
-        </button>
-      </div>
-    </div>
   </section>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import {
   inject,
   ref,
   reactive,
+  computed,
   onMounted,
   onBeforeUnmount,
-  computed,
   nextTick,
+  watch,
 } from "vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import QrcodeVue from "qrcode.vue";
 import LoadingModal from "../LoadingModal.vue";
+import ResultModal from "../ResultModal.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
-const { startFunc, offQrCodeStation } = inject("accountItems");
-const { changeEnableStation } = inject("changeEnableStation");
-const { selectedItem } = inject("accountItems");
-const { source, login, storage } = selectedItem.value;
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-
-const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
-};
 
 const props = defineProps({
   changeForceStopItemData: {
@@ -249,12 +149,16 @@ const props = defineProps({
   },
 });
 
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
-const token = computed(() => accountStore.getAccountToken);
-
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
+const countries = ref([
+  { code: "+7", name: "Russia", flag: "🇷🇺", format: "(###) ###-##-##" },
+  { code: "+1", name: "USA/Canada", flag: "🇺🇸", format: "(###) ###-####" },
+  { code: "+44", name: "UK", flag: "🇬🇧", format: "#### ### ####" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", format: "### ### ####" },
+  { code: "+33", name: "France", flag: "🇫🇷", format: "# ## ## ## ##" },
+  { code: "+81", name: "Japan", flag: "🇯🇵", format: "##-####-####" },
+  { code: "+86", name: "China", flag: "🇨🇳", format: "### #### ####" },
+  { code: "+91", name: "India", flag: "🇮🇳", format: "##### #####" },
+]);
 
 const selectedCountry = ref("+7");
 const formattedPhone = ref("");
@@ -262,59 +166,51 @@ const phoneNumber = ref("");
 const phoneInput = ref(null);
 const showMask = ref(true);
 
-const station = reactive({
-  phone: false,
-  error: false,
-  errorPhone: false,
-  qrSend: false,
-  text: "",
-  loading: false,
+// Получаем текущий формат для выбранной страны
+const currentFormat = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  return country ? country.format : "";
 });
 
-const accountInfo = reactive({
-  data: null,
-  loading: false,
-  error: null,
+// Плейсхолдер с учетом выбранного формата
+const placeholder = computed(() => {
+  const country = countries.value.find((c) => c.code === selectedCountry.value);
+  if (!country) return "";
+
+  let placeholder = country.code + " ";
+  for (let i = 0; i < country.format.length; i++) {
+    placeholder += country.format[i] === "#" ? "_" : country.format[i];
+  }
+  return placeholder;
 });
 
-const stationLoading = ref(false);
-const qrCodeData = reactive({
-  link: "",
-  station: false,
-});
+// Обновляем формат при изменении страны
+const updatePhoneFormat = () => {
+  formattedPhone.value = selectedCountry.value + " ";
+};
 
-// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ТАЙМЕРА
-const SESSION_DURATION = 60; // 60 секунд
-const sessionTimeRemaining = ref(SESSION_DURATION);
-const sessionProgress = ref(100);
-const sessionExpired = ref(false);
-let sessionTimerId = null;
-let sessionProgressTimerId = null;
-
-let intervalId = null;
-let previousLink = "";
-
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
-
+// Обработчик backspace
 const handleBackspace = (e) => {
   const value = phoneNumber.value;
   const cursorPosition = phoneInput.value.selectionStart;
 
   if (!showMask.value) return;
 
+  // Полное удаление +7 при нажатии Backspace на +7
   if (value === "+7" && cursorPosition <= 2) {
     phoneNumber.value = "";
     e.preventDefault();
     return;
   }
 
+  // Удаление +7 при курсоре после них
   if (value.startsWith("+7") && cursorPosition === 2) {
     phoneNumber.value = "";
     e.preventDefault();
     return;
   }
 
+  // Пропуск разделителей при удалении
   if (
     cursorPosition > 0 &&
     [" ", "(", ")", "-"].includes(value[cursorPosition - 1])
@@ -324,6 +220,7 @@ const handleBackspace = (e) => {
   }
 };
 
+// Форматирование телефона
 const formatPhone = () => {
   const value = phoneNumber.value;
   const cursorPosition = phoneInput.value.selectionStart;
@@ -333,6 +230,7 @@ const formatPhone = () => {
     return;
   }
 
+  // Автодобавление +7 при вводе + или 7
   if (value === "+") {
     phoneNumber.value = "+7";
     nextTick(() => phoneInput.value.setSelectionRange(2, 2));
@@ -381,6 +279,7 @@ const formatPhone = () => {
       digits = digits.substring(1);
     }
 
+    // Форматирование по маске
     if (digits.length > 0) {
       formatted += " (" + digits.substring(0, 3);
       digits = digits.substring(3);
@@ -416,52 +315,123 @@ const formatPhone = () => {
   }
 };
 
-const enableCode = () => {
-  station.phone = true;
+// Получаем номер в международном формате
+const getInternationalFormat = () => {
+  const digits = phoneNumber.value.replace(/\D/g, "");
+  return digits;
 };
+
+// Остальной код компонента остается без изменений
+const { changeEnableStation } = inject("changeEnableStation");
+const { selectedItem, startFunc, offQrCodeStation } = inject("accountItems");
+const { source, login, storage } = selectedItem.value;
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
+const station = reactive({
+  phone: false,
+  error: false,
+  errorPhone: false,
+  qrSend: false,
+  text: "",
+  loading: false,
+});
+
+import { useAccountStore } from "@/stores/accountStore";
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
   try {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
-    console.error("error", err);
+    console.error("Ошибка при парсинге JSON:", err);
   }
 };
 
-// ФУНКЦИЯ ЗАПУСКА ТАЙМЕРА СЕССИИ
-const startSessionTimer = () => {
-  sessionTimeRemaining.value = SESSION_DURATION;
-  sessionProgress.value = 100;
-  sessionExpired.value = false;
+const qrCodeData = reactive({
+  link: "",
+  station: false,
+});
 
-  // Таймер для отсчета времени
-  sessionTimerId = setInterval(() => {
-    sessionTimeRemaining.value--;
-    sessionProgress.value =
-      (sessionTimeRemaining.value / SESSION_DURATION) * 100;
+const errorBlock = ref(false);
+const chaneErrorBlock = () => {
+  errorBlock.value = errorBlock.value;
+};
 
-    if (sessionTimeRemaining.value <= 0) {
-      clearInterval(sessionTimerId);
-      sessionExpired.value = true;
-      clearInterval(intervalId); // Останавливаем запросы QR
+const stationLoading = ref(true);
+const intervalId = ref(null);
+const isRunning = ref(false);
+let previousLink = "";
+
+// НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ТАЙМЕРА
+const SESSION_DURATION = 60; // 60 секунд
+const sessionTimeRemaining = ref(SESSION_DURATION);
+const sessionProgress = ref(100);
+const sessionExpired = ref(false);
+let sessionTimerId = null;
+
+const enablePhoneAuth = async () => {
+  const internationalPhone = getInternationalFormat();
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomain.navigate.value != "whatsapi") {
+    params = {
+      source: source,
+      login: login,
+      phone: internationalPhone,
+    };
+  } else {
+    params = {
+      source: source,
+      login: login,
+      storage: storage,
+      phone: internationalPhone,
+    };
+  }
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}enablePhoneAuth`,
+      params,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      }
+    );
+
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "enablePhoneAuth",
+        params,
+        response.data.ok,
+        response.data
+      );
     }
-  }, 1000);
-};
 
-// ФУНКЦИЯ ОСТАНОВКИ ТАЙМЕРА
-const stopSessionTimer = () => {
-  if (sessionTimerId) {
-    clearInterval(sessionTimerId);
-    sessionTimerId = null;
+    if (response.data.status === "ok") {
+      console.log(response.data);
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      // console.log(response.data.ok);
+    }
+  } catch (error) {
+    console.error("Ошибка:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
   }
-};
-
-// ФУНКЦИЯ РЕГЕНЕРАЦИИ QR-КОДА
-const regenerateQrCode = async () => {
-  sessionExpired.value = false;
-  stopSessionTimer();
-  clearInterval(intervalId);
-  await EnablebyQR();
 };
 
 const getQr = async () => {
@@ -510,6 +480,16 @@ const getQr = async () => {
         localStorage.removeItem("accountToken");
         router.push("/login");
       }, 2000);
+    } else if (response.data.error.message === "QR is undefined") {
+      props.changeForceStopItemData(selectedItem.value);
+      props.openEnableMenuTrue();
+      clearInterval(intervalId.value); // Используем .value для ref
+      isRunning.value = false; // Добавляем эту строку
+      qrCodeData.link = previousLink;
+      // changeEnableStation();
+    } else if (response.data.error.message === "False step") {
+      props.updateLoadingStatus(false);
+      regenerateQrCode();
     } else {
       if (!response.data.value) {
         clearInterval(intervalId);
@@ -518,153 +498,84 @@ const getQr = async () => {
       }
     }
   } catch (error) {
-    console.error("error", error);
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
+    console.error("Ошибка при создании аккаунта:", error);
+    station.error = true;
+    return;
   }
 };
 
-const getInternationalFormat = () => {
-  const digits = phoneNumber.value.replace(/\D/g, "");
-  return digits;
+// ФУНКЦИЯ ЗАПУСКА ТАЙМЕРА СЕССИИ
+const startSessionTimer = () => {
+  sessionTimeRemaining.value = SESSION_DURATION;
+  sessionProgress.value = 100;
+  sessionExpired.value = false;
+
+  // Таймер для отсчета времени
+  sessionTimerId = setInterval(() => {
+    sessionTimeRemaining.value--;
+    sessionProgress.value =
+      (sessionTimeRemaining.value / SESSION_DURATION) * 100;
+
+    if (sessionTimeRemaining.value <= 0) {
+      clearInterval(sessionTimerId);
+      sessionExpired.value = true;
+      clearInterval(intervalId.value); // Останавливаем запросы QR
+      isRunning.value = false;
+    }
+  }, 1000);
 };
 
-const enablePhoneAuth = async () => {
-  const internationalPhone = getInternationalFormat();
-  props.updateLoadingStatus(true, "Изменение статуса...");
-  let params = {
-    token: token.value,
-    source: source,
-    login: login,
-  };
-  if (stationDomain.navigate.value != "whatsapi") {
-    params = {
-      token: token.value,
-      source: source,
-      login: login,
-      phone: internationalPhone,
-    };
-  } else {
-    params = {
-      token: token.value,
-      source: source,
-      login: login,
-      phone: internationalPhone,
-      storage: storage,
-    };
-  }
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}enablePhoneAuth`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "getQr",
-        "enablePhoneAuth",
-        params,
-        response.data.ok,
-        response.data
-      );
-    }
-
-    if (response.data.status === "ok") {
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
-    } else {
-    }
-  } catch (error) {
-    console.error(`error`, error);
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
+// ФУНКЦИЯ ОСТАНОВКИ ТАЙМЕРА
+const stopSessionTimer = () => {
+  if (sessionTimerId) {
+    clearInterval(sessionTimerId);
+    sessionTimerId = null;
   }
 };
 
-const EnablebyQR = async () => {
-  await Promise.all([getQr(), getAccountInfo()]);
+// ФУНКЦИЯ РЕГЕНЕРАЦИИ QR-КОДА
+const regenerateQrCode = async () => {
+  sessionExpired.value = false;
+  stopSessionTimer();
+  clearInterval(intervalId.value);
+  isRunning.value = false;
+  await startEnableByQR();
+};
+
+const startEnableByQR = async () => {
+  if (isRunning.value) return;
+
+  props.updateLoadingStatus(true, "Генерирация QR-кода");
+  await getQr();
 
   // ЗАПУСКАЕМ ТАЙМЕР СЕССИИ
   startSessionTimer();
 
   let count = 0;
-  intervalId = setInterval(async () => {
-    if (accountInfo.data?.step?.value === 5) {
-      clearInterval(intervalId);
-      stopSessionTimer();
+  isRunning.value = true;
+
+  intervalId.value = setInterval(async () => {
+    if (!isRunning.value) {
+      clearInterval(intervalId.value);
       return;
     }
 
-    await Promise.all([getQr(), getAccountInfo()]);
+    await getQr();
     count++;
     if (count >= 6) {
-      clearInterval(intervalId);
+      clearInterval(intervalId.value);
       stopSessionTimer();
+      isRunning.value = false;
       sessionExpired.value = true;
       changeEnableStation();
     }
-  }, 30000);
+  }, 20000);
 };
 
-const getAccountInfo = async () => {
-  accountInfo.loading = true;
-  accountInfo.error = null;
-
-  let params = {
-    source: source,
-    login: login,
-  };
-
-  if (stationDomain.navigate.value === "whatsapi") {
-    params.storage = storage;
-  }
-
-  try {
-    const response = await axios.post(`${FRONTEND_URL}getInfo`, params, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    if (response.data) {
-      await handleSendLog(
-        "getInfo",
-        "getInfo",
-        params,
-        response.data.ok,
-        response.data
-      );
-
-      if (response.data.step?.value === 5) {
-        clearInterval(intervalId);
-        stopSessionTimer();
-        props.changeForceStopItemData(selectedItem.value);
-        props.openEnableMenuTrue();
-        return;
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching account info:", error);
-    accountInfo.error = error;
-    if (error.response) {
-      console.error("Error response:", error.response.data);
-    }
-  } finally {
-    accountInfo.loading = false;
-  }
+const stopEnableByQR = () => {
+  clearInterval(intervalId.value);
+  isRunning.value = false;
+  station.phone = true;
 };
 
 const closeModal = () => {
@@ -678,23 +589,27 @@ const getCode = async () => {
     station.errorPhone = true;
     return;
   }
+  props.updateLoadingStatus(true, "Изменение статуса...");
   await enablePhoneAuth();
   await offQrCodeStation();
   await startFunc();
 };
 
 onMounted(() => {
-  EnablebyQR();
+  startEnableByQR();
+  updatePhoneFormat();
 });
 
 onBeforeUnmount(() => {
-  clearInterval(intervalId);
+  clearInterval(intervalId.value);
   stopSessionTimer();
 });
+
+defineExpose({ stopEnableByQR });
 </script>
 
 <style scoped>
-.qr-telegram-section {
+.qr-whatsapp-section {
   border-radius: 16px;
   max-width: 360px;
   width: 100%;
@@ -713,17 +628,22 @@ onBeforeUnmount(() => {
 
 .session-progress {
   height: 100%;
-  background: linear-gradient(90deg, #0088cc, #0066aa);
+  background: linear-gradient(90deg, #25d366, #1da851);
   border-radius: 16px;
   transition: width 0.1s linear;
-  box-shadow: 0 0 8px rgba(0, 136, 204, 0.3);
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.3);
+}
+
+.number-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   gap: 12px;
   padding: 0 16px;
 }
@@ -784,7 +704,7 @@ onBeforeUnmount(() => {
   left: 16px;
   right: 16px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #0088cc, transparent);
+  background: linear-gradient(90deg, transparent, #25d366, transparent);
   animation: scan 2s ease-in-out infinite;
   border-radius: 1px;
 }
@@ -806,12 +726,21 @@ onBeforeUnmount(() => {
   }
 }
 
+.instruction {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
 /* СТИЛЬ ДЛЯ ТАЙМЕРА */
 .timer-display {
   width: 100%;
   padding: 12px 16px;
-  background: #f0f7ff;
-  border: 1px solid #d4e6f7;
+  background: #e8f7f0;
+  border: 1px solid #b3e5d8;
   border-radius: 8px;
   text-align: center;
 }
@@ -819,7 +748,7 @@ onBeforeUnmount(() => {
 .timer-text {
   font-size: 13px;
   font-weight: 500;
-  color: #0088cc;
+  color: #25d366;
 }
 
 /* СТИЛЬ ДЛЯ ИСТЕКШЕЙ СЕССИИ */
@@ -857,7 +786,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background-color: #0088cc;
+  background-color: #25d366;
   border: none;
   border-radius: 10px;
   color: white;
@@ -870,21 +799,12 @@ onBeforeUnmount(() => {
 }
 
 .regenerate-button:hover {
-  background-color: #0077b3;
-  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.25);
+  background-color: #1da851;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
 }
 
 .regenerate-button:active {
   transform: translateY(1px);
-}
-
-.instruction {
-  font-size: 14px;
-  color: #666;
-  text-align: center;
-  margin: 0;
-  line-height: 1.4;
-  font-weight: 400;
 }
 
 .phone-link-button {
@@ -907,6 +827,46 @@ onBeforeUnmount(() => {
 .phone-link-button:hover {
   background: #e9ecef;
   border-color: #dee2e6;
+}
+
+/* ОРИГИНАЛЬНЫЕ СТИЛИ ДЛЯ ИНПУТА И КНОПКИ */
+.num-input {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #c1c1c1;
+  background: #fcfcfc;
+  flex-grow: 1;
+}
+
+.num-input-error {
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 280px;
+  height: 45px;
+  font-weight: 400;
+  font-size: 14px;
+  color: #000;
+  border: 0.5px solid #be2424;
+  background: #ffeaea;
+  flex-grow: 1;
+}
+
+.next-button {
+  width: 100%;
+  height: 35px;
+  border-radius: 5px;
+  background-color: #4950ca;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  margin-top: 20px;
+  border: none;
+  cursor: pointer;
 }
 
 /* НОВЫЕ СТИЛИ ДЛЯ СЕКЦИИ ТЕЛЕФОНА */
@@ -985,32 +945,6 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-.num-input {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 280px;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
-  flex-grow: 1;
-}
-
-.num-input-error {
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 280px;
-  height: 45px;
-  font-weight: 400;
-  font-size: 14px;
-  color: #000;
-  border: 0.5px solid #be2424;
-  background: #ffeaea;
-  flex-grow: 1;
-}
-
 .error-message {
   color: #d32f2f;
   font-size: 12px;
@@ -1022,7 +956,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 45px;
   border-radius: 10px;
-  background-color: #0088cc;
+  background-color: #25d366;
   font-size: 14px;
   color: rgb(255, 255, 255);
   font-weight: 600;
@@ -1033,7 +967,7 @@ onBeforeUnmount(() => {
 }
 
 .phone-next-button:hover {
-  background-color: #0077b3;
+  background-color: #1da851;
 }
 
 .phone-next-button:active {
@@ -1063,27 +997,9 @@ onBeforeUnmount(() => {
   border-color: #dee2e6;
 }
 
-.number-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.next-button {
-  width: 100%;
-  height: 35px;
-  border-radius: 5px;
-  background-color: #4950ca;
-  font-size: 14px;
-  color: rgb(255, 255, 255);
-  font-weight: 600;
-  margin-top: 20px;
-  border: none;
-  cursor: pointer;
-}
-
-/* Responsive Design */
+/* Responsive Design для телефонной секции */
 @media (max-width: 500px) {
-  .qr-telegram-section {
+  .qr-whatsapp-section {
     padding: 0;
     border-radius: 12px;
   }
@@ -1095,20 +1011,6 @@ onBeforeUnmount(() => {
   .header {
     padding: 16px;
     margin-bottom: 16px;
-  }
-
-  .title {
-    font-size: 16px;
-  }
-
-  .qr-content {
-    padding: 0 16px 16px 16px;
-    gap: 16px;
-  }
-
-  .qr-code {
-    width: 200px;
-    height: 200px;
   }
 
   .phone-section {
@@ -1134,6 +1036,32 @@ onBeforeUnmount(() => {
     width: 100%;
     max-width: 280px;
   }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .qr-content {
+    gap: 16px;
+  }
+
+  .qr-wrapper {
+    padding: 12px;
+  }
+
+  .qr-code {
+    width: 200px;
+    height: 200px;
+  }
+
+  .instruction {
+    font-size: 13px;
+  }
+
+  .phone-link-button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 400px) {
@@ -1158,7 +1086,7 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 360px) {
-  .qr-telegram-section {
+  .qr-whatsapp-section {
     padding: 12px;
   }
 

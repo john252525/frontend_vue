@@ -15,14 +15,9 @@
       </div>
       <div class="modal-body">
         <p class="info-text">
-          Выберите аккаунты для добавления в группу (максимум 2: один WhatsApp и
-          один Telegram)
+          Выберите аккаунты для добавления в группу (максимум w: один WhatsApp и
+          один Telegram и Max)
         </p>
-
-        <!-- Сообщение об ошибке валидации -->
-        <div v-if="validationMessage" class="validation-error">
-          ⚠️ {{ validationMessage }}
-        </div>
 
         <div v-if="loadingAccounts" class="loading-spinner">
           <div class="spinner"></div>
@@ -53,11 +48,10 @@
                 :class="{
                   'badge-telegram': acc.source === 'telegram',
                   'badge-whatsapp': acc.source === 'whatsapp',
+                  'badge-max': acc.source === 'max',
                 }"
               ></span>
-              <span class="acc-type-text">{{
-                acc.source === "telegram" ? "Telegram" : "WhatsApp"
-              }}</span>
+              <span class="acc-type-text">{{ getSource(acc.source) }}</span>
               <span class="acc-name">{{ acc.name || acc.login }}</span>
               <span v-if="isAdded(acc)" class="acc-badge-in-group"
                 >Уже в группе</span
@@ -122,7 +116,10 @@ onMounted(async () => {
 
     if (Array.isArray(all) && all.length > 0) {
       const filtered = all.filter(
-        (acc) => acc.source === "whatsapp" || acc.source === "telegram"
+        (acc) =>
+          acc.source === "whatsapp" ||
+          acc.source === "telegram" ||
+          acc.source === "max"
       );
       console.log("✅ Отфильтровано аккаунтов:", filtered.length, filtered);
       availableAccounts.value = filtered;
@@ -137,6 +134,19 @@ onMounted(async () => {
     loadingAccounts.value = false;
   }
 });
+
+function getSource(source) {
+  switch (source) {
+    case "telegram":
+      return "Telegram";
+    case "whatsapp":
+      return "WhatsApp";
+    case "max":
+      return "Max";
+    default:
+      return "Неизвестно";
+  }
+}
 
 // Подсчитать кол-во выбранных аккаунтов по источнику
 const countSelectedBySource = (source) => {
@@ -186,10 +196,13 @@ const validationMessage = computed(() => {
     countSelectedBySource("telegram") + countAddedBySource("telegram");
   const whatsappCount =
     countSelectedBySource("whatsapp") + countAddedBySource("whatsapp");
+  const maxCount =
+    countSelectedBySource("whatsapp") + countAddedBySource("max");
 
   const errors = [];
   if (telegramCount > 1) errors.push("Максимум 1 Telegram аккаунт");
   if (whatsappCount > 1) errors.push("Максимум 1 WhatsApp аккаунт");
+  if (maxCount > 1) errors.push("Максимум 1 Max аккаунт");
 
   return errors.length > 0 ? errors.join(", ") : "";
 });
@@ -281,6 +294,10 @@ const close = () => emit("close");
 
 .badge-whatsapp {
   background: #25d366;
+}
+
+.badge-max {
+  background-color: #424ee9;
 }
 
 .acc-type-text {

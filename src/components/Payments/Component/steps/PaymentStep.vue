@@ -23,16 +23,18 @@
               />
             </svg>
           </div>
-          <h3 class="summary-title">Оплата через YooKassa</h3>
+          <h3 class="summary-title">{{ t("paymentStep.yookassaPayment") }}</h3>
         </div>
 
         <div class="summary-details">
           <div class="detail-item">
-            <span class="detail-label">Сумма:</span>
+            <span class="detail-label">{{ t("paymentStep.amount") }}:</span>
             <span class="detail-value">{{ amount }} ₽</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Email для чека:</span>
+            <span class="detail-label"
+              >{{ t("paymentStep.emailForReceipt") }}:</span
+            >
             <span class="detail-value">{{ email }}</span>
           </div>
         </div>
@@ -46,16 +48,13 @@
                 stroke-width="2"
               />
             </svg>
-            <span>Безопасная оплата через YooKassa</span>
+            <span>{{ t("paymentStep.securePayment") }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="step-actions">
-      <!-- <button @click="$emit('back')" class="btn btn-outline" :disabled="isLoading">
-        Назад
-      </button> -->
       <button
         @click="processPayment"
         class="btn btn-primary"
@@ -63,9 +62,11 @@
       >
         <span v-if="isLoading" class="btn-loading">
           <div class="btn-spinner"></div>
-          Переходим к оплате...
+          {{ t("paymentStep.redirecting") }}
         </span>
-        <span v-else class="btn-content"> Перейти к оплате </span>
+        <span v-else class="btn-content">
+          {{ t("paymentStep.goToPayment") }}
+        </span>
       </button>
     </div>
 
@@ -84,7 +85,7 @@
               />
             </svg>
           </div>
-          <h4 class="error-title">Ошибка оплаты</h4>
+          <h4 class="error-title">{{ t("paymentStep.paymentError") }}</h4>
           <button @click="clearError" class="error-close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
@@ -101,7 +102,7 @@
         </div>
         <div class="error-actions" v-if="showRetry">
           <button @click="processPayment" class="btn btn-sm btn-primary">
-            Попробовать снова
+            {{ t("paymentStep.tryAgain") }}
           </button>
         </div>
       </div>
@@ -111,10 +112,12 @@
 
 <script setup>
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 import useFrontendLogger from "@/composables/useFrontendLogger";
 
+const { t } = useI18n();
 const { sendLog } = useFrontendLogger();
 const accountStore = useAccountStore();
 const token = accountStore.getAccountToken;
@@ -159,13 +162,13 @@ const processPayment = async () => {
 
   // Валидация
   if (!props.amount || props.amount < 10) {
-    localError.value = "Минимальная сумма оплаты - 10 руб.";
+    localError.value = t("paymentStep.errors.minAmount");
     showRetry.value = true;
     return;
   }
 
   if (props.amount > 50000) {
-    localError.value = "Максимальная сумма оплаты - 50,000 руб.";
+    localError.value = t("paymentStep.errors.maxAmount");
     showRetry.value = true;
     return;
   }
@@ -206,7 +209,7 @@ const processPayment = async () => {
       emit("payment-success");
     } else {
       const errorMsg =
-        response.data.message || "Неизвестная ошибка при создании платежа";
+        response.data.message || t("paymentStep.errors.unknownError");
       localError.value = errorMsg;
       showRetry.value = true;
       emit("payment-error", errorMsg);
@@ -214,17 +217,16 @@ const processPayment = async () => {
   } catch (error) {
     console.error("Payment error:", error);
 
-    let errorMsg = "Ошибка сети";
+    let errorMsg = t("paymentStep.errors.networkError");
 
     if (error.code === "ECONNABORTED") {
-      errorMsg = "Превышено время ожидания. Проверьте соединение.";
+      errorMsg = t("paymentStep.errors.timeoutError");
     } else if (error.response) {
       errorMsg =
         error.response.data?.message ||
-        `Ошибка сервера: ${error.response.status}`;
+        `${t("paymentStep.errors.serverError")}: ${error.response.status}`;
     } else if (error.request) {
-      errorMsg =
-        "Не удалось соединиться с сервером. Проверьте интернет-соединение.";
+      errorMsg = t("paymentStep.errors.connectionError");
     }
 
     localError.value = errorMsg;

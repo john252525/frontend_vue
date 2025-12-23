@@ -6,14 +6,14 @@
   />
   <section v-if="loading" class="loading-section">
     <div class="loading-spinner"></div>
-    <div class="loading-text">Авторизация</div>
+    <div class="loading-text">{{ t("login.authorizing") }}</div>
   </section>
   <section v-else class="login-section">
     <form>
       <h2 class="title" v-if="stationDomain.cosmetics.additionallyLogo">
         {{ t("login.title") }}
         <div class="logo-cont">
-          в
+          {{ t("login.in") }}
           <img
             class="url-img-logo"
             :src="stationDomain.cosmetics.urlLogo"
@@ -29,7 +29,7 @@
       <h2 class="title" v-else>
         {{ t("login.title") }}
         <div class="logo-cont">
-          в
+          {{ t("login.in") }}
           <img
             class="url-img-logo"
             :src="stationDomain.cosmetics.urlLogo"
@@ -39,11 +39,11 @@
         </div>
       </h2>
       <div class="input-cont">
-        <label class="name-input" for="name">{{ t("login.mail") }}</label>
+        <label class="name-input" for="login">{{ t("login.mail") }}</label>
         <input
           :style="inputStyle.login"
           type="email"
-          placeholder="name@company.com"
+          :placeholder="t('login.emailPlaceholder')"
           id="login"
           v-model="formData.login"
           @blur="validateEmail"
@@ -60,10 +60,12 @@
         </div>
       </div>
       <div class="input-cont">
-        <label class="name-input" for="email">{{ t("login.password") }}</label>
+        <label class="name-input" for="password">{{
+          t("login.password")
+        }}</label>
         <input
           :style="inputStyle.password"
-          placeholder="••••••••••••"
+          :placeholder="t('login.passwordPlaceholder')"
           type="password"
           id="password"
           v-model="formData.password"
@@ -80,7 +82,7 @@
           </transition>
         </div>
         <p @click="navigateTo('/Forgot')" class="forgot-password-text">
-          {{ t("login.fogoutPassword") }}
+          {{ t("login.forgotPassword") }}
         </p>
       </div>
       <button
@@ -93,13 +95,12 @@
         {{ loading ? t("login.loading") : t("login.button") }}
       </button>
       <p class="create-account-button">
-        {{ t("login.noAccaunt") }}
+        {{ t("login.noAccount") }}
         <span @click="navigateTo('/Registration')">{{
           t("login.createAccount")
         }}</span>
       </p>
     </form>
-    <!-- <LoginForGoogle class="login-for-google" /> -->
   </section>
 </template>
 
@@ -115,10 +116,6 @@ import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import useFrontendLogger from "@/composables/useFrontendLogger";
 
 const loading = ref(false);
-
-const changeLoadin = () => {
-  loading.value = !loading.value;
-};
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
@@ -187,20 +184,20 @@ function errorStyleStation(input, station) {
 const validateEmail = () => {
   const email = formData.login.trim();
   if (!email) {
-    emailError.value = "Пожалуйста, введите email";
+    emailError.value = t("login.errorEmailRequired");
     errorStyleStation("login", "on");
     return false;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    emailError.value = "Пожалуйста, введите корректный email";
+    emailError.value = t("login.errorInvalidEmail");
     errorStyleStation("login", "on");
     return false;
   }
 
   if (email.length > 30) {
-    emailError.value = "Email должен быть не длиннее 30 символов";
+    emailError.value = t("login.errorEmailTooLong");
     errorStyleStation("login", "on");
     return false;
   }
@@ -213,13 +210,13 @@ const validateEmail = () => {
 const validatePassword = () => {
   const password = formData.password.trim();
   if (!password) {
-    passwordError.value = "Пожалуйста, введите пароль";
+    passwordError.value = t("login.errorPasswordRequired");
     errorStyleStation("password", "on");
     return false;
   }
 
   if (password.length < 8) {
-    passwordError.value = "Пароль должен содержать минимум 8 символов";
+    passwordError.value = t("login.errorPasswordTooShort");
     errorStyleStation("password", "on");
     return false;
   }
@@ -285,25 +282,32 @@ const loginAccount = async () => {
       setTimeout(() => {
         inputStyle.incorrectPassword = false;
       }, 5000);
-      inputStyle.incorrectPasswordMessage = "Ошибка при авторизации";
+      inputStyle.incorrectPasswordMessage = t("login.errorAuthFailed");
     }
   } catch (error) {
     inputStyle.incorrectPassword = true;
     setTimeout(() => {
       inputStyle.incorrectPassword = false;
     }, 5000);
+
     if (error.response) {
-      if (error.response.data.errors[0] === "Wrong password or login.") {
-        inputStyle.incorrectPasswordMessage = "Неверный логин или пароль";
-      } else if (error.response.data.errors[0] === "User not found.") {
-        inputStyle.incorrectPasswordMessage = "Пользователь не найден";
+      const errorText = error.response.data.errors?.[0];
+      if (
+        errorText === "Wrong password or login." ||
+        errorText?.includes("Wrong")
+      ) {
+        inputStyle.incorrectPasswordMessage = t(
+          "login.errorInvalidCredentials"
+        );
+      } else if (errorText === "User not found.") {
+        inputStyle.incorrectPasswordMessage = t("login.errorUserNotFound");
       } else {
-        inputStyle.incorrectPasswordMessage = "Ошибка при авторизации";
+        inputStyle.incorrectPasswordMessage = t("login.errorAuthFailed");
       }
 
       console.error("Ошибка сервера:", error.response.data);
     } else {
-      inputStyle.incorrectPasswordMessage = "Ошибка сервера";
+      inputStyle.incorrectPasswordMessage = t("login.errorServerError");
     }
   } finally {
     loading.value = false;
@@ -452,7 +456,7 @@ input:disabled {
 }
 
 .error-container {
-  min-height: 24px; /* Фиксированная высота для контейнера ошибок */
+  min-height: 24px;
   position: relative;
   overflow: hidden;
 }
@@ -503,6 +507,8 @@ input:disabled {
   justify-content: center;
   gap: 8px;
   position: relative;
+  border: none;
+  cursor: pointer;
 }
 
 .login-account-button:hover:not(:disabled) {

@@ -5,26 +5,26 @@
         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
-      Основное
+      {{ t("profileSection.main") }}
     </h2>
 
     <!-- Состояние загрузки -->
     <div v-if="loading" class="loading-state">
       <div class="loading-spinner"></div>
-      <span>Загрузка...</span>
+      <span>{{ t("profileSection.loading") }}</span>
     </div>
 
     <!-- Основной контент (скрывается при редактировании) -->
     <div v-else-if="!isEditingPhone && !isEditingChannels" class="info-grid">
       <div class="info-item">
-        <span class="info-label">Email:</span>
+        <span class="info-label">{{ t("profileSection.email") }}:</span>
         <div class="value-container">
           <span class="info-value">{{ email || "—" }}</span>
         </div>
       </div>
 
       <div class="info-item">
-        <span class="info-label">Телефон:</span>
+        <span class="info-label">{{ t("profileSection.phone") }}:</span>
         <div class="value-container">
           <span class="info-value">{{ formattedPhone || "—" }}</span>
           <button
@@ -45,7 +45,7 @@
       </div>
 
       <div class="info-item">
-        <span class="info-label">Каналы связи:</span>
+        <span class="info-label">{{ t("profileSection.channelsTitle") }}:</span>
         <div class="value-container">
           <span class="info-value">
             {{ formattedChannels || "—" }}
@@ -70,29 +70,42 @@
 
     <!-- Редактирование телефона -->
     <div v-else-if="isEditingPhone" class="edit-mode">
-      <h3 class="edit-title">Редактирование телефона</h3>
+      <h3 class="edit-title">{{ t("profileSection.editPhone") }}</h3>
       <div class="edit-form">
         <div class="form-group">
-          <label class="form-label">Телефон:</label>
+          <label class="form-label">{{ t("profileSection.phone") }}:</label>
           <input
-            v-model="editedPhone"
-            type="tel"
-            class="form-input"
-            placeholder="Введите номер телефона"
+            :class="
+              phoneFormatter.state.errorPhone
+                ? 'form-input form-input-error'
+                : 'form-input'
+            "
+            :placeholder="
+              phoneFormatter.state.showMask
+                ? '+7 (___) ___-__-__'
+                : t('profileSection.enterPhone')
+            "
+            @input="phoneFormatter.formatPhone"
+            @keydown.delete="phoneFormatter.handleBackspace"
+            v-model="phoneFormatter.state.phoneNumber"
+            :ref="(el) => (phoneFormatter.phoneInput.value = el)"
             :disabled="saving"
           />
+          <div v-if="phoneFormatter.state.errorPhone" class="error-text">
+            {{ t("profileSection.invalidPhone") }}
+          </div>
         </div>
         <div class="edit-actions">
           <button @click="savePhone" class="save-btn" :disabled="saving">
             <span v-if="saving" class="button-loading"></span>
-            {{ saving ? "Сохранение..." : "Сохранить" }}
+            {{ saving ? t("profileSection.saving") : t("profileSection.save") }}
           </button>
           <button
             @click="cancelEditingPhone"
             class="cancel-btn"
             :disabled="saving"
           >
-            Отмена
+            {{ t("profileSection.cancel") }}
           </button>
         </div>
       </div>
@@ -100,10 +113,12 @@
 
     <!-- Редактирование каналов связи -->
     <div v-else-if="isEditingChannels" class="edit-mode">
-      <h3 class="edit-title">Редактирование каналов связи</h3>
+      <h3 class="edit-title">{{ t("profileSection.editChannels") }}</h3>
       <div class="edit-form">
         <div class="form-group">
-          <label class="form-label">Предпочитаемые каналы:</label>
+          <label class="form-label"
+            >{{ t("profileSection.preferredChannels") }}:</label
+          >
           <div class="channels-options">
             <label
               v-for="channel in availableChannels"
@@ -125,14 +140,14 @@
         <div class="edit-actions">
           <button @click="saveChannels" class="save-btn" :disabled="saving">
             <span v-if="saving" class="button-loading"></span>
-            {{ saving ? "Сохранение..." : "Сохранить" }}
+            {{ saving ? t("profileSection.saving") : t("profileSection.save") }}
           </button>
           <button
             @click="cancelEditingChannels"
             class="cancel-btn"
             :disabled="saving"
           >
-            Отмена
+            {{ t("profileSection.cancel") }}
           </button>
         </div>
       </div>
@@ -147,8 +162,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useAccountStore } from "@/stores/accountStore";
+import { usePhoneFormatter } from "@/composables/usePhoneFormatter";
 
+const { t } = useI18n();
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
@@ -156,6 +174,9 @@ const props = defineProps({
   email: String,
   country: String,
 });
+
+// Инициализируем утилиту форматирования телефона
+const phoneFormatter = usePhoneFormatter();
 
 // Состояния загрузки
 const loading = ref(false);
@@ -168,7 +189,6 @@ const userChannels = ref([]);
 // Состояния редактирования
 const isEditingPhone = ref(false);
 const isEditingChannels = ref(false);
-const editedPhone = ref("");
 const editedChannels = ref([]);
 
 // Уведомления
@@ -177,11 +197,11 @@ const messageType = ref(""); // 'success' или 'error'
 
 // Доступные каналы связи
 const availableChannels = ref([
-  { value: "call", label: "Звонок" },
-  { value: "telegram", label: "Telegram" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "viber", label: "Viber" },
-  { value: "sms", label: "SMS" },
+  { value: "call", label: t("profileSection.channels.call") },
+  { value: "telegram", label: t("profileSection.channels.telegram") },
+  { value: "whatsapp", label: t("profileSection.channels.whatsapp") },
+  { value: "viber", label: t("profileSection.channels.viber") },
+  { value: "sms", label: t("profileSection.channels.sms") },
 ]);
 
 // Форматированный телефон
@@ -195,7 +215,7 @@ const formattedPhone = computed(() => {
       9
     )}-${phone.slice(9)}`;
   }
-  return phone; // Возвращаем как есть, если формат неподходящий
+  return phone;
 });
 
 // Форматированные каналы связи
@@ -215,7 +235,7 @@ const loadContactInfo = async () => {
   try {
     const currentToken = token.value;
     if (!currentToken) {
-      showMessage("Токен авторизации не найден", "error");
+      showMessage(t("profileSection.errors.noToken"), "error");
       return;
     }
 
@@ -231,7 +251,7 @@ const loadContactInfo = async () => {
       }
     );
 
-    if (!response.ok) throw new Error("Ошибка загрузки контактов");
+    if (!response.ok) throw new Error(t("profileSection.errors.loadFailed"));
 
     const data = await response.json();
 
@@ -241,7 +261,7 @@ const loadContactInfo = async () => {
     }
   } catch (error) {
     console.error("Ошибка загрузки контактной информации:", error);
-    showMessage("Ошибка загрузки контактной информации", "error");
+    showMessage(t("profileSection.errors.loadFailed"), "error");
   } finally {
     loading.value = false;
   }
@@ -249,7 +269,9 @@ const loadContactInfo = async () => {
 
 // Начало редактирования телефона
 const startEditingPhone = () => {
-  editedPhone.value = userPhone.value; // Сохраняем исходный номер без форматирования
+  // Очищаем форму и устанавливаем текущий номер
+  phoneFormatter.clearPhone();
+  phoneFormatter.state.phoneNumber = userPhone.value;
   isEditingPhone.value = true;
   isEditingChannels.value = false;
 };
@@ -264,7 +286,7 @@ const startEditingChannels = () => {
 // Отмена редактирования телефона
 const cancelEditingPhone = () => {
   isEditingPhone.value = false;
-  editedPhone.value = "";
+  phoneFormatter.clearPhone();
 };
 
 // Отмена редактирования каналов
@@ -275,16 +297,17 @@ const cancelEditingChannels = () => {
 
 // Сохранение телефона
 const savePhone = async () => {
-  if (!editedPhone.value.trim()) {
-    showMessage("Введите номер телефона", "error");
+  if (!phoneFormatter.validatePhone()) {
     return;
   }
 
   const currentToken = token.value;
   if (!currentToken) {
-    showMessage("Токен авторизации не найден", "error");
+    showMessage(t("profileSection.errors.noToken"), "error");
     return;
   }
+
+  const internationalPhone = phoneFormatter.getInternationalFormat();
 
   saving.value = true;
   try {
@@ -298,26 +321,27 @@ const savePhone = async () => {
         },
         credentials: "include",
         body: JSON.stringify({
-          phone: editedPhone.value,
+          phone: internationalPhone,
           contact_preferred_channels: userChannels.value,
         }),
       }
     );
 
-    if (!response.ok) throw new Error("Ошибка сохранения телефона");
+    if (!response.ok) throw new Error(t("profileSection.errors.saveFailed"));
 
     const data = await response.json();
 
     if (data.ok) {
       await loadContactInfo();
       isEditingPhone.value = false;
-      showMessage("Телефон успешно обновлен", "success");
+      phoneFormatter.clearPhone();
+      showMessage(t("profileSection.messages.phoneSaved"), "success");
     } else {
-      throw new Error(data.message || "Ошибка сохранения");
+      throw new Error(data.message || t("profileSection.errors.saveFailed"));
     }
   } catch (error) {
     console.error("Ошибка сохранения телефона:", error);
-    showMessage("Ошибка сохранения телефона", "error");
+    showMessage(t("profileSection.errors.phoneSaveFailed"), "error");
   } finally {
     saving.value = false;
   }
@@ -327,7 +351,7 @@ const savePhone = async () => {
 const saveChannels = async () => {
   const currentToken = token.value;
   if (!currentToken) {
-    showMessage("Токен авторизации не найден", "error");
+    showMessage(t("profileSection.errors.noToken"), "error");
     return;
   }
 
@@ -349,20 +373,20 @@ const saveChannels = async () => {
       }
     );
 
-    if (!response.ok) throw new Error("Ошибка сохранения каналов");
+    if (!response.ok) throw new Error(t("profileSection.errors.saveFailed"));
 
     const data = await response.json();
 
     if (data.ok) {
       await loadContactInfo();
       isEditingChannels.value = false;
-      showMessage("Каналы связи успешно обновлены", "success");
+      showMessage(t("profileSection.messages.channelsSaved"), "success");
     } else {
-      throw new Error(data.message || "Ошибка сохранения");
+      throw new Error(data.message || t("profileSection.errors.saveFailed"));
     }
   } catch (error) {
     console.error("Ошибка сохранения каналов:", error);
-    showMessage("Ошибка сохранения каналов связи", "error");
+    showMessage(t("profileSection.errors.channelsSaveFailed"), "error");
   } finally {
     saving.value = false;
   }
@@ -460,7 +484,7 @@ onMounted(() => {
   font-size: 0.875rem;
   line-height: 1.4;
   margin: 0;
-  font-family: inherit; /* Нормальный шрифт */
+  font-family: inherit;
 }
 
 .edit-btn {
@@ -559,6 +583,23 @@ onMounted(() => {
   background-color: #f7fafc;
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.form-input-error {
+  border-color: #f56565;
+  background-color: #fef5f5;
+}
+
+.form-input-error:focus {
+  border-color: #f56565;
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+}
+
+.error-text {
+  color: #c53030;
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
 }
 
 .channels-options {
@@ -781,13 +822,11 @@ onMounted(() => {
   }
 }
 
-/* ТОЛЬКО на очень маленьких экранах - обрезаем email */
 @media (max-width: 380px) {
   .info-value {
     font-size: 0.8rem;
   }
 
-  /* Обрезаем длинный email только на очень маленьких экранах */
   .info-value:first-child {
     overflow: hidden;
     text-overflow: ellipsis;

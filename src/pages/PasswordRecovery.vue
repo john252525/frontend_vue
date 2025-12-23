@@ -7,19 +7,19 @@
 
   <section v-if="!emailSendStation" class="password-recovery-section">
     <form @submit.prevent="sendEmail">
-      <h2 class="title">{{ t("fogoutPassword.title") }}</h2>
+      <h2 class="title">{{ t("forgotPassword.title") }}</h2>
       <p class="subtitle">
-        {{ t("fogoutPassword.subtitle") }}
+        {{ t("forgotPassword.subtitle") }}
       </p>
 
       <div class="input-cont">
-        <label class="name-input" for="name">{{
-          t("fogoutPassword.mail")
+        <label class="name-input" for="email">{{
+          t("forgotPassword.mail")
         }}</label>
         <input
           type="email"
-          placeholder="name@company.com"
-          id="name"
+          :placeholder="t('forgotPassword.placeholder')"
+          id="email"
           v-model="email"
           @blur="validateEmail"
           @input="clearEmailError"
@@ -35,13 +35,13 @@
         </div>
       </div>
 
-      <button type="submit" class="send-сode-button">
-        {{ t("fogoutPassword.send") }}
+      <button type="submit" class="send-code-button">
+        {{ t("forgotPassword.send") }}
       </button>
 
       <p class="login-account-button">
-        {{ t("fogoutPassword.pas") }}
-        <span @click="navigateToLogin"> {{ t("fogoutPassword.login") }}</span>
+        {{ t("forgotPassword.remember") }}
+        <span @click="navigateToLogin">{{ t("forgotPassword.login") }}</span>
       </p>
     </form>
   </section>
@@ -59,8 +59,7 @@
       />
     </svg>
     <h2 class="text-email-sent">
-      На ваш E-mail отправлено письмо, перейдите по ссылке, чтобы изменить
-      пароль
+      {{ t("forgotPassword.emailSent") }}
     </h2>
   </div>
 </template>
@@ -92,20 +91,20 @@ const navigateToLogin = () => {
 const validateEmail = () => {
   const emailValue = email.value.trim();
   if (!emailValue) {
-    emailErrorMessage.value = "Пожалуйста, введите email";
+    emailErrorMessage.value = t("forgotPassword.errors.emailRequired");
     emailError.value = true;
     return false;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(emailValue)) {
-    emailErrorMessage.value = "Пожалуйста, введите корректный email";
+    emailErrorMessage.value = t("forgotPassword.errors.invalidEmail");
     emailError.value = true;
     return false;
   }
 
   if (emailValue.length > 30) {
-    emailErrorMessage.value = "Email должен быть не длиннее 30 символов";
+    emailErrorMessage.value = t("forgotPassword.errors.emailTooLong");
     emailError.value = true;
     return false;
   }
@@ -147,16 +146,17 @@ const sendEmail = async () => {
     } else {
       showErrorBlock.value = true;
       errorMessage.value =
-        response.data.error_message || "Ошибка при отправке письма";
+        response.data.error_message || t("forgotPassword.errors.sendFailed");
     }
   } catch (error) {
     showErrorBlock.value = true;
     if (error.response) {
       errorMessage.value =
-        error.response.data?.error_message || "Ошибка сервера";
+        error.response.data?.error_message ||
+        t("forgotPassword.errors.serverError");
       console.error("Ошибка сервера:", error.response.data);
     } else {
-      errorMessage.value = "Сетевая ошибка";
+      errorMessage.value = t("forgotPassword.errors.networkError");
     }
   }
 };
@@ -259,6 +259,7 @@ input {
   width: 300px;
   font-weight: 500;
   text-align: center;
+  color: var(--text);
 }
 
 .cont {
@@ -278,7 +279,7 @@ input {
   gap: 40px;
 }
 
-.send-сode-button {
+.send-code-button {
   border-radius: 5px;
   width: 565px;
   height: 44px;
@@ -287,14 +288,21 @@ input {
   font-size: 14px;
   color: white;
   transition: all 0.25s;
+  border: none;
+  cursor: pointer;
 }
 
-.send-сode-button:hover {
+.send-code-button:hover {
   background: #595fd1;
 }
 
-.send-сode-button:active {
+.send-code-button:active {
   background: #2f36af;
+}
+
+.send-code-button:disabled {
+  background: #a0a0a0;
+  cursor: not-allowed;
 }
 
 .login-account-button {
@@ -321,7 +329,7 @@ input {
     height: 45px;
   }
 
-  .send-сode-button {
+  .send-code-button {
     width: 365px;
     height: 44px;
   }
@@ -343,7 +351,7 @@ input {
     height: 45px;
   }
 
-  .send-сode-button {
+  .send-code-button {
     width: 265px;
     height: 44px;
   }

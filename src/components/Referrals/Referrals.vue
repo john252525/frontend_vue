@@ -10,18 +10,17 @@
         <div class="stats-row">
           <!-- Блок доступно (баланс) -->
           <div class="stat-block stat-balance">
-            <span class="stat-title">Доступно</span>
+            <span class="stat-title">{{ t("referrals.available") }}</span>
             <span class="stat-value">{{
               formatCurrency(statistics.balance || 0)
             }}</span>
           </div>
 
           <div class="stat-block">
-            <span class="stat-title">Привлечено пользователей</span>
+            <span class="stat-title">{{ t("referrals.invitedUsers") }}</span>
             <span class="stat-value">{{ statistics.count || 0 }}</span>
           </div>
 
-          <!-- Реферальная ссылка красивая -->
           <!-- Реферальная ссылка красивая -->
           <div class="stat-block referral-block">
             <div class="referral-content">
@@ -44,9 +43,11 @@
                 </svg>
               </div>
               <div class="referral-text">
-                <h3 class="referral-title">Приглась друзей</h3>
+                <h3 class="referral-title">
+                  {{ t("referrals.inviteFriends") }}
+                </h3>
                 <p class="referral-subtitle">
-                  Получайте комиссию от каждого пополнения
+                  {{ t("referrals.earnCommission") }}
                 </p>
                 <button @click="copyReferralLink" class="copy-button-primary">
                   <svg
@@ -76,14 +77,16 @@
       <!-- График под блоками -->
       <section class="chart-section">
         <div class="chart-container">
-          <h3 class="chart-title">Операции по дням</h3>
+          <h3 class="chart-title">{{ t("referrals.operationsByDay") }}</h3>
           <div class="chart-wrapper">
             <canvas ref="chartCanvas" width="400" height="2000"></canvas>
           </div>
           <div class="chart-legend">
             <label class="legend-item">
               <span class="legend-dot"></span>
-              <span class="legend-label">Количество операций</span>
+              <span class="legend-label">{{
+                t("referrals.operationsCount")
+              }}</span>
             </label>
           </div>
         </div>
@@ -100,7 +103,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 import ReferralsList from "./ReferralsList.vue";
 import HelpModal from "./HelpModal.vue";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, computed } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 import Chart from "chart.js/auto";
@@ -118,7 +121,7 @@ const statistics = ref({
 const chartCanvas = ref(null);
 let chartInstance = null;
 const isLoadingChart = ref(false);
-const copyButtonText = ref("Скопировать");
+const isCopied = ref(false);
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 const API_URL = "https://api22.developtech.ru/api";
@@ -126,9 +129,10 @@ const API_URL = "https://api22.developtech.ru/api";
 const refId = ref("");
 const refLink = ref(`https://${window.location.hostname}/Registration...`);
 
-const openHelpModal = () => {
-  showHelpModal.value = true;
-};
+// ✅ ИСПРАВЛЕНИЕ 1: Используем computed для copyButtonText
+const copyButtonText = computed(() => {
+  return isCopied.value ? t("referrals.copied") : t("referrals.copy");
+});
 
 const closeHelpModal = () => {
   showHelpModal.value = false;
@@ -140,6 +144,11 @@ const formatCurrency = (value) => {
     currency: "RUB",
     minimumFractionDigits: 2,
   }).format(value);
+};
+
+// ✅ ИСПРАВЛЕНИЕ 2: Перемещаем логику t() в переменные ДО использования
+const getChartTooltipLabel = (context) => {
+  return `${t("referrals.operations")}: ${Math.round(context.parsed.y)}`;
 };
 
 const initChart = () => {
@@ -175,7 +184,7 @@ const initChart = () => {
         labels: data.labels,
         datasets: [
           {
-            label: "Количество операций",
+            label: t("referrals.operationsCount"),
             data: data.datasets[0].data,
             borderColor: "#4f46e5",
             backgroundColor: "rgba(79, 70, 229, 0.08)",
@@ -205,9 +214,12 @@ const initChart = () => {
             bodyFont: { size: 12 },
             borderColor: "#ddd",
             borderWidth: 1,
+            // ✅ ИСПРАВЛЕНИЕ 3: Сохраняем контекст перед вызовом
             callbacks: {
-              label: function (context) {
-                return "Операций: " + Math.round(context.parsed.y);
+              label: (context) => {
+                return `${t("referrals.operations")}: ${Math.round(
+                  context.parsed.y
+                )}`;
               },
             },
           },
@@ -269,8 +281,15 @@ const fetchStatistics = async () => {
     );
 
     if (response.data.success) {
-      statistics.value = response.data.statistics;
-      console.log("✅ Статистика обновлена");
+      // ✅ ИСПРАВЛЕНИЕ 4: Правильно映射 данные из API
+      const apiData = response.data.statistics;
+      statistics.value = {
+        balance: apiData.available || apiData.balance || 0,
+        count: apiData.invitedUsers || apiData.count || 0,
+        chartData: apiData.operationsByDay || apiData.chartData || null,
+        summary: apiData.summary || {},
+      };
+      console.log("✅ Статистика обновлена:", statistics.value);
 
       await nextTick();
 
@@ -307,11 +326,11 @@ const getRefId = async () => {
 const copyReferralLink = async () => {
   try {
     await navigator.clipboard.writeText(refLink.value);
-    copyButtonText.value = "Скопировано!";
+    isCopied.value = true;
     console.log("✅ Ссылка скопирована");
 
     setTimeout(() => {
-      copyButtonText.value = "Скопировать";
+      isCopied.value = false;
     }, 2000);
   } catch (err) {
     console.error("❌ Ошибка копирования:", err);

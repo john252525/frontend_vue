@@ -23,7 +23,8 @@ const switchLanguage = (language) => {
 };
 
 const selectLeng = () => {
-  const savedLang = localStorage.getItem("lang");
+  const savedLang = localStorage.getItem("lang") || "ru";
+  locale.value = savedLang; // ← Добавлено
   lang.value = savedLang === "ru" ? "Русский" : "English";
 };
 
@@ -34,7 +35,7 @@ const handleClickOutside = (event) => {
 };
 
 onMounted(() => {
-  selectLeng();
+  selectLeng(); // Теперь функция корректно синхронизирует оба значения
   document.addEventListener("click", handleClickOutside);
 });
 

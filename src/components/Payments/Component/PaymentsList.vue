@@ -5,11 +5,11 @@
       <table class="table">
         <thead class="table-header">
           <tr>
-            <th class="table-login">ID</th>
-            <th class="table-type">Сумма</th>
-            <th class="table-step">Тип операции</th>
-            <th class="table-status">Статус</th>
-            <th class="table-action">Действие</th>
+            <th class="table-login">{{ t("paymentList.id") }}</th>
+            <th class="table-type">{{ t("paymentList.sum") }}</th>
+            <th class="table-step">{{ t("paymentList.operationType") }}</th>
+            <th class="table-status">{{ t("paymentList.statusType") }}</th>
+            <th class="table-action">{{ t("paymentList.action") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -34,14 +34,14 @@
             </td>
             <td class="table-action-text">
               <button class="details-button" @click="openPaymentModal(item)">
-                Детали
+                {{ t("paymentList.details") }}
               </button>
             </td>
           </tr>
           <tr v-else-if="paymentsLoadingStation.dataStationNone">
             <td colspan="5">
               <div class="none-account-cont">
-                <h2>Транзакций нет</h2>
+                <h2>{{ t("paymentList.noTransactions") }}</h2>
               </div>
             </td>
           </tr>
@@ -66,7 +66,7 @@
         >
           <div class="card-header">
             <div class="card-id">
-              <span class="id-label">ID:</span>
+              <span class="id-label">{{ t("paymentList.idLabel") }}:</span>
               <span class="id-value">{{ item.public_id }}</span>
             </div>
             <div class="card-title">
@@ -81,7 +81,9 @@
 
           <div class="card-content">
             <div class="card-row">
-              <span class="card-label">Тип операции:</span>
+              <span class="card-label"
+                >{{ t("paymentList.operationType") }}:</span
+              >
               <span
                 class="card-value"
                 :class="getOperationTypeClass(item.payment_type, item.type)"
@@ -91,12 +93,12 @@
             </div>
 
             <div class="card-row">
-              <span class="card-label">Дата:</span>
+              <span class="card-label">{{ t("paymentList.date") }}:</span>
               <span class="card-value">{{ formatDate(item.dt_ins) }}</span>
             </div>
 
             <div class="card-row">
-              <span class="card-label">Статус:</span>
+              <span class="card-label">{{ t("paymentList.status") }}:</span>
               <span
                 class="card-value"
                 :class="getStatusClass(item.payment_type, item.public_status)"
@@ -111,14 +113,14 @@
               class="details-button-mobile"
               @click="openPaymentModal(item)"
             >
-              Просмотреть детали
+              {{ t("paymentList.viewDetails") }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-else-if="paymentsLoadingStation.dataStationNone" class="no-data">
-        <h2>Транзакций нет</h2>
+        <h2>{{ t("paymentList.noTransactions") }}</h2>
       </div>
 
       <div v-if="paymentsLoadingStation.loadDataStation" class="load-cont">
@@ -132,48 +134,52 @@
         <button class="modal-close" @click="closePaymentModal">✕</button>
 
         <div class="modal-header">
-          <h2>Детали платежа</h2>
-          <p class="modal-id">ID: {{ selectedPayment.public_id }}</p>
+          <h2>{{ t("paymentList.paymentDetails") }}</h2>
+          <p class="modal-id">
+            {{ t("paymentList.idLabel") }}: {{ selectedPayment.public_id }}
+          </p>
         </div>
 
         <div class="modal-body">
           <!-- Admin Payment Type -->
           <template v-if="selectedPayment.payment_type === 'admin'">
             <div class="detail-row">
-              <label>Тип операции:</label>
+              <label>{{ t("paymentList.operationType") }}:</label>
               <span>{{
-                selectedPayment.type === "+" ? "Пополнение" : "Списание"
+                selectedPayment.type === "+"
+                  ? t("paymentList.replenishment")
+                  : t("paymentList.debit")
               }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Сумма:</label>
+              <label>{{ t("paymentList.sum") }}:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Предыдущий баланс:</label>
+              <label>{{ t("paymentList.previousBalance") }}:</label>
               <span>{{ parsedAdminDetails.previous_balance }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Новый баланс:</label>
+              <label>{{ t("paymentList.newBalance") }}:</label>
               <span>{{ parsedAdminDetails.new_balance }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Дата:</label>
+              <label>{{ t("paymentList.date") }}:</label>
               <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Изменено:</label>
-              <span>Администратором</span>
+              <label>{{ t("paymentList.changedBy") }}:</label>
+              <span>{{ t("paymentList.byAdmin") }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Уточнение:</label>
-              <span>{{ selectedPayment.message }} </span>
+              <label>{{ t("paymentList.clarification") }}:</label>
+              <span>{{ selectedPayment.message }}</span>
             </div>
 
             <div class="modal-actions">
@@ -181,7 +187,7 @@
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
           </template>
@@ -189,17 +195,17 @@
           <!-- Check Payment Type -->
           <template v-else-if="selectedPayment.payment_type === 'check'">
             <div class="detail-row">
-              <label>Сумма:</label>
+              <label>{{ t("paymentList.sum") }}:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Дата:</label>
+              <label>{{ t("paymentList.date") }}:</label>
               <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Статус:</label>
+              <label>{{ t("paymentList.status") }}:</label>
               <span
                 :class="
                   getStatusClass(
@@ -214,13 +220,13 @@
 
             <div v-if="selectedPayment.link" class="modal-actions">
               <button class="action-button primary" @click="openCheckLink">
-                Открыть счет
+                {{ t("paymentList.openInvoice") }}
               </button>
               <button
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
             <div v-else class="modal-actions">
@@ -228,7 +234,7 @@
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
           </template>
@@ -236,17 +242,17 @@
           <!-- Up Payment Type -->
           <template v-else-if="selectedPayment.payment_type === 'up'">
             <div class="detail-row">
-              <label>Сумма:</label>
+              <label>{{ t("paymentList.sum") }}:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Дата:</label>
+              <label>{{ t("paymentList.date") }}:</label>
               <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Статус:</label>
+              <label>{{ t("paymentList.status") }}:</label>
               <span
                 :class="
                   getStatusClass(
@@ -264,13 +270,13 @@
               class="modal-actions"
             >
               <button class="action-button primary" @click="goToPayment">
-                Перейти к оплате
+                {{ t("paymentList.goToPayment") }}
               </button>
               <button
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
             <div v-else class="modal-actions">
@@ -278,7 +284,7 @@
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
           </template>
@@ -286,32 +292,34 @@
           <!-- Tariff Payment Type -->
           <template v-else-if="selectedPayment.payment_type === 'tariff'">
             <div class="detail-row">
-              <label>Тариф:</label>
-              <span>{{ parsedTariffDetails.title || "Не указано" }}</span>
+              <label>{{ t("paymentList.tariff") }}:</label>
+              <span>{{
+                parsedTariffDetails.title || t("paymentList.notSpecified")
+              }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Сумма:</label>
+              <label>{{ t("paymentList.sum") }}:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Период:</label>
+              <label>{{ t("paymentList.period") }}:</label>
               <span>{{ getPeriodText(parsedTariffDetails.period) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Валюта:</label>
+              <label>{{ t("paymentList.currency") }}:</label>
               <span>{{ parsedTariffDetails.currency }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Дата:</label>
+              <label>{{ t("paymentList.date") }}:</label>
               <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Статус:</label>
+              <label>{{ t("paymentList.status") }}:</label>
               <span
                 :class="
                   getStatusClass(
@@ -329,7 +337,7 @@
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
           </template>
@@ -337,17 +345,17 @@
           <!-- Other Payment Types -->
           <template v-else>
             <div class="detail-row">
-              <label>Сумма:</label>
+              <label>{{ t("paymentList.sum") }}:</label>
               <span>{{ removeDecimalZeros(selectedPayment.amount) }} ₽</span>
             </div>
 
             <div class="detail-row">
-              <label>Дата:</label>
+              <label>{{ t("paymentList.date") }}:</label>
               <span>{{ formatDate(selectedPayment.dt_ins) }}</span>
             </div>
 
             <div class="detail-row">
-              <label>Статус:</label>
+              <label>{{ t("paymentList.status") }}:</label>
               <span
                 :class="
                   getStatusClass(
@@ -365,7 +373,7 @@
                 class="action-button secondary"
                 @click="closePaymentModal"
               >
-                Закрыть
+                {{ t("paymentList.close") }}
               </button>
             </div>
           </template>
@@ -377,8 +385,11 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
 import LoadAccount from "/src/components/Accounts/Accounts/LoadAccount.vue";
+
+const { t } = useI18n();
 
 const payments = ref([]);
 const fetchError = ref(null);
@@ -420,8 +431,8 @@ const fetchPayments = async () => {
     paymentsLoadingStation.dataStationNone = true;
     console.error("error", error);
     fetchError.value = error.response
-      ? error.response.data.message || "Неизвестная ошибка"
-      : "Ошибка сети";
+      ? error.response.data.message || t("paymentList.unknownError")
+      : t("paymentList.networkError");
   }
 };
 
@@ -476,25 +487,25 @@ function formatDate(dateString) {
 }
 
 function getOperationType(paymentType, operationType) {
-  // Обработка админских изменений
   if (paymentType === "admin") {
-    return operationType === "+" ? "Пополнение" : "Списание";
+    return operationType === "+"
+      ? t("paymentList.replenishment")
+      : t("paymentList.debit");
   }
 
   switch (paymentType) {
     case "up":
-      return "Пополнение баланса";
+      return t("paymentList.balanceReplenishment");
     case "check":
-      return "Создание счета";
+      return t("paymentList.invoiceCreation");
     case "tariff":
-      return "Покупка тарифа";
+      return t("paymentList.tariffPurchase");
     default:
-      return "Неизвестно";
+      return t("paymentList.unknown");
   }
 }
 
 function getOperationTypeClass(paymentType, operationType) {
-  // Админские операции
   if (paymentType === "admin") {
     return operationType === "+"
       ? "operation-admin-up"
@@ -514,7 +525,6 @@ function getOperationTypeClass(paymentType, operationType) {
 }
 
 function getAmountClass(paymentType, operationType) {
-  // Админские операции
   if (paymentType === "admin") {
     return operationType === "+" ? "amount-income" : "amount-outcome";
   }
@@ -547,19 +557,19 @@ function getStatusClass(paymentType, state) {
 
 function getDisplayStatus(paymentType, state) {
   if (paymentType === "admin") {
-    return "Изменено администратором";
+    return t("paymentList.changedByAdmin");
   }
   return state;
 }
 
 function getPeriodText(period) {
-  if (!period) return "Неизвестно";
+  if (!period) return t("paymentList.unknown");
 
   const periodMap = {
-    "1m": "1 месяц",
-    "3m": "3 месяца",
-    "6m": "6 месяцев",
-    "1y": "1 год",
+    "1m": t("paymentList.period1m"),
+    "3m": t("paymentList.period3m"),
+    "6m": t("paymentList.period6m"),
+    "1y": t("paymentList.period1y"),
   };
 
   return periodMap[period] || period;

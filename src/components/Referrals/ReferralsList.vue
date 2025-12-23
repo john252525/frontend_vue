@@ -20,7 +20,7 @@
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
-        Рефералы
+        {{ t("referralsList.referrals") }}
       </button>
       <button
         @click="activeTab = 'payments'"
@@ -38,7 +38,7 @@
           <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
           <path d="M1 10h22" />
         </svg>
-        Платежи
+        {{ t("referralsList.payments") }}
       </button>
     </div>
 
@@ -48,9 +48,11 @@
         <thead class="table-header">
           <tr>
             <th class="table-login">{{ t("accountList.login") }}</th>
-            <th class="table-status">СТАТУС</th>
-            <th class="table-date">ДАТА РЕГИСТРАЦИИ</th>
-            <th class="table-active">АКТИВЕН</th>
+            <th class="table-status">{{ t("referralsList.status") }}</th>
+            <th class="table-date">
+              {{ t("referralsList.registrationDate") }}
+            </th>
+            <th class="table-active">{{ t("referralsList.active") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -64,7 +66,9 @@
                 ]"
               >
                 {{
-                  item.is_verified === "1" ? "Подтвержден" : "Не подтвержден"
+                  item.is_verified === "1"
+                    ? t("referralsList.verified")
+                    : t("referralsList.notVerified")
                 }}
               </span>
             </td>
@@ -76,7 +80,11 @@
                   item.enable === '1' ? 'active' : 'inactive',
                 ]"
               >
-                {{ item.enable === "1" ? "Да" : "Нет" }}
+                {{
+                  item.enable === "1"
+                    ? t("referralsList.yes")
+                    : t("referralsList.no")
+                }}
               </span>
             </td>
           </tr>
@@ -90,11 +98,11 @@
           class="mobile-card"
         >
           <div class="card-row">
-            <span class="card-label">Email:</span>
+            <span class="card-label">{{ t("accountList.login") }}:</span>
             <span class="card-value">{{ item.email }}</span>
           </div>
           <div class="card-row">
-            <span class="card-label">Статус:</span>
+            <span class="card-label">{{ t("referralsList.status") }}:</span>
             <span class="card-value">
               <span
                 :class="[
@@ -103,17 +111,21 @@
                 ]"
               >
                 {{
-                  item.is_verified === "1" ? "Подтвержден" : "Не подтвержден"
+                  item.is_verified === "1"
+                    ? t("referralsList.verified")
+                    : t("referralsList.notVerified")
                 }}
               </span>
             </span>
           </div>
           <div class="card-row">
-            <span class="card-label">Дата регистрации:</span>
+            <span class="card-label"
+              >{{ t("referralsList.registrationDate") }}:</span
+            >
             <span class="card-value">{{ formatDate(item.dt_ins) }}</span>
           </div>
           <div class="card-row">
-            <span class="card-label">Активен:</span>
+            <span class="card-label">{{ t("referralsList.active") }}:</span>
             <span class="card-value">
               <span
                 :class="[
@@ -121,7 +133,11 @@
                   item.enable === '1' ? 'active' : 'inactive',
                 ]"
               >
-                {{ item.enable === "1" ? "Да" : "Нет" }}
+                {{
+                  item.enable === "1"
+                    ? t("referralsList.yes")
+                    : t("referralsList.no")
+                }}
               </span>
             </span>
           </div>
@@ -140,7 +156,7 @@
         v-if="!loadDataStation && !errorAccountBolean && accounts.length === 0"
         class="none-account-cont"
       >
-        <h2>У вас пока нет рефералов</h2>
+        <h2>{{ t("referralsList.noReferrals") }}</h2>
       </div>
     </div>
 
@@ -149,10 +165,10 @@
       <table class="table" v-if="payments.length > 0">
         <thead class="table-header">
           <tr>
-            <th class="table-email">EMAIL</th>
-            <th class="table-amount">СУММА</th>
-            <th class="table-status">СТАТУС</th>
-            <th class="table-date">ДАТА</th>
+            <th class="table-email">{{ t("accountList.login") }}</th>
+            <th class="table-amount">{{ t("referralsList.amount") }}</th>
+            <th class="table-status">{{ t("referralsList.status") }}</th>
+            <th class="table-date">{{ t("referralsList.date") }}</th>
           </tr>
         </thead>
         <tbody class="tbody">
@@ -180,17 +196,17 @@
           class="mobile-card"
         >
           <div class="card-row">
-            <span class="card-label">Email:</span>
+            <span class="card-label">{{ t("accountList.login") }}:</span>
             <span class="card-value">{{ item.email }}</span>
           </div>
           <div class="card-row">
-            <span class="card-label">Сумма:</span>
+            <span class="card-label">{{ t("referralsList.amount") }}:</span>
             <span class="card-value">{{
               formatCurrency(item.reward_amount)
             }}</span>
           </div>
           <div class="card-row">
-            <span class="card-label">Статус:</span>
+            <span class="card-label">{{ t("referralsList.status") }}:</span>
             <span class="card-value">
               <span
                 :class="['status-badge', getPaymentStatusClass(item.status)]"
@@ -200,7 +216,7 @@
             </span>
           </div>
           <div class="card-row">
-            <span class="card-label">Дата:</span>
+            <span class="card-label">{{ t("referralsList.date") }}:</span>
             <span class="card-value">{{ formatDate(item.created_at) }}</span>
           </div>
         </div>
@@ -218,7 +234,7 @@
         v-if="!loadPayments && !errorPaymentsBolean && payments.length === 0"
         class="none-account-cont"
       >
-        <h2>У вас пока нет платежей</h2>
+        <h2>{{ t("referralsList.noPayments") }}</h2>
       </div>
     </div>
   </section>
@@ -289,10 +305,10 @@ const formatCurrency = (value) => {
 // Получение текста статуса платежа
 const getPaymentStatusText = (status) => {
   const statusMap = {
-    applied: "Применен",
-    pending: "Ожидание",
-    rejected: "Отклонен",
-    completed: "Завершен",
+    applied: t("referralsList.statuses.applied"),
+    pending: t("referralsList.statuses.pending"),
+    rejected: t("referralsList.statuses.rejected"),
+    completed: t("referralsList.statuses.completed"),
   };
   return statusMap[status] || status;
 };

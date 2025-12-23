@@ -1,5 +1,10 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
+  <div
+    class="modal-overlay"
+    @keydown.esc="close"
+    tabindex="0"
+    @click.self="close"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="modal-title">Удалить вендора</h2>

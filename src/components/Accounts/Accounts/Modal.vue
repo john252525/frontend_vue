@@ -155,7 +155,7 @@
             "
             class="action"
             @click="changeRoutingSettings"
-            >Маршрутизации</span
+            >Менеджеры</span
           >
 
           <span

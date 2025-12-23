@@ -1,9 +1,9 @@
 <template>
   <div class="integration-settings">
     <div class="settings-header">
-      <h3 class="settings-title">Интеграция</h3>
+      <h3 class="settings-title">{{ t("integrationSettings.title") }}</h3>
       <p class="settings-description">
-        Управление синхронизацией данных между сервисами
+        {{ t("integrationSettings.description") }}
       </p>
     </div>
 
@@ -11,12 +11,10 @@
       <div class="setting-item">
         <div class="setting-info">
           <label class="setting-label">
-            Отключить проброс исходящих сообщений из привязанных мессенджеров
+            {{ t("integrationSettings.disableMessengerOutgoing") }}
           </label>
           <p class="setting-hint">
-            В CRM будут отображаться только исходящие сообщения, отправленные из
-            самой CRM. Исходящие из мессенджеров в CRM не фиксируются. Все
-            входящие, в том числе ответы клиента, продолжают попадать в CRM.
+            {{ t("integrationSettings.disableMessengerOutgoingHint") }}
           </p>
         </div>
         <div class="setting-control">
@@ -41,9 +39,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 
+const { t } = useI18n();
 const accountStore = useAccountStore();
 const VITE_FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 
@@ -80,7 +80,7 @@ const fetchSettings = async () => {
     }
   } catch (error) {
     console.error("Ошибка при загрузке настроек:", error);
-    showMessage("Ошибка при загрузке настроек", "error");
+    showMessage(t("integrationSettings.errors.loadFailed"), "error");
   }
 };
 
@@ -94,16 +94,19 @@ const saveSettings = async () => {
     });
 
     if (response.data.ok) {
-      showMessage("Настройки успешно сохранены", "success");
+      showMessage(t("integrationSettings.messages.saved"), "success");
     } else {
-      showMessage(response.data.message || "Ошибка при сохранении", "error");
+      showMessage(
+        response.data.message || t("integrationSettings.errors.saveFailed"),
+        "error"
+      );
       // Откатываем значение если ошибка
       localSettings.value.disable_messenger_outgoing =
         !localSettings.value.disable_messenger_outgoing;
     }
   } catch (error) {
     console.error("Ошибка при сохранении настроек:", error);
-    showMessage("Ошибка при сохранении настроек", "error");
+    showMessage(t("integrationSettings.errors.saveFailed"), "error");
     // Откатываем значение если ошибка
     localSettings.value.disable_messenger_outgoing =
       !localSettings.value.disable_messenger_outgoing;

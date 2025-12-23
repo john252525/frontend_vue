@@ -1,9 +1,9 @@
 <template>
   <div class="inn-settings">
     <div class="settings-header">
-      <h3 class="settings-title">Реквизиты организации</h3>
+      <h3 class="settings-title">{{ t("innSettings.title") }}</h3>
       <p class="settings-description">
-        Сохраните ИНН для использования при генерации счетов
+        {{ t("innSettings.description") }}
       </p>
     </div>
 
@@ -11,7 +11,7 @@
       <!-- Лоадер загрузки ИНН -->
       <div v-if="loadingInn" class="inn-loading">
         <div class="inn-loader"></div>
-        <span>Загрузка ИНН...</span>
+        <span>{{ t("innSettings.loading") }}</span>
       </div>
 
       <!-- Если ИНН загружен и не редактируется -->
@@ -22,7 +22,7 @@
         <input
           v-model.trim="innValue"
           type="text"
-          placeholder="Введите 10 или 12 цифр"
+          :placeholder="t('innSettings.placeholder')"
           maxlength="12"
           class="form-input"
           :disabled="true"
@@ -32,7 +32,7 @@
           @click="enableInnEditing"
           class="edit-inn-btn"
           :disabled="isSaving"
-          title="Изменить ИНН"
+          :title="t('innSettings.changeInn')"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
@@ -54,7 +54,7 @@
         <input
           v-model.trim="innValue"
           type="text"
-          placeholder="Введите 10 или 12 цифр"
+          :placeholder="t('innSettings.placeholder')"
           maxlength="12"
           class="form-input"
           :class="{ 'input-error': innError }"
@@ -75,7 +75,7 @@
             stroke-linejoin="round"
           />
         </svg>
-        <span>ИНН загружен из профиля</span>
+        <span>{{ t("innSettings.innLoaded") }}</span>
       </div>
 
       <div v-else-if="!innFromBackend && !loadingInn" class="inn-info info">
@@ -88,7 +88,7 @@
             stroke-linejoin="round"
           />
         </svg>
-        <span>Введите и сохраните ИНН для использования при оплате</span>
+        <span>{{ t("innSettings.enterAndSave") }}</span>
       </div>
     </div>
 
@@ -103,10 +103,10 @@
       >
         <span v-if="isSaving" class="btn-loading">
           <div class="btn-spinner"></div>
-          Сохранение...
+          {{ t("innSettings.saving") }}
         </span>
         <span v-else>
-          {{ innFromBackend ? "Обновить" : "Сохранить" }}
+          {{ innFromBackend ? t("innSettings.update") : t("innSettings.save") }}
         </span>
       </button>
 
@@ -117,7 +117,7 @@
         class="btn btn-secondary"
         :disabled="isSaving"
       >
-        Отменить
+        {{ t("innSettings.cancel") }}
       </button>
     </div>
 
@@ -132,9 +132,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
 
+const { t } = useI18n();
 const accountStore = useAccountStore();
 const VITE_INVOICES_URL = import.meta.env.VITE_INVOICES_URL;
 
@@ -163,12 +165,12 @@ apiClient.interceptors.request.use((config) => {
 
 // Валидация ИНН
 const validateInn = (inn) => {
-  if (!inn) return "ИНН обязателен для заполнения";
-  if (!/^\d+$/.test(inn)) return "ИНН должен содержать только цифры";
-  if (inn.length < 10) return "ИНН должен содержать минимум 10 цифр";
-  if (inn.length > 12) return "ИНН должен содержать максимум 12 цифр";
+  if (!inn) return t("innSettings.errors.required");
+  if (!/^\d+$/.test(inn)) return t("innSettings.errors.onlyDigits");
+  if (inn.length < 10) return t("innSettings.errors.minLength");
+  if (inn.length > 12) return t("innSettings.errors.maxLength");
   if (inn.length !== 10 && inn.length !== 12)
-    return "ИНН должен содержать 10 или 12 цифр";
+    return t("innSettings.errors.length10or12");
   return "";
 };
 
@@ -215,9 +217,9 @@ const loadInn = async () => {
     innFromBackend.value = null;
     isEditingInn.value = true;
 
-    let errorMsg = "Ошибка загрузки ИНН";
+    let errorMsg = t("innSettings.errors.loadFailed");
     if (error.code === "ECONNABORTED") {
-      errorMsg = "Время загрузки ИНН истекло";
+      errorMsg = t("innSettings.errors.loadTimeout");
     } else if (error.response) {
       errorMsg = error.response.data?.message || errorMsg;
     }
@@ -251,17 +253,19 @@ const saveInn = async () => {
       innFromBackend.value = innValue.value;
       initialInnValue.value = innValue.value;
       isEditingInn.value = false;
-      showMessage("ИНН успешно сохранен", "success");
+      showMessage(t("innSettings.messages.saved"), "success");
     } else {
-      throw new Error(response.data.message || "Ошибка сохранения");
+      throw new Error(
+        response.data.message || t("innSettings.errors.saveFailed")
+      );
     }
   } catch (error) {
     console.error("Ошибка при сохранении ИНН:", error);
 
-    let errorMsg = "Ошибка при сохранении ИНН";
+    let errorMsg = t("innSettings.errors.saveFailed");
 
     if (error.code === "ECONNABORTED") {
-      errorMsg = "Время сохранения истекло";
+      errorMsg = t("innSettings.errors.saveTimeout");
     } else if (error.response) {
       errorMsg = error.response.data?.message || errorMsg;
     }

@@ -7,8 +7,8 @@
         <div class="bounce2"></div>
         <div class="bounce3"></div>
       </div>
-      <h2 class="title">{{ t("VerifyEmail.title") }}</h2>
-      <p class="message">{{ t("VerifyEmail.message") }}</p>
+      <h2 class="title">{{ t("verifyEmail.loading.title") }}</h2>
+      <p class="message">{{ t("verifyEmail.loading.message") }}</p>
     </div>
 
     <!-- Success State -->
@@ -25,12 +25,12 @@
           d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
         />
       </svg>
-      <h2 class="title">{{ t("VerifyEmail.true") }}!</h2>
+      <h2 class="title">{{ t("verifyEmail.success.title") }}</h2>
       <p class="message">
-        {{ t("VerifyEmail.messageTrue") }}
+        {{ t("verifyEmail.success.message") }}
       </p>
       <button class="btn success-btn" @click="redirectToApp">
-        {{ t("VerifyEmail.buttonNext") }}
+        {{ t("verifyEmail.success.button") }}
       </button>
     </div>
 
@@ -48,12 +48,12 @@
           d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
         />
       </svg>
-      <h2 class="title error-text">{{ t("VerifyEmail.error") }}</h2>
+      <h2 class="title error-text">{{ t("verifyEmail.error.title") }}</h2>
       <p class="message">
-        {{ errorMessage || t("VerifyEmail.errorMessage") }}
+        {{ errorMessage || t("verifyEmail.error.message") }}
       </p>
       <button class="btn error-btn" @click="retryVerification">
-        {{ t("VerifyEmail.repeat") }}
+        {{ t("verifyEmail.error.button") }}
       </button>
     </div>
   </div>
@@ -107,10 +107,12 @@ const verifyToken = async (token) => {
     } else {
       error.value = true;
       isLoading.value = false;
+      errorMessage.value =
+        response.data.message || t("verifyEmail.error.default");
       console.error("Ошибка верификации:", response.data.message);
       return {
         success: false,
-        message: response.data.message || t("VerifyEmail.errorOne"),
+        message: response.data.message || t("verifyEmail.error.default"),
       };
     }
   } catch (err) {
@@ -119,23 +121,27 @@ const verifyToken = async (token) => {
 
     if (err.response) {
       console.error("Ошибка сервера:", err.response.status, err.response.data);
+      errorMessage.value =
+        err.response.data.message ||
+        `${t("verifyEmail.error.server")}: ${err.response.status}`;
       return {
         success: false,
-        message:
-          err.response.data.message || `Ошибка сервера: ${err.response.status}`,
+        message: errorMessage.value,
       };
     } else if (err.request) {
       console.error("Нет ответа от сервера:", err.request);
+      errorMessage.value = t("verifyEmail.error.noResponse");
       return {
         success: false,
-        message: t("VerifyEmail.errorTwo"),
+        message: t("verifyEmail.error.noResponse"),
       };
     } else {
       // Ошибка при настройке запроса
       console.error("Ошибка настройки запроса:", err.message);
+      errorMessage.value = t("verifyEmail.error.request");
       return {
         success: false,
-        message: t("VerifyEmail.errorThree"),
+        message: t("verifyEmail.error.request"),
       };
     }
   }
@@ -157,7 +163,7 @@ onMounted(() => {
     verifyToken(token);
   } else {
     error.value = true;
-    errorMessage.value = t("VerifyEmail.errorFour");
+    errorMessage.value = t("verifyEmail.error.noToken");
     isLoading.value = false;
   }
 });

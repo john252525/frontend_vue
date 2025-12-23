@@ -5,12 +5,27 @@
         <div class="section-header">
           <div class="section-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
-              <path d="M2 10h20" stroke="currentColor" stroke-width="2"/>
-              <path d="M6 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <rect
+                x="2"
+                y="5"
+                width="20"
+                height="14"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path d="M2 10h20" stroke="currentColor" stroke-width="2" />
+              <path
+                d="M6 15h4"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
           </div>
-          <h3 class="section-title">Способ оплаты</h3>
+          <h3 class="section-title">
+            {{ t("paymentMethodStep.paymentMethod") }}
+          </h3>
         </div>
 
         <div class="methods-grid">
@@ -27,13 +42,18 @@
             <div class="method-icon">
               <div class="icon-wrapper">
                 <svg width="24" height="24" viewBox="0 0 95 64" fill="none">
-                  <path clip-rule="evenodd" d="m26.4424 31.7092c.0477-17.4683 14.4906-31.7092 32.6397-31.7092 17.9726 0 32.8465 14.288 32.6399 31.7959 0 17.5079-14.6673 31.7959-32.6399 31.7959-17.9431 0-32.5917-14.0406-32.6397-31.7088v23.6592h-11.5685l-14.8739-46.2852h26.4424zm20.4514.0867c0 6.4397 5.5777 11.8732 12.1883 11.8732 6.8172 0 12.1884-5.4335 12.1884-11.8732s-5.5777-11.8731-12.1884-11.8731c-6.6106 0-12.1883 5.4334-12.1883 11.8731z" fill="#0070f0" fill-rule="evenodd"/>
+                  <path
+                    clip-rule="evenodd"
+                    d="m26.4424 31.7092c.0477-17.4683 14.4906-31.7092 32.6397-31.7092 17.9726 0 32.8465 14.288 32.6399 31.7959 0 17.5079-14.6673 31.7959-32.6399 31.7959-17.9431 0-32.5917-14.0406-32.6397-31.7088v23.6592h-11.5685l-14.8739-46.2852h26.4424zm20.4514.0867c0 6.4397 5.5777 11.8732 12.1883 11.8732 6.8172 0 12.1884-5.4335 12.1884-11.8732s-5.5777-11.8731-12.1884-11.8731c-6.6106 0-12.1883 5.4334-12.1883 11.8731z"
+                    fill="#0070f0"
+                    fill-rule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
             <div class="method-info">
               <h4>YooKassa</h4>
-              <p>Банковская карта, ЮMoney, СБП</p>
+              <p>{{ t("paymentMethodStep.yookassaMethods") }}</p>
             </div>
             <div class="method-check">
               <div class="checkmark"></div>
@@ -53,15 +73,31 @@
             <div class="method-icon">
               <div class="icon-wrapper">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M9 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path
+                    d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M9 12h6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M9 16h6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </div>
             </div>
             <div class="method-info">
-              <h4>Оплата по счету</h4>
-              <p>Для юридических лиц и ИП</p>
+              <h4>{{ t("paymentMethodStep.invoicePayment") }}</h4>
+              <p>{{ t("paymentMethodStep.invoicePaymentDesc") }}</p>
             </div>
             <div class="method-check">
               <div class="checkmark"></div>
@@ -78,9 +114,14 @@
       :disabled="!localMethod || isLoading"
     >
       <span class="btn-content">
-        Продолжить
+        {{ t("paymentMethodStep.continue") }}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path
+            d="M5 12h14M12 5l7 7-7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
         </svg>
       </span>
     </button>
@@ -88,38 +129,41 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
   method: {
     type: String,
-    default: 'YooKassa'
+    default: "YooKassa",
   },
   isLoading: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['update:method', 'next'])
+const emit = defineEmits(["update:method", "next"]);
 
-const localMethod = ref(props.method)
+const localMethod = ref(props.method);
 
 const selectMethod = (method) => {
-  localMethod.value = method
-  emit('update:method', method)
-}
+  localMethod.value = method;
+  emit("update:method", method);
+};
 
 const handleContinue = () => {
   if (localMethod.value) {
-    emit('next')
+    emit("next");
   }
-}
+};
 
 // Синхронизация с родительским компонентом
 watch(localMethod, (value) => {
-  emit('update:method', value)
-})
+  emit("update:method", value);
+});
 </script>
 
 <style scoped>
@@ -253,7 +297,7 @@ watch(localMethod, (value) => {
 .btn-content {
   display: flex;
   align-items: center;
-gap: 4px;
+  gap: 4px;
 }
 
 .action-btn {
