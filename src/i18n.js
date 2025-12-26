@@ -930,11 +930,7 @@ const messages = {
       actionButton: "Действие",
       accountNone: "Аккаунты отсутствуют.",
     },
-    referrals: {
-      title: "Рефералы",
-      link: "Ссылка скопирована",
-      errorAccount: "Не удалось загрузить данные",
-    },
+
     personalAccount: {
       out: "Выйти",
       balance: "Ваш баланс",

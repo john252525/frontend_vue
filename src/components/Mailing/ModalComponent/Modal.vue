@@ -107,6 +107,9 @@ import {
 import LoadingMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 import axios from "axios";
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
 import { useI18n } from "vue-i18n";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -207,7 +210,9 @@ const updateStatus = async (state) => {
   try {
     const response = await axios.post(
       apiUrlMethod,
-      {},
+      {
+        version: getVersion.value,
+      },
       {
         headers: {
           "Content-Type": "application/json",
@@ -259,6 +264,7 @@ const getMessages = async () => {
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
+        version: getVersion.value,
         limit: 10,
         offset: 0,
         sort: "asc",

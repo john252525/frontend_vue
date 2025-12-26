@@ -131,6 +131,10 @@ import MessageStep from "./Steps/MessageStep.vue";
 import SettingsStep from "./Steps/SettingsStep.vue";
 import LoadMoadal from "@/components/Accounts/Accounts/LoadingMoadal/LoadModal.vue";
 
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
+
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 
 const { t } = useI18n();
@@ -187,6 +191,7 @@ const formData = reactive({
   removeDuplicates: true,
   sendOnlyExistingDialogs: true,
   sendMessagesRandomOrder: false,
+  version: getVersion.value,
   // НОВЫЕ ПОЛЯ для каналов отправки
   selectedChannels: ["telegram", "whatsapp"],
   cascade: "telegram,whatsapp",
@@ -313,6 +318,7 @@ async function createWhatsAppBroadcast() {
   formDataToSend.append("cascade", formData.cascade || "telegram,whatsapp");
   formDataToSend.append("ph_col", formData.selectedLetter);
 
+  formDataToSend.append("version", formData.version || "1");
   if (formData.otherFile) {
     formDataToSend.append("file_base", formData.otherFile);
   }

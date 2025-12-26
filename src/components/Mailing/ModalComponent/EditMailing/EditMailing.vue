@@ -220,6 +220,11 @@ import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
+
 const router = useRouter();
 const props = defineProps({
   selectedItem: {
@@ -349,6 +354,7 @@ async function editWhatsAppBroadcast() {
     delay_to: items.value.options.delay.max * 60,
     uniq: items.value.options.uniq,
     exist: items.value.options.exist,
+    version: getVersion.value,
     random: items.value.options.random,
     cascade: cascadeString,
   };

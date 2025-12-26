@@ -218,7 +218,7 @@
 
 <script setup>
 import MessageLise from "../ModalComponent/MessageLise.vue";
-import { ref, reactive, onMounted, provide, computed } from "vue";
+import { ref, reactive, onMounted, provide, watch, computed } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -235,6 +235,9 @@ import { useI18n } from "vue-i18n";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
 const { t } = useI18n();
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const router = useRouter();
@@ -252,6 +255,7 @@ const chaneErrorBlock = () => {
 };
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
+
 const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
@@ -328,8 +332,13 @@ const getMailingLists = async () => {
   dataStationNone.value = false;
   loadDataStation.value = true;
   const apiUrlMethod = `${apiUrl}/list/`;
+
   try {
     const response = await axios.get(apiUrlMethod, {
+      params: {
+        // Параметры передаются здесь
+        version: getVersion.value,
+      },
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${token.value}`,
@@ -612,6 +621,13 @@ const changeDeleteMailing = () => {
 const changeInfoMailing = () => {
   station.infoMailing = !station.infoMailing;
 };
+
+watch(getVersion, async (newVersion) => {
+  if (newVersion) {
+    console.log("New", newVersion);
+    await getMailingLists();
+  }
+});
 
 onMounted(getMailingLists);
 provide("selectedItem", { selectedItem });

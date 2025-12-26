@@ -40,6 +40,10 @@ const router = useRouter();
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
+
 const props = defineProps({
   selectedItem: {
     type: Object,
@@ -83,7 +87,9 @@ const deleteMailing = async () => {
   try {
     const response = await axios.post(
       apiUrlMethod,
-      {}, // пустое тело запроса, если нужно
+      {
+        version: getVersion.value,
+      }, // пустое тело запроса, если нужно
       {
         headers: {
           "Content-Type": "application/json",

@@ -25,7 +25,9 @@
         Как пользоваться
       </button>
     </section>
+
     <section class="account-section">
+      <ToggleVersion />
       <button @click="handleAddMailing" class="add-account-button">
         <svg
           class="svg-icon"
@@ -38,11 +40,7 @@
             clip-rule="evenodd"
           ></path>
         </svg>
-        {{
-          subscriptionCheck.loading
-            ? "Проверка подписки.."
-            : "Добавить рассылку"
-        }}
+        {{ getWidht > 500 ? "Добавить рассылку" : "Добавить " }}
       </button>
     </section>
   </header>
@@ -63,6 +61,7 @@ import AlertManager from "./ModalComponent/SubscriptionWarning/AlertManager.vue"
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import MailingTour from "../../components/tours/MailingsTour.vue";
 import MailingsTourModal from "../GlobalModal/TourModal/Mailings/MailingsTourModal.vue";
+import ToggleVersion from "./toggleVersion.vue";
 import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
@@ -183,6 +182,8 @@ const stationLoading = reactive({
 const navigateTo = (page) => {
   router.push(page);
 };
+
+const getWidht = computed(() => window.innerWidth);
 
 const closeResultModal = () => {
   stationLoading.modalStation = false;
@@ -470,6 +471,23 @@ header {
   background-color: #eeeeee;
   border-radius: 5px;
   transition: all 0.2s;
+}
+
+@media (max-width: 1000px) {
+  .account {
+    display: none;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .account-section {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 768px) {

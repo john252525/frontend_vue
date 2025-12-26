@@ -8,23 +8,47 @@
             ({{ mailingLists.length }})
           </span>
         </h2>
-        <button class="close-button" @click="changeStationMessage" aria-label="Закрыть">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32">
-            <path fill="currentColor" d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"/>
+        <button
+          class="close-button"
+          @click="changeStationMessage"
+          aria-label="Закрыть"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 32 32"
+          >
+            <path
+              fill="currentColor"
+              d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
+            />
           </svg>
         </button>
       </div>
 
       <div class="modal-content">
-        <div class="table-container" :class="{ 'empty-state': mailingLists.length === 0 }">
+        <div
+          class="table-container"
+          :class="{ 'empty-state': mailingLists.length === 0 }"
+        >
           <div v-if="loadingMessge" class="loading-container">
             <div class="spinner"></div>
             <p>Загрузка сообщений...</p>
           </div>
 
           <div v-else-if="errorMessage" class="error-container">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="error-icon">
-              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              class="error-icon"
+            >
+              <path
+                fill="currentColor"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+              />
             </svg>
             <h3>Ошибка загрузки данных</h3>
             <button class="retry-button" @click="getMessages">
@@ -33,8 +57,17 @@
           </div>
 
           <div v-else-if="mailingLists.length === 0" class="empty-container">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" class="empty-icon">
-              <path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              class="empty-icon"
+            >
+              <path
+                fill="currentColor"
+                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"
+              />
             </svg>
             <h3>Сообщения отсутствуют</h3>
             <p>В этой рассылке пока нет сообщений</p>
@@ -52,14 +85,27 @@
                 </tr>
               </thead>
               <tbody class="table-body">
-                <tr v-for="(item, index) in mailingLists" :key="index" class="table-row">
+                <tr
+                  v-for="(item, index) in mailingLists"
+                  :key="index"
+                  class="table-row"
+                >
                   <td class="cell-id">
                     <span class="id-badge">#{{ item.id }}</span>
                   </td>
                   <td class="cell-number">
                     <div class="number-wrapper">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="phone-icon">
-                        <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        class="phone-icon"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"
+                        />
                       </svg>
                       {{ item.to }}
                     </div>
@@ -78,7 +124,11 @@
 
             <!-- Мобильные карточки -->
             <div class="mobile-cards mobile-view">
-              <div v-for="(item, index) in mailingLists" :key="index" class="message-card">
+              <div
+                v-for="(item, index) in mailingLists"
+                :key="index"
+                class="message-card"
+              >
                 <div class="card-header">
                   <span class="id-badge">#{{ item.id }}</span>
                   <span :class="['status-badge', `status-${item.state}`]">
@@ -87,16 +137,36 @@
                 </div>
                 <div class="card-content">
                   <div class="card-field">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="field-icon">
-                      <path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      class="field-icon"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"
+                      />
                     </svg>
                     <span class="field-value">{{ item.to }}</span>
                   </div>
                   <div class="card-field">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" class="field-icon">
-                      <path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      class="field-icon"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
+                      />
                     </svg>
-                    <span class="field-value text-truncate">{{ item.text }}</span>
+                    <span class="field-value text-truncate">{{
+                      item.text
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -115,6 +185,10 @@ import { ref, reactive, onMounted, computed, toRefs } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useRouter } from "vue-router";
+
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
 
 const router = useRouter();
 const errorBlock = ref(false);
@@ -150,7 +224,7 @@ const getStatusText = (state) => {
     1: "Отправлено",
     2: "Ошибка отправки",
     3: "Доставлено",
-    4: "Прочитано"
+    4: "Прочитано",
   };
   return statusMap[state] || "Неизвестный статус";
 };
@@ -159,10 +233,11 @@ const getMessages = async () => {
   const apiUrlMethod = `${apiUrl}/view/${selectedItem.value.id}/`;
   loadingMessge.value = true;
   errorMessage.value = false;
-  
+
   try {
     const response = await axios.get(apiUrlMethod, {
       params: {
+        version: getVersion.value,
         limit: 50,
         offset: 0,
         sort: "asc",
@@ -453,7 +528,9 @@ onMounted(getMessages);
   word-break: break-word;
 }
 
-.loading-container, .error-container, .empty-container {
+.loading-container,
+.error-container,
+.empty-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -472,7 +549,8 @@ onMounted(getMessages);
   margin-bottom: 16px;
 }
 
-.error-icon, .empty-icon {
+.error-icon,
+.empty-icon {
   margin-bottom: 16px;
   color: #9ca3af;
 }
@@ -481,7 +559,9 @@ onMounted(getMessages);
   color: #ef4444;
 }
 
-.loading-container p, .error-container h3, .empty-container h3 {
+.loading-container p,
+.error-container h3,
+.empty-container h3 {
   margin: 0 0 8px 0;
   color: #111827;
   font-weight: 500;
@@ -511,18 +591,32 @@ onMounted(getMessages);
 
 /* Анимации */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Адаптивность */
@@ -531,19 +625,19 @@ onMounted(getMessages);
     max-height: 95vh;
     margin: 0 10px;
   }
-  
+
   .modal-header {
     padding: 16px;
   }
-  
+
   .modal-content {
     padding: 16px;
   }
-  
+
   .desktop-view {
     display: none;
   }
-  
+
   .mobile-view {
     display: flex;
   }
@@ -553,7 +647,7 @@ onMounted(getMessages);
   .desktop-view {
     display: table;
   }
-  
+
   .mobile-view {
     display: none;
   }
@@ -563,21 +657,21 @@ onMounted(getMessages);
   .modal-overlay {
     padding: 10px;
   }
-  
+
   .modal-title {
     font-size: 1.25rem;
   }
-  
+
   .message-card {
     padding: 12px;
   }
-  
+
   .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .status-badge {
     align-self: flex-start;
   }
