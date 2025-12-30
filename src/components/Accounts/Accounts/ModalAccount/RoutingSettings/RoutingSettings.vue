@@ -12,7 +12,8 @@
         <p class="description">
           Установка менеджера по умолчанию для каналов. Поступающие в канал
           сообщения от новых клиентов будут направляться на выбранного
-          менеджера.
+          менеджера. Можно выбрать компанию, компанию-офис или
+          компанию-офис-менеджера.
         </p>
 
         <div v-if="loading" class="loading">
@@ -35,15 +36,66 @@
               <span class="form-id">{{ item.source }}</span>
             </div>
 
-            <!-- Выбор офиса -->
+            <!-- Выбор компании -->
             <div class="form-group">
               <label class="form-label">
-                <span class="step-badge">2</span>
-                Выберите офис:
+                <span class="step-badge">1</span>
+                Выберите компанию:
               </label>
               <div class="options-list">
                 <button
-                  v-for="office in offices"
+                  v-for="company in companies"
+                  :key="company.id"
+                  @click="selectCompany(company.id)"
+                  :class="[
+                    'option-item',
+                    { active: selectedCompany == company.id },
+                  ]"
+                >
+                  <div class="option-text">
+                    <div class="option-title">{{ company.name_rus }}</div>
+                    <div class="option-meta">
+                      {{ company.phones || "Телефон не указан" }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="selectedCompany == company.id"
+                    class="option-check"
+                  >
+                    ✓
+                  </div>
+                </button>
+
+                <button
+                  @click="selectCompany('')"
+                  :class="[
+                    'option-item',
+                    'option-alt',
+                    { active: selectedCompany === '' },
+                  ]"
+                >
+                  <div class="option-text">
+                    <div class="option-title">Без компании</div>
+                    <div class="option-meta">
+                      Выберите только менеджера без привязки к компании
+                    </div>
+                  </div>
+                  <div v-if="selectedCompany === ''" class="option-check">
+                    ✓
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Выбор офиса (только если выбрана компания) -->
+            <div v-if="selectedCompany" class="form-group">
+              <label class="form-label">
+                <span class="step-badge">2</span>
+                Выберите офис (необязательно):
+              </label>
+              <div v-if="filteredOffices.length > 0" class="options-list">
+                <button
+                  v-for="office in filteredOffices"
                   :key="office.id"
                   @click="selectOffice(office.id)"
                   :class="[
@@ -54,7 +106,8 @@
                   <div class="option-text">
                     <div class="option-title">{{ office.name }}</div>
                     <div class="option-meta">
-                      {{ office.city }} • {{ office.phones }}
+                      {{ office.city || "Город не указан" }} •
+                      {{ office.phones || "Телефон не указан" }}
                     </div>
                   </div>
                   <div v-if="selectedOffice == office.id" class="option-check">
@@ -72,25 +125,33 @@
                 >
                   <div class="option-text">
                     <div class="option-title">Без офиса</div>
+                    <div class="option-meta">
+                      Выбрать только компанию без привязки к офису
+                    </div>
                   </div>
                   <div v-if="selectedOffice === ''" class="option-check">✓</div>
                 </button>
+              </div>
+              <div v-else class="empty-state">
+                У выбранной компании нет офисов
               </div>
             </div>
 
             <!-- Выбор менеджера -->
             <div class="form-group">
               <label class="form-label">
-                <span class="step-badge">3</span>
-                Выберите менеджера:
+                <span class="step-badge">{{
+                  selectedCompany ? "3" : "2"
+                }}</span>
+                Выберите менеджера (необязательно):
               </label>
 
-              <!-- Менеджеры офиса -->
-              <div v-if="selectedOffice && getManagersForOffice.length > 0">
-                <div class="section-label">Менеджеры офиса</div>
+              <!-- Менеджеры по фильтрам -->
+              <template v-if="filteredManagers.length > 0">
+                <div class="section-label">Доступные менеджеры</div>
                 <div class="options-list">
                   <button
-                    v-for="manager in getManagersForOffice"
+                    v-for="manager in filteredManagers"
                     :key="manager.u_id"
                     @click="selectManager(manager.u_id)"
                     :class="[
@@ -105,7 +166,12 @@
                       <div class="option-title">
                         {{ manager.u_name }} {{ manager.u_surname }}
                       </div>
-                      <div class="option-meta">{{ manager.u_email }}</div>
+                      <div class="option-meta">
+                        {{ manager.u_email }}
+                        <span v-if="manager.office_id">
+                          • Офис ID: {{ manager.office_id }}
+                        </span>
+                      </div>
                     </div>
                     <div
                       v-if="selectedManager == manager.u_id"
@@ -115,49 +181,65 @@
                     </div>
                   </button>
                 </div>
-              </div>
+              </template>
 
-              <!-- Менеджеры без офиса -->
-              <div v-if="!selectedOffice || selectedOffice === ''">
-                <div class="section-label">Менеджеры без офиса</div>
-                <div
-                  v-if="managersWithoutOffice.length > 0"
-                  class="options-list"
+              <!-- Вариант без менеджера -->
+              <div class="options-list">
+                <button
+                  @click="selectManager('')"
+                  :class="[
+                    'option-item',
+                    'option-alt',
+                    { active: selectedManager === '' },
+                  ]"
                 >
-                  <button
-                    v-for="manager in managersWithoutOffice"
-                    :key="manager.u_id"
-                    @click="selectManager(manager.u_id)"
-                    :class="[
-                      'option-item',
-                      { active: selectedManager == manager.u_id },
-                    ]"
-                  >
-                    <div class="manager-avatar">
-                      {{ getInitials(manager.u_name, manager.u_surname) }}
+                  <div class="option-text">
+                    <div class="option-title">Без менеджера</div>
+                    <div class="option-meta">
+                      Настроить только компанию и/или офис
                     </div>
-                    <div class="option-text">
-                      <div class="option-title">
-                        {{ manager.u_name }} {{ manager.u_surname }}
-                      </div>
-                      <div class="option-meta">{{ manager.u_email }}</div>
-                    </div>
-                    <div
-                      v-if="selectedManager == manager.u_id"
-                      class="option-check"
-                    >
-                      ✓
-                    </div>
-                  </button>
-                </div>
-                <div v-else class="empty-state">Нет менеджеров без офиса</div>
+                  </div>
+                  <div v-if="selectedManager === ''" class="option-check">
+                    ✓
+                  </div>
+                </button>
               </div>
 
               <div
-                v-if="!getManagersForOffice.length && selectedOffice"
+                v-if="
+                  !filteredManagers.length &&
+                  (selectedCompany || selectedOffice)
+                "
                 class="empty-state"
               >
-                В этом офисе нет менеджеров
+                Нет доступных менеджеров по выбранным критериям
+              </div>
+            </div>
+
+            <!-- Информация о текущем выборе -->
+            <div
+              v-if="selectedCompany || selectedOffice || selectedManager"
+              class="selection-summary"
+            >
+              <div class="summary-title">Вы выбрали:</div>
+              <div class="summary-items">
+                <div v-if="selectedCompany" class="summary-item">
+                  <strong>Компания:</strong>
+                  {{ getCompanyName(selectedCompany) }}
+                </div>
+                <div v-if="selectedOffice" class="summary-item">
+                  <strong>Офис:</strong> {{ getOfficeName(selectedOffice) }}
+                </div>
+                <div v-if="selectedManager" class="summary-item">
+                  <strong>Менеджер:</strong>
+                  {{ getManagerName(selectedManager) }}
+                </div>
+                <div
+                  v-if="!selectedCompany && !selectedOffice && !selectedManager"
+                  class="summary-item"
+                >
+                  <em>Ничего не выбрано</em>
+                </div>
               </div>
             </div>
 
@@ -165,16 +247,19 @@
             <div class="form-actions">
               <button
                 @click="saveMessengerRouting"
-                :disabled="!selectedManager || isSaving"
+                :disabled="isSaving"
                 class="btn btn-primary"
               >
                 <span v-if="isSaving">Сохранение...</span>
-                <span v-else>Сохранить</span>
+                <span v-else>Сохранить настройки</span>
               </button>
             </div>
 
             <div v-if="successMessage" class="success-message">
               {{ successMessage }}
+            </div>
+            <div v-if="saveError" class="error-banner">
+              {{ saveError }}
             </div>
           </div>
         </template>
@@ -218,12 +303,16 @@ const loading = ref(false);
 const error = ref("");
 const isSaving = ref(false);
 const successMessage = ref("");
+const saveError = ref("");
 
-const offices = ref([]);
+const companies = ref([]);
+const officesByCompany = ref({});
 const managersByOffice = ref({});
 const managersWithoutOffice = ref([]);
+const currentSettings = ref(null);
 
 const selectedVendor = ref("");
+const selectedCompany = ref("");
 const selectedOffice = ref("");
 const selectedManager = ref("");
 
@@ -236,13 +325,61 @@ const axiosInstance = computed(() => {
   });
 });
 
-const getManagersForOffice = computed(() => {
-  if (!selectedOffice.value) return [];
-  return managersByOffice.value[selectedOffice.value] || [];
+// Отфильтрованные офисы для выбранной компании
+const filteredOffices = computed(() => {
+  if (!selectedCompany.value) return [];
+  return officesByCompany.value[selectedCompany.value] || [];
 });
 
+// Отфильтрованные менеджеры по выбранным критериям
+const filteredManagers = computed(() => {
+  let managers = [];
+
+  // Если выбран офис - показываем менеджеров этого офиса
+  if (selectedOffice.value) {
+    managers = managersByOffice.value[selectedOffice.value] || [];
+  }
+  // Если выбрана компания без офиса - показываем менеджеров без офиса
+  else if (selectedCompany.value && !selectedOffice.value) {
+    managers = managersWithoutOffice.value.filter(
+      (manager) => !manager.office_id || manager.office_id === 0
+    );
+  }
+  // Если компания не выбрана - показываем всех менеджеров без офиса
+  else if (!selectedCompany.value) {
+    managers = managersWithoutOffice.value;
+  }
+
+  return managers;
+});
+
+const getCompanyName = (companyId) => {
+  const company = companies.value.find((c) => c.id == companyId);
+  return company ? company.name_rus : "Неизвестная компания";
+};
+
+const getOfficeName = (officeId) => {
+  const office = Object.values(officesByCompany.value)
+    .flat()
+    .find((o) => o.id == officeId);
+  return office ? office.name : "Неизвестный офис";
+};
+
+const getManagerName = (managerId) => {
+  const allManagers = [
+    ...Object.values(managersByOffice.value).flat(),
+    ...managersWithoutOffice.value,
+  ];
+  const manager = allManagers.find((m) => m.u_id == managerId);
+  return manager
+    ? `${manager.u_name} ${manager.u_surname}`
+    : "Неизвестный менеджер";
+};
+
 const getInitials = (firstName, lastName) => {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  return `${firstName?.charAt(0) || ""}${
+    lastName?.charAt(0) || ""
+  }`.toUpperCase();
 };
 
 const close = () => {
@@ -252,6 +389,7 @@ const close = () => {
 const fetchOfficesAndManagers = async () => {
   loading.value = true;
   error.value = "";
+  saveError.value = "";
   successMessage.value = "";
 
   try {
@@ -260,9 +398,13 @@ const fetchOfficesAndManagers = async () => {
     );
 
     if (data.ok) {
-      offices.value = data.data.offices;
-      managersByOffice.value = data.data.managers_by_office;
-      managersWithoutOffice.value = data.data.managers_without_office;
+      companies.value = data.data.companies || [];
+      officesByCompany.value = data.data.offices_by_company || {};
+      managersByOffice.value = data.data.managers_by_office || {};
+      managersWithoutOffice.value = data.data.managers_without_office || [];
+
+      // Загружаем текущие настройки
+      await fetchCurrentSettings();
     } else {
       error.value = data.message || "Ошибка при загрузке данных";
     }
@@ -275,8 +417,42 @@ const fetchOfficesAndManagers = async () => {
   }
 };
 
+const fetchCurrentSettings = async () => {
+  try {
+    const { data } = await axiosInstance.value.get(
+      `${VITE_BASE_URL}uon-account/getAccountMessageRouting?uuid=${props.item.uuid}`
+    );
+
+    if (data.ok && data.data) {
+      currentSettings.value = data.data;
+
+      // Устанавливаем текущие значения из настроек
+      if (data.data.company_id) {
+        selectedCompany.value = data.data.company_id.toString();
+      }
+      if (data.data.office_id) {
+        selectedOffice.value = data.data.office_id.toString();
+      }
+      if (data.data.manager_id) {
+        selectedManager.value = data.data.manager_id.toString();
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching current settings:", err);
+  }
+};
+
+const selectCompany = (companyId) => {
+  selectedCompany.value = companyId;
+  // При смене компании сбрасываем офис
+  selectedOffice.value = "";
+  // Менеджера тоже сбрасываем, т.к. он зависит от офиса/компании
+  selectedManager.value = "";
+};
+
 const selectOffice = (officeId) => {
   selectedOffice.value = officeId;
+  // При смене офиса сбрасываем менеджера
   selectedManager.value = "";
 };
 
@@ -285,27 +461,20 @@ const selectManager = (managerId) => {
 };
 
 const saveMessengerRouting = async () => {
-  const officeId = selectedOffice.value || 0;
-  const managerId = selectedManager.value;
-
-  if (!managerId) {
-    error.value = "Пожалуйста, выберите менеджера";
-    return;
-  }
-
   isSaving.value = true;
-  error.value = "";
+  saveError.value = "";
   successMessage.value = "";
 
   try {
     const payload = {
       uuid: selectedVendor.value,
       messenger_vendor_uuid: props.item.uuid,
-      office_id: parseInt(officeId),
-      manager_id: parseInt(managerId),
+      company_id: selectedCompany.value ? parseInt(selectedCompany.value) : 0,
+      office_id: selectedOffice.value ? parseInt(selectedOffice.value) : 0,
+      manager_id: selectedManager.value ? parseInt(selectedManager.value) : 0,
     };
 
-    console.log(payload);
+    console.log("Saving routing:", payload);
 
     const { data } = await axiosInstance.value.post(
       `${VITE_BASE_URL}uon-account/setAccountMessageRouting`,
@@ -313,15 +482,17 @@ const saveMessengerRouting = async () => {
     );
 
     if (data.ok) {
-      successMessage.value = "Маршрутизация успешно сохранена";
+      successMessage.value = "Настройки маршрутизации успешно сохранены";
+      // Обновляем текущие настройки
+      await fetchCurrentSettings();
       setTimeout(() => {
         successMessage.value = "";
       }, 3000);
     } else {
-      error.value = data.message || "Ошибка при сохранении";
+      saveError.value = data.message || "Ошибка при сохранении настроек";
     }
   } catch (err) {
-    error.value =
+    saveError.value =
       err.response?.data?.message || err.message || "Ошибка сохранения";
     console.error("Error saving messenger routing:", err);
   } finally {
@@ -333,11 +504,32 @@ watch(
   () => props.isOpen,
   (newVal) => {
     if (newVal) {
+      selectedCompany.value = "";
       selectedOffice.value = "";
       selectedManager.value = "";
       error.value = "";
+      saveError.value = "";
       successMessage.value = "";
       fetchOfficesAndManagers();
+    }
+  }
+);
+
+// Если выбран офис, автоматически определяем компанию
+watch(
+  () => selectedOffice.value,
+  (newOfficeId) => {
+    if (newOfficeId) {
+      // Находим компанию офиса
+      for (const [companyId, offices] of Object.entries(
+        officesByCompany.value
+      )) {
+        const office = offices.find((o) => o.id == newOfficeId);
+        if (office) {
+          selectedCompany.value = companyId;
+          break;
+        }
+      }
     }
   }
 );
@@ -363,7 +555,7 @@ watch(
   background-color: white;
   border-radius: 6px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  max-width: 650px;
+  max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -576,6 +768,7 @@ watch(
 .option-item.option-alt {
   color: #777;
   font-style: italic;
+  border-style: dashed;
 }
 
 .option-text {
@@ -632,6 +825,39 @@ watch(
   background-color: white;
   border-radius: 5px;
   border: 1px dashed #d5d5d5;
+}
+
+/* === SELECTION SUMMARY === */
+.selection-summary {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f0f7ff;
+  border: 1px solid #dbeafe;
+  margin-bottom: 14px;
+}
+
+.summary-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  margin-bottom: 6px;
+}
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item {
+  font-size: 11px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.summary-item strong {
+  color: #2563eb;
+  font-weight: 600;
 }
 
 /* === FORM ACTIONS === */
