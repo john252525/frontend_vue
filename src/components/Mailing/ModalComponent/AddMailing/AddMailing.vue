@@ -188,6 +188,8 @@ const formData = reactive({
   endTime: "17:00",
   startNum: 10,
   endNum: 30,
+  autostart: true,
+  ignore_inactive_sources: false,
   removeDuplicates: true,
   sendOnlyExistingDialogs: true,
   sendMessagesRandomOrder: false,
@@ -314,6 +316,11 @@ async function createWhatsAppBroadcast() {
   formDataToSend.append("uniq", formData.removeDuplicates);
   formDataToSend.append("exist", formData.sendOnlyExistingDialogs);
   formDataToSend.append("random", formData.sendMessagesRandomOrder);
+  formDataToSend.append("autostart", formData.autostart);
+  formDataToSend.append(
+    "ignore_inactive_sources",
+    formData.ignore_inactive_sources
+  );
   // ОБНОВЛЕНО: Используем динамический cascade из SettingsStep
   formDataToSend.append("cascade", formData.cascade || "telegram,whatsapp");
   formDataToSend.append("ph_col", formData.selectedLetter);

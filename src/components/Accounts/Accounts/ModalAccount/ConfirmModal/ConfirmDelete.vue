@@ -157,11 +157,11 @@ const props = defineProps({
 
 const { selectedItem } = toRefs(props);
 
-// Проверяем наличие активной подписки
 const hasSubscription = computed(() => {
   return (
     selectedItem.value?.subscription_dt_to !== undefined &&
-    selectedItem.value?.subscription_dt_to !== null
+    selectedItem.value?.subscription_dt_to !== null &&
+    selectedItem.value?.trial != true
   );
 });
 

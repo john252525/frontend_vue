@@ -467,8 +467,8 @@ const saveMessengerRouting = async () => {
 
   try {
     const payload = {
-      uuid: selectedVendor.value,
-      messenger_vendor_uuid: props.item.uuid,
+      uuid: props.item.uuid,
+      messenger_vendor_uuid: selectedVendor.value,
       company_id: selectedCompany.value ? parseInt(selectedCompany.value) : 0,
       office_id: selectedOffice.value ? parseInt(selectedOffice.value) : 0,
       manager_id: selectedManager.value ? parseInt(selectedManager.value) : 0,

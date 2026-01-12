@@ -131,9 +131,11 @@
               <td>
                 <span class="phone">{{ getPhone(record) }}</span>
               </td>
-              <td class="text-column" :title="getText(record)">
-                {{ getText(record) }}
-              </td>
+              <td
+                class="text-column"
+                :title="getText(record)"
+                v-html="getText(record)"
+              ></td>
               <td>{{ getDeviceType(record) }}</td>
               <td>
                 <span class="status-pill" :class="getStatusClass(record)">
@@ -171,7 +173,7 @@
 
           <div class="card-row full-width">
             <span class="label">Текст</span>
-            <span class="value text-message">{{ getText(record) }}</span>
+            <span class="value text-message" v-html="getText(record)"></span>
           </div>
 
           <div class="card-row">
@@ -322,10 +324,41 @@ const getPhone = (record) => {
   return d?.target?.value || "N/A";
 };
 
+const decodeHtml = (str) => {
+  if (!str) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+};
+
 // Получение текста сообщения (полного)
+const formatMessageText = (rawStr) => {
+  if (!rawStr || rawStr === "N/A") return "N/A";
+
+  // 1. Сначала декодируем HTML-сущности (&quot; -> ")
+  // Используем временный элемент, чтобы получить чистый текст
+  const txt = document.createElement("textarea");
+  txt.innerHTML = rawStr;
+  let decoded = txt.value;
+
+  // 2. Превращаем жирный текст (**текст** или *текст*)
+  // Жирный: **текст** -> <strong>текст</strong>
+  decoded = decoded.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Курсив: *текст* -> <em>текст</em>
+  // (Важно: делаем после жирного, чтобы не испортить двойные звезды)
+  decoded = decoded.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+  // 3. Обрабатываем переносы строк, если white-space: pre-line не используется
+  // decoded = decoded.replace(/\n/g, '<br>');
+
+  return decoded;
+};
+
+// Обновляем функцию getText, чтобы она возвращала готовую HTML-строку
 const getText = (record) => {
   const d = parseData(record);
-  return d?.message?.text || "N/A";
+  return formatMessageText(d?.message?.text);
 };
 
 // Получение типа устройства

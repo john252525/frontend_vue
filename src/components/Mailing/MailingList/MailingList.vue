@@ -484,7 +484,11 @@ const changeStatusMailing = (item, state) => {
   );
   if (index !== -1) {
     mailingLists.value[index].state = state;
-    // Если нужно также обновить другие поля, например state_text
+    if (state === 1) {
+      mailingLists.value[index].state_text = "В процессе";
+    } else {
+      mailingLists.value[index].state_text = "Приостановлена";
+    }
   }
 };
 

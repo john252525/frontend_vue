@@ -118,6 +118,31 @@
       <div class="form-group">
         <label>Дополнительные настройки:</label>
         <div class="options-list">
+          <label v-show="getVersion === 2" class="option-item">
+            <input
+              type="checkbox"
+              v-model="formData.autostart"
+              class="real-checkbox"
+            />
+            <span
+              class="custom-checkbox"
+              :class="{ checked: formData.autostart }"
+            ></span>
+            Автоматический запуск после создания
+          </label>
+          <label v-show="getVersion === 2" class="option-item">
+            <input
+              type="checkbox"
+              v-model="formData.ignore_inactive_sources"
+              class="real-checkbox"
+            />
+            <span
+              class="custom-checkbox"
+              :class="{ checked: formData.ignore_inactive_sources }"
+            ></span>
+            Не останавливать рассылку, если обнаружены неактивные аккаунты
+            мессенджеров
+          </label>
           <label class="option-item">
             <input
               type="checkbox"
@@ -166,13 +191,17 @@
 </template>
 
 <script setup>
-import { inject, ref, watch } from "vue";
+import { inject, ref, watch, computed } from "vue";
 
 const props = defineProps({
   currentStep: Number,
 });
 
 const emit = defineEmits(["submit", "prev", "step-completed"]);
+
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
 
 const formData = inject("formData");
 const updateFormData = inject("updateFormData");
