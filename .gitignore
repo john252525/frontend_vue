@@ -1,5 +1,4 @@
 .env
 .env.save*
-dist/
 node_modules/
 .vscode/
