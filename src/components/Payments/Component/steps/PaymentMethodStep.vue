@@ -38,6 +38,7 @@
               },
             ]"
             @click="!isLoading && selectMethod('YooKassa')"
+            v-if="getPermission"
           >
             <div class="method-icon">
               <div class="icon-wrapper">
@@ -129,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -146,6 +147,13 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:method", "next"]);
+
+const getPermission = computed(() => {
+  return window.location.hostname != "whatsapi.developtech.ru" ||
+    window.location.hostname != "app.whatsapi.ru"
+    ? false
+    : true;
+});
 
 const localMethod = ref(props.method);
 
