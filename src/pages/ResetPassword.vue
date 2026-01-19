@@ -5,45 +5,61 @@
     :changeIncorrectPassword="hideErrorBlock"
   />
 
-  <section v-if="!emailSendStation" class="password-recovery-section">
-    <form @submit.prevent="sendEmail">
-      <h2 class="title">{{ t("forgotPassword.title") }}</h2>
+  <section v-if="!isSuccess" class="password-recovery-section">
+    <form @submit.prevent="handleSubmit" class="recovery-form">
+      <h2 class="title">Установка нового пароля</h2>
       <p class="subtitle">
-        {{ t("forgotPassword.subtitle") }}
+        Пожалуйста, придумайте сложный пароль, содержащий не менее 8 символов.
       </p>
 
       <div class="input-cont">
-        <label class="name-input" for="email">{{
-          t("forgotPassword.mail")
-        }}</label>
+        <label class="name-input" for="password">Новый пароль</label>
         <input
-          type="email"
-          :placeholder="t('forgotPassword.placeholder')"
-          id="email"
-          v-model="email"
-          @blur="validateEmail"
-          @input="clearEmailError"
-          :class="{ error: emailError }"
+          type="password"
+          placeholder="Введите новый пароль"
+          id="password"
+          v-model="password"
+          @input="clearErrors"
+          :class="{ error: passwordError }"
           required
         />
         <div class="error-container">
           <transition name="slide-fade">
-            <p v-if="emailError" class="error-message">
-              {{ emailErrorMessage }}
+            <p v-if="passwordError" class="error-message">
+              {{ passwordErrorMessage }}
+            </p>
+          </transition>
+        </div>
+      </div>
+
+      <div class="input-cont">
+        <label class="name-input" for="confirmPassword"
+          >Подтвердите пароль</label
+        >
+        <input
+          type="password"
+          placeholder="Повторите пароль"
+          id="confirmPassword"
+          v-model="confirmPassword"
+          @input="clearErrors"
+          :class="{ error: confirmError }"
+          required
+        />
+        <div class="error-container">
+          <transition name="slide-fade">
+            <p v-if="confirmError" class="error-message">
+              {{ confirmErrorMessage }}
             </p>
           </transition>
         </div>
       </div>
 
       <button type="submit" class="send-code-button" :disabled="isSubmitting">
-        {{
-          isSubmitting ? t("forgotPassword.sending") : t("forgotPassword.send")
-        }}
+        {{ isSubmitting ? "Сохранение..." : "Сохранить пароль" }}
       </button>
 
       <p class="login-account-button">
-        {{ t("forgotPassword.remember") }}
-        <span @click="navigateToLogin">{{ t("forgotPassword.login") }}</span>
+        Вспомнили пароль? <span @click="navigateToLogin">Войти</span>
       </p>
     </form>
   </section>
@@ -60,107 +76,107 @@
         d="m7.416 3.604l4.605 4.98l-3.251 6.395l6.855-1.229l3.12 7.532L32 3.902zm-.843 10.781l1.276-1.047l-1.647.521l-.172-.24l.683-.661l-.891.359c-3.407 1.323-5.823 4.62-5.823 8.485a9.043 9.043 0 0 0 2.844 6.593A9.006 9.006 0 0 1 1.66 23.92c0-3.817 2.417-7.219 5.755-8.557l.423-1.02l-1 .437l-.281-.38zm5.818-2.625L14.522 8l12.531-2.932z"
       />
     </svg>
-    <h2 class="text-email-sent">
-      {{ t("forgotPassword.emailSent") }}
-    </h2>
+    <h2 class="text-email-sent">Пароль успешно изменен!</h2>
+    <button
+      @click="navigateToLogin"
+      class="send-code-button"
+      style="width: 200px; margin-top: 0"
+    >
+      Войти в аккаунт
+    </button>
   </div>
 </template>
 
 <script setup>
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-import axios from "axios";
-const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
-import { useRouter } from "vue-router";
 import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 
 const router = useRouter();
+const route = useRoute(); // Используем для получения токена из URL
+const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 
-const emailSendStation = ref(false);
-const email = ref("");
-const emailError = ref(false);
-const emailErrorMessage = ref("");
-const showErrorBlock = ref(false);
-const errorMessage = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const isSuccess = ref(false);
 const isSubmitting = ref(false);
 
-const navigateToLogin = () => {
-  router.push("/Login");
+const passwordError = ref(false);
+const passwordErrorMessage = ref("");
+const confirmError = ref(false);
+const confirmErrorMessage = ref("");
+const showErrorBlock = ref(false);
+const errorMessage = ref("");
+
+const navigateToLogin = () => router.push("/Login");
+const hideErrorBlock = () => (showErrorBlock.value = false);
+
+const clearErrors = () => {
+  passwordError.value = false;
+  confirmError.value = false;
+  passwordErrorMessage.value = "";
+  confirmErrorMessage.value = "";
 };
 
-const validateEmail = () => {
-  const emailValue = email.value.trim();
-  if (!emailValue) {
-    emailErrorMessage.value = t("forgotPassword.errorEmailRequired");
-    emailError.value = true;
-    return false;
+const validateForm = () => {
+  let isValid = true;
+  if (password.value.length < 8) {
+    passwordErrorMessage.value = "Пароль должен быть не менее 8 символов";
+    passwordError.value = true;
+    isValid = false;
   }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(emailValue)) {
-    emailErrorMessage.value = t("forgotPassword.errorInvalidEmail");
-    emailError.value = true;
-    return false;
+  if (password.value !== confirmPassword.value) {
+    confirmErrorMessage.value = "Пароли не совпадают";
+    confirmError.value = true;
+    isValid = false;
   }
-
-  if (emailValue.length > 30) {
-    emailErrorMessage.value = t("forgotPassword.errorEmailTooLong");
-    emailError.value = true;
-    return false;
-  }
-
-  emailErrorMessage.value = "";
-  emailError.value = false;
-  return true;
+  return isValid;
 };
 
-const clearEmailError = () => {
-  if (emailError.value) {
-    emailErrorMessage.value = "";
-    emailError.value = false;
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  // Извлекаем токен из ссылки (?token=...)
+  const token = route.query.token;
+
+  if (!token) {
+    showErrorBlock.value = true;
+    errorMessage.value = "Токен сброса пароля отсутствует или недействителен.";
+    return;
   }
-};
-
-const hideErrorBlock = () => {
-  showErrorBlock.value = false;
-};
-
-const sendEmail = async () => {
-  if (!validateEmail()) return;
 
   isSubmitting.value = true;
 
   try {
+    // Отправляем запрос согласно документации
     const response = await axios.post(
-      `${FRONTEND_URL_AUTH}forgotPassword`,
+      `${FRONTEND_URL_AUTH}resetPassword`,
       {
-        email: email.value,
+        token: token,
+        new_password: password.value, // Ключ из вашей доки
       },
       {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
-      }
+      },
     );
 
-    if (response.data.ok === true) {
-      emailSendStation.value = true;
+    // Проверяем ответ (обычно response.data.ok или статус 200)
+    if (response.status === 200 || response.data.ok === true) {
+      isSuccess.value = true;
     } else {
       showErrorBlock.value = true;
       errorMessage.value =
-        response.data.error_message || t("forgotPassword.errorSendFailed");
+        response.data.error_message || "Не удалось сбросить пароль";
     }
   } catch (error) {
     showErrorBlock.value = true;
-    if (error.response) {
-      errorMessage.value =
-        error.response.data?.error_message ||
-        t("forgotPassword.errorServerError");
-      console.error("Ошибка сервера:", error.response.data);
-    } else {
-      errorMessage.value = t("forgotPassword.errorNetworkError");
-    }
+    errorMessage.value =
+      error.response?.data?.error_message ||
+      "Произошла ошибка при обращении к серверу";
+    console.error("API Error:", error);
   } finally {
     isSubmitting.value = false;
   }
@@ -173,92 +189,65 @@ const sendEmail = async () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 10px;
-  width: 650px;
-  height: 420px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
   background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.error-container {
-  min-height: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.error-message {
-  font-weight: 500;
-  font-size: 14px;
-  color: #d33838;
-  margin: 4px 0 0;
-  position: absolute;
   width: 100%;
+  max-width: 650px;
+  min-height: 450px;
+  padding: 60px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
-}
-
-input.error {
-  border: 0.5px solid #be2424 !important;
-  background: #ffeaea !important;
+.recovery-form {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .title {
-  font-weight: 600;
   font-size: 28px;
+  font-weight: 700;
   color: var(--text);
-  margin-bottom: 24px;
-  margin: 0;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .subtitle {
-  font-weight: 400;
-  font-size: 18px;
-  color: var(--text);
-  margin-bottom: 38px;
-  width: 500px;
-  margin-top: 0;
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 32px;
+  line-height: 1.4;
 }
 
 .input-cont {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
-  width: 100%;
 }
 
 .name-input {
-  font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
   color: var(--text);
-  margin: 0;
+  text-align: left;
+  width: 100%;
 }
 
 input {
-  border: 0.5px solid #c1c1c1;
-  border-radius: 5px;
-  padding-left: 10px;
-  width: 550px;
-  height: 45px;
+  width: 100%;
+  height: 48px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 15px;
   background: var(--input);
-  font-weight: 400;
-  font-size: 14px;
   color: var(--text);
   box-sizing: border-box;
 }
@@ -268,13 +257,52 @@ input:focus {
   border-color: #4950ca;
 }
 
-.text-email-sent {
-  font-size: 20px;
-  width: 300px;
-  font-weight: 500;
-  text-align: center;
-  color: var(--text);
+input.error {
+  border-color: #d33838 !important;
+  background: #fffafa !important;
+}
+
+.error-container {
+  min-height: 24px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.error-message {
+  color: #d33838;
+  font-size: 12px;
   margin: 0;
+}
+
+.send-code-button {
+  width: 100%;
+  height: 50px;
+  background: #4950ca;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.send-code-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.login-account-button {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.login-account-button span {
+  color: #4950ca;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .cont {
@@ -282,110 +310,38 @@ input:focus {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 10px;
-  width: 350px;
-  height: 400px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.send-code-button {
-  border-radius: 5px;
-  width: 565px;
-  height: 44px;
-  background: #4950ca;
-  font-weight: 600;
-  font-size: 14px;
-  color: white;
-  transition: all 0.25s;
-  border: none;
-  cursor: pointer;
-  margin: 0;
-}
-
-.send-code-button:hover:not(:disabled) {
-  background: #595fd1;
-}
-
-.send-code-button:active:not(:disabled) {
-  background: #2f36af;
-}
-
-.send-code-button:disabled {
-  background: #a0a0a0;
-  cursor: not-allowed;
-}
-
-.login-account-button {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text);
   text-align: center;
-  margin-top: 24px;
+  background: var(--bg);
+  padding: 60px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 400px;
+}
+
+.text-email-sent {
+  font-size: 22px;
+  color: var(--text);
   margin: 0;
-  padding-top: 24px;
 }
 
-.login-account-button span {
-  cursor: pointer;
-  text-decoration: underline;
-  color: #4950ca;
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s ease;
 }
-
-.login-account-button span:hover {
-  color: #595fd1;
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
 }
 
 @media (max-width: 650px) {
   .password-recovery-section {
-    width: 450px;
-    height: 420px;
-  }
-
-  input {
-    width: 350px;
-    height: 45px;
-  }
-
-  .send-code-button {
-    width: 365px;
-    height: 44px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-    width: 350px;
-  }
-}
-
-@media (max-width: 450px) {
-  .password-recovery-section {
-    width: 350px;
-    height: 420px;
-  }
-
-  input {
-    width: 250px;
-    height: 45px;
-  }
-
-  .send-code-button {
-    width: 265px;
-    height: 44px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .subtitle {
-    font-size: 14px;
-    width: 250px;
+    width: 95%;
+    padding: 40px 20px;
   }
 }
 </style>

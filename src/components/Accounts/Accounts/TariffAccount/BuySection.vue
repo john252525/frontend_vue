@@ -3,7 +3,7 @@
     <div class="modal-header">
       <button class="back-button" @click="close">
         <svg viewBox="0 0 24 24" width="20" height="20">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
         </svg>
         Назад к тарифам
       </button>
@@ -11,101 +11,116 @@
     </div>
 
     <Loading v-if="loadingPay" />
-    
-    <div v-else class="tariff-content">
-      <!-- Карточка тарифа -->
-      <div class="tariff-card">
-        <div class="tariff-header">
-          <div class="tariff-badges">
-            <span class="tariff-name">{{ selectTariff.name }}</span>
-            <div v-if="hasDiscount" class="discount-badge">-{{ discountPercent }}%</div>
-          </div>
-          <div class="tariff-period">на {{ getPeriodText(selectTariff.period) }}</div>
-        </div>
 
-        <!-- Цена -->
-        <div class="price-section">
-          <div v-if="hasDiscount" class="price-with-discount">
-            <div class="original-price">
-              {{ formatPrice(selectTariff.price) }} {{ selectTariff.currency }}
+    <div v-else class="modal-body-scroll">
+      <div class="tariff-content">
+        <div class="tariff-card">
+          <div class="tariff-header">
+            <div class="tariff-badges">
+              <span class="tariff-name">{{ selectTariff.name }}</span>
+              <div v-if="hasDiscount" class="discount-badge">
+                -{{ discountPercent }}%
+              </div>
             </div>
-            <div class="final-price">
+            <div class="tariff-period">
+              на {{ getPeriodText(selectTariff.period) }}
+            </div>
+          </div>
+
+          <div class="price-section">
+            <div v-if="hasDiscount" class="price-with-discount">
+              <div class="original-price">
+                {{ formatPrice(selectTariff.price) }}
+                {{ selectTariff.currency }}
+              </div>
+              <div class="final-price">
+                {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+              </div>
+            </div>
+            <div v-else class="price-regular">
               {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
             </div>
           </div>
-          <div v-else class="price-regular">
-            {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
-          </div>
-        </div>
 
-        <!-- Лимиты тарифа -->
-        <div class="limits-section" v-if="selectTariff.limits">
-          <h4>Что включено:</h4>
-          <div class="limits-grid">
-            <div class="limit-item">
-              <div class="limit-icon">💬</div>
-              <div class="limit-info">
-                <span class="limit-value">{{ formatLimit(selectTariff.limits.dialogs) }}</span>
-                <span class="limit-label">диалогов</span>
+          <div class="limits-section" v-if="selectTariff.limits">
+            <h4>Что включено:</h4>
+            <div class="limits-grid">
+              <div class="limit-item">
+                <div class="limit-icon">💬</div>
+                <div class="limit-info">
+                  <span class="limit-value">{{
+                    formatLimit(selectTariff.limits.dialogs)
+                  }}</span>
+                  <span class="limit-label">диалогов</span>
+                </div>
               </div>
-            </div>
-            <div class="limit-item">
-              <div class="limit-icon">📨</div>
-              <div class="limit-info">
-                <span class="limit-value">{{ formatLimit(selectTariff.limits.messages) }}</span>
-                <span class="limit-label">сообщений</span>
+              <div class="limit-item">
+                <div class="limit-icon">📨</div>
+                <div class="limit-info">
+                  <span class="limit-value">{{
+                    formatLimit(selectTariff.limits.messages)
+                  }}</span>
+                  <span class="limit-label">сообщений</span>
+                </div>
               </div>
-            </div>
-            <div class="limit-item" v-if="selectTariff.limits.write_first">
-              <div class="limit-icon">👆</div>
-              <div class="limit-info">
-                <span class="limit-value">Да</span>
-                <span class="limit-label">первое сообщение</span>
+              <div class="limit-item" v-if="selectTariff.limits.write_first">
+                <div class="limit-icon">👆</div>
+                <div class="limit-info">
+                  <span class="limit-value">Да</span>
+                  <span class="limit-label">первое сообщение</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Бонусы -->
-        <div class="bonuses-section" v-if="hasBonuses">
-          <h4>🎁 Ваши бонусы:</h4>
-          <div class="bonuses-list">
-            <div v-for="bonus in activeBonuses" :key="bonus.mod_id" class="bonus-item">
-              <div class="bonus-icon">+</div>
-              <div class="bonus-text">
-                {{ getBonusDescription(bonus) }}
+          <div class="bonuses-section" v-if="hasBonuses">
+            <h4>🎁 Ваши бонусы:</h4>
+            <div class="bonuses-list">
+              <div
+                v-for="bonus in activeBonuses"
+                :key="bonus.mod_id"
+                class="bonus-item"
+              >
+                <div class="bonus-icon">+</div>
+                <div class="bonus-text">
+                  {{ getBonusDescription(bonus) }}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Кнопка покупки -->
-      <div class="purchase-section">
-        <div class="total-price">
-          <span class="total-label">К оплате:</span>
-          <span class="total-amount">{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span>
-        </div>
-        
-        <button class="buy-button" @click="buyTariff">
-          <span class="button-text">Оплатить подписку</span>
-          <span class="button-price">{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span>
-        </button>
-        
-        <div class="security-notice">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
-          </svg>
-          <span>Платежи защищены SSL-шифрованием</span>
-        </div>
+    <div v-if="!loadingPay" class="purchase-section">
+      <div class="total-price">
+        <span class="total-label">К оплате:</span>
+        <span class="total-amount"
+          >{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span
+        >
+      </div>
+
+      <button class="buy-button" @click="buyTariff">
+        <span class="button-text">Оплатить подписку</span>
+        <span class="button-price"
+          >{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span
+        >
+      </button>
+
+      <div class="security-notice">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path
+            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+          />
+        </svg>
+        <span>Платежи защищены SSL-шифрованием</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { toRefs, computed } from "vue";
-import { ref } from "vue";
+import { toRefs, computed, ref } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import { useAccountStore } from "@/stores/accountStore";
@@ -138,16 +153,24 @@ const { selectTariff, selectedItem } = toRefs(props);
 
 // Вычисляемые свойства
 const hasDiscount = computed(() => {
-  return selectTariff.value.final_price && selectTariff.value.final_price < selectTariff.value.price;
+  return (
+    selectTariff.value.final_price &&
+    selectTariff.value.final_price < selectTariff.value.price
+  );
 });
 
 const finalPrice = computed(() => {
-  return hasDiscount.value ? selectTariff.value.final_price : selectTariff.value.price;
+  return hasDiscount.value
+    ? selectTariff.value.final_price
+    : selectTariff.value.price;
 });
 
 const discountPercent = computed(() => {
   if (!hasDiscount.value) return 0;
-  const discount = ((selectTariff.value.price - selectTariff.value.final_price) / selectTariff.value.price) * 100;
+  const discount =
+    ((selectTariff.value.price - selectTariff.value.final_price) /
+      selectTariff.value.price) *
+    100;
   return Math.round(discount);
 });
 
@@ -157,7 +180,7 @@ const hasBonuses = computed(() => {
 
 const activeBonuses = computed(() => {
   if (!selectTariff.value.bonuses) return [];
-  return selectTariff.value.bonuses.filter(bonus => bonus.multiplier > 0);
+  return selectTariff.value.bonuses.filter((bonus) => bonus.multiplier > 0);
 });
 
 // Вспомогательные функции
@@ -167,22 +190,28 @@ const formatPrice = (price) => {
 
 const formatLimit = (limit) => {
   if (limit === -1) return "∞";
-  return new Intl.NumberFormat('ru-RU').format(limit);
+  return new Intl.NumberFormat("ru-RU").format(limit);
 };
 
 const getPeriodText = (period) => {
   const periodMap = {
-    "1d": "1 день", "7d": "7 дней", "14d": "14 дней", "30d": "30 дней",
-    "1m": "1 месяц", "3m": "3 месяца", "6m": "6 месяцев", "12m": "12 месяцев",
-    "1y": "1 год"
+    "1d": "1 день",
+    "7d": "7 дней",
+    "14d": "14 дней",
+    "30d": "30 дней",
+    "1m": "1 месяц",
+    "3m": "3 месяца",
+    "6m": "6 месяцев",
+    "12m": "12 месяцев",
+    "1y": "1 год",
   };
   return periodMap[period] || period;
 };
 
 const getBonusDescription = (bonus) => {
   if (bonus.multiplier === 0) return "Бонус недоступен";
-  const periodText = getPeriodText(bonus.tariff_period || '1m');
-  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} × ` : '';
+  const periodText = getPeriodText(bonus.tariff_period || "1m");
+  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} × ` : "";
   return `${multiplierText}${bonus.tariff_code} на ${periodText}`;
 };
 
@@ -194,7 +223,9 @@ const encodeTariff = (tariffCode, id) => {
     const str = `${prefix}${tariffCode}|${id}|${timestamp}|${randomSalt}`;
 
     const firstPass = btoa(unescape(encodeURIComponent(str)));
-    const secondPass = btoa(unescape(encodeURIComponent(firstPass.split("").reverse().join(""))));
+    const secondPass = btoa(
+      unescape(encodeURIComponent(firstPass.split("").reverse().join(""))),
+    );
 
     return secondPass;
   } catch (error) {
@@ -205,10 +236,11 @@ const encodeTariff = (tariffCode, id) => {
 
 const buyTariff = async () => {
   loadingPay.value = true;
-
   try {
-    const encodedTariff = encodeTariff(selectTariff.value.code, selectTariff.value.id);
-
+    const encodedTariff = encodeTariff(
+      selectTariff.value.code,
+      selectTariff.value.id,
+    );
     const response = await axios.post(
       `${apiUrl}/buy`,
       {
@@ -227,7 +259,7 @@ const buyTariff = async () => {
         headers: {
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.success) {
@@ -243,26 +275,49 @@ const buyTariff = async () => {
     props.changePaymentsStation(
       true,
       "error",
-      error.response?.data?.message || "Ошибка при покупке"
+      error.response?.data?.message || "Ошибка при покупке",
     );
   }
 };
 </script>
 
 <style scoped>
+/* ОСНОВНОЙ КОНТЕЙНЕР: Растягиваем на всю высоту и запрещаем внешний скролл */
 .buy-section {
   height: 100%;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Это убирает основной скролл */
+  background: white;
 }
 
+/* ШАПКА: Фиксирована сверху */
 .modal-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  padding: 16px 24px;
   border-bottom: 1px solid #f0f0f0;
+}
+
+/* ТЕЛО: Только эта часть будет скроллиться, если контента много */
+.modal-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  /* Плавный скролл для мобилок */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Кастомизация скроллбара для красоты */
+.modal-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body-scroll::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
 }
 
 .back-button {
@@ -297,7 +352,6 @@ const buyTariff = async () => {
 }
 
 .tariff-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -454,12 +508,14 @@ const buyTariff = async () => {
   font-weight: 500;
 }
 
+/* ФУТЕР: Фиксирован снизу */
 .purchase-section {
+  flex-shrink: 0;
   margin-top: auto;
-  padding: 16px;
+  padding: 16px 24px;
   background: white;
-  border: 1px solid #eaeaea;
-  border-radius: 12px;
+  border-top: 1px solid #eaeaea;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
 }
 
 .total-price {
@@ -530,13 +586,12 @@ const buyTariff = async () => {
 
 @media (max-width: 768px) {
   .modal-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    flex-direction: row; /* Оставил в ряд, чтобы не съедало высоту */
+    justify-content: space-between;
   }
 
-  .back-button {
-    align-self: flex-start;
+  .modal-body-scroll {
+    padding: 16px;
   }
 
   .tariff-card {
@@ -554,32 +609,6 @@ const buyTariff = async () => {
 
   .buy-button {
     padding: 14px;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .button-text,
-  .button-price {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-header h2 {
-    font-size: 18px;
-  }
-
-  .tariff-name {
-    font-size: 16px;
-  }
-
-  .final-price,
-  .price-regular {
-    font-size: 24px;
-  }
-
-  .total-amount {
-    font-size: 18px;
   }
 }
 </style>

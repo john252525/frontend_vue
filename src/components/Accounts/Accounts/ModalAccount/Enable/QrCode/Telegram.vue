@@ -247,6 +247,9 @@ const props = defineProps({
   updateLoadingStatus: {
     type: Function,
   },
+  changeMax: {
+    type: Function,
+  },
 });
 
 import { useAccountStore } from "@/stores/accountStore";
@@ -495,7 +498,7 @@ const getQr = async () => {
         "getQr",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -563,7 +566,7 @@ const enablePhoneAuth = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -572,7 +575,7 @@ const enablePhoneAuth = async () => {
         "enablePhoneAuth",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -645,8 +648,15 @@ const getAccountInfo = async () => {
         "getInfo",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
+
+      if (
+        response.data.step?.value === 2.1 ||
+        response.data.step?.value === 2.25
+      ) {
+        props.changeMax();
+      }
 
       if (response.data.step?.value === 5) {
         clearInterval(intervalId);

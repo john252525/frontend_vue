@@ -81,7 +81,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            window.open(`mailto:hr@developtech.ru`, "_blank");
           },
         },
         // {
@@ -151,7 +151,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            window.open(`mailto:hr@developtech.ru`, "_blank");
           },
         },
         // {

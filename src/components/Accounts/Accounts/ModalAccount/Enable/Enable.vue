@@ -8,6 +8,7 @@
       ref="subComponentRef"
       v-if="station.qrCode"
       :updateLoadingStatus="updateLoadingStatus"
+      :changeMax="changeMax"
       :changeEnableStation="changeEnableStation"
     />
     <GetCode
@@ -112,6 +113,16 @@ const changeChallengeRequired = () => {
   station.ChallengeRequired = false;
 };
 
+const changeMax = () => {
+  station.qrCode = false;
+  station.max = true;
+};
+
+const changeStatus = () => {
+  stepStation.enteringCode = false;
+  stepStation.enteringPassword = true;
+};
+
 const openEnableMenuTrue = () => {
   station.resultTrue = !station.resultTrue;
   station.qrCode = false;
@@ -121,7 +132,7 @@ const openEnableMenuTrue = () => {
 };
 
 const errorTrue = () => {
-  (station.result = true), (station.ChallengeRequired = false);
+  ((station.result = true), (station.ChallengeRequired = false));
 };
 
 const subComponent = ref(null);
@@ -140,7 +151,7 @@ const handleStopEnableByQR = () => {
   if (subComponentRef.value) {
     const childComponent = subComponentRef.value.getChild(); // Получаем дочерний компонент
     if (childComponent && typeof childComponent.stopEnableByQR === "function") {
-      childComponent.stopEnableByQR(); // Вызываем функцию остановки в дочернем компоненте
+      childComponent.stopEnableByQR();
     }
   }
 };
@@ -230,7 +241,7 @@ const forceStop = async () => {
         "forceStop",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -325,7 +336,7 @@ const setState = async (request) => {
         "setState",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
     props.changeForceStopItemData(selectedItem.value);
@@ -353,7 +364,7 @@ const setState = async (request) => {
         station.qrCode = true;
       } else if (response.data.error.message === "Challenge required") {
         station.stationLoading = false;
-        station.ChallengeRequired = true;
+        station.max = true;
       } else if (response.data.error.message === "QR code received") {
         station.qrCode = true;
       } else if (response.data.error.message === "Auth code received") {

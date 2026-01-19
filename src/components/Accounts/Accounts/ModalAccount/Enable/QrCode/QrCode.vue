@@ -1,6 +1,7 @@
 <template>
   <section>
     <Telegram
+      :changeMax="changeMax"
       :changeForceStopItemData="changeForceStopItemData"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeEnableStation="changeEnableStation"
@@ -40,6 +41,9 @@ const props = defineProps({
     type: Function,
   },
   updateLoadingStatus: {
+    type: Function,
+  },
+  changeMax: {
     type: Function,
   },
   openEnableMenuTrue: {
