@@ -155,7 +155,7 @@
                     />
                   </svg>
                 </div>
-                <span class="feature-text">Первое сообщение</span>
+                <span class="feature-text">Написать первым</span>
               </div>
 
               <!-- Ежемесячная стоимость -->
@@ -429,7 +429,7 @@ const calculateMonthlyEquivalent = (tariff) => {
 
 const calculateSavings = (tariff) => {
   const monthlyTariff = sortedTariffs.value.find(
-    (t) => t.period === "1m" || t.period === "30d"
+    (t) => t.period === "1m" || t.period === "30d",
   );
 
   if (!monthlyTariff) return 0;
@@ -467,7 +467,7 @@ const fetchTariffs = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.ok && response.data.data) {

@@ -68,19 +68,7 @@
       </p>
     </div>
 
-    <div class="code-footer">
-      <button class="code-switch" @click="getQr">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M2 9V7C2 5.89543 2.89543 5 4 5H7M16 5H20C21.1046 5 22 5.89543 22 7V9M22 16V20C22 21.1046 21.1046 22 20 22H16M7 22H4C2.89543 22 2 21.1046 2 20V16"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        Перейти к QR-коду
-      </button>
-    </div>
+    <GetQrButton :updateLoadingStatus="updateLoadingStatus" />
 
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
     <LoadingModal
@@ -93,6 +81,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, inject, computed, onUnmounted } from "vue";
+import GetQrButton from "../ui/GetQrButton.vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 import ResultModal from "../ResultModal.vue";
@@ -195,7 +184,7 @@ const forceStop = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if (response.data.status === "ok") {
     } else if (response.data === 401) {
@@ -229,7 +218,7 @@ const enablePhoneAuth = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if (response.data.status === "ok") {
     } else if (response.data === 401) {
@@ -259,62 +248,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
-const disablePhoneAuth = async () => {
-  let params = {
-    source: source,
-    login: login,
-  };
-  if (stationDomain.navigate.value != "whatsapi") {
-    params = {
-      source: source,
-      login: login,
-    };
-  } else {
-    params = {
-      source: source,
-      login: login,
-      storage: storage,
-    };
-  }
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}disablePhoneAuth`,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-
-    if (response.data) {
-      await handleSendLog(
-        "getCode",
-        "disablePhoneAuth",
-        params,
-        response.data.ok,
-        response.data
-      );
-    }
-
-    if (response.data.status === "ok") {
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
-    } else {
-    }
-  } catch (error) {
-    console.error("error", error);
-    if (error.response) {
-      console.error("error", error.response.data);
-    }
-  }
-};
-
 const setState = async () => {
   try {
     const response = await axios.post(
@@ -329,7 +262,7 @@ const setState = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if (response.data.status === "ok") {
     } else if (response.data === 401) {
@@ -424,13 +357,13 @@ const getInfo = async () => {
         "getInfo",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
 
       // Проверяем, если step.value === 4 или 5, то включаем аккаунт и вызываем функцию
       if (response.data.step.value === 5 || response.data.step.value === 4) {
         console.log(
-          "Step 4 or 5 detected, account enabled - calling openEnableMenuTrue"
+          "Step 4 or 5 detected, account enabled - calling openEnableMenuTrue",
         );
         props.openEnableMenuTrue();
         stopAllRequests();
@@ -451,7 +384,6 @@ const getInfo = async () => {
   }
 };
 
-// Функция для остановки всех интервалов
 const stopAllRequests = () => {
   if (authCodeInterval) {
     clearInterval(authCodeInterval);
@@ -680,33 +612,6 @@ defineExpose({ stopAuthCode: stopAllRequests }); // Обновляем эксп�
   text-align: center;
   margin: 0;
   line-height: 1.4;
-}
-
-.code-footer {
-  display: flex;
-  justify-content: center;
-}
-
-.code-switch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: none;
-  border: 1px solid #e9ecef;
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #6c757d;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.code-switch:hover {
-  background: #f8f9fa;
-  color: #495057;
-  border-color: #ced4da;
 }
 
 /* Мобильная адаптация */

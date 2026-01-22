@@ -100,6 +100,16 @@
         </div>
       </div>
 
+      <div v-show="getVersion === 2" class="edit-section">
+        <h3 class="edit-label">Текст рассылки:</h3>
+        <textarea
+          v-model="mailingText"
+          class="mailing-textarea"
+          placeholder="Введите текст сообщения..."
+          rows="4"
+        ></textarea>
+      </div>
+
       <!-- Выбор каналов отправки -->
       <div class="edit-section">
         <h3 class="edit-label">Каналы отправки:</h3>
@@ -254,6 +264,7 @@ const handleSendLog = async (location, method, params, results, answer) => {
 };
 
 const load = ref(false);
+const mailingText = ref(props.selectedItem.text);
 
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
@@ -296,7 +307,7 @@ function getChannelName(channelId) {
  */
 function handleChannelChange() {
   const newOrder = cascadeOrder.value.filter((id) =>
-    selectedChannels.value.includes(id)
+    selectedChannels.value.includes(id),
   );
 
   selectedChannels.value.forEach((id) => {
@@ -357,6 +368,7 @@ async function editWhatsAppBroadcast() {
     version: getVersion.value,
     random: items.value.options.random,
     cascade: cascadeString,
+    text: mailingText.value,
   };
   load.value = true;
   try {
@@ -373,7 +385,7 @@ async function editWhatsAppBroadcast() {
         "edit",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -397,7 +409,7 @@ async function editWhatsAppBroadcast() {
   } catch (error) {
     console.error(
       "error",
-      error.response ? error.response.data : error.message
+      error.response ? error.response.data : error.message,
     );
   }
 }
@@ -456,7 +468,7 @@ watch(
       cascadeOrder.value = [...cascadeArray];
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
@@ -548,6 +560,26 @@ watch(
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.mailing-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical; /* Позволяет менять высоту, но не ширину */
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1a1a1a);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.mailing-textarea:focus {
+  outline: none;
+  border-color: oklch(0.541 0.198 267);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
 }
 
 .checkbox-container {

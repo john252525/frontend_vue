@@ -7,7 +7,6 @@
   <CodeWarningModal :isOpen="isWarningModalOpen" @close="closeWarningModal" />
 
   <div class="code-auth-container">
-    <!-- ВВОД КОДА -->
     <div class="code-auth-modal">
       <div class="code-auth-header">
         <h2 class="code-auth-title">Подтверждение входа</h2>
@@ -80,24 +79,7 @@
           </svg>
         </button>
 
-        <button @click="handleClose" class="back-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M19 12H5M12 19L5 12L12 5"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Вернуться
-        </button>
+        <GetQrButton :updateLoadingStatus="updateLoadingStatus" />
       </div>
     </div>
 
@@ -115,6 +97,7 @@ import { useDomain } from "@/composables/getDomain";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import CodeWarningModal from "./CodeWarningModal.vue";
 import LoadingModal from "../LoadingModal.vue";
+import GetQrButton from "../ui/GetQrButton.vue";
 
 const props = defineProps({
   changeChallengeRequired: {
@@ -127,6 +110,9 @@ const props = defineProps({
     type: String,
   },
   updateLoadingStatus: {
+    type: Function,
+  },
+  changeEnteringPassword: {
     type: Function,
   },
   openError: {
@@ -233,13 +219,20 @@ const solveChallenge = async () => {
         "solveChallenge",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
     if (response.data.status === "ok") {
       props.openEnableMenuTrue();
       props.updateLoadingStatus(false);
+    } else if (response.data.status === "error") {
+      if ((response.data.error.message = "Two factor auth")) {
+        console.log("| two factor auth");
+        props.changeEnteringPassword();
+        props.updateLoadingStatus(false);
+        return;
+      }
     } else if (response.data.status === 401) {
       errorBlock.value = true;
       setTimeout(() => {

@@ -1,6 +1,6 @@
 <template>
   <div class="cont">
-    <h3>{{ t("referrals.errorAccount") }}</h3>
+    <h3>Ошибка при получении данных</h3>
   </div>
 </template>
 

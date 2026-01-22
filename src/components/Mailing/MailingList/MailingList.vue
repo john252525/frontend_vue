@@ -345,19 +345,6 @@ const getMailingLists = async () => {
       },
     });
 
-    if (response.data) {
-      await handleSendLog(
-        "mailingList",
-        "list",
-        {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token.value}`,
-        },
-        response.data.ok,
-        response.data
-      );
-    }
-
     mailingLists.value = response.data.result.items;
     if (mailingLists.value.length === 0) {
       loadDataStation.value = false;
@@ -480,7 +467,7 @@ const getMailingLists = async () => {
 
 const changeStatusMailing = (item, state) => {
   const index = mailingLists.value.findIndex(
-    (mailing) => mailing.id === item.id
+    (mailing) => mailing.id === item.id,
   );
   if (index !== -1) {
     mailingLists.value[index].state = state;

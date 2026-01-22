@@ -14,7 +14,6 @@
               }
         "
       >
-        <!-- Мобильный заголовок -->
         <div v-if="isMobile" class="mobile-header">
           <div class="account-info-mobile">
             <AccountIcon :item="selectedItem" />
@@ -118,7 +117,7 @@
             @click="ChangeconfirmStation"
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
-                selectedItem.type
+                selectedItem.type,
               ) &&
               !(
                 selectedItem.storage === 'binder' &&
@@ -156,6 +155,26 @@
             class="action"
             @click="changeRoutingSettings"
             >Менеджеры</span
+          >
+
+          <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
+            @click="openUonSettingModal"
+            >Настройки</span
+          >
+
+          <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
+            @click="openBlacklistModal"
+            >Черный список</span
           >
 
           <span
@@ -208,6 +227,7 @@
     :changeForceStopItemData="changeForceStopItemData"
     :loadingStop="loadingStop"
   />
+
   <ChatStation
     v-if="chatsStationModal"
     :close="changeChatsStationModal"
@@ -243,6 +263,7 @@ import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
 import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
+import Settings from "./ModalAccount/CRM/UonSettings/Settings.vue";
 import EditNameModal from "./ModalAccount/EditNameModal/EditNameModal.vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
@@ -253,6 +274,9 @@ const props = defineProps({
     type: Function,
   },
   changeTariffStation: {
+    type: Function,
+  },
+  openUonSettingModal: {
     type: Function,
   },
   modalPosition: {
@@ -281,6 +305,9 @@ const props = defineProps({
   },
   loadingStation: {
     type: Boolean,
+  },
+  openBlacklistModal: {
+    type: Function,
   },
   changeStationSettingsModal: {
     type: Function,
@@ -328,6 +355,7 @@ const token = computed(() => accountStore.getAccountToken);
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
+
 const qrData = ref([]);
 const router = useRouter();
 
@@ -500,7 +528,7 @@ const connectToDatabaseAndNavigate = async () => {
         "connect",
         { source: "whatsapp", login: selectedItem.value.login, token: `token` },
         response.data,
-        response.data
+        response.data,
       );
     }
   } catch (err) {
@@ -579,7 +607,7 @@ const createRequest = async (request) => {
         request,
         params,
         response.data,
-        response.data
+        response.data,
       );
     }
 
@@ -643,7 +671,7 @@ const updateAccountButton = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if (response.data.ok === true) {
       stationLoading.loading = false;
@@ -689,7 +717,7 @@ const deleteAccountButton = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if ((response.data.ok = true)) {
       chatStore.removeChat(login, source);
@@ -735,7 +763,7 @@ const forceStop = async (request) => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     console.log(response.data);
     if (response.data.status === "ok") {
@@ -783,7 +811,7 @@ const disablePhoneAuth = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -792,7 +820,7 @@ const disablePhoneAuth = async () => {
         "disablePhoneAuth",
         { source: source, login: login },
         response.data,
-        response.data
+        response.data,
       );
     }
 
@@ -827,7 +855,7 @@ const changeName = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if ((response.data.ok = true)) {
       stationLoading.loading = false;
@@ -871,7 +899,7 @@ const setState = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -880,7 +908,7 @@ const setState = async () => {
         "setState",
         { source: source, login: login, setState: true },
         response.data,
-        response.data
+        response.data,
       );
     }
 
@@ -917,7 +945,7 @@ const setStateTelegram = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -926,7 +954,7 @@ const setStateTelegram = async () => {
         "setState",
         { source: "whatsapp", login: "helly", setState: true, qrLogin: true },
         response.data,
-        response.data
+        response.data,
       );
     }
 

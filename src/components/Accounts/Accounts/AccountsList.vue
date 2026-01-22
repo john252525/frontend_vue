@@ -85,6 +85,8 @@
       :getAccounts="getAccounts"
       :openSupport="changeSendSupport"
       :changeBindingStation="changeBindingStation"
+      :openUonSettingModal="openUonSettingModal"
+      :openBlacklistModal="openBlacklistModal"
     />
 
     <SettignsModal
@@ -144,6 +146,18 @@
       :getAllAccounts="getAllAccounts"
       :selectedItem="selectedItem"
     />
+
+    <UonSettings
+      v-if="uonSettingsModal"
+      :item="selectedItem"
+      :close="closeUonSettings"
+    />
+
+    <Blacklist
+      v-if="blacklistModal"
+      :item="selectedItem"
+      :close="closeBlacklistModal"
+    />
   </section>
 </template>
 
@@ -162,6 +176,8 @@ import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
 import GetHistory from "./ModalAccount/CRM/GetHistory/GetHistory.vue";
+import UonSettings from "./ModalAccount/CRM/UonSettings/Settings.vue";
+import Blacklist from "./ModalAccount/CRM/UonSettings/Blacklist.vue";
 import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
 import NoData from "@/components/GlobalModal/StationList/NoData.vue";
@@ -245,6 +261,8 @@ const errorBlock = ref(false);
 const showWarningModal = ref(false);
 const selectedWarningItem = ref(null);
 const showRoutingSettings = ref(false);
+const uonSettingsModal = ref(false);
+const blacklistModal = ref(false);
 
 // ============= УТИЛИТЫ =============
 const formatSubscriptionDate = (dateString) => {
@@ -278,6 +296,22 @@ const openSubscriptionModal = (item) => {
   showWarningModal.value = true;
 };
 
+const openBlacklistModal = () => {
+  blacklistModal.value = true;
+};
+
+const closeBlacklistModal = () => {
+  blacklistModal.value = false;
+};
+
+const openUonSettingModal = () => {
+  uonSettingsModal.value = true;
+};
+
+const closeUonSettings = () => {
+  uonSettingsModal.value = false;
+};
+
 const closeWarningModal = () => {
   showWarningModal.value = false;
   selectedWarningItem.value = null;
@@ -291,7 +325,7 @@ const changeTariffStation = (item) => {
 
 const changePayDataForAccounts = (item) => {
   const index = instanceData.value.findIndex(
-    (account) => account.uuid === item.uuid
+    (account) => account.uuid === item.uuid,
   );
 
   if (index !== -1) {
@@ -409,7 +443,7 @@ const getInfoWhats = async (source, login, type, storage) => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     return response;
   } catch (error) {
@@ -422,7 +456,7 @@ const changeForceStopItemData = async (item) => {
   try {
     forceStopItemData.value = { ...item, loading: true };
     const accountIndex = instanceData.value.findIndex(
-      (acc) => acc.login === item.login && acc.source === item.source
+      (acc) => acc.login === item.login && acc.source === item.source,
     );
 
     if (accountIndex === -1) {
@@ -436,7 +470,7 @@ const changeForceStopItemData = async (item) => {
       item.source,
       item.login,
       item.type,
-      item.storage
+      item.storage,
     );
 
     if (!infoResponse?.data) {
@@ -465,7 +499,7 @@ const changeForceStopItemData = async (item) => {
       forceStopItemData.value.loading = false;
     }
     const accountIndex = instanceData.value.findIndex(
-      (acc) => acc.login === item.login && acc.source === item.source
+      (acc) => acc.login === item.login && acc.source === item.source,
     );
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
@@ -626,7 +660,7 @@ const getInfo = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -638,7 +672,7 @@ const getInfo = async () => {
           login: selectedItem.value.login,
         },
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -730,7 +764,7 @@ const getAccounts = async () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token.value}`,
           },
-        }
+        },
       );
 
       if (response.data.ok === true) {
@@ -760,18 +794,18 @@ const getAccounts = async () => {
               (instance) =>
                 instance.step?.value === 5 &&
                 !["bulk", "amocrm", "bitrix24", "uon"].includes(
-                  instance.type
+                  instance.type,
                 ) &&
                 ((instance.storage === "binder" &&
                   instance.type !== "touchapi") ||
                   (instance.storage === "whatsapi" &&
-                    instance.type === "whatsapi"))
+                    instance.type === "whatsapi")),
             );
 
             if (accountsToFetch.length > 0) {
               try {
                 await new Promise((resolve) =>
-                  setTimeout(resolve, 200 * accountsToFetch.length)
+                  setTimeout(resolve, 200 * accountsToFetch.length),
                 );
                 const result = await fetchChats({
                   token: token.value,
@@ -810,7 +844,7 @@ const getAccounts = async () => {
                   instance.source,
                   login,
                   instance.type,
-                  instance.storage
+                  instance.storage,
                 );
 
                 if (infoResponse?.data?.step) {

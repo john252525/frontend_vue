@@ -35,7 +35,19 @@
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeChallengeRequired="changeChallengeRequired"
       :updateLoadingStatus="updateLoadingStatus"
+      :changeEnteringPassword="changeEnteringPassword"
       v-if="station.ChallengeRequired"
+    />
+    <EnteringPassword
+      :startFunc="startFunc"
+      :openError="errorTrue"
+      :close="changeEnableStation"
+      :source="selectedItem.source"
+      :openEnableMenuTrue="openEnableMenuTrue"
+      :changeChallengeRequired="changeChallengeRequired"
+      :updateLoadingStatus="updateLoadingStatus"
+      :user="selectedItem"
+      v-if="station.enteringPassword"
     />
     <LoadingModal
       :textLoadin="station.text"
@@ -59,6 +71,7 @@ import QrCode from "./QrCode/QrCode.vue";
 import GetCode from "./GetCode/GetCode.vue";
 import ResultModal from "./ResultModal.vue";
 import ChallengeRequired from "./ChallengeRequired/ChallengeRequired.vue";
+import EnteringPassword from "./ChallengeRequired/EnteringPassword.vue";
 import LoadingModal from "./LoadingModal.vue";
 import Max from "./Max/Max.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
@@ -103,11 +116,17 @@ const station = reactive({
   getCode: false,
   max: false,
   ChallengeRequired: false,
+  enteringPassword: false,
   stationLoading: false,
   result: null,
   resultTrue: false,
   text: "",
 });
+
+const changeEnteringPassword = () => {
+  station.ChallengeRequired = false;
+  station.enteringPassword = true;
+};
 
 const changeChallengeRequired = () => {
   station.ChallengeRequired = false;
@@ -125,6 +144,7 @@ const changeStatus = () => {
 
 const openEnableMenuTrue = () => {
   station.resultTrue = !station.resultTrue;
+  station.enteringPassword = false;
   station.qrCode = false;
   station.ChallengeRequired = false;
   station.getCode = false;
@@ -188,6 +208,7 @@ const resetAllStation = async () => {
   station.getCode = false;
   station.ChallengeRequired = false;
   station.max = false;
+  station.enteringPassword = false;
 };
 
 const code = ref(null);
@@ -364,7 +385,7 @@ const setState = async (request) => {
         station.qrCode = true;
       } else if (response.data.error.message === "Challenge required") {
         station.stationLoading = false;
-        station.max = true;
+        station.ChallengeRequired = true;
       } else if (response.data.error.message === "QR code received") {
         station.qrCode = true;
       } else if (response.data.error.message === "Auth code received") {
