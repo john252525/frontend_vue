@@ -79,7 +79,7 @@ const showNoAccountsModal = ref(false);
 
 const filteredAccounts = computed(() => {
   return props.availableAccounts.filter((account) =>
-    ["whatsapp", "telegram"].includes(account.source || account.type)
+    ["whatsapp", "telegram", "max"].includes(account.source || account.type),
   );
 });
 
@@ -97,7 +97,6 @@ const hasAvailableAccounts = computed(() => {
 const handleGroupsClick = () => {
   if (isLoading.value) return;
 
-  // Если уже на вкладке групп, ничего не делаем
   if (currentTab.value === "groups") return;
 
   // Проверяем наличие аккаунтов

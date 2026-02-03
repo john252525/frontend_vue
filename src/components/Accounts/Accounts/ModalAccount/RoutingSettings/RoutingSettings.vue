@@ -297,8 +297,8 @@ const props = defineProps({
 
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
-
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const loading = ref(false);
 const error = ref("");
 const isSaving = ref(false);
@@ -309,6 +309,7 @@ const companies = ref([]);
 const officesByCompany = ref({});
 const managersByOffice = ref({});
 const managersWithoutOffice = ref([]);
+
 const currentSettings = ref(null);
 
 const selectedVendor = ref("");
@@ -325,34 +326,29 @@ const axiosInstance = computed(() => {
   });
 });
 
-// Отфильтрованные офисы для выбранной компании
+// computed для отфильтрованных данных
 const filteredOffices = computed(() => {
   if (!selectedCompany.value) return [];
   return officesByCompany.value[selectedCompany.value] || [];
 });
 
-// Отфильтрованные менеджеры по выбранным критериям
 const filteredManagers = computed(() => {
   let managers = [];
 
-  // Если выбран офис - показываем менеджеров этого офиса
   if (selectedOffice.value) {
     managers = managersByOffice.value[selectedOffice.value] || [];
-  }
-  // Если выбрана компания без офиса - показываем менеджеров без офиса
-  else if (selectedCompany.value && !selectedOffice.value) {
+  } else if (selectedCompany.value && !selectedOffice.value) {
     managers = managersWithoutOffice.value.filter(
-      (manager) => !manager.office_id || manager.office_id === 0
+      (m) => !m.office_id || m.office_id === 0,
     );
-  }
-  // Если компания не выбрана - показываем всех менеджеров без офиса
-  else if (!selectedCompany.value) {
+  } else if (!selectedCompany.value) {
     managers = managersWithoutOffice.value;
   }
 
   return managers;
 });
 
+// Хелперы для отображения названий
 const getCompanyName = (companyId) => {
   const company = companies.value.find((c) => c.id == companyId);
   return company ? company.name_rus : "Неизвестная компания";
@@ -377,24 +373,21 @@ const getManagerName = (managerId) => {
 };
 
 const getInitials = (firstName, lastName) => {
-  return `${firstName?.charAt(0) || ""}${
-    lastName?.charAt(0) || ""
-  }`.toUpperCase();
+  return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
 };
 
+// Закрытие модалки
 const close = () => {
   props.close();
 };
 
+// Загрузка справочников (компании, офисы, менеджеры)
 const fetchOfficesAndManagers = async () => {
   loading.value = true;
   error.value = "";
-  saveError.value = "";
-  successMessage.value = "";
-
   try {
     const { data } = await axiosInstance.value.get(
-      `${VITE_BASE_URL}uon-account/getOfficesAndManagers?uuid=${props.item.uuid}`
+      `${VITE_BASE_URL}uon-account/getOfficesAndManagers?uuid=${props.item.uuid}`,
     );
 
     if (data.ok) {
@@ -402,64 +395,75 @@ const fetchOfficesAndManagers = async () => {
       officesByCompany.value = data.data.offices_by_company || {};
       managersByOffice.value = data.data.managers_by_office || {};
       managersWithoutOffice.value = data.data.managers_without_office || [];
-
-      // Загружаем текущие настройки
-      await fetchCurrentSettings();
     } else {
-      error.value = data.message || "Ошибка при загрузке данных";
+      error.value = data.message || "Ошибка при загрузке справочников";
     }
   } catch (err) {
     error.value =
       err.response?.data?.message || err.message || "Ошибка загрузки данных";
-    console.error("Error fetching offices and managers:", err);
+    console.error("fetchOfficesAndManagers error:", err);
   } finally {
     loading.value = false;
   }
 };
 
+// Загрузка текущих сохранённых настроек маршрутизации
 const fetchCurrentSettings = async () => {
+  if (!props.item?.uuid) return;
+
   try {
     const { data } = await axiosInstance.value.get(
-      `${VITE_BASE_URL}uon-account/getAccountMessageRouting?uuid=${props.item.uuid}`
+      `${VITE_BASE_URL}uon-account/getAccountMessageRouting?uuid=${props.item.uuid}`,
     );
 
     if (data.ok && data.data) {
       currentSettings.value = data.data;
 
-      // Устанавливаем текущие значения из настроек
-      if (data.data.company_id) {
-        selectedCompany.value = data.data.company_id.toString();
-      }
-      if (data.data.office_id) {
-        selectedOffice.value = data.data.office_id.toString();
-      }
-      if (data.data.manager_id) {
-        selectedManager.value = data.data.manager_id.toString();
-      }
+      // Явно приводим к строкам и устанавливаем
+      selectedCompany.value = data.data.company_id
+        ? String(data.data.company_id)
+        : "";
+      selectedOffice.value = data.data.office_id
+        ? String(data.data.office_id)
+        : "";
+      selectedManager.value = data.data.manager_id
+        ? String(data.data.manager_id)
+        : "";
+
+      console.debug(`Настройки загружены для ${props.item.uuid}:`, {
+        company: selectedCompany.value,
+        office: selectedOffice.value,
+        manager: selectedManager.value,
+      });
+    } else {
+      // Нет настроек — оставляем пустыми (нормальная ситуация)
+      selectedCompany.value = "";
+      selectedOffice.value = "";
+      selectedManager.value = "";
     }
   } catch (err) {
-    console.error("Error fetching current settings:", err);
+    console.error("Ошибка загрузки текущих настроек:", err);
+    // Не сбрасываем значения при ошибке — оставляем то, что было
   }
 };
 
+// Выборы
 const selectCompany = (companyId) => {
   selectedCompany.value = companyId;
-  // При смене компании сбрасываем офис
-  selectedOffice.value = "";
-  // Менеджера тоже сбрасываем, т.к. он зависит от офиса/компании
-  selectedManager.value = "";
+  selectedOffice.value = ""; // сбрасываем офис при смене компании
+  selectedManager.value = ""; // и менеджера
 };
 
 const selectOffice = (officeId) => {
   selectedOffice.value = officeId;
-  // При смене офиса сбрасываем менеджера
-  selectedManager.value = "";
+  selectedManager.value = ""; // сбрасываем менеджера при смене офиса
 };
 
 const selectManager = (managerId) => {
   selectedManager.value = managerId;
 };
 
+// Сохранение
 const saveMessengerRouting = async () => {
   isSaving.value = true;
   saveError.value = "";
@@ -474,64 +478,83 @@ const saveMessengerRouting = async () => {
       manager_id: selectedManager.value ? parseInt(selectedManager.value) : 0,
     };
 
-    console.log("Saving routing:", payload);
+    console.log("Сохранение маршрутизации:", payload);
 
     const { data } = await axiosInstance.value.post(
       `${VITE_BASE_URL}uon-account/setAccountMessageRouting`,
-      payload
+      payload,
     );
 
     if (data.ok) {
-      successMessage.value = "Настройки маршрутизации успешно сохранены";
-      // Обновляем текущие настройки
+      successMessage.value = "Настройки успешно сохранены";
+      // Перезагружаем текущие настройки для подтверждения
       await fetchCurrentSettings();
-      setTimeout(() => {
-        successMessage.value = "";
-      }, 3000);
+      setTimeout(() => (successMessage.value = ""), 3000);
     } else {
-      saveError.value = data.message || "Ошибка при сохранении настроек";
+      saveError.value = data.message || "Ошибка при сохранении";
     }
   } catch (err) {
     saveError.value =
       err.response?.data?.message || err.message || "Ошибка сохранения";
-    console.error("Error saving messenger routing:", err);
+    console.error("saveMessengerRouting error:", err);
   } finally {
     isSaving.value = false;
   }
 };
 
+// ────────────────────────────────────────────────
+// Реакции на изменения
+// ────────────────────────────────────────────────
+
+// При открытии модалки — загружаем справочники
 watch(
   () => props.isOpen,
-  (newVal) => {
-    if (newVal) {
-      selectedCompany.value = "";
-      selectedOffice.value = "";
-      selectedManager.value = "";
+  (isOpen) => {
+    if (isOpen) {
       error.value = "";
       saveError.value = "";
       successMessage.value = "";
       fetchOfficesAndManagers();
     }
-  }
+  },
 );
 
-// Если выбран офис, автоматически определяем компанию
+// Главная логика: реагируем на смену канала / item.uuid
+watch(
+  () => props.item?.uuid,
+  async (newUuid, oldUuid) => {
+    if (!newUuid || newUuid === oldUuid) return;
+
+    // Сбрасываем выборы при переключении на другой канал
+    selectedVendor.value = newUuid; // или props.item.uuid — в зависимости от логики VendorList
+    selectedCompany.value = "";
+    selectedOffice.value = "";
+    selectedManager.value = "";
+
+    // 1. Загружаем справочники для нового uuid
+    await fetchOfficesAndManagers();
+
+    // 2. Загружаем сохранённые настройки именно этого канала
+    await fetchCurrentSettings();
+  },
+  { immediate: true }, // срабатывает сразу при монтировании
+);
+
+// Если выбрали офис — автоматически подставляем компанию (если ещё не выбрана)
 watch(
   () => selectedOffice.value,
   (newOfficeId) => {
-    if (newOfficeId) {
-      // Находим компанию офиса
+    if (newOfficeId && !selectedCompany.value) {
       for (const [companyId, offices] of Object.entries(
-        officesByCompany.value
+        officesByCompany.value,
       )) {
-        const office = offices.find((o) => o.id == newOfficeId);
-        if (office) {
+        if (offices.some((o) => o.id == newOfficeId)) {
           selectedCompany.value = companyId;
           break;
         }
       }
     }
-  }
+  },
 );
 </script>
 

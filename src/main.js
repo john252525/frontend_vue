@@ -2,6 +2,8 @@ import "./assets/main.css";
 import { createRouter, createWebHistory } from "vue-router";
 import { createApp } from "vue";
 import App from "./App.vue";
+import FloatingVue from "floating-vue";
+import "floating-vue/dist/style.css";
 import PersonalAccount from "./pages/Account.vue";
 import Login from "./pages/Login.vue";
 import Registration from "./pages/Registration.vue";
@@ -377,6 +379,18 @@ app.use(pinia);
 app.use(router);
 app.use(i18n);
 
+app.use(FloatingVue, {
+  themes: {
+    "light-dropdown": {
+      $extend: "dropdown",
+      backgroundColor: "#ffffff",
+      borderColor: "#e5e7eb",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+      borderRadius: "10px",
+    },
+  },
+});
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 
@@ -498,7 +512,7 @@ axios.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Конфигурация ограничений по доменам
@@ -718,7 +732,7 @@ app.config.errorHandler = (err) => {
 const themeStore = useThemeStore();
 document.documentElement.setAttribute(
   "data-theme",
-  themeStore.isDark ? "dark" : "light"
+  themeStore.isDark ? "dark" : "light",
 );
 
 // Дублирующие перехватчики (убрать если они дублируют функциональность выше)
@@ -781,7 +795,7 @@ axios.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 app.mount("#app");

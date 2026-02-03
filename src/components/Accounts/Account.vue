@@ -145,7 +145,7 @@ const availableAccounts = computed(() => {
   const accounts =
     accountsCache.value.length > 0 ? accountsCache.value : accountsList.value;
   const filtered = accounts.filter((account) =>
-    ["whatsapp", "telegram"].includes(account.source || account.type)
+    ["whatsapp", "telegram"].includes(account.source || account.type),
   );
   console.log("📊 availableAccounts computed:", filtered.length);
   return filtered;
@@ -161,7 +161,7 @@ const getAccountListMethod = async () => {
     if (accountsCache.value.length > 0) {
       console.log(
         "📦 Используем кешированные аккаунты:",
-        accountsCache.value.length
+        accountsCache.value.length,
       );
       accountsList.value = accountsCache.value;
       return accountsCache.value;

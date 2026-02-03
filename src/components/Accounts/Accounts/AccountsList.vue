@@ -1,6 +1,5 @@
 <template>
   <section class="account-list-section">
-    <!-- Десктопная версия -->
     <AccountListDesktop
       v-if="dataStation"
       :instanceData="instanceData"
@@ -16,7 +15,6 @@
       @hide-message="hideMessage"
     />
 
-    <!-- Мобильная версия -->
     <AccountListMobile
       v-if="dataStation && instanceData.length > 0"
       :instanceData="instanceData"
@@ -28,7 +26,6 @@
       @change-tariff="changeTariffStation"
     />
 
-    <!-- Состояния загрузки и ошибок для обеих версий -->
     <div v-if="dataStationNone" class="none-account-cont">
       <NoData type="accounts" />
     </div>
@@ -41,7 +38,6 @@
       <errorAccount />
     </div>
 
-    <!-- Модалки -->
     <WarningAccount
       v-if="showWarningModal"
       :item="selectedWarningItem"
@@ -582,15 +578,57 @@ const openModal = (event, item) => {
   updateUserInfo(JSON.stringify(selectedItem.value));
   getInfo();
 
+  // 1. Получаем координаты кнопки относительно видимой области (viewport)
   const rect = event.currentTarget.getBoundingClientRect();
-  const modalWidth = 160;
-  const edgeMargin = 10;
+  const viewportHeight = window.innerHeight;
+  const viewportWidth = window.innerWidth;
 
+  // Константы для расчетов
+  const modalWidth = 180; // Чуть шире, с запасом
+  const edgeMargin = 15; // Отступ от краев экрана
+  const gap = 4; // Отступ модалки от кнопки
+
+  // 2. Считаем высоту модалки с ЗАПАСОМ
+  // Увеличили высоту пункта до 40px (было 32), чтобы наверняка перекрыть паддинги
   const actionCount = getActionCount(item);
-  const itemHeight = 32;
-  const padding = 16;
-  const estimatedModalHeight = actionCount * itemHeight + padding;
+  const itemHeight = 40;
+  const containerPadding = 20;
+  const estimatedModalHeight = actionCount * itemHeight + containerPadding;
 
+  // === РАСЧЕТ ВЕРТИКАЛИ (Y) ===
+
+  // Сколько места реально видно снизу под кнопкой?
+  const spaceBelow = viewportHeight - rect.bottom;
+
+  let top;
+
+  // ЖЕСТКАЯ ЛОГИКА:
+  // 1. Если визуально места снизу меньше, чем высота модалки...
+  // 2. ИЛИ если кнопка находится ниже 70% высоты экрана (жесткий триггер)...
+  // ... ТО открываем ВВЕРХ.
+  const isTooLowOnScreen = rect.top > viewportHeight * 0.7;
+
+  if (spaceBelow < estimatedModalHeight || isTooLowOnScreen) {
+    // -- Открываем ВВЕРХ --
+    // Координата: Верх кнопки + Скролл страницы - Высота модалки - Зазор
+    top = rect.top + window.scrollY - estimatedModalHeight - gap;
+
+    // Защита: если при открытии вверх мы улетели за верхний край страницы (top < 0)
+    // Прижимаем к верхнему краю, но не даем уйти в минус
+    if (top < window.scrollY + edgeMargin) {
+      top = window.scrollY + edgeMargin;
+    }
+  } else {
+    // -- Открываем ВНИЗ --
+    // Координата: Низ кнопки + Скролл страницы + Зазор
+    top = rect.bottom + window.scrollY + gap;
+  }
+
+  // === РАСЧЕТ ГОРИЗОНТАЛИ (X) ===
+
+  let left = rect.left + window.scrollX;
+
+  // Мобильная версия (оставляем без изменений логику позиционирования, только стили)
   if (window.innerWidth <= 768) {
     modalPosition.value = {
       top: "auto",
@@ -600,48 +638,25 @@ const openModal = (event, item) => {
       width: "90%",
       maxWidth: "400px",
     };
-  } else {
-    let left = rect.left + window.scrollX;
-    let top = rect.bottom + window.scrollY + 5;
-
-    if (left + modalWidth > window.innerWidth - edgeMargin) {
-      left = window.innerWidth - modalWidth - edgeMargin;
-    }
-
-    if (left < edgeMargin) {
-      left = edgeMargin;
-    }
-
-    const spaceBelow = window.innerHeight - rect.bottom - 15;
-    const spaceAbove = rect.top - 15;
-
-    if (actionCount <= 2) {
-      if (spaceBelow < estimatedModalHeight) {
-        if (spaceAbove > spaceBelow) {
-          top = rect.top + window.scrollY - estimatedModalHeight - 5;
-        } else {
-          top = window.innerHeight - estimatedModalHeight - edgeMargin;
-        }
-      }
-    } else {
-      if (spaceBelow < estimatedModalHeight && spaceAbove > spaceBelow) {
-        top = rect.top + window.scrollY - estimatedModalHeight - 5;
-      }
-    }
-
-    if (top < edgeMargin) {
-      top = edgeMargin;
-    }
-
-    if (top + estimatedModalHeight > window.innerHeight - edgeMargin) {
-      top = window.innerHeight - estimatedModalHeight - edgeMargin;
-    }
-
-    modalPosition.value = {
-      top: Math.max(edgeMargin, Math.round(top)),
-      left: Math.max(edgeMargin, Math.round(left)),
-    };
+    return;
   }
+
+  // Если модалка вылезает за правый край экрана
+  // (Координата левого края + ширина модалки > ширины окна + скролл)
+  if (rect.left + modalWidth > viewportWidth - edgeMargin) {
+    // Сдвигаем влево: Правый край кнопки - Ширина модалки
+    left = rect.right + window.scrollX - modalWidth;
+  }
+
+  // Финальная защита левого края
+  if (left < edgeMargin) {
+    left = edgeMargin;
+  }
+
+  modalPosition.value = {
+    top: Math.round(top),
+    left: Math.round(left),
+  };
 };
 
 const getInfo = async () => {

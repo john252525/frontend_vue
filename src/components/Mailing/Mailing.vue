@@ -156,7 +156,7 @@ async function checkSubscription() {
       "error",
       { error: error.response?.data || error.message },
       false,
-      error.response?.data
+      error.response?.data,
     );
   }
 }

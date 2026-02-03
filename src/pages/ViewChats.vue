@@ -180,7 +180,7 @@ async function fetchAccounts() {
       `${FRONTEND_URL}getInfoByToken`,
       {
         group: ["messenger", "crm", "bulk"],
-        source: ["telegram", "whatsapp", "crm"],
+        source: ["telegram", "whatsapp", "crm", "max"],
         type: ["amocrm", "bitrix24", "bulk"],
       },
       {
@@ -188,7 +188,7 @@ async function fetchAccounts() {
           Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (response.data.ok) {
@@ -236,7 +236,7 @@ async function fetchAccountsInfo(allAccounts) {
     } catch (err) {
       console.error(
         `Ошибка при получении информации для аккаунта ${account.login}:`,
-        err
+        err,
       );
       return {
         ...account,
