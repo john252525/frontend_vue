@@ -1,10 +1,21 @@
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite"; // Важно: импорт из vite
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import Markdown from "unplugin-vue-markdown/vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    // 1. Настраиваем vue, чтобы он "видел" .md файлы как компоненты
+    vue({
+      include: [/\.vue$/, /\.md$/],
+    }),
+
+    // 2. Добавляем сам плагин Markdown
+    Markdown({
+      // Здесь можно добавить опции, например, классы для обертки
+      wrapperClasses: "markdown-body",
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

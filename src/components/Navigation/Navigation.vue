@@ -1,44 +1,60 @@
 <template>
   <aside
     class="pc-menu"
+    :class="{ 'is-collapsed': isCollapsed }"
     v-if="stationDomain.navigate.value && !isMailingMode && !isWidgetMode"
   >
-    <nav v-if="!isWidgetMode">
+    <button class="menu-toggle-btn" @click="toggleMenu">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        class="arrow-icon"
+      >
+        <path
+          d="M15 18L9 12L15 6"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <nav class="nav-container">
       <div
         v-for="(section, sectionName) in navSections"
         :key="sectionName"
         class="menu-section"
       >
-        <h3 class="section-title">{{ sectionName }}</h3>
+        <div class="section-title-wrapper">
+          <h3 class="section-title">{{ sectionName }}</h3>
+        </div>
+
         <ul>
           <li
             v-for="item in section.items"
             :key="item.name"
-            class="list"
+            class="list-item"
             :class="{ active: item.isActive }"
             @click="handleItemClick(item)"
+            :title="isCollapsed ? item.text : ''"
           >
-            <img
-              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-              class="svg-icon"
-            />
-            <p class="page">
-              {{ item.text }}
-            </p>
+            <div class="icon-container">
+              <img
+                :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+                class="svg-icon"
+              />
+            </div>
+            <div class="text-container">
+              <span class="page-text">{{ item.text }}</span>
+            </div>
           </li>
         </ul>
       </div>
-      <!-- <div class="footer-pc-menu">
-        <LangSwither
-          :isWidgetMode="isWidgetMode"
-          class="theme-block"
-          v-if="stationDomain.navigate.value !== 'settings'"
-        />
-      </div> -->
     </nav>
-
-    <div v-if="!isWidgetMode" class="line"></div>
-    <div v-else class="line-chat"></div>
   </aside>
 
   <aside v-if="isWidgetMode" class="chat-menu">
@@ -53,13 +69,13 @@
       <div
         v-for="(section, sectionName) in navSections"
         :key="sectionName"
-        class="menu-section"
+        class="menu-section-simple"
       >
         <ul>
           <li
             v-for="item in section.items"
             :key="item.name"
-            class="list"
+            class="list-item-simple"
             :class="{ active: item.isActive }"
             @click="handleItemClick(item)"
           >
@@ -70,11 +86,6 @@
           </li>
         </ul>
       </div>
-      <!-- <LangSwither
-        :isWidgetMode="isWidgetMode"
-        class="theme-block"
-        v-if="stationDomain.navigate.value !== 'settings'"
-      /> -->
     </nav>
   </aside>
 
@@ -89,7 +100,7 @@
           <li
             v-for="item in section.items"
             :key="item.name"
-            class="list-mailing"
+            class="list-item-simple"
             :class="{ active: item.isActive }"
             @click="handleItemClick(item)"
           >
@@ -100,24 +111,15 @@
           </li>
         </ul>
       </div>
-      <!-- <LangSwither
-        :isWidgetMode="isWidgetMode"
-        class="theme-block"
-        v-if="stationDomain.navigate.value !== 'settings'"
-      /> -->
     </nav>
-    <div class="line-mailing"></div>
   </aside>
 
-  <!-- Mobile Menu -->
   <div class="mobile-menu" v-if="stationDomain.navigate.value && isMobile">
-    <!-- Mobile menu overlay -->
     <div
       class="mobile-menu-overlay"
       :class="{ active: mobileMenuOpen }"
       @click="toggleMobileMenu"
     ></div>
-
     <div class="mobile-menu-content" :class="{ active: mobileMenuOpen }">
       <div class="mobile-menu-header">
         <div class="logo-header-cont">
@@ -148,13 +150,7 @@
             />
           </div>
           <button class="close-menu-btn" @click="toggleMobileMenu">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M18 6L6 18"
                 stroke="var(--text)"
@@ -173,50 +169,37 @@
           </button>
         </div>
       </div>
-
       <div class="mobile-menu-body">
         <div
           v-for="(section, sectionName) in navSections"
           :key="sectionName"
           class="menu-section"
         >
-          <h3 class="section-title">{{ sectionName }}</h3>
+          <h3 class="section-title mobile-title">{{ sectionName }}</h3>
           <ul>
             <li
               v-for="item in section.items"
               :key="item.name"
               @click="handleMobileItemClick(item)"
-              class="list"
+              class="list-item mobile-item"
               :class="{ active: item.isActive }"
             >
-              <!-- Если это Support, используем <a href="mailto:"> -->
-              <a
-                v-if="item.name === 'Support'"
-                href="mailto:maksim.test@mail.ru"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 12px;
-                  text-decoration: none;
-                  color: inherit;
-                "
-                @click.prevent="handleMobileItemClick(item)"
-              >
-                <img
-                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(
-                    item.icon
-                  )}`"
-                  class="svg-icon"
-                />
-                <p class="page">{{ item.text }}</p>
-              </a>
-
-              <!-- Остальные пункты меню -->
+              <template v-if="item.name === 'Support'">
+                <a
+                  href="mailto:maksim.test@mail.ru"
+                  class="mobile-link"
+                  @click.prevent="handleMobileItemClick(item)"
+                >
+                  <img
+                    :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
+                    class="svg-icon"
+                  />
+                  <p class="page">{{ item.text }}</p>
+                </a>
+              </template>
               <template v-else>
                 <img
-                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(
-                    item.icon
-                  )}`"
+                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
                   class="svg-icon"
                 />
                 <p class="page">{{ item.text }}</p>
@@ -226,20 +209,12 @@
         </div>
       </div>
     </div>
-
-    <!-- Mobile menu toggle button (hamburger) -->
     <button
       class="mobile-menu-toggle"
       v-if="!mobileMenuOpen"
       @click="toggleMobileMenu"
     >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path
           d="M3 12H21"
           stroke="var(--text)"
@@ -270,34 +245,30 @@
 import { computed, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDomain } from "@/composables/getDomain";
-import LangSwither from "../LangSwither.vue";
 import { useNavigationConfig } from "@/config/navigation";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { stationDomain } = useDomain();
 const { navConfig } = useNavigationConfig();
-import { useHelpModalStore } from "@/stores/helpModalStore"; // Добавьте этот импорт
-const helpModalStore = useHelpModalStore(); // Инициализируем стор
 
 const props = defineProps({
   isMailingMode: Boolean,
-  phoneMenuOn: Function,
-  phoneMenuStation: Boolean,
-  chatStation: Boolean,
-  chatsLoading: Boolean,
   isWidgetMode: Boolean,
 });
 
-// Исправление ошибки с toRefs
 const isWidgetMode = computed(() => props.isWidgetMode);
-
 const route = useRoute();
 const router = useRouter();
+
+const isCollapsed = ref(false);
+const toggleMenu = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
+
 const mobileMenuOpen = ref(false);
 const isMobile = ref(false);
 
-// Проверка на мобильное устройство
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768;
 };
@@ -307,54 +278,38 @@ onMounted(() => {
   window.addEventListener("resize", checkMobile);
 });
 
-// Обработчик клика для десктопного меню
 const handleItemClick = (item) => {
-  console.log("Navigation: Clicked item:", item.name);
-
-  if (item.action) {
-    console.log("Navigation: Calling item action");
-    item.action();
-  } else {
-    navigateTo(item.name);
-  }
+  if (item.action) item.action();
+  else navigateTo(item.name);
 };
 
-// Обработчик клика для мобильного меню
 const handleMobileItemClick = (item) => {
-  if (item.action) {
-    item.action();
-  } else {
-    navigateTo(item.name);
-  }
-  toggleMobileMenu(); // Закрываем меню после клика
+  if (item.action) item.action();
+  else navigateTo(item.name);
+  toggleMobileMenu();
 };
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
 
-const testbtn = () => {
-  window.location.href = "mailto:maksim.test@mail.ru";
-};
-
 const navSections = computed(() => {
   const currentNav = stationDomain?.navigate?.value;
   if (!currentNav || !navConfig.value?.[currentNav]) return {};
-
   return {
     [t("navPage.main")]: {
       items: (navConfig.value[currentNav].main || []).filter(
-        (item) => item.condition
+        (item) => item.condition,
       ),
     },
     [t("navPage.settings")]: {
       items: (navConfig.value[currentNav].settings || []).filter(
-        (item) => item.condition
+        (item) => item.condition,
       ),
     },
     [t("navPage.help")]: {
       items: (navConfig.value[currentNav].help || []).filter(
-        (item) => item.condition
+        (item) => item.condition,
       ),
     },
   };
@@ -363,386 +318,377 @@ const navSections = computed(() => {
 const navigateTo = (page) => {
   router.push(page);
 };
-
-const isActive = (routeName) => {
-  return route.name === routeName;
-};
-
-const isChatPage = computed(() => {
-  return route.name === "Chats";
-});
 </script>
 
 <style scoped>
 .pc-menu {
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 80px;
+  --primary-color: var(--textNavHover, #eef2ff);
+  --icon-color: var(--svgColor, #555);
+  --text-color: var(--text, #333);
+  --anim-speed: 0.4s;
+  --anim-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  position: sticky;
+  top: 0;
   display: flex;
-  width: 230px;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  background: #ffffff;
+  height: calc(100vh - 57px);
+  z-index: 40;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
+  transition: width var(--anim-speed) var(--anim-curve);
+  overflow: visible;
   box-sizing: border-box;
-  background: var(--bg);
-  position: fixed;
-  left: 0;
-  top: 57px; /* Высота header, измените если нужно */
-  height: calc(100vh - 57px); /* Меню займет оставшуюся высоту */
-  overflow-y: auto;
-  z-index: 2;
 }
 
-nav {
-  margin-top: 20px;
-  width: 100%;
+/* Свернутое состояние */
+.pc-menu.is-collapsed {
+  width: var(--sidebar-collapsed-width);
 }
 
-.chat-menu {
-  border-right: 1px solid black;
-  background-color: white;
-  width: 60px;
-  height: calc(100vh - 57px); /* Меню займет оставшуюся высоту */
-  position: fixed;
-  left: 0;
-  top: 57px; /* Высота header */
-  overflow-y: auto;
-  z-index: 50;
-}
-
-.line-mailing {
-  width: 0.5px;
-  background-color: var(--line);
-  position: fixed;
-  z-index: 2;
-  top: 57px; /* Высота header */
-  height: calc(100vh - 57px);
-  left: 60px;
-}
-
-.nav-chat {
-  width: 60px;
-  position: fixed;
-  left: 0;
-  top: 57px; /* Высота header */
-  height: calc(100vh - 57px);
-  overflow-y: auto;
-}
-
-.logo-header {
-  font-family: system-ui;
-  font-weight: 500;
-  font-size: 24px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.menu-section-mailing {
-  margin-bottom: 6px;
-  border-bottom: 1.5px solid var(--line);
-}
-
-.menu-section {
-  margin-bottom: 30px;
-  border-bottom: 1.5px solid var(--line);
-}
-
-.logo-img {
-  width: 2rem;
-}
-
-.section-title {
-  font-family: system-ui;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-left: 8px;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-}
-
-.mobile-logo-title-cont {
+/* --- КНОПКА СВОРАЧИВАНИЯ --- */
+.menu-toggle-btn {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  cursor: pointer;
+  color: #666;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+  transition: all var(--anim-speed) var(--anim-curve);
+
+  /* Положение по умолчанию: сверху справа внутри меню */
+  top: 16px;
+  right: 16px;
 }
 
-.title {
-  font-size: 24px;
+.menu-toggle-btn:hover {
+  background: #f8f9fa;
+  transform: scale(1.05);
+  color: #000;
+}
+
+/* Положение кнопки при свернутом меню: ВНИЗУ по центру */
+.pc-menu.is-collapsed .menu-toggle-btn {
+  top: auto; /* Сбрасываем top */
+  bottom: 24px; /* Прижимаем к низу */
+  right: 50%; /* Центрируем относительно ширины 80px */
+  transform: translateX(50%) rotate(180deg); /* Сдвиг для точного центра + поворот стрелки */
+}
+
+.arrow-icon {
+  transition: transform var(--anim-speed) var(--anim-curve);
+}
+
+/* --- КОНТЕЙНЕР НАВИГАЦИИ --- */
+.nav-container {
+  padding: 20px 12px; /* Внутренние отступы, чтобы hover не касался краев */
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  /* Отступ снизу, чтобы контент не перекрывался кнопкой в свернутом режиме */
+  padding-bottom: 70px;
+}
+
+.menu-section {
+  margin-bottom: 24px;
+}
+
+/* Заголовок секции */
+.section-title-wrapper {
+  overflow: hidden; /* Чтобы скрывать текст плавно */
+}
+
+.section-title {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  padding-left: 14px;
+  white-space: nowrap;
+
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.pc-menu.is-collapsed .section-title {
+  opacity: 0;
+  pointer-events: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* --- ПУНКТ МЕНЮ (LIST ITEM) --- */
+.list-item {
+  display: flex;
+  align-items: center;
+  /* Убираем gap, отступы регулируем через text-container margin, чтобы анимация была плавнее */
+  padding: 10px 14px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  border-radius: 12px;
+  color: var(--text-color);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box; /* Важно: ширина включает паддинги */
+  width: 100%; /* Занимает всю доступную ширину внутри паддингов контейнера */
+}
+
+/* Hover/Active - теперь они внутри nav-container и не выходят за границы */
+.list-item:hover {
+  background: rgba(204, 212, 245, 0.4);
+}
+
+.list-item.active {
+  background: rgba(204, 212, 245, 0.4);
+  color: #778ff2;
   font-weight: 500;
+}
+
+.list-item.active .svg-icon {
+  fill: #778ff2;
+}
+
+/* --- ИКОНКИ --- */
+.icon-container {
+  min-width: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .svg-icon {
   width: 22px;
   height: 22px;
-  fill: var(--svgColor);
-  transition: all 75ms;
+  fill: var(--icon-color);
+  transition: fill 0.2s ease;
 }
 
-.svg-icon-chat {
-  width: 26px;
-  height: 26px;
-  fill: var(--svgColor);
-  transition: all 75ms;
+/* --- ТЕКСТ И АНИМАЦИЯ ИСЧЕЗНОВЕНИЯ --- */
+.text-container {
+  overflow: hidden;
+  white-space: nowrap; /* Текст не переносится */
+  /* Анимация ширины и прозрачности */
+  max-width: 200px; /* Достаточно для текста */
+  opacity: 1;
+  margin-left: 12px; /* Отступ от иконки */
+  transition:
+    max-width var(--anim-speed) var(--anim-curve),
+    opacity 0.2s ease,
+    margin-left var(--anim-speed) var(--anim-curve);
 }
 
-.line {
-  width: 0.5px;
-  background-color: var(--line);
-  position: fixed;
-  z-index: 2;
-  top: 45px; /* Высота header */
-  height: calc(100vh - 45px);
-  left: 230px;
+.page-text {
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 15px;
+  font-weight: 400;
 }
 
-.line-chat {
-  width: 0.5px;
-  background-color: var(--line);
-  position: fixed;
-  z-index: 2;
-  left: 60px;
-  height: calc(100vh - 57px);
-  top: 57px; /* Высота header */
+/* --- Стили при свернутом состоянии --- */
+.pc-menu.is-collapsed .list-item {
+  justify-content: center; /* Иконка по центру */
+  padding: 12px 0; /* Уменьшаем боковые паддинги */
 }
 
-.logo-img {
-  height: 2rem;
-  margin-left: 12px;
-  margin-top: 10px;
+.pc-menu.is-collapsed .text-container {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0; /* Убираем отступ, чтобы иконка была ровно по центру */
 }
 
-.list-chats-loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-  padding: 8px 0px 8px 8px;
-  cursor: pointer;
-}
-
-.list-chats-loading.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-.list {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-  padding: 8px 0px 8px 16px;
-  cursor: pointer;
-}
-
-.line-mailing {
-  width: 0.5px;
-  background-color: var(--line);
-  position: fixed;
-  z-index: 2;
+/* --- Стили для остальных режимов (Chat/Mobile) без изменений --- */
+.chat-menu {
+  position: sticky;
   top: 0;
-  height: 100vh;
-  left: 60px;
+  height: 100%;
+  background-color: white;
+  width: 80px;
+  height: calc(100vh - 57px);
+  position: fixed;
+  left: 0;
+  top: 57px;
+  border-right: 1px solid #eee;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
 }
-
-.list-mailing:hover {
-  background-color: var(--textNavHover);
-  transition: all 0.3s ease;
-  border-radius: 10px;
+.nav-chat {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-
-.list-mailing.active {
-  background-color: var(--textNavHover);
-  border-radius: 10px;
-}
-
-.list.active {
-  background-color: var(--textNavHover);
-  border-radius: 10px;
-  width: 200px;
-}
-
 .logo-header-cont-chat {
-  border-bottom: 1.5px solid var(--line);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+.logo-img {
+  width: 2rem;
+  height: auto;
+}
+.list-item-simple {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  margin: 4px 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 48px;
+  height: 48px;
+}
+.list-item-simple:hover,
+.list-item-simple.active {
+  background-color: var(--primary-color);
+}
+.menu-section-simple,
+.menu-section-mailing {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 10px;
 }
 
-.list-mode {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-  padding: 8px 0px 8px 16px;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.list-mode:hover {
-  background-color: var(--textNavHover);
-  transition: all 0.3s ease;
-}
-
-.list-mode.active {
-  background-color: var(--textNavHover);
-}
-
-.mobile-logo-additionallyLogo-title-cont {
-  display: flex;
-  gap: 6px;
-}
-
-.list-chat {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-  padding: 8px 0px 8px 8px;
-  cursor: pointer;
-}
-
-.phone-logo-additionallyLogo {
-  width: 20%;
-}
-
-.list-chat.active {
-  background-color: var(--textNavHover);
-  border-radius: 10px;
-  width: 35px;
-}
-
-.footer-pc-menu {
-  position: absolute;
-  bottom: 0;
-  border-top: 1.5px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-self: center;
-}
-
-.page {
-  font-family: system-ui;
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--text);
-}
-
-.list:hover {
-  background-color: var(--textNavHover);
-  border-radius: 10px;
-  width: 200px;
-}
-
-.list:hover .svg-icon path {
-  fill: var(--iconNavHover);
-}
-
-/* Mobile Styles */
-.mobile-menu {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 50;
-}
-
+/* Mobile */
 .mobile-menu-toggle {
   position: fixed;
-  bottom: 30px;
-  left: 20px;
-  width: 50px;
-  height: 50px;
+  bottom: 24px;
+  left: 24px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: var(--bg);
-  border: 1px solid var(--line);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  border: none;
 }
-
 .mobile-menu-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  z-index: 50;
+  z-index: 90;
+  backdrop-filter: blur(2px);
 }
-
 .mobile-menu-overlay.active {
   opacity: 1;
   pointer-events: all;
 }
-
 .mobile-menu-content {
   position: fixed;
   top: 0;
   left: -100%;
-  width: 80%;
-  max-width: 300px;
+  width: 280px;
   height: 100%;
-  background: var(--bg);
-  transition: left 0.3s ease;
-  z-index: 50;
+  background: white;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
   display: flex;
   flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
-
 .mobile-menu-content.active {
-  left: 0;
+  transform: translateX(100%);
 }
-
 .mobile-menu-header {
-  padding: 12px 6px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
 }
-
 .logo-header-cont {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
 }
-
+.mobile-logo-title-cont {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.title {
+  font-size: 20px;
+  font-weight: 600;
+}
 .close-menu-btn {
   background: none;
   border: none;
-  padding: 8px;
+  padding: 4px;
+  cursor: pointer;
 }
-
 .mobile-menu-body {
   flex: 1;
   overflow-y: auto;
-  /* padding: 16px; */
+  padding: 20px;
 }
-
-.mobile-menu-footer {
+.mobile-title {
+  padding-left: 0;
+  margin-top: 10px;
+}
+.mobile-item {
+  padding: 12px 0;
+  border-radius: 0;
+  border-bottom: 1px solid #f9f9f9;
+}
+.mobile-link {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border-top: 1px solid var(--line);
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
 }
 
-/* Responsive adjustments */
 @media (min-width: 769px) {
   .mobile-menu {
     display: none;
   }
 }
-
 @media (max-width: 768px) {
-  .pc-menu {
-    display: none;
-  }
+  .pc-menu,
   .chat-menu {
     display: none;
   }

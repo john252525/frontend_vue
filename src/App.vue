@@ -6,10 +6,12 @@
   <div v-else class="app-wrapper">
     <HelpModal />
     <DownloadsBox />
+
     <Header
       v-if="!isAuthPage && !isWidgetMode && !isMailingMode"
       :phoneMenuOn="phoneMenuOn"
     />
+
     <div class="page-container" v-if="!isAuthPage">
       <Navigation
         v-if="isWidgetMode || isMailingMode"
@@ -19,7 +21,7 @@
         :isWidgetMode="isWidgetMode"
         :chatsLoading="chatsLoading"
         :isMailingMode="isMailingMode"
-        class="navigation-chat"
+        class="navigation-wrapper"
       />
       <Navigation
         v-else
@@ -29,18 +31,21 @@
         :isWidgetMode="isWidgetMode"
         :chatsLoading="chatsLoading"
         :isMailingMode="isMailingMode"
-        class="navigation"
+        class="navigation-wrapper"
       />
+
       <ResultModal
         :changeStationLoadingModal="offModal"
         :stationLoading="stationLoading"
       />
+
       <main class="main-content">
         <section>
           <router-view @routeChanged="checkChatStation"></router-view>
         </section>
       </main>
     </div>
+
     <div v-else class="auth-container">
       <router-view></router-view>
     </div>
@@ -48,15 +53,7 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  watch,
-  computed,
-  onMounted,
-  reactive,
-  provide,
-  nextTick,
-} from "vue";
+import { ref, watch, computed, onMounted, provide, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import Header from "./components/Header/Header.vue";
 import Navigation from "./components/Navigation/Navigation.vue";
@@ -114,7 +111,6 @@ const currentDomain = ref("");
 
 onMounted(async () => {
   currentDomain.value = window.location.hostname;
-
   const myDomains = [
     "app1.developtech.ru",
     "app2.developtech.ru",
@@ -129,7 +125,6 @@ onMounted(async () => {
   }
 
   await nextTick();
-
   setTimeout(() => {
     isLoading.value = false;
   }, 150);
@@ -144,12 +139,8 @@ watch(
       }, 100);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
-
-function getDomen() {
-  return currentDomain.value;
-}
 
 provide("domen", currentDomain);
 provide("chatsLoadingChange", chatsLoadingChange);
@@ -173,66 +164,49 @@ body {
   height: 100vh;
   width: 100%;
   overflow: hidden;
+  background-color: var(--bg); /* Гарантируем фон */
 }
 
+/* Контейнер страницы (Меню + Контент) */
 .page-container {
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  flex: 1; /* Занимает всю высоту под хедером */
+  overflow: hidden; /* Скроллится только контент внутри */
+  position: relative;
 }
 
+/* Обертка для навигации */
+.navigation-wrapper {
+  flex-shrink: 0; /* Меню не сжимается меньше своего размера */
+  height: 100%;
+  z-index: 10;
+  /* Ширину не задаем! Она придет из компонента Navigation */
+}
+
+/* Основной контент */
 .main-content {
-  flex: 1;
-  margin-left: 230px;
-  box-sizing: border-box;
+  flex: 1; /* РЕЗИНОВАЯ ВЕРСТКА: Занимает всё оставшееся место */
+  min-width: 0; /* Критично для flexbox, чтобы контент не распирал контейнер */
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+
+  /* Убрали margin-left: 230px, так как теперь флекс сам распределяет место */
+  margin-left: 0;
+  transition: all 0.3s ease; /* Плавность, если будут изменения */
 }
 
 .main-content > section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: auto; /* Скролл только внутри секции */
+  padding: 0;
 }
 
-main {
-  flex: 1;
-  box-sizing: border-box;
-  display: flex;
-  overflow: hidden;
-}
-
-main > section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-}
-
-.navigation-chat {
-  width: 60px;
-  flex-shrink: 0;
-}
-
-.navigation-chat + .main-content {
-  margin-left: 60px;
-}
-
-.navigation {
-  width: 230px;
-  flex-shrink: 0;
-}
-
-.auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: var(--authBg);
-}
-
+/* Loading / Auth screens */
+.auth-container,
 .loading-container {
   display: flex;
   justify-content: center;
@@ -246,18 +220,20 @@ main > section {
   color: var(--text-color);
 }
 
-/* Адаптивность для мобильных */
+/* Адаптивность */
 @media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
-
-  .main-content > section {
-    overflow: auto;
-  }
-
   .page-container {
     flex-direction: column;
+  }
+
+  .navigation-wrapper {
+    /* На мобилках меню часто position: fixed или скрыто */
+    position: absolute;
+    height: 100%;
+  }
+
+  .main-content {
+    margin-left: 0;
   }
 }
 </style>
