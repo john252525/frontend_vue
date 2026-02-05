@@ -29,16 +29,13 @@ const isIndexing = ref(true);
 
 const buildSearchIndex = async () => {
   const index = [];
-  // Нормализуем строку поиска бренда
   const targetBrand = brandName.value.toLowerCase();
 
   for (const path in rawModules) {
-    // Проверяем, относится ли файл к бренду
     if (path.toLowerCase().includes(`/${targetBrand}/`)) {
       try {
         const rawContent = await rawModules[path]();
 
-        // Формируем заголовок
         const title = path
           .split("/")
           .pop()
@@ -69,19 +66,10 @@ const fuse = computed(
         { name: "title", weight: 0.8 },
         { name: "content", weight: 0.2 },
       ],
-      // threshold: 0.0 делает поиск абсолютно точным.
-      // Поставим 0.1, чтобы допускать только минимальные различия (например, регистр).
       threshold: 0.1,
-
-      // Ищем совпадение в любом месте текста
       ignoreLocation: true,
-
-      // Включаем нахождение всех совпадений
       findAllMatches: true,
-
-      // Минимальная длина слова для поиска
       minMatchCharLength: 2,
-
       includeMatches: true,
     }),
 );
@@ -111,7 +99,6 @@ const getHighlightedSnippet = (resultItem) => {
   let snippet = text.substring(snippetStart, snippetEnd);
   const matchedWord = text.substring(start, end);
 
-  // Оборачиваем только точное совпадение
   const highlighted = snippet.replace(
     new RegExp(`(${matchedWord})`, "gi"),
     "<mark>$1</mark>",
@@ -138,25 +125,18 @@ const selectSearchResult = (path) => {
   searchResults.value = [];
 };
 
-// --- ДЕРЕВО И НАВИГАЦИЯ ---
-
-// Хелпер для нормализации путей (убирает /src/docs/brand/...)
 const normalizePath = (fullPath) => {
-  // Ищем вхождение бренда в путь
   const brandSegment = `/${brandName.value}/`;
   const idx = fullPath.indexOf(brandSegment);
   if (idx === -1) return null;
-
-  // Возвращаем часть пути после бренда
   return fullPath.substring(idx + brandSegment.length).replace(".md", "");
 };
 
 const buildTree = () => {
   const root = [];
-
   for (const path in renderModules) {
     const cleanPath = normalizePath(path);
-    if (!cleanPath) continue; // Пропускаем файлы других брендов
+    if (!cleanPath) continue;
 
     const parts = cleanPath.split("/");
     let currentLevel = root;
@@ -170,7 +150,7 @@ const buildTree = () => {
       if (!existingNode) {
         existingNode = {
           name: cleanName,
-          path: path, // Сохраняем ОРИГИНАЛЬНЫЙ полный путь
+          path: path,
           isFile: isFile,
           children: isFile ? null : [],
         };
@@ -185,7 +165,6 @@ const buildTree = () => {
 const loadDoc = async (path) => {
   isLoading.value = true;
   errorMsg.value = "";
-
   const importFn = renderModules[path];
 
   if (!importFn) {
@@ -219,15 +198,12 @@ const loadDoc = async (path) => {
 
 onMounted(async () => {
   try {
-    // 1. Строим меню
     menu.value = buildTree();
-
     if (menu.value.length === 0) {
-      errorMsg.value = `Документы не найдены в папке /src/docs/${brandName.value}/. Проверьте путь.`;
+      errorMsg.value = `Документы не найдены.`;
       isLoading.value = false;
       return;
     }
-
     const findFirstFile = (nodes) => {
       for (const node of nodes) {
         if (node.isFile) return node.path;
@@ -237,19 +213,10 @@ onMounted(async () => {
         }
       }
     };
-
     const firstPath = findFirstFile(menu.value);
-
-    if (firstPath) {
-      await loadDoc(firstPath);
-    } else {
-      errorMsg.value = "Не найдено ни одного MD файла в структуре.";
-      isLoading.value = false;
-    }
-
+    if (firstPath) await loadDoc(firstPath);
     buildSearchIndex();
   } catch (e) {
-    console.error("Critical error:", e);
     errorMsg.value = "Критическая ошибка инициализации";
     isLoading.value = false;
   }
@@ -286,7 +253,7 @@ onMounted(async () => {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Найти..."
+            placeholder="Поиск по заголовку"
             class="kb-search-input"
           />
 
@@ -304,20 +271,10 @@ onMounted(async () => {
               ></div>
             </div>
           </div>
-          <div
-            v-else-if="searchQuery.length > 1 && searchResults.length === 0"
-            class="kb-search-results empty"
-          >
-            Ничего не найдено
-          </div>
         </div>
       </div>
-      <div class="content-container">
-        <div v-if="errorMsg" class="error-state">
-          <h3>Упс!</h3>
-          <p>{{ errorMsg }}</p>
-        </div>
 
+      <div class="content-container">
         <transition name="page-fade" mode="out-in">
           <div
             :key="currentPath"
@@ -325,29 +282,17 @@ onMounted(async () => {
             v-if="!isLoading && currentDoc"
           >
             <header class="doc-header">
-              <nav class="breadcrumb">
-                <span class="root-label">Docs</span>
-                <span v-if="currentCategory" class="separator">/</span>
-                <span v-if="currentCategory" class="category-name">{{
-                  currentCategory
-                }}</span>
-              </nav>
               <h1 class="main-title">{{ currentDocName }}</h1>
-              <div class="header-divider"></div>
+              <div class="meta-info"></div>
             </header>
 
             <article class="markdown-body">
               <component :is="currentDoc" />
             </article>
-
-            <footer class="doc-footer">
-              <p>Обновлено: {{ new Date().toLocaleDateString() }}</p>
-            </footer>
           </div>
 
           <div v-else-if="isLoading" class="empty-state">
             <div class="loader-spinner"></div>
-            <p>Загрузка...</p>
           </div>
         </transition>
       </div>
@@ -356,217 +301,194 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* Layout */
 .kb-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
   background: #ffffff;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 }
-
 .sidebar-header {
-  padding: 20px;
-  /* flex-shrink: 0; */
+  padding: 20px 40px;
 }
-
 .sidebar-nav-scroll {
   flex: 1;
   overflow-y: auto;
-  /* padding: 0 20px 20px 20px; */
 }
-
-/* Scrollbar */
-.sidebar-nav-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-.sidebar-nav-scroll::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 4px;
-}
-
-/* Search */
 .search-wrapper {
   position: relative;
+  max-width: 400px;
 }
-
 .search-input-icon {
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
-  pointer-events: none;
+  color: #6b778c;
 }
-
 .kb-search-input {
   width: 100%;
-  padding: 10px 10px 10px 36px;
-  box-sizing: border-box;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  padding: 8px 12px 8px 38px;
+  border: 1px solid #dfe1e6;
+  border-radius: 10px;
+  font-size: 14px;
   outline: none;
+  transition: border-color 0.2s;
 }
-
 .kb-search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #4c9aff;
 }
-
 .kb-search-results {
   position: absolute;
-  top: calc(100% + 8px); /* Плотная привязка под инпутом */
+  top: 100%;
   left: 0;
-  width: 100%; /* Ширина точно как у поля ввода */
+  width: 100%;
   background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  max-height: 450px;
-  overflow-y: auto;
-  z-index: 9999; /* Поверх всего */
+  border: 1px solid #dfe1e6;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
-
-.kb-search-results.empty {
-  padding: 12px;
-  text-align: center;
-  color: #6b7280;
-  font-size: 0.85rem;
-}
-
 .kb-search-item {
-  padding: 14px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 10px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  border-bottom: 1px solid #f4f5f7;
 }
-.kb-search-item:last-child {
-  border-bottom: none;
-}
-.kb-search-item:hover {
-  background: #f1f5f9;
-}
-
-.item-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1e293b;
-  margin-bottom: 4px;
-}
-.item-snippet {
-  font-size: 0.8rem;
-  line-height: 1.5;
-  color: #64748b;
-}
-.item-snippet :deep(mark) {
-  background: #ffde58;
-  color: #000;
-  border-radius: 2px;
-  padding: 0 2px;
-}
-
 .content-area {
   flex: 1;
   overflow-y: auto;
-  scroll-behavior: smooth;
-  background: white;
+  background: #fff;
 }
+
+/* СТИЛИЗАЦИЯ ПОД CONFLUENCE (Ваш запрос) */
 .content-container {
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 40px 50px;
 }
 
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 50vh;
-  color: #ef4444;
-  text-align: center;
-}
-
-/* Headers & Markdown */
 .doc-header {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
-.breadcrumb {
+
+.main-title {
+  font-size: 32px;
+  font-weight: 500;
+  color: #172b4d;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.meta-info {
   display: flex;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: #6b7280;
+  gap: 16px;
+  font-size: 14px;
+  color: #6b778c;
+  margin-bottom: 24px;
+}
+
+/* Markdown контент */
+.markdown-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #172b4d; /* Темно-синий/черный цвет текста Atlassian */
+}
+
+/* Заголовки как на скриншоте */
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3) {
+  color: #172b4d;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.markdown-body :deep(h1) {
+  font-size: 24px;
+  border-bottom: 1px solid #dfe1e6;
+  padding-bottom: 8px;
+}
+.markdown-body :deep(h2) {
+  font-size: 20px;
+}
+.markdown-body :deep(h3) {
+  font-size: 18px;
+}
+
+/* Списки */
+.markdown-body :deep(ol),
+.markdown-body :deep(ul) {
+  padding-left: 24px;
   margin-bottom: 16px;
 }
-.category-name {
-  color: #3b82f6;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-.main-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 0 0 20px 0;
-  line-height: 1.2;
-}
-.header-divider {
-  height: 1px;
-  background: #e5e7eb;
-  width: 100%;
-  margin-top: 20px;
+
+.markdown-body :deep(li) {
+  margin-bottom: 8px;
 }
 
-.doc-footer {
-  margin-top: 60px;
-  padding-top: 20px;
-  border-top: 1px solid #f3f4f6;
-  color: #9ca3af;
-  font-size: 0.85rem;
+/* Ссылки */
+.markdown-body :deep(a) {
+  color: #0052cc;
+  text-decoration: none;
+}
+.markdown-body :deep(a:hover) {
+  text-decoration: underline;
 }
 
-/* Loader */
-.empty-state {
-  height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
+/* Изображения (важный пункт со скриншота) */
+.markdown-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 24px 0;
+  border: 1px solid #dfe1e6; /* Тонкая рамка */
+  border-radius: 3px;
+  box-shadow:
+    0 1px 1px rgba(9, 30, 66, 0.25),
+    0 0 1px rgba(9, 30, 66, 0.31); /* Мягкая тень Atlassian */
 }
+
+/* Текст */
+.markdown-body :deep(p) {
+  margin-bottom: 16px;
+}
+
+/* Код */
+.markdown-body :deep(code) {
+  background: #f4f5f7;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family:
+    "SFMono-Medium", "SF Mono", "Segoe UI Mono", "Roboto Mono", "Ubuntu Mono",
+    Menlo, Consolas, monospace;
+  font-size: 14px;
+  color: #172b4d;
+}
+
+/* Загрузка */
 .loader-spinner {
-  width: 30px;
-  height: 30px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #ebecf0;
+  border-top-color: #0052cc;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 12px;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Transition */
+/* Плавный переход */
 .page-fade-enter-active,
 .page-fade-leave-active {
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
+  transition: opacity 0.15s ease;
 }
-.page-fade-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
+.page-fade-enter-from,
 .page-fade-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
 }
 </style>
