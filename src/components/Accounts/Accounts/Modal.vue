@@ -173,6 +173,16 @@
               stationDomain.navigate.value === 'whatsapi'
             "
             class="action"
+            @click="openMessageHistory"
+            >История сообщений</span
+          >
+
+          <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
             @click="openBlacklistModal"
             >Черный список</span
           >
@@ -274,6 +284,9 @@ const props = defineProps({
     type: Function,
   },
   changeTariffStation: {
+    type: Function,
+  },
+  openMessageHistory: {
     type: Function,
   },
   openUonSettingModal: {

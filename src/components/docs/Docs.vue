@@ -361,10 +361,9 @@ onMounted(async () => {
   background: #fff;
 }
 
-/* СТИЛИЗАЦИЯ ПОД CONFLUENCE (Ваш запрос) */
 .content-container {
   margin: 0 auto;
-  padding: 40px 50px;
+  padding: 40px 40px;
 }
 
 .doc-header {
@@ -391,10 +390,9 @@ onMounted(async () => {
 .markdown-body {
   font-size: 16px;
   line-height: 1.6;
-  color: #172b4d; /* Темно-синий/черный цвет текста Atlassian */
+  color: #172b4d;
 }
 
-/* Заголовки как на скриншоте */
 .markdown-body :deep(h1),
 .markdown-body :deep(h2),
 .markdown-body :deep(h3) {
@@ -427,26 +425,17 @@ onMounted(async () => {
   margin-bottom: 8px;
 }
 
-/* Ссылки */
-.markdown-body :deep(a) {
-  color: #0052cc;
-  text-decoration: none;
-}
-.markdown-body :deep(a:hover) {
-  text-decoration: underline;
-}
-
-/* Изображения (важный пункт со скриншота) */
+/* Изображения (ОБНОВЛЕНО) */
 .markdown-body :deep(img) {
-  max-width: 100%;
+  max-width: 80%; /* Не более 80% от ширины статьи */
   height: auto;
   display: block;
-  margin: 24px 0;
-  border: 1px solid #dfe1e6; /* Тонкая рамка */
-  border-radius: 3px;
+  margin: 32px 0; /* Отступы сверху и снизу */
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
   box-shadow:
-    0 1px 1px rgba(9, 30, 66, 0.25),
-    0 0 1px rgba(9, 30, 66, 0.31); /* Мягкая тень Atlassian */
+    0 2px 4px rgba(9, 30, 66, 0.08),
+    0 0 1px rgba(9, 30, 66, 0.31);
 }
 
 /* Текст */
@@ -459,11 +448,8 @@ onMounted(async () => {
   background: #f4f5f7;
   padding: 2px 4px;
   border-radius: 3px;
-  font-family:
-    "SFMono-Medium", "SF Mono", "Segoe UI Mono", "Roboto Mono", "Ubuntu Mono",
-    Menlo, Consolas, monospace;
+  font-family: monospace;
   font-size: 14px;
-  color: #172b4d;
 }
 
 /* Загрузка */
@@ -482,7 +468,6 @@ onMounted(async () => {
   }
 }
 
-/* Плавный переход */
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition: opacity 0.15s ease;

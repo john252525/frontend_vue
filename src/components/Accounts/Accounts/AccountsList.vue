@@ -83,6 +83,7 @@
       :changeBindingStation="changeBindingStation"
       :openUonSettingModal="openUonSettingModal"
       :openBlacklistModal="openBlacklistModal"
+      :openMessageHistory="openMessageHistory"
     />
 
     <SettignsModal
@@ -154,6 +155,12 @@
       :item="selectedItem"
       :close="closeBlacklistModal"
     />
+
+    <MessageHistory
+      v-if="messageHistory"
+      :close="closeMessageHistory"
+      :item="selectedItem"
+    />
   </section>
 </template>
 
@@ -168,6 +175,7 @@ import Enable from "./ModalAccount/Enable/Enable.vue";
 import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
+import MessageHistory from "./ModalAccount/CRM/MessageHistory/MessageHistory.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
@@ -259,6 +267,7 @@ const selectedWarningItem = ref(null);
 const showRoutingSettings = ref(false);
 const uonSettingsModal = ref(false);
 const blacklistModal = ref(false);
+const messageHistory = ref(false);
 
 // ============= УТИЛИТЫ =============
 const formatSubscriptionDate = (dateString) => {
@@ -285,6 +294,14 @@ const showSubscriptionWarning = (item) => {
     item.enable !== "0" &&
     item.type !== "bulk"
   );
+};
+
+const openMessageHistory = () => {
+  messageHistory.value = true;
+};
+
+const closeMessageHistory = () => {
+  messageHistory.value = false;
 };
 
 const openSubscriptionModal = (item) => {
