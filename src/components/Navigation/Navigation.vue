@@ -337,7 +337,7 @@ const navigateTo = (page) => {
   width: var(--sidebar-width);
   background: #ffffff;
   height: calc(100vh - 57px);
-  z-index: 40;
+  z-index: 10;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
   transition: width var(--anim-speed) var(--anim-curve);
   overflow: visible;

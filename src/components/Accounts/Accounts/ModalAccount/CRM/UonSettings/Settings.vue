@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Настройки</h3>
+        <h3>Настройки CRM</h3>
         <button class="close-btn" @click="close">
           <svg
             width="20"
@@ -72,8 +72,7 @@
               <div class="setting-info">
                 <span class="setting-label">Запретить создание новых</span>
                 <p class="setting-description">
-                  Если обращение уже есть — касание добавится, если нет — новое
-                  создано не будет
+                  Если обращения нет — новое создано не будет
                 </p>
               </div>
               <label class="switch">
@@ -103,16 +102,32 @@
                 <span class="slider round"></span>
               </label>
             </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-label">Назначать менеджера</span>
+                <p class="setting-description">
+                  Автоматически закреплять менеджера за обращением
+                </p>
+              </div>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  v-model="settinsOptions.requests.set_manager"
+                  @change="handleUpdate"
+                />
+                <span class="slider round"></span>
+              </label>
+            </div>
           </div>
 
           <div class="settings-section">
-            <h4 class="section-title">Касания</h4>
+            <h4 class="section-title">Касания (Actions)</h4>
             <div class="setting-item">
               <div class="setting-info">
                 <span class="setting-label">Полная блокировка</span>
                 <p class="setting-description">
-                  Заблокировать создание всех касаний из мессенджеров (вх. и
-                  исх.)
+                  Заблокировать создание всех касаний из мессенджеров
                 </p>
               </div>
               <label class="switch">
@@ -132,7 +147,7 @@
               <div class="setting-info">
                 <span class="setting-label">Блокировать входящие</span>
                 <p class="setting-description">
-                  Сообщения из мессенджера не пробрасываются в U-ON
+                  Входящие сообщения не пробрасываются в CRM
                 </p>
               </div>
               <label class="switch">
@@ -153,8 +168,7 @@
               <div class="setting-info">
                 <span class="setting-label">Блокировать исходящие</span>
                 <p class="setting-description">
-                  Сообщения, отправленные вручную из мессенджера, не попадут в
-                  U-ON
+                  Ручные сообщения из мессенджера не попадут в CRM
                 </p>
               </div>
               <label class="switch">
@@ -166,6 +180,45 @@
                 />
                 <span class="slider round"></span>
               </label>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-label">Создавать напоминание</span>
+                <p class="setting-description">
+                  Автоматически создавать задачу при новом касании
+                </p>
+              </div>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  v-model="settinsOptions.actions.create_reminder"
+                  @change="handleUpdate"
+                />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h4 class="section-title">Доступ менеджеров</h4>
+            <div class="manager-info-box">
+              <div class="info-row">
+                <span>Разрешенные ID:</span>
+                <span class="badge gray">{{
+                  settinsOptions.managers.allowed.length || "Все"
+                }}</span>
+              </div>
+              <div class="info-row">
+                <span>Исключенные ID:</span>
+                <span class="badge red">{{
+                  settinsOptions.managers.excluded.length || "Нет"
+                }}</span>
+              </div>
+              <p class="setting-description mt-2">
+                Управление списками менеджеров осуществляется через основной
+                раздел сотрудников.
+              </p>
             </div>
           </div>
         </div>
@@ -208,9 +261,8 @@ const token = computed(() => accountStore.getAccountToken);
 
 const settinsOptions = ref(null);
 const loading = ref(true);
-const saveStatus = ref(""); // '', 'saving', 'saved', 'error'
+const saveStatus = ref("");
 
-// Загрузка настроек
 const fetchSettings = async () => {
   const { uuid } = item.value;
   loading.value = true;
@@ -229,24 +281,21 @@ const fetchSettings = async () => {
   }
 };
 
-// Сохранение настроек (вызывается при каждом переключении)
 const handleUpdate = async () => {
   const { uuid } = item.value;
   saveStatus.value = "saving";
-
   try {
     const response = await axios.post(
       `${FRONTEND_URL}uon-account/saveSettings`,
-      settinsOptions.value, // Тело запроса
+      settinsOptions.value,
       {
-        params: { uuid }, // UUID в GET параметрах, как указано в описании
+        params: { uuid },
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
       },
     );
-
     if (response.data.ok) {
       saveStatus.value = "saved";
       setTimeout(() => {
@@ -254,9 +303,8 @@ const handleUpdate = async () => {
       }, 2000);
     }
   } catch (error) {
-    console.error("Ошибка сохранения:", error);
     saveStatus.value = "error";
-    alert("Ошибка при сохранении настроек");
+    console.error("Ошибка сохранения:", error);
   }
 };
 
@@ -350,6 +398,37 @@ onMounted(fetchSettings);
   font-weight: 600;
   color: #334155;
   margin-bottom: 2px;
+}
+
+.manager-info-box {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge.gray {
+  background: #e2e8f0;
+  color: #475569;
+}
+.badge.red {
+  background: #fee2e2;
+  color: #ef4444;
+}
+.mt-2 {
+  margin-top: 8px;
 }
 
 .setting-description {
