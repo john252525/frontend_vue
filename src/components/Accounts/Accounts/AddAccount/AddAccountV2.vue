@@ -4,7 +4,6 @@
     :stationLoading="stationLoading"
   />
 
-  <!-- Модальное окно ошибки загрузки формы -->
   <div
     v-if="formLoadError"
     class="modal-overlay error-overlay"
@@ -58,7 +57,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно подтверждения интеграции -->
   <div
     v-if="showIntegrationModal"
     class="modal-overlay"
@@ -131,12 +129,266 @@
     </div>
   </div>
 
-  <!-- Основное модальное окно добавления аккаунта -->
-  <div
+  <ModalFrame
     v-if="!stationLoading.loading && !formLoadError"
-    class="modal-overlay"
-    data-testid="main-modal-overlay"
+    :text="modalText"
+    :close="openModal"
+    :action="submitForm"
+    :isDisabled="!isFormValid"
   >
+    <div class="modal-content">
+      <!-- Group Select -->
+      <div v-if="showElement('group')" class="form-group">
+        <label
+          v-if="getLabel('group')"
+          class="accounts-addAccounts-group-label"
+          data-testid="group-label"
+        >
+          {{ getLabel("group") }}
+        </label>
+        <div class="custom-select" ref="groupSelect" data-testid="group-select">
+          <div
+            class="selected-option accounts-addAccounts-group-select"
+            @click="toggleDropdown('group')"
+            data-testid="group-select-button"
+          >
+            <span>{{ getSelectedText("group") || "Выберите тип" }}</span>
+            <svg
+              class="dropdown-icon"
+              :class="{ 'rotate-180': dropdownOpen.group }"
+              width="12"
+              height="8"
+              viewBox="0 0 12 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L6 6L11 1"
+                stroke="#6B7280"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <teleport to="body" v-if="dropdownOpen.group">
+            <div
+              class="dropdown-options-global accounts-addAccounts-group-dropdown"
+              :style="getDropdownStyle('group')"
+              data-testid="group-dropdown"
+            >
+              <div
+                v-for="option in getOptions('group')"
+                :key="option.value"
+                class="option accounts-addAccounts-group-option"
+                @click="selectOption('group', option.value)"
+                :data-testid="`group-option-${option.value}`"
+              >
+                {{ option.text }}
+              </div>
+            </div>
+          </teleport>
+        </div>
+      </div>
+
+      <!-- Messenger Select -->
+      <div v-if="showElement('messenger')" class="form-group">
+        <label
+          v-if="getLabel('messenger')"
+          class="accounts-addAccounts-messenger-label"
+          data-testid="messenger-label"
+        >
+          {{ getLabel("messenger") }}
+        </label>
+        <div
+          class="custom-select"
+          ref="messengerSelect"
+          data-testid="messenger-select"
+        >
+          <div
+            class="selected-option accounts-addAccounts-messenger-select"
+            @click="toggleDropdown('messenger')"
+            data-testid="messenger-select-button"
+          >
+            <span>{{
+              getSelectedText("messenger") || "Выберите мессенджер"
+            }}</span>
+            <svg
+              class="dropdown-icon"
+              :class="{ 'rotate-180': dropdownOpen.messenger }"
+              width="12"
+              height="8"
+              viewBox="0 0 12 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L6 6L11 1"
+                stroke="#6B7280"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <teleport to="body" v-if="dropdownOpen.messenger">
+            <div
+              class="dropdown-options-global accounts-addAccounts-messenger-dropdown"
+              :style="getDropdownStyle('messenger')"
+              data-testid="messenger-dropdown"
+            >
+              <div
+                v-for="option in getOptions('messenger')"
+                :key="option.value"
+                class="option accounts-addAccounts-messenger-option"
+                @click="selectOption('messenger', option.value)"
+                :data-testid="`messenger-option-${option.value}`"
+              >
+                {{ option.text }}
+              </div>
+            </div>
+          </teleport>
+        </div>
+      </div>
+
+      <!-- CRM Select -->
+      <div v-if="showElement('type')" class="form-group">
+        <label
+          v-if="getLabel('type')"
+          class="accounts-addAccounts-crmType-label"
+          data-testid="type-label"
+        >
+          {{ getLabel("type") }}
+        </label>
+        <div class="custom-select" ref="typeSelect" data-testid="type-select">
+          <div
+            class="selected-option accounts-addAccounts-crmType-select"
+            @click="toggleDropdown('type')"
+            data-testid="type-select-button"
+          >
+            <span>{{ getSelectedText("type") || "Выберите CRM" }}</span>
+            <svg
+              class="dropdown-icon"
+              :class="{ 'rotate-180': dropdownOpen.type }"
+              width="12"
+              height="8"
+              viewBox="0 0 12 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L6 6L11 1"
+                stroke="#6B7280"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <teleport to="body" v-if="dropdownOpen.type">
+            <div
+              class="dropdown-options-global accounts-addAccounts-crmType-dropdown"
+              :style="getDropdownStyle('type')"
+              data-testid="type-dropdown"
+            >
+              <div
+                v-for="option in getOptions('type')"
+                :key="option.value"
+                class="option accounts-addAccounts-crmType-option"
+                @click="handleCrmSelect(option.value, option.text)"
+                :data-testid="`type-option-${option.value}`"
+              >
+                {{ option.text }}
+              </div>
+            </div>
+          </teleport>
+        </div>
+      </div>
+
+      <!-- Dynamic CRM Fields -->
+      <template v-if="formValues.group === 'crm' && formValues.type">
+        <div
+          v-for="field in getCrmFields(formValues.type)"
+          :key="field.name"
+          class="form-field"
+        >
+          <label
+            :class="`accounts-addAccounts-${field.name}-label`"
+            :data-testid="`${field.name}-label`"
+          >
+            {{ field.label }}
+          </label>
+          <input
+            v-model="formValues[field.name]"
+            type="text"
+            :placeholder="field.placeholder"
+            :required="field.required"
+            :class="`accounts-addAccounts-${field.name}-input`"
+            :data-testid="`${field.name}-input`"
+          />
+          <p
+            v-if="field.hint"
+            class="field-hint"
+            :data-testid="`${field.name}-hint`"
+          >
+            {{ field.hint }}
+          </p>
+        </div>
+      </template>
+
+      <!-- Info messages -->
+      <div
+        v-if="
+          formValues.group === 'messenger' &&
+          formValues.messenger === 'whatsapp'
+        "
+        class="info-message accounts-addAccounts-whatsapp-info"
+        data-testid="whatsapp-info"
+      >
+        <p>
+          Привязать номер своего Whatsapp можно будет после создания аккаунта
+        </p>
+      </div>
+
+      <div
+        v-if="
+          formValues.group === 'messenger' && formValues.messenger === 'max'
+        "
+        class="info-message accounts-addAccounts-whatsapp-info"
+        data-testid="whatsapp-info"
+      >
+        <p>Привязать номер своего Max можно будет после создания аккаунта</p>
+      </div>
+
+      <div
+        v-if="
+          formValues.group === 'messenger' &&
+          formValues.messenger === 'telegram'
+        "
+        class="info-message accounts-addAccounts-telegram-info"
+        data-testid="telegram-info"
+      >
+        <p>
+          Привязать свой аккаунт Telegram можно будет после создания аккаунта
+        </p>
+      </div>
+
+      <!-- SMS Warning -->
+      <div
+        v-if="formValues.group === 'sms'"
+        class="info-message accounts-addAccounts-sms-warning"
+        data-testid="sms-warning"
+      >
+        <p>
+          Внимание! Если у вас нет телефона на ОС Android (не ниже версии 7.0),
+          вы не сможете подключить канал СМС
+        </p>
+      </div>
+    </div>
+  </ModalFrame>
+
+  <!-- Основное модальное окно добавления аккаунта -->
+  <!-- <div v-if="!stationLoading.loading && !formLoadError" class="modal-overlay">
     <div class="modal-container" data-testid="main-modal-container">
       <div class="modal-header">
         <h2 class="accounts-addAccounts-title-text" data-testid="modal-title">
@@ -152,7 +404,6 @@
       </div>
 
       <div class="modal-content">
-        <!-- Group Select -->
         <div v-if="showElement('group')" class="form-group">
           <label
             v-if="getLabel('group')"
@@ -210,7 +461,6 @@
           </div>
         </div>
 
-        <!-- Messenger Select -->
         <div v-if="showElement('messenger')" class="form-group">
           <label
             v-if="getLabel('messenger')"
@@ -270,7 +520,6 @@
           </div>
         </div>
 
-        <!-- CRM Select -->
         <div v-if="showElement('type')" class="form-group">
           <label
             v-if="getLabel('type')"
@@ -324,7 +573,6 @@
           </div>
         </div>
 
-        <!-- Dynamic CRM Fields -->
         <template v-if="formValues.group === 'crm' && formValues.type">
           <div
             v-for="field in getCrmFields(formValues.type)"
@@ -355,7 +603,6 @@
           </div>
         </template>
 
-        <!-- Info messages -->
         <div
           v-if="
             formValues.group === 'messenger' &&
@@ -392,7 +639,6 @@
           </p>
         </div>
 
-        <!-- SMS Warning -->
         <div
           v-if="formValues.group === 'sms'"
           class="info-message accounts-addAccounts-sms-warning"
@@ -425,13 +671,14 @@
         </button>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
 import axios from "axios";
 import LoadModal from "../LoadingMoadal/LoadModal.vue";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const props = defineProps({
   isOpen: Boolean,
@@ -454,6 +701,12 @@ import { useAccountStore } from "@/stores/accountStore";
 
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+
+const modalText = ref({
+  title: "Настройка интеграции",
+  close: "Отмена",
+  action: "Сохранить",
+});
 
 // State
 const stationLoading = reactive({
@@ -510,7 +763,7 @@ const fetchFormStructure = async () => {
       retryCount.value = 0;
     } else {
       throw new Error(
-        response.data.message || "Не удалось загрузить структуру формы"
+        response.data.message || "Не удалось загрузить структуру формы",
       );
     }
   } catch (error) {
@@ -560,13 +813,13 @@ const closeFormError = () => {
 // Helper functions
 const getSelectElement = (name) => {
   return formElements.value.find(
-    (el) => el.element === "select" && el.name === name
+    (el) => el.element === "select" && el.name === name,
   );
 };
 
 const getLabel = (forAttr) => {
   const label = formElements.value.find(
-    (el) => el.element === "label" && el.for === forAttr
+    (el) => el.element === "label" && el.for === forAttr,
   );
   return label?.text_content || "";
 };
@@ -594,7 +847,7 @@ const getSelectedText = (selectName) => {
     (el) =>
       el.parent_id === select.id &&
       el.element === "option" &&
-      el.value === selectedValue
+      el.value === selectedValue,
   );
 
   return option?.text_content || "";
@@ -607,7 +860,7 @@ const getCrmFields = (crmType) => {
     (el) =>
       el.element === "option" &&
       el.value === crmType &&
-      el.parent_id === getSelectElement("type")?.id
+      el.parent_id === getSelectElement("type")?.id,
   );
 
   if (!crmOption) return [];
@@ -616,7 +869,7 @@ const getCrmFields = (crmType) => {
   const fields = formElements.value.filter(
     (el) =>
       el.parent_id === crmOption.id &&
-      (el.element === "input" || el.element === "label")
+      (el.element === "input" || el.element === "label"),
   );
 
   // Build field structure with labels and inputs
@@ -649,7 +902,7 @@ const getCrmFields = (crmType) => {
 
   // Find hints (p elements)
   const hints = formElements.value.filter(
-    (el) => el.parent_id === crmOption.id && el.element === "p"
+    (el) => el.parent_id === crmOption.id && el.element === "p",
   );
   hints.forEach((hint) => {
     // Find associated field (usually the first input found for this CRM)
@@ -749,8 +1002,8 @@ const getDropdownStyle = (name) => {
     name === "group"
       ? groupSelect
       : name === "messenger"
-      ? messengerSelect
-      : typeSelect;
+        ? messengerSelect
+        : typeSelect;
 
   if (!selectRef.value) return {};
 
@@ -818,7 +1071,7 @@ const submitForm = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.ok) {

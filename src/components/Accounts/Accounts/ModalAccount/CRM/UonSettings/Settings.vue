@@ -1,256 +1,228 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Настройки CRM</h3>
-        <button class="close-btn" @click="close">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+  <ModalFrame :item="item" :close="close" :text="textModal">
+    <div>
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Загрузка конфигурации...</p>
       </div>
 
-      <div class="modal-body">
-        <div v-if="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Загрузка конфигурации...</p>
-        </div>
-
-        <div v-else-if="settinsOptions" class="settings-container">
-          <div class="settings-section">
-            <h4 class="section-title">Клиенты</h4>
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Менеджер по умолчанию</span>
-                <p class="setting-description">
-                  Устанавливать ответственного менеджера при создании новых
-                  клиентов
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.clients.set_default_manager"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <h4 class="section-title">Обращения</h4>
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Отключить обработку</span>
-                <p class="setting-description">
-                  Никакие касания не добавляются в обращения, только в историю
-                  клиента
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.requests.disable"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div
-              class="setting-item"
-              :class="{ 'item-disabled': settinsOptions.requests.disable }"
-            >
-              <div class="setting-info">
-                <span class="setting-label">Запретить создание новых</span>
-                <p class="setting-description">
-                  Если обращения нет — новое создано не будет
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  :disabled="settinsOptions.requests.disable"
-                  v-model="settinsOptions.requests.disable_creation"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Менеджер по умолчанию</span>
-                <p class="setting-description">
-                  Назначать первого активного менеджера для новых обращений
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.requests.set_default_manager"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Назначать менеджера</span>
-                <p class="setting-description">
-                  Автоматически закреплять менеджера за обращением
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.requests.set_manager"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <h4 class="section-title">Касания (Actions)</h4>
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Полная блокировка</span>
-                <p class="setting-description">
-                  Заблокировать создание всех касаний из мессенджеров
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.actions.block"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div
-              class="setting-item"
-              :class="{ 'item-disabled': settinsOptions.actions.block }"
-            >
-              <div class="setting-info">
-                <span class="setting-label">Блокировать входящие</span>
-                <p class="setting-description">
-                  Входящие сообщения не пробрасываются в CRM
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  :disabled="settinsOptions.actions.block"
-                  v-model="settinsOptions.actions.block_incoming"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div
-              class="setting-item"
-              :class="{ 'item-disabled': settinsOptions.actions.block }"
-            >
-              <div class="setting-info">
-                <span class="setting-label">Блокировать исходящие</span>
-                <p class="setting-description">
-                  Ручные сообщения из мессенджера не попадут в CRM
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  :disabled="settinsOptions.actions.block"
-                  v-model="settinsOptions.actions.block_outgoing"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-
-            <div class="setting-item">
-              <div class="setting-info">
-                <span class="setting-label">Создавать напоминание</span>
-                <p class="setting-description">
-                  Автоматически создавать задачу при новом касании
-                </p>
-              </div>
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  v-model="settinsOptions.actions.create_reminder"
-                  @change="handleUpdate"
-                />
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <h4 class="section-title">Доступ менеджеров</h4>
-            <div class="manager-info-box">
-              <div class="info-row">
-                <span>Разрешенные ID:</span>
-                <span class="badge gray">{{
-                  settinsOptions.managers.allowed.length || "Все"
-                }}</span>
-              </div>
-              <div class="info-row">
-                <span>Исключенные ID:</span>
-                <span class="badge red">{{
-                  settinsOptions.managers.excluded.length || "Нет"
-                }}</span>
-              </div>
-              <p class="setting-description mt-2">
-                Управление списками менеджеров осуществляется через основной
-                раздел сотрудников.
+      <div v-else-if="settinsOptions" class="settings-container">
+        <div class="settings-section">
+          <h4 class="section-title">Клиенты</h4>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Менеджер по умолчанию</span>
+              <p class="setting-description">
+                Устанавливать ответственного менеджера при создании новых
+                клиентов
               </p>
             </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.clients.set_default_manager"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="section-title">Обращения</h4>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Отключить обработку</span>
+              <p class="setting-description">
+                Никакие касания не добавляются в обращения, только в историю
+                клиента
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.requests.disable"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div
+            class="setting-item"
+            :class="{ 'item-disabled': settinsOptions.requests.disable }"
+          >
+            <div class="setting-info">
+              <span class="setting-label">Запретить создание новых</span>
+              <p class="setting-description">
+                Если обращения нет — новое создано не будет
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                :disabled="settinsOptions.requests.disable"
+                v-model="settinsOptions.requests.disable_creation"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Менеджер по умолчанию</span>
+              <p class="setting-description">
+                Назначать первого активного менеджера для новых обращений
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.requests.set_default_manager"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Назначать менеджера</span>
+              <p class="setting-description">
+                Автоматически закреплять менеджера за обращением
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.requests.set_manager"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="section-title">Касания (Actions)</h4>
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Полная блокировка</span>
+              <p class="setting-description">
+                Заблокировать создание всех касаний из мессенджеров
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.actions.block"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div
+            class="setting-item"
+            :class="{ 'item-disabled': settinsOptions.actions.block }"
+          >
+            <div class="setting-info">
+              <span class="setting-label">Блокировать входящие</span>
+              <p class="setting-description">
+                Входящие сообщения не пробрасываются в CRM
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                :disabled="settinsOptions.actions.block"
+                v-model="settinsOptions.actions.block_incoming"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div
+            class="setting-item"
+            :class="{ 'item-disabled': settinsOptions.actions.block }"
+          >
+            <div class="setting-info">
+              <span class="setting-label">Блокировать исходящие</span>
+              <p class="setting-description">
+                Ручные сообщения из мессенджера не попадут в CRM
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                :disabled="settinsOptions.actions.block"
+                v-model="settinsOptions.actions.block_outgoing"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Создавать напоминание</span>
+              <p class="setting-description">
+                Автоматически создавать задачу при новом касании
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.actions.create_reminder"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="section-title">Доступ менеджеров</h4>
+          <div class="manager-info-box">
+            <div class="info-row">
+              <span>Разрешенные ID:</span>
+              <span class="badge gray">{{
+                settinsOptions.managers.allowed.length || "Все"
+              }}</span>
+            </div>
+            <div class="info-row">
+              <span>Исключенные ID:</span>
+              <span class="badge red">{{
+                settinsOptions.managers.excluded.length || "Нет"
+              }}</span>
+            </div>
+            <p class="setting-description mt-2">
+              Управление списками менеджеров осуществляется через основной
+              раздел сотрудников.
+            </p>
           </div>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <span v-if="saveStatus === 'saving'" class="save-loader"
-          >Сохранение...</span
-        >
-        <span v-if="saveStatus === 'saved'" class="save-success"
-          >Изменения сохранены</span
-        >
-        <button
-          class="done-btn"
-          :disabled="saveStatus === 'saving'"
-          @click="close"
-        >
-          Закрыть
-        </button>
-      </div>
     </div>
-  </div>
+  </ModalFrame>
 </template>
 
 <script setup>
 import { toRefs, onMounted, computed, ref } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const props = defineProps({
   close: Function,
   item: Object,
+});
+
+const textModal = ref({
+  title: "Настрйоки CRM",
+  close: "Закрыть",
 });
 
 const { item } = toRefs(props);
@@ -312,55 +284,6 @@ onMounted(fetchSettings);
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  backdrop-filter: blur(3px);
-}
-
-.modal-content {
-  background: #fff;
-  width: 95%;
-  max-width: 550px;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-}
-
-.modal-header {
-  padding: 18px 24px;
-  background: #fff;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.close-btn {
-  background-color: transparent;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 17px;
-  color: #0f172a;
-  font-weight: 700;
-}
-
-.modal-body {
-  padding: 20px 24px;
-  max-height: 65vh;
-  overflow-y: auto;
-}
-
 .settings-section {
   margin-bottom: 24px;
 }

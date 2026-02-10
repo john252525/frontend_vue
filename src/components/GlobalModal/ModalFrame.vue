@@ -1,6 +1,6 @@
 <template>
   <Transition name="modal">
-    <div v-if="isOpen" class="modal-overlay" @click.self="close">
+    <div class="modal-overlay" @click.self="close">
       <div class="modal-content">
         <div class="modal-header">
           <div class="header-left">
@@ -30,26 +30,17 @@
         </div>
 
         <div class="modal-footer">
-          <span v-if="saveStatus === 'saving'" class="save-loader"
-            >Сохранение...</span
-          >
-
-          <button
-            v-if="text.close"
-            class="done-btn"
-            :disabled="saveStatus === 'saving'"
-            @click="close"
-          >
+          <button v-if="text.close" class="done-btn" @click="close">
             {{ text.close }}
           </button>
 
           <button
             v-if="text.action"
             class="active-btn"
-            :disabled="saveStatus === 'saving'"
+            :disabled="isDisabled"
             @click="action"
           >
-            <span v-if="saveStatus === 'saving'" class="spinner"></span>
+            <!-- <span v-if="saveStatus === 'saving'" class="spinner"></span> -->
             {{ text.action }}
           </button>
         </div>
@@ -62,7 +53,6 @@
 import AccountIcon from "../Accounts/AccountIcon.vue";
 
 defineProps({
-  isOpen: { type: Boolean, default: false },
   text: {
     type: Object,
     default: () => ({
@@ -72,14 +62,13 @@ defineProps({
     }),
   },
   item: { type: Object, default: null },
-  saveStatus: { type: String, default: "idle" }, // 'idle', 'saving', 'success'
+  isDisabled: { type: Boolean },
   action: { type: Function, default: () => {} },
   close: { type: Function, default: () => {} },
 });
 </script>
 
 <style scoped>
-/* --- Анимация появления --- */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.25s ease;

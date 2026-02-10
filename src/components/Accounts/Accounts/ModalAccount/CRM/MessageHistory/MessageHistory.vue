@@ -79,7 +79,7 @@ import { useAccountStore } from "@/stores/accountStore";
 
 const props = defineProps({
   close: Function,
-  item: Object, // Предполагаем, что здесь лежит uuid и user_id
+  item: Object,
 });
 
 const { item } = toRefs(props);
@@ -98,41 +98,96 @@ const dictionaries = ref({
 const filters = reactive({
   date_from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     .toISOString()
-    .substr(0, 10), // -7 дней
+    .substr(0, 10),
   date_to: new Date().toISOString().substr(0, 10),
   per_page: 10,
   page: 1,
 });
 
+// --- МОК ДАННЫЕ ---
+const mockResponse = {
+  ok: true,
+  data: {
+    messages: [
+      {
+        id: "66",
+        messenger: "telegram",
+        number: "79366000000",
+        content: "вот тестовое сообщение из моков",
+        status: "success",
+        dt_ins: "2026-02-01 19:34:18",
+      },
+      {
+        id: "1",
+        messenger: "telegram",
+        number: "79366000000",
+        content: "Второе сообщение",
+        status: "success",
+        dt_ins: "2026-02-01 19:27:09",
+      },
+      {
+        id: "3",
+        messenger: "whatsapp",
+        number: "79001112233",
+        content: "Ошибка доставки",
+        status: "fail",
+        dt_ins: "2026-02-02 10:15:00",
+      },
+    ],
+    dictionaries: {
+      statuses: {
+        pending: "В ожидании",
+        success: "Успешно",
+        fail: "Ошибка",
+      },
+      messengers: {
+        whatsapp: "WhatsApp",
+        telegram: "Telegram",
+        vk: "VK",
+      },
+    },
+  },
+};
+
 // Запрос к API
 const fetchHistory = async () => {
   loading.value = true;
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}/uon-account/getHistory`,
-      {
-        uuid: item.value?.uuid,
-        user_id: item.value?.user_id,
-        date_from: filters.date_from,
-        date_to: filters.date_to,
-        per_page: filters.per_page,
-        page: filters.page,
-        filter_by_vendor: true,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      },
-    );
 
-    if (response.data.ok) {
-      historyData.value = response.data.data.messages;
-      dictionaries.value = response.data.data.dictionaries;
+  // Переключатель: true - использовать моки, false - запрос к серверу
+  const useMock = true;
+
+  try {
+    if (useMock) {
+      // Имитация задержки сети
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      historyData.value = mockResponse.data.messages;
+      dictionaries.value = mockResponse.data.dictionaries;
+    } else {
+      const response = await axios.post(
+        `${FRONTEND_URL}/uon-account/getHistory`,
+        {
+          uuid: item.value?.uuid,
+          user_id: item.value?.user_id,
+          date_from: filters.date_from,
+          date_to: filters.date_to,
+          per_page: filters.per_page,
+          page: filters.page,
+          filter_by_vendor: true,
+        },
+        {
+          headers: { Authorization: `Bearer ${token.value}` },
+        },
+      );
+
+      if (response.data.ok) {
+        historyData.value = response.data.data.messages;
+        dictionaries.value = response.data.data.dictionaries;
+      }
     }
   } catch (error) {
     console.error("Ошибка при получении истории:", error);
-    alert("Не удалось загрузить историю");
+    if (!useMock) alert("Не удалось загрузить историю");
   } finally {
     loading.value = false;
   }

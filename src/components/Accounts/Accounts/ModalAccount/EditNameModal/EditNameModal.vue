@@ -1,59 +1,47 @@
 <template>
-  <div class="modal-overlay" @click.self="closeModal">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h2 class="modal-title">Изменение имени аккаунта</h2>
-        <button class="close-button" @click="closeModal" aria-label="Закрыть">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M15 5L5 15M5 5L15 15"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
+  <ModalFrame
+    :text="modalText"
+    :close="closeModal"
+    :item="selectedItem"
+    :action="saveName"
+  >
+    <div>
+      <div class="input-group">
+        <label for="accountName" class="input-label">Новое имя аккаунта</label>
+        <input
+          id="accountName"
+          v-model="newName"
+          type="text"
+          class="name-input"
+          :class="{ error: error }"
+          placeholder="Введите новое имя"
+          maxlength="20"
+          @keyup.enter="saveName"
+          @input="validateInput"
+        />
+        <div class="character-counter">{{ newName.length }}/20</div>
+        <p v-if="error" class="error-message">{{ error }}</p>
+      </div>
+
+      <!-- <div class="modal-actions">
+        <button class="cancel-button" @click="closeModal">Отмена</button>
+        <button
+          class="save-button"
+          @click="saveName"
+          :disabled="!isFormValid"
+          :class="{ disabled: !isFormValid }"
+        >
+          Сохранить
         </button>
-      </div>
-
-      <div class="modal-content">
-        <div class="input-group">
-          <label for="accountName" class="input-label"
-            >Новое имя аккаунта</label
-          >
-          <input
-            id="accountName"
-            v-model="newName"
-            type="text"
-            class="name-input"
-            :class="{ error: error }"
-            placeholder="Введите новое имя"
-            maxlength="20"
-            @keyup.enter="saveName"
-            @input="validateInput"
-          />
-          <div class="character-counter">{{ newName.length }}/20</div>
-          <p v-if="error" class="error-message">{{ error }}</p>
-        </div>
-
-        <div class="modal-actions">
-          <button class="cancel-button" @click="closeModal">Отмена</button>
-          <button
-            class="save-button"
-            @click="saveName"
-            :disabled="!isFormValid"
-            :class="{ disabled: !isFormValid }"
-          >
-            Сохранить
-          </button>
-        </div>
-      </div>
+      </div> -->
     </div>
-  </div>
+  </ModalFrame>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, toRefs, onUnmounted } from "vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const props = defineProps({
   currentName: {
@@ -73,6 +61,12 @@ const props = defineProps({
   close: {
     type: Function,
   },
+});
+
+const modalText = ref({
+  title: "Изменение имени",
+  close: "Отмена",
+  action: "Сохранить",
 });
 
 import { useStationLoading } from "@/composables/useStationLoading";
@@ -115,7 +109,7 @@ const changeName = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     if ((response.data.ok = true)) {
       props.stateLoading(false);
@@ -210,7 +204,8 @@ onUnmounted(() => {
   max-width: 450px;
   max-height: 90vh;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: modalSlideIn 0.3s ease-out;
 }
