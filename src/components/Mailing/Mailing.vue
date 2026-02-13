@@ -56,7 +56,7 @@
 
 <script setup>
 import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
-import MailingList from "./MailingList/MailingList.vue";
+import MailingList from "./MailingList/MailingListV2.vue";
 import AlertManager from "./ModalComponent/SubscriptionWarning/AlertManager.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
 import MailingTour from "../../components/tours/MailingsTour.vue";

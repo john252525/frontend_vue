@@ -1,228 +1,156 @@
 <template>
-  <div class="table-container desktop-view">
-    <table class="table">
-      <thead class="table-header">
-        <tr>
-          <th class="table-account">
-            <span class="column-header">
-              <!-- <svg
-                class="header-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg> -->
-              АККАУНТ
-            </span>
-          </th>
-          <th class="table-on">
-            <span class="column-header">
-              <!-- <svg
-                class="header-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 8v4l2 2"></path>
-              </svg> -->
-              ВКЛЮЧЕНИЕ
-            </span>
-          </th>
-          <th class="table-status">
-            <span class="column-header">
-              <!-- <svg
-                class="header-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg> -->
-              СТАТУС
-            </span>
-          </th>
-          <th class="table-subscription">
-            <span class="column-header">
-              <!-- <svg
-                class="header-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"
-                ></path>
-                <polygon points="12 15 17 21 7 21 12 15"></polygon>
-              </svg> -->
-              ПОДПИСКА
-            </span>
-          </th>
-          <th class="table-chat">
-            <span class="column-center"> ЧАТ </span>
-          </th>
-          <th class="table-screenshot">
-            <span class="column-center"> СКРИНШОТ </span>
-          </th>
-          <th class="table-action">
-            <span class="column-header"> ДЕЙСТВИЕ </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="tbody">
-        <tr
-          class="table-row"
-          :class="{
-            'row-active': item.isPay,
-            'row-disabled': !item.enabled,
-          }"
-          v-if="dataStation"
-          v-for="(item, index) in instanceData"
-          :key="index"
+  <div class="list-container">
+    <div v-if="dataStation && instanceData.length > 0" class="accounts-list">
+      <div
+        class="account-row"
+        v-for="(item, index) in instanceData"
+        :key="index"
+      >
+        <div
+          class="row-section section-identity"
+          @click="openAccountModal(item)"
         >
-          <!-- АККАУНТ -->
-          <td @click="openAccountModal(item)" class="table-account-data">
-            <div class="account-content">
-              <AccountIcon :item="item" />
-              <div class="account-info">
-                <span v-if="item.name" class="account-name">{{
-                  item.name
-                }}</span>
-                <span v-else class="account-login">{{ item.login }}</span>
-                <span v-if="item.type != 'undefined'" class="account-type">{{
-                  getType(item.type)
-                }}</span>
-                 <span v-else class="account-type">{{
-                  getType(item.source)
-                }}</span>
-              </div>
-            </div>
-          </td>
+          <AccountIcon :item="item" class="account-icon-large" />
+          <div class="identity-info">
+            <span v-if="item.name" class="account-name">{{ item.name }}</span>
+            <span v-else class="account-login">{{ item.login }}</span>
 
-          <!-- ВКЛЮЧЕНИЕ -->
-          <td class="table-switch">
-            <label class="switch" :class="{ 'switch-loading': item.loading }">
-               <input
-  type="checkbox"
-  :checked="enableCheckbox(item)"
-  :disabled="item.type === 'bulk'"
-  @change="changeEnableStartModal(item)"
-/>
-              <span class="slider round">
-                <span class="switch-handle"></span>
-              </span>
-              <span v-if="item.loading" class="switch-loader"></span>
-            </label>
-          </td>
-
-          <!-- СТАТУС -->
-          <td class="table-status-data">
-            <div
-              class="status-content"
-              @mouseover="
-                item.step?.message &&
-                  $emit('show-message', $event, item.step.message)
-              "
-              @mouseleave="$emit('hide-message')"
+            <span v-if="item.type != 'undefined'" class="account-type">
+              {{ getType(item.type) }}
+            </span>
+            <span v-else class="account-type">
+              {{ getType(item.source) }}
+            </span>
+          </div>
+          <div
+            class="subscription-warning-desktop"
+            v-if="showSubscriptionWarning(item)"
+            @click="$emit('open-subscription-modal', item)"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <span
-                v-if="
-                  item.step && item.type != 'amocrm' && item.type != 'bitrix24'
-                "
-                class="status-badge"
-                :class="getStatusClass(item.step)"
-              >
-                {{ getStatusText(item.step) }}
-              </span>
-              <LoadingAccount
-                v-else-if="
-                  item.loading &&
-                  item.type != 'amocrm' &&
-                  item.type != 'bitrix24'
-                "
+              <path
+                d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53216 19 5.07183 19Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               />
-              <span
-                v-else-if="item.type === 'amocrm' || item.type === 'bitrix24'"
-                class="status-text"
-              >
-                {{ item.enable }}
-              </span>
-              <span v-else class="status-empty">-</span>
-            </div>
-          </td>
+            </svg>
+          </div>
+        </div>
 
-          <!-- ПОДПИСКА -->
-          <td class="table-subscription-data">
-            <div class="subscription-content">
-              <span
-                v-if="item.subscription_dt_to === null"
-                class="subscription-expired"
-              >
-                <button
-                  v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
-                  class="open-tariff-button"
-                  @click="$emit('change-tariff', item)"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"
-                    />
-                  </svg>
-                  Продлить
-                </button>
-                <span v-else>-</span>
-              </span>
-              <span v-else class="subscription-active">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                До {{ formatDate(item.subscription_dt_to) }}
-              </span>
-            </div>
-          </td>
+        <div class="row-section section-toggle">
+          <label class="switch" :class="{ 'switch-loading': item.loading }">
+            <input
+              type="checkbox"
+              :checked="enableCheckbox(item)"
+              :disabled="item.type === 'bulk'"
+              @change="changeEnableStartModal(item)"
+            />
+            <span class="slider round">
+              <span class="switch-handle"></span>
+            </span>
+            <span v-if="item.loading" class="switch-loader"></span>
+          </label>
+        </div>
 
-          <!-- ЧАТ -->
-          <td class="table-chat-data">
-            <div class="icon-wrapper" @click="$emit('open-chat', item)">
+        <div class="vertical-divider"></div>
+
+        <div @click="openAccountModal(item)" class="row-section section-data">
+          <span class="data-label">Статус</span>
+          <span v-if="item.enable === '0'">
+            <StatusBadge status="deleted" type="account" />
+          </span>
+          <span v-else-if="item.type === 'bulk'">
+            <StatusBadge type="bulk" />
+          </span>
+          <span
+            v-else-if="
+              item.step &&
+              item.type != 'amocrm' &&
+              item.type != 'bitrix24' &&
+              item.type != 'uon'
+            "
+            @mouseover="$emit('show-message', $event, item.step.message)"
+            @mouseleave="$emit('hide-message')"
+          >
+            <StatusBadge :status="item.step.value" type="account" />
+          </span>
+          <span
+            v-else-if="
+              item.loading &&
+              item.type != 'amocrm' &&
+              item.type != 'bitrix24' &&
+              item.type != 'uon'
+            "
+          >
+            <LoadingAccount />
+          </span>
+          <span
+            v-else-if="
+              item.type === 'amocrm' ||
+              item.type === 'bitrix24' ||
+              item.type === 'uon'
+            "
+          >
+            <StatusBadge :status="item.enable" type="crm" />
+          </span>
+          <span v-else>
+            <StatusBadge :status="null" type="account" />
+          </span>
+        </div>
+
+        <div class="row-section section-data">
+          <span class="data-label">Подписка</span>
+          <div class="data-value">
+            <span
+              v-if="item.subscription_dt_to === null"
+              class="subscription-expired"
+            >
+              <button
+                v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
+                class="open-tariff-button"
+                @click="$emit('change-tariff', item)"
+              >
+                Продлить
+              </button>
+              <span v-else>-</span>
+            </span>
+            <span v-else class="subscription-active">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              До {{ formatDate(item.subscription_dt_to) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="row-section section-actions">
+          <div class="icon-actions">
+            <!-- <div
+              class="icon-wrapper"
+              @click="$emit('open-chat', item)"
+              title="Открыть чат"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -235,15 +163,15 @@
                 />
               </svg>
             </div>
-          </td>
-
-          <!-- СКРИНШОТ -->
-          <td class="table-screenshot-data">
-            <div class="icon-wrapper" @click="$emit('take-screenshot', item)">
+            <div
+              class="icon-wrapper"
+              @click="$emit('take-screenshot', item)"
+              title="Сделать скриншот"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -255,78 +183,60 @@
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
               </svg>
-            </div>
-          </td>
+            </div> -->
+          </div>
 
-          <!-- ДЕЙСТВИЯ -->
-          <td class="table-action-data">
-            <div class="action-buttons">
-              <button
-                class="action-table-button"
-                @click="$emit('open-modal', $event, item)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  class="action-icon"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
-                  ></path>
-                </svg>
-                <span class="action-text">Действия</span>
-              </button>
-            </div>
-          </td>
-        </tr>
+          <button
+            class="action-menu-button"
+            @click="$emit('open-modal', $event, item)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
 
-        <!-- Состояния загрузки и ошибок -->
-        <tr v-else-if="dataStationNone">
-          <td colspan="7">
-            <div class="none-account-cont">
-              <div class="empty-state">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <h3>{{ t("accountList.accountNone") }}</h3>
-                <p>Нет доступных аккаунтов для отображения</p>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr v-if="loadDataStation">
-          <td colspan="7">
-            <div class="load-cont">
-              <div class="loading-state">
-                <div class="loading-spinner"></div>
-                <p>Загрузка аккаунтов...</p>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr v-if="errorAccountBolean && !loadDataStation">
-          <td colspan="7">
-            <div class="load-cont">
-              <errorAccount />
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else-if="dataStationNone" class="state-container">
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>{{ t("accountList.accountNone") }}</h3>
+        <p>Нет доступных аккаунтов для отображения</p>
+      </div>
+    </div>
+
+    <div v-if="loadDataStation" class="state-container">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Загрузка аккаунтов...</p>
+      </div>
+    </div>
+
+    <div v-if="errorAccountBolean && !loadDataStation" class="state-container">
+      <errorAccount />
+    </div>
 
     <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">
       {{ tooltipMessage }}
@@ -347,6 +257,7 @@ import LoadingAccount from "../LoadingMoadal/LoadingAccount.vue";
 import LoadAccount from "../LoadAccount.vue";
 import AccountModal from "./AccountModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
+import StatusBadge from "../StatusBadge.vue";
 import { useI18n } from "vue-i18n";
 import { ref, computed, toRefs } from "vue";
 
@@ -358,11 +269,11 @@ const props = defineProps({
   dataStationNone: Boolean,
   loadDataStation: Boolean,
   errorAccountBolean: Boolean,
-  changeEnableStartModal: Function
+  changeEnableStartModal: Function,
 });
 
-const {instanceData } = toRefs(props)
- 
+const { instanceData } = toRefs(props);
+
 defineEmits([
   "show-message",
   "hide-message",
@@ -380,7 +291,6 @@ const tooltipStyle = ref({});
 const selectedAccount = ref(null);
 const isModalVisible = ref(false);
 
-// Вспомогательные функции
 const getStatusClass = (status) => {
   if (!status) return "status-default";
 
@@ -425,32 +335,28 @@ const closeAccountModal = () => {
 };
 
 const enableCheckbox = (item) => {
-  console.log('Processing item:', item);
-  
-  if (item.source === 'whatsapp' || item.source === 'telegram') {
+  if (item.source === "whatsapp" || item.source === "telegram") {
     return item.step?.value === 5 || false;
-  } 
-  
-  if (item.type === 'amocrm' || item.type === 'bitrix24') {
+  }
+
+  if (item.type === "amocrm" || item.type === "bitrix24") {
     return item.enable === 1;
   }
-  
-  if (item.type === 'bulk') {
+
+  if (item.type === "bulk") {
     return true;
   }
-  
-  // Возвращаем false по умолчанию для других случаев
-  console.log('Default case');
+
   return false;
 };
 
 function getType(type) {
   switch (type) {
-    case "bulk": // Успешный платеж
+    case "bulk":
       return "Аккаунт рассылки";
-    case "amocrm": // Ошибка
+    case "amocrm":
       return "AmoCRM";
-    case "bitrix24": // В обработке
+    case "bitrix24":
       return "Битрикс 24";
     case "telegram":
       return "Telegram";
@@ -461,9 +367,22 @@ function getType(type) {
   }
 }
 
+const showSubscriptionWarning = (item) => {
+  const isExcludedType = ["amocrm", "bitrix24", "uon", "bulk"].includes(
+    item.type,
+  );
+
+  if (isExcludedType) return false;
+
+  const noSubscription = item.subscription_dt_to === null;
+
+  const stepNotFinished = item.step?.value !== 5;
+
+  // Итоговое условие: нет подписки И (статус не 5 ИЛИ статус вообще не задан)
+  return noSubscription && stepNotFinished;
+};
+
 const handleAccountAction = (actionType, account) => {
-  console.log("Action:", actionType, "Account:", account);
-  // Здесь обрабатывайте разные действия
   switch (actionType) {
     case "extend":
       $emit("change-tariff", account);
@@ -477,7 +396,6 @@ const handleAccountAction = (actionType, account) => {
     case "toggle":
       $emit("toggle-account", account, !account.enabled);
       break;
-    // Добавьте обработчики для других действий
     default:
       $emit("account-action", actionType, account);
   }
@@ -494,180 +412,163 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
-/* ОСНОВНЫЕ СТИЛИ */
-.table-container {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-width: 100%;
-  height: 80vh;
-  background: #ffffff;
-  /* border-radius: 8px; */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-}
-
-.desktop-view {
-  display: block;
-}
-
-/* СКРОЛЛБАРЫ */
-.table-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* ТАБЛИЦА */
-.table {
+/* ОСНОВНОЙ КОНТЕЙНЕР */
+.list-container {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: transparent;
-  font-size: 14px;
+  height: 80vh;
+  overflow-y: auto;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-/* ЗАГОЛОВКИ */
-.table-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.table-header th {
-  padding: 16px 12px;
-  font-weight: 600;
-  font-size: 13px;
-  color: #334155;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.table-action {
-  text-align: right;
+.accounts-list {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.table-status, .table-status-data {
+/* СТРОКА-КАРТОЧКА */
+.account-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  background: #ffffff;
+  /* border: 1px solid #e2e8f0; */
+  border-radius: 10px;
+  padding: 12px 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  gap: 20px;
 }
 
-.table-chat-data, .table-screenshot-data, .table-screenshot{
-  text-align: center;
-}
-
-.column-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.column-header {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.header-icon {
-  width: 14px;
-  height: 14px;
-  color: #64748b;
-}
-
-/* СТРОКИ ДАННЫХ */
-.table-row {
-  position: relative;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
-  background: transparent;
-}
-
-.table-row:hover {
-  background: #f8fafc;
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.row-disabled:hover {
-  background: #f1f5f9;
+.account-row:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
 .row-active {
-  background: #f0fdf4;
+  background: #ffffff;
 }
 
-/* ЯЧЕЙКИ ДАННЫХ */
-.table-row td {
-  padding: 16px 12px;
-  font-size: 14px;
-  color: #334155;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.2s ease;
+.row-disabled {
+  background: #f5f7fa;
+  opacity: 0.9;
 }
 
-/* АККАУНТ */
-.account-content {
+/* СЕКЦИИ СТРОКИ */
+.row-section {
   display: flex;
   align-items: center;
+}
+
+/* 1. ИДЕНТИФИКАЦИЯ (Иконка, Имя) */
+.section-identity {
+  flex: 1.5; /* Широкая секция */
+  min-width: 220px;
   gap: 12px;
   cursor: pointer;
 }
 
-.account-info {
+.identity-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
 }
 
 .account-name {
   font-weight: 600;
   color: #1e293b;
+  font-size: 15px;
 }
 
 .account-login {
   font-weight: 500;
   color: #475569;
+  font-size: 15px;
 }
 
 .account-type {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
   display: inline-block;
+  align-self: flex-start;
 }
 
-/* ПЕРЕКЛЮЧАТЕЛЬ */
+.subscription-warning-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  border-radius: 100%;
+  background: rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.subscription-warning-desktop:hover {
+  color: #d97706;
+  transform: scale(1.1);
+}
+
+/* 2. ТУМБЛЕР (ПЕРЕКЛЮЧАТЕЛЬ) */
+.section-toggle {
+  flex: 0 0 auto;
+}
+
+/* Вертикальная линия разделитель (опционально) */
+.vertical-divider {
+  width: 1px;
+  height: 32px;
+  background: #e2e8f0;
+}
+
+/* 3. ДАННЫЕ (СТАТУС И ПОДПИСКА) - Вертикальный стек */
+.section-data {
+  flex: 1;
+  flex-direction: column; /* Сверху вниз */
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.data-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.data-value {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+/* 4. ДЕЙСТВИЯ (Справа) */
+.section-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto; /* Прижимаем вправо */
+}
+
+/* КОМПОНЕНТЫ УПРАВЛЕНИЯ */
+
+/* Переключатель */
 .switch {
   position: relative;
   display: inline-block;
-  width: 40px;
+  width: 36px;
   height: 20px;
 }
 
@@ -707,11 +608,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider .switch-handle {
-  transform: translateX(20px);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  transform: translateX(16px);
 }
 
 .switch-loading .slider {
@@ -722,9 +619,9 @@ input:focus + .slider {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
   border: 2px solid transparent;
   border-top: 2px solid #fff;
   border-radius: 50%;
@@ -740,46 +637,44 @@ input:focus + .slider {
   }
 }
 
-/* СТАТУС */
-.status-content {
-  display: flex;
-  align-items: center;
-}
-
+/* Статус Бейджи */
 .status-badge {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
-.status-active {
+.status-active,
+.status-online,
+.status-connected,
+.status-success,
+.status-running {
   background: #dcfce7;
   color: #166534;
   border: 1px solid #bbf7d0;
 }
 
-.status-online {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.status-offline {
+.status-offline,
+.status-disconnected,
+.status-stopped {
   background: #f1f5f9;
   color: #64748b;
   border: 1px solid #e2e8f0;
 }
 
-.status-error {
+.status-error,
+.status-failed {
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fecaca;
 }
 
-.status-loading {
+.status-loading,
+.status-pending {
   background: #dbeafe;
   color: #1d4ed8;
   border: 1px solid #bfdbfe;
@@ -801,23 +696,14 @@ input:focus + .slider {
   font-style: italic;
 }
 
-/* ПОДПИСКА */
-.subscription-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+/* Подписка */
 .open-tariff-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  padding: 4px 8px;
   background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -825,7 +711,6 @@ input:focus + .slider {
 
 .open-tariff-button:hover {
   background: #2563eb;
-  transform: translateY(-1px);
 }
 
 .subscription-active {
@@ -843,9 +728,14 @@ input:focus + .slider {
   font-size: 13px;
 }
 
-/* ИКОНКИ */
+/* Иконки действий */
+.icon-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .icon-wrapper {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -854,44 +744,42 @@ input:focus + .slider {
   background: #f1f5f9;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: #64748b;
 }
 
 .icon-wrapper:hover {
   background: #e2e8f0;
-  transform: scale(1.05);
-}
-
-.icon-wrapper svg {
-  color: #64748b;
-}
-
-/* ДЕЙСТВИЯ */
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.action-table-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.action-table-button:hover {
-  background: #e2e8f0;
   color: #334155;
 }
 
-/* СОСТОЯНИЯ */
+.action-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.action-menu-button:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* СОСТОЯНИЯ (Empty, Loading, Error) */
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
 .empty-state,
 .loading-state {
   display: flex;
@@ -944,53 +832,59 @@ input:focus + .slider {
   line-height: 1.4;
 }
 
+/* СКРОЛЛБАР */
+.list-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
 /* АДАПТИВНОСТЬ */
-@media (max-width: 950px)  {
-  .action-text {
+@media (max-width: 900px) {
+  .account-row {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .section-identity {
+    flex: 100%;
+    min-width: 100%;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+  }
+
+  .vertical-divider {
     display: none;
   }
-}
 
-@media (max-height: 900px) {
-  .table-container {
-    height: 74vh;
+  .section-data {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .section-toggle {
+    order: 2;
+  }
+
+  .section-actions {
+    order: 10;
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
   }
 }
-
-@media (max-height: 660px) {
-  .table-container {
-    height: 78vh;
-  }
-}
-
-@media (max-height: 600px) {
-  .table-container {
-    height: 76vh;
-  }
-}
-
-@media (max-height: 550px) {
-  .table-container {
-    height: 74vh;
-  }
-}
-
-@media (max-height: 500px) {
-  .table-container {
-    height: 70vh;
-  }
-}
-
-@media (max-height: 450px) {
-  .table-container {
-    height: 66vh;
-  }
-}
-
-@media (max-width: 768px) {
-  .desktop-view {
-    display: none !important;
-  }
-}
-</style
+</style>

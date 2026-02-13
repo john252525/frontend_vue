@@ -6,14 +6,14 @@
       :dataStationNone="dataStationNone"
       :loadDataStation="loadDataStation"
       :errorAccountBolean="errorAccountBolean"
-      :changeEnableStartModal="changeEnableStartModal"
+      :changeEnableStartModal="changeEnableStation"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
       @open-modal="openModal"
     />
 
-    <MobileCardsView
+    <!-- <MobileCardsView
       :dataStation="dataStation"
       :instanceData="instanceData"
       :dataStationNone="dataStationNone"
@@ -22,6 +22,24 @@
       :accountStation="accountStation"
       @open-mobile-modal="openMobileModal"
       @change-tariff="changeTariffStation"
+    /> -->
+
+    <div v-if="dataStationNone" class="none-account-cont">
+      <NoData type="accounts" />
+    </div>
+
+    <div v-if="loadDataStation" class="load-cont">
+      <LoadAccount />
+    </div>
+
+    <div v-if="errorAccountBolean && !loadDataStation" class="load-cont">
+      <errorAccount />
+    </div>
+
+    <WarningAccount
+      v-if="showWarningModal"
+      :item="selectedWarningItem"
+      @close="closeWarningModal"
     />
 
     <Tariff
@@ -32,10 +50,18 @@
       :changePayDataForAccounts="changePayDataForAccounts"
     />
 
+    <GetHistory
+      v-if="getHistoryModal"
+      :changeStationGetHistory="changeStationGetHistory"
+      :item="selectedItem"
+    />
+
     <Modal
+      :changeStationGetHistory="changeStationGetHistory"
       :changeTariffStation="changeTariffStation"
       :isModalOpen="isModalOpen"
       :closeModal="closeModal"
+      :changeRoutingSettings="changeRoutingSettings"
       :modalPosition="modalPosition"
       :selectedItem="selectedItem"
       :qrCodeData="qrCodeData"
@@ -51,6 +77,11 @@
       :chatsStation="chatsStation"
       :changeForceStopItemData="changeForceStopItemData"
       :getAccounts="getAccounts"
+      :openSupport="changeSendSupport"
+      :changeBindingStation="changeBindingStation"
+      :openUonSettingModal="openUonSettingModal"
+      :openBlacklistModal="openBlacklistModal"
+      :openMessageHistory="openMessageHistory"
     />
 
     <SettignsModal
@@ -81,6 +112,13 @@
       :selectedItem="selectedItem"
     />
 
+    <RoutingSettings
+      :isOpen="showRoutingSettings"
+      :close="changeRoutingSettings"
+      :item="selectedItem"
+      :vendors="instanceData"
+    />
+
     <Enable
       v-if="enableStation"
       :changeForceStopItemData="changeForceStopItemData"
@@ -88,12 +126,39 @@
       :selectedItem="selectedItem"
       :changeEnableStation="changeEnableStation"
     />
-    <StartModal
-      v-if="enableStartModal"
-      :item="selectedItem"
-      :closeModal="changeEnableStartModal"
+
+    <SendSupport
+      v-if="sendSupportStation"
+      :close="changeSendSupport"
+      :selectedItem="selectedItem"
     />
+
     <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
+
+    <Binding
+      v-if="bindingStation"
+      :close="changeBindingStation"
+      :getAllAccounts="getAllAccounts"
+      :selectedItem="selectedItem"
+    />
+
+    <UonSettings
+      v-if="uonSettingsModal"
+      :item="selectedItem"
+      :close="closeUonSettings"
+    />
+
+    <Blacklist
+      v-if="blacklistModal"
+      :item="selectedItem"
+      :close="closeBlacklistModal"
+    />
+
+    <MessageHistory
+      v-if="messageHistory"
+      :close="closeMessageHistory"
+      :item="selectedItem"
+    />
   </section>
 </template>
 
@@ -101,23 +166,39 @@
 import { ref, reactive, onMounted, provide, inject, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
-import MobileCardsView from "./AccountListComponents/MobileCardsView.vue";
+import LoadingAccount from "./LoadingMoadal/LoadingAccount.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import Modal from "./Modal.vue";
 import Enable from "./ModalAccount/Enable/Enable.vue";
-import SettignsModal from "./ModalAccount/SettingsModal/SettingsModal.vue";
+import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
-import StartModal from "./ModalAccount/EnableAccount/StartModal.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
+import MessageHistory from "./ModalAccount/CRM/MessageHistory/MessageHistory.vue";
+import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
+import LoadAccount from "./LoadAccount.vue";
+import GetHistory from "./ModalAccount/CRM/GetHistory/GetHistory.vue";
+import UonSettings from "./ModalAccount/CRM/UonSettings/Settings.vue";
+import Blacklist from "./ModalAccount/CRM/UonSettings/Blacklist.vue";
+import AccountIcon from "../AccountIcon.vue";
 import Tariff from "./TariffAccount/Tariff.vue";
-import { useAccountStore } from "@/stores/accountStore";
+import NoData from "@/components/GlobalModal/StationList/NoData.vue";
+import StatusBadge from "./StatusBadge.vue";
+import SendSupport from "./ModalAccount/SendSupport.vue";
+import Binding from "./ModalAccount/AmoCrm/Binding.vue";
+import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue";
+import WarningAccount from "./WarningAccount.vue";
 
+// Импортируем новые компоненты
+import AccountListDesktop from "./AccountComponents/AccountListDesktop.vue";
+import AccountListMobile from "./AccountComponents/AccountListMobile.vue";
+
+import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 const sourceGroup = computed(() => accountStore.getSource);
+const addDeleted = computed(() => accountStore.getAddDeleted);
 const typeGroup = computed(() => accountStore.getType);
 const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
@@ -139,8 +220,18 @@ const { stationDomain } = useDomain();
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
+import useFrontendLogger from "@/composables/useFrontendLogger";
+const { sendLog } = useFrontendLogger();
+
 const router = useRouter();
 
+const props = defineProps({
+  changeAllAccounts: {
+    type: Function,
+  },
+});
+
+// ============= СОСТОЯНИЯ =============
 const tariffStation = ref(false);
 const forceStopItemData = ref({});
 const chatsLoadingChange = inject("chatsLoadingChange");
@@ -162,68 +253,21 @@ const selectedItem = ref(null);
 const selectedItems = ref(null);
 const loadingStation = ref(false);
 const chatsStation = ref(null);
-const enableStartModal = ref(false);
+const sendSupportStation = ref(false);
+const bindingStation = ref(false);
+const getHistoryModal = ref(false);
+const messageVisible = ref(false);
+const tooltipMessage = ref("");
+const tooltipStyle = ref({});
+const errorBlock = ref(false);
+const showWarningModal = ref(false);
+const selectedWarningItem = ref(null);
+const showRoutingSettings = ref(false);
+const uonSettingsModal = ref(false);
+const blacklistModal = ref(false);
+const messageHistory = ref(false);
 
-import useFrontendLogger from "@/composables/useFrontendLogger";
-import False from "@/components/Chats/UserList/ResultModal/False.vue";
-import { compileScript } from "vue/compiler-sfc";
-const { sendLog } = useFrontendLogger();
-
-const changeForceStopItemData = async (item) => {
-  try {
-    forceStopItemData.value = { ...item, loading: true };
-    const accountIndex = instanceData.value.findIndex(
-      (acc) => acc.login === item.login && acc.source === item.source
-    );
-
-    if (accountIndex === -1) {
-      console.warn("Account not found in instanceData");
-      return;
-    }
-
-    instanceData.value[accountIndex].loading = true;
-
-    const infoResponse = await getInfoWhats(
-      item.source,
-      item.login,
-      item.type,
-      item.storage
-    );
-
-    if (!infoResponse?.data) {
-      throw new Error("Invalid response structure");
-    }
-
-    const currentStep = infoResponse.data.step || { value: "-", message: "" };
-
-    instanceData.value[accountIndex] = {
-      ...instanceData.value[accountIndex],
-      step: currentStep,
-      loading: false,
-    };
-
-    forceStopItemData.value = {
-      ...instanceData.value[accountIndex],
-      loading: false,
-    };
-
-    if (currentStep.value === 5) {
-      updateLocalStorage(item.login, item.source, item.storage, item.type);
-    }
-  } catch (error) {
-    console.error("Error in changeForceStopItemData:", error);
-    if (forceStopItemData.value) {
-      forceStopItemData.value.loading = false;
-    }
-    const accountIndex = instanceData.value.findIndex(
-      (acc) => acc.login === item.login && acc.source === item.source
-    );
-    if (accountIndex !== -1) {
-      instanceData.value[accountIndex].loading = false;
-    }
-  }
-};
-
+// ============= УТИЛИТЫ =============
 const formatSubscriptionDate = (dateString) => {
   if (!dateString) return "-";
 
@@ -239,9 +283,60 @@ const formatSubscriptionDate = (dateString) => {
   }
 };
 
+const showSubscriptionWarning = (item) => {
+  return (
+    item.subscription_dt_to === null &&
+    item.type !== "amocrm" &&
+    item.type !== "bitrix24" &&
+    item.type !== "uon" &&
+    item.enable !== "0" &&
+    item.type !== "bulk"
+  );
+};
+
+const openMessageHistory = () => {
+  messageHistory.value = true;
+};
+
+const closeMessageHistory = () => {
+  messageHistory.value = false;
+};
+
+const openSubscriptionModal = (item) => {
+  selectedWarningItem.value = item;
+  showWarningModal.value = true;
+};
+
+const openBlacklistModal = () => {
+  blacklistModal.value = true;
+};
+
+const closeBlacklistModal = () => {
+  blacklistModal.value = false;
+};
+
+const openUonSettingModal = () => {
+  uonSettingsModal.value = true;
+};
+
+const closeUonSettings = () => {
+  uonSettingsModal.value = false;
+};
+
+const closeWarningModal = () => {
+  showWarningModal.value = false;
+  selectedWarningItem.value = null;
+};
+
+// ============= УПРАВЛЕНИЕ МОДАЛКАМИ =============
+const changeTariffStation = (item) => {
+  selectedItem.value = item;
+  tariffStation.value = !tariffStation.value;
+};
+
 const changePayDataForAccounts = (item) => {
   const index = instanceData.value.findIndex(
-    (account) => account.uuid === item.uuid
+    (account) => account.uuid === item.uuid,
   );
 
   if (index !== -1) {
@@ -259,20 +354,6 @@ const changePayDataForAccounts = (item) => {
   }
 };
 
-const updateLocalStorage = (login, source, storage, type) => {
-  try {
-    const newLoginData = {
-      login,
-      source,
-      storage: storage || "undefined",
-      type: type || "undefined",
-    };
-    chatStore.addOrUpdateChat(newLoginData);
-  } catch (e) {
-    console.error("Error updating store:", e);
-  }
-};
-
 const changeEnableStation = () => {
   enableStation.value = !enableStation.value;
 };
@@ -281,199 +362,25 @@ const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
 };
 
-const changeEnableStartModal = (item) => {
-  selectedItem.value = item;
-  console.log(selectedItem.value);
-  enableStartModal.value = !enableStartModal.value;
+const changeRoutingSettings = () => {
+  showRoutingSettings.value = !showRoutingSettings.value;
 };
 
 const closeScreen = () => {
   getScreenStation.value = false;
 };
 
-const errorBlock = ref(false);
+const changeStationGetHistory = () => {
+  getHistoryModal.value = !getHistoryModal.value;
+};
+
+const changeBindingStation = () => {
+  bindingStation.value = !bindingStation.value;
+};
+
 const chaneErrorBlock = () => {
   errorBlock.value = !errorBlock.value;
 };
-
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-  }
-};
-
-const changeTariffStation = (item) => {
-  selectedItem.value = item;
-  tariffStation.value = !tariffStation.value;
-};
-
-const getAccounts = async () => {
-  dataStationNone.value = false;
-  errorAccountBolean.value = false;
-  loadDataStation.value = true;
-
-  const mockResponse = {
-    ok: true,
-    message: "Instances received",
-    data: {
-      instances: [
-        {
-          storage: "local",
-          type: "undefined",
-          login: "mizxoyjnmvsdcnq",
-          source: "whatsapp",
-          id: "3",
-          step: { value: 5 },
-          uuid: "20964f74-641c-4869-9ecf-eef76902ebe3",
-          domain: "",
-          subscription_dt_to: "2026-03-14 23:55:24",
-          name: "политех",
-        },
-        {
-          storage: "local",
-          type: "undefined",
-          login: "mizxoyjnmm2wiyi",
-          source: "whatsapp",
-          id: "2",
-          uuid: "e44f9d80-343b-40cb-8a6e-584195a44243",
-          domain: "",
-          step: null,
-          subscription_dt_to: "2026-01-15 01:00:27",
-          name: "алабуга",
-        },
-        {
-          id: "4",
-          uuid: "6936f66b-b336-430f-b4cd-c99850a9532a",
-          dt_ins: "2025-09-18 18:50:21",
-          type: "amocrm",
-          login: "еу",
-          source: "",
-          enable: 1,
-          subscription_dt_to: "2025-09-22 23:32:35",
-        },
-        {
-          id: "5",
-          uuid: "f49bf745-5221-4bc1-bbe1-46c41cb35e46",
-          dt_ins: "2025-09-18 19:21:20",
-          type: "bitrix24",
-          login: "4324324",
-          source: "4324324",
-          enable: 1,
-          subscription_dt_to: "2025-09-22 23:32:35",
-        },
-        {
-          id: "1",
-          uuid: "337734e4-05fe-4262-97e5-43d401b7c4de",
-          dt_ins: "2025-09-11 15:47:20",
-          type: "bulk",
-          token: "22e75215907b1984e7c117db09cb23bd",
-          login: "maksim.birykov.2007@mail.ru",
-          source: "whatsapi",
-          enable: 1,
-          subscription_dt_to: "2025-09-22 23:32:35",
-        },
-      ],
-    },
-  };
-
-  if (mockResponse.ok === true) {
-    accounts.value = mockResponse;
-    instanceData.value = accounts.value.data.instances.map((instance) => ({
-      ...instance,
-      step: instance.step || null,
-      loading: false,
-      storage: instance.storage || "undefined",
-      type: instance.type || "undefined",
-    }));
-
-    if (instanceData.value.length === 0) {
-      loadDataStation.value = false;
-      dataStationNone.value = true;
-    } else {
-      loadDataStation.value = false;
-      dataStation.value = true;
-    }
-  }
-};
-
-const getInfoWhats = async (source, login, type, storage) => {
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}getInfo`,
-      {
-        source: source,
-        login: login,
-        type: type,
-        storage: storage,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    console.error("Error in getInfoWhats:", error);
-    return null;
-  }
-};
-
-const updateUserInfo = (event) => {
-  userInfoStore.setUserInfo(event);
-};
-
-const openModal = (event, item) => {
-  selectedItem.value = item;
-  isModalOpen.value = true;
-  updateUserInfo(JSON.stringify(selectedItem.value));
-  getInfo();
-
-  const rect = event.currentTarget.getBoundingClientRect();
-  const modalWidth = 160;
-  const edgeMargin = 10;
-
-  let left = rect.left + window.scrollX;
-  let top = rect.bottom + window.scrollY + 2;
-
-  if (left + modalWidth > window.innerWidth + window.scrollX - edgeMargin) {
-    left = window.innerWidth + window.scrollX - modalWidth - edgeMargin;
-  }
-
-  if (left < window.scrollX + edgeMargin) {
-    left = window.scrollX + edgeMargin;
-  }
-
-  const modalHeight = 300;
-  const bottomEdge = window.innerHeight + window.scrollY;
-
-  if (top + modalHeight > bottomEdge - edgeMargin) {
-    top = rect.top + window.scrollY - modalHeight - 2;
-
-    if (top < window.scrollY + edgeMargin) {
-      top = window.scrollY + edgeMargin;
-    }
-  }
-
-  modalPosition.value = {
-    top: Math.round(top),
-    left: Math.round(left),
-  };
-};
-
-function formatPhoneNumber(phoneNumber) {
-  const regex = /^8(\d{3})(\d{3})(\d{2})(\d{2})$/;
-  const match = phoneNumber.match(regex);
-
-  if (!match) {
-    return phoneNumber;
-  }
-
-  return `+7 (${match[1]}) ${match[2]}-${match[3]}-${match[4]}`;
-}
 
 const changeStationSettingsModal = () => {
   settingsModalStation.value = !settingsModalStation.value;
@@ -504,30 +411,15 @@ const updateqrCodeData = (newValue) => {
   qrCodeData.value = newValue;
 };
 
+const changeSendSupport = () => {
+  sendSupportStation.value = !sendSupportStation.value;
+};
+
 const updateLoading = (newValue) => {
   loadingStation.value = newValue;
 };
 
-const messageVisible = ref(false);
-const tooltipMessage = ref("");
-const tooltipStyle = ref({});
-
-const isActionAvailable = (item) => {
-  return (
-    (item.storage === "local" && item.type === "undefined") ||
-    (item.storage === "binder" && item.type === "touchapi") ||
-    (item.storage === "undefined" && item.type === "whatsapi") ||
-    (item.storage === "whatsapi" && item.type === "undefined") ||
-    item.type === "bulk" ||
-    item.type === "amocrm" ||
-    item.type === "bitrix24"
-  );
-};
-
-const openMobileModal = (event, item) => {
-  openModal(event, item);
-};
-
+// ============= ТУЛТИПЫ И СООБЩЕНИЯ =============
 const showMessage = (event, step) => {
   tooltipMessage.value = `Текущий шаг: ${step}`;
   messageVisible.value = true;
@@ -546,6 +438,242 @@ const hideMessage = () => {
   messageVisible.value = false;
 };
 
+// ============= API ВЫЗОВЫ =============
+const getInfoWhats = async (source, login, type, storage) => {
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}getInfo`,
+      {
+        source: source,
+        login: login,
+        type: type,
+        storage: storage,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error("Error in getInfoWhats:", error);
+    return null;
+  }
+};
+
+const changeForceStopItemData = async (item) => {
+  try {
+    forceStopItemData.value = { ...item, loading: true };
+    const accountIndex = instanceData.value.findIndex(
+      (acc) => acc.login === item.login && acc.source === item.source,
+    );
+
+    if (accountIndex === -1) {
+      console.warn("Account not found in instanceData");
+      return;
+    }
+
+    instanceData.value[accountIndex].loading = true;
+
+    const infoResponse = await getInfoWhats(
+      item.source,
+      item.login,
+      item.type,
+      item.storage,
+    );
+
+    if (!infoResponse?.data) {
+      throw new Error("Invalid response structure");
+    }
+
+    const currentStep = infoResponse.data.step || { value: "-", message: "" };
+
+    instanceData.value[accountIndex] = {
+      ...instanceData.value[accountIndex],
+      step: currentStep,
+      loading: false,
+    };
+
+    forceStopItemData.value = {
+      ...instanceData.value[accountIndex],
+      loading: false,
+    };
+
+    if (currentStep.value === 5) {
+      updateLocalStorage(item.login, item.source, item.storage, item.type);
+    }
+  } catch (error) {
+    console.error("Error in changeForceStopItemData:", error);
+    if (forceStopItemData.value) {
+      forceStopItemData.value.loading = false;
+    }
+    const accountIndex = instanceData.value.findIndex(
+      (acc) => acc.login === item.login && acc.source === item.source,
+    );
+    if (accountIndex !== -1) {
+      instanceData.value[accountIndex].loading = false;
+    }
+  }
+};
+
+const updateLocalStorage = (login, source, storage, type) => {
+  try {
+    const newLoginData = {
+      login,
+      source,
+      storage: storage || "undefined",
+      type: type || "undefined",
+    };
+    chatStore.addOrUpdateChat(newLoginData);
+    console.log("Account saved to store:", newLoginData);
+  } catch (e) {
+    console.error("Error updating store:", e);
+  }
+};
+
+const updateUserInfo = (event) => {
+  userInfoStore.setUserInfo(event);
+};
+
+const getAllAccounts = () => {
+  console.log("📦 getAllAccounts вызван, возвращаем:", instanceData.value);
+  return instanceData.value;
+};
+
+const getActionCount = (item) => {
+  if (!item) return 1;
+
+  if (item.enable === "0") {
+    return 1;
+  }
+
+  let count = 0;
+
+  if (!["amocrm", "bitrix24", "uon", "bulk"].includes(item.type)) {
+    if (!["amocrm", "bitrix24", "uon"].includes(item.type)) count++;
+
+    count += 2;
+
+    if (item.source !== "telegram") count++;
+
+    count += 3;
+
+    count++;
+
+    if (
+      !(
+        (item.storage === "binder" && item.type === "touchapi") ||
+        (item.storage === "whatsapi" && item.type === "undefined")
+      )
+    ) {
+      count++;
+    }
+  } else if (["amocrm", "bitrix24", "uon"].includes(item.type)) {
+    count++;
+
+    if (item.type === "amocrm") {
+      count++;
+    }
+
+    if (item.source !== "telegram") {
+      count++;
+    }
+  } else if (item.type === "bulk") {
+    count += 2;
+  }
+
+  return Math.max(1, count);
+};
+
+const openModal = (event, item) => {
+  selectedItem.value = item;
+  isModalOpen.value = true;
+  updateUserInfo(JSON.stringify(selectedItem.value));
+  getInfo();
+
+  // 1. Получаем координаты кнопки относительно видимой области (viewport)
+  const rect = event.currentTarget.getBoundingClientRect();
+  const viewportHeight = window.innerHeight;
+  const viewportWidth = window.innerWidth;
+
+  // Константы для расчетов
+  const modalWidth = 180; // Чуть шире, с запасом
+  const edgeMargin = 15; // Отступ от краев экрана
+  const gap = 4; // Отступ модалки от кнопки
+
+  // 2. Считаем высоту модалки с ЗАПАСОМ
+  // Увеличили высоту пункта до 40px (было 32), чтобы наверняка перекрыть паддинги
+  const actionCount = getActionCount(item);
+  const itemHeight = 40;
+  const containerPadding = 20;
+  const estimatedModalHeight = actionCount * itemHeight + containerPadding;
+
+  // === РАСЧЕТ ВЕРТИКАЛИ (Y) ===
+
+  // Сколько места реально видно снизу под кнопкой?
+  const spaceBelow = viewportHeight - rect.bottom;
+
+  let top;
+
+  // ЖЕСТКАЯ ЛОГИКА:
+  // 1. Если визуально места снизу меньше, чем высота модалки...
+  // 2. ИЛИ если кнопка находится ниже 70% высоты экрана (жесткий триггер)...
+  // ... ТО открываем ВВЕРХ.
+  const isTooLowOnScreen = rect.top > viewportHeight * 0.7;
+
+  if (spaceBelow < estimatedModalHeight || isTooLowOnScreen) {
+    // -- Открываем ВВЕРХ --
+    // Координата: Верх кнопки + Скролл страницы - Высота модалки - Зазор
+    top = rect.top + window.scrollY - estimatedModalHeight - gap;
+
+    // Защита: если при открытии вверх мы улетели за верхний край страницы (top < 0)
+    // Прижимаем к верхнему краю, но не даем уйти в минус
+    if (top < window.scrollY + edgeMargin) {
+      top = window.scrollY + edgeMargin;
+    }
+  } else {
+    // -- Открываем ВНИЗ --
+    // Координата: Низ кнопки + Скролл страницы + Зазор
+    top = rect.bottom + window.scrollY + gap;
+  }
+
+  // === РАСЧЕТ ГОРИЗОНТАЛИ (X) ===
+
+  let left = rect.left + window.scrollX;
+
+  // Мобильная версия (оставляем без изменений логику позиционирования, только стили)
+  if (window.innerWidth <= 768) {
+    modalPosition.value = {
+      top: "auto",
+      bottom: "10px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "90%",
+      maxWidth: "400px",
+    };
+    return;
+  }
+
+  // Если модалка вылезает за правый край экрана
+  // (Координата левого края + ширина модалки > ширины окна + скролл)
+  if (rect.left + modalWidth > viewportWidth - edgeMargin) {
+    // Сдвигаем влево: Правый край кнопки - Ширина модалки
+    left = rect.right + window.scrollX - modalWidth;
+  }
+
+  // Финальная защита левого края
+  if (left < edgeMargin) {
+    left = edgeMargin;
+  }
+
+  modalPosition.value = {
+    top: Math.round(top),
+    left: Math.round(left),
+  };
+};
+
 const getInfo = async () => {
   chatsStation.value = "loading";
   try {
@@ -562,8 +690,9 @@ const getInfo = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
+
     if (response.data) {
       await handleSendLog(
         "accountList",
@@ -573,9 +702,10 @@ const getInfo = async () => {
           login: selectedItem.value.login,
         },
         response.data.ok,
-        response.data
+        response.data,
       );
     }
+
     if (response.data) {
       if (response.data.step != null) {
         if (response.data.step.value === 5) {
@@ -593,6 +723,191 @@ const getInfo = async () => {
     }
   } catch (error) {
     console.error("error:", error);
+    if (error.response) {
+      console.error("error", error.response.data);
+    }
+  }
+};
+
+const handleSendLog = async (location, method, params, results, answer) => {
+  try {
+    await sendLog(location, method, params, results, answer);
+  } catch (err) {
+    console.error("error", err);
+  }
+};
+
+const getAccounts = async () => {
+  console.log("🔄 AccountList: начало загрузки");
+
+  if (!accountStore || typeof accountStore.setLoading !== "function") {
+    console.error("❌ AccountList: store или setLoading не доступны");
+    return [];
+  }
+
+  try {
+    console.log("🔄 AccountList: устанавливаем loading = true");
+    accountStore.setLoading(true);
+
+    dataStationNone.value = false;
+    errorAccountBolean.value = false;
+    instanceData.value = [];
+
+    let params = {
+      source: accountStation.value,
+      skipDetails: true,
+      group: "messenger",
+    };
+
+    console.debug(stationDomain.navigate.value, "stationDomain navigate value");
+    console.debug(typeGroup.value, "typeGroup");
+
+    if (stationDomain.navigate.value === "touchapi") {
+      params = {
+        source: sourceGroup.value,
+        type: typeGroup.value,
+        group: allGroup.value,
+        add_deleted: addDeleted.value,
+      };
+    }
+
+    if (stationDomain.navigate.value === "whatsapi") {
+      params = {
+        source: sourceGroup.value,
+        type: typeGroup.value,
+        group: allGroup.value,
+        add_deleted: addDeleted.value,
+      };
+    }
+
+    console.debug(params, "Params before requesting accounts");
+
+    loadDataStation.value = true;
+    console.log("Параметры отправки", params);
+
+    try {
+      const response = await axios.post(
+        `${FRONTEND_URL}getInfoByToken`,
+        params,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.value}`,
+          },
+        },
+      );
+
+      if (response.data.ok === true) {
+        accounts.value = response.data;
+        instanceData.value = accounts.value.data.instances.map((instance) => ({
+          ...instance,
+          step: instance.step === null ? "Н/Д" : instance.step,
+          loading: true,
+          storage: instance.storage || "undefined",
+          type: instance.type || "undefined",
+        }));
+
+        await props.changeAllAccounts(instanceData.value);
+
+        if (instanceData.value.length === 0) {
+          loadDataStation.value = false;
+          dataStationNone.value = true;
+        } else {
+          loadDataStation.value = false;
+          dataStation.value = true;
+
+          if (
+            accountStation.value === "whatsapp" ||
+            accountStation.value === "telegram"
+          ) {
+            const accountsToFetch = instanceData.value.filter(
+              (instance) =>
+                instance.step?.value === 5 &&
+                !["bulk", "amocrm", "bitrix24", "uon"].includes(
+                  instance.type,
+                ) &&
+                ((instance.storage === "binder" &&
+                  instance.type !== "touchapi") ||
+                  (instance.storage === "whatsapi" &&
+                    instance.type === "whatsapi")),
+            );
+
+            if (accountsToFetch.length > 0) {
+              try {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 200 * accountsToFetch.length),
+                );
+                const result = await fetchChats({
+                  token: token.value,
+                  accounts: accountsToFetch,
+                });
+              } catch (e) {
+                console.error("Ошибка при сохранении аккаунтов:", e);
+              }
+            }
+
+            const promises = instanceData.value.map(async (instance) => {
+              const login = instance.login;
+
+              if (
+                instance.type === "bulk" ||
+                instance.type === "amocrm" ||
+                instance.type === "bitrix24" ||
+                instance.type === "uon"
+              ) {
+                instance.loading = false;
+                return;
+              }
+
+              if (
+                (instance.storage === "binder" &&
+                  instance.type !== "touchapi") ||
+                (instance.storage === "whatsapi" &&
+                  instance.type === "whatsapi")
+              ) {
+                instance.loading = false;
+                return;
+              }
+
+              try {
+                const infoResponse = await getInfoWhats(
+                  instance.source,
+                  login,
+                  instance.type,
+                  instance.storage,
+                );
+
+                if (infoResponse?.data?.step) {
+                  instance.step = infoResponse.data.step;
+                }
+              } catch (error) {
+                console.error(`Error for ${login}:`, error);
+              } finally {
+                instance.loading = false;
+              }
+            });
+
+            await Promise.all(promises);
+            chatsLoadingChange();
+          } else {
+            instanceData.value.forEach((instance) => {
+              instance.loading = false;
+            });
+          }
+        }
+      }
+    } catch (error) {
+      loadDataStation.value = false;
+      errorAccountBolean.value = true;
+      console.error("Error:", error);
+    }
+  } catch (error) {
+    console.error("❌ AccountList: ошибка в основном блоке:", error);
+  } finally {
+    console.log("✅ AccountList: устанавливаем loading = false");
+    console.log("✅ AccountList: возвращаем аккаунты:", instanceData.value);
+    accountStore.setLoading(false);
+    return instanceData.value;
   }
 };
 
@@ -603,6 +918,7 @@ onMounted(async () => {
 
 defineExpose({
   getAccounts,
+  getAllAccounts,
 });
 
 provide("selectedItems", { selectedItems });
