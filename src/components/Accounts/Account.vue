@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import AccountList from "./Accounts/AccountsListV2.vue";
+import AccountList from "./Accounts/AccountsList.vue";
 import GroupsList from "./Groups/GroupsList.vue";
 import TabToggle from "./Groups/TabToggle.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";

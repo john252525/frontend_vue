@@ -190,6 +190,7 @@ import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue"
 import WarningAccount from "./WarningAccount.vue";
 
 // Импортируем новые компоненты
+import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
 import AccountListDesktop from "./AccountComponents/AccountListDesktop.vue";
 import AccountListMobile from "./AccountComponents/AccountListMobile.vue";
 
