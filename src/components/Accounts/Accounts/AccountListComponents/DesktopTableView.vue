@@ -141,50 +141,7 @@
         </div>
 
         <div class="row-section section-actions">
-          <div class="icon-actions">
-            <!-- <div
-              class="icon-wrapper"
-              @click="$emit('open-chat', item)"
-              title="Открыть чат"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                />
-              </svg>
-            </div>
-            <div
-              class="icon-wrapper"
-              @click="$emit('take-screenshot', item)"
-              title="Сделать скриншот"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-            </div> -->
-          </div>
+          <div class="icon-actions"></div>
 
           <button
             class="action-menu-button"
@@ -207,40 +164,6 @@
       </div>
     </div>
 
-    <div v-else-if="dataStationNone" class="state-container">
-      <div class="empty-state">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <h3>{{ t("accountList.accountNone") }}</h3>
-        <p>Нет доступных аккаунтов для отображения</p>
-      </div>
-    </div>
-
-    <div v-if="loadDataStation" class="state-container">
-      <div class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>Загрузка аккаунтов...</p>
-      </div>
-    </div>
-
-    <div v-if="errorAccountBolean && !loadDataStation" class="state-container">
-      <errorAccount />
-    </div>
-
-    <span v-if="messageVisible" class="tooltip" :style="tooltipStyle">
-      {{ tooltipMessage }}
-    </span>
     <AccountModal
       v-if="selectedAccount && isModalVisible"
       :accountData="selectedAccount"

@@ -20,27 +20,30 @@ const accountStore = useAccountStore();
 const storedData = computed(() => accountStore.getAccountData);
 
 const email = storedData.value;
-const menuWidth = ref('auto');
+const menuWidth = ref("auto");
 
 // Функция для расчета ширины меню на основе длины email
 const calculateMenuWidth = () => {
-  if (!email) return 'auto';
-  
+  if (!email) return "auto";
+
   // Базовые отступы и padding
   const basePadding = 40; // padding + margin
   const charWidth = 10; // примерная ширина одного символа (можно настроить)
-  
+
   // Рассчитываем ширину на основе длины email
   const calculatedWidth = email.length * charWidth + basePadding;
-  
+
   // Устанавливаем минимальную и максимальную ширину
   return `min(max(${calculatedWidth}px, 200px), 90vw)`;
 };
 
 // Обновляем ширину при изменении email
-watch(() => storedData.value, () => {
-  menuWidth.value = calculateMenuWidth();
-});
+watch(
+  () => storedData.value,
+  () => {
+    menuWidth.value = calculateMenuWidth();
+  },
+);
 
 // Инициализируем ширину при монтировании компонента
 onMounted(() => {
@@ -72,7 +75,7 @@ const leaveAccount = () => {
 <style scoped>
 .account-menu-section {
   position: absolute;
-  z-index: 10;
+  z-index: 100;
   right: 0;
   top: 65px;
   border-radius: 5px 0 0 5px;
