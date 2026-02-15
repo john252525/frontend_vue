@@ -1,420 +1,210 @@
 <template>
-  <section class="account-list-section">
-    <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-
-    <!-- Десктопная таблица -->
-    <div class="table-container desktop-view">
-      <table class="table">
-        <thead class="table-header">
-          <tr>
-            <th class="table-name">
-              <span class="column-header"> НАЗВАНИЕ </span>
-            </th>
-            <th class="table-date">
-              <span class="column-header"> ДАТА </span>
-            </th>
-            <th class="table-switch">
-              <span class="column-header"> ВКЛЮЧЕНИЕ </span>
-            </th>
-            <th class="table-status">
-              <span class="column-header"> СТАТУС </span>
-            </th>
-            <th class="table-info">
-              <span class="column-center"> ИНФО </span>
-            </th>
-            <th class="table-messages">
-              <span class="column-center"> СООБЩЕНИЯ </span>
-            </th>
-            <th class="table-edit">
-              <span class="column-center"> РЕДАКТИРОВАТЬ </span>
-            </th>
-            <th class="table-delete">
-              <span class="column-center"> УДАЛИТЬ </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="tbody">
-          <tr
-            class="table-row"
-            v-if="dataStation"
-            v-for="(item, index) in mailingLists"
-            :key="index"
-          >
-            <!-- НАЗВАНИЕ -->
-            <td class="table-name-data">
-              <div class="mailing-content">
-                <div class="mailing-info">
-                  <span v-if="item.name.length > 0" class="mailing-name">{{
-                    item.name
-                  }}</span>
-                  <span v-else class="mailing-placeholder">{{
-                    t("mailingList.name")
-                  }}</span>
-                  <span class="mailing-id">ID: {{ item.id }}</span>
-                </div>
-              </div>
-            </td>
-
-            <!-- ДАТА -->
-            <td class="table-date-data">
-              <div class="date-content">
-                <span class="date-value">{{ formatDate(item.dt_create) }}</span>
-              </div>
-            </td>
-
-            <!-- ВКЛЮЧЕНИЕ -->
-            <td class="table-switch-data">
-              <label class="switch" :class="{ 'switch-loading': item.loading }">
-                <input
-                  type="checkbox"
-                  :checked="item.state === 1"
-                  :disabled="item.loading"
-                  @change="toggleMailing(item, $event.target.checked)"
-                />
-                <span class="slider round">
-                  <span class="switch-handle"></span>
-                </span>
-                <span v-if="item.loading" class="switch-loader"></span>
-              </label>
-            </td>
-
-            <!-- СТАТУС -->
-            <td class="table-status-data">
-              <div class="status-content">
-                <span class="status-badge" :class="getStatusClass(item.state)">
-                  {{ getStatusText(item.state) }}
-                </span>
-              </div>
-            </td>
-
-            <!-- ИНФОРМАЦИЯ -->
-            <td class="table-info-data">
-              <div class="icon-wrapper" @click="showInfo(item)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </div>
-            </td>
-
-            <!-- СООБЩЕНИЯ -->
-            <td class="table-messages-data">
-              <div class="icon-wrapper" @click="editMessages(item)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                  ></path>
-                </svg>
-              </div>
-            </td>
-
-            <!-- РЕДАКТИРОВАТЬ -->
-            <td class="table-edit-data">
-              <div class="icon-wrapper" @click="editMailing(item)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  <path d="M15 5l4 4" />
-                </svg>
-              </div>
-            </td>
-
-            <!-- УДАЛИТЬ -->
-            <td class="table-delete-data">
-              <div
-                class="icon-wrapper delete-icon"
-                @click="deleteMailing(item)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Состояния загрузки и ошибок -->
-          <tr v-else-if="dataStationNone">
-            <td colspan="8">
-              <div class="none-account-cont">
-                <div class="empty-state">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
-                  <h3>{{ t("mailingList.noneMailing") }}</h3>
-                  <p>Нет доступных рассылок для отображения</p>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr v-if="loadDataStation">
-            <td colspan="8">
-              <div class="load-cont">
-                <div class="loading-state">
-                  <div class="loading-spinner"></div>
-                  <p>Загрузка рассылок...</p>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr v-if="errorMailing && !loadDataStation">
-            <td colspan="8">
-              <div class="load-cont">
-                <ErrorAccount />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Мобильные карточки -->
-    <div class="mobile-cards" v-if="dataStation && mailingLists.length > 0">
+  <div class="list-container">
+    <div v-if="mailingLists && mailingLists.length > 0" class="accounts-list">
       <div
-        class="mailing-card"
+        class="account-row"
         v-for="(item, index) in mailingLists"
-        :key="'mobile-' + index"
+        :key="index"
       >
-        <div class="card-header">
-          <div class="mailing-info">
-            <span class="mailing-name">
-              <span v-if="item.name.length > 0">{{ item.name }}</span>
-              <span v-else>{{ t("mailingList.name") }}</span>
-            </span>
-            <span class="mailing-id">ID: {{ item.id }}</span>
-          </div>
-          <div class="status-badge-mobile" :class="getStatusClass(item.state)">
-            {{ getStatusText(item.state) }}
+        <div class="row-section section-identity">
+          <div class="identity-info">
+            <span v-if="item.name" class="account-name">{{ item.name }}</span>
+            <span v-else class="account-name"> Рассылка {{ item.id }}</span>
           </div>
         </div>
 
-        <div class="card-content">
-          <div class="card-row">
-            <span class="label">Дата:</span>
-            <span class="value">{{ formatDate(item.dt_create) }}</span>
-          </div>
+        <StatusSwitch :item="item" :changeStatusMailing="changeStatusMailing" />
 
-          <div class="card-row">
-            <span class="label">Включение:</span>
-            <label
-              class="switch switch-mobile"
-              :class="{ 'switch-loading': item.loading }"
-            >
-              <input
-                type="checkbox"
-                :checked="item.state === 1"
-                :disabled="item.loading"
-                @change="toggleMailing(item, $event.target.checked)"
-              />
-              <span class="slider round">
-                <span class="switch-handle"></span>
-              </span>
-              <span v-if="item.loading" class="switch-loader"></span>
-            </label>
-          </div>
+        <div class="vertical-divider"></div>
 
-          <div class="card-row" v-if="item.state_text">
-            <span class="label">Статус:</span>
-            <span class="value state-text-mobile">{{ item.state_text }}</span>
-          </div>
+        <div @click="openAccountModal(item)" class="row-section section-data">
+          <span class="data-label">Состояние</span>
+          <span class="status-badge" :class="getStatusClass(item.state)"
+            >{{ getStatusText(item.state) }}
+          </span>
         </div>
 
-        <div class="card-actions">
-          <button class="action-btn info-btn" @click="showInfo(item)">
+        <div @click="openAccountModal(item)" class="row-section section-data">
+          <span class="data-label">Статус</span>
+          <span v-if="item.state_text" class="status-text">{{
+            item.state_text
+          }}</span>
+          <span v-else class="status-text">-</span>
+        </div>
+
+        <div class="row-section section-actions">
+          <div class="icon-actions"></div>
+
+          <button
+            class="action-btn"
+            @click="changeInfoMailing(item)"
+            title="Информация"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="16" x2="12" y2="12"></line>
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            Инфо
           </button>
 
-          <button class="action-btn messages-btn" @click="editMessages(item)">
+          <button
+            class="action-btn"
+            @click="changeStationMessage(item)"
+            title="Сообщения"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path
                 d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
               ></path>
             </svg>
-            Сообщения
           </button>
 
-          <button class="action-btn edit-btn" @click="editMailing(item)">
+          <button
+            class="action-btn edit-btn"
+            @click="changeisEditMailing(item)"
+            title="Редактировать"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
               <path d="M15 5l4 4" />
             </svg>
-            Редакт.
           </button>
 
-          <button class="action-btn delete-btn" @click="deleteMailing(item)">
+          <button
+            class="action-btn delete-btn"
+            @click="changeDeleteMailing(item)"
+            title="Удалить"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path d="M3 6h18"></path>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
               <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            Удалить
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Состояния для мобильной версии -->
-    <div
-      class="mobile-states"
-      v-if="!dataStation || dataStationNone || loadDataStation || errorMailing"
-    >
-      <div class="none-account-cont" v-if="dataStationNone">
-        <NoData type="campaigns" />
-      </div>
-
-      <div class="load-cont" v-if="loadDataStation">
-        <LoadAccount />
-      </div>
-
-      <div class="load-cont" v-if="errorMailing">
-        <ErrorAccount />
+    <div v-else-if="dataStationNone" class="state-container">
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>Рассылки отсутствуют</h3>
+        <p>Нет доступных рассылок для отображения</p>
       </div>
     </div>
 
-    <!-- Модальные окна -->
-    <Modal
-      :changeStatusMailing="changeStatusMailing"
-      :isModalOpen="station.isModalOpen"
-      :closeModal="closeModal"
-      :modalPosition="modalPosition"
-      :changeInfoMailing="changeInfoMailing"
-      :selectedItem="selectedItem"
-      :changeDeleteMailing="changeDeleteMailing"
-      :refreshMailingLists="getMailingLists"
-      :changeisEditMailing="changeisEditMailing"
-      :changeStationMessage="changeStationMessage"
-    />
-    <InfoMailing
-      :changeInfoMailing="changeInfoMailing"
-      :selectedItem="selectedItem"
-      v-if="station.infoMailing"
-      :changeisEditMailing="changeisEditMailingInfo"
-    />
-    <ConfirmDelete
-      v-if="station.deleteMailing"
-      :selectedItem="selectedItem"
-      :changeDeleteMailing="changeDeleteMailing"
-      :refreshMailingLists="getMailingLists"
-      :changeResultModal="changeResultModal"
-    />
-    <EditMailing
-      v-if="station.editMailing"
-      :changeisEditMailing="changeisEditMailing"
-      :selectedItem="selectedItem"
-      :changeResultModal="changeResultModal"
-    />
-    <MessageLise
-      v-if="stationMessage"
-      :changeStationMessage="changeStationMessage"
-      :selectedItem="selectedItem"
-    />
-  </section>
+    <div v-if="loadDataStation" class="state-container">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Загрузка рассылок...</p>
+      </div>
+    </div>
+
+    <div v-if="errorMailing && !loadDataStation" class="state-container">
+      <errorAccount />
+    </div>
+  </div>
+
+  <Modal
+    :changeStatusMailing="changeStatusMailing"
+    :isModalOpen="station.isModalOpen"
+    :closeModal="closeModal"
+    :modalPosition="modalPosition"
+    :changeInfoMailing="changeInfoMailing"
+    :selectedItem="selectedItem"
+    :changeDeleteMailing="changeDeleteMailing"
+    :refreshMailingLists="getMailingLists"
+    :changeisEditMailing="changeisEditMailing"
+    :changeStationMessage="changeStationMessage"
+  />
+  <InfoMailing
+    :changeInfoMailing="changeInfoMailing"
+    :selectedItem="selectedItem"
+    v-if="station.infoMailing"
+    :changeisEditMailing="changeisEditMailingInfo"
+    :changeStationMessage="changeStationMessage"
+  />
+  <ConfirmDelete
+    v-if="station.deleteMailing"
+    :selectedItem="selectedItem"
+    :changeDeleteMailing="changeDeleteMailing"
+    :refreshMailingLists="getMailingLists"
+    :changeResultModal="changeResultModal"
+  />
+  <EditMailing
+    v-if="station.editMailing"
+    :changeisEditMailing="changeisEditMailing"
+    :selectedItem="selectedItem"
+    :changeResultModal="changeResultModal"
+  />
+  <MessageLise
+    v-if="stationMessage"
+    :changeStationMessage="changeStationMessage"
+    :selectedItem="selectedItem"
+  />
 </template>
 
 <script setup>
-// ... остальной скрипт без изменений ...
-
 import MessageLise from "../ModalComponent/MessageLise.vue";
-import { ref, reactive, onMounted, provide, computed } from "vue";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import { ref, reactive, onMounted, provide, watch, computed } from "vue";
+import StatusSwitch from "./listComponents/StatusSwitch.vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-import Mailing from "@/components/Mailing/Mailing.vue";
-import AddMailing from "../ModalComponent/AddMailing/AddMailing.vue";
 import ConfirmDelete from "../ModalComponent/confirmModal/confirmDelete.vue";
 import Modal from "../ModalComponent/Modal.vue";
 import InfoMailing from "../ModalComponent/InfoMailing.vue";
-import LoadAccount from "./LoadAccount.vue";
 import EditMailing from "../ModalComponent/EditMailing/EditMailing.vue";
 import ErrorAccount from "./errorAccount.vue";
 import { useRouter } from "vue-router";
@@ -422,6 +212,9 @@ import { useI18n } from "vue-i18n";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+import { useMailingVersion } from "@/stores/mailingVersion";
+const mailingVersion = useMailingVersion();
+const getVersion = computed(() => mailingVersion.getVersion);
 const { t } = useI18n();
 const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
 const router = useRouter();
@@ -439,6 +232,7 @@ const chaneErrorBlock = () => {
 };
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
+
 const { sendLog } = useFrontendLogger();
 
 const handleSendLog = async (location, method, params, results, answer) => {
@@ -446,7 +240,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-    // Optionally, update the error message ref
   }
 };
 
@@ -482,11 +275,11 @@ const formatDate = (dateString) => {
 const getStatusText = (state) => {
   switch (state) {
     case 1:
-      return t("mailingList.status.active");
+      return "Активна";
     case 0:
-      return t("mailingList.status.noActive");
+      return "Неактивна";
     case 2:
-      return t("mailingList.status.completed");
+      return "Завершена";
     default:
       return "-";
   }
@@ -505,153 +298,33 @@ const getStatusClass = (state) => {
   }
 };
 
-const toggleMailing = (item, isEnabled) => {
-  console.log("Toggle mailing:", item.id, "to:", isEnabled);
-  // Здесь будет логика включения/выключения рассылки
-  // Пока просто меняем состояние локально для демонстрации
-  const newState = isEnabled ? 1 : 0;
-  changeStatusMailing(item, newState);
-
-  // Можно добавить вызов API здесь:
-  // await axios.post('/api/mailing/toggle', { id: item.id, enabled: isEnabled });
-};
-
 const openMobileModal = (event, item) => {
   openModal(event, item);
 };
-
-// const getMailingLists = async () => {
-//   mailingLists.value = false;
-//   errorMailing.value = false;
-//   dataStationNone.value = false;
-//   loadDataStation.value = true;
-//   const apiUrlMethod = `${apiUrl}/list/`;
-//   try {
-//     const response = await axios.get(apiUrlMethod, {
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//         Authorization: `Bearer ${token.value}`,
-//       },
-//     });
-
-//     if (response.data) {
-//       await handleSendLog(
-//         "mailingList",
-//         "list",
-//         {
-//           "Content-Type": "application/x-www-form-urlencoded",
-//           Authorization: `Bearer ${token.value}`,
-//         },
-//         response.data.ok,
-//         response.data
-//       );
-//     }
-
-//     mailingLists.value = response.data.result.items;
-//     if (mailingLists.value.length === 0) {
-//       loadDataStation.value = false;
-//       dataStationNone.value = true;
-//     } else if (response.data === 401) {
-//       errorBlock.value = true;
-//       setTimeout(() => {
-//         localStorage.removeItem("accountToken");
-//         router.push("/login");
-//       }, 2000);
-//     } else {
-//       loadDataStation.value = false;
-//       dataStation.value = true;
-//     }
-//   } catch (error) {
-//     console.error("error", error.message);
-//     errorMailing.value = true;
-//     loadDataStation.value = false;
-//     dataStationNone.value = false;
-//   }
-// };
 
 const getMailingLists = async () => {
   mailingLists.value = false;
   errorMailing.value = false;
   dataStationNone.value = false;
   loadDataStation.value = true;
-
-  // Имитация загрузки в 2 секунды
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const apiUrlMethod = `${apiUrl}/list/`;
 
   try {
-    // Используем ваши данные вместо API запроса
-    const mockData = {
-      count: 2,
-      items: [
-        {
-          id: 1,
-          state: 2,
-          state_text: "",
-          next_ts: 0,
-          name: "",
-          text: "еуые",
-          options: {
-            uniq: true,
-            exist: true,
-            random: false,
-            cascade: ["whatsapp"],
-            days: {
-              1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-              5: 5,
-            },
-            hours: {
-              min: "10:00",
-              max: "17:00",
-              timezone: 3,
-            },
-            delay: {
-              min: 9,
-              max: 19,
-            },
-          },
-          recipients: 1,
-          dt_create: "2025-09-18 21:16:13",
-        },
-        {
-          id: 2,
-          state: 1,
-          state_text: "Отправка приостановлена из-за дня недели",
-          next_ts: 0,
-          name: "",
-          text: "test",
-          options: {
-            uniq: true,
-            exist: true,
-            random: false,
-            cascade: ["whatsapp"],
-            days: {
-              1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-              5: 5,
-            },
-            hours: {
-              min: "10:00",
-              max: "17:00",
-              timezone: 3,
-            },
-            delay: {
-              min: 10,
-              max: 30,
-            },
-          },
-          recipients: 1,
-          dt_create: "2025-09-20 20:20:50",
-        },
-      ],
-    };
+    const response = await axios.get(apiUrlMethod, {
+      params: {
+        version: getVersion.value,
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-    mailingLists.value = mockData.items;
-
+    mailingLists.value = response.data.result.items.map((instance) => ({
+      ...instance,
+      loading: false,
+    }));
+    console.log("mailingLists", mailingLists.value);
     if (mailingLists.value.length === 0) {
       loadDataStation.value = false;
       dataStationNone.value = true;
@@ -669,49 +342,134 @@ const getMailingLists = async () => {
 
 const changeStatusMailing = (item, state) => {
   const index = mailingLists.value.findIndex(
-    (mailing) => mailing.id === item.id
+    (mailing) => mailing.id === item.id,
   );
   if (index !== -1) {
     mailingLists.value[index].state = state;
-    // Если нужно также обновить другие поля, например state_text
+    if (state === 1) {
+      mailingLists.value[index].state_text = "В процессе";
+    } else {
+      mailingLists.value[index].state_text = "Приостановлена";
+    }
   }
 };
 
 const openModal = (event, item) => {
   selectedItem.value = item;
   station.isModalOpen = true;
+
   const rect = event.currentTarget.getBoundingClientRect();
   const modalWidth = 150;
-  const modalHeight = 200;
-  const offset = 4; // Минимальный отступ
+  const edgeMargin = 10;
 
-  let left = rect.right + window.scrollX + offset;
-  let top = rect.bottom + window.scrollY + offset;
+  // Динамически рассчитываем высоту модалки на основе количества действий
+  const actionCount = getMailingActionCount(item);
+  const itemHeight = 32; // Высота одного пункта меню
+  const padding = 16; // Внутренние отступы
+  const estimatedModalHeight = actionCount * itemHeight + padding;
 
-  if (left + modalWidth > window.innerWidth) {
-    left = rect.left + window.scrollX - modalWidth - offset;
+  if (window.innerWidth <= 768) {
+    // Для мобильных - позиционируем снизу экрана
+    modalPosition.value = {
+      top: "auto",
+      bottom: "10px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "90%",
+      maxWidth: "400px",
+    };
+  } else {
+    // Для десктопа - умное позиционирование
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 5;
+
+    // Проверяем правую границу
+    if (left + modalWidth > window.innerWidth - edgeMargin) {
+      left = window.innerWidth - modalWidth - edgeMargin;
+    }
+
+    // Проверяем левую границу
+    if (left < edgeMargin) {
+      left = edgeMargin;
+    }
+
+    // Проверяем, помещается ли модалка снизу
+    const spaceBelow = window.innerHeight - rect.bottom - 15;
+    const spaceAbove = rect.top - 15;
+
+    // Для модалок с 1-2 элементами ВСЕГДА показываем снизу (если хватает места)
+    if (actionCount <= 2) {
+      // Для маленьких модалок всегда предпочитаем позицию снизу
+      if (spaceBelow < estimatedModalHeight) {
+        // Если снизу не хватает места, ограничиваем высоту или показываем сверху
+        if (spaceAbove > spaceBelow) {
+          top = rect.top + window.scrollY - estimatedModalHeight - 5;
+        } else {
+          // Если и сверху мало места, ограничиваем позицию снизу
+          top = window.innerHeight - estimatedModalHeight - edgeMargin;
+        }
+      }
+    } else {
+      // Для больших модалок используем стандартную логику
+      if (spaceBelow < estimatedModalHeight && spaceAbove > spaceBelow) {
+        top = rect.top + window.scrollY - estimatedModalHeight - 5;
+      }
+    }
+
+    // Финальная проверка границ
+    if (top < edgeMargin) {
+      top = edgeMargin;
+    }
+
+    if (top + estimatedModalHeight > window.innerHeight - edgeMargin) {
+      top = window.innerHeight - estimatedModalHeight - edgeMargin;
+    }
+
+    modalPosition.value = {
+      top: Math.max(edgeMargin, Math.round(top)),
+      left: Math.max(edgeMargin, Math.round(left)),
+    };
+  }
+};
+
+// Функция для подсчета количества действий в модалке рассылки
+const getMailingActionCount = (item) => {
+  if (!item) return 4; // Значение по умолчанию
+
+  let count = 0;
+
+  // Базовые действия для всех рассылок
+  count++; // Информация
+  count++; // Сообщения
+
+  // Действия в зависимости от статуса
+  if (item.state === 1) {
+    // Активная
+    count++; // Остановить
+  } else if (item.state === 0) {
+    // Неактивная
+    count++; // Запустить
   }
 
-  // Гарантируем минимальный отступ 4px
-  left = Math.max(offset, left);
-  top = Math.max(offset, top);
+  count++; // Редактировать
+  count++; // Удалить
 
-  // Гарантируем невыход за правый и нижний края
-  left = Math.min(left, window.innerWidth - modalWidth - offset);
-  top = Math.min(
-    top,
-    window.innerHeight - modalHeight - offset + window.scrollY
-  );
-
-  modalPosition.value = {
-    top: top,
-    left: left,
-  };
+  return Math.max(1, count); // Всегда минимум 1 действие
 };
 
 const stationMessage = ref(false);
 
-const changeStationMessage = () => {
+const changeStationMessage = (item) => {
+  if (item != null) {
+    console.log("item");
+    selectedItem.value = item;
+  }
+
+  if (station.infoMailing === true) {
+    station.infoMailing = false;
+  }
+
+  console.log("message");
   stationMessage.value = !stationMessage.value;
 };
 
@@ -719,254 +477,233 @@ const closeModal = () => {
   station.isModalOpen = false;
 };
 
-const changeisEditMailing = () => {
+const changeisEditMailing = (item) => {
+  selectedItem.value = item;
+
   station.editMailing = !station.editMailing;
 };
 
-const changeisEditMailingInfo = () => {
+const changeisEditMailingInfo = (item) => {
+  if (!station.infoMailing) {
+    selectedItem.value = item;
+  }
   changeInfoMailing();
   station.editMailing = !station.editMailing;
 };
 
-const changeisAddMailing = () => {
+const changeisAddMailing = (item) => {
   station.isAddMailing = !station.isAddMailing;
 };
 
-const changeDeleteMailing = () => {
+const changeDeleteMailing = (item) => {
+  selectedItem.value = item;
   station.deleteMailing = !station.deleteMailing;
 };
 
-const changeInfoMailing = () => {
+const changeInfoMailing = (item) => {
+  selectedItem.value = item;
   station.infoMailing = !station.infoMailing;
 };
 
+watch(getVersion, async (newVersion) => {
+  if (newVersion) {
+    console.log("New", newVersion);
+    await getMailingLists();
+  }
+});
+
 onMounted(getMailingLists);
 provide("selectedItem", { selectedItem });
-
-const showInfo = (item) => {
-  selectedItem.value = item;
-  changeInfoMailing();
-};
-
-const editMailing = (item) => {
-  selectedItem.value = item;
-  changeisEditMailing();
-};
-
-const deleteMailing = (item) => {
-  selectedItem.value = item;
-  changeDeleteMailing();
-};
-
-const editMessages = (item) => {
-  console.log("Edit messages for:", item);
-  // Здесь можно открыть модальное окно редактирования сообщений
-};
 </script>
 
 <style scoped>
-/* ОСНОВНЫЕ СТИЛИ */
-.account-list-section {
-  padding: 0;
-}
-
-.table-container {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-width: 100%;
-  height: 80vh;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-}
-
-.desktop-view {
-  display: block;
-}
-
-.mobile-cards,
-.mobile-states {
-  display: none;
-}
-
-/* СКРОЛЛБАРЫ */
-.table-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* ТАБЛИЦА */
-.table {
+/* ОСНОВНОЙ КОНТЕЙНЕР */
+.list-container {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: transparent;
-  font-size: 14px;
+  height: 80vh;
+  overflow-y: auto;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-/* ЗАГОЛОВКИ */
-.table-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.table-header th {
-  padding: 14px 10px;
-  font-weight: 600;
-  font-size: 12px;
-  color: #334155;
-  text-align: center;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.table-name {
-  text-align: left;
-  width: 25%;
-}
-
-.table-date {
-  text-align: center;
-  width: 12%;
-}
-
-.table-switch {
-  text-align: center;
-  width: 12%;
-}
-
-.table-status {
-  text-align: center;
-  width: 12%;
-}
-
-.table-info,
-.table-messages,
-.table-edit,
-.table-delete {
-  text-align: center;
-  width: 9%;
-}
-
-.column-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: #475569;
-  font-size: 12px;
-}
-
-.column-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: #475569;
-  font-size: 12px;
-  justify-content: center;
-}
-
-/* СТРОКИ ДАННЫХ */
-.table-row {
-  position: relative;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
-  background: transparent;
-}
-
-.table-row:hover {
-  background: #f8fafc;
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-/* ЯЧЕЙКИ ДАННЫХ */
-.table-row td {
-  padding: 12px 10px;
-  font-size: 13px;
-  color: #334155;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.2s ease;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.table-name-data {
-  text-align: left;
-}
-
-/* НАЗВАНИЕ */
-.mailing-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mailing-info {
+.accounts-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 12px;
 }
 
-.mailing-name {
+/* СТРОКА-КАРТОЧКА */
+.account-row {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  gap: 20px;
+}
+
+.account-row:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.row-active {
+  background: #ffffff;
+}
+
+.row-disabled {
+  background: #f5f7fa;
+  opacity: 0.9;
+}
+
+/* СЕКЦИИ СТРОКИ */
+.row-section {
+  display: flex;
+  align-items: center;
+}
+
+/* 1. ИДЕНТИФИКАЦИЯ (Иконка, Имя) */
+.section-identity {
+  flex: 1.5; /* Широкая секция */
+  gap: 12px;
+}
+
+.identity-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.account-name {
   font-weight: 600;
   color: #1e293b;
-  font-size: 13px;
+  font-size: 15px;
 }
 
-.mailing-placeholder {
+.account-login {
   font-weight: 500;
   color: #475569;
-  font-style: italic;
-  font-size: 13px;
+  font-size: 15px;
 }
 
-.mailing-id {
+.account-type {
   font-size: 11px;
   color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: inline-block;
+  align-self: flex-start;
 }
 
-/* ДАТА */
-.date-content {
+.subscription-warning-desktop {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 4px;
+  border-radius: 100%;
+
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
-.date-value {
-  font-weight: 500;
-  color: #374151;
-  font-size: 13px;
+.subscription-warning-desktop:hover {
+  color: #d97706;
+  transform: scale(1.1);
 }
 
-/* ПЕРЕКЛЮЧАТЕЛЬ */
+/* 2. ТУМБЛЕР (ПЕРЕКЛЮЧАТЕЛЬ) */
+.section-toggle {
+  flex: 0 0 auto;
+}
+
+/* Вертикальная линия разделитель (опционально) */
+.vertical-divider {
+  width: 1px;
+  height: 32px;
+  background: #e2e8f0;
+}
+
+/* 3. ДАННЫЕ (СТАТУС И ПОДПИСКА) - Вертикальный стек */
+.section-data {
+  flex: 1;
+  flex-direction: column; /* Сверху вниз */
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.data-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.data-value {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+/* 4. ДЕЙСТВИЯ (Справа) */
+.section-actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto; /* Прижимаем вправо */
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-color: #f7fafc;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #edf2f7;
+  color: #4a5568;
+  transform: translateY(-1px);
+}
+
+.action-btn.edit-btn:hover {
+  background-color: #ebf8ff;
+  color: #3182ce;
+  border-color: #bee3f8;
+}
+
+.action-btn.delete-btn:hover {
+  background-color: #fff5f5;
+  color: #e53e3e;
+  border-color: #fed7d7;
+}
+
+/* КОМПОНЕНТЫ УПРАВЛЕНИЯ */
+
+/* Переключатель */
 .switch {
   position: relative;
   display: inline-block;
-  width: 40px;
+  width: 36px;
   height: 20px;
-  margin: 0 auto;
 }
 
 .switch input {
@@ -1005,11 +742,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider .switch-handle {
-  transform: translateX(20px);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  transform: translateX(16px);
 }
 
 .switch-loading .slider {
@@ -1020,9 +753,9 @@ input:focus + .slider {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
   border: 2px solid transparent;
   border-top: 2px solid #fff;
   border-radius: 50%;
@@ -1038,19 +771,15 @@ input:focus + .slider {
   }
 }
 
-/* СТАТУС */
-.status-content {
-  display: flex;
-  justify-content: center;
-}
-
+/* Статус Бейджи */
 .status-badge {
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .status-active {
@@ -1060,345 +789,236 @@ input:focus + .slider {
 }
 
 .status-completed {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.status-inactive {
   background: #f1f5f9;
   color: #64748b;
   border: 1px solid #e2e8f0;
 }
 
-/* ИКОНКИ */
+.status-inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.status-empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.open-tariff-button {
+  position: relative;
+  z-index: 1;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden; /* Чтобы градиент не вылезал за скругление */
+}
+
+/* Создаем слой для нового градиента при наведении */
+.open-tariff-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #4f46e5 100%
+  ); /* Цвета наоборот или другие */
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.open-tariff-button:hover::before {
+  opacity: 1;
+}
+
+.subscription-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #166534;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.subscription-expired {
+  color: #dc2626;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Иконки действий */
+.icon-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .icon-wrapper {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   background: #f1f5f9;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin: 0 auto;
+  color: #64748b;
 }
 
 .icon-wrapper:hover {
   background: #e2e8f0;
-  transform: scale(1.05);
+  color: #334155;
 }
 
-.icon-wrapper svg {
+.action-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
   color: #64748b;
-  width: 16px;
-  height: 16px;
+  transition: all 0.2s ease;
 }
 
-.delete-icon:hover {
-  background: #fee2e2;
+.action-menu-button:hover {
+  background: #f1f5f9;
+  color: #334155;
 }
 
-.delete-icon:hover svg {
-  color: #dc2626;
+/* СОСТОЯНИЯ (Empty, Loading, Error) */
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
-/* СОСТОЯНИЯ */
 .empty-state,
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 48px 32px;
   text-align: center;
 }
 
 .empty-state svg {
   color: #cbd5e0;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .empty-state h3 {
   color: #475569;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .empty-state p {
   color: #64748b;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .loading-spinner {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: 2px solid #f1f5f9;
   border-top: 2px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-/* МОБИЛЬНАЯ ВЕРСИЯ */
-@media (max-width: 768px) {
-  .desktop-view {
-    display: none;
-  }
+/* ТУЛТИП */
+.tooltip {
+  position: fixed;
+  background: rgba(15, 23, 42, 0.95);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 250px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
 
-  .mobile-cards,
-  .mobile-states {
-    display: block;
-  }
+/* СКРОЛЛБАР */
+.list-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
 
-  .mobile-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 12px;
-    padding: 12px;
-  }
+.list-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
 
-  .mailing-card {
-    background: white;
-    border-radius: 10px;
-    padding: 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
-    display: flex;
-    flex-direction: column;
-  }
+.list-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  .mailing-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-  }
-
-  .mailing-name {
-    font-weight: 600;
-    font-size: 14px;
-    color: #1f2937;
-  }
-
-  .mailing-id {
-    font-size: 11px;
-    color: #6b7280;
-  }
-
-  .status-badge-mobile {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .status-active {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .status-completed {
-    background: #dbeafe;
-    color: #1d4ed8;
-  }
-
-  .status-inactive {
-    background: #f3f4f6;
-    color: #4b5563;
-  }
-
-  .card-content {
-    flex: 1;
-    margin-bottom: 10px;
-  }
-
-  .card-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    padding: 6px 0;
-  }
-
-  .label {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 500;
-  }
-
-  .value {
-    font-size: 12px;
-    color: #374151;
-    font-weight: 500;
-  }
-
-  .switch-mobile {
-    margin: 0;
-  }
-
-  .state-text-mobile {
-    color: #6b7280;
-    font-size: 11px;
-  }
-
-  .card-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    margin-top: auto;
-  }
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 8px;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    justify-content: center;
-  }
-
-  .info-btn {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-  }
-
-  .info-btn:hover {
-    background: #e2e8f0;
-  }
-
-  .messages-btn {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-  }
-
-  .messages-btn:hover {
-    background: #e2e8f0;
-  }
-
-  .edit-btn {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-  }
-
-  .edit-btn:hover {
-    background: #e2e8f0;
-  }
-
-  .delete-btn {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-  }
-
-  .delete-btn:hover {
-    background: #fee2e2;
-  }
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* АДАПТИВНОСТЬ */
-@media (max-height: 900px) {
-  .table-container {
-    height: 74vh;
-  }
-}
-
-@media (max-height: 660px) {
-  .table-container {
-    height: 78vh;
-  }
-}
-
-@media (max-height: 600px) {
-  .table-container {
-    height: 76vh;
-  }
-}
-
-@media (max-height: 550px) {
-  .table-container {
-    height: 74vh;
-  }
-}
-
-@media (max-height: 500px) {
-  .table-container {
-    height: 70vh;
-  }
-}
-
-@media (max-height: 450px) {
-  .table-container {
-    height: 66vh;
-  }
-}
-
-@media (max-width: 640px) {
-  .mobile-cards {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px;
+@media (max-width: 900px) {
+  .account-row {
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
-  .mailing-card {
-    padding: 12px;
+  .section-identity {
+    flex: 100%;
+    min-width: 100%;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
   }
 
-  .mailing-name {
-    font-size: 13px;
+  .vertical-divider {
+    display: none;
   }
 
-  .label {
-    font-size: 11px;
+  .section-data {
+    flex: 1;
+    min-width: 120px;
   }
 
-  .value {
-    font-size: 11px;
+  .section-toggle {
+    order: 2;
   }
 
-  .action-btn {
-    padding: 5px 6px;
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .mobile-cards {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .mailing-card {
-    padding: 10px;
-  }
-
-  .mailing-name {
-    font-size: 12px;
-  }
-
-  .action-btn {
-    padding: 4px 5px;
-    font-size: 9px;
+  .section-actions {
+    order: 10;
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
   }
 }
 </style>

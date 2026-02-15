@@ -1,280 +1,53 @@
 <template>
-  <ModalFrame :text="textModal" :close="closeModal" :item="accountData">
-    <div class="modal-body">
+  <ModalFrame
+    :isLoading="loading"
+    :text="textModal"
+    :close="closeModal"
+    :item="accountData"
+  >
+    <div class="loading-test"></div>
+    <div v-if="!loading" class="modal-body">
       <div class="info-sections">
-        <div class="info-section">
-          <h4 class="section-title">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M12 8v4l2 2"></path>
-            </svg>
-            Статус
-          </h4>
-          <div class="status-grid">
-            <div class="status-item">
-              <span class="status-label">Состояние:</span>
-              <span
-                class="status-value"
-                :class="getStatusClass(accountData.step)"
-              >
-                {{ getStatusText(accountData.step) }}
-              </span>
-            </div>
-            <div class="status-item">
-              <span class="status-label">Включен:</span>
-              <span
-                class="status-value"
-                :class="accountData.enabled ? 'status-on' : 'status-off'"
-              >
-                {{ accountData.enabled ? "Да" : "Нет" }}
-              </span>
-            </div>
-            <div class="status-item" v-if="accountData.last_activity">
-              <span class="status-label">Активность:</span>
-              <span class="status-value">{{
-                formatDateTime(accountData.last_activity)
-              }}</span>
-            </div>
-          </div>
-          <div class="action-section">
-            <div class="action-buttons-grid">
-              <button
-                class="action-button"
-                @click="emitAction('toggle')"
-                :class="accountData.enabled ? 'warning' : 'success'"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="16"></line>
-                  <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-                {{ accountData.enabled ? "Выключить" : "Включить" }}
-              </button>
-
-              <button class="action-button" @click="emitAction('reset')">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
-                  ></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-                Сбросить
-              </button>
-              <button class="action-button" @click="emitAction('change-proxy')">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <circle cx="12" cy="12" r="4"></circle>
-                </svg>
-                Сменить прокси
-              </button>
-
-              <button class="action-button" @click="emitAction('reset')">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
-                  ></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-                Сбросить
-              </button>
-            </div>
-          </div>
+        <div v-if="getAccessToStatus" class="info-section">
+          <Subscription :account-data="accountData" />
         </div>
 
-        <!-- Подписка -->
-        <div class="info-section">
-          <h4 class="section-title">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            Подписка
-          </h4>
-          <div class="subscription-info">
-            <div class="subscription-item">
-              <span class="subscription-label">Статус:</span>
-              <span
-                class="subscription-value"
-                :class="
-                  accountData.subscription_dt_to
-                    ? 'subscription-active'
-                    : 'subscription-expired'
-                "
-              >
-                {{ accountData.subscription_dt_to ? "Активна" : "Неактивна" }}
-              </span>
-            </div>
-            <div
-              class="subscription-item"
-              v-if="accountData.subscription_dt_to"
-            >
-              <span class="subscription-label">Действует до:</span>
-              <span class="subscription-value">{{
-                formatDate(accountData.subscription_dt_to)
-              }}</span>
-            </div>
-            <div
-              class="subscription-item"
-              v-if="accountData.subscription_days_left !== undefined"
-            >
-              <span class="subscription-label">Осталось дней:</span>
-              <span
-                class="subscription-value"
-                :class="getDaysLeftClass(accountData.subscription_days_left)"
-              >
-                {{ accountData.subscription_days_left }}
-              </span>
-            </div>
-          </div>
-          <div class="action-section">
-            <div class="action-buttons-grid">
-              <button
-                class="action-button primary"
-                @click="emitAction('extend')"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                </svg>
-                Продлить
-              </button>
-            </div>
-          </div>
+        <div v-if="getAccessToStatus" class="info-section">
+          <Status
+            :openResetAccountModal="openResetAccountModal"
+            :changeEditNameModal="changeEditNameModal"
+            :createRequest="actionClik"
+            :account-data="accountData"
+            :changeForceStopItemData="changeForceStopItemData"
+            :deleteAccount="deleteAccount"
+          />
         </div>
 
-        <!-- Аккаунт -->
-        <div class="info-section">
-          <h4 class="section-title">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            Аккаунт
-          </h4>
-          <div class="account-details">
-            <div class="detail-item">
-              <span class="detail-label">Логин:</span>
-              <span class="detail-value">{{ accountData.name }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Создан:</span>
-              <span class="detail-value">{{
-                formatDateTime(accountData.created_at)
-              }}</span>
-            </div>
-          </div>
-          <div class="action-section">
-            <div class="action-buttons-grid">
-              <button class="action-button" @click="emitAction('rename')">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  <path d="M15 5l4 4" />
-                </svg>
-                Сменить имя
-              </button>
-
-              <button
-                class="action-button danger"
-                @click="emitAction('delete')"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M3 6h18"></path>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Удалить
-              </button>
-            </div>
-          </div>
+        <div v-if="getAccessToAccount" class="info-section">
+          <Account
+            :changeRoutingSettings="changeRoutingSettings"
+            :openMessageHistory="openMessageHistory"
+            :uonSettings="uonSettings"
+            :blacklistModal="blacklistModal"
+            :changeStationGetHistory="changeStationGetHistory"
+            :account-data="accountData"
+          />
         </div>
       </div>
+    </div>
+    <div v-else class="loading-box">
+      <BoxLoading />
     </div>
   </ModalFrame>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import AccountIcon from "../../AccountIcon.vue";
+import { ref, computed, toRefs } from "vue";
+import Status from "./accountInfoComponents/Status.vue";
+import Subscription from "./accountInfoComponents/Subscription.vue";
 import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
+import Account from "./accountInfoComponents/Account.vue";
+import BoxLoading from "@/components/GlobalModal/loading/BoxLoading.vue";
 
 const props = defineProps({
   accountData: {
@@ -286,7 +59,44 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  changeEditNameModal: {
+    type: Function,
+  },
+  changeForceStopItemData: {
+    type: Function,
+  },
+  openResetAccountModal: {
+    type: Function,
+  },
+  deleteAccount: {
+    type: Function,
+  },
+  changeRoutingSettings: {
+    type: Function,
+  },
+
+  openMessageHistory: {
+    type: Function,
+  },
+
+  uonSettings: {
+    type: Function,
+  },
+
+  blacklistModal: {
+    type: Function,
+  },
+  changeStationGetHistory: {
+    type: Function,
+  },
 });
+
+import { useActions } from "@/composables/useActions";
+
+const { createRequest } = useActions();
+
+const { accountData } = toRefs(props);
+const loading = ref(false);
 
 const emit = defineEmits(["close", "action"]);
 
@@ -295,101 +105,37 @@ const textModal = ref({
   close: "Закрыть",
 });
 
+const actionClik = async (item, req) => {
+  loading.value = true;
+  const result = await createRequest(item, req);
+
+  if (result === true) {
+    loading.value = false;
+    return true;
+  }
+};
+
 const closeModal = () => {
   emit("close");
 };
 
-const emitAction = (actionType) => {
-  emit("action", actionType, props.accountData);
-};
-
-// Вспомогательные функции
-const getStatusClass = (status) => {
-  if (!status) return "status-offline";
-  const statusValue = status.value || status.code || status;
-  const statusString =
-    typeof statusValue === "number" ? statusValue.toString() : statusValue;
-  if (typeof statusString !== "string") return "status-offline";
-
-  const statusMap = {
-    active: "status-online",
-    online: "status-online",
-    offline: "status-offline",
-    error: "status-error",
-    loading: "status-loading",
-    connected: "status-online",
-    disconnected: "status-offline",
-    success: "status-online",
-    failed: "status-error",
-    pending: "status-loading",
-    running: "status-online",
-    stopped: "status-offline",
-  };
-
-  return statusMap[statusString.toLowerCase()] || "status-offline";
-};
-
-const getStatusText = (status) => {
-  if (!status) return "Неизвестно";
-  const statusValue = status.value || status.code || status;
-  const statusMap = {
-    active: "Активен",
-    online: "В сети",
-    offline: "Не в сети",
-    error: "Ошибка",
-    loading: "Загрузка",
-    connected: "Подключен",
-    disconnected: "Отключен",
-    success: "Успешно",
-    failed: "Ошибка",
-    pending: "Ожидание",
-    running: "Работает",
-    stopped: "Остановлен",
-  };
-
-  const text = statusMap[String(statusValue).toLowerCase()];
-  return text || String(statusValue);
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "Не указано";
-  try {
-    return new Date(dateString).toLocaleDateString("ru-RU");
-  } catch (e) {
-    return dateString;
-  }
-};
-
-const formatDateTime = (dateString) => {
-  if (!dateString) return "Не указано";
-  try {
-    return new Date(dateString).toLocaleString("ru-RU");
-  } catch (e) {
-    return dateString;
-  }
-};
-
-const getDaysLeftClass = (days) => {
-  if (days > 7) return "days-many";
-  if (days > 3) return "days-few";
-  return "days-critical";
-};
-
-const formatUptime = (seconds) => {
-  if (!seconds) return "Неизвестно";
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  return `${days}д ${hours}ч`;
-};
-
-const hasStatistics = (account) => {
+const getAccessToStatus = computed(() => {
   return (
-    account.messages_sent ||
-    account.contacts_count ||
-    account.groups_count ||
-    account.uptime
+    accountData.value.source === "whatsapp" ||
+    accountData.value.source === "telegram" ||
+    accountData.value.source === "max" ||
+    accountData.value.source === "vk"
   );
-};
+});
+
+const getAccessToAccount = computed(() => {
+  return (
+    accountData.value.source !== "whatsapp" &&
+    accountData.value.source !== "telegram" &&
+    accountData.value.source !== "max" &&
+    accountData.value.source !== "vk"
+  );
+});
 </script>
 
 <style scoped>
@@ -416,6 +162,13 @@ const hasStatistics = (account) => {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
 }
 
 .modal-header {
@@ -590,6 +343,11 @@ const hasStatistics = (account) => {
   font-weight: 600;
   display: inline-block;
   width: fit-content;
+}
+
+.status-value-message {
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .status-online {

@@ -184,6 +184,24 @@
         </div>
 
         <div class="settings-section">
+          <h4 class="section-title">Источники</h4>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Кастомные источники</span>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.sources.use_custom_sources"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <h4 class="section-title">Доступ менеджеров</h4>
           <div class="manager-info-box">
             <div class="info-row">

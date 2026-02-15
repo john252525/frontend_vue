@@ -1,33 +1,41 @@
 <template>
-  <div @click="ChangeconfirmStationReset" class="black-fon"></div>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-  <transition name="fade">
-    <section class="confirm-modal">
-      <article class="circle">
-        <span>!</span>
-      </article>
-      <h2 class="title">{{ t("confirmMoadal.reset.message") }}</h2>
-      <article class="button-cont">
-        <button class="confirm-button" @click="confirm">
-          {{ t("confirmMoadal.reset.continue") }}
-        </button>
-        <button class="cansel-button" @click="ChangeconfirmStationReset">
-          {{ t("confirmMoadal.reset.cancel") }}
-        </button>
-      </article>
-    </section>
-  </transition>
+  <ModalFrame
+    :close="close"
+    :action="confirm"
+    :text="modalText"
+    :item="selectedItem"
+    :is-loading="loading"
+  >
+    <div class="modal-header">
+      <div class="icon-wrapper">
+        <svg
+          class="danger-icon"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h2 class="modal-title">Сброс аккаунта</h2>
+      <p class="modal-subtitle">Это действие нельзя будет отменить</p>
+    </div>
+  </ModalFrame>
 </template>
 
 <script setup>
 import { toRefs, ref, computed } from "vue";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 import axios from "axios";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
-import { useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
-import useFrontendLogger from "@/composables/useFrontendLogger";
-const { sendLog } = useFrontendLogger();
+
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
@@ -35,50 +43,26 @@ const token = computed(() => accountStore.getAccountToken);
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
-const handleSendLog = async (location, method, params, results, answer) => {
-  try {
-    await sendLog(location, method, params, results, answer);
-  } catch (err) {
-    console.error("error", err);
-    // Optionally, update the error message ref
-  }
-};
-const { t } = useI18n();
-const router = useRouter();
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 const props = defineProps({
-  loadingStart: {
-    type: Function,
-  },
-  changeStationLoadingModal: {
-    type: Function,
-  },
-  ChangeconfirmStationReset: {
+  close: {
     type: Function,
   },
   selectedItem: {
     type: Object,
   },
-  errorStationOn: {
-    type: Function,
-  },
-  errorStationOff: {
-    type: Function,
-  },
-  loadingStop: {
-    type: Function,
-  },
-  changeForceStopItemData: {
-    type: Function,
-  },
 });
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
+
 const { selectedItem } = toRefs(props);
 
-const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
+const modalText = {
+  title: "Подтверждение",
+  close: "Отмена",
+  action: "Продолжить",
 };
+
+const loading = ref(false);
 
 const createRequest = async (request) => {
   const { source, login, storage, type } = selectedItem.value;
@@ -88,18 +72,7 @@ const createRequest = async (request) => {
     storage: storage,
     type: type,
   };
-  if (stationDomain.navigate.value != "whatsapi") {
-    params = {
-      source: source,
-      login: login,
-    };
-  } else {
-    params = {
-      source: source,
-      login: login,
-      storage: storage,
-    };
-  }
+
   try {
     const response = await axios.post(`${FRONTEND_URL}${request}`, params, {
       headers: {
@@ -107,49 +80,30 @@ const createRequest = async (request) => {
         Authorization: `Bearer ${token.value}`,
       },
     });
-    if (response.data) {
-      await handleSendLog(
-        "getNewProxy",
-        request,
-        params,
-        response.data.ok,
-        response.data
-      );
-    }
+
     if (response.data.status === "ok") {
       if (request === "getNewProxy") {
         setLoadingStatus(true, "success");
-        props.loadingStop();
-        props.changeForceStopItemData(selectedItem.value);
-      } else {
-        console.log(`${request} - Успешно`);
+        location.reload();
       }
-    } else if (response.data === 401) {
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
     } else {
       setLoadingStatus(true, "error");
     }
   } catch (error) {
     console.error(`error`, error);
-    props.errorStationOn();
-    props.changeStationLoadingModal(true);
-    setTimeout(() => {
-      props.changeStationLoadingModal(false);
-      props.errorStationOff();
-    }, 5000);
+
     if (error.response) {
       console.error("error", error.response.data);
+    }
+  } finally {
+    if (request === "getNewProxy") {
+      loading.value = false;
     }
   }
 };
 
 const confirm = async () => {
-  await props.ChangeconfirmStationReset();
-  await props.loadingStart(t("globalLoading.reset"));
+  loading.value = true;
   await createRequest("forceStop");
   await createRequest("clearSession");
   await createRequest("getNewProxy");
@@ -157,104 +111,110 @@ const confirm = async () => {
 </script>
 
 <style scoped>
-.confirm-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  border-radius: 5px;
-  width: 389px;
-  height: 208px;
-  background: #fff;
+.modal-header {
+  text-align: center;
+}
+
+.icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fee2e2;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  margin: 0 auto 16px;
+  border: 2px solid #fecaca;
 }
 
-.circle {
-  border: 2px solid #b73131;
-  border-radius: 199px;
-  width: 51px;
-  height: 51px;
+.danger-icon {
+  color: #dc2626;
+  width: 32px;
+  height: 32px;
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.modal-subtitle {
+  font-weight: 400;
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.subscription-alert {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+}
+
+.alert-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 22px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.circle span {
-  font-weight: 500;
-  font-size: 18px;
-  color: #b73131;
+.alert-icon {
+  color: #d97706;
 }
 
-.title {
-  font-weight: 500;
-  font-size: 16px;
-  color: #8b8b8b;
-  margin-bottom: 28px;
-}
-
-.button-cont {
-  display: flex;
-  align-self: center;
-  gap: 16px;
-}
-
-.confirm-button {
-  border-radius: 5px;
-  width: 119px;
-  height: 36px;
-  background: #b73131;
+.alert-title {
   font-weight: 600;
-  font-size: 12px;
-  color: #fff;
+  font-size: 14px;
+  color: #92400e;
 }
 
-.cansel-button {
-  border: 0.5px solid #c3c3c3;
-  border-radius: 5px;
-  width: 119px;
-  height: 36px;
-  font-weight: 600;
-  font-size: 12px;
-  color: #000;
-  background-color: transparent;
+.alert-description {
+  font-weight: 400;
+  font-size: 13px;
+  color: #b45309;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.confirm-modal.fade-enter-active,
-.confirm-modal.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.confirm-modal.fade-enter,
-.confirm-modal.fade-leave-to {
-  opacity: 0;
+.alert-description strong {
+  color: #92400e;
 }
 
-.confirm-modal {
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -48%);
-  }
-  to {
-    opacity: 1;
-    /* transform: translate(0); */
-  }
-}
-
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .confirm-modal {
-    width: 330px;
+    width: 90%;
+    max-width: 380px;
+    margin: 0 16px;
+    border-radius: 16px;
   }
 
-  .title {
-    font-size: 15px;
+  .modal-header {
+    padding: 24px 24px 20px;
+  }
+
+  .modal-content {
+    padding: 20px 24px;
+  }
+
+  .modal-actions {
+    padding: 20px 24px 24px;
+    flex-direction: column-reverse;
+  }
+
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .modal-title {
+    font-size: 18px;
   }
 }
 </style>

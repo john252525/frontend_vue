@@ -6,7 +6,17 @@
       :dataStationNone="dataStationNone"
       :loadDataStation="loadDataStation"
       :errorAccountBolean="errorAccountBolean"
+      :changeForceStopItemData="changeForceStopItemData"
       :changeEnableStartModal="changeEnableStation"
+      :changeEditNameModal="changeEditNameModal"
+      :openResetAccountModal="openResetAccountModal"
+      :openDeleteAccountModal="openDeleteAccountModal"
+      :selectAccount="selectAccount"
+      :changeRoutingSettings="changeRoutingSettings"
+      :openMessageHistory="openMessageHistory"
+      :openUonSettingModal="openUonSettingModal"
+      :openBlacklistModal="openBlacklistModal"
+      :changeStationGetHistory="changeStationGetHistory"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
@@ -18,12 +28,12 @@
       :instanceData="instanceData"
       :dataStationNone="dataStationNone"
       :loadDataStation="loadDataStation"
-      :errorAccountBolean="errorAccountBolean"
+      :errorAccountBolean="errorAccountBolean"    
       :accountStation="accountStation"
       @open-mobile-modal="openMobileModal"
       @change-tariff="changeTariffStation"
     /> -->
-
+    <!-- 
     <div v-if="dataStationNone" class="none-account-cont">
       <NoData type="accounts" />
     </div>
@@ -34,7 +44,7 @@
 
     <div v-if="errorAccountBolean && !loadDataStation" class="load-cont">
       <errorAccount />
-    </div>
+    </div> -->
 
     <WarningAccount
       v-if="showWarningModal"
@@ -65,6 +75,7 @@
       :modalPosition="modalPosition"
       :selectedItem="selectedItem"
       :qrCodeData="qrCodeData"
+      :openResetAccountModal="openResetAccountModal"
       @update:loadingStation="updateLoading"
       @update:selectedItems="updateSelectedItems"
       @update:qrCodeData="updateqrCodeData"
@@ -81,7 +92,9 @@
       :changeBindingStation="changeBindingStation"
       :openUonSettingModal="openUonSettingModal"
       :openBlacklistModal="openBlacklistModal"
+      :changeEditNameModal="changeEditNameModal"
       :openMessageHistory="openMessageHistory"
+      :openDeleteAccountModal="openDeleteAccountModal"
     />
 
     <SettignsModal
@@ -159,6 +172,26 @@
       :close="closeMessageHistory"
       :item="selectedItem"
     />
+
+    <EditNameModal
+      v-if="editNameModal"
+      :selectedItem="selectedItem"
+      :close="changeEditNameModal"
+      :getAccounts="getAccounts"
+    />
+
+    <ConfirmReset
+      v-if="resetAccountModal"
+      :selected-item="selectedItem"
+      :close="closeResetAccountModal"
+      :changeForceStopItemData="changeForceStopItemData"
+    />
+
+    <ConfirmDelete
+      v-if="deleteAccountModal"
+      :selected-item="selectedItem"
+      :close="closeDeleteAccountModal"
+    />
   </section>
 </template>
 
@@ -174,7 +207,9 @@ import SettignsModal from "./ModalAccount/settingsModal.vue";
 import getByCode from "./ModalAccount/GetByCode/GetByCode.vue";
 import QrModal from "./ModalAccount/qrModal.vue";
 import MessageHistory from "./ModalAccount/CRM/MessageHistory/MessageHistory.vue";
+import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
+import EditNameModal from "./ModalAccount/EditNameModal/EditNameModal.vue";
 import getScreen from "./ModalAccount/GetScreen.vue";
 import LoadAccount from "./LoadAccount.vue";
 import GetHistory from "./ModalAccount/CRM/GetHistory/GetHistory.vue";
@@ -185,6 +220,7 @@ import Tariff from "./TariffAccount/Tariff.vue";
 import NoData from "@/components/GlobalModal/StationList/NoData.vue";
 import StatusBadge from "./StatusBadge.vue";
 import SendSupport from "./ModalAccount/SendSupport.vue";
+import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import Binding from "./ModalAccount/AmoCrm/Binding.vue";
 import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue";
 import WarningAccount from "./WarningAccount.vue";
@@ -267,36 +303,34 @@ const showRoutingSettings = ref(false);
 const uonSettingsModal = ref(false);
 const blacklistModal = ref(false);
 const messageHistory = ref(false);
+const editNameModal = ref(false);
+const resetAccountModal = ref(false);
+const deleteAccountModal = ref(false);
 
 // ============= УТИЛИТЫ =============
-const formatSubscriptionDate = (dateString) => {
-  if (!dateString) return "-";
-
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch (e) {
-    return dateString;
-  }
-};
-
-const showSubscriptionWarning = (item) => {
-  return (
-    item.subscription_dt_to === null &&
-    item.type !== "amocrm" &&
-    item.type !== "bitrix24" &&
-    item.type !== "uon" &&
-    item.enable !== "0" &&
-    item.type !== "bulk"
-  );
-};
 
 const openMessageHistory = () => {
   messageHistory.value = true;
+};
+
+const openDeleteAccountModal = () => {
+  deleteAccountModal.value = true;
+};
+
+const closeDeleteAccountModal = () => {
+  deleteAccountModal.value = false;
+};
+
+const openResetAccountModal = () => {
+  resetAccountModal.value = true;
+};
+
+const closeResetAccountModal = () => {
+  resetAccountModal.value = false;
+};
+
+const changeEditNameModal = () => {
+  editNameModal.value = !editNameModal.value;
 };
 
 const closeMessageHistory = () => {
@@ -355,12 +389,12 @@ const changePayDataForAccounts = (item) => {
   }
 };
 
-const changeEnableStation = () => {
-  enableStation.value = !enableStation.value;
-};
-
 const changeGetScreenStation = () => {
   getScreenStation.value = !getScreenStation.value;
+};
+
+const selectAccount = (item) => {
+  selectedItem.value = item;
 };
 
 const changeRoutingSettings = () => {
@@ -586,6 +620,18 @@ const getActionCount = (item) => {
   }
 
   return Math.max(1, count);
+};
+
+const changeEnableStation = (item, locale) => {
+  console.log("click changeEnableStation");
+  if (locale === "accountList") {
+    console.log("item", item);
+    selectedItem.value = item;
+  }
+  changeForceStopItemData(selectedItem.value);
+  console.log(selectedItem.value);
+
+  enableStation.value = !enableStation.value;
 };
 
 const openModal = (event, item) => {

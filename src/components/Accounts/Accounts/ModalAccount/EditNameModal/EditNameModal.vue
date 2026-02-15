@@ -4,36 +4,23 @@
     :close="closeModal"
     :item="selectedItem"
     :action="saveName"
+    :is-loading="loading"
   >
-    <div>
-      <div class="input-group">
-        <label for="accountName" class="input-label">Новое имя аккаунта</label>
-        <input
-          id="accountName"
-          v-model="newName"
-          type="text"
-          class="name-input"
-          :class="{ error: error }"
-          placeholder="Введите новое имя"
-          maxlength="20"
-          @keyup.enter="saveName"
-          @input="validateInput"
-        />
-        <div class="character-counter">{{ newName.length }}/20</div>
-        <p v-if="error" class="error-message">{{ error }}</p>
-      </div>
-
-      <!-- <div class="modal-actions">
-        <button class="cancel-button" @click="closeModal">Отмена</button>
-        <button
-          class="save-button"
-          @click="saveName"
-          :disabled="!isFormValid"
-          :class="{ disabled: !isFormValid }"
-        >
-          Сохранить
-        </button>
-      </div> -->
+    <div class="input-group">
+      <label for="accountName" class="input-label">Новое имя аккаунта</label>
+      <input
+        id="accountName"
+        v-model="newName"
+        type="text"
+        class="name-input"
+        :class="{ error: error }"
+        placeholder="Введите новое имя"
+        maxlength="20"
+        @keyup.enter="saveName"
+        @input="validateInput"
+      />
+      <div class="character-counter">{{ newName.length }}/20</div>
+      <p v-if="error" class="error-message">{{ error }}</p>
     </div>
   </ModalFrame>
 </template>
@@ -51,9 +38,7 @@ const props = defineProps({
   selectedItem: {
     type: Object,
   },
-  stateLoading: {
-    type: Function,
-  },
+
   getAccounts: {
     type: Function,
   },
@@ -78,6 +63,8 @@ const token = computed(() => accountStore.getAccountToken);
 
 import axios from "axios";
 
+const loading = ref(false);
+
 const { selectedItem } = toRefs(props);
 
 const emit = defineEmits(["close", "save"]);
@@ -96,7 +83,7 @@ const isFormValid = computed(() => {
 const changeName = async () => {
   const { uuid } = selectedItem.value;
 
-  props.stateLoading(true);
+  loading.value = true;
   try {
     const response = await axios.post(
       `${FRONTEND_URL}updateInstanceName`,
@@ -112,7 +99,6 @@ const changeName = async () => {
       },
     );
     if ((response.data.ok = true)) {
-      props.stateLoading(false);
       props.getAccounts();
       setLoadingStatus(true, "success");
     } else {
@@ -121,14 +107,15 @@ const changeName = async () => {
   } catch (error) {
     console.log("Огиька level1");
     console.error(`error`, error);
-    props.stateLoading(false);
     setLoadingStatus(true, "error");
-
     if (error.response) {
-      console.log("Огиька level 2");
       console.error("error", error.response.data);
-      props.stateLoading(false);
+      if (props.stateLoading) {
+        props.stateLoading(false);
+      }
     }
+  } finally {
+    loading.value = false;
   }
 };
 

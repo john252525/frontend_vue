@@ -1,88 +1,57 @@
 <template>
-  <div class="modal-overlay" @click="changeInfoMailing"></div>
+  <ModalFrame
+    :text="modalText"
+    :close="changeInfoMailing"
+    :action="changeisEditMailing"
+  >
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">{{ t("information.status.title") }}</span>
+        <span :class="['status-badge', statusClass]">
+          {{ statusText }}
+        </span>
+      </div>
 
-  <section v-if="!station.message" class="info-modal">
-    <div class="modal-content">
-      <!-- Заголовок с кнопкой закрытия -->
-      <div class="modal-header">
-        <h2 class="modal-title">
-          {{ t("information.title") }}
-        </h2>
-        <button class="close-btn" @click="changeInfoMailing" aria-label="Close">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
+      <div class="info-item">
+        <span class="info-label">{{ t("information.name") }}</span>
+        <span class="info-value">{{ selectedItem.name }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("information.weekDay") }}</span>
+        <span class="info-value">{{ formattedWeekDays }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("information.time") }}</span>
+        <span class="info-value">
+          {{ selectedItem.options.hours.min }} -
+          {{ selectedItem.options.hours.max }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("information.timeout.title") }}</span>
+        <span class="info-value">
+          {{ selectedItem?.options?.delay.min }} -
+          {{ selectedItem?.options?.delay.max }}
+        </span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("information.message") }}</span>
+        <button class="message-btn" @click="changeStationMessage(null)">
+          {{ selectedItem.recipients }}
         </button>
       </div>
-
-      <!-- Информация о рассылке -->
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">{{ t("information.status.title") }}</span>
-          <span :class="['status-badge', statusClass]">
-            {{ statusText }}
-          </span>
-        </div>
-
-        <div class="info-item">
-          <span class="info-label">{{ t("information.name") }}</span>
-          <span class="info-value">{{ selectedItem.name }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="info-label">{{ t("information.weekDay") }}</span>
-          <span class="info-value">{{ formattedWeekDays }}</span>
-        </div>
-
-        <div class="info-item">
-          <span class="info-label">{{ t("information.time") }}</span>
-          <span class="info-value">
-            {{ selectedItem.options.hours.min }} -
-            {{ selectedItem.options.hours.max }}
-          </span>
-        </div>
-
-        <div class="info-item">
-          <span class="info-label">{{ t("information.timeout.title") }}</span>
-          <span class="info-value">
-            {{ selectedItem?.options?.delay.min }} -
-            {{ selectedItem?.options?.delay.max }}
-          </span>
-        </div>
-
-        <div class="info-item">
-          <span class="info-label">{{ t("information.message") }}</span>
-          <button class="message-btn" @click="changeStationMessage">
-            {{ selectedItem.recipients }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Кнопка редактирования -->
-      <button class="edit-btn" @click="changeisEditMailing">
-        {{ t("information.button") }}
-      </button>
     </div>
-  </section>
-  <MessageLise
-    v-if="station.message"
-    :changeStationMessage="changeStationMessage"
-    :selectedItem="selectedItem"
-  />
+  </ModalFrame>
 </template>
 
 <script setup>
 import { reactive, computed } from "vue";
-import MessageLise from "./MessageLise.vue";
 import { useI18n } from "vue-i18n";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const { t } = useI18n();
 const props = defineProps({
@@ -98,14 +67,14 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  changeStationMessage: {
+    type: Function,
+  },
 });
 
-const station = reactive({
-  message: false,
-});
-
-const changeStationMessage = () => {
-  station.message = !station.message;
+const modalText = {
+  title: "Информация",
+  close: "Закрыть",
 };
 
 const weekDaysMap = {
@@ -118,10 +87,6 @@ const weekDaysMap = {
   7: "вс",
 };
 
-const getDelay = () => {
-  return `${props.selectedItem?.options?.delay.min} - ${props.selectedItem?.options?.delay.min}`;
-};
-
 // Computed properties
 const formattedWeekDays = computed(() => {
   if (!props.selectedItem?.options?.days) return "";
@@ -132,16 +97,6 @@ const formattedWeekDays = computed(() => {
     .map((day) => weekDaysMap[day]);
 
   return days.join(", ");
-});
-
-const formattedDelayInterval = computed(() => {
-  if (!props.selectedItem?.options?.delay) return "";
-
-  const { min, max } = props.selectedItem.options.delay;
-  const minMinutes = Math.round(min / 60);
-  const maxMinutes = Math.round(max / 60);
-
-  return `${minMinutes} - ${maxMinutes}`;
 });
 
 const statusText = computed(() => {
@@ -157,8 +112,8 @@ const statusClass = computed(() => {
   return props.selectedItem.state === 0
     ? "status-inactive"
     : props.selectedItem.state === 1
-    ? "status-active"
-    : "status-completed";
+      ? "status-active"
+      : "status-completed";
 });
 </script>
 

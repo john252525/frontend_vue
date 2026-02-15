@@ -3,7 +3,6 @@
     class="downloads-container"
     :class="{ 'container-expanded': isDownloadsVisible }"
   >
-    <!-- Иконка коробки загрузок - показываем только когда есть загрузки -->
     <div v-if="hasAnyDownloads" class="downloads-icon" @click="toggleDownloads">
       <svg
         v-if="hasActiveDownloads"
@@ -211,7 +210,7 @@ const activeDownloadsCount = computed(() => {
 
 const hasCompletedDownloads = computed(() => {
   return downloads.value.some(
-    (download) => download.status === "success" || download.status === "error"
+    (download) => download.status === "success" || download.status === "error",
   );
 });
 </script>

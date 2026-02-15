@@ -84,7 +84,6 @@ import { ref, toRefs, provide, onMounted, reactive, computed } from "vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
-import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
 
 const chatStore = useLoginWhatsAppChatsStepStore();

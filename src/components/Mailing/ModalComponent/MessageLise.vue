@@ -2,12 +2,7 @@
   <div class="modal-overlay" @click="changeStationMessage">
     <div class="modal-container" @click.stop>
       <div class="modal-header">
-        <h2 class="modal-title">
-          Сообщения рассылки
-          <span class="message-count" v-if="mailingLists.length > 0">
-            ({{ mailingLists.length }})
-          </span>
-        </h2>
+        <h2 class="modal-title">Сообщения рассылки</h2>
         <button
           class="close-button"
           @click="changeStationMessage"
@@ -29,9 +24,32 @@
 
       <div class="modal-content">
         <div
-          class="table-container"
-          :class="{ 'empty-state': mailingLists.length === 0 }"
+          class="filters-bar"
+          v-if="!loadingMessge && !errorMessage && mailingLists.length > 0"
         >
+          <div class="search-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              class="search-icon"
+            >
+              <path
+                fill="currentColor"
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+              />
+            </svg>
+            <input
+              v-model="filters.search"
+              type="text"
+              placeholder="Поиск по тексту или номеру..."
+              class="filter-input"
+            />
+          </div>
+        </div>
+
+        <div class="scrollable-area">
           <div v-if="loadingMessge" class="loading-container">
             <div class="spinner"></div>
             <p>Загрузка сообщений...</p>
@@ -70,24 +88,28 @@
               />
             </svg>
             <h3>Сообщения отсутствуют</h3>
-            <p>В этой рассылке пока нет сообщений</p>
           </div>
 
-          <!-- Десктопная таблица -->
+          <div v-else-if="paginatedList.length === 0" class="empty-container">
+            <h3>Ничего не найдено</h3>
+          </div>
+
           <template v-else>
             <table class="messages-table desktop-view">
               <thead class="table-header">
                 <tr>
                   <th class="column-id">ID</th>
                   <th class="column-number">Номер</th>
-                  <th class="column-text">Текст сообщения</th>
+                  <th v-if="getVersion === 1" class="column-text">
+                    Текст сообщения
+                  </th>
                   <th class="column-status">Статус</th>
                 </tr>
               </thead>
               <tbody class="table-body">
                 <tr
-                  v-for="(item, index) in mailingLists"
-                  :key="index"
+                  v-for="item in paginatedList"
+                  :key="item.id"
                   class="table-row"
                 >
                   <td class="cell-id">
@@ -110,7 +132,11 @@
                       {{ item.to }}
                     </div>
                   </td>
-                  <td class="cell-text" :title="item.text">
+                  <td
+                    v-if="getVersion === 1"
+                    class="cell-text"
+                    :title="item.text"
+                  >
                     <div class="text-truncate">{{ item.text }}</div>
                   </td>
                   <td class="cell-status">
@@ -122,11 +148,10 @@
               </tbody>
             </table>
 
-            <!-- Мобильные карточки -->
             <div class="mobile-cards mobile-view">
               <div
-                v-for="(item, index) in mailingLists"
-                :key="index"
+                v-for="item in paginatedList"
+                :key="item.id"
                 class="message-card"
               >
                 <div class="card-header">
@@ -135,43 +160,79 @@
                     {{ getStatusText(item.state) }}
                   </span>
                 </div>
-                <div class="card-content">
+                <div class="card-content-inner">
                   <div class="card-field">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
                       height="16"
                       viewBox="0 0 24 24"
-                      class="field-icon"
+                      class="phone-icon"
                     >
                       <path
                         fill="currentColor"
                         d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02l-2.2 2.2z"
                       />
                     </svg>
-                    <span class="field-value">{{ item.to }}</span>
+                    <span class="card-label">Номер:</span>
+                    <span class="card-value">{{ item.to }}</span>
                   </div>
-                  <div class="card-field">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      class="field-icon"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
-                      />
-                    </svg>
-                    <span class="field-value text-truncate">{{
-                      item.text
-                    }}</span>
+                  <div v-if="getVersion === 1" class="card-field">
+                    <span class="card-label">Текст:</span>
+                    <span class="card-value card-text">{{ item.text }}</span>
                   </div>
                 </div>
               </div>
             </div>
           </template>
+        </div>
+
+        <div class="pagination-container" v-if="filteredList.length > 0">
+          <div class="pagination-info">Всего: {{ filteredList.length }}</div>
+          <div class="pagination-controls">
+            <button
+              class="page-btn"
+              :disabled="currentPage === 1"
+              @click="currentPage--"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+                />
+              </svg>
+            </button>
+            <span class="page-current"
+              >{{ currentPage }} / {{ totalPages }}</span
+            >
+            <button
+              class="page-btn"
+              :disabled="currentPage === totalPages"
+              @click="currentPage++"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+                />
+              </svg>
+            </button>
+          </div>
+          <select v-model="itemsPerPage" class="limit-select">
+            <option :value="10">10 / стр.</option>
+            <option :value="20">20 / стр.</option>
+            <option :value="50">50 / стр.</option>
+          </select>
         </div>
       </div>
     </div>
@@ -181,154 +242,148 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, toRefs } from "vue";
+import { ref, reactive, onMounted, computed, toRefs, watch } from "vue";
 import axios from "axios";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 import { useRouter } from "vue-router";
-
 import { useMailingVersion } from "@/stores/mailingVersion";
-const mailingVersion = useMailingVersion();
-const getVersion = computed(() => mailingVersion.getVersion);
+import { useAccountStore } from "@/stores/accountStore";
 
+const mailingVersion = useMailingVersion();
+const accountStore = useAccountStore();
 const router = useRouter();
-const errorBlock = ref(false);
-const chaneErrorBlock = () => {
-  errorBlock.value = errorBlock.value;
-};
 
 const props = defineProps({
-  selectedItem: {
-    type: Object,
-  },
-  changeInfoMailing: {
-    type: Function,
-  },
-  changeStationMessage: {
-    type: Function,
-  },
+  selectedItem: Object,
+  changeInfoMailing: Function,
+  changeStationMessage: Function,
 });
+
 const { selectedItem } = toRefs(props);
-
-const mailingLists = ref([]);
-const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
-const errorMessage = ref(false);
-const loadingMessge = ref(true);
-
-import { useAccountStore } from "@/stores/accountStore";
-const accountStore = useAccountStore();
+const getVersion = computed(() => mailingVersion.getVersion);
 const token = computed(() => accountStore.getAccountToken);
 
-const getStatusText = (state) => {
-  const statusMap = {
-    0: "Ожидание отправки",
-    1: "Отправлено",
-    2: "Ошибка отправки",
-    3: "Доставлено",
-    4: "Прочитано",
-  };
-  return statusMap[state] || "Неизвестный статус";
+const mailingLists = ref([]);
+const errorMessage = ref(false);
+const loadingMessge = ref(true);
+const errorBlock = ref(false);
+
+const filters = reactive({ search: "" });
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+
+const statusMap = {
+  0: "Ожидание",
+  1: "Отправлено",
+  2: "Ошибка",
+  3: "Доставлено",
+  4: "Прочитано",
 };
 
+const getStatusText = (state) => statusMap[state] || "Неизвестно";
+
+const filteredList = computed(() => {
+  if (!filters.search) return mailingLists.value;
+  const s = filters.search.toLowerCase();
+  return mailingLists.value.filter(
+    (i) => i.text.toLowerCase().includes(s) || String(i.to).includes(s),
+  );
+});
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredList.value.length / itemsPerPage.value)),
+);
+const paginatedList = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return filteredList.value.slice(start, start + itemsPerPage.value);
+});
+
+watch([() => filters.search, itemsPerPage], () => (currentPage.value = 1));
+
 const getMessages = async () => {
-  const apiUrlMethod = `${apiUrl}/view/${selectedItem.value.id}/`;
+  const apiUrl = import.meta.env.VITE_WHATSAPI_URL;
   loadingMessge.value = true;
   errorMessage.value = false;
-
   try {
-    const response = await axios.get(apiUrlMethod, {
-      params: {
-        version: getVersion.value,
-        limit: 50,
-        offset: 0,
-        sort: "asc",
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
-      },
+    const res = await axios.get(`${apiUrl}/view/${selectedItem.value.id}/`, {
+      params: { version: getVersion.value, limit: 500, offset: 0 },
+      headers: { Authorization: `Bearer ${token.value}` },
     });
-
-    if (response.data.ok) {
-      loadingMessge.value = false;
-      mailingLists.value = response.data.result.items;
-    } else if (response.status === 401) {
-      loadingMessge.value = false;
-      errorMessage.value = true;
-      errorBlock.value = true;
-      setTimeout(() => {
-        localStorage.removeItem("accountToken");
-        router.push("/login");
-      }, 2000);
+    if (res.data.ok) {
+      mailingLists.value = res.data.result.items;
     } else {
-      console.error("error", response.data);
-      loadingMessge.value = false;
       errorMessage.value = true;
     }
-  } catch (error) {
-    loadingMessge.value = false;
+  } catch (e) {
     errorMessage.value = true;
-    console.error(
-      "error",
-      error.response ? error.response.data : error.message
-    );
+  } finally {
+    loadingMessge.value = false;
   }
 };
 
 onMounted(getMessages);
+const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 </script>
 
 <style scoped>
+/* --- Основа модального окна --- */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease;
 }
 
 .modal-container {
-  background: #fff;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
+  max-width: 1000px;
+  height: 85vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: scaleIn 0.2s ease;
 }
 
+/* --- Шапка --- */
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #ffffff;
+  flex-shrink: 0;
 }
 
 .modal-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #111827;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .message-count {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #6b7280;
-  font-weight: 500;
+  font-weight: normal;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
 .close-button {
@@ -336,61 +391,96 @@ onMounted(getMessages);
   border: none;
   cursor: pointer;
   padding: 8px;
-  border-radius: 6px;
-  color: #6b7280;
+  border-radius: 50%;
+  color: #9ca3af;
   transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .close-button:hover {
-  background-color: #e5e7eb;
+  background-color: #f3f4f6;
   color: #111827;
 }
 
+/* --- Контентная область --- */
 .modal-content {
-  padding: 24px;
-  overflow-y: auto;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  min-height: 0;
 }
 
-.table-container {
+/* Фильтр (Поиск) */
+.filters-bar {
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* --- Зона скролла (Таблица) --- */
+.scrollable-area {
+  flex: 1;
+  overflow-y: auto;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: hidden;
+  background: #ffffff;
+  position: relative;
 }
 
 .messages-table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.table-header {
-  background-color: #f9fafb;
+  table-layout: fixed;
 }
 
 .table-header th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f9fafb;
   padding: 12px 16px;
   text-align: left;
-  font-weight: 500;
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.table-body {
-  background-color: #fff;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .table-row {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s;
-}
-
-.table-row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.1s;
 }
 
 .table-row:hover {
@@ -398,32 +488,37 @@ onMounted(getMessages);
 }
 
 .table-row td {
-  padding: 16px;
-  font-size: 0.9rem;
-  color: #111827;
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  vertical-align: middle;
 }
 
-.cell-id {
+/* Колонки */
+.column-id {
   width: 80px;
 }
 
-.id-badge {
-  background-color: #f3f4f6;
-  color: #4b5563;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
+.column-number {
+  width: 150px;
 }
 
-.cell-number {
+.column-status {
   width: 160px;
+}
+
+.id-badge {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 .number-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #111827;
 }
 
 .phone-icon {
@@ -431,103 +526,106 @@ onMounted(getMessages);
   flex-shrink: 0;
 }
 
-.cell-text {
-  max-width: 0;
-}
-
 .text-truncate {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #4b5563;
 }
 
-.cell-status {
-  width: 140px;
-}
-
+/* Статусы */
 .status-badge {
-  padding: 6px 10px;
-  border-radius: 20px;
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
   font-size: 0.75rem;
-  font-weight: 500;
-  display: inline-block;
-  text-align: center;
+  font-weight: 600;
 }
 
 .status-0 {
-  background-color: #fef3c7;
+  background: #fef3c7;
   color: #92400e;
-}
-
+} /* Ожидание */
 .status-1 {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
+  background: #dcfce7;
+  color: #166534;
+} /* Отправлено */
 .status-2 {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
+  background: #fee2e2;
+  color: #991b1b;
+} /* Ошибка */
 .status-3 {
-  background-color: #dbeafe;
+  background: #dbeafe;
   color: #1e40af;
-}
-
+} /* Доставлено */
 .status-4 {
-  background-color: #e0e7ff;
+  background: #e0e7ff;
   color: #3730a3;
-}
+} /* Прочитано */
 
-/* Мобильные карточки */
-.mobile-cards {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-}
-
-.message-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.card-header {
+/* --- Пагинация --- */
+.pagination-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card-field {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.field-icon {
-  color: #9ca3af;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
   flex-shrink: 0;
-  margin-top: 2px;
+  gap: 12px;
 }
 
-.field-value {
-  font-size: 0.9rem;
-  color: #374151;
-  word-break: break-word;
+.pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-current {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  min-width: 60px;
+  text-align: center;
+}
+
+.limit-select {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+}
+
+/* --- Состояния загрузки и ошибок --- */
 .loading-container,
 .error-container,
 .empty-container {
@@ -535,61 +633,102 @@ onMounted(getMessages);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  height: 100%;
+  padding: 40px;
   text-align: center;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #e5e7eb;
+  border: 3px solid #f3f4f6;
   border-top: 3px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-.error-icon,
-.empty-icon {
-  margin-bottom: 16px;
-  color: #9ca3af;
+/* --- Адаптивность --- */
+@media (max-width: 768px) {
+  .modal-container {
+    height: 95vh;
+    border-radius: 14px;
+  }
+
+  .desktop-view {
+    display: none;
+  }
+  .mobile-view {
+    display: block;
+  }
+
+  .mobile-cards {
+    padding: 8px 12px;
+  }
+
+  .message-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+  }
+
+  .card-content-inner {
+    font-size: 0.875rem;
+  }
+
+  .card-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .card-label {
+    color: #6b7280;
+    min-width: 56px;
+  }
+
+  .card-value {
+    color: #111827;
+  }
+
+  .card-text {
+    flex: 1;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .phone-icon {
+    margin-top: 2px;
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 
-.error-icon {
-  color: #ef4444;
+@media (min-width: 769px) {
+  .mobile-view {
+    display: none;
+  }
 }
 
-.loading-container p,
-.error-container h3,
-.empty-container h3 {
-  margin: 0 0 8px 0;
-  color: #111827;
-  font-weight: 500;
-}
-
-.empty-container p {
-  margin: 0;
-  color: #6b7280;
-  max-width: 300px;
-}
-
-.retry-button {
-  margin-top: 16px;
-  padding: 8px 16px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.retry-button:hover {
-  background-color: #2563eb;
-}
-
-/* Анимации */
+/* --- Анимации --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -601,7 +740,7 @@ onMounted(getMessages);
 
 @keyframes scaleIn {
   from {
-    transform: scale(0.95);
+    transform: scale(0.98);
     opacity: 0;
   }
   to {
@@ -611,69 +750,8 @@ onMounted(getMessages);
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
-  }
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .modal-container {
-    max-height: 95vh;
-    margin: 0 10px;
-  }
-
-  .modal-header {
-    padding: 16px;
-  }
-
-  .modal-content {
-    padding: 16px;
-  }
-
-  .desktop-view {
-    display: none;
-  }
-
-  .mobile-view {
-    display: flex;
-  }
-}
-
-@media (min-width: 769px) {
-  .desktop-view {
-    display: table;
-  }
-
-  .mobile-view {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-overlay {
-    padding: 10px;
-  }
-
-  .modal-title {
-    font-size: 1.25rem;
-  }
-
-  .message-card {
-    padding: 12px;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .status-badge {
-    align-self: flex-start;
   }
 }
 </style>

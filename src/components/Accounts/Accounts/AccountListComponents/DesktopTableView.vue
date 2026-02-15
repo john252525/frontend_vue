@@ -45,20 +45,12 @@
           </div>
         </div>
 
-        <div class="row-section section-toggle">
-          <label class="switch" :class="{ 'switch-loading': item.loading }">
-            <input
-              type="checkbox"
-              :checked="enableCheckbox(item)"
-              :disabled="item.type === 'bulk'"
-              @change="changeEnableStartModal(item)"
-            />
-            <span class="slider round">
-              <span class="switch-handle"></span>
-            </span>
-            <span v-if="item.loading" class="switch-loader"></span>
-          </label>
-        </div>
+        <StatusSwitch
+          :item="item"
+          :enableCheckbox="enableCheckbox"
+          :changeEnableStartModal="changeEnableStartModal"
+          :changeForceStopItemData="changeForceStopItemData"
+        />
 
         <div class="vertical-divider"></div>
 
@@ -164,10 +156,50 @@
       </div>
     </div>
 
+    <div v-else-if="dataStationNone" class="state-container">
+      <div class="empty-state">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>{{ t("accountList.accountNone") }}</h3>
+        <p>Нет доступных аккаунтов для отображения</p>
+      </div>
+    </div>
+
+    <div v-if="loadDataStation" class="state-container">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Загрузка аккаунтов...</p>
+      </div>
+    </div>
+
+    <div v-if="errorAccountBolean && !loadDataStation" class="state-container">
+      <errorAccount />
+    </div>
+
     <AccountModal
       v-if="selectedAccount && isModalVisible"
       :accountData="selectedAccount"
       :isVisible="isModalVisible"
+      :changeEditNameModal="changeEditName"
+      :changeForceStopItemData="changeForceStopItemData"
+      :openResetAccountModal="resetAccount"
+      :deleteAccount="deleteAccount"
+      :changeRoutingSettings="routingSettings"
+      :openMessageHistory="messageHistory"
+      :uonSettings="uonSettings"
+      :blacklistModal="blacklistModal"
+      :changeStationGetHistory="stationGetHistory"
       @close="closeAccountModal"
       @action="handleAccountAction"
     />
@@ -177,12 +209,13 @@
 <script setup>
 import AccountIcon from "../../AccountIcon.vue";
 import LoadingAccount from "../LoadingMoadal/LoadingAccount.vue";
-import LoadAccount from "../LoadAccount.vue";
 import AccountModal from "./AccountModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import StatusBadge from "../StatusBadge.vue";
 import { useI18n } from "vue-i18n";
 import { ref, computed, toRefs } from "vue";
+
+import StatusSwitch from "./cardComponents/StatusSwitch.vue";
 
 const { t } = useI18n();
 
@@ -193,6 +226,16 @@ const props = defineProps({
   loadDataStation: Boolean,
   errorAccountBolean: Boolean,
   changeEnableStartModal: Function,
+  changeForceStopItemData: Function,
+  openResetAccountModal: Function,
+  changeEditNameModal: Function,
+  selectAccount: Function,
+  openDeleteAccountModal: Function,
+  changeRoutingSettings: Function,
+  openMessageHistory: Function,
+  openUonSettingModal: Function,
+  openBlacklistModal: Function,
+  changeStationGetHistory: Function,
 });
 
 const { instanceData } = toRefs(props);
@@ -207,47 +250,14 @@ defineEmits([
   "take-screenshot",
 ]);
 
-const messageVisible = ref(false);
-const tooltipMessage = ref("");
-const tooltipStyle = ref({});
-
 const selectedAccount = ref(null);
 const isModalVisible = ref(false);
 
-const getStatusClass = (status) => {
-  if (!status) return "status-default";
-
-  const statusValue = status.value || status.code || status;
-  const statusString =
-    typeof statusValue === "number" ? statusValue.toString() : statusValue;
-
-  if (typeof statusString !== "string") return "status-default";
-
-  const statusMap = {
-    active: "status-active",
-    online: "status-online",
-    offline: "status-offline",
-    error: "status-error",
-    loading: "status-loading",
-    connected: "status-online",
-    disconnected: "status-offline",
-    success: "status-active",
-    failed: "status-error",
-    pending: "status-loading",
-    running: "status-active",
-    stopped: "status-offline",
-  };
-
-  return statusMap[statusString.toLowerCase()] || "status-default";
-};
-
-const getStatusText = (status) => {
-  if (!status) return "-";
-  const statusValue = status.value || status.code || status;
-  return typeof statusValue === "number" ? statusValue.toString() : statusValue;
-};
-
 const openAccountModal = (account) => {
+  if (account.type === "bulk") {
+    return;
+  }
+  props.selectAccount(account);
   selectedAccount.value = account;
   isModalVisible.value = true;
 };
@@ -258,7 +268,13 @@ const closeAccountModal = () => {
 };
 
 const enableCheckbox = (item) => {
-  if (item.source === "whatsapp" || item.source === "telegram") {
+  console.log("check start", item);
+  if (
+    item.source === "whatsapp" ||
+    item.source === "telegram" ||
+    item.source === "max" ||
+    item.source === "vk"
+  ) {
     return item.step?.value === 5 || false;
   }
 
@@ -285,6 +301,10 @@ function getType(type) {
       return "Telegram";
     case "whatsapp":
       return "WhatsApp";
+    case "max":
+      return "Max";
+    case "uon":
+      return "U-ON";
     default:
       return "Неизвестно";
   }
@@ -301,7 +321,6 @@ const showSubscriptionWarning = (item) => {
 
   const stepNotFinished = item.step?.value !== 5;
 
-  // Итоговое условие: нет подписки И (статус не 5 ИЛИ статус вообще не задан)
   return noSubscription && stepNotFinished;
 };
 
@@ -331,6 +350,46 @@ const formatDate = (dateString) => {
   } catch (e) {
     return dateString;
   }
+};
+
+const changeEditName = () => {
+  isModalVisible.value = false;
+  props.changeEditNameModal();
+};
+
+const resetAccount = () => {
+  isModalVisible.value = false;
+  props.openResetAccountModal();
+};
+
+const deleteAccount = () => {
+  isModalVisible.value = false;
+  props.openDeleteAccountModal();
+};
+
+const routingSettings = () => {
+  isModalVisible.value = false;
+  props.changeRoutingSettings();
+};
+
+const messageHistory = () => {
+  isModalVisible.value = false;
+  props.openMessageHistory();
+};
+
+const stationGetHistory = () => {
+  isModalVisible.value = false;
+  props.changeStationGetHistory();
+};
+
+const uonSettings = () => {
+  isModalVisible.value = false;
+  props.openUonSettingModal();
+};
+
+const blacklistModal = () => {
+  isModalVisible.value = false;
+  props.openBlacklistModal();
 };
 </script>
 
@@ -425,11 +484,11 @@ const formatDate = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   padding: 4px;
   border-radius: 100%;
-  background: rgba(245, 158, 11, 0.5);
+
   color: #f59e0b;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -619,21 +678,40 @@ input:checked + .slider .switch-handle {
   font-style: italic;
 }
 
-/* Подписка */
 .open-tariff-button {
+  position: relative;
+  z-index: 1;
   padding: 4px 8px;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
   border: none;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  overflow: hidden; /* Чтобы градиент не вылезал за скругление */
 }
 
-.open-tariff-button:hover {
-  background: #2563eb;
+/* Создаем слой для нового градиента при наведении */
+.open-tariff-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #4f46e5 100%
+  ); /* Цвета наоборот или другие */
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.open-tariff-button:hover::before {
+  opacity: 1;
 }
 
 .subscription-active {

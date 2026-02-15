@@ -1,222 +1,190 @@
 <template>
-  <div class="modal-overlay" @click="changeisEditMailing"></div>
-  <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
-
-  <section class="info-modal">
-    <div v-if="!load" class="modal-content">
-      <!-- Заголовок с кнопкой закрытия -->
-      <div class="modal-header">
-        <h2 class="modal-title">
-          {{ t("editMailing.title") }}
-        </h2>
-        <button
-          class="close-btn"
-          @click="changeisEditMailing"
-          aria-label="Close"
+  <ModalFrame
+    :text="modalText"
+    :action="editWhatsAppBroadcast"
+    :close="changeisEditMailing"
+    :is-loading="load"
+  >
+    <div class="edit-section">
+      <h3 class="edit-label">{{ t("editMailing.weekDay") }}:</h3>
+      <div class="checkbox-group">
+        <div
+          v-for="(day, index) in days"
+          :key="index"
+          class="checkbox-container"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Дни недели -->
-      <div class="edit-section">
-        <h3 class="edit-label">{{ t("editMailing.weekDay") }}:</h3>
-        <div class="checkbox-group">
-          <div
-            v-for="(day, index) in days"
-            :key="index"
-            class="checkbox-container"
-          >
-            <input
-              type="checkbox"
-              :id="'day-' + (index + 1)"
-              :value="index + 1"
-              v-model="selectedDays"
-            />
-            <label class="day-text" :for="'day-' + (index + 1)">
-              <span class="custom-checkbox"></span>
-              {{ day }}
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Время рассылки -->
-      <div class="edit-section">
-        <h3 class="edit-label">{{ t("editMailing.time.title") }}:</h3>
-        <div class="time-grid">
-          <div class="time-input-group">
-            <label for="end-time">{{ t("editMailing.time.c") }}</label>
-            <input
-              type="time"
-              id="end-time"
-              v-model="items.options.hours.min"
-              @change="updateTimes"
-            />
-          </div>
-          <div class="time-input-group">
-            <label for="start-time">{{ t("editMailing.time.po") }}</label>
-            <input
-              type="time"
-              id="start-time"
-              v-model="items.options.hours.max"
-              @change="updateTimes"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Таймаут -->
-      <div class="edit-section">
-        <h3 class="edit-label">{{ t("editMailing.timeout.title") }}:</h3>
-        <div class="timeout-grid">
-          <div class="timeout-input-group">
-            <label for="start-num">{{ t("editMailing.timeout.ot") }}</label>
-            <select id="start-num" v-model="items.options.delay.min">
-              <option v-for="minute in minutes" :key="minute" :value="minute">
-                {{ minute }}
-              </option>
-            </select>
-          </div>
-          <div class="timeout-input-group">
-            <label for="end-num">{{ t("editMailing.timeout.do") }}</label>
-            <select id="end-num" v-model="items.options.delay.max">
-              <option v-for="minute in minutes" :key="minute" :value="minute">
-                {{ minute }}
-              </option>
-            </select>
-            <span class="min-text">{{ t("editMailing.timeout.min") }}.</span>
-          </div>
-        </div>
-      </div>
-
-      <div v-show="getVersion === 2" class="edit-section">
-        <h3 class="edit-label">Текст рассылки:</h3>
-        <textarea
-          v-model="mailingText"
-          class="mailing-textarea"
-          placeholder="Введите текст сообщения..."
-          rows="4"
-        ></textarea>
-      </div>
-
-      <!-- Выбор каналов отправки -->
-      <div class="edit-section">
-        <h3 class="edit-label">Каналы отправки:</h3>
-        <div class="channels-selector">
-          <label
-            v-for="channel in availableChannels"
-            :key="channel.id"
-            class="channel-item"
-            :class="{ active: selectedChannels.includes(channel.id) }"
-          >
-            <input
-              type="checkbox"
-              :value="channel.id"
-              v-model="selectedChannels"
-              class="channel-checkbox"
-              hidden
-              @change="handleChannelChange"
-            />
-            <span class="channel-text">{{ channel.name }}</span>
+          <input
+            type="checkbox"
+            :id="'day-' + (index + 1)"
+            :value="index + 1"
+            v-model="selectedDays"
+          />
+          <label class="day-text" :for="'day-' + (index + 1)">
+            <span class="custom-checkbox"></span>
+            {{ day }}
           </label>
         </div>
       </div>
-
-      <!-- Последовательность отправки -->
-      <div v-if="selectedChannels.length > 1" class="edit-section">
-        <h3 class="edit-label">Последовательность отправки:</h3>
-        <p class="sequence-info">Используйте стрелки для изменения порядка</p>
-        <div class="cascade-container">
-          <div
-            v-for="(channelId, index) in cascadeOrder"
-            :key="channelId"
-            class="cascade-item"
-          >
-            <div class="cascade-position">{{ index + 1 }}</div>
-            <div class="cascade-name">{{ getChannelName(channelId) }}</div>
-            <div class="cascade-buttons">
-              <button
-                v-if="index > 0"
-                @click="moveCascadeUp(index)"
-                class="btn-move"
-                title="Переместить выше"
-              >
-                ↑
-              </button>
-              <button
-                v-if="index < cascadeOrder.length - 1"
-                @click="moveCascadeDown(index)"
-                class="btn-move"
-                title="Переместить ниже"
-              >
-                ↓
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Настройки -->
-      <div class="edit-section">
-        <h3 class="edit-label">Дополнительные Настройки</h3>
-        <div class="settings-grid">
-          <div class="checkbox-container setting-item">
-            <input
-              type="checkbox"
-              id="remove-duplicates"
-              v-model="items.options.exist"
-            />
-            <label for="remove-duplicates">
-              <span class="custom-checkbox"></span>
-              {{ t("editMailing.checbox.one") }}
-            </label>
-          </div>
-
-          <div class="checkbox-container setting-item">
-            <input
-              type="checkbox"
-              id="existing-dialogs"
-              v-model="items.options.uniq"
-            />
-            <label for="existing-dialogs">
-              <span class="custom-checkbox"></span>
-              {{ t("editMailing.checbox.two") }}
-            </label>
-          </div>
-
-          <div class="checkbox-container setting-item">
-            <input
-              type="checkbox"
-              id="random-order"
-              v-model="items.options.random"
-            />
-            <label for="random-order">
-              <span class="custom-checkbox"></span>
-              {{ t("editMailing.checbox.three") }}
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Кнопка сохранения -->
-      <button @click="editWhatsAppBroadcast" class="edit-btn">
-        {{ t("editMailing.button") }}
-      </button>
     </div>
 
-    <LoadModal v-else :text="'Сохраняем данные'" />
-  </section>
+    <!-- Время рассылки -->
+    <div class="edit-section">
+      <h3 class="edit-label">{{ t("editMailing.time.title") }}:</h3>
+      <div class="time-grid">
+        <div class="time-input-group">
+          <label for="end-time">{{ t("editMailing.time.c") }}</label>
+          <input
+            type="time"
+            id="end-time"
+            v-model="items.options.hours.min"
+            @change="updateTimes"
+          />
+        </div>
+        <div class="time-input-group">
+          <label for="start-time">{{ t("editMailing.time.po") }}</label>
+          <input
+            type="time"
+            id="start-time"
+            v-model="items.options.hours.max"
+            @change="updateTimes"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Таймаут -->
+    <div class="edit-section">
+      <h3 class="edit-label">{{ t("editMailing.timeout.title") }}:</h3>
+      <div class="timeout-grid">
+        <div class="timeout-input-group">
+          <label for="start-num">{{ t("editMailing.timeout.ot") }}</label>
+          <select id="start-num" v-model="items.options.delay.min">
+            <option v-for="minute in minutes" :key="minute" :value="minute">
+              {{ minute }}
+            </option>
+          </select>
+        </div>
+        <div class="timeout-input-group">
+          <label for="end-num">{{ t("editMailing.timeout.do") }}</label>
+          <select id="end-num" v-model="items.options.delay.max">
+            <option v-for="minute in minutes" :key="minute" :value="minute">
+              {{ minute }}
+            </option>
+          </select>
+          <span class="min-text">{{ t("editMailing.timeout.min") }}.</span>
+        </div>
+      </div>
+    </div>
+
+    <div v-show="getVersion === 2" class="edit-section">
+      <h3 class="edit-label">Текст рассылки:</h3>
+      <textarea
+        v-model="mailingText"
+        class="mailing-textarea"
+        placeholder="Введите текст сообщения..."
+        rows="4"
+      ></textarea>
+    </div>
+
+    <!-- Выбор каналов отправки -->
+    <div class="edit-section">
+      <h3 class="edit-label">Каналы отправки:</h3>
+      <div class="channels-selector">
+        <label
+          v-for="channel in availableChannels"
+          :key="channel.id"
+          class="channel-item"
+          :class="{ active: selectedChannels.includes(channel.id) }"
+        >
+          <input
+            type="checkbox"
+            :value="channel.id"
+            v-model="selectedChannels"
+            class="channel-checkbox"
+            hidden
+            @change="handleChannelChange"
+          />
+          <span class="channel-text">{{ channel.name }}</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Последовательность отправки -->
+    <div v-if="selectedChannels.length > 1" class="edit-section">
+      <h3 class="edit-label">Последовательность отправки:</h3>
+      <p class="sequence-info">Используйте стрелки для изменения порядка</p>
+      <div class="cascade-container">
+        <div
+          v-for="(channelId, index) in cascadeOrder"
+          :key="channelId"
+          class="cascade-item"
+        >
+          <div class="cascade-position">{{ index + 1 }}</div>
+          <div class="cascade-name">{{ getChannelName(channelId) }}</div>
+          <div class="cascade-buttons">
+            <button
+              v-if="index > 0"
+              @click="moveCascadeUp(index)"
+              class="btn-move"
+              title="Переместить выше"
+            >
+              ↑
+            </button>
+            <button
+              v-if="index < cascadeOrder.length - 1"
+              @click="moveCascadeDown(index)"
+              class="btn-move"
+              title="Переместить ниже"
+            >
+              ↓
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Настройки -->
+    <div class="edit-section">
+      <h3 class="edit-label">Дополнительные Настройки</h3>
+      <div class="settings-grid">
+        <div class="checkbox-container setting-item">
+          <input
+            type="checkbox"
+            id="remove-duplicates"
+            v-model="items.options.exist"
+          />
+          <label for="remove-duplicates">
+            <span class="custom-checkbox"></span>
+            {{ t("editMailing.checbox.one") }}
+          </label>
+        </div>
+
+        <div class="checkbox-container setting-item">
+          <input
+            type="checkbox"
+            id="existing-dialogs"
+            v-model="items.options.uniq"
+          />
+          <label for="existing-dialogs">
+            <span class="custom-checkbox"></span>
+            {{ t("editMailing.checbox.two") }}
+          </label>
+        </div>
+
+        <div class="checkbox-container setting-item">
+          <input
+            type="checkbox"
+            id="random-order"
+            v-model="items.options.random"
+          />
+          <label for="random-order">
+            <span class="custom-checkbox"></span>
+            {{ t("editMailing.checbox.three") }}
+          </label>
+        </div>
+      </div>
+    </div>
+  </ModalFrame>
 </template>
 
 <script setup>
@@ -230,6 +198,8 @@ import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 import { useMailingVersion } from "@/stores/mailingVersion";
 const mailingVersion = useMailingVersion();
@@ -248,6 +218,12 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const modalText = {
+  title: "Редактирование",
+  close: "Отмена",
+  action: "Сохранить",
+};
 
 import useFrontendLogger from "@/composables/useFrontendLogger";
 const { sendLog } = useFrontendLogger();

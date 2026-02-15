@@ -19,7 +19,6 @@ export function useDomain() {
     currentDomain.value = window.location.hostname;
     console.log(currentDomain);
 
-    // Получаем конфигурацию для текущего домена
     const config = getDomainConfig(currentDomain.value);
     console.log(config, "config");
 

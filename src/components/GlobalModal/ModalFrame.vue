@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
     <div class="modal-overlay" @click.self="close">
-      <div class="modal-content">
+      <div v-if="!isLoading" class="modal-content">
         <div class="modal-header">
           <div class="header-left">
             <h3>{{ text.title }}</h3>
@@ -45,12 +45,14 @@
           </button>
         </div>
       </div>
+      <BoxLoading v-else />
     </div>
   </Transition>
 </template>
 
 <script setup>
 import AccountIcon from "../Accounts/AccountIcon.vue";
+import BoxLoading from "./loading/BoxLoading.vue";
 
 defineProps({
   text: {
@@ -65,6 +67,7 @@ defineProps({
   isDisabled: { type: Boolean },
   action: { type: Function, default: () => {} },
   close: { type: Function, default: () => {} },
+  isLoading: { type: Boolean },
 });
 </script>
 
@@ -102,12 +105,12 @@ defineProps({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.5); /* Глубокий темный фон */
+  background: rgba(33, 37, 47, 0.5); /* Глубокий темный фон */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
-  backdrop-filter: blur(4px); /* Размытие заднего плана */
+  z-index: 100;
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
@@ -187,7 +190,6 @@ defineProps({
   color: #ef4444;
 }
 
-/* --- Тело модалки --- */
 .modal-body {
   padding: 24px;
   max-height: 70vh;

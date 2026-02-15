@@ -99,7 +99,7 @@
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
             "
             class="action action-throw"
-            @click="ChangeconfirmStationReset"
+            @click="openResetAccountModal"
             >{{ t("modalAccount.change") }}</span
           >
 
@@ -114,7 +114,7 @@
 
           <span
             class="action action-delete"
-            @click="ChangeconfirmStation"
+            @click="openDeleteAccountModal"
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
@@ -207,15 +207,18 @@
       </div>
     </transition>
   </div>
+
   <LoadingMoadal
     :changeStationLoadingModal="changeStationLoadingModal"
     :stationLoading="stationLoading"
   />
+
   <LoadMoadal
     :stationLoading="stationLoading"
     :textLoadin="stationLoading.text"
     :changeStationLoading="changeStationLoading"
   />
+
   <ConfirmDelete
     :loadingStart="loadingStart"
     :ChangeconfirmStation="ChangeconfirmStation"
@@ -226,55 +229,22 @@
     :errorStationOff="errorStationOff"
     :loadingStop="loadingStop"
   />
-  <ConfirmReset
-    :loadingStart="loadingStart"
-    :ChangeconfirmStationReset="ChangeconfirmStationReset"
-    v-if="confirmStation.reset"
-    :selectedItem="selectedItem"
-    :changeStationLoadingModal="changeStationLoadingModal"
-    :errorStationOn="errorStationOn"
-    :errorStationOff="errorStationOff"
-    :changeForceStopItemData="changeForceStopItemData"
-    :loadingStop="loadingStop"
-  />
 
   <ChatStation
     v-if="chatsStationModal"
     :close="changeChatsStationModal"
     :error="errorValueChat"
   />
-
-  <EditNameModal
-    v-if="editNameModal"
-    :selectedItem="selectedItem"
-    :stateLoading="stateLoading"
-    :getAccounts="getAccounts"
-    :close="changeEditNameModal"
-  />
 </template>
 
 <script setup>
-import {
-  toRefs,
-  ref,
-  defineProps,
-  reactive,
-  onMounted,
-  inject,
-  onUnmounted,
-  watch,
-  computed,
-} from "vue";
+import { toRefs, ref, defineProps, reactive, computed } from "vue";
 import ChatStation from "./ModalAccount/ChatStation.vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import axios from "axios";
 import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import LoadingMoadal from "./LoadingMoadal/LoadingMoadal.vue";
 import LoadMoadal from "./LoadingMoadal/LoadModal.vue";
-import ConfirmReset from "./ModalAccount/ConfirmModal/ConfirmReset.vue";
-import LoadingBalance from "@/components/Header/Loading/LoadingBalance.vue";
-import Settings from "./ModalAccount/CRM/UonSettings/Settings.vue";
-import EditNameModal from "./ModalAccount/EditNameModal/EditNameModal.vue";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const FRONTEND_URL_VENDORS = import.meta.env.VITE_FRONTEND_URL_VENDORS;
 import GetScreen from "./ModalAccount/GetScreen.vue";
@@ -295,8 +265,17 @@ const props = defineProps({
   modalPosition: {
     type: Object,
   },
+  openDeleteAccountModal: {
+    type: Function,
+  },
   isModalOpen: {
     type: Boolean,
+  },
+  changeEditNameModal: {
+    type: Function,
+  },
+  openResetAccountModal: {
+    type: Function,
   },
   changeRoutingSettings: {
     type: Function,
@@ -400,12 +379,6 @@ const navigateTo = (page, queryParams = {}) => {
     path: page,
     query: queryParams,
   });
-};
-
-const editNameModal = ref(false);
-
-const changeEditNameModal = () => {
-  editNameModal.value = !editNameModal.value;
 };
 
 // Функция для обращения в техподдержку

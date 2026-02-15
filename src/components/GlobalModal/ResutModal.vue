@@ -1,80 +1,85 @@
 <template>
   <transition name="fade">
-    <section v-if="stationLoading.isOpen">
-      <section v-if="stationLoading.successfully" class="loading-section-true">
-        <h2 class="title-true">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <g fill="none" stroke="currentColor" stroke-width="2">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m8 12.5l3 3l5-6"
-              />
-              <circle cx="12" cy="12" r="10" />
-            </g>
-          </svg>
+    <Teleport to="body">
+      <section v-if="stationLoading.isOpen">
+        <section
+          v-if="stationLoading.successfully"
+          class="loading-section-true"
+        >
+          <h2 class="title-true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <g fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m8 12.5l3 3l5-6"
+                />
+                <circle cx="12" cy="12" r="10" />
+              </g>
+            </svg>
 
-          {{ t("resultModal.messageTrue") }}
-          <svg
-            @click="changeStationLoadingModal"
-            xmlns="http://www.w3.org/2000/svg"
-            width="26"
-            height="26"
-            viewBox="0 0 32 32"
-          >
-            <path
-              fill="currentColor"
-              d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
+            {{ t("resultModal.messageTrue") }}
+            <svg
+              @click="changeStationLoadingModal"
+              xmlns="http://www.w3.org/2000/svg"
+              width="26"
+              height="26"
+              viewBox="0 0 32 32"
+            >
+              <path
+                fill="currentColor"
+                d="M17.414 16L24 9.414L22.586 8L16 14.586L9.414 8L8 9.414L14.586 16L8 22.586L9.414 24L16 17.414L22.586 24L24 22.586z"
+              />
+            </svg>
+          </h2>
+        </section>
+        <section v-else class="loading-section-error">
+          <h2 v-if="!stationLoading.text" class="title-error">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+              />
+            </svg>
+            {{ t("resultModal.messageFalse") }}
+            <img
+              @click="changeStationLoadingModal"
+              src="/account/close-error.svg"
+              alt=""
             />
-          </svg>
-        </h2>
+          </h2>
+          <h2 v-else class="title-error">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+              />
+            </svg>
+            {{ stationLoading.text }}
+            <img
+              @click="changeStationLoadingModal"
+              src="/account/close-error.svg"
+              alt=""
+            />
+          </h2>
+        </section>
       </section>
-      <section v-else class="loading-section-error">
-        <h2 v-if="!stationLoading.text" class="title-error">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
-            />
-          </svg>
-          {{ t("resultModal.messageFalse") }}
-          <img
-            @click="changeStationLoadingModal"
-            src="/account/close-error.svg"
-            alt=""
-          />
-        </h2>
-        <h2 v-else class="title-error">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
-            />
-          </svg>
-          {{ stationLoading.text }}
-          <img
-            @click="changeStationLoadingModal"
-            src="/account/close-error.svg"
-            alt=""
-          />
-        </h2>
-      </section>
-    </section>
+    </Teleport>
   </transition>
 </template>
 
@@ -102,11 +107,12 @@ const { stationLoading } = toRefs(props);
   border-radius: 5px;
   width: 314px;
   height: 60px;
-  box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
+  box-shadow:
+    -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
     0 0 4px 0 rgba(85, 255, 195, 0.04);
   background: rgba(250, 253, 247, 0.95);
   position: fixed;
-  z-index: 100;
+  z-index: 2000;
   top: 5px;
   right: 15px;
   display: flex;
@@ -121,11 +127,12 @@ const { stationLoading } = toRefs(props);
   border-radius: 5px;
   width: 337px;
   height: 60px;
-  box-shadow: -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
+  box-shadow:
+    -4px 4px 8px 0 rgba(0, 0, 0, 0.06),
     0 0 4px 0 rgba(85, 255, 195, 0.04);
   background: rgba(238, 166, 166, 0.95);
   position: fixed;
-  z-index: 100;
+  z-index: 500;
   top: 5px;
   right: 15px;
   display: flex;
