@@ -188,6 +188,16 @@
           >
 
           <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
+            @click="openCustomSourcesModal"
+            >Источники</span
+          >
+
+          <span
             v-if="['amocrm'].includes(selectedItem.type)"
             class="action"
             @click="changeBindingStation"
@@ -329,6 +339,9 @@ const props = defineProps({
     type: Function,
   },
   getAccounts: {
+    type: Function,
+  },
+  openCustomSourcesModal: {
     type: Function,
   },
 });

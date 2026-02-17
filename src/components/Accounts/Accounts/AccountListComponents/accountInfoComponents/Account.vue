@@ -55,6 +55,7 @@
         :openMessageHistory="openMessageHistory"
         :changeStationGetHistory="changeStationGetHistory"
         :account-data="accountData"
+        :customSources="customSources"
       />
 
       <button class="action-button danger" @click="emitAction('delete')">
@@ -107,6 +108,9 @@ const props = defineProps({
   },
 
   changeStationGetHistory: {
+    type: Function,
+  },
+  customSources: {
     type: Function,
   },
 });

@@ -31,6 +31,7 @@
             :blacklistModal="blacklistModal"
             :changeStationGetHistory="changeStationGetHistory"
             :account-data="accountData"
+            :customSources="customSources"
           />
         </div>
       </div>
@@ -69,6 +70,9 @@ const props = defineProps({
     type: Function,
   },
   deleteAccount: {
+    type: Function,
+  },
+  customSources: {
     type: Function,
   },
   changeRoutingSettings: {

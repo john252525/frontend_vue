@@ -21,7 +21,7 @@
           </svg>
         </button>
       </div>
-
+      ``
       <div class="modal-content">
         <div
           class="filters-bar"

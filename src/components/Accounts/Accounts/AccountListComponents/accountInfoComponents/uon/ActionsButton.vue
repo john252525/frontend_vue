@@ -72,6 +72,27 @@
     История сообщений
   </button>
 
+  <button class="action-button" @click="customSources">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 6v-3" />
+      <path d="M12 18v3" />
+      <path d="M6 12H3" />
+      <path d="M18 12h3" />
+    </svg>
+
+    Источники
+  </button>
+
   <button class="action-button" @click="blacklistModal">
     <svg
       width="16"
@@ -113,6 +134,9 @@ const props = defineProps({
   },
 
   changeStationGetHistory: {
+    type: Function,
+  },
+  customSources: {
     type: Function,
   },
 });

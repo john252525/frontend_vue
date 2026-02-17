@@ -1,81 +1,148 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>История уведомлений (U-ON Travel)</h3>
-        <button class="close-btn" @click="close">×</button>
+  <ModalFrame
+    :text="modalText"
+    :action="fetchHistory"
+    :close="close"
+    :item="item"
+    :is-loading="loading"
+  >
+    <div class="filters-panel">
+      <div class="filter-group">
+        <label>ОТ:</label>
+        <input
+          type="date"
+          v-model="filters.date_from"
+          :max="today"
+          :class="{ 'input-error': errors.date_from }"
+        />
+        <span v-if="errors.date_from" class="error-text">{{
+          errors.date_from
+        }}</span>
       </div>
 
-      <div class="filters-panel">
-        <div class="filter-group">
-          <label>ДАТА ОТ:</label>
-          <input type="date" v-model="filters.date_from" />
-        </div>
-        <div class="filter-group">
-          <label>ДАТА ДО:</label>
-          <input type="date" v-model="filters.date_to" />
-        </div>
-        <div class="filter-group">
-          <label>НА СТРАНИЦЕ:</label>
-          <select v-model="filters.per_page">
+      <div class="filter-group">
+        <label>ДО:</label>
+        <input
+          type="date"
+          v-model="filters.date_to"
+          :min="filters.date_from"
+          :class="{ 'input-error': errors.date_to }"
+        />
+        <span v-if="errors.date_to" class="error-text">{{
+          errors.date_to
+        }}</span>
+      </div>
+
+      <div class="filter-group per-page">
+        <label>КОЛ-ВО СООБЩЕНИЙ:</label>
+        <div class="select-wrapper">
+          <select v-model="filters.per_page" @change="resetAndFetch">
             <option :value="10">10</option>
             <option :value="20">20</option>
             <option :value="50">50</option>
           </select>
         </div>
-        <button class="refresh-btn" @click="fetchHistory" :disabled="loading">
-          <span v-if="loading">⏳</span>
-          <span v-else>🔄 Обновить</span>
-        </button>
       </div>
+    </div>
 
-      <div class="history-body">
-        <div v-if="loading" class="empty-state">Загрузка данных...</div>
+    <!-- Блок с историей -->
+    <div class="history-body">
+      <div v-if="historyData.length > 0" class="cards-container">
+        <div v-for="msg in historyData" :key="msg.id" class="card">
+          <!-- Заголовок карточки -->
+          <div class="card-header">
+            <span class="card-date">{{ formatDate(msg.dt_ins) }}</span>
+            <span
+              :class="['status-badge', msg.status]"
+              :title="dictionaries.statuses[msg.status] || msg.status"
+            >
+              {{ dictionaries.statuses[msg.status] || msg.status }}
+            </span>
+          </div>
 
-        <div v-else-if="historyData.length > 0" class="table-wrapper">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Дата</th>
-                <th>Мессенджер</th>
-                <th>Получатель</th>
-                <th>Статус</th>
-                <th>Текст</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="msg in historyData" :key="msg.id">
-                <td>{{ msg.dt_ins }}</td>
-                <td>
-                  {{ dictionaries.messengers[msg.messenger] || msg.messenger }}
-                </td>
-                <td>{{ msg.number }}</td>
-                <td>
-                  <span :class="['status-badge', msg.status]">
-                    {{ dictionaries.statuses[msg.status] || msg.status }}
-                  </span>
-                </td>
-                <td class="content-cell" :title="msg.content">
-                  {{ msg.content }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Основные поля -->
+          <div class="card-body">
+            <div class="card-row">
+              <span class="label">Мессенджер</span>
+              <span class="value">
+                {{ dictionaries.messengers[msg.messenger] || msg.messenger }}
+              </span>
+            </div>
+
+            <div class="card-row">
+              <span class="label">Получатель</span>
+              <span class="value">{{ msg.number || msg.sent_to }}</span>
+            </div>
+
+            <div class="card-row">
+              <span class="label">Текст</span>
+              <span class="value content-cell" :title="msg.content">
+                {{ msg.content || "-" }}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div v-else class="empty-state">
-          <div class="search-icon">🔍</div>
-          <p>Нет данных истории</p>
+        <!-- Пагинация -->
+        <div class="pagination-container">
+          <button
+            class="pag-nav"
+            :disabled="filters.page === 1"
+            @click="changePage(filters.page - 1)"
+          >
+            &larr; <span class="nav-text">Назад</span>
+          </button>
+
+          <div class="page-numbers">
+            <template v-for="p in displayedPages" :key="p">
+              <button
+                v-if="p !== '...'"
+                :class="['page-num', { active: filters.page === p }]"
+                @click="changePage(p)"
+              >
+                {{ p }}
+              </button>
+              <span v-else class="dots">...</span>
+            </template>
+          </div>
+
+          <button
+            class="pag-nav"
+            :disabled="filters.page >= totalPages"
+            @click="changePage(filters.page + 1)"
+          >
+            <span class="nav-text">Вперед</span> &rarr;
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="state-container">
+        <div class="empty-state">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <h3>Данных нет</h3>
         </div>
       </div>
     </div>
-  </div>
+  </ModalFrame>
 </template>
 
 <script setup>
 import { toRefs, onMounted, computed, ref, reactive } from "vue";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const props = defineProps({
   close: Function,
@@ -87,263 +154,376 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const FRONTEND_URL = import.meta.env.VITE_BASE_URL;
 
-// Состояние
+const today = new Date().toISOString().split("T")[0];
 const loading = ref(false);
 const historyData = ref([]);
+const totalPages = ref(1);
+const modalText = {
+  title: "История сообщений",
+  close: "Закрыть",
+  action: "Обновить",
+};
+
 const dictionaries = ref({
-  statuses: {},
-  messengers: {},
+  statuses: {
+    success: "Успешно",
+    fail: "Ошибка",
+    pending: "В ожидании",
+  },
+  messengers: {
+    whatsapp: "WhatsApp",
+    telegram: "Telegram",
+    vk: "VK",
+  },
 });
 
 const filters = reactive({
   date_from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     .toISOString()
-    .substr(0, 10),
-  date_to: new Date().toISOString().substr(0, 10),
+    .split("T")[0],
+  date_to: today,
   per_page: 10,
   page: 1,
 });
 
-// --- МОК ДАННЫЕ ---
-const mockResponse = {
-  ok: true,
-  data: {
-    messages: [
-      {
-        id: "66",
-        messenger: "telegram",
-        number: "79366000000",
-        content: "вот тестовое сообщение из моков",
-        status: "success",
-        dt_ins: "2026-02-01 19:34:18",
-      },
-      {
-        id: "1",
-        messenger: "telegram",
-        number: "79366000000",
-        content: "Второе сообщение",
-        status: "success",
-        dt_ins: "2026-02-01 19:27:09",
-      },
-      {
-        id: "3",
-        messenger: "whatsapp",
-        number: "79001112233",
-        content: "Ошибка доставки",
-        status: "fail",
-        dt_ins: "2026-02-02 10:15:00",
-      },
-    ],
-    dictionaries: {
-      statuses: {
-        pending: "В ожидании",
-        success: "Успешно",
-        fail: "Ошибка",
-      },
-      messengers: {
-        whatsapp: "WhatsApp",
-        telegram: "Telegram",
-        vk: "VK",
-      },
-    },
-  },
+const displayedPages = computed(() => {
+  const total = totalPages.value;
+  const current = filters.page;
+  const pages = [];
+
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push("...");
+
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+
+    for (let i = start; i <= end; i++) {
+      if (!pages.includes(i)) pages.push(i);
+    }
+
+    if (current < total - 2) pages.push("...");
+    if (!pages.includes(total)) pages.push(total);
+  }
+  return pages;
+});
+
+const errors = computed(() => {
+  const errs = {};
+  const from = new Date(filters.date_from);
+  const to = new Date(filters.date_to);
+  if (from > to) errs.date_from = "Ошибка дат";
+  return errs;
+});
+
+const hasErrors = computed(() => Object.keys(errors.value).length > 0);
+
+const resetAndFetch = () => {
+  filters.page = 1;
+  fetchHistory();
 };
 
-// Запрос к API
+const changePage = (newPage) => {
+  if (newPage < 1 || newPage > totalPages.value) return;
+  filters.page = newPage;
+  fetchHistory();
+};
+
 const fetchHistory = async () => {
+  if (hasErrors.value) return;
   loading.value = true;
-
-  // Переключатель: true - использовать моки, false - запрос к серверу
-  const useMock = true;
-
   try {
-    if (useMock) {
-      // Имитация задержки сети
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    const response = await axios.post(
+      `${FRONTEND_URL}/uon-account/getHistory`,
+      {
+        uuid: item.value?.uuid,
+        user_id: item.value?.user_id,
+        ...filters,
+      },
+      {
+        headers: { Authorization: `Bearer ${token.value}` },
+      },
+    );
 
-      historyData.value = mockResponse.data.messages;
-      dictionaries.value = mockResponse.data.dictionaries;
-    } else {
-      const response = await axios.post(
-        `${FRONTEND_URL}/uon-account/getHistory`,
-        {
-          uuid: item.value?.uuid,
-          user_id: item.value?.user_id,
-          date_from: filters.date_from,
-          date_to: filters.date_to,
-          per_page: filters.per_page,
-          page: filters.page,
-          filter_by_vendor: true,
-        },
-        {
-          headers: { Authorization: `Bearer ${token.value}` },
-        },
-      );
-
-      if (response.data.ok) {
-        historyData.value = response.data.data.messages;
+    if (response.data.ok) {
+      historyData.value = response.data.data.messages;
+      totalPages.value =
+        response.data.data.total_pages || Math.ceil(100 / filters.per_page);
+      if (response.data.data.dictionaries)
         dictionaries.value = response.data.data.dictionaries;
-      }
     }
   } catch (error) {
-    console.error("Ошибка при получении истории:", error);
-    if (!useMock) alert("Не удалось загрузить историю");
+    console.error(error);
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(() => {
-  fetchHistory();
-});
+const formatDate = (iso) => {
+  return iso.replace("T", " ").replace(/:\d{2}\.\d+$/, "");
+};
+
+onMounted(fetchHistory);
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+/* --- БАЗОВЫЕ СТИЛИ --- */
+.history-body {
+  flex: 1;
+  overflow-y: auto;
 }
 
-.modal-content {
-  background: white;
-  width: 90%;
-  max-width: 1000px;
-  max-height: 80vh;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #333;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #999;
-}
-
+/* --- ФИЛЬТРЫ --- */
 .filters-panel {
   display: flex;
-  gap: 20px;
-  padding: 20px;
-  background: #f8f9fc;
-  align-items: flex-end;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #f5f7fa;
+  border-radius: 12px;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-group.per-page {
+  flex: 0;
+  min-width: 100px;
 }
 
 .filter-group label {
-  font-size: 11px;
-  font-weight: bold;
-  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b778c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filter-group input,
-.filter-group select {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.select-wrapper select {
+  padding: 10px 12px;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.filter-group input:focus,
+.select-wrapper select:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .refresh-btn {
-  background-color: #1a73e8;
+  background: #1a73e8;
   color: white;
   border: none;
-  padding: 8px 20px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 600;
+  height: 38px;
+  transition: background 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.refresh-btn:hover {
-  background-color: #1557b0;
+.refresh-btn:disabled {
+  background: #9aa0a6;
+  cursor: not-allowed;
 }
 
-.history-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  min-height: 300px;
+.refresh-btn:hover:not(:disabled) {
+  background: #1967d2;
 }
 
-.table-wrapper {
-  width: 100%;
+/* --- КАРТОЧКИ --- */
+.cards-container {
+  padding: 16px 0px;
 }
 
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+.card {
+  border: 1px solid #e4e7ed;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
 }
 
-.history-table th {
-  text-align: left;
-  background: #f4f4f4;
-  padding: 10px;
-  border-bottom: 2px solid #ddd;
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
-.history-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-date {
+  font-size: 12px;
+  color: #6b778c;
+  background-color: #f0f2f5;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 14px;
   font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-badge.success {
-  background: #e6fffa;
-  color: #2d3748;
-  border: 1px solid #b2f5ea;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
+
 .status-badge.fail {
-  background: #fff5f5;
-  color: #c53030;
-  border: 1px solid #feb2b2;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
+
 .status-badge.pending {
-  background: #fffaf0;
-  color: #975a16;
-  border: 1px solid #fbd38d;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.card-row .label {
+  font-weight: 600;
+  color: #5e6c84;
+  min-width: 100px;
+  white-space: nowrap;
+}
+
+.card-row .value {
+  color: #333;
+  word-break: break-word;
+  margin-left: 12px;
 }
 
 .content-cell {
-  max-width: 300px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 180px;
+  white-space: normal;
+}
+
+/* --- ПАГИНАЦИЯ --- */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.page-num {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dfe1e5;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.page-num:hover:not(.active) {
+  background: #f0f2f5;
+  border-color: #dfe1e5;
+}
+
+.page-num.active {
+  background: #1a73e8;
+  color: white;
+  border-color: #1a73e8;
+}
+
+.pag-nav {
+  padding: 8px 16px;
+  border: 1px solid #dfe1e5;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.pag-nav:hover:not(:disabled) {
+  background: #f0f2f5;
+  border-color: #c6c6c6;
+}
+
+.pag-nav:disabled {
+  background: #f8f9fa;
+  color: #9aa0a6;
+  cursor: not-allowed;
+}
+
+.dots {
+  color: #9aa0a6;
+  padding: 0 6px;
+}
+
+.state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 .empty-state {
@@ -351,13 +531,62 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #999;
-  margin-top: 50px;
+  padding: 48px 32px;
+  text-align: center;
 }
 
-.search-icon {
-  font-size: 48px;
-  margin-bottom: 10px;
+.empty-state svg {
+  color: #cbd5e0;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  color: #475569;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.empty-state p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* --- АДАПТИВНОСТЬ --- */
+@media (max-width: 768px) {
+  .filters-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+
+  .nav-text {
+    display: none;
+  }
+
+  .card {
+    padding: 12px 14px;
+  }
+
+  .card-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-row .label {
+    font-weight: 700;
+  }
+
+  .card-row .value {
+    margin-left: 0;
+    margin-top: 2px;
+  }
 }
 </style>

@@ -200,6 +200,7 @@
       :uonSettings="uonSettings"
       :blacklistModal="blacklistModal"
       :changeStationGetHistory="stationGetHistory"
+      :customSources="customSources"
       @close="closeAccountModal"
       @action="handleAccountAction"
     />
@@ -236,6 +237,7 @@ const props = defineProps({
   openUonSettingModal: Function,
   openBlacklistModal: Function,
   changeStationGetHistory: Function,
+  openCustomSourcesModal: Function,
 });
 
 const { instanceData } = toRefs(props);
@@ -390,6 +392,11 @@ const uonSettings = () => {
 const blacklistModal = () => {
   isModalVisible.value = false;
   props.openBlacklistModal();
+};
+
+const customSources = () => {
+  isModalVisible.value = false;
+  props.openCustomSourcesModal();
 };
 </script>
 

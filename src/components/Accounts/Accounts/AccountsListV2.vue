@@ -17,6 +17,7 @@
       :openUonSettingModal="openUonSettingModal"
       :openBlacklistModal="openBlacklistModal"
       :changeStationGetHistory="changeStationGetHistory"
+      :openCustomSourcesModal="openCustomSourcesModal"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
@@ -95,6 +96,7 @@
       :changeEditNameModal="changeEditNameModal"
       :openMessageHistory="openMessageHistory"
       :openDeleteAccountModal="openDeleteAccountModal"
+      :openCustomSourcesModal="openCustomSourcesModal"
     />
 
     <SettignsModal
@@ -192,6 +194,13 @@
       :selected-item="selectedItem"
       :close="closeDeleteAccountModal"
     />
+
+    <CustomSources
+      v-if="customSourcesModal"
+      :item="selectedItem"
+      :close="closeCustomSourcesModal"
+      :accounts="instanceData"
+    />
   </section>
 </template>
 
@@ -224,6 +233,7 @@ import ConfirmDelete from "./ModalAccount/ConfirmModal/ConfirmDelete.vue";
 import Binding from "./ModalAccount/AmoCrm/Binding.vue";
 import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue";
 import WarningAccount from "./WarningAccount.vue";
+import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSources.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -306,8 +316,17 @@ const messageHistory = ref(false);
 const editNameModal = ref(false);
 const resetAccountModal = ref(false);
 const deleteAccountModal = ref(false);
+const customSourcesModal = ref(false);
 
 // ============= УТИЛИТЫ =============
+
+const closeCustomSourcesModal = () => {
+  customSourcesModal.value = false;
+};
+
+const openCustomSourcesModal = () => {
+  customSourcesModal.value = true;
+};
 
 const openMessageHistory = () => {
   messageHistory.value = true;
