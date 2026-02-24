@@ -7,10 +7,9 @@
     />
     <ResultModal v-if="station.error" />
     <article v-if="qrCodeData.station && !station.error" class="qr-container">
-      <!-- ПРОГРЕССБАР СВЕРХУ -->
       <div class="session-timer-bar">
-        <div 
-          class="session-progress" 
+        <div
+          class="session-progress"
           :style="{ width: sessionProgress + '%' }"
         ></div>
       </div>
@@ -43,11 +42,14 @@
             <div class="scan-line"></div>
           </div>
 
-          <p class="instruction">Отсканируйте QR-код через приложение WhatsApp</p>
+          <p class="instruction">
+            Отсканируйте QR-код через приложение WhatsApp
+          </p>
 
-          <!-- ТАЙМЕР ОСТАВШЕГОСЯ ВРЕМЕНИ -->
           <div class="timer-display">
-            <span class="timer-text">Сессия истечет через {{ sessionTimeRemaining }}с</span>
+            <span class="timer-text"
+              >Сессия истечет через {{ sessionTimeRemaining }}с</span
+            >
           </div>
         </template>
 
@@ -62,7 +64,13 @@
               xmlns="http://www.w3.org/2000/svg"
               class="expired-icon"
             >
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+              />
               <path
                 d="M12 6V12L16 16"
                 stroke="currentColor"
@@ -76,28 +84,6 @@
               Пожалуйста, нажмите кнопку ниже для получения нового QR-кода
             </p>
             <button @click="regenerateQrCode" class="regenerate-button">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M23 4V10H17"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M20.49 15C19.9868 16.5022 18.9995 17.7217 17.7213 18.4629C16.4432 19.204 14.9229 19.4299 13.4819 19.1077C12.0409 18.7854 10.8044 17.9342 10.0322 16.7447C9.2599 15.5552 8.99856 14.0982 9.29298 12.6983"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
               Получить новый QR-код
             </button>
           </div>
@@ -119,7 +105,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          Связать через телефон
+          Привязать по номеру телефона
         </button>
       </div>
     </article>
@@ -486,7 +472,7 @@ const enablePhoneAuth = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data) {
@@ -495,7 +481,7 @@ const enablePhoneAuth = async () => {
         "enablePhoneAuth",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -549,7 +535,7 @@ const getQr = async () => {
         "getQr",
         params,
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
@@ -557,7 +543,7 @@ const getQr = async () => {
       previousLink = qrCodeData.link;
       qrCodeData.link = response.data.value;
       qrCodeData.station = true;
-      props.updateLoadingStatus(false);
+      props.updateLoadingStatus("qr-code");
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
@@ -597,7 +583,8 @@ const startSessionTimer = () => {
   // Таймер для отсчета времени
   sessionTimerId = setInterval(() => {
     sessionTimeRemaining.value--;
-    sessionProgress.value = (sessionTimeRemaining.value / SESSION_DURATION) * 100;
+    sessionProgress.value =
+      (sessionTimeRemaining.value / SESSION_DURATION) * 100;
 
     if (sessionTimeRemaining.value <= 0) {
       clearInterval(sessionTimerId);
@@ -628,9 +615,9 @@ const regenerateQrCode = async () => {
 const startEnableByQR = async () => {
   if (isRunning.value) return;
 
-  props.updateLoadingStatus(true, "Генерирация QR-кода");
+  props.updateLoadingStatus("loading");
   await getQr();
-  
+
   // ЗАПУСКАЕМ ТАЙМЕР СЕССИИ
   startSessionTimer();
 
@@ -672,7 +659,7 @@ const getCode = async () => {
     station.errorPhone = true;
     return;
   }
-  props.updateLoadingStatus(true, "Изменение статуса...");
+  props.updateLoadingStatus("loading");
   await enablePhoneAuth();
   await offQrCodeStation();
   await startFunc();
@@ -694,7 +681,6 @@ defineExpose({ stopEnableByQR });
 <style scoped>
 .qr-whatsapp-section {
   border-radius: 16px;
-  max-width: 360px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;

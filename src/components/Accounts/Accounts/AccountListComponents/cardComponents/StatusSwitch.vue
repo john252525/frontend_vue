@@ -4,7 +4,13 @@
       <input
         type="checkbox"
         :checked="enableCheckbox(item)"
-        :disabled="item.type === 'bulk' || item.loading"
+        :disabled="
+          item.type === 'bulk' ||
+          item.type === 'amocrm' ||
+          item.type === 'bitrix24' ||
+          item.type === 'uon' ||
+          item.loading
+        "
         @click.prevent="changeSwitch(item)"
       />
       <span class="slider round">

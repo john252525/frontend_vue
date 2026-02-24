@@ -5,12 +5,12 @@
         class="account-row"
         v-for="(item, index) in instanceData"
         :key="index"
+        @click="openAccountModal(item)"
+        style="cursor: pointer"
       >
-        <div
-          class="row-section section-identity"
-          @click="openAccountModal(item)"
-        >
+        <div class="row-section section-identity">
           <AccountIcon :item="item" class="account-icon-large" />
+
           <div class="identity-info">
             <span v-if="item.name" class="account-name">{{ item.name }}</span>
             <span v-else class="account-login">{{ item.login }}</span>
@@ -22,10 +22,11 @@
               {{ getType(item.source) }}
             </span>
           </div>
+
           <div
             class="subscription-warning-desktop"
             v-if="showSubscriptionWarning(item)"
-            @click="$emit('open-subscription-modal', item)"
+            @click.stop="openWarningModal(item)"
           >
             <svg
               width="20"
@@ -45,16 +46,18 @@
           </div>
         </div>
 
-        <StatusSwitch
-          :item="item"
-          :enableCheckbox="enableCheckbox"
-          :changeEnableStartModal="changeEnableStartModal"
-          :changeForceStopItemData="changeForceStopItemData"
-        />
+        <div @click.stop>
+          <StatusSwitch
+            :item="item"
+            :enableCheckbox="enableCheckbox"
+            :changeEnableStartModal="changeEnableStartModal"
+            :changeForceStopItemData="changeForceStopItemData"
+          />
+        </div>
 
         <div class="vertical-divider"></div>
 
-        <div @click="openAccountModal(item)" class="row-section section-data">
+        <div class="row-section section-data">
           <span class="data-label">Статус</span>
           <span v-if="item.enable === '0'">
             <StatusBadge status="deleted" type="account" />
@@ -98,22 +101,38 @@
           </span>
         </div>
 
-        <div class="row-section section-data">
+        <div
+          @click.stop="$emit('change-tariff', item)"
+          class="row-section section-data"
+        >
           <span class="data-label">Подписка</span>
           <div class="data-value">
             <span
-              v-if="item.subscription_dt_to === null"
+              v-if="
+                item.subscription_dt_to === null &&
+                item.type !== 'amocrm' &&
+                item.type !== 'bitrix24' &&
+                item.type !== 'uon'
+              "
               class="subscription-expired"
             >
               <button
                 v-if="item.type != 'amocrm' && item.type != 'bitrix24'"
                 class="open-tariff-button"
-                @click="$emit('change-tariff', item)"
               >
                 Продлить
               </button>
               <span v-else>-</span>
             </span>
+            <span
+              class="subscription-active"
+              v-else-if="
+                item.type === 'amocrm' ||
+                item.type === 'bitrix24' ||
+                item.type === 'uon'
+              "
+              >Не требуется</span
+            >
             <span v-else class="subscription-active">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +156,7 @@
 
           <button
             class="action-menu-button"
-            @click="$emit('open-modal', $event, item)"
+            @click.stop="$emit('open-modal', $event, item)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -238,6 +257,7 @@ const props = defineProps({
   openBlacklistModal: Function,
   changeStationGetHistory: Function,
   openCustomSourcesModal: Function,
+  openWarningModal: Function,
 });
 
 const { instanceData } = toRefs(props);
@@ -280,11 +300,12 @@ const enableCheckbox = (item) => {
     return item.step?.value === 5 || false;
   }
 
-  if (item.type === "amocrm" || item.type === "bitrix24") {
-    return item.enable === 1;
-  }
-
-  if (item.type === "bulk") {
+  if (
+    item.type === "amocrm" ||
+    item.type === "bitrix24" ||
+    item.type === "uon" ||
+    item.type === "bulk"
+  ) {
     return true;
   }
 
@@ -859,40 +880,42 @@ input:checked + .slider .switch-handle {
   background: #94a3b8;
 }
 
-/* АДАПТИВНОСТЬ */
 @media (max-width: 900px) {
   .account-row {
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    padding: 12px; /* Чуть уменьшаем отступы для мобилок */
   }
 
   .section-identity {
-    flex: 100%;
+    flex: 1 1 100%; /* Занимает всю верхнюю строку */
     min-width: 100%;
     border-bottom: 1px solid #f1f5f9;
     padding-bottom: 8px;
+    margin-bottom: 4px;
   }
 
   .vertical-divider {
-    display: none;
+    display: none; /* Скрываем разделитель */
   }
 
+  /* Статус и Подписка теперь делят место */
   .section-data {
     flex: 1;
-    min-width: 120px;
+    min-width: auto; /* Убираем жесткое ограничение */
   }
 
+  /* Тумблер и кнопка меню */
   .section-toggle {
-    order: 2;
+    order: 1; /* Порядок сразу после иконки, если нужно */
   }
 
   .section-actions {
-    order: 10;
-    margin-left: 0;
-    width: 100%;
-    justify-content: flex-end;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 8px;
+    order: unset; /* Возвращаем в общий поток */
+    margin-left: auto; /* Прижимаем вправо */
+    width: auto; /* Убираем 100% */
+    border-top: none; /* Убираем линию сверху */
+    padding-top: 0;
   }
 }
 </style>

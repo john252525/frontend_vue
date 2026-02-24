@@ -82,28 +82,6 @@
               Пожалуйста, нажмите кнопку ниже для получения нового QR-кода
             </p>
             <button @click="regenerateQrCode" class="regenerate-button">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M23 4V10H17"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M20.49 15C19.9868 16.5022 18.9995 17.7217 17.7213 18.4629C16.4432 19.204 14.9229 19.4299 13.4819 19.1077C12.0409 18.7854 10.8044 17.9342 10.0322 16.7447C9.2599 15.5552 8.99856 14.0982 9.29298 12.6983"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
               Получить новый QR-код
             </button>
           </div>
@@ -125,7 +103,7 @@
               stroke-linejoin="round"
             />
           </svg>
-          Связать через телефон
+          Привязать по номеру телефона
         </button>
       </div>
     </article>

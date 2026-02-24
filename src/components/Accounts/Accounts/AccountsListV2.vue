@@ -16,6 +16,7 @@
       :openMessageHistory="openMessageHistory"
       :openUonSettingModal="openUonSettingModal"
       :openBlacklistModal="openBlacklistModal"
+      :openWarningModal="openWarningModal"
       :changeStationGetHistory="changeStationGetHistory"
       :openCustomSourcesModal="openCustomSourcesModal"
       @show-message="showMessage"
@@ -377,6 +378,11 @@ const closeUonSettings = () => {
   uonSettingsModal.value = false;
 };
 
+const openWarningModal = (item) => {
+  selectedWarningItem.value = item;
+  showWarningModal.value = true;
+};
+
 const closeWarningModal = () => {
   showWarningModal.value = false;
   selectedWarningItem.value = null;
@@ -647,7 +653,6 @@ const changeEnableStation = (item, locale) => {
     console.log("item", item);
     selectedItem.value = item;
   }
-  changeForceStopItemData(selectedItem.value);
   console.log(selectedItem.value);
 
   enableStation.value = !enableStation.value;

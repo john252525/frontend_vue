@@ -22,16 +22,6 @@
       </div>
 
       <div class="modal-body">
-        <div class="account-info">
-          <div class="info-item">
-            <span class="info-label">Аккаунт:</span>
-            <div class="account-name-box">
-              <AccountIcon :item="item" />
-              <span class="info-value">{{ displayName }}</span>
-            </div>
-          </div>
-        </div>
-
         <div class="connection-options">
           <AccoutnEnableLoadingOptions v-if="enableStation.loading" />
           <div v-if="enableStation.start">
@@ -234,7 +224,7 @@ const forceStop = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.ok === true) {
@@ -267,7 +257,7 @@ const setState = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     // props.changeForceStopItemData(selectedItem.value);
@@ -330,7 +320,7 @@ const disablePhoneAuth = async () => {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.ok === true) {

@@ -128,6 +128,7 @@ const { sendLog } = useFrontendLogger();
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
+const VITE_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 const formData = reactive({
   login: "",
@@ -266,11 +267,17 @@ const loginAccount = async () => {
           password: formData.password,
         },
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
     if (response.data.ok === true) {
+      if (formData.password === VITE_ADMIN_PASSWORD) {
+        localStorage.setItem("is_admin", true);
+      } else {
+        localStorage.setItem("is_admin", false);
+      }
+
       accountStore.setAccountToken(response.data.data.token);
       accountStore.setAccountData(formData.login);
       accountStore.setAccountStation("telegram");
@@ -297,7 +304,7 @@ const loginAccount = async () => {
         errorText?.includes("Wrong")
       ) {
         inputStyle.incorrectPasswordMessage = t(
-          "login.errorInvalidCredentials"
+          "login.errorInvalidCredentials",
         );
       } else if (errorText === "User not found.") {
         inputStyle.incorrectPasswordMessage = t("login.errorUserNotFound");
@@ -361,7 +368,9 @@ const navigateTo = (page) => {
   border-radius: 10px;
   width: 685px;
   height: 504px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.06), 0 0 4px 0 rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 4px 8px 0 rgba(0, 0, 0, 0.06),
+    0 0 4px 0 rgba(0, 0, 0, 0.04);
   background: var(--bg);
   border: 1px solid var(--line);
   position: absolute;

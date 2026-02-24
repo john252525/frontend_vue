@@ -55,6 +55,7 @@
           <span
             class="action"
             v-if="
+              isAdminUser &&
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
             "
             @click="handleSubmit"
@@ -71,7 +72,10 @@
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) &&
+              isAdminUser
             "
             class="action"
             @click="openScreen"
@@ -349,6 +353,7 @@ const props = defineProps({
 import { storeToRefs } from "pinia";
 import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepStore";
 
+const isAdminUser = localStorage.getItem("is_admin") === "true" || false;
 const chatStore = useLoginWhatsAppChatsStepStore();
 const emit = defineEmits();
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);

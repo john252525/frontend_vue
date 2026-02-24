@@ -26,12 +26,7 @@
       <h2 class="modal-title">{{ t("result.true") }}</h2>
       <p class="modal-text">Ваш аккаунт успешно активирован!</p>
 
-      <button class="action-button" @click="closeAll">
-        Продолжить
-        <svg class="arrow-icon" viewBox="0 0 20 20">
-          <path fill="currentColor" d="M10 17l5-5-5-5v10z" />
-        </svg>
-      </button>
+      <button class="action-button" @click="closeAll">Продолжить</button>
     </div>
   </div>
 </template>
@@ -45,8 +40,8 @@ const props = defineProps({
     type: Function,
   },
   changeChallengeRequired: {
-    type: Function
-  }
+    type: Function,
+  },
 });
 
 const { t } = useI18n();
@@ -54,9 +49,9 @@ const { t } = useI18n();
 const confetti = ref([]);
 
 const closeAll = () => {
-  props.changeChallengeRequired()
-  props.changeEnableStation()
-}
+  props.changeChallengeRequired();
+  props.changeEnableStation();
+};
 
 const createConfetti = () => {
   const colors = [

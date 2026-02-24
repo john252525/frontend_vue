@@ -18,8 +18,8 @@
           <div class="tariff-header">
             <div class="tariff-badges">
               <span class="tariff-name">{{ selectTariff.name }}</span>
-              <div v-if="hasDiscount" class="discount-badge">
-                -{{ discountPercent }}%
+              <div v-if="appliedPromo || hasDiscount" class="discount-badge">
+                -{{ discountDisplay }}%
               </div>
             </div>
             <div class="tariff-period">
@@ -27,11 +27,46 @@
             </div>
           </div>
 
+          <!-- Блок промокода -->
+          <div class="promo-section">
+            <div class="promo-input-group">
+              <input
+                v-model="promoCodeInput"
+                type="text"
+                placeholder="Введите промокод"
+                class="promo-input"
+                :disabled="promoApplied"
+                @keyup.enter="applyPromo"
+              />
+              <button
+                class="promo-apply-btn"
+                :disabled="
+                  !promoCodeInput.trim() || promoLoading || promoApplied
+                "
+                @click="applyPromo"
+              >
+                {{
+                  promoApplied
+                    ? "Применён"
+                    : promoLoading
+                      ? "Проверка..."
+                      : "Применить"
+                }}
+              </button>
+            </div>
+
+            <div v-if="promoError" class="promo-error">
+              {{ promoError }}
+            </div>
+            <div v-if="promoSuccessMessage" class="promo-success">
+              {{ promoSuccessMessage }}
+            </div>
+          </div>
+
           <div class="price-section">
-            <div v-if="hasDiscount" class="price-with-discount">
+            <div class="price-with-discount" v-if="appliedPromo || hasDiscount">
               <div class="original-price">
-                {{ formatPrice(selectTariff.price) }}
-                {{ selectTariff.currency }}
+                {{ formatPrice(originalPrice) }} {{ selectTariff.currency }}
               </div>
               <div class="final-price">
                 {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
@@ -95,16 +130,16 @@
     <div v-if="!loadingPay" class="purchase-section">
       <div class="total-price">
         <span class="total-label">К оплате:</span>
-        <span class="total-amount"
-          >{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span
-        >
+        <span class="total-amount">
+          {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+        </span>
       </div>
 
-      <button class="buy-button" @click="buyTariff">
+      <button class="buy-button" @click="buyTariff" :disabled="loadingPay">
         <span class="button-text">Оплатить подписку</span>
-        <span class="button-price"
-          >{{ formatPrice(finalPrice) }} {{ selectTariff.currency }}</span
-        >
+        <span class="button-price">
+          {{ formatPrice(finalPrice) }} {{ selectTariff.currency }}
+        </span>
       </button>
 
       <div class="security-notice">
@@ -120,7 +155,7 @@
 </template>
 
 <script setup>
-import { toRefs, computed, ref } from "vue";
+import { ref, computed, toRefs } from "vue";
 import axios from "axios";
 import Loading from "./Loading.vue";
 import { useAccountStore } from "@/stores/accountStore";
@@ -128,51 +163,60 @@ import { useBalanceStore } from "@/stores/balanceStore";
 
 const accountStore = useAccountStore();
 const balanceStore = useBalanceStore();
+
 const token = computed(() => accountStore.getAccountToken);
-const apiUrl = import.meta.env.VITE_PAY_URL;
+const apiUrl = import.meta.env.VITE_PAY_URL; // или ваш URL для промокодов
 
 const props = defineProps({
-  selectTariff: {
-    type: Object,
-    required: true,
-  },
-  close: {
-    type: Function,
-    required: true,
-  },
-  changePaymentsStation: {
-    type: Function,
-  },
-  selectedItem: {
-    type: Object,
-  },
+  selectTariff: { type: Object, required: true },
+  close: { type: Function, required: true },
+  changePaymentsStation: { type: Function },
+  selectedItem: { type: Object },
 });
 
-const loadingPay = ref(false);
 const { selectTariff, selectedItem } = toRefs(props);
 
-// Вычисляемые свойства
-const hasDiscount = computed(() => {
-  return (
-    selectTariff.value.final_price &&
-    selectTariff.value.final_price < selectTariff.value.price
-  );
-});
+const loadingPay = ref(false);
+const promoCodeInput = ref("");
+const promoApplied = ref(false);
+const promoLoading = ref(false);
+const promoError = ref("");
+const promoSuccessMessage = ref("");
+const appliedPromo = ref(null); // объект с данными промокода {discount, type, ...}
 
-const finalPrice = computed(() => {
-  return hasDiscount.value
-    ? selectTariff.value.final_price
+// ─── Вычисляемые цены ──────────────────────────────────────
+const originalPrice = computed(() => {
+  return selectTariff.value.final_price &&
+    selectTariff.value.final_price < selectTariff.value.price
+    ? selectTariff.value.price
     : selectTariff.value.price;
 });
 
-const discountPercent = computed(() => {
-  if (!hasDiscount.value) return 0;
-  const discount =
-    ((selectTariff.value.price - selectTariff.value.final_price) /
-      selectTariff.value.price) *
-    100;
-  return Math.round(discount);
+const baseFinalPrice = computed(() => {
+  return selectTariff.value.final_price ?? selectTariff.value.price;
 });
+
+const promoDiscount = computed(() => appliedPromo.value?.discount || 0);
+
+const finalPrice = computed(() => {
+  return Math.max(0, baseFinalPrice.value - promoDiscount.value);
+});
+
+const totalDiscount = computed(() => {
+  const baseDiscount = originalPrice.value - baseFinalPrice.value;
+  return baseDiscount + promoDiscount.value;
+});
+
+const discountPercent = computed(() => {
+  if (originalPrice.value <= 0) return 0;
+  return Math.round((totalDiscount.value / originalPrice.value) * 100);
+});
+
+const discountDisplay = computed(() => {
+  return discountPercent.value > 0 ? discountPercent.value : "";
+});
+
+const hasDiscount = computed(() => discountPercent.value > 0);
 
 const hasBonuses = computed(() => {
   return selectTariff.value.bonuses && selectTariff.value.bonuses.length > 0;
@@ -180,21 +224,17 @@ const hasBonuses = computed(() => {
 
 const activeBonuses = computed(() => {
   if (!selectTariff.value.bonuses) return [];
-  return selectTariff.value.bonuses.filter((bonus) => bonus.multiplier > 0);
+  return selectTariff.value.bonuses.filter((b) => b.multiplier > 0);
 });
 
-// Вспомогательные функции
-const formatPrice = (price) => {
-  return new Intl.NumberFormat("ru-RU").format(price);
-};
-
-const formatLimit = (limit) => {
-  if (limit === -1) return "∞";
-  return new Intl.NumberFormat("ru-RU").format(limit);
-};
+// ─── Функции форматирования ────────────────────────────────
+const formatPrice = (price) =>
+  new Intl.NumberFormat("ru-RU").format(Math.round(price));
+const formatLimit = (limit) =>
+  limit === -1 ? "∞" : new Intl.NumberFormat("ru-RU").format(limit);
 
 const getPeriodText = (period) => {
-  const periodMap = {
+  const map = {
     "1d": "1 день",
     "7d": "7 дней",
     "14d": "14 дней",
@@ -205,78 +245,113 @@ const getPeriodText = (period) => {
     "12m": "12 месяцев",
     "1y": "1 год",
   };
-  return periodMap[period] || period;
+  return map[period] || period;
 };
 
 const getBonusDescription = (bonus) => {
   if (bonus.multiplier === 0) return "Бонус недоступен";
-  const periodText = getPeriodText(bonus.tariff_period || "1m");
-  const multiplierText = bonus.multiplier > 1 ? `${bonus.multiplier} × ` : "";
-  return `${multiplierText}${bonus.tariff_code} на ${periodText}`;
+  const period = getPeriodText(bonus.tariff_period || "1m");
+  const mult = bonus.multiplier > 1 ? `${bonus.multiplier} × ` : "";
+  return `${mult}${bonus.tariff_code} на ${period}`;
 };
 
-const encodeTariff = (tariffCode, id) => {
-  try {
-    const prefix = "tariff_";
-    const timestamp = Date.now();
-    const randomSalt = Math.random().toString(36).substring(2, 8);
-    const str = `${prefix}${tariffCode}|${id}|${timestamp}|${randomSalt}`;
+const applyPromo = async () => {
+  const code = promoCodeInput.value.trim().toUpperCase();
+  if (!code) return;
 
-    const firstPass = btoa(unescape(encodeURIComponent(str)));
-    const secondPass = btoa(
-      unescape(encodeURIComponent(firstPass.split("").reverse().join(""))),
+  promoLoading.value = true;
+  promoError.value = "";
+  promoSuccessMessage.value = "";
+
+  try {
+    const res = await axios.post(
+      `https://api22.developtech.ru/validate`, // ← ваш эндпоинт валидации промокода
+      { code, amount: baseFinalPrice.value },
+      { headers: { Authorization: `Bearer ${token.value}` } },
     );
 
-    return secondPass;
-  } catch (error) {
-    console.error("Encoding error:", error);
-    throw new Error("Failed to encode tariff code");
+    if (res.data.valid) {
+      appliedPromo.value = {
+        code,
+        discount: res.data.discount,
+        type: res.data.discount_type,
+      };
+      promoApplied.value = true;
+      promoSuccessMessage.value = `Промокод применён! Скидка ${formatPrice(res.data.discount)} ${selectTariff.value.currency}`;
+      promoCodeInput.value = code; // оставляем код в поле
+    } else {
+      promoError.value = res.data.message || "Промокод не действителен";
+      appliedPromo.value = null;
+      promoApplied.value = false;
+    }
+  } catch (err) {
+    promoError.value =
+      err.response?.data?.message || "Ошибка проверки промокода";
+    console.error(err);
+  } finally {
+    promoLoading.value = false;
   }
 };
 
+// ─── Покупка тарифа ────────────────────────────────────────
 const buyTariff = async () => {
   loadingPay.value = true;
+
   try {
     const encodedTariff = encodeTariff(
       selectTariff.value.code,
       selectTariff.value.id,
     );
-    const response = await axios.post(
-      `${apiUrl}/buy`,
-      {
-        amount: finalPrice.value,
-        tariff_id: selectTariff.value.id,
-        tariff: encodedTariff,
-        currency: selectTariff.value.currency,
-        domain: window.location.hostname,
-        entity: "vendor",
-        category: "tariff",
-        entity_uuid: selectedItem.value.uuid,
-        original_price: selectTariff.value.price,
-        discount_percent: discountPercent.value,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      },
-    );
+
+    const payload = {
+      amount: baseFinalPrice.value, // оригинальная сумма тарифа
+      tariff_id: selectTariff.value.id,
+      tariff: encodedTariff,
+      currency: selectTariff.value.currency,
+      domain: window.location.hostname,
+      entity: "vendor",
+      category: "tariff",
+      entity_uuid: selectedItem.value.uuid,
+      original_price: originalPrice.value,
+      discount_percent: discountPercent.value,
+      promo_code: appliedPromo.value?.code || null, // ← передаём промокод
+    };
+
+    const response = await axios.post(`${apiUrl}/buy`, payload, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
 
     if (response.data.success) {
-      loadingPay.value = false;
       await balanceStore.refreshBalance();
       props.changePaymentsStation(true, "success");
     } else {
       props.changePaymentsStation(true, "error");
     }
   } catch (error) {
-    console.error("error", error);
-    loadingPay.value = false;
+    console.error("Ошибка покупки:", error);
     props.changePaymentsStation(
       true,
       "error",
-      error.response?.data?.message || "Ошибка при покупке",
+      error.response?.data?.message || "Ошибка при покупке тарифа",
     );
+  } finally {
+    loadingPay.value = false;
+  }
+};
+
+const encodeTariff = (code, id) => {
+  try {
+    const prefix = "tariff_";
+    const ts = Date.now();
+    const salt = Math.random().toString(36).slice(2, 8);
+    const str = `${prefix}${code}|${id}|${ts}|${salt}`;
+    const step1 = btoa(unescape(encodeURIComponent(str)));
+    return btoa(
+      unescape(encodeURIComponent(step1.split("").reverse().join(""))),
+    );
+  } catch (e) {
+    console.error("Encode error:", e);
+    throw new Error("Не удалось закодировать тариф");
   }
 };
 </script>
@@ -505,6 +580,70 @@ const buyTariff = async () => {
 .bonus-text {
   font-size: 13px;
   color: #2e7d32;
+  font-weight: 500;
+}
+
+.promo-section {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  border: 1px solid #e0e0ff;
+}
+
+.promo-input-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.promo-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.promo-input:focus {
+  border-color: #6732ff;
+  box-shadow: 0 0 0 3px rgba(103, 50, 255, 0.1);
+}
+
+.promo-apply-btn {
+  padding: 0 20px;
+  background: #6732ff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.promo-apply-btn:hover:not(:disabled) {
+  background: #8a63ff;
+  transform: translateY(-1px);
+}
+
+.promo-apply-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.promo-error {
+  color: #d32f2f;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.promo-success {
+  color: #2e7d32;
+  font-size: 13px;
+  margin-top: 8px;
   font-weight: 500;
 }
 

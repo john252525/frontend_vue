@@ -89,7 +89,6 @@
       <path d="M6 12H3" />
       <path d="M18 12h3" />
     </svg>
-
     Источники
   </button>
 
