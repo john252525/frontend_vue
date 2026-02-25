@@ -38,7 +38,6 @@
               },
             ]"
             @click="!isLoading && selectMethod('YooKassa')"
-            v-if="getPermission"
           >
             <div class="method-icon">
               <div class="icon-wrapper">
