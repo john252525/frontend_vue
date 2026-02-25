@@ -18,7 +18,7 @@
           </div>
           <div class="tooltip-content">
             <p v-if="type === 'crm'">CRM-система активна</p>
-            <p v-else-if="type === 'bulk'">Аккаунт рассылки активен</p>
+            <p v-else-if="type === 'bulk'">Аккаунт работает</p>
             <p v-else>{{ statusSubtitle }}</p>
 
             <span v-if="type != 'bulk'" class="tooltip-hint"

@@ -843,7 +843,7 @@ const submitForm = async () => {
     }
   } catch (error) {
     console.error("Ошибка при отправке формы:", error);
-    // Здесь можно добавить обработку ошибки отправки (например, показать тост)
+    setLoadingStatus(true, "error");
   } finally {
     stationLoading.loading = false;
   }

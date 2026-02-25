@@ -147,16 +147,6 @@
               stationDomain.navigate.value === 'whatsapi'
             "
             class="action"
-            @click="changeStationGetHistory"
-            >История</span
-          >
-
-          <span
-            v-if="
-              ['uon'].includes(selectedItem.type) &&
-              stationDomain.navigate.value === 'whatsapi'
-            "
-            class="action"
             @click="changeRoutingSettings"
             >Менеджеры</span
           >
@@ -178,8 +168,8 @@
             "
             class="action"
             @click="openMessageHistory"
-            >История сообщений</span
-          >
+            >История
+          </span>
 
           <span
             v-if="

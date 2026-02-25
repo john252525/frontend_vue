@@ -200,7 +200,7 @@ const getStatusText = (status) => {
     case 5:
       return "Активен";
     default:
-      return "Не активен";
+      return "Неактивен";
   }
 };
 
