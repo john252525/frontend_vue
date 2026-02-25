@@ -165,7 +165,7 @@ const accountStore = useAccountStore();
 const balanceStore = useBalanceStore();
 
 const token = computed(() => accountStore.getAccountToken);
-const apiUrl = import.meta.env.VITE_PAY_URL; // или ваш URL для промокодов
+const apiUrl = import.meta.env.VITE_PAY_URL;
 
 const props = defineProps({
   selectTariff: { type: Object, required: true },
@@ -265,7 +265,7 @@ const applyPromo = async () => {
 
   try {
     const res = await axios.post(
-      `https://api22.developtech.ru/validate`, // ← ваш эндпоинт валидации промокода
+      `${apiUrl}/validate`, // ← ваш эндпоинт валидации промокода
       { code, amount: baseFinalPrice.value },
       { headers: { Authorization: `Bearer ${token.value}` } },
     );
