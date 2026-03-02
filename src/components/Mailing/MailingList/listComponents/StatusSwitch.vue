@@ -5,10 +5,13 @@
         type="checkbox"
         @change="updateStatus(item.state === 1 ? 0 : 1)"
         :checked="item.state === 1"
-        :disabled="item.loading"
+        :disabled="item.loading || item.state_text === 'Завершена'"
       />
       <span class="slider round">
-        <span class="switch-handle"></span>
+        <span
+          :class="{ disable: item.state_text === 'Завершена' }"
+          class="switch-handle"
+        ></span>
       </span>
       <span v-if="item.loading" class="switch-loader"></span>
     </label>
@@ -165,6 +168,13 @@ const updateStatus = async (state) => {
   left: 2px;
   bottom: 2px;
   background: white;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch-handle.disable {
+  background: rgb(233, 233, 233);
   transition: all 0.3s ease;
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);

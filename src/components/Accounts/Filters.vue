@@ -177,7 +177,7 @@ const items = reactive([
     checked: accountStore.filterState.max,
   },
   {
-    id: "vk",
+    id: "vk-bot",
     name: "VK",
     checked: accountStore.filterState.vk,
   },
@@ -216,7 +216,7 @@ const visibleCrmSubItems = computed(() => {
 
   return crmSubItems.filter((subItem) => {
     const subFilterConfig = crmConfig.subFilters.find(
-      (sf) => sf.id === subItem.id
+      (sf) => sf.id === subItem.id,
     );
     return subFilterConfig?.enabled !== false;
   });
@@ -259,7 +259,8 @@ const updateSources = () => {
 
 const updateGroups = () => {
   const messengerSelected = visibleItems.value.some(
-    (item) => (item.id === "telegram" || item.id === "whatsapp") && item.checked
+    (item) =>
+      (item.id === "telegram" || item.id === "whatsapp") && item.checked,
   );
   const crmSelected =
     visibleItems.value.find((item) => item.id === "crm")?.checked || false;

@@ -106,7 +106,7 @@
 
           <!-- Add Vendor Button (если слот не полный) -->
           <button
-            v-if="Object.keys(group.vendors).length < 3"
+            v-if="Object.keys(group.vendors).length < 4"
             @click="openAddVendorModal(group)"
             class="add-vendor-button"
           >
@@ -193,7 +193,7 @@ const availableAccounts = ref([]);
 
 const filteredAccounts = computed(() => {
   return availableAccounts.value.filter((account) =>
-    ["whatsapp", "telegram"].includes(account.source || account.type)
+    ["whatsapp", "telegram"].includes(account.source || account.type),
   );
 });
 

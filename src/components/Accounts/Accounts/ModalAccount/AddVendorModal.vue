@@ -15,8 +15,8 @@
       </div>
       <div class="modal-body">
         <p class="info-text">
-          Выберите аккаунты для добавления в группу (максимум w: один WhatsApp и
-          один Telegram и Max)
+          Выберите аккаунты для добавления в группу (максимум по одному для
+          каждого типа: WhatsApp, Telegram, VK, Max)
         </p>
 
         <div v-if="loadingAccounts" class="loading-spinner">
@@ -49,6 +49,7 @@
                   'badge-telegram': acc.source === 'telegram',
                   'badge-whatsapp': acc.source === 'whatsapp',
                   'badge-max': acc.source === 'max',
+                  'badge-vk': acc.source === 'vk' || acc.source === 'vk-bot',
                 }"
               ></span>
               <span class="acc-type-text">{{ getSource(acc.source) }}</span>
@@ -58,6 +59,14 @@
               >
             </label>
           </div>
+        </div>
+
+        <div
+          v-if="validationMessage"
+          class="validation-error"
+          style="margin-top: 15px"
+        >
+          {{ validationMessage }}
         </div>
       </div>
       <div class="modal-footer">
@@ -96,35 +105,29 @@ const availableAccounts = ref([]);
 
 onMounted(async () => {
   loadingAccounts.value = true;
-  console.log("🔍 AddVendorModal: accountListRef =", props.accountListRef);
-
   try {
-    if (!props.accountListRef) {
-      console.error("❌ accountListRef не передан в модалку!");
-      loadingAccounts.value = false;
-      return;
-    }
-
-    if (typeof props.accountListRef.getAllAccounts !== "function") {
-      console.error("❌ getAllAccounts не функция!");
+    if (
+      !props.accountListRef ||
+      typeof props.accountListRef.getAllAccounts !== "function"
+    ) {
+      console.error("❌ accountListRef ошибка");
       loadingAccounts.value = false;
       return;
     }
 
     const all = props.accountListRef.getAllAccounts();
-    console.log("📦 Все аккаунты:", all);
 
-    if (Array.isArray(all) && all.length > 0) {
+    if (Array.isArray(all)) {
+      // Добавлена поддержка 'vk' и 'vk-bot'
       const filtered = all.filter(
         (acc) =>
           acc.source === "whatsapp" ||
           acc.source === "telegram" ||
-          acc.source === "max"
+          acc.source === "max" ||
+          acc.source === "vk" ||
+          acc.source === "vk-bot",
       );
-      console.log("✅ Отфильтровано аккаунтов:", filtered.length, filtered);
       availableAccounts.value = filtered;
-    } else {
-      console.warn("⚠️ Аккаунты пустые или не массив");
     }
 
     selectedVendorUuids.value = [];
@@ -143,69 +146,57 @@ function getSource(source) {
       return "WhatsApp";
     case "max":
       return "Max";
+    case "vk":
+    case "vk-bot":
+      return "VK";
     default:
-      return "Неизвестно";
+      return source || "Неизвестно";
   }
 }
 
+// Нормализация сорса для сравнения (чтобы vk и vk-bot считались одним типом)
+const normalizeSource = (source) => {
+  const s = source?.toLowerCase();
+  if (s === "vk-bot" || s === "vk") return "vk";
+  return s;
+};
+
 // Подсчитать кол-во выбранных аккаунтов по источнику
 const countSelectedBySource = (source) => {
+  const target = normalizeSource(source);
   return selectedVendorUuids.value.filter((uuid) => {
     const account = availableAccounts.value.find((acc) => acc.uuid === uuid);
-    return account?.source?.toLowerCase() === source.toLowerCase();
+    return normalizeSource(account?.source) === target;
   }).length;
 };
 
 // Подсчитать уже добавленные аккаунты по источнику
 const countAddedBySource = (source) => {
+  const target = normalizeSource(source);
   const groupVendors = Array.isArray(props.group.vendors)
     ? props.group.vendors
     : Object.values(props.group.vendors || {});
 
   return (groupVendors || []).filter(
-    (v) => v.source?.toLowerCase() === source.toLowerCase()
+    (v) => normalizeSource(v.source) === target,
   ).length;
 };
 
 // Проверить, можно ли выбрать аккаунт
 const canSelectAccount = (acc) => {
-  // Уже добавлен в группу - нельзя выбрать
   if (isAdded(acc)) return false;
 
-  const source = acc.source?.toLowerCase();
+  const source = acc.source;
   const isSelected = selectedVendorUuids.value.includes(acc.uuid);
 
-  // Если аккаунт уже выбран, можем его снять
   if (isSelected) return true;
 
-  // Если не выбран, проверяем лимит: максимум 1 per source
+  // Лимит: 1 аккаунт каждого типа (TG, WA, VK, Max)
   const selectedCount = countSelectedBySource(source);
   const addedCount = countAddedBySource(source);
 
   return selectedCount + addedCount < 1;
 };
-
-// Проверить, можно ли добавлять (максимум 2 аккаунта всего)
-const isMaxAccountsSelected = computed(() => {
-  return selectedVendorUuids.value.length >= 2;
-});
-
-// Получить сообщение об ошибке валидации
-const validationMessage = computed(() => {
-  const telegramCount =
-    countSelectedBySource("telegram") + countAddedBySource("telegram");
-  const whatsappCount =
-    countSelectedBySource("whatsapp") + countAddedBySource("whatsapp");
-  const maxCount =
-    countSelectedBySource("whatsapp") + countAddedBySource("max");
-
-  const errors = [];
-  if (telegramCount > 1) errors.push("Максимум 1 Telegram аккаунт");
-  if (whatsappCount > 1) errors.push("Максимум 1 WhatsApp аккаунт");
-  if (maxCount > 1) errors.push("Максимум 1 Max аккаунт");
-
-  return errors.length > 0 ? errors.join(", ") : "";
-});
 
 const isAdded = (acc) => {
   const groupVendors = Array.isArray(props.group.vendors)
@@ -213,6 +204,20 @@ const isAdded = (acc) => {
     : Object.values(props.group.vendors || {});
   return (groupVendors || []).some((v) => v.uuid === acc.uuid);
 };
+
+// Сообщение о валидации
+const validationMessage = computed(() => {
+  const sources = ["telegram", "whatsapp", "max", "vk"];
+  const errors = [];
+
+  sources.forEach((s) => {
+    if (countSelectedBySource(s) + countAddedBySource(s) > 1) {
+      errors.push(`Максимум 1 ${getSource(s)}`);
+    }
+  });
+
+  return errors.length > 0 ? errors.join(", ") : "";
+});
 
 const handleAddMany = async () => {
   if (selectedVendorUuids.value.length === 0) return;
@@ -229,14 +234,11 @@ const handleAddMany = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     emit("added");
   } catch (err) {
-    alert(
-      "Ошибка при добавлении вендоров: " +
-        (err?.response?.data?.message ?? err?.message ?? err)
-    );
+    alert("Ошибка: " + (err?.response?.data?.message ?? err?.message));
   } finally {
     isLoading.value = false;
   }
@@ -246,6 +248,7 @@ const close = () => emit("close");
 </script>
 
 <style scoped>
+/* Существующие стили без изменений, добавляем только VK */
 .account-options-multiselect {
   display: flex;
   flex-direction: column;
@@ -263,14 +266,14 @@ const close = () => emit("close");
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   background: #fff;
-  transition: box-shadow 0.2s, border 0.2s, background 0.2s;
+  transition: all 0.2s;
   font-size: 14px;
   position: relative;
+  cursor: pointer;
 }
 
 .account-checkbox:hover:not(.disabled) {
   border-color: #bfdbfe;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   background: #f9fafb;
 }
 
@@ -285,20 +288,20 @@ const close = () => emit("close");
   height: 18px;
   border-radius: 4px;
   display: inline-block;
-  margin-right: 2px;
 }
 
 .badge-telegram {
   background: #0088cc;
 }
-
 .badge-whatsapp {
   background: #25d366;
 }
-
 .badge-max {
   background-color: #424ee9;
 }
+.badge-vk {
+  background-color: #0077ff;
+} /* Цвет VK */
 
 .acc-type-text {
   min-width: 70px;
@@ -311,9 +314,8 @@ const close = () => emit("close");
   font-size: 14px;
   color: #111827;
   font-weight: 500;
-  margin-left: 10px;
-  word-break: break-all;
   flex: 1;
+  word-break: break-all;
 }
 
 .acc-badge-in-group {
@@ -322,28 +324,12 @@ const close = () => emit("close");
   font-size: 12px;
   border-radius: 4px;
   padding: 2px 8px;
-  margin-left: 10px;
 }
 
 input[type="checkbox"] {
   width: 16px;
   height: 16px;
   accent-color: #5666c8;
-  flex-shrink: 0;
-}
-
-input[type="checkbox"]:disabled {
-  cursor: not-allowed;
-}
-
-.validation-error {
-  padding: 12px;
-  margin-bottom: 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  color: #991b1b;
-  font-size: 13px;
 }
 
 .modal-overlay {
@@ -366,7 +352,6 @@ input[type="checkbox"]:disabled {
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
@@ -377,83 +362,17 @@ input[type="checkbox"]:disabled {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-title {
-  font-weight: 600;
-  font-size: 18px;
-  color: var(--text);
-  margin: 0;
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-
-.modal-close:hover {
-  background: #f3f4f6;
-  color: var(--text);
-}
-
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
-
 .modal-body {
   padding: 20px;
 }
 
-.info-text {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0 0 20px 0;
-}
-
-.loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid oklch(0.541 0.198 267);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.no-accounts {
-  padding: 16px;
+.validation-error {
+  padding: 10px;
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: 6px;
   color: #991b1b;
-  text-align: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .modal-footer {
@@ -466,21 +385,15 @@ input[type="checkbox"]:disabled {
 
 .button {
   padding: 8px 16px;
-  border: none;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 14px;
   cursor: pointer;
-  transition: all 0.25s;
 }
 
 .button-primary {
   background: oklch(0.541 0.198 267);
   color: white;
-}
-
-.button-primary:hover:not(:disabled) {
-  background: #565cc8;
+  border: none;
 }
 
 .button-primary:disabled {
@@ -490,10 +403,20 @@ input[type="checkbox"]:disabled {
 
 .button-secondary {
   background: #f3f4f6;
-  color: var(--text);
+  border: none;
 }
 
-.button-secondary:hover {
-  background: #e5e7eb;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #5666c8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 </style>

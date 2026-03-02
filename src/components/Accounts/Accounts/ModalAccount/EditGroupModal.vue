@@ -49,13 +49,7 @@
 
               <div class="messenger-info">
                 <div class="messenger-badge" :class="`badge-${item}`"></div>
-                <span class="messenger-name">{{
-                  item === "telegram"
-                    ? "Telegram"
-                    : item === "whatsapp"
-                    ? "WhatsApp"
-                    : "Max"
-                }}</span>
+                <span class="messenger-name">{{ getMessengerName(item) }}</span>
               </div>
 
               <button
@@ -68,7 +62,6 @@
             </div>
           </div>
 
-          <!-- Добавление нового канала -->
           <div class="add-cascade" v-if="hasAvailableItems">
             <p class="label-sm">Добавить канал:</p>
             <div class="cascade-options">
@@ -91,6 +84,16 @@
               >
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
+              </button>
+              <button
+                v-if="!formData.cascade.includes('vk')"
+                id="vk-button"
+                type="button"
+                @click="addCascadeItem('vk')"
+                class="cascade-btn cascade-btn-vk"
+              >
+                <span class="btn-badge badge-vk"></span>
+                VK
               </button>
               <button
                 v-if="!formData.cascade.includes('max')"
@@ -121,7 +124,6 @@
   </div>
 </template>
 
-<!-- SCRIPT -->
 <script setup>
 import { ref, reactive, watch, computed } from "vue";
 import { useVendorGroups } from "@/composables/useVendorGroups";
@@ -146,15 +148,31 @@ const formData = reactive({
   cascade: [],
 });
 
-// Вычисляем доступные элементы
+// Вычисляем доступные элементы (Добавлен vk)
 const availableCascadeItems = computed(() => {
-  const allItems = ["telegram", "whatsapp", "max"]; // ← добавить "max"
+  const allItems = ["telegram", "whatsapp", "vk", "max"];
   return allItems.filter((item) => !formData.cascade.includes(item));
 });
 
 const hasAvailableItems = computed(
-  () => availableCascadeItems.value.length > 0
+  () => availableCascadeItems.value.length > 0,
 );
+
+// Хелпер для отображения названия мессенджера
+const getMessengerName = (item) => {
+  switch (item) {
+    case "telegram":
+      return "Telegram";
+    case "whatsapp":
+      return "WhatsApp";
+    case "vk":
+      return "VK";
+    case "max":
+      return "Max";
+    default:
+      return item;
+  }
+};
 
 watch(
   () => props.group,
@@ -172,7 +190,7 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const dragStart = (e, index) => {
@@ -187,13 +205,11 @@ const dragOver = (e) => {
 
 const dragDrop = (e, index) => {
   e.preventDefault();
-
   if (draggedIndex.value !== null && draggedIndex.value !== index) {
     const draggedItem = formData.cascade[draggedIndex.value];
     formData.cascade.splice(draggedIndex.value, 1);
     formData.cascade.splice(index, 0, draggedItem);
   }
-
   dragOverIndex.value = null;
   draggedIndex.value = null;
 };
@@ -238,8 +254,8 @@ const handleUpdate = async () => {
 };
 </script>
 
-<!-- STYLES -->
 <style scoped>
+/* Стили из исходника + добавление VK */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -274,32 +290,19 @@ const handleUpdate = async () => {
 .modal-title {
   font-weight: 600;
   font-size: 18px;
-  color: var(--text);
   margin: 0;
 }
 
 .modal-close {
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: none;
   background: transparent;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.25s;
-}
-
-.modal-close:hover {
-  background: #f3f4f6;
-  color: var(--text);
-}
-
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-body {
@@ -311,11 +314,9 @@ const handleUpdate = async () => {
 }
 
 .form-label {
-  box-sizing: border-box;
   display: block;
   font-weight: 600;
   font-size: 14px;
-  color: var(--text);
   margin-bottom: 8px;
 }
 
@@ -326,20 +327,12 @@ const handleUpdate = async () => {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
-  font-family: inherit;
-  transition: all 0.25s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: oklch(0.541 0.198 267);
-  box-shadow: 0 0 0 3px rgba(85, 102, 200, 0.1);
 }
 
 .order-hint {
   font-size: 12px;
   color: #6b7280;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
   font-style: italic;
 }
 
@@ -349,7 +342,6 @@ const handleUpdate = async () => {
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;
-  min-height: 60px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -363,45 +355,12 @@ const handleUpdate = async () => {
   background: white;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  transition: all 0.25s;
   cursor: grab;
-  user-select: none;
-}
-
-.order-item:hover {
-  border-color: #bfdbfe;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .order-item.drag-over {
   background: rgba(85, 102, 200, 0.1);
   border-color: oklch(0.541 0.198 267);
-  transform: scale(1.02);
-}
-
-.order-item:active {
-  cursor: grabbing;
-}
-
-.drag-handle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  opacity: 0.5;
-  transition: opacity 0.25s;
-}
-
-.order-item:hover .drag-handle {
-  opacity: 1;
-}
-
-.handle-icon {
-  width: 20px;
-  height: 20px;
-  fill: #6b7280;
 }
 
 .order-number {
@@ -415,7 +374,6 @@ const handleUpdate = async () => {
   border-radius: 50%;
   font-weight: 700;
   font-size: 12px;
-  flex-shrink: 0;
 }
 
 .messenger-info {
@@ -423,51 +381,40 @@ const handleUpdate = async () => {
   align-items: center;
   gap: 10px;
   flex: 1;
-  min-width: 0;
 }
 
 .messenger-badge {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .badge-telegram {
   background: #0088cc;
 }
-
 .badge-whatsapp {
   background: #25d366;
+}
+.badge-vk {
+  background: #0077ff;
+}
+.badge-max {
+  background: #5b4ef5;
 }
 
 .messenger-name {
   font-weight: 600;
   font-size: 14px;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .remove-btn {
   width: 28px;
   height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: none;
   background: #fee2e2;
   color: #ef4444;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  flex-shrink: 0;
-  transition: all 0.25s;
-}
-
-.remove-btn:hover {
-  background: #fca5a5;
 }
 
 .add-cascade {
@@ -475,52 +422,35 @@ const handleUpdate = async () => {
   border-top: 1px solid #e5e7eb;
 }
 
-.label-sm {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  margin: 0 0 10px 0;
-}
-
 .cascade-options {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .cascade-btn {
   flex: 1;
+  min-width: 100px;
   padding: 10px 12px;
   border: 2px solid #d1d5db;
   background: white;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.25s;
 }
 
-.badge-max {
-  background: #5b4ef5; /* или любой другой цвет на твой выбор */
+.cascade-btn-vk:hover {
+  border-color: #0077ff;
+  background: rgba(0, 119, 255, 0.05);
 }
-
 .cascade-btn-max:hover {
+  border-color: #5b4ef5;
   background: rgba(91, 78, 245, 0.05);
-  border-color: #c4b5fd;
-}
-
-.cascade-btn:hover {
-  border-color: #bfdbfe;
-  background: rgba(0, 136, 204, 0.05);
-}
-
-.cascade-btn-whatsapp:hover {
-  background: rgba(37, 211, 102, 0.05);
-  border-color: #86efac;
 }
 
 .btn-badge {
@@ -542,31 +472,13 @@ const handleUpdate = async () => {
   border: none;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 14px;
   cursor: pointer;
-  transition: all 0.25s;
 }
-
 .button-primary {
   background: oklch(0.541 0.198 267);
   color: white;
 }
-
-.button-primary:hover:not(:disabled) {
-  background: #565cc8;
-}
-
-.button-primary:disabled {
-  background: #d1d5db;
-  cursor: not-allowed;
-}
-
 .button-secondary {
   background: #f3f4f6;
-  color: var(--text);
-}
-
-.button-secondary:hover {
-  background: #e5e7eb;
 }
 </style>

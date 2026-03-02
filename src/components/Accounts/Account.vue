@@ -145,7 +145,7 @@ const availableAccounts = computed(() => {
   const accounts =
     accountsCache.value.length > 0 ? accountsCache.value : accountsList.value;
   const filtered = accounts.filter((account) =>
-    ["whatsapp", "telegram"].includes(account.source || account.type),
+    ["whatsapp", "telegram", "vk-bot"].includes(account.source || account.type),
   );
   console.log("📊 availableAccounts computed:", filtered.length);
   return filtered;

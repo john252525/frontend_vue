@@ -391,6 +391,14 @@ const closeWarningModal = () => {
 // ============= УПРАВЛЕНИЕ МОДАЛКАМИ =============
 const changeTariffStation = (item) => {
   selectedItem.value = item;
+
+  if (
+    item.type === "uon" ||
+    item.type === "amocrm" ||
+    item.type === "bitrix24"
+  ) {
+    return;
+  }
   tariffStation.value = !tariffStation.value;
 };
 

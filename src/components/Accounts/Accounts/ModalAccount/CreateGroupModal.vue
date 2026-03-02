@@ -20,7 +20,7 @@
           <input
             v-model="formData.name"
             type="text"
-            placeholder="Например: WhatsApp Group"
+            placeholder="Например: Новая каскадная группа"
             class="form-input"
           />
         </div>
@@ -58,13 +58,7 @@
 
               <div class="messenger-info">
                 <div class="messenger-badge" :class="`badge-${item}`"></div>
-                <span class="messenger-name">{{
-                  item === "telegram"
-                    ? "Telegram"
-                    : item === "whatsapp"
-                    ? "WhatsApp"
-                    : "Max"
-                }}</span>
+                <span class="messenger-name">{{ getMessengerName(item) }}</span>
               </div>
 
               <button
@@ -97,6 +91,15 @@
               >
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
+              </button>
+              <button
+                v-if="!formData.cascade.includes('vk')"
+                type="button"
+                @click="addCascadeItem('vk')"
+                class="cascade-btn cascade-btn-vk"
+              >
+                <span class="btn-badge badge-vk"></span>
+                VK
               </button>
               <button
                 v-if="!formData.cascade.includes('max')"
@@ -148,6 +151,22 @@ const formData = reactive({
   type: "cascade",
   cascade: [],
 });
+
+// Хелпер для получения человекочитаемого названия
+const getMessengerName = (item) => {
+  switch (item) {
+    case "telegram":
+      return "Telegram";
+    case "whatsapp":
+      return "WhatsApp";
+    case "vk":
+      return "VK";
+    case "max":
+      return "Max";
+    default:
+      return item;
+  }
+};
 
 const dragStart = (e, index) => {
   draggedIndex.value = index;
@@ -217,6 +236,7 @@ const handleCreate = async () => {
 </script>
 
 <style scoped>
+/* Базовые стили */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -251,7 +271,6 @@ const handleCreate = async () => {
 .modal-title {
   font-weight: 600;
   font-size: 18px;
-  color: var(--text);
   margin: 0;
 }
 
@@ -265,18 +284,6 @@ const handleCreate = async () => {
   background: transparent;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.25s;
-}
-
-.modal-close:hover {
-  background: #f3f4f6;
-  color: var(--text);
-}
-
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
 }
 
 .modal-body {
@@ -291,7 +298,6 @@ const handleCreate = async () => {
   display: block;
   font-weight: 600;
   font-size: 14px;
-  color: var(--text);
   margin-bottom: 8px;
 }
 
@@ -302,8 +308,6 @@ const handleCreate = async () => {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
-  font-family: inherit;
-  transition: all 0.25s;
 }
 
 .form-input:focus {
@@ -315,7 +319,7 @@ const handleCreate = async () => {
 .order-hint {
   font-size: 12px;
   color: #6b7280;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
   font-style: italic;
 }
 
@@ -339,45 +343,13 @@ const handleCreate = async () => {
   background: white;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  transition: all 0.25s;
   cursor: grab;
   user-select: none;
-}
-
-.order-item:hover {
-  border-color: #bfdbfe;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .order-item.drag-over {
   background: rgba(85, 102, 200, 0.1);
   border-color: oklch(0.541 0.198 267);
-  transform: scale(1.02);
-}
-
-.order-item:active {
-  cursor: grabbing;
-}
-
-.drag-handle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  opacity: 0.5;
-  transition: opacity 0.25s;
-}
-
-.order-item:hover .drag-handle {
-  opacity: 1;
-}
-
-.handle-icon {
-  width: 20px;
-  height: 20px;
-  fill: #6b7280;
 }
 
 .order-number {
@@ -391,7 +363,6 @@ const handleCreate = async () => {
   border-radius: 50%;
   font-weight: 700;
   font-size: 12px;
-  flex-shrink: 0;
 }
 
 .messenger-info {
@@ -399,40 +370,31 @@ const handleCreate = async () => {
   align-items: center;
   gap: 10px;
   flex: 1;
-  min-width: 0;
 }
 
 .messenger-badge {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
-.badge-max {
-  background: #5b4ef5;
-}
-
-.cascade-btn-max:hover {
-  background: rgba(91, 78, 245, 0.05);
-  border-color: #c4b5fd;
-}
-
+/* Цвета баджей */
 .badge-telegram {
   background: #0088cc;
 }
-
 .badge-whatsapp {
   background: #25d366;
+}
+.badge-vk {
+  background: #0077ff;
+}
+.badge-max {
+  background: #5b4ef5;
 }
 
 .messenger-name {
   font-weight: 600;
   font-size: 14px;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .remove-btn {
@@ -446,13 +408,6 @@ const handleCreate = async () => {
   color: #ef4444;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  flex-shrink: 0;
-  transition: all 0.25s;
-}
-
-.remove-btn:hover {
-  background: #fca5a5;
 }
 
 .add-cascade {
@@ -464,23 +419,24 @@ const handleCreate = async () => {
   font-size: 12px;
   font-weight: 600;
   color: #6b7280;
-  margin: 0 0 10px 0;
+  margin-bottom: 10px;
 }
 
 .cascade-options {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .cascade-btn {
   flex: 1;
+  min-width: 100px;
   padding: 10px 12px;
   border: 2px solid #d1d5db;
   background: white;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -489,28 +445,28 @@ const handleCreate = async () => {
   transition: all 0.25s;
 }
 
+/* Ховеры для кнопок */
 .cascade-btn:hover {
   border-color: #bfdbfe;
   background: rgba(0, 136, 204, 0.05);
 }
-
 .cascade-btn-whatsapp:hover {
-  background: rgba(37, 211, 102, 0.05);
   border-color: #86efac;
+  background: rgba(37, 211, 102, 0.05);
+}
+.cascade-btn-vk:hover {
+  border-color: #0077ff;
+  background: rgba(0, 119, 255, 0.05);
+}
+.cascade-btn-max:hover {
+  border-color: #c4b5fd;
+  background: rgba(91, 78, 245, 0.05);
 }
 
 .btn-badge {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-}
-
-.badge-telegram {
-  background: #0088cc;
-}
-
-.badge-whatsapp {
-  background: #25d366;
 }
 
 .modal-footer {
@@ -528,29 +484,16 @@ const handleCreate = async () => {
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.25s;
 }
-
 .button-primary {
   background: oklch(0.541 0.198 267);
   color: white;
 }
-
-.button-primary:hover:not(:disabled) {
-  background: #565cc8;
-}
-
 .button-primary:disabled {
   background: #d1d5db;
   cursor: not-allowed;
 }
-
 .button-secondary {
   background: #f3f4f6;
-  color: var(--text);
-}
-
-.button-secondary:hover {
-  background: #e5e7eb;
 }
 </style>
