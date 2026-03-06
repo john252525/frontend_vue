@@ -328,8 +328,10 @@ function getType(type) {
       return "Max";
     case "uon":
       return "U-ON";
+    case "adapter":
+      return "Вконтакте";
     default:
-      return "Неизвестно";
+      return type;
   }
 }
 

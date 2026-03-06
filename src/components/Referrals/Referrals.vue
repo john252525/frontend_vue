@@ -43,9 +43,7 @@
                 </svg>
               </div>
               <div class="referral-text">
-                <h3 class="referral-title">
-                  {{ t("referrals.inviteFriends") }}
-                </h3>
+                <h3 class="referral-title">Пригласи друзей</h3>
                 <p class="referral-subtitle">
                   {{ t("referrals.earnCommission") }}
                 </p>
@@ -218,7 +216,7 @@ const initChart = () => {
             callbacks: {
               label: (context) => {
                 return `${t("referrals.operations")}: ${Math.round(
-                  context.parsed.y
+                  context.parsed.y,
                 )}`;
               },
             },
@@ -277,7 +275,7 @@ const fetchStatistics = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accountStore.accountToken}`,
         },
-      }
+      },
     );
 
     if (response.data.success) {

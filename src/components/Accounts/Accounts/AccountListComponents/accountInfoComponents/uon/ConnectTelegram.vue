@@ -18,7 +18,7 @@
         />
       </svg>
       <span v-else class="loader"></span>
-      <span>Подключить Telegram</span>
+      <span>Системные уведомления</span>
     </div>
   </button>
 

@@ -100,7 +100,9 @@
 
           <span
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) && selectedItem.type != 'adapter'
             "
             class="action action-throw"
             @click="openResetAccountModal"
@@ -109,7 +111,9 @@
 
           <span
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) && isAdminUser
             "
             class="action"
             @click="getNewProxy"

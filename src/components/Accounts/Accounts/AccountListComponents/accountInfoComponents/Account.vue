@@ -17,7 +17,7 @@
   <div class="account-details">
     <div class="detail-item">
       <span class="detail-label">Логин:</span>
-      <span class="detail-value">{{ accountData.name }}</span>
+      <span class="detail-value">{{ accountData.login }}</span>
     </div>
     <div class="detail-item">
       <span class="detail-label">Создан:</span>
@@ -27,7 +27,11 @@
 
   <div class="action-section">
     <div class="action-buttons-grid">
-      <button class="action-button" @click="emitAction('rename')">
+      <button
+        v-if="['amocrm', 'bitrix24', 'uon'].includes(accountData.type)"
+        class="action-button"
+        @click="emitAction('rename')"
+      >
         <svg
           width="14"
           height="14"
@@ -42,7 +46,7 @@
         </svg>
         Обновить аккаунт
       </button>
-      <ConnectTelegram />
+      <ConnectTelegram v-if="['uon'].includes(accountData.type)" />
       <ActionsButton
         v-if="
           ['uon'].includes(accountData.type) &&
