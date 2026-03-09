@@ -21,7 +21,11 @@
     </div>
 
     <div class="action-buttons">
-      <button v-if="balanceError" class="retry-btn" @click="getBalance">
+      <button
+        v-if="balanceError"
+        class="retry-btn"
+        @click="navigateTo('/payments')"
+      >
         <span>Пополнить баланс</span>
       </button>
       <button class="close-btn" @click="changeTariffStation">
@@ -36,6 +40,9 @@ import { defineProps } from "vue";
 import { ref, computed, toRefs } from "vue";
 import axios from "axios";
 const apiUrl = import.meta.env.VITE_PAY_URL;
+
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -82,11 +89,11 @@ const userBalance = ref();
 const balanceError = ref(false);
 
 const sendError = (error) => {
-  if (error === "Balance error") {
+  if (error === "Insufficient balance") {
     balanceError.value = true;
     return "Недостаточно средств";
   } else {
-    return "Ошибка сервера";
+    return " Ошибка сервера";
   }
 };
 
@@ -101,7 +108,7 @@ const getBalance = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
     console.log(response.data);
     userBalance.value = response.data.balance;
@@ -116,6 +123,18 @@ const getBalance = async () => {
     console.error("error", err.response ? err.response.data : err.message);
   }
 };
+
+function navigateTo(page) {
+  if (typeof page === "object" && page.query) {
+    page.query.payment = "create";
+    router.push(page);
+  } else if (typeof page === "string") {
+    const separator = page.includes("?") ? "&" : "?";
+    router.push(`${page}${separator}payment=create`);
+  } else {
+    router.push(page);
+  }
+}
 
 const changePay = () => {
   // props.changePaymentsStation(false, "error");
@@ -136,7 +155,7 @@ const createPayment = async (amount) => {
         headers: {
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.success) {

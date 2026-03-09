@@ -332,7 +332,9 @@ const closeWarningModal = () => {
 
 // ============= УПРАВЛЕНИЕ МОДАЛКАМИ =============
 const changeTariffStation = (item) => {
-  selectedItem.value = item;
+  if (item) {
+    selectedItem.value = item;
+  }
   tariffStation.value = !tariffStation.value;
 };
 

@@ -305,6 +305,7 @@ const paymentsStation = reactive({
 const changePaymentsStation = (isOpen, answer, error) => {
   if (answer === "error") {
     if (isOpen) {
+      console.log(isOpen, answer, error);
       paymentsStation.errorMessages = error;
       paymentsStation.error = true;
     } else {
@@ -456,6 +457,10 @@ const fetchTariffs = async () => {
     code = `touchapi-${selectedItem.value.source}`;
   } else {
     code = "whatsapi-bulk";
+  }
+
+  if (selectedItem.value.type === "adapter") {
+    code = `adapter-${selectedItem.value.source}`;
   }
 
   try {

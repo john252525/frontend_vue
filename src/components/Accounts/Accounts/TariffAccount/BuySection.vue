@@ -324,11 +324,13 @@ const buyTariff = async () => {
     if (response.data.success) {
       await balanceStore.refreshBalance();
       props.changePaymentsStation(true, "success");
-    } else {
-      props.changePaymentsStation(true, "error");
     }
   } catch (error) {
-    console.error("Ошибка покупки:", error);
+    if (error.response.data.message === "Insufficient balance") {
+      console.log("Balance error");
+      props.changePaymentsStation(true, "error", "Balance error");
+    }
+
     props.changePaymentsStation(
       true,
       "error",
