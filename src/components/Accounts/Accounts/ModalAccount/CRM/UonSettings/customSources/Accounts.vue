@@ -1,19 +1,45 @@
 <template>
-  <div class="accounts-list">
-    <div v-for="item in filteredAccounts" :key="item.uuid" class="account-item">
-      <div class="account-item__info">
-        <AccountIcon :item="item" />
-        <span class="account-item__name">{{ item.name }}</span>
-      </div>
+  <div class="accounts-wrapper">
+    <div class="accounts-header">
+      <div class="header-name">Аккаунт</div>
+      <div class="header-status">Не использовать</div>
+      <div class="header-input">Название источника</div>
+    </div>
 
-      <div class="account-item__input-wrapper">
-        <input
-          v-model="localSources[item.uuid]"
-          type="text"
-          class="account-item__input"
-          placeholder="Например: WhatsApp для отдела продаж"
-          @input="onInput(item.uuid)"
-        />
+    <div class="accounts-list">
+      <div
+        v-for="item in filteredAccounts"
+        :key="item.uuid"
+        class="account-row"
+      >
+        <div class="account-info">
+          <AccountIcon :item="item" />
+          <span class="account-name" :title="item.name">{{ item.name }}</span>
+        </div>
+
+        <div class="account-checkbox">
+          <input
+            type="checkbox"
+            :checked="localSources[item.uuid] === 'None'"
+            @change="toggleNone(item.uuid, $event.target.checked)"
+          />
+        </div>
+
+        <div class="account-input-field">
+          <input
+            v-model="localSources[item.uuid]"
+            type="text"
+            class="input-control"
+            :class="{ 'is-disabled': localSources[item.uuid] === 'None' }"
+            :placeholder="
+              localSources[item.uuid] === 'None'
+                ? 'Отключено'
+                : 'Например: WhatsApp для отд'
+            "
+            :disabled="localSources[item.uuid] === 'None'"
+            @input="onInput(item.uuid)"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -24,98 +50,123 @@ import { computed, defineProps, defineEmits, ref, watch } from "vue";
 import AccountIcon from "@/components/Accounts/AccountIcon.vue";
 
 const props = defineProps({
-  accounts: {
-    type: Array,
-    required: true,
-  },
-  customSources: {
-    type: Object,
-    default: () => ({}),
-  },
+  accounts: { type: Array, required: true },
+  customSources: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(["update:source"]);
 
 const filteredAccounts = computed(() =>
-  props.accounts.filter(
-    (item) =>
-      item.source === "max" ||
-      item.source === "telegram" ||
-      item.source === "vk" ||
-      item.source === "whatsapp",
+  props.accounts.filter((item) =>
+    ["max", "telegram", "vk-bot", "whatsapp"].includes(item.source),
   ),
 );
 
 const localSources = ref({});
 
+// Исправляем баг с перезаписью при вводе:
+// Обновляем localSources только если проп пришел "снаружи" (например, загрузился с бэка)
 watch(
   () => props.customSources,
   (newSources) => {
-    localSources.value = { ...newSources };
+    // Глубокое сравнение или проверка на пустоту, чтобы не затирать текущий ввод пользователя
+    if (
+      Object.keys(localSources.value).length === 0 ||
+      JSON.stringify(newSources) !== JSON.stringify(localSources.value)
+    ) {
+      localSources.value = { ...newSources };
+    }
   },
   { immediate: true },
 );
 
 const onInput = (uuid) => {
-  const newName = localSources.value[uuid];
-  emit("update:source", uuid, newName);
+  emit("update:source", uuid, localSources.value[uuid]);
+};
+
+const toggleNone = (uuid, isChecked) => {
+  if (isChecked) {
+    localSources.value[uuid] = "None";
+  } else {
+    localSources.value[uuid] = "";
+  }
+  emit("update:source", uuid, localSources.value[uuid]);
 };
 </script>
 
 <style scoped>
-.accounts-list {
-  margin-bottom: 20px;
-}
-
-.account-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0px;
-  transition: background-color 0.15s ease;
-}
-
-.account-item__info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.account-item__name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-}
-
-.account-item__input-wrapper {
-  flex: 1;
-  margin-left: 16px;
-}
-
-.account-item__label {
-  display: block;
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 6px;
-}
-
-.account-item__input {
+.accounts-wrapper {
   width: 100%;
-  padding: 9px 12px;
+  overflow-x: hidden; /* Гарантируем отсутствие скролла */
+}
+
+/* Сетка: 160px для имени, 100px для чекбокса, остальное для инпута */
+.accounts-header,
+.account-row {
+  display: grid;
+  grid-template-columns: 160px 100px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.accounts-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+}
+
+.header-name,
+.header-status,
+.header-input {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.header-status {
+  text-align: center;
+}
+
+.account-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* Важно для обрезки текста */
+}
+
+.account-name {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Если имя слишком длинное, оно не раздвинет модалку */
+}
+
+.account-checkbox {
+  display: flex;
+  justify-content: center;
+}
+
+.account-checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #1d4ed8;
+}
+
+.input-control {
+  width: 100%;
+  padding: 8px 12px;
   border: 1px solid #ced4da;
   border-radius: 6px;
-  font-size: 14px;
-  background-color: #fff;
-  box-sizing: border-box;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  font-size: 13px;
+  box-sizing: border-box; /* Чтобы padding не увеличивал ширину */
 }
 
-.account-item__input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+.input-control.is-disabled {
+  background-color: #f5f5f5;
+  color: #bfbfbf;
+  border-color: #d9d9d9;
+  cursor: not-allowed;
 }
 </style>

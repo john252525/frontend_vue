@@ -34,6 +34,7 @@ import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
 import Docs from "./pages/Docs.vue";
+import News from "./pages/News.vue";
 
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "off"; // off, all, error
@@ -261,6 +262,12 @@ const routes = [
     name: "ViewChatsPage",
     component: ViewChats,
     meta: { title: "Просмотр чатов" },
+  },
+  {
+    path: "/news",
+    name: "News",
+    component: News,
+    meta: { title: "Новости" },
   },
   {
     path: "/close",

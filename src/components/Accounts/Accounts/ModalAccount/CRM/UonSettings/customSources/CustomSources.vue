@@ -51,7 +51,7 @@ const props = defineProps({
 const modalText = {
   title: "Источники аккаунта",
   close: "Отмена",
-  action: "Сохранить источники",
+  action: "Сохранить",
 };
 
 const loading = ref(false);
@@ -141,9 +141,12 @@ const saveCustomSources = async () => {
 };
 
 const handleUpdateSource = (uuid, newName) => {
-  sources.value[uuid] = newName || "";
+  // Используем spread или явное присваивание, чтобы Vue видел изменения
+  sources.value = {
+    ...sources.value,
+    [uuid]: newName,
+  };
 };
-
 onMounted(getCustomSources);
 </script>
 
@@ -191,7 +194,6 @@ onMounted(getCustomSources);
 .btn--primary:hover {
   background-color: #0069d9;
 }
-
 .btn--secondary {
   background-color: #f8f9fa;
   color: #495057;
