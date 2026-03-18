@@ -92,15 +92,7 @@
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
               </button>
-              <button
-                v-if="!formData.cascade.includes('vk')"
-                type="button"
-                @click="addCascadeItem('vk')"
-                class="cascade-btn cascade-btn-vk"
-              >
-                <span class="btn-badge badge-vk"></span>
-                VK
-              </button>
+
               <button
                 v-if="!formData.cascade.includes('max')"
                 type="button"
@@ -159,8 +151,7 @@ const getMessengerName = (item) => {
       return "Telegram";
     case "whatsapp":
       return "WhatsApp";
-    case "vk":
-      return "VK";
+
     case "max":
       return "Max";
     default:

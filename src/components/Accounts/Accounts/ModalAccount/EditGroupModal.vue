@@ -85,16 +85,7 @@
                 <span class="btn-badge badge-whatsapp"></span>
                 WhatsApp
               </button>
-              <button
-                v-if="!formData.cascade.includes('vk')"
-                id="vk-button"
-                type="button"
-                @click="addCascadeItem('vk')"
-                class="cascade-btn cascade-btn-vk"
-              >
-                <span class="btn-badge badge-vk"></span>
-                VK
-              </button>
+
               <button
                 v-if="!formData.cascade.includes('max')"
                 id="max-button"
@@ -150,7 +141,7 @@ const formData = reactive({
 
 // Вычисляем доступные элементы (Добавлен vk)
 const availableCascadeItems = computed(() => {
-  const allItems = ["telegram", "whatsapp", "vk", "max"];
+  const allItems = ["telegram", "whatsapp", "max"];
   return allItems.filter((item) => !formData.cascade.includes(item));
 });
 
@@ -165,8 +156,7 @@ const getMessengerName = (item) => {
       return "Telegram";
     case "whatsapp":
       return "WhatsApp";
-    case "vk":
-      return "VK";
+
     case "max":
       return "Max";
     default:

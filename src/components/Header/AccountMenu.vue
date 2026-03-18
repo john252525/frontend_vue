@@ -12,7 +12,7 @@
 
     <div class="line"></div>
 
-    <div class="menu-content">
+    <!-- <div class="menu-content">
       <div class="notifications-section">
         <h3 class="section-title">Уведомления</h3>
 
@@ -31,7 +31,7 @@
           </p>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="menu-footer">
       <div class="line"></div>

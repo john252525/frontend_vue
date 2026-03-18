@@ -16,7 +16,7 @@
       <div class="modal-body">
         <p class="info-text">
           Выберите аккаунты для добавления в группу (максимум по одному для
-          каждого типа: WhatsApp, Telegram, VK, Max)
+          каждого типа: WhatsApp, Telegram, Max)
         </p>
 
         <div v-if="loadingAccounts" class="loading-spinner">
@@ -49,7 +49,6 @@
                   'badge-telegram': acc.source === 'telegram',
                   'badge-whatsapp': acc.source === 'whatsapp',
                   'badge-max': acc.source === 'max',
-                  'badge-vk': acc.source === 'vk' || acc.source === 'vk-bot',
                 }"
               ></span>
               <span class="acc-type-text">{{ getSource(acc.source) }}</span>
@@ -123,9 +122,7 @@ onMounted(async () => {
         (acc) =>
           acc.source === "whatsapp" ||
           acc.source === "telegram" ||
-          acc.source === "max" ||
-          acc.source === "vk" ||
-          acc.source === "vk-bot",
+          acc.source === "max",
       );
       availableAccounts.value = filtered;
     }
@@ -146,9 +143,7 @@ function getSource(source) {
       return "WhatsApp";
     case "max":
       return "Max";
-    case "vk":
-    case "vk-bot":
-      return "VK";
+
     default:
       return source || "Неизвестно";
   }
@@ -207,7 +202,7 @@ const isAdded = (acc) => {
 
 // Сообщение о валидации
 const validationMessage = computed(() => {
-  const sources = ["telegram", "whatsapp", "max", "vk"];
+  const sources = ["telegram", "whatsapp", "max"];
   const errors = [];
 
   sources.forEach((s) => {
