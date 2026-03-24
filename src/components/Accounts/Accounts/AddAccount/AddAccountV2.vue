@@ -837,7 +837,8 @@ const submitForm = async () => {
     if (response.data.ok) {
       emit("submit", formData);
       if (props.openModal) {
-        props.openModal(); // Закрываем модалку при успехе
+        props.openModal();
+        location.reload();
       }
       handleSomeAction(); // Если нужно обновить список аккаунтов
     }

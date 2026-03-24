@@ -622,7 +622,8 @@ ul {
 .mobile-menu-content {
   position: fixed;
   top: 0;
-  left: -100%;
+  left: 0; /* ИСПРАВЛЕНО: было -100% */
+  transform: translateX(-100%); /* ДОБАВЛЕНО: прячем меню за левым краем */
   width: 280px;
   height: 100%;
   background: white;
@@ -633,7 +634,7 @@ ul {
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
 .mobile-menu-content.active {
-  transform: translateX(100%);
+  transform: translateX(0); /* ИСПРАВЛЕНО: выдвигаем в исходную позицию */
 }
 .mobile-menu-header {
   padding: 20px;

@@ -171,6 +171,7 @@ const props = defineProps({
   selectTariff: { type: Object, required: true },
   close: { type: Function, required: true },
   changePaymentsStation: { type: Function },
+  type: { type: String },
   selectedItem: { type: Object },
 });
 
@@ -293,7 +294,6 @@ const applyPromo = async () => {
   }
 };
 
-// ─── Покупка тарифа ────────────────────────────────────────
 const buyTariff = async () => {
   loadingPay.value = true;
 
@@ -304,19 +304,21 @@ const buyTariff = async () => {
     );
 
     const payload = {
-      amount: baseFinalPrice.value, // оригинальная сумма тарифа
+      amount: baseFinalPrice.value,
       tariff_id: selectTariff.value.id,
       tariff: encodedTariff,
       currency: selectTariff.value.currency,
       domain: window.location.hostname,
-      entity: "vendor",
+      entity: props.type,
       category: "tariff",
       entity_uuid: selectedItem.value.uuid,
       original_price: originalPrice.value,
       discount_percent: discountPercent.value,
-      promo_code: appliedPromo.value?.code || null, // ← передаём промокод
+      promo_code: appliedPromo.value?.code || null,
     };
 
+    console.log("payload", payload);
+    // return;
     const response = await axios.post(`${apiUrl}/buy`, payload, {
       headers: { Authorization: `Bearer ${token.value}` },
     });

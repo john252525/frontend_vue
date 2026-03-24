@@ -139,11 +139,6 @@ const updates = [
     category: "feature",
     image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=1200",
     tags: ["рекомендации", "ai", "персонализация", "алгоритмы"],
-    author: {
-      name: "Алексей Иванов",
-      role: "Lead ML Engineer",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
   },
 ];
 

@@ -1,9 +1,7 @@
 <template>
   <section class="groups-list-section">
-    <!-- Header с кнопками -->
     <div class="groups-header">
       <h3 class="groups-title">Группы</h3>
-
       <button @click="openCreateGroupModal" class="create-group-button">
         <svg class="icon" viewBox="0 0 20 20">
           <path
@@ -16,16 +14,13 @@
       </button>
     </div>
 
-    <!-- Error Message -->
     <div v-if="error" class="error-message">❌ {{ error }}</div>
 
-    <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>Загрузка групп...</p>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="allGroupsList.length === 0" class="empty-state">
       <svg class="empty-icon" viewBox="0 0 24 24">
         <path
@@ -39,7 +34,6 @@
       </button>
     </div>
 
-    <!-- Groups Grid -->
     <div v-else class="groups-grid">
       <div v-for="group in allGroupsList" :key="group.uuid" class="group-card">
         <div class="group-header-card">
@@ -75,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Vendors List -->
         <div class="vendors-list">
           <div
             v-for="vendor in Object.values(group.vendors)"
@@ -104,26 +97,32 @@
             </button>
           </div>
 
-          <!-- Add Vendor Button (если слот не полный) -->
-          <button
-            v-if="Object.keys(group.vendors).length < 4"
-            @click="openAddVendorModal(group)"
-            class="add-vendor-button"
-          >
-            <svg viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            Добавить аккаунт
-          </button>
+          <div class="action-buttons">
+            <button
+              v-if="Object.keys(group.vendors).length > 0"
+              @click="changeTariffStation(group)"
+              class="open-tariff-button"
+            >
+              Подписка
+            </button>
+            <button
+              v-if="Object.keys(group.vendors).length < 4"
+              @click="openAddVendorModal(group)"
+              class="add-vendor-button"
+            >
+              <svg viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modals -->
     <CreateGroupModal
       v-if="showCreateModal"
       @close="showCreateModal = false"
@@ -159,6 +158,15 @@
       @close="showRemoveVendorModal = false"
       @removed="onVendorRemoved"
     />
+    <Tariff
+      v-if="tariffStation"
+      :tariffStation="tariffStation"
+      :getAccounts="getAccounts"
+      :changePayDataForAccounts="changePayDataForAccounts"
+      :selectedItem="selectedGroup"
+      :changeTariffStation="changeTariffStation"
+      :type="'group'"
+    />
   </section>
 </template>
 
@@ -166,6 +174,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useVendorGroups } from "@/composables/useVendorGroups";
 import { useAccountStore } from "@/stores/accountStore";
+import Tariff from "../Accounts/TariffAccount/Tariff.vue";
 import CreateGroupModal from "@/components/Accounts/Accounts/ModalAccount/CreateGroupModal.vue";
 import EditGroupModal from "@/components/Accounts/Accounts/ModalAccount/EditGroupModal.vue";
 import DeleteGroupModal from "@/components/Accounts/Accounts/ModalAccount/DeleteGroupModal.vue";
@@ -181,6 +190,7 @@ const token = computed(() => accountStore.getAccountToken);
 
 const { allGroupsList, loading, error, getGroups } = useVendorGroups(token);
 
+const tariffStation = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
@@ -201,9 +211,20 @@ const openCreateGroupModal = () => {
   showCreateModal.value = true;
 };
 
+const changeTariffStation = (group) => {
+  if (group) {
+    selectedGroup.value = group;
+  }
+  tariffStation.value = !tariffStation.value;
+};
+
 const openEditGroupModal = (group) => {
   selectedGroup.value = group;
   showEditModal.value = true;
+};
+
+const changePayDataForAccounts = () => {
+  return;
 };
 
 const openDeleteGroupModal = (group) => {
@@ -338,6 +359,27 @@ onMounted(async () => {
   text-align: center;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.open-tariff-button {
+  flex: 0 0 80%;
+  position: relative;
+  z-index: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden; /* Чтобы градиент не вылезал за скругление */
+}
 .spinner {
   width: 40px;
   height: 40px;
@@ -581,8 +623,9 @@ onMounted(async () => {
 }
 
 .add-vendor-button {
+  flex: 1;
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   border: 2px dashed #d1d5db;
   background: transparent;
   color: #6b7280;
@@ -592,9 +635,10 @@ onMounted(async () => {
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   transition: all 0.25s;
+  width: auto; /* Сбрасываем width: 100%, если он был */
+  justify-content: center;
 }
 
 .add-vendor-button:hover {

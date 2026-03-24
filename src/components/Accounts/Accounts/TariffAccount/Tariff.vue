@@ -23,6 +23,7 @@
       v-if="createPaymentsStation"
       :changeCreatePayments="changePaymentsStationModal"
     />
+
     <div
       v-if="
         !buySection &&
@@ -34,6 +35,7 @@
     >
       <div class="modal-header">
         <h2>Выберите тариф</h2>
+
         <button class="close-button" @click="closeModal">
           <svg viewBox="0 0 24 24" width="24" height="24">
             <path
@@ -241,11 +243,13 @@
       class="modal-container"
       v-if="buySection && !paymentsStation.success && !paymentsStation.error"
     >
+      {{ selectedItem }}
       <BuySection
         :changePaymentsStation="changePaymentsStation"
         :selectTariff="selectTariff"
         :close="changeStationTariff"
         :selectedItem="selectedItem"
+        :type="type"
       />
     </div>
   </div>
@@ -286,6 +290,10 @@ const props = defineProps({
   },
   changePayDataForAccounts: {
     type: Function,
+  },
+  type: {
+    type: String,
+    default: "vendor",
   },
 });
 
@@ -453,19 +461,23 @@ const fetchTariffs = async () => {
 
   let code;
 
-  if (selectedItem.value.source !== "whatsapi") {
-    code = `touchapi-${selectedItem.value.source}`;
+  if (props.type === "vendor") {
+    if (selectedItem.value.source !== "whatsapi") {
+      code = `touchapi-${selectedItem.value.source}`;
+    } else {
+      code = "whatsapi-bulk";
+    }
+    if (selectedItem.value.type === "adapter") {
+      code = `adapter-${selectedItem.value.source}`;
+    }
   } else {
-    code = "whatsapi-bulk";
-  }
-
-  if (selectedItem.value.type === "adapter") {
-    code = `adapter-${selectedItem.value.source}`;
+    code = `group-${Object.keys(selectedItem.value.vendors).length}-channels`;
   }
 
   try {
     const response = await axios.post(
       `${FRONTEND_URL_TARIFFS}getByCodeWithMods`,
+      // { code: code },
       { code: code },
       {
         headers: {
