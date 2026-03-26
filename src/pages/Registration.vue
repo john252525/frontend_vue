@@ -22,7 +22,7 @@
         <span class="b-logo">{{ stationDomain.cosmetics.titleLogo }}</span>
       </h1>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.company_name }">
         <label>Название компании</label>
         <input
           type="text"
@@ -30,10 +30,14 @@
           placeholder="Введите название компании"
           required
           :disabled="loading"
+          @blur="touch('company_name')"
         />
+        <span v-if="fieldErrors.company_name" class="field-error">{{
+          fieldErrors.company_name
+        }}</span>
       </div>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.contact_name }">
         <label>Контактное лицо</label>
         <input
           type="text"
@@ -41,10 +45,14 @@
           placeholder="Введите имя контактного лица"
           required
           :disabled="loading"
+          @blur="touch('contact_name')"
         />
+        <span v-if="fieldErrors.contact_name" class="field-error">{{
+          fieldErrors.contact_name
+        }}</span>
       </div>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.login }">
         <label>{{ t("registration.mail") }}</label>
         <input
           type="email"
@@ -52,10 +60,14 @@
           :placeholder="t('registration.emailPlaceholder')"
           required
           :disabled="loading"
+          @blur="touch('login')"
         />
+        <span v-if="fieldErrors.login" class="field-error">{{
+          fieldErrors.login
+        }}</span>
       </div>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.password }">
         <label>{{ t("registration.password") }}</label>
         <div class="input-wrapper">
           <input
@@ -64,6 +76,7 @@
             :placeholder="t('registration.passwordPlaceholder')"
             required
             :disabled="loading"
+            @blur="touch('password')"
           />
           <span class="eye-icon" @click="showPass = !showPass">
             <svg
@@ -98,17 +111,21 @@
             </svg>
           </span>
         </div>
+        <span v-if="fieldErrors.password" class="field-error">{{
+          fieldErrors.password
+        }}</span>
       </div>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.confirmPassword }">
         <label>{{ t("registration.passwordConfirm") }}</label>
         <div class="input-wrapper">
           <input
             :type="showPassConfirm ? 'text' : 'password'"
-            v-model="formData.fogoutPassword"
+            v-model="formData.confirmPassword"
             :placeholder="t('registration.passwordPlaceholder')"
             required
             :disabled="loading"
+            @blur="touch('confirmPassword')"
           />
           <span class="eye-icon" @click="showPassConfirm = !showPassConfirm">
             <svg
@@ -143,11 +160,14 @@
             </svg>
           </span>
         </div>
+        <span v-if="fieldErrors.confirmPassword" class="field-error">{{
+          fieldErrors.confirmPassword
+        }}</span>
       </div>
 
-      <div class="field">
+      <div class="field" :class="{ 'has-error': fieldErrors.phone }">
         <label>{{ t("registration.phone") }}</label>
-        <div class="phone-input">
+        <div class="phone-input" :class="{ 'input-error': fieldErrors.phone }">
           <div class="country-prefix">
             <img src="https://flagcdn.com/w20/ru.png" width="20" alt="RU" />
             <span>+7</span>
@@ -165,8 +185,12 @@
             :ref="(el) => (phoneFormatter.phoneInput.value = el)"
             required
             :disabled="loading"
+            @blur="touch('phone')"
           />
         </div>
+        <span v-if="fieldErrors.phone" class="field-error">{{
+          fieldErrors.phone
+        }}</span>
       </div>
 
       <div class="row">
@@ -254,8 +278,11 @@
       </div>
 
       <div class="checkbox-group">
-        <label class="checkbox-container">
-          <input type="checkbox" v-model="formData.agreeTerms" required />
+        <label
+          class="checkbox-container"
+          :class="{ 'checkbox-error': fieldErrors.agreeTerms }"
+        >
+          <input type="checkbox" v-model="formData.agreeTerms" />
           <span class="custom-checkmark"></span>
           <span class="checkbox-text">
             {{ t("registration.acceptTerms") }}
@@ -268,8 +295,8 @@
         <label class="checkbox-container">
           <input type="checkbox" v-model="formData.agreeCookies" />
           <span class="custom-checkmark"></span>
-          <span class="checkbox-text"
-            >Я согласен на использование файлов cookie</span
+          <span class="checkbox-text">
+            Я согласен на использование файлов cookie</span
           >
         </label>
 
@@ -281,23 +308,29 @@
           >
         </label>
 
-        <label class="checkbox-container">
-          <input
-            type="checkbox"
-            v-model="formData.agreePersonalData"
-            required
-          />
+        <label
+          class="checkbox-container"
+          :class="{ 'checkbox-error': fieldErrors.agreePersonalData }"
+        >
+          <input type="checkbox" v-model="formData.agreePersonalData" />
           <span class="custom-checkmark"></span>
           <span class="checkbox-text"
             >Даю согласие на обработку персональных данных</span
           >
         </label>
+        <span
+          v-if="fieldErrors.agreeTerms || fieldErrors.agreePersonalData"
+          class="field-error"
+        >
+          {{ fieldErrors.agreeTerms || fieldErrors.agreePersonalData }}
+        </span>
       </div>
 
       <button
         type="submit"
         class="submit-btn"
-        :disabled="!isFormValid || loading"
+        :disabled="loading"
+        @click="touchAll"
       >
         <span v-if="loading" class="btn-spinner"></span>
         {{ loading ? t("registration.loading") : t("registration.button") }}
@@ -334,17 +367,40 @@ const showPass = ref(false);
 const showPassConfirm = ref(false);
 const activeSelect = ref(null);
 const countdown = ref(5);
+const redirectInterval = ref(null);
+const submitted = ref(false);
 
 const phoneFormatter = usePhoneFormatter();
+
+const touched = reactive({
+  company_name: false,
+  contact_name: false,
+  login: false,
+  password: false,
+  confirmPassword: false,
+  phone: false,
+});
+
+const touch = (field) => {
+  touched[field] = true;
+};
+
+const touchAll = () => {
+  Object.keys(touched).forEach((key) => {
+    touched[key] = true;
+  });
+  submitted.value = true;
+};
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const formData = reactive({
   company_name: "",
   contact_name: "",
   login: "",
-  phone: "",
   contact_preferred_channels: [],
   password: "",
-  fogoutPassword: "",
+  confirmPassword: "",
   country: "Россия",
   crm: "",
   promo: "",
@@ -352,6 +408,62 @@ const formData = reactive({
   agreeCookies: false,
   agreeNews: false,
   agreePersonalData: false,
+});
+
+const fieldErrors = computed(() => {
+  const errors = {};
+
+  if (touched.company_name && !formData.company_name.trim()) {
+    errors.company_name = "Введите название компании";
+  }
+
+  if (touched.contact_name && !formData.contact_name.trim()) {
+    errors.contact_name = "Введите имя контактного лица";
+  }
+
+  if (touched.login) {
+    if (!formData.login.trim()) {
+      errors.login = "Введите email";
+    } else if (!emailRegex.test(formData.login)) {
+      errors.login = "Некорректный формат email";
+    }
+  }
+
+  if (touched.password) {
+    if (!formData.password) {
+      errors.password = "Введите пароль";
+    } else if (formData.password.length < 6) {
+      errors.password = "Пароль должен содержать минимум 6 символов";
+    }
+  }
+
+  if (touched.confirmPassword) {
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = "Подтвердите пароль";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Пароли не совпадают";
+    }
+  }
+
+  if (touched.phone) {
+    const digits = phoneFormatter.state.phoneNumber.replace(/\D/g, "");
+    if (!digits) {
+      errors.phone = "Введите номер телефона";
+    } else if (digits.length !== 10) {
+      errors.phone = "Номер телефона должен содержать 10 цифр";
+    }
+  }
+
+  if (!formData.agreeTerms && submitted.value) {
+    errors.agreeTerms = "Необходимо принять условия использования";
+  }
+
+  if (!formData.agreePersonalData && submitted.value) {
+    errors.agreePersonalData =
+      "Необходимо дать согласие на обработку персональных данных";
+  }
+
+  return errors;
 });
 
 const availableChannels = [
@@ -374,7 +486,13 @@ const closeSelects = () => {
 };
 
 onMounted(() => window.addEventListener("click", closeSelects));
-onUnmounted(() => window.removeEventListener("click", closeSelects));
+onUnmounted(() => {
+  window.removeEventListener("click", closeSelects);
+  if (redirectInterval.value) {
+    clearInterval(redirectInterval.value);
+    redirectInterval.value = null;
+  }
+});
 
 const navigateTo = (page) => router.push(page);
 
@@ -383,8 +501,8 @@ const isFormValid = computed(() => {
     formData.company_name &&
     formData.contact_name &&
     formData.login &&
-    formData.password &&
-    formData.password === formData.fogoutPassword &&
+    formData.password.length >= 6 &&
+    formData.password === formData.confirmPassword &&
     phoneFormatter.state.phoneNumber.replace(/\D/g, "").length === 10 &&
     formData.agreeTerms &&
     formData.agreePersonalData
@@ -392,6 +510,7 @@ const isFormValid = computed(() => {
 });
 
 const handleSubmit = async () => {
+  touchAll();
   if (!isFormValid.value) return;
 
   loading.value = true;
@@ -404,14 +523,26 @@ const handleSubmit = async () => {
       contact_name: formData.contact_name,
       email: formData.login,
       phone: "+7" + internationalPhone,
+      country: formData.country,
       ref_id: route.query.ref,
       password: formData.password,
     };
+
+    if (formData.crm) {
+      requestData.crm = formData.crm;
+    }
+
+    if (formData.promo) {
+      requestData.promo = formData.promo;
+    }
 
     if (formData.contact_preferred_channels.length > 0) {
       requestData.contact_preferred_channels =
         formData.contact_preferred_channels;
     }
+
+    requestData.agree_cookies = formData.agreeCookies;
+    requestData.agree_news = formData.agreeNews;
 
     const response = await axios.post(
       `${FRONTEND_URL_AUTH}register`,
@@ -459,10 +590,11 @@ const handleSubmit = async () => {
 };
 
 const startRedirectTimer = () => {
-  const interval = setInterval(() => {
+  redirectInterval.value = setInterval(() => {
     countdown.value--;
     if (countdown.value <= 0) {
-      clearInterval(interval);
+      clearInterval(redirectInterval.value);
+      redirectInterval.value = null;
       router.push("/");
     }
   }, 1000);
@@ -859,6 +991,41 @@ input:checked ~ .custom-checkmark::after {
 }
 .footer-link span:hover {
   text-decoration: underline;
+}
+
+/* ОШИБКИ ПОЛЕЙ */
+.field-error {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 6px;
+  padding-left: 2px;
+}
+
+.has-error input[type="text"],
+.has-error input[type="email"],
+.has-error input[type="password"],
+.has-error input[type="tel"] {
+  border-color: #dc2626;
+}
+
+.has-error input:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.has-error .phone-input,
+.phone-input.input-error {
+  border-color: #dc2626;
+}
+
+.has-error .phone-input:focus-within {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.checkbox-error {
+  border-color: #dc2626 !important;
 }
 
 /* ОШИБКА */
