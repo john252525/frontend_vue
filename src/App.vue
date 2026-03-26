@@ -210,8 +210,9 @@ body {
 .loading-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   height: 100vh;
+  overflow-y: auto;
   background-color: var(--authBg);
 }
 

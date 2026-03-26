@@ -559,6 +559,8 @@ const messages = {
       errorPasswordTooShort: "Password must be at least 8 characters",
       errorInvalidCredentials: "Invalid login or password",
       errorUserNotFound: "User not found",
+      errorEmailNotVerified:
+        "Your email is not verified. Please check your inbox and confirm your email address.",
       errorAuthFailed: "Authentication error",
       errorServerError: "Server error",
     },
@@ -1194,6 +1196,7 @@ const messages = {
       errorPasswordTooShort: "Пароль должен содержать минимум 8 символов",
       errorInvalidCredentials: "Неверный логин или пароль",
       errorUserNotFound: "Пользователь не найден",
+      errorEmailNotVerified: "Ваш email не подтверждён.",
       errorAuthFailed: "Ошибка при авторизации",
       errorServerError: "Ошибка сервера",
     },

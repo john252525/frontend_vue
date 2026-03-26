@@ -1,220 +1,322 @@
 <template>
-  <ErrorBlock
-    v-if="inputStyle.incorrectPassword"
-    :errorMessage="inputStyle.incorrectPasswordMessage"
-    :changeIncorrectPassword="changeIncorrectPassword"
-  />
+  <div class="registration-container">
+    <div v-if="errorMessage" class="error-banner">
+      {{ errorMessage }}
+    </div>
 
-  <div class="registration-wrapper">
-    <section v-if="!sendEmail" class="registration-section">
-      <div class="form-container">
-        <form @submit.prevent="logAccoutn" class="registration-form">
-          <div class="title-cont">
-            <h2 class="title">
-              {{ t("registration.title") }}
-              <img
-                class="url-img-logo"
-                :src="stationDomain.cosmetics.urlLogo"
-                alt=""
-              />
-              <span class="b-logo">{{
-                stationDomain.cosmetics.titleLogo
-              }}</span>
-            </h2>
+    <div v-if="sendEmail" class="email-sent">
+      <h2>{{ t("registration.emailSent") }}</h2>
+      <p>Проверьте вашу почту для подтверждения аккаунта.</p>
+      <p class="redirect-timer">Перенаправление через {{ countdown }} сек...</p>
+      <router-link to="/" class="redirect-btn">На главную</router-link>
+    </div>
+
+    <form v-else @submit.prevent="handleSubmit" class="reg-form">
+      <h1>
+        {{ t("registration.title") }}
+        <img
+          class="url-img-logo"
+          :src="stationDomain.cosmetics.urlLogo"
+          alt=""
+        />
+        <span class="b-logo">{{ stationDomain.cosmetics.titleLogo }}</span>
+      </h1>
+
+      <div class="field">
+        <label>Название компании</label>
+        <input
+          type="text"
+          v-model="formData.company_name"
+          placeholder="Введите название компании"
+          required
+          :disabled="loading"
+        />
+      </div>
+
+      <div class="field">
+        <label>Контактное лицо</label>
+        <input
+          type="text"
+          v-model="formData.contact_name"
+          placeholder="Введите имя контактного лица"
+          required
+          :disabled="loading"
+        />
+      </div>
+
+      <div class="field">
+        <label>{{ t("registration.mail") }}</label>
+        <input
+          type="email"
+          v-model="formData.login"
+          :placeholder="t('registration.emailPlaceholder')"
+          required
+          :disabled="loading"
+        />
+      </div>
+
+      <div class="field">
+        <label>{{ t("registration.password") }}</label>
+        <div class="input-wrapper">
+          <input
+            :type="showPass ? 'text' : 'password'"
+            v-model="formData.password"
+            :placeholder="t('registration.passwordPlaceholder')"
+            required
+            :disabled="loading"
+          />
+          <span class="eye-icon" @click="showPass = !showPass">
+            <svg
+              v-if="!showPass"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+              ></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+            <svg
+              v-else
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{{ t("registration.passwordConfirm") }}</label>
+        <div class="input-wrapper">
+          <input
+            :type="showPassConfirm ? 'text' : 'password'"
+            v-model="formData.fogoutPassword"
+            :placeholder="t('registration.passwordPlaceholder')"
+            required
+            :disabled="loading"
+          />
+          <span class="eye-icon" @click="showPassConfirm = !showPassConfirm">
+            <svg
+              v-if="!showPassConfirm"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+              ></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+            <svg
+              v-else
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{{ t("registration.phone") }}</label>
+        <div class="phone-input">
+          <div class="country-prefix">
+            <img src="https://flagcdn.com/w20/ru.png" width="20" alt="RU" />
+            <span>+7</span>
           </div>
+          <input
+            type="tel"
+            v-model="phoneFormatter.state.phoneNumber"
+            @input="phoneFormatter.formatPhone"
+            @keydown.delete="phoneFormatter.handleBackspace"
+            :placeholder="
+              phoneFormatter.state.showMask
+                ? '(___) ___-__-__'
+                : t('registration.phonePlaceholder')
+            "
+            :ref="(el) => (phoneFormatter.phoneInput.value = el)"
+            required
+            :disabled="loading"
+          />
+        </div>
+      </div>
 
-          <div class="input-row">
-            <div class="input-cont">
-              <label class="name-input">{{ t("registration.mail") }}</label>
-              <input
-                type="email"
-                :placeholder="t('registration.emailPlaceholder')"
-                v-model="formData.login"
-                @blur="validateEmail"
-                @input="clearEmailError"
-                required
-                :class="{ error: error.login }"
-                class="input-reg"
-                :disabled="loading"
-              />
-              <div class="error-container">
-                <p v-if="error.login" class="error-message">{{ emailError }}</p>
-              </div>
+      <div class="row">
+        <div class="field half">
+          <label>Страна</label>
+          <div
+            class="custom-select"
+            :class="{ active: activeSelect === 'country' }"
+            @click.stop="toggleSelect('country')"
+          >
+            <div class="select-trigger">
+              {{ formData.country }}
+              <span class="arrow"></span>
             </div>
-
-            <!-- ТЕЛЕФОН С ИСПОЛЬЗОВАНИЕМ УТИЛИТЫ -->
-            <div class="input-cont">
-              <label class="name-input">{{ t("registration.phone") }}</label>
-              <div class="phone-input-container">
-                <input
-                  type="tel"
-                  :placeholder="
-                    phoneFormatter.state.showMask
-                      ? '+7 (___) ___-__-__'
-                      : t('registration.phonePlaceholder')
-                  "
-                  @input="phoneFormatter.formatPhone"
-                  @keydown.delete="phoneFormatter.handleBackspace"
-                  :class="{ error: phoneFormatter.state.errorPhone }"
-                  class="input-reg phone-input"
-                  v-model="phoneFormatter.state.phoneNumber"
-                  :ref="(el) => (phoneFormatter.phoneInput.value = el)"
-                  :disabled="loading"
-                  required
-                />
+            <Transition name="fade">
+              <div class="select-options" v-if="activeSelect === 'country'">
+                <div @click.stop="selectValue('country', 'Россия')">Россия</div>
               </div>
-              <div class="error-container">
-                <p v-if="phoneFormatter.state.errorPhone" class="error-message">
-                  {{ t("registration.errorInvalidPhone") }}
-                </p>
-              </div>
-            </div>
+            </Transition>
           </div>
+        </div>
 
-          <div class="input-cont compact-field">
-            <label class="name-input">{{
-              t("registration.preferredChannels")
-            }}</label>
-            <div class="messengers-cont">
-              <label
-                v-for="channel in availableChannels"
-                :key="channel.value"
-                class="messenger-label"
-                :class="{ disabled: loading }"
-              >
-                <input
-                  type="checkbox"
-                  :value="channel.value"
-                  v-model="formData.contact_preferred_channels"
-                  class="messenger-checkbox"
-                  :disabled="loading"
-                />
-                <span class="messenger-text">{{ channel.label }}</span>
-              </label>
+        <div class="field half">
+          <label>CRM</label>
+          <div
+            class="custom-select"
+            :class="{ active: activeSelect === 'crm' }"
+            @click.stop="toggleSelect('crm')"
+          >
+            <div class="select-trigger" :class="{ placeholder: !formData.crm }">
+              {{ formData.crm || "-" }}
+              <span class="arrow"></span>
             </div>
-          </div>
-
-          <div class="input-row">
-            <div class="input-cont">
-              <label class="name-input">{{ t("registration.password") }}</label>
-              <input
-                :placeholder="t('registration.passwordPlaceholder')"
-                type="password"
-                v-model="formData.password"
-                @blur="validatePassword"
-                @input="clearPasswordError"
-                :class="{ error: error.password }"
-                required
-                class="input-reg"
-                :disabled="loading"
-              />
-              <div class="error-container">
-                <p v-if="error.password" class="error-message">
-                  {{ passwordError }}
-                </p>
+            <Transition name="fade">
+              <div class="select-options" v-if="activeSelect === 'crm'">
+                <div @click.stop="selectValue('crm', 'Bitrix24')">Bitrix24</div>
+                <div @click.stop="selectValue('crm', 'AmoCRM')">AmoCRM</div>
+                <div @click.stop="selectValue('crm', 'uon')">Uon-Travel</div>
               </div>
-            </div>
-
-            <div class="input-cont">
-              <label class="name-input">{{
-                t("registration.passwordConfirm")
-              }}</label>
-              <input
-                :placeholder="t('registration.passwordPlaceholder')"
-                type="password"
-                v-model="formData.fogoutPassword"
-                @blur="validatePasswordConfirmation"
-                @input="clearPasswordConfirmationError"
-                required
-                :class="{ error: error.fogoutPassword }"
-                class="input-reg"
-                :disabled="loading"
-              />
-              <div class="error-container">
-                <p v-if="error.fogoutPassword" class="error-message">
-                  {{ passwordConfirmationError }}
-                </p>
-              </div>
-            </div>
+            </Transition>
           </div>
+        </div>
+      </div>
 
-          <div class="checkbox-cont">
+      <div class="field">
+        <label>{{ t("registration.preferredChannels") }}</label>
+        <div class="messengers-cont">
+          <label
+            v-for="channel in availableChannels"
+            :key="channel.value"
+            class="messenger-label"
+            :class="{
+              active: formData.contact_preferred_channels.includes(
+                channel.value,
+              ),
+              disabled: loading,
+            }"
+          >
             <input
               type="checkbox"
-              id="checkbox"
-              v-model="formData.check"
-              required
+              :value="channel.value"
+              v-model="formData.contact_preferred_channels"
+              class="messenger-checkbox-hidden"
               :disabled="loading"
             />
-            <label
-              class="name-checkbox"
-              :class="{ error: error.check, disabled: loading }"
-              for="checkbox"
-            >
-              {{ t("registration.acceptTerms") }}
-              <a
-                href="https://chatserv.ru/documents"
-                target="_blank"
-                class="terms-link"
-              >
-                {{ t("registration.termsLink") }}
-              </a>
-            </label>
-            <div class="error-container">
-              <p v-if="error.check" class="error-message">
-                {{ checkboxError }}
-              </p>
-            </div>
-          </div>
+            <span class="messenger-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6l3 3 5-5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span class="messenger-text">{{ channel.label }}</span>
+          </label>
+        </div>
+      </div>
 
-          <button
-            type="submit"
-            class="registration-account-button"
-            :disabled="loading"
+      <div class="field">
+        <label>Промокод</label>
+        <input type="text" v-model="formData.promo" :disabled="loading" />
+      </div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-container">
+          <input type="checkbox" v-model="formData.agreeTerms" required />
+          <span class="custom-checkmark"></span>
+          <span class="checkbox-text">
+            {{ t("registration.acceptTerms") }}
+            <a href="https://chatserv.ru/documents" target="_blank">{{
+              t("registration.termsLink")
+            }}</a>
+          </span>
+        </label>
+
+        <label class="checkbox-container">
+          <input type="checkbox" v-model="formData.agreeCookies" />
+          <span class="custom-checkmark"></span>
+          <span class="checkbox-text"
+            >Я согласен на использование файлов cookie</span
           >
-            <span v-if="loading" class="button-spinner"></span>
-            {{ loading ? t("registration.loading") : t("registration.button") }}
-          </button>
+        </label>
 
-          <p class="login-account-button">
-            {{ t("registration.haveAccount") }}
-            <span @click="navigateTo('/Login')">{{
-              t("registration.login")
-            }}</span>
-          </p>
-        </form>
+        <label class="checkbox-container">
+          <input type="checkbox" v-model="formData.agreeNews" />
+          <span class="custom-checkmark"></span>
+          <span class="checkbox-text"
+            >Я согласен получать новостные рассылки</span
+          >
+        </label>
+
+        <label class="checkbox-container">
+          <input
+            type="checkbox"
+            v-model="formData.agreePersonalData"
+            required
+          />
+          <span class="custom-checkmark"></span>
+          <span class="checkbox-text"
+            >Даю согласие на обработку персональных данных</span
+          >
+        </label>
       </div>
-    </section>
 
-    <div v-if="sendEmail" class="email-confirmation">
-      <svg width="32" height="32" viewBox="0 0 32 32">
-        <path
-          fill="#4950ca"
-          d="m7.416 3.604l4.605 4.98l-3.251 6.395l6.855-1.229l3.12 7.532L32 3.902zm-.843 10.781l1.276-1.047l-1.647.521l-.172-.24l.683-.661l-.891.359c-3.407 1.323-5.823 4.62-5.823 8.485a9.043 9.043 0 0 0 2.844 6.593A9.006 9.006 0 0 1 1.66 23.92c0-3.817 2.417-7.219 5.755-8.557l.423-1.02l-1 .437l-.281-.38zm5.818-2.625L14.522 8l12.531-2.932z"
-        />
-      </svg>
-      <p class="text-email-sent">
-        {{ t("registration.emailSent") }}
-      </p>
-    </div>
+      <button
+        type="submit"
+        class="submit-btn"
+        :disabled="!isFormValid || loading"
+      >
+        <span v-if="loading" class="btn-spinner"></span>
+        {{ loading ? t("registration.loading") : t("registration.button") }}
+      </button>
 
-    <!-- Полноэкранный лоадер -->
-    <div v-if="loading" class="fullscreen-loader">
-      <div class="loader-content">
-        <div class="loader-spinner"></div>
-        <p class="loader-text">{{ t("registration.loading") }}</p>
+      <div class="footer-link">
+        {{ t("registration.haveAccount") }}
+        <span @click="navigateTo('/Login')">{{ t("registration.login") }}</span>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
-import { reactive, ref } from "vue";
+import { reactive, ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useDomain } from "@/composables/getDomain";
 import useFrontendLogger from "@/composables/useFrontendLogger";
 import { usePhoneFormatter } from "@/composables/usePhoneFormatter";
@@ -224,19 +326,32 @@ const { sendLog } = useFrontendLogger();
 const { stationDomain } = useDomain();
 const router = useRouter();
 const route = useRoute();
+
 const sendEmail = ref(false);
 const loading = ref(false);
+const errorMessage = ref("");
+const showPass = ref(false);
+const showPassConfirm = ref(false);
+const activeSelect = ref(null);
+const countdown = ref(5);
 
-// Инициализируем утилиту форматирования телефона
 const phoneFormatter = usePhoneFormatter();
 
 const formData = reactive({
+  company_name: "",
+  contact_name: "",
   login: "",
   phone: "",
   contact_preferred_channels: [],
   password: "",
   fogoutPassword: "",
-  check: false,
+  country: "Россия",
+  crm: "",
+  promo: "",
+  agreeTerms: false,
+  agreeCookies: false,
+  agreeNews: false,
+  agreePersonalData: false,
 });
 
 const availableChannels = [
@@ -246,107 +361,47 @@ const availableChannels = [
   { value: "viber", label: t("profileSection.channels.viber") },
 ];
 
-const emailError = ref("");
-const phoneError = ref("");
-const passwordError = ref("");
-const passwordConfirmationError = ref("");
-const checkboxError = ref("");
-
-const inputStyle = reactive({
-  incorrectPassword: false,
-  incorrectPasswordMessage: "",
-});
-
-const error = reactive({
-  login: false,
-  phone: false,
-  password: false,
-  fogoutPassword: false,
-  check: false,
-});
-
-const validateEmail = () => {
-  const email = formData.login.trim();
-  if (!email) {
-    emailError.value = t("registration.errorEmailRequired");
-    error.login = true;
-    return false;
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    emailError.value = t("registration.errorInvalidEmail");
-    error.login = true;
-    return false;
-  }
-  emailError.value = "";
-  error.login = false;
-  return true;
+// Селекты
+const toggleSelect = (type) => {
+  activeSelect.value = activeSelect.value === type ? null : type;
+};
+const selectValue = (type, val) => {
+  formData[type] = val;
+  activeSelect.value = null;
+};
+const closeSelects = () => {
+  activeSelect.value = null;
 };
 
-const validatePhone = () => {
-  if (!phoneFormatter.validatePhone()) {
-    error.phone = true;
-    return false;
-  }
-  error.phone = false;
-  return true;
-};
+onMounted(() => window.addEventListener("click", closeSelects));
+onUnmounted(() => window.removeEventListener("click", closeSelects));
 
-const validatePassword = () => {
-  const password = formData.password.trim();
-  if (!password) {
-    passwordError.value = t("registration.errorPasswordRequired");
-    error.password = true;
-    return false;
-  }
-  if (password.length < 8) {
-    passwordError.value = t("registration.errorPasswordTooShort");
-    error.password = true;
-    return false;
-  }
-  passwordError.value = "";
-  error.password = false;
-  return true;
-};
-
-const validatePasswordConfirmation = () => {
-  if (formData.password !== formData.fogoutPassword) {
-    passwordConfirmationError.value = t("registration.errorPasswordsNotMatch");
-    error.fogoutPassword = true;
-    return false;
-  }
-  passwordConfirmationError.value = "";
-  error.fogoutPassword = false;
-  return true;
-};
-
-const validateCheckbox = () => {
-  if (!formData.check) {
-    checkboxError.value = t("registration.errorAcceptTerms");
-    error.check = true;
-    return false;
-  }
-  checkboxError.value = "";
-  error.check = false;
-  return true;
-};
-
-const clearEmailError = () =>
-  error.login && ((emailError.value = ""), (error.login = false));
-const clearPasswordError = () =>
-  error.password && ((passwordError.value = ""), (error.password = false));
-const clearPasswordConfirmationError = () =>
-  error.fogoutPassword &&
-  ((passwordConfirmationError.value = ""), (error.fogoutPassword = false));
-const changeIncorrectPassword = () => (inputStyle.incorrectPassword = false);
 const navigateTo = (page) => router.push(page);
 
-const loginAccount = async () => {
+const isFormValid = computed(() => {
+  return (
+    formData.company_name &&
+    formData.contact_name &&
+    formData.login &&
+    formData.password &&
+    formData.password === formData.fogoutPassword &&
+    phoneFormatter.state.phoneNumber.replace(/\D/g, "").length === 10 &&
+    formData.agreeTerms &&
+    formData.agreePersonalData
+  );
+});
+
+const handleSubmit = async () => {
+  if (!isFormValid.value) return;
+
   loading.value = true;
+  errorMessage.value = "";
 
   try {
     const internationalPhone = phoneFormatter.getInternationalFormat();
     const requestData = {
+      company_name: formData.company_name,
+      contact_name: formData.contact_name,
       email: formData.login,
       phone: "+7" + internationalPhone,
       ref_id: route.query.ref,
@@ -363,7 +418,7 @@ const loginAccount = async () => {
       requestData,
       {
         headers: { "Content-Type": "application/json; charset=utf-8" },
-      }
+      },
     );
 
     if (response.data) {
@@ -376,93 +431,79 @@ const loginAccount = async () => {
           channels: formData.contact_preferred_channels,
         },
         response.data.ok,
-        response.data
+        response.data,
       );
     }
 
     if (!response.data.ok) {
-      inputStyle.incorrectPassword = true;
-      inputStyle.incorrectPasswordMessage =
+      errorMessage.value =
         response.data.error_message || t("registration.errorRegistration");
-      setTimeout(() => (inputStyle.incorrectPassword = false), 5000);
+      setTimeout(() => (errorMessage.value = ""), 5000);
       return;
     }
 
     if (response.data.data.result === true) {
       sendEmail.value = true;
+      startRedirectTimer();
     }
-  } catch (error) {
-    inputStyle.incorrectPassword = true;
-    inputStyle.incorrectPasswordMessage =
-      error.response?.data?.errors?.[0] ===
-      "User with this credentials already exists."
+  } catch (err) {
+    const serverError = err.response?.data?.errors?.[0];
+    errorMessage.value =
+      serverError === "User with this credentials already exists."
         ? t("registration.errorUserExists")
         : t("registration.errorRegistration");
-    setTimeout(() => (inputStyle.incorrectPassword = false), 5000);
+    setTimeout(() => (errorMessage.value = ""), 5000);
   } finally {
     loading.value = false;
   }
 };
 
-const logAccoutn = () => {
-  if (
-    validateEmail() &&
-    validatePhone() &&
-    validatePassword() &&
-    validatePasswordConfirmation() &&
-    validateCheckbox()
-  ) {
-    loginAccount();
-  }
+const startRedirectTimer = () => {
+  const interval = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      clearInterval(interval);
+      router.push("/");
+    }
+  }, 1000);
 };
 </script>
 
 <style scoped>
-* {
+/* ПЕРЕМЕННЫЕ ЦВЕТОВ */
+.registration-container {
+  --primary-color: #4950ca;
+  --primary-hover: #595fd1;
+  --primary-light: rgba(73, 80, 202, 0.15);
+  --border-color: #e1e5eb;
+  --text-main: #1a1a1a;
+  --text-secondary: #7a828a;
+  --bg-input: #fcfdfe;
+
+  font-family: "Inter", sans-serif;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 30px 60px;
+  color: var(--text-main);
   box-sizing: border-box;
 }
 
-.registration-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  position: relative;
+.reg-form {
+  box-sizing: border-box;
 }
 
-.registration-section {
-  border-radius: 6px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  margin: auto;
+.reg-form *,
+.reg-form *::before,
+.reg-form *::after {
+  box-sizing: border-box;
 }
 
-.form-container {
-  width: 100%;
-  padding: 20px 16px;
-}
-
-.registration-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.title-cont {
-  margin-bottom: 12px;
+h1 {
   text-align: center;
-}
-
-.title {
+  font-size: 26px;
   font-weight: 600;
-  font-size: 18px;
-  color: var(--text);
+  margin-bottom: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -477,115 +518,122 @@ const logAccoutn = () => {
 
 .b-logo {
   font-weight: 600;
-  font-size: 18px;
+  font-size: 22px;
 }
 
-.input-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  width: 100%;
+.field {
+  margin-bottom: 20px;
 }
 
-.input-cont {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
-}
-
-.compact-field {
-  grid-column: 1 / -1;
-}
-
-.name-input {
-  font-weight: 500;
-  font-size: 12px;
-  color: var(--text);
-}
-
-.input-reg {
-  border: 1px solid #c1c1c1;
-  border-radius: 3px;
-  padding: 0 8px;
-  width: 100%;
-  height: 34px;
-  background: var(--input);
+label {
+  display: block;
   font-size: 13px;
-  color: var(--text);
-  box-sizing: border-box;
-  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
 }
 
-.input-reg:focus {
+/* ИНПУТЫ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  border-radius: 8px;
+  font-size: 14px;
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.1);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.input-reg.error {
-  border-color: #be2424;
-  background: #ffeaea;
+input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-.input-reg.error:focus {
-  border-color: #be2424;
-  box-shadow: 0 0 0 2px rgba(190, 36, 36, 0.1);
-}
-
-.input-reg:disabled {
+input:disabled {
   background-color: #f5f5f5;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.phone-input-container {
+/* ПАРОЛЬ */
+.input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
-
-.phone-prefix {
+.input-wrapper input {
+  padding-right: 40px;
+}
+.eye-icon {
   position: absolute;
-  left: 8px;
-  font-size: 13px;
-  color: var(--text);
+  right: 12px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+}
+.eye-icon:hover {
+  color: var(--text-main);
 }
 
-.error-container {
-  min-height: 14px;
+/* ТЕЛЕФОН */
+.phone-input {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: 0.2s;
+}
+.phone-input:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.country-prefix {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  background: #f4f6f8;
+  border-right: 1px solid var(--border-color);
+  font-size: 14px;
+}
+.phone-input input {
+  border: none;
+  flex: 1;
+  box-shadow: none;
 }
 
-.error-message {
-  font-size: 11px;
-  color: #d33838;
-  margin: 1px 0 0;
-}
-
+/* МЕССЕНДЖЕРЫ */
 .messengers-cont {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin-top: 2px;
+  gap: 8px;
 }
 
 .messenger-label {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
   cursor: pointer;
-  padding: 4px 6px;
-  border: 1px solid #c1c1c1;
-  border-radius: 3px;
-  font-size: 11px;
-  background: var(--input);
-  min-height: 26px;
-  transition: all 0.2s ease;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-input);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 }
 
 .messenger-label:hover:not(.disabled) {
-  border-color: #4299e1;
-  background: #f0f7ff;
+  border-color: var(--primary-color);
+}
+
+.messenger-label.active {
+  border-color: var(--primary-color);
+  background: var(--bg-input);
 }
 
 .messenger-label.disabled {
@@ -593,247 +641,325 @@ const logAccoutn = () => {
   cursor: not-allowed;
 }
 
-.messenger-checkbox {
-  margin: 0;
-  transform: scale(0.8);
-  cursor: pointer;
+.messenger-checkbox-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
 
-.messenger-checkbox:disabled {
-  cursor: not-allowed;
+.messenger-check {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: transparent;
+  background: #fff;
+}
+
+.messenger-label:hover:not(.disabled) .messenger-check {
+  border-color: var(--primary-color);
+}
+
+.messenger-label.active .messenger-check {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(73, 80, 202, 0.3);
+  transform: scale(1.05);
 }
 
 .messenger-text {
   white-space: nowrap;
 }
 
-.checkbox-cont {
+/* СЕЛЕКТЫ */
+.row {
+  display: flex;
+  gap: 15px;
+}
+.half {
+  flex: 1;
+}
+.custom-select {
+  position: relative;
+  cursor: pointer;
+}
+.select-trigger {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  transition: 0.2s;
+}
+.active .select-trigger {
+  border-color: var(--primary-color);
+}
+.arrow {
+  border: solid var(--text-secondary);
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 3px;
+  transform: rotate(45deg);
+  transition: 0.2s;
+}
+.active .arrow {
+  transform: rotate(-135deg);
+  margin-top: 4px;
+}
+.select-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  overflow: hidden;
+}
+.select-options div {
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: 0.2s;
+}
+.select-options div:hover {
+  background: #f4f6f8;
+  color: var(--primary-color);
+}
+
+/* ЧЕКБОКСЫ */
+.checkbox-group {
+  margin: 25px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.checkbox-container {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
-  margin: 4px 0;
-  width: 100%;
-}
-
-.name-checkbox {
-  font-size: 11px;
-  color: var(--text);
-  line-height: 1.2;
   cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  transition: all 0.25s ease;
 }
-
-.name-checkbox.error {
-  color: #d33838;
+.checkbox-container:hover {
+  border-color: var(--primary-color);
 }
-
-.name-checkbox.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
-
-.terms-link {
-  color: #4950ca;
-  text-decoration: none;
-}
-
-.terms-link:hover {
-  text-decoration: underline;
-}
-
-.registration-account-button {
-  border-radius: 3px;
-  width: 100%;
-  height: 36px;
-  background: #4950ca;
-  font-weight: 600;
-  font-size: 13px;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  margin-top: 4px;
+.custom-checkmark {
+  flex-shrink: 0;
+  height: 22px;
+  width: 22px;
+  background: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  margin-right: 12px;
+  margin-top: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  transition: all 0.25s;
+}
+.checkbox-container:hover .custom-checkmark {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+input:checked ~ .custom-checkmark {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(73, 80, 202, 0.35);
+  transform: scale(1.05);
+}
+.custom-checkmark::after {
+  content: "";
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 2px;
+}
+input:checked ~ .custom-checkmark::after {
+  transform: rotate(45deg) scale(1);
+}
+.checkbox-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4a4a4a;
+  padding-top: 2px;
+}
+.checkbox-text a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px dashed rgba(73, 80, 202, 0.4);
+  transition: border-color 0.2s;
+}
+.checkbox-text a:hover {
+  border-bottom-color: var(--primary-color);
 }
 
-.registration-account-button:hover:not(:disabled) {
-  background: #595fd1;
+/* КНОПКА */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-
-.registration-account-button:active:not(:disabled) {
-  background: #2f36af;
+.submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
 }
-
-.registration-account-button:disabled {
-  background: #a0a0a0;
+.submit-btn:disabled {
+  background: #e1e5eb;
+  color: #a0a5ab;
   cursor: not-allowed;
 }
 
-.button-spinner {
+.footer-link {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.footer-link span {
+  color: var(--primary-color);
+  cursor: pointer;
+  margin-left: 4px;
+}
+.footer-link span:hover {
+  text-decoration: underline;
+}
+
+/* ОШИБКА */
+.error-banner {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ЭКРАН ПОДТВЕРЖДЕНИЯ */
+.email-sent {
+  text-align: center;
+  padding: 60px 20px;
+}
+.email-sent h2 {
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: var(--primary-color);
+}
+.email-sent p {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+.redirect-timer {
+  margin-top: 8px;
+  font-size: 14px;
+}
+.redirect-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+.redirect-btn:hover {
+  background: var(--primary-hover);
+}
+
+/* СПИННЕР КНОПКИ */
+.btn-spinner {
+  display: inline-block;
   width: 16px;
   height: 16px;
   border: 2px solid transparent;
-  border-top: 2px solid #fff;
+  border-top-color: #fff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
 }
-
-.login-account-button {
-  font-size: 12px;
-  color: var(--text);
-  text-align: center;
-  margin-top: 8px;
-}
-
-.login-account-button span {
-  color: #4950ca;
-  cursor: pointer;
-}
-
-.login-account-button span:hover {
-  text-decoration: underline;
-}
-
-.email-confirmation {
-  border-radius: 6px;
-  width: 90%;
-  max-width: 360px;
-  padding: 24px 16px;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-}
-
-.text-email-sent {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-/* Полноэкранный лоадер */
-.fullscreen-loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.loader-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4950ca;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.loader-text {
-  font-weight: 500;
-  font-size: 16px;
-  color: var(--text);
-}
-
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
+/* АНИМАЦИИ */
+.fade-enter-active,
+.fade-leave-active {
+  transition: 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
 @media (max-width: 480px) {
-  .registration-wrapper {
-    padding: 4px;
+  .registration-container {
+    padding: 24px 16px 40px;
   }
 
-  .form-container {
-    padding: 16px 12px;
+  h1 {
+    font-size: 20px;
   }
 
-  .title {
-    font-size: 16px;
-  }
-
-  .input-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
+  .row {
+    flex-direction: column;
+    gap: 0;
   }
 
   .messengers-cont {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .registration-account-button {
-    height: 34px;
-    font-size: 12px;
+  .checkbox-container {
+    padding: 8px 10px;
   }
 
-  .input-reg {
-    height: 32px;
-    font-size: 12px;
-  }
-
-  .fullscreen-loader {
-    background: rgba(255, 255, 255, 0.95);
-  }
-
-  .loader-content {
-    padding: 20px;
-    margin: 16px;
-  }
-
-  .loader-spinner {
-    width: 32px;
-    height: 32px;
-  }
-
-  .loader-text {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 360px) {
-  .form-container {
-    padding: 12px 8px;
-  }
-
-  .messengers-cont {
-    grid-template-columns: 1fr;
-  }
-
-  .messenger-label {
-    padding: 3px 4px;
-    font-size: 10px;
-    min-height: 24px;
-  }
-
-  .input-row {
-    gap: 4px;
+  .custom-checkmark {
+    height: 20px;
+    width: 20px;
   }
 }
 </style>

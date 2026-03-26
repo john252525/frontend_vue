@@ -308,6 +308,8 @@ const loginAccount = async () => {
         );
       } else if (errorText === "User not found.") {
         inputStyle.incorrectPasswordMessage = t("login.errorUserNotFound");
+      } else if (errorText === "Email is not verified.") {
+        inputStyle.incorrectPasswordMessage = t("login.errorEmailNotVerified");
       } else {
         inputStyle.incorrectPasswordMessage = t("login.errorAuthFailed");
       }

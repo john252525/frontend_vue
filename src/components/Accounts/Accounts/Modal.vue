@@ -172,6 +172,16 @@
             "
             class="action"
             @click="openMessageHistory"
+            >История Сообщений
+          </span>
+
+          <span
+            v-if="
+              ['uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value === 'whatsapi'
+            "
+            class="action"
+            @click="changeStationGetHistory"
             >История
           </span>
 
@@ -992,6 +1002,7 @@ const EnablebyQR = async (value) => {
 };
 
 import { useI18n } from "vue-i18n";
+import GetHistory from "./ModalAccount/CRM/GetHistory/GetHistory.vue";
 const { t } = useI18n();
 
 const startEnableByQR = async (value) => {

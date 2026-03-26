@@ -378,7 +378,7 @@ const getDeviceType = (record) => {
   // Если это cascade (без final_source), показываем все источники
   if (r?.source_results) {
     const sources = Object.keys(r.source_results).map(
-      (s) => s.charAt(0).toUpperCase() + s.slice(1)
+      (s) => s.charAt(0).toUpperCase() + s.slice(1),
     );
     return sources.join(", ") || "Неизвестно";
   }
@@ -560,17 +560,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.black-fon {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9;
-  cursor: pointer;
-}
-
 .history-modal {
   position: fixed;
   top: 50%;
@@ -611,7 +600,9 @@ onBeforeUnmount(() => {
   font-size: 28px;
   cursor: pointer;
   color: #ccc;
-  transition: color 0.3s, transform 0.2s;
+  transition:
+    color 0.3s,
+    transform 0.2s;
   padding: 0;
   width: 32px;
   height: 32px;
