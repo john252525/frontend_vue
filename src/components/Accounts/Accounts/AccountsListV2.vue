@@ -200,6 +200,7 @@
       v-if="customSourcesModal"
       :item="selectedItem"
       :close="closeCustomSourcesModal"
+      :openUonSettingModal="openUonSettingModal"
       :accounts="instanceData"
     />
   </section>

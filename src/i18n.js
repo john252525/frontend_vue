@@ -177,9 +177,14 @@ const messages = {
       email: "Email",
       phone: "Phone",
       channelsTitle: "Communication channels",
+      contactName: "Contact name",
+      companyName: "Company name",
       editPhone: "Edit phone",
       editChannels: "Edit communication channels",
+      editContactInfo: "Edit contact info",
       enterPhone: "Enter phone number",
+      enterContactName: "Enter contact name",
+      enterCompanyName: "Enter company name",
       invalidPhone: "Please enter a valid phone number",
       preferredChannels: "Preferred channels",
       save: "Save",
@@ -195,6 +200,7 @@ const messages = {
       messages: {
         phoneSaved: "Phone number updated successfully",
         channelsSaved: "Communication channels updated successfully",
+        contactInfoSaved: "Contact info updated successfully",
       },
       errors: {
         noToken: "Authorization token not found",
@@ -202,6 +208,7 @@ const messages = {
         saveFailed: "Save error",
         phoneSaveFailed: "Error saving phone number",
         channelsSaveFailed: "Error saving communication channels",
+        contactInfoSaveFailed: "Error saving contact info",
       },
     },
     innSettings: {
@@ -812,9 +819,14 @@ const messages = {
       email: "Email",
       phone: "Телефон",
       channelsTitle: "Каналы связи",
+      contactName: "Имя контакта",
+      companyName: "Название компании",
       editPhone: "Редактирование телефона",
       editChannels: "Редактирование каналов связи",
+      editContactInfo: "Редактирование контактных данных",
       enterPhone: "Введите номер телефона",
+      enterContactName: "Введите имя контакта",
+      enterCompanyName: "Введите название компании",
       invalidPhone: "Пожалуйста, введите корректный номер телефона",
       preferredChannels: "Предпочитаемые каналы",
       save: "Сохранить",
@@ -830,6 +842,7 @@ const messages = {
       messages: {
         phoneSaved: "Телефон успешно обновлен",
         channelsSaved: "Каналы связи успешно обновлены",
+        contactInfoSaved: "Контактные данные успешно обновлены",
       },
       errors: {
         noToken: "Токен авторизации не найден",
@@ -837,6 +850,7 @@ const messages = {
         saveFailed: "Ошибка сохранения",
         phoneSaveFailed: "Ошибка сохранения телефона",
         channelsSaveFailed: "Ошибка сохранения каналов связи",
+        contactInfoSaveFailed: "Ошибка сохранения контактных данных",
       },
     },
     innSettings: {

@@ -7,6 +7,36 @@
     :is-loading="loading"
   >
     <div class="sources-modal">
+      <div class="uon-warning">
+        <div class="uon-warning__icon">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="#856404"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="uon-warning__content">
+          <p class="uon-warning__text">
+            <strong>Важное уточнение:</strong> Для корректного отображения
+            данных необходимо активировать использование кастомных источников в
+            личном кабинете U-ON.
+          </p>
+          <button @click="goToSettings" class="uon-warning__link">
+            Перейти в настройки U-ON
+          </button>
+        </div>
+      </div>
+
       <Accounts
         :accounts="accounts"
         :custom-sources="sources"
@@ -37,6 +67,9 @@ const props = defineProps({
   close: {
     type: Function,
     required: true,
+  },
+  openUonSettingModal: {
+    type: Function,
   },
   item: {
     type: Object,
@@ -140,6 +173,11 @@ const saveCustomSources = async () => {
   }
 };
 
+const goToSettings = () => {
+  props.close();
+  props.openUonSettingModal();
+};
+
 const handleUpdateSource = (uuid, newName) => {
   // Используем spread или явное присваивание, чтобы Vue видел изменения
   sources.value = {
@@ -154,6 +192,56 @@ onMounted(getCustomSources);
 .sources-modal {
   max-width: 560px;
   margin: 0 auto;
+}
+
+.uon-warning {
+  display: flex;
+  gap: 12px;
+  background-color: #fff3cd; /* Светло-желтый фон */
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+
+.uon-warning__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.uon-warning__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uon-warning__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #856404; /* Темно-коричневый текст */
+}
+
+.uon-warning__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #664d03;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  width: fit-content;
+  transition: opacity 0.2s;
+}
+
+.uon-warning__link:hover {
+  opacity: 0.8;
+  text-decoration: none;
 }
 
 .sources-modal__title {

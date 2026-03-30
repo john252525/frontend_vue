@@ -15,7 +15,7 @@
     </div>
 
     <!-- Основной контент (скрывается при редактировании) -->
-    <div v-else-if="!isEditingPhone && !isEditingChannels" class="info-grid">
+    <div v-else-if="!isEditingPhone && !isEditingChannels && !isEditingContactInfo" class="info-grid">
       <div class="info-item">
         <span class="info-label">{{ t("profileSection.email") }}:</span>
         <div class="value-container">
@@ -64,6 +64,34 @@
               />
             </svg>
           </button>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("profileSection.contactName") }}:</span>
+        <div class="value-container">
+          <span class="info-value">{{ userContactName || "—" }}</span>
+          <button
+            @click="startEditingContactInfo"
+            class="edit-btn"
+            :disabled="saving"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path
+                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+              />
+              <path
+                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">{{ t("profileSection.companyName") }}:</span>
+        <div class="value-container">
+          <span class="info-value">{{ userCompanyName || "—" }}</span>
         </div>
       </div>
     </div>
@@ -153,6 +181,44 @@
       </div>
     </div>
 
+    <!-- Редактирование контактных данных -->
+    <div v-else-if="isEditingContactInfo" class="edit-mode">
+      <h3 class="edit-title">{{ t("profileSection.editContactInfo") }}</h3>
+      <div class="edit-form">
+        <div class="form-group">
+          <label class="form-label">{{ t("profileSection.contactName") }}:</label>
+          <input
+            class="form-input"
+            v-model="editedContactName"
+            :placeholder="t('profileSection.enterContactName')"
+            :disabled="saving"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t("profileSection.companyName") }}:</label>
+          <input
+            class="form-input"
+            v-model="editedCompanyName"
+            :placeholder="t('profileSection.enterCompanyName')"
+            :disabled="saving"
+          />
+        </div>
+        <div class="edit-actions">
+          <button @click="saveContactInfo" class="save-btn" :disabled="saving">
+            <span v-if="saving" class="button-loading"></span>
+            {{ saving ? t("profileSection.saving") : t("profileSection.save") }}
+          </button>
+          <button
+            @click="cancelEditingContactInfo"
+            class="cancel-btn"
+            :disabled="saving"
+          >
+            {{ t("profileSection.cancel") }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Уведомления -->
     <div v-if="message" :class="['message', messageType]">
       {{ message }}
@@ -185,11 +251,16 @@ const saving = ref(false);
 // Данные пользователя
 const userPhone = ref("");
 const userChannels = ref([]);
+const userContactName = ref("");
+const userCompanyName = ref("");
 
 // Состояния редактирования
 const isEditingPhone = ref(false);
 const isEditingChannels = ref(false);
+const isEditingContactInfo = ref(false);
 const editedChannels = ref([]);
+const editedContactName = ref("");
+const editedCompanyName = ref("");
 
 // Уведомления
 const message = ref("");
@@ -258,6 +329,8 @@ const loadContactInfo = async () => {
     if (data.ok && data.data) {
       userPhone.value = data.data.phone || "";
       userChannels.value = data.data.contact_preferred_channels || [];
+      userContactName.value = data.data.contact_name || "";
+      userCompanyName.value = data.data.company_name || "";
     }
   } catch (error) {
     console.error("Ошибка загрузки контактной информации:", error);
@@ -281,6 +354,16 @@ const startEditingChannels = () => {
   editedChannels.value = [...userChannels.value];
   isEditingChannels.value = true;
   isEditingPhone.value = false;
+  isEditingContactInfo.value = false;
+};
+
+// Начало редактирования контактных данных
+const startEditingContactInfo = () => {
+  editedContactName.value = userContactName.value;
+  editedCompanyName.value = userCompanyName.value;
+  isEditingContactInfo.value = true;
+  isEditingPhone.value = false;
+  isEditingChannels.value = false;
 };
 
 // Отмена редактирования телефона
@@ -293,6 +376,13 @@ const cancelEditingPhone = () => {
 const cancelEditingChannels = () => {
   isEditingChannels.value = false;
   editedChannels.value = [];
+};
+
+// Отмена редактирования контактных данных
+const cancelEditingContactInfo = () => {
+  isEditingContactInfo.value = false;
+  editedContactName.value = "";
+  editedCompanyName.value = "";
 };
 
 // Сохранение телефона
@@ -323,6 +413,8 @@ const savePhone = async () => {
         body: JSON.stringify({
           phone: internationalPhone,
           contact_preferred_channels: userChannels.value,
+          contact_name: userContactName.value,
+          company_name: userCompanyName.value,
         }),
       }
     );
@@ -369,6 +461,8 @@ const saveChannels = async () => {
         body: JSON.stringify({
           phone: userPhone.value,
           contact_preferred_channels: editedChannels.value,
+          contact_name: userContactName.value,
+          company_name: userCompanyName.value,
         }),
       }
     );
@@ -387,6 +481,53 @@ const saveChannels = async () => {
   } catch (error) {
     console.error("Ошибка сохранения каналов:", error);
     showMessage(t("profileSection.errors.channelsSaveFailed"), "error");
+  } finally {
+    saving.value = false;
+  }
+};
+
+// Сохранение контактных данных
+const saveContactInfo = async () => {
+  const currentToken = token.value;
+  if (!currentToken) {
+    showMessage(t("profileSection.errors.noToken"), "error");
+    return;
+  }
+
+  saving.value = true;
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_FRONTEND_URL_USERS}/saveContact`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentToken}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          phone: userPhone.value,
+          contact_preferred_channels: userChannels.value,
+          contact_name: editedContactName.value,
+          company_name: editedCompanyName.value,
+        }),
+      }
+    );
+
+    if (!response.ok) throw new Error(t("profileSection.errors.saveFailed"));
+
+    const data = await response.json();
+
+    if (data.ok) {
+      await loadContactInfo();
+      isEditingContactInfo.value = false;
+      showMessage(t("profileSection.messages.contactInfoSaved"), "success");
+    } else {
+      throw new Error(data.message || t("profileSection.errors.saveFailed"));
+    }
+  } catch (error) {
+    console.error("Ошибка сохранения контактных данных:", error);
+    showMessage(t("profileSection.errors.contactInfoSaveFailed"), "error");
   } finally {
     saving.value = false;
   }

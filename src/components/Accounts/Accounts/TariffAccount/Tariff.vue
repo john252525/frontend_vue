@@ -123,7 +123,10 @@
 
             <div class="tariff-card__features">
               <!-- Лимиты тарифа -->
-              <div class="feature-item" v-if="tariff.limits">
+              <div
+                class="feature-item"
+                v-if="tariff.limits && formatLimit(tariff.limits.dialogs) > 0"
+              >
                 <div class="feature-icon">
                   <svg viewBox="0 0 24 24" width="14" height="14">
                     <path
@@ -136,7 +139,10 @@
                 </span>
               </div>
 
-              <div class="feature-item" v-if="tariff.limits">
+              <div
+                class="feature-item"
+                v-if="tariff.limits && formatLimit(tariff.limits.messages) > 0"
+              >
                 <div class="feature-icon">
                   <svg viewBox="0 0 24 24" width="14" height="14">
                     <path
@@ -215,6 +221,29 @@
           </div>
         </div>
 
+        <!-- Предложение перейти на 3 канала -->
+        <div
+          v-if="type === 'group' && groupCode === 'group-2-channels'"
+          class="upsell-banner"
+          @click="switchToThreeChannels"
+        >
+          <div class="upsell-banner__icon">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+          </div>
+          <div class="upsell-banner__text">
+            <strong>Добавьте 3-й аккаунт — выгоднее!</strong>
+            <span
+              >Тариф на 3 канала стоит всего на {{ upsellDiffPercent }}% дороже,
+              но даёт +50% мощности</span
+            >
+          </div>
+          <div class="upsell-banner__arrow">→</div>
+        </div>
+
         <div
           v-if="totalPages > 1 && (windowWidth >= 768 || totalPages > 1)"
           class="pagination-controls"
@@ -274,6 +303,18 @@ const FRONTEND_URL_TARIFFS = import.meta.env.VITE_FRONTEND_URL_TARIFFS;
 import FailedPurchase from "./Purchase/FailedPurchase.vue";
 import SuccessfulPurchase from "./Purchase/SuccessfulPurchase.vue";
 import BuySection from "./BuySection.vue";
+
+const GROUP_PRICES = {
+  "group-2-channels": { "1m": 3380, "3m": 9790, "6m": 18900, "12m": 33800 },
+  "group-3-channels": { "1m": 4170, "3m": 12190, "6m": 23900, "12m": 41700 },
+};
+
+const GROUP_PERIOD_NAMES = {
+  "1m": "1 Месяц",
+  "3m": "3 Месяца",
+  "6m": "6 Месяцев",
+  "12m": "12 Месяцев",
+};
 
 const props = defineProps({
   changeTariffStation: {
@@ -341,6 +382,7 @@ const tariffsData = ref([]);
 const error = ref(null);
 const nullTariff = ref(false);
 const currentPage = ref(0);
+const groupCode = ref(null);
 
 // Реактивная ширина окна
 const windowWidth = ref(window.innerWidth);
@@ -454,14 +496,30 @@ const calculateSavings = (tariff) => {
   return Math.round(savings);
 };
 
-const fetchTariffs = async () => {
+const generateGroupTariffs = (baseTariff, code) => {
+  const prices = GROUP_PRICES[code];
+  if (!prices) return [baseTariff];
+
+  return Object.entries(prices).map(([period, price]) => ({
+    ...baseTariff,
+    id: baseTariff.id,
+    period,
+    price,
+    final_price: price,
+    name: `${baseTariff.limits.channel_count} канала — ${GROUP_PERIOD_NAMES[period]}`,
+  }));
+};
+
+const fetchTariffs = async (overrideCode = null) => {
   loading.value = true;
   error.value = null;
   nullTariff.value = false;
 
   let code;
 
-  if (props.type === "vendor") {
+  if (overrideCode) {
+    code = overrideCode;
+  } else if (props.type === "vendor") {
     if (selectedItem.value.source !== "whatsapi") {
       code = `touchapi-${selectedItem.value.source}`;
     } else {
@@ -477,7 +535,6 @@ const fetchTariffs = async () => {
   try {
     const response = await axios.post(
       `${FRONTEND_URL_TARIFFS}getByCodeWithMods`,
-      // { code: code },
       { code: code },
       {
         headers: {
@@ -488,9 +545,17 @@ const fetchTariffs = async () => {
     );
 
     if (response.data.ok && response.data.data) {
-      tariffsData.value = Array.isArray(response.data.data)
+      const raw = Array.isArray(response.data.data)
         ? response.data.data
         : [response.data.data];
+
+      if (props.type === "group" && raw.length > 0) {
+        const detectedCode = raw[0].code;
+        groupCode.value = detectedCode;
+        tariffsData.value = generateGroupTariffs(raw[0], detectedCode);
+      } else {
+        tariffsData.value = raw;
+      }
 
       if (tariffsData.value.length === 0) {
         nullTariff.value = true;
@@ -510,6 +575,11 @@ const fetchTariffs = async () => {
   }
 };
 
+const switchToThreeChannels = () => {
+  currentPage.value = 0;
+  fetchTariffs("group-3-channels");
+};
+
 const selectTariff = ref({});
 
 const changeStationTariff = () => {
@@ -521,6 +591,12 @@ const clickSelectTariff = (tariff) => {
   selectTariff.value = tariff;
   console.log("Выбран тариф:", selectTariff.value);
 };
+
+const upsellDiffPercent = computed(() => {
+  const price2 = GROUP_PRICES["group-2-channels"]["1m"];
+  const price3 = GROUP_PRICES["group-3-channels"]["1m"];
+  return Math.round(((price3 - price2) / price2) * 100);
+});
 
 const sortedTariffs = computed(() => {
   const periodOrder = {
@@ -985,6 +1061,64 @@ onMounted(fetchTariffs);
 
 .retry-button:hover {
   transform: translateY(-1px);
+}
+
+.upsell-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+  border: 1px solid #ffd54f;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upsell-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.25);
+  border-color: #ffc107;
+}
+
+.upsell-banner__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upsell-banner__icon svg {
+  fill: white;
+}
+
+.upsell-banner__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.upsell-banner__text strong {
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.upsell-banner__text span {
+  font-size: 12px;
+  color: #666;
+}
+
+.upsell-banner__arrow {
+  font-size: 18px;
+  color: #ffa000;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .pagination-controls {

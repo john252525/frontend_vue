@@ -298,15 +298,15 @@ const buyTariff = async () => {
   loadingPay.value = true;
 
   try {
-    const encodedTariff = encodeTariff(
-      selectTariff.value.code,
-      selectTariff.value.id,
-    );
+    const isGroup = props.type === "group";
+
+    const encodedTariff = isGroup
+      ? null
+      : encodeTariff(selectTariff.value.code, selectTariff.value.id);
 
     const payload = {
       amount: baseFinalPrice.value,
       tariff_id: selectTariff.value.id,
-      tariff: encodedTariff,
       currency: selectTariff.value.currency,
       domain: window.location.hostname,
       entity: props.type,
@@ -315,6 +315,9 @@ const buyTariff = async () => {
       original_price: originalPrice.value,
       discount_percent: discountPercent.value,
       promo_code: appliedPromo.value?.code || null,
+      ...(isGroup
+        ? { code: selectTariff.value.code, duration: selectTariff.value.period }
+        : { tariff: encodedTariff }),
     };
 
     console.log("payload", payload);
