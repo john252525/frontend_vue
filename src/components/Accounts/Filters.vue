@@ -182,6 +182,11 @@ const items = reactive([
     checked: accountStore.filterState.vk,
   },
   {
+    id: "sms",
+    name: "SMS",
+    checked: accountStore.filterState.sms,
+  },
+  {
     id: "whatsapp",
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,
@@ -276,9 +281,16 @@ const updateGroups = () => {
 };
 
 const updateCrmTypes = () => {
-  result.type = visibleCrmSubItems.value
+  const crmTypes = visibleCrmSubItems.value
     .filter((subItem) => subItem.checked)
     .map((subItem) => subItem.id);
+
+  const smsSelected = items.find((i) => i.id === "sms")?.checked || false;
+  if (smsSelected) {
+    crmTypes.push("touchapi");
+  }
+
+  result.type = crmTypes;
   accountStore.setType(result.type);
 };
 
@@ -286,6 +298,7 @@ const updateFilterState = () => {
   const newFilterState = {
     telegram: items.find((i) => i.id === "telegram")?.checked || false,
     whatsapp: items.find((i) => i.id === "whatsapp")?.checked || false,
+    sms: items.find((i) => i.id === "sms")?.checked || false,
     crm: items.find((i) => i.id === "crm")?.checked || false,
     amocrm: crmSubItems.find((i) => i.id === "amocrm")?.checked || false,
     bitrix24: crmSubItems.find((i) => i.id === "bitrix24")?.checked || false,

@@ -456,4 +456,42 @@ const closeInvoiceModal = () => {
   opacity: 0;
   transform: translateY(8px);
 }
+
+@media (max-width: 480px) {
+  .payment-modal {
+    top: auto;
+    left: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-content {
+    padding: 16px;
+    overflow-y: auto;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .modal-header {
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+
+  .steps {
+    gap: 8px;
+  }
+
+  .step-label {
+    font-size: 10px;
+  }
+
+  .step-number {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
 </style>

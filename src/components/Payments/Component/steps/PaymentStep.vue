@@ -483,4 +483,24 @@ const processPayment = async () => {
   opacity: 0;
   transform: translateY(8px);
 }
+
+@media (max-width: 480px) {
+  .payment-summary {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .summary-title {
+    font-size: 15px;
+  }
+
+  .step-actions {
+    margin-top: 16px;
+  }
+
+  .btn {
+    padding: 13px 16px;
+    font-size: 14px;
+  }
+}
 </style>

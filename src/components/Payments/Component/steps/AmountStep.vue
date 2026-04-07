@@ -321,4 +321,20 @@ watch(
 .action-btn {
   margin-top: auto;
 }
+
+@media (max-width: 480px) {
+  .payment-form {
+    gap: 14px;
+  }
+
+  .form-input {
+    font-size: 16px; /* предотвращает zoom на iOS */
+    padding: 10px 14px;
+  }
+
+  .action-btn {
+    margin-top: 16px;
+    padding: 13px 16px;
+  }
+}
 </style>

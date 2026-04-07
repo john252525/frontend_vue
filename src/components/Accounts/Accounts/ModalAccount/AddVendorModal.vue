@@ -16,7 +16,8 @@
       <div class="modal-body">
         <p class="info-text">
           Выберите аккаунты для добавления в группу (максимум по одному для
-          каждого типа: WhatsApp, Telegram, Max)
+          каждого типа: WhatsApp, Telegram, Max)<span v-if="channelLimit !== null">
+            · доступно каналов по подписке: {{ channelLimit - currentVendorCount }}</span>
         </p>
 
         <div v-if="loadingAccounts" class="loading-spinner">
@@ -177,6 +178,17 @@ const countAddedBySource = (source) => {
   ).length;
 };
 
+const channelLimit = computed(() => {
+  return props.group?.subscription_limits?.channel_count ?? props.group?.settings?.channel_count ?? null;
+});
+
+const currentVendorCount = computed(() => {
+  const groupVendors = Array.isArray(props.group.vendors)
+    ? props.group.vendors
+    : Object.values(props.group.vendors || {});
+  return groupVendors.length;
+});
+
 // Проверить, можно ли выбрать аккаунт
 const canSelectAccount = (acc) => {
   if (isAdded(acc)) return false;
@@ -185,6 +197,14 @@ const canSelectAccount = (acc) => {
   const isSelected = selectedVendorUuids.value.includes(acc.uuid);
 
   if (isSelected) return true;
+
+  // Лимит по подписке: нельзя добавить больше channel_count аккаунтов суммарно
+  if (channelLimit.value !== null) {
+    const totalSelected = selectedVendorUuids.value.length;
+    if (currentVendorCount.value + totalSelected >= channelLimit.value) {
+      return false;
+    }
+  }
 
   // Лимит: 1 аккаунт каждого типа (TG, WA, VK, Max)
   const selectedCount = countSelectedBySource(source);

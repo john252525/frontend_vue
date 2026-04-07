@@ -28,7 +28,8 @@
       </article>
 
       <article class="user-cont">
-        <!-- Иконка почты -->
+        <!-- Колокольчик уведомлений -->
+        <NotificationBell />
 
         <!-- Email пользователя -->
         <div v-if="email" class="email-display">
@@ -103,6 +104,7 @@ import { useRoute } from "vue-router";
 import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
+import NotificationBell from "./NotificationBell.vue";
 import { useDomain } from "@/composables/getDomain";
 import { useBalanceStore } from "@/stores/balanceStore";
 import { useAccountStore } from "@/stores/accountStore";

@@ -414,4 +414,40 @@ onMounted(() => {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 480px) {
+  .invoice-modal {
+    top: auto;
+    left: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+  }
+
+  .invoice-modal-content {
+    padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .modal-header {
+    margin-bottom: 16px;
+  }
+
+  .modal-title {
+    font-size: 17px;
+  }
+
+  .success-message h3 {
+    font-size: 16px;
+  }
+
+  .btn-large {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+}
 </style>

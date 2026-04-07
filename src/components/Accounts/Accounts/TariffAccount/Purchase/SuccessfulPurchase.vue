@@ -96,8 +96,7 @@ const getPeriodText = (period) => {
 const close = async () => {
   props.changeTariffStation();
   await props.getAccounts();
-  props.changePayDataForAccounts(selectedItem.value);
-  console.log(true);
+  props.changePayDataForAccounts(selectedItem.value, props.tariff);
 };
 
 const confettiStyle = (i) => {

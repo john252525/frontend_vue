@@ -69,6 +69,13 @@
           </div>
         </div>
 
+        <div v-if="group.has_subscription" class="subscription-badge">
+          Подписка до {{ formatSubscriptionDate(group.subscription_to) }}
+          <span v-if="group.subscription_limits?.channel_count" class="subscription-channels">
+            · {{ group.subscription_limits.channel_count }} {{ channelWord(group.subscription_limits.channel_count) }}
+          </span>
+        </div>
+
         <div class="vendors-list">
           <div
             v-for="vendor in Object.values(group.vendors)"
@@ -106,7 +113,7 @@
               Подписка
             </button>
             <button
-              v-if="Object.keys(group.vendors).length < 4"
+              v-if="canAddVendor(group)"
               @click="openAddVendorModal(group)"
               class="add-vendor-button"
             >
@@ -188,7 +195,7 @@ const props = defineProps({
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
-const { allGroupsList, loading, error, getGroups } = useVendorGroups(token);
+const { allGroupsList, loading, error, getGroups, updateGroup } = useVendorGroups(token);
 
 const tariffStation = ref(false);
 const showCreateModal = ref(false);
@@ -223,8 +230,53 @@ const openEditGroupModal = (group) => {
   showEditModal.value = true;
 };
 
-const changePayDataForAccounts = () => {
-  return;
+const getChannelLimit = (group) => {
+  return group.subscription_limits?.channel_count || group.settings?.channel_count || null;
+};
+
+const canAddVendor = (group) => {
+  const limit = getChannelLimit(group);
+  const vendorCount = Object.keys(group.vendors).length;
+  return vendorCount < (limit ?? 4);
+};
+
+const formatSubscriptionDate = (dateStr) => {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const channelWord = (n) => {
+  if (n === 1) return "канал";
+  if (n >= 2 && n <= 4) return "канала";
+  return "каналов";
+};
+
+const changePayDataForAccounts = async (group, tariff) => {
+  if (!group || !tariff) return;
+  const channelCount = tariff.limits?.channel_count;
+  if (!channelCount) return;
+
+  const settings =
+    typeof group.settings === "string"
+      ? JSON.parse(group.settings)
+      : group.settings || {};
+  const cascade = settings.cascade || [];
+
+  if (cascade.length > channelCount) {
+    await updateGroup({
+      uuid: group.uuid,
+      name: group.name,
+      settings: {
+        ...settings,
+        cascade: cascade.slice(0, channelCount),
+      },
+    });
+    await getGroups();
+  }
 };
 
 const openDeleteGroupModal = (group) => {
@@ -537,6 +589,24 @@ onMounted(async () => {
 
 .delete-button:hover {
   background: #fee2e2;
+}
+
+.subscription-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 20px;
+  padding: 3px 10px;
+  margin-bottom: 10px;
+}
+
+.subscription-channels {
+  color: #047857;
 }
 
 .vendors-list {

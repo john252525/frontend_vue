@@ -341,4 +341,21 @@ watch(localMethod, (value) => {
   background: #2563eb;
   transform: translateY(-1px);
 }
+
+@media (max-width: 480px) {
+  .method-card {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .action-btn {
+    margin-top: 16px;
+    padding: 13px 16px;
+  }
+}
 </style>

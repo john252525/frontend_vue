@@ -98,9 +98,13 @@ const formatDate = (dateStr) => {
 };
 
 const getCategoryName = (cat) => {
-  if (cat === "feature") return "Новая функция";
-  if (cat === "fix") return "Исправление";
-  return "Важное объявление";
+  const names = {
+    feature: "Новая функция",
+    fix: "Исправление",
+    announcement: "Объявление",
+    news: "Новость",
+  };
+  return names[cat] ?? "Новость";
 };
 
 // Примерный расчёт времени чтения (≈ 220 слов в минуту)
@@ -261,6 +265,10 @@ const renderedContent = computed(() => {
 }
 .category-badge.announcement {
   background: #8b5cf6;
+  color: white;
+}
+.category-badge.news {
+  background: oklch(0.541 0.198 267);
   color: white;
 }
 

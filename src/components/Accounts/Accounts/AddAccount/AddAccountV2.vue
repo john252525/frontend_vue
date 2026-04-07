@@ -197,7 +197,24 @@
         >
           {{ getLabel("messenger") }}
         </label>
+
+        <!-- Mobile: показываем все опции сразу -->
+        <div v-if="isMobile" class="messenger-cards" data-testid="messenger-cards">
+          <div
+            v-for="option in getOptions('messenger')"
+            :key="option.value"
+            class="messenger-card accounts-addAccounts-messenger-option"
+            :class="{ 'messenger-card-active': formValues.messenger === option.value }"
+            @click="selectOption('messenger', option.value)"
+            :data-testid="`messenger-option-${option.value}`"
+          >
+            {{ option.text }}
+          </div>
+        </div>
+
+        <!-- Desktop: dropdown -->
         <div
+          v-else
           class="custom-select"
           ref="messengerSelect"
           data-testid="messenger-select"
@@ -780,14 +797,22 @@ const handleClickOutside = (event) => {
   }
 };
 
+// Mobile detection
+const isMobile = ref(window.innerWidth <= 480);
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 480;
+};
+
 // Set up event listeners
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", handleResize);
   fetchFormStructure();
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", handleResize);
 });
 
 const handleSomeAction = () => {
@@ -1254,6 +1279,37 @@ const submitForm = async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Mobile messenger cards */
+.messenger-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messenger-card {
+  padding: 12px 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.messenger-card:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.messenger-card-active {
+  border-color: #6366f1;
+  background: #eef2ff;
+  color: #4338ca;
 }
 
 /* Адаптивные стили для мобильных устройств */

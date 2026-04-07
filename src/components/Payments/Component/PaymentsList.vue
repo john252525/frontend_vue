@@ -1173,31 +1173,6 @@ tr:hover {
 }
 
 @media (max-width: 600px) {
-  .table-login {
-    width: 18%;
-  }
-
-  .table-type {
-    width: 12%;
-  }
-
-  .table-step {
-    width: 28%;
-  }
-
-  .table-status {
-    width: 22%;
-  }
-
-  .table-action {
-    width: 20%;
-  }
-
-  .details-button {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
   .modal-header {
     padding: 20px 16px 12px 16px;
   }
@@ -1209,6 +1184,48 @@ tr:hover {
   .modal-close {
     top: 12px;
     right: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .modal-body {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .cards-container {
+    padding: 8px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .payment-card {
+    padding: 12px;
+  }
+
+  .card-amount {
+    font-size: 16px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

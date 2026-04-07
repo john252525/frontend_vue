@@ -1,152 +1,171 @@
 <template>
   <div class="news-page">
-    <div class="content-wrapper">
-      <div v-if="!selectedUpdate" class="articles-grid">
-        <article
-          v-for="item in sortedUpdates"
-          :key="item.id"
-          class="update-card"
-          @click="selectedUpdate = item"
-        >
-          <div class="category-strip" :class="item.category"></div>
+    <!-- Кнопка создания для admin -->
+    <div v-if="isAdmin" class="admin-bar">
+      <button class="create-btn" @click="openCreateForm">+ Новая статья</button>
+    </div>
 
-          <div class="card-content">
-            <div v-if="item.image" class="card-image">
-              <img :src="item.image" :alt="item.title" />
-            </div>
+    <div v-if="loading" class="state-msg">Загрузка...</div>
+    <div v-else-if="error" class="state-msg error">{{ error }}</div>
 
-            <div class="card-header">
-              <span class="date">{{ formatDate(item.date) }}</span>
-              <span class="category-label" :class="item.category">
-                {{ getCategoryName(item.category) }}
-              </span>
-            </div>
+    <!-- Сетка карточек -->
+    <div v-else-if="!selectedArticle" class="articles-grid">
+      <article
+        v-for="item in articles"
+        :key="item.id"
+        class="update-card"
+        @click="selectedArticle = item"
+      >
+        <div class="category-strip" :class="item.category"></div>
 
-            <h3 class="card-title">{{ item.title }}</h3>
-            <p class="card-text">{{ item.description }}</p>
-
-            <div v-if="item.link" class="card-footer">
-              <a :href="item.link" class="read-more" @click.stop>
-                Подробнее →
-              </a>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <div v-if="selectedUpdate" class="full-article-view">
-        <button class="close-article" @click="selectedUpdate = null">
-          ← Назад к списку
-        </button>
-
-        <article class="full-article">
-          <div v-if="selectedUpdate.image" class="hero-image">
-            <img :src="selectedUpdate.image" :alt="selectedUpdate.title" />
+        <div class="card-content">
+          <div v-if="item.image" class="card-image">
+            <img :src="item.image" :alt="item.title" />
           </div>
 
-          <div class="article-container">
-            <div class="meta">
-              <span class="category-badge" :class="selectedUpdate.category">
-                {{ getCategoryName(selectedUpdate.category) }}
-              </span>
-              <time>{{ formatDate(selectedUpdate.date) }}</time>
-            </div>
-
-            <h1 class="article-title">{{ selectedUpdate.title }}</h1>
-
-            <p v-if="selectedUpdate.lead" class="lead">
-              {{ selectedUpdate.lead }}
-            </p>
-
-            <div class="article-content">
-              <p
-                v-for="(paragraph, i) in selectedUpdate.content.split('\n\n')"
-                :key="i"
-              >
-                {{ paragraph }}
-              </p>
-            </div>
-
-            <div v-if="selectedUpdate.tags?.length" class="tags">
-              <span v-for="tag in selectedUpdate.tags" :key="tag" class="tag">
-                #{{ tag }}
-              </span>
-            </div>
+          <div class="card-header">
+            <span class="date">{{ formatDate(item.dt_published || item.dt_ins) }}</span>
+            <span class="category-label" :class="item.category">
+              {{ getCategoryName(item.category) }}
+            </span>
           </div>
-        </article>
+
+          <h3 class="card-title">{{ item.title }}</h3>
+          <p class="card-text">{{ item.description }}</p>
+
+          <!-- Кнопка редактирования для admin -->
+          <div v-if="isAdmin" class="card-admin-actions" @click.stop>
+            <button class="edit-btn" @click="openEditForm(item)">
+              Редактировать
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <div v-if="articles.length === 0" class="state-msg">Новостей пока нет</div>
+    </div>
+
+    <!-- Полный просмотр статьи -->
+    <Article
+      v-else
+      :update="mapToArticleProps(selectedArticle)"
+      @close="selectedArticle = null"
+    />
+
+    <!-- Модальная форма (только admin) -->
+    <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
+      <div class="modal-box">
+        <h2 class="modal-title">
+          {{ editingArticle ? "Редактировать статью" : "Новая статья" }}
+        </h2>
+
+        <div v-if="formError" class="form-error">{{ formError }}</div>
+
+        <form @submit.prevent="submitForm" class="article-form">
+          <label class="form-label">
+            Заголовок *
+            <input v-model="form.title" class="form-input" required />
+          </label>
+
+          <label class="form-label">
+            Краткое описание
+            <input v-model="form.description" class="form-input" />
+          </label>
+
+          <label class="form-label">
+            Содержание (Markdown) *
+            <textarea
+              v-model="form.content"
+              class="form-textarea"
+              rows="12"
+              required
+            ></textarea>
+          </label>
+
+          <label class="form-label">
+            URL изображения
+            <input v-model="form.image" class="form-input" placeholder="https://..." />
+          </label>
+
+          <label class="form-label">
+            Категория
+            <select v-model="form.category" class="form-select">
+              <option value="news">Новость</option>
+              <option value="feature">Новая функция</option>
+              <option value="fix">Исправление</option>
+              <option value="announcement">Объявление</option>
+            </select>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="form.publish" />
+            Опубликовать сразу
+          </label>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" @click="closeForm">
+              Отмена
+            </button>
+            <button type="submit" class="btn-submit" :disabled="formLoading">
+              {{ formLoading ? "Сохранение..." : "Сохранить" }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
+import Article from "./Article.vue";
+import { useArticles } from "@/composables/useArticles";
+import { useAccountStore } from "@/stores/accountStore";
 
-const selectedUpdate = ref(null);
+const accountStore = useAccountStore();
 
-const updates = [
-  {
-    id: 1,
-    date: "2026-03-17",
-    title: "Запущена новая система рекомендаций",
-    lead: "Мы полностью переработали алгоритм рекомендаций — теперь он учитывает не только просмотры, но и время взаимодействия, лайки, скрытия и даже скорость скролла.",
-    description: "Краткое описание для карточки…",
-    content: `
-Это одно из самых масштабных обновлений за последние полгода.
+const {
+  articles,
+  loading,
+  error,
+  isAdmin,
+  checkAdminAccess,
+  fetchArticles,
+  fetchAllArticles,
+  addArticle,
+  editArticle,
+} = useArticles();
 
-**Что изменилось:**
-- Алгоритм теперь смотрит на 14 разных сигналов вместо прежних 4
-- Появилась персональная «температура интереса» к темам
-- Рекомендации обновляются каждые 15 минут вместо 1 раза в сутки
+const selectedArticle = ref(null);
+const showForm = ref(false);
+const editingArticle = ref(null);
+const formLoading = ref(false);
+const formError = ref(null);
 
-**Результаты первых тестов (A/B 50/50):**
-- Время сессии +28%
-- Глубина просмотра +41%
-- CTR на карточки рекомендаций +19%
+const defaultForm = () => ({
+  title: "",
+  description: "",
+  content: "",
+  image: "",
+  category: "news",
+  publish: false,
+});
 
-Мы продолжаем собирать обратную связь — пишите в чат, если что-то кажется странным или наоборот очень крутым.
-    `,
-    category: "feature",
-    image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=1200",
-    tags: ["рекомендации", "ai", "персонализация", "алгоритмы"],
-    author: {
-      name: "Алексей Иванов",
-      role: "Lead ML Engineer",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-  },
-  {
-    id: 1,
-    date: "2026-03-17",
-    title: "Запущена новая система рекомендаций",
-    lead: "Мы полностью переработали алгоритм рекомендаций — теперь он учитывает не только просмотры, но и время взаимодействия, лайки, скрытия и даже скорость скролла.",
-    description: "Краткое описание для карточки…",
-    content: `
-Это одно из самых масштабных обновлений за последние полгода.
+const form = ref(defaultForm());
 
-**Что изменилось:**
-- Алгоритм теперь смотрит на 14 разных сигналов вместо прежних 4
-- Появилась персональная «температура интереса» к темам
-- Рекомендации обновляются каждые 15 минут вместо 1 раза в сутки
+onMounted(async () => {
+  checkAdminAccess();
+  await fetchArticles();
+});
 
-**Результаты первых тестов (A/B 50/50):**
-- Время сессии +28%
-- Глубина просмотра +41%
-- CTR на карточки рекомендаций +19%
-
-Мы продолжаем собирать обратную связь — пишите в чат, если что-то кажется странным или наоборот очень крутым.
-    `,
-    category: "feature",
-    image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=1200",
-    tags: ["рекомендации", "ai", "персонализация", "алгоритмы"],
-  },
-];
-
-const sortedUpdates = computed(() =>
-  [...updates].sort((a, b) => new Date(b.date) - new Date(a.date)),
-);
+// Маппинг полей API → пропсы Article.vue
+const mapToArticleProps = (item) => ({
+  ...item,
+  date: item.dt_published || item.dt_ins,
+});
 
 const formatDate = (dateStr) => {
+  if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "long",
@@ -155,22 +174,99 @@ const formatDate = (dateStr) => {
 };
 
 const getCategoryName = (cat) => {
-  if (cat === "feature") return "Новая функция";
-  if (cat === "fix") return "Исправление";
-  return "Объявление";
+  const names = {
+    feature: "Новая функция",
+    fix: "Исправление",
+    announcement: "Объявление",
+    news: "Новость",
+  };
+  return names[cat] ?? "Новость";
+};
+
+const openCreateForm = () => {
+  editingArticle.value = null;
+  form.value = defaultForm();
+  formError.value = null;
+  showForm.value = true;
+};
+
+const openEditForm = (item) => {
+  editingArticle.value = item;
+  form.value = {
+    title: item.title,
+    description: item.description ?? "",
+    content: item.content ?? "",
+    image: item.image ?? "",
+    category: item.category ?? "news",
+    publish: item.status === "published",
+  };
+  formError.value = null;
+  showForm.value = true;
+};
+
+const closeForm = () => {
+  showForm.value = false;
+  editingArticle.value = null;
+};
+
+const submitForm = async () => {
+  formLoading.value = true;
+  formError.value = null;
+  try {
+    if (editingArticle.value) {
+      await editArticle(editingArticle.value.id, form.value);
+    } else {
+      await addArticle(form.value);
+    }
+    closeForm();
+    await fetchArticles();
+  } catch (err) {
+    formError.value = err.message;
+  } finally {
+    formLoading.value = false;
+  }
 };
 </script>
 
 <style scoped>
-.content-wrapper {
-  margin: 0 auto;
-  padding: 1rem;
+.admin-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem 1.25rem;
+}
+
+.create-btn {
+  background: oklch(0.541 0.198 267);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.create-btn:hover {
+  background: #565cc8;
+}
+
+.state-msg {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.state-msg.error {
+  color: #ef4444;
 }
 
 .articles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
   gap: 2rem 2.5rem;
+  padding: 0 1rem;
 }
 
 @media (min-width: 1200px) {
@@ -186,7 +282,7 @@ const getCategoryName = (cat) => {
   }
 }
 
-/* === Карточка новости === */
+/* Карточка */
 .update-card {
   background: white;
   border-radius: 12px;
@@ -194,6 +290,7 @@ const getCategoryName = (cat) => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: all 0.25s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .update-card:hover {
@@ -209,9 +306,13 @@ const getCategoryName = (cat) => {
   top: 0;
 }
 
+.category-strip.feature { background: #10b981; }
+.category-strip.fix { background: #ef4444; }
+.category-strip.announcement { background: #8b5cf6; }
+.category-strip.news { background: oklch(0.541 0.198 267); }
+
 .card-content {
   padding: 1.75rem 2rem;
-  position: relative;
 }
 
 .card-image {
@@ -244,18 +345,10 @@ const getCategoryName = (cat) => {
   font-weight: 600;
 }
 
-.category-label.feature {
-  background: #d1fae5;
-  color: #065f46;
-}
-.category-label.fix {
-  background: #fee2e2;
-  color: #991b1b;
-}
-.category-label.announcement {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
+.category-label.feature { background: #d1fae5; color: #065f46; }
+.category-label.fix { background: #fee2e2; color: #991b1b; }
+.category-label.announcement { background: #f3e8ff; color: #6b21a8; }
+.category-label.news { background: rgba(84, 92, 200, 0.12); color: oklch(0.541 0.198 267); }
 
 .card-title {
   font-size: 1.4rem;
@@ -272,130 +365,161 @@ const getCategoryName = (cat) => {
   margin-bottom: 1rem;
 }
 
-.read-more {
-  color: #3b82f6;
-  font-weight: 600;
-  text-decoration: none;
+.card-admin-actions {
+  margin-top: 0.75rem;
+}
+
+.edit-btn {
+  background: none;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1.5rem;
+}
+
+.form-error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
   font-size: 0.95rem;
 }
 
-.read-more:hover {
-  color: #2563eb;
-  text-decoration: underline;
+.article-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* === Полная статья === */
-.full-article-view {
-  padding: 2rem 1rem;
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
 }
 
-.close-article {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 1.5rem;
+.form-input,
+.form-select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: oklch(0.541 0.198 267);
+}
+
+.form-textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: "Courier New", monospace;
+  color: #111827;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-textarea:focus {
+  border-color: oklch(0.541 0.198 267);
+}
+
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.hero-image {
-  width: 100%;
-  height: 380px;
-  overflow: hidden;
-  border-radius: 16px;
-  margin-bottom: 2rem;
-}
-
-.hero-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.article-container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-.category-badge {
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-
-.category-badge.feature {
-  background: #10b981;
-  color: white;
-}
-.category-badge.fix {
-  background: #ef4444;
-  color: white;
-}
-.category-badge.announcement {
-  background: #8b5cf6;
-  color: white;
-}
-
-.article-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  line-height: 1.2;
-  margin: 0 0 1.5rem;
-  color: #111827;
-}
-
-.lead {
-  font-size: 1.35rem;
-  line-height: 1.65;
-  color: #374151;
-  margin: 0 0 2.5rem;
-  font-weight: 400;
-}
-
-.article-content {
-  font-size: 1.15rem;
-  line-height: 1.85;
-  color: #1f2937;
-}
-
-.article-content p {
-  margin-bottom: 1.6rem;
-}
-
-.tags {
-  margin-top: 3rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-}
-
-.tag {
-  background: #e5e7eb;
-  color: #374151;
-  padding: 6px 14px;
-  border-radius: 999px;
   font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .article-title {
-    font-size: 2rem;
-  }
-  .hero-image {
-    height: 260px;
-  }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.btn-submit {
+  background: oklch(0.541 0.198 267);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #565cc8;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

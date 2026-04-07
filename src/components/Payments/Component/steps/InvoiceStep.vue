@@ -879,4 +879,27 @@ onMounted(() => {
   opacity: 0;
   transform: translateY(8px);
 }
+
+@media (max-width: 480px) {
+  .invoice-step {
+    gap: 14px;
+  }
+
+  .inn-section.compact {
+    padding: 12px;
+  }
+
+  .form-input.compact {
+    font-size: 16px; /* предотвращает zoom на iOS */
+  }
+
+  .btn {
+    padding: 13px 16px;
+    font-size: 14px;
+  }
+
+  .step-actions {
+    margin-top: 12px;
+  }
+}
 </style>

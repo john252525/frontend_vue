@@ -62,6 +62,13 @@
             </div>
           </div>
 
+          <div
+            v-if="channelLimit !== null && formData.cascade.length >= channelLimit"
+            class="limit-hint"
+          >
+            Достигнут лимит каналов по подписке ({{ channelLimit }})
+          </div>
+
           <div class="add-cascade" v-if="hasAvailableItems">
             <p class="label-sm">Добавить канал:</p>
             <div class="cascade-options">
@@ -139,15 +146,22 @@ const formData = reactive({
   cascade: [],
 });
 
+const channelLimit = computed(() => {
+  return props.group?.subscription_limits?.channel_count ?? props.group?.settings?.channel_count ?? null;
+});
+
 // Вычисляем доступные элементы (Добавлен vk)
 const availableCascadeItems = computed(() => {
   const allItems = ["telegram", "whatsapp", "max"];
   return allItems.filter((item) => !formData.cascade.includes(item));
 });
 
-const hasAvailableItems = computed(
-  () => availableCascadeItems.value.length > 0,
-);
+const hasAvailableItems = computed(() => {
+  if (channelLimit.value !== null && formData.cascade.length >= channelLimit.value) {
+    return false;
+  }
+  return availableCascadeItems.value.length > 0;
+});
 
 // Хелпер для отображения названия мессенджера
 const getMessengerName = (item) => {
@@ -405,6 +419,16 @@ const handleUpdate = async () => {
   color: #ef4444;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.limit-hint {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #92400e;
 }
 
 .add-cascade {

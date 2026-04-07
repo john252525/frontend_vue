@@ -27,6 +27,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "sms",
+        name: "SMS",
+        enabled: true,
+      },
+      {
         id: "crm",
         name: "CRM",
         enabled: true,

@@ -13,7 +13,7 @@ export const useAccountStore = defineStore("accountStore", {
     crmPlatformText: "AmoCRM",
     allSource: [],
     add_deleted: false,
-    source: ["telegram", "whatsapp", "max", "vk-bot"],
+    source: ["telegram", "whatsapp", "max", "vk-bot", "sms"],
     group: ["messenger", "crm", "bulk"],
     type: ["amocrm", "bitrix24", "uon", "bulk"],
     filterState: {
@@ -22,6 +22,7 @@ export const useAccountStore = defineStore("accountStore", {
       max: true,
       vk: true,
       crm: true,
+      sms: true,
       amocrm: true,
       bitrix24: true,
       uon: true,
@@ -136,6 +137,7 @@ export const useAccountStore = defineStore("accountStore", {
       this.filterState = {
         telegram: false,
         whatsapp: false,
+        sms: false,
         crm: false,
         amocrm: false,
         bitrix24: false,

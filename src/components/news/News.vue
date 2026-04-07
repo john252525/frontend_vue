@@ -11,7 +11,6 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
 import ArticleList from "./ArticleList.vue";
 </script>
 
