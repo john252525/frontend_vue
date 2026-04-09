@@ -322,6 +322,8 @@ function getType(type) {
       return "Битрикс 24";
     case "telegram":
       return "Telegram";
+    case "sms":
+      return "SMS";
     case "whatsapp":
       return "WhatsApp";
     case "max":

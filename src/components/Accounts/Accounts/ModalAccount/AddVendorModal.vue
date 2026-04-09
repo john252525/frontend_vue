@@ -50,6 +50,7 @@
                   'badge-telegram': acc.source === 'telegram',
                   'badge-whatsapp': acc.source === 'whatsapp',
                   'badge-max': acc.source === 'max',
+                  'badge-sms': acc.source === 'sms',
                 }"
               ></span>
               <span class="acc-type-text">{{ getSource(acc.source) }}</span>
@@ -123,7 +124,8 @@ onMounted(async () => {
         (acc) =>
           acc.source === "whatsapp" ||
           acc.source === "telegram" ||
-          acc.source === "max",
+          acc.source === "max" ||
+          acc.source === "sms",
       );
       availableAccounts.value = filtered;
     }
@@ -144,7 +146,8 @@ function getSource(source) {
       return "WhatsApp";
     case "max":
       return "Max";
-
+    case "sms":
+      return "SMS";
     default:
       return source || "Неизвестно";
   }
@@ -222,7 +225,7 @@ const isAdded = (acc) => {
 
 // Сообщение о валидации
 const validationMessage = computed(() => {
-  const sources = ["telegram", "whatsapp", "max"];
+  const sources = ["telegram", "whatsapp", "max", "sms"];
   const errors = [];
 
   sources.forEach((s) => {
@@ -316,7 +319,10 @@ const close = () => emit("close");
 }
 .badge-vk {
   background-color: #0077ff;
-} /* Цвет VK */
+}
+.badge-sms {
+  background-color: #7c3aed;
+}
 
 .acc-type-text {
   min-width: 70px;

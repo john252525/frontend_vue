@@ -268,7 +268,7 @@
       <template v-if="formValues.group === 'messenger' && formValues.messenger">
         <div
           v-for="field in getDynamicFields('messenger', formValues.messenger)"
-          :key="field.name"
+          :key="field.id"
           class="form-field"
         >
           <label
@@ -279,7 +279,7 @@
           </label>
           <input
             v-model="formValues[field.name]"
-            type="text"
+            :type="field.type || 'text'"
             :placeholder="field.placeholder"
             :required="field.required"
             :class="`accounts-addAccounts-${field.name}-input`"
@@ -351,7 +351,7 @@
       <template v-if="formValues.group === 'crm' && formValues.type">
         <div
           v-for="field in getDynamicFields('type', formValues.type)"
-          :key="field.name"
+          :key="field.id"
           class="form-field"
         >
           <label
@@ -362,11 +362,41 @@
           </label>
           <input
             v-model="formValues[field.name]"
-            type="text"
+            :type="field.type || 'text'"
             :placeholder="field.placeholder"
             :required="field.required"
             :class="`accounts-addAccounts-${field.name}-input`"
             :data-testid="`${field.name}-input`"
+          />
+          <p
+            v-if="field.hint"
+            class="field-hint"
+            :data-testid="`${field.name}-hint`"
+          >
+            {{ field.hint }}
+          </p>
+        </div>
+      </template>
+
+      <template v-if="formValues.group === 'email'">
+        <div
+          v-for="field in getDynamicFields('group', 'email')"
+          :key="field.id"
+          class="form-field"
+        >
+          <label
+            :class="`accounts-addAccounts-${field.name}-label`"
+            :data-testid="`${field.name}-label`"
+          >
+            {{ field.label }}
+          </label>
+          <input
+            v-model="formValues[field.name]"
+            :type="field.type"
+            :placeholder="field.placeholder"
+            :required="field.required"
+            :class="`accounts-addAccounts-${field.name}-input`"
+            :data-testid="`${field.name}-input-${field.id}`"
           />
           <p
             v-if="field.hint"
@@ -607,7 +637,7 @@ const getSelectedText = (selectName) => {
   return option?.text_content || "";
 };
 
-// 🔑 ИЗМЕНЕНО: Универсальная функция получения динамических полей (и для CRM, и для Мессенджеров)
+// Универсальная функция получения динамических полей (для CRM, Мессенджеров и групповых опций)
 const getDynamicFields = (selectName, optionValue) => {
   const selectElement = getSelectElement(selectName);
   if (!selectElement) return [];
@@ -622,52 +652,47 @@ const getDynamicFields = (selectName, optionValue) => {
 
   if (!targetOption) return [];
 
-  // Ищем все поля, привязанные к этой опции
-  const fields = formElements.value.filter(
+  // Получаем детей опции в исходном порядке
+  const children = formElements.value.filter(
     (el) =>
       el.parent_id === targetOption.id &&
-      (el.element === "input" || el.element === "label"),
+      (el.element === "input" || el.element === "label" || el.element === "p"),
   );
 
-  const fieldMap = {};
+  // Обрабатываем последовательно: label → input парами
+  const result = [];
+  let pendingLabel = null;
 
-  fields.forEach((field) => {
-    if (field.element === "label") {
-      fieldMap[field.for] = {
-        name: field.for,
-        label: field.text_content,
-        required: false,
-        placeholder: "",
+  for (const child of children) {
+    if (child.element === "label") {
+      pendingLabel = child;
+    } else if (child.element === "input") {
+      const name = child.name;
+      const inferredType =
+        name === "password"
+          ? "password"
+          : name === "email"
+            ? "email"
+            : child.type || "text";
+
+      result.push({
+        id: child.id,
+        name,
+        label: pendingLabel?.text_content || "",
+        required: child.required || false,
+        placeholder: child.placeholder || "",
+        type: inferredType,
         hint: null,
-      };
-    } else if (field.element === "input") {
-      if (fieldMap[field.name]) {
-        fieldMap[field.name].required = field.required || false;
-        fieldMap[field.name].placeholder = field.placeholder || "";
-      } else {
-        fieldMap[field.name] = {
-          name: field.name,
-          label: "",
-          required: field.required || false,
-          placeholder: field.placeholder || "",
-          hint: null,
-        };
+      });
+      pendingLabel = null;
+    } else if (child.element === "p") {
+      if (result.length > 0) {
+        result[result.length - 1].hint = child.text_content;
       }
     }
-  });
+  }
 
-  // Ищем подсказки (тег p)
-  const hints = formElements.value.filter(
-    (el) => el.parent_id === targetOption.id && el.element === "p",
-  );
-  hints.forEach((hint) => {
-    const firstField = Object.values(fieldMap)[0];
-    if (firstField) {
-      firstField.hint = hint.text_content;
-    }
-  });
-
-  return Object.values(fieldMap).filter((f) => f.name);
+  return result;
 };
 
 const showElement = (name) => {
@@ -677,14 +702,12 @@ const showElement = (name) => {
   return false;
 };
 
-// 🔑 ИЗМЕНЕНО: Обновленная валидация формы с учетом динамических полей мессенджеров
 const isFormValid = computed(() => {
   if (!formValues.group) return false;
 
   if (formValues.group === "messenger") {
     if (!formValues.messenger) return false;
 
-    // Проверка динамических полей для мессенджеров (например, токен VK)
     const requiredFields = getDynamicFields("messenger", formValues.messenger);
     return requiredFields.every((field) => {
       return field.required ? !!formValues[field.name] : true;
@@ -694,8 +717,14 @@ const isFormValid = computed(() => {
   if (formValues.group === "crm") {
     if (!formValues.type) return false;
 
-    // Проверка динамических полей для CRM
     const requiredFields = getDynamicFields("type", formValues.type);
+    return requiredFields.every((field) => {
+      return field.required ? !!formValues[field.name] : true;
+    });
+  }
+
+  if (formValues.group === "email") {
+    const requiredFields = getDynamicFields("group", "email");
     return requiredFields.every((field) => {
       return field.required ? !!formValues[field.name] : true;
     });
@@ -821,7 +850,6 @@ const handleSomeAction = () => {
   }
 };
 
-// 🔑 ИЗМЕНЕНО: Сборка и отправка данных для всех типов
 const submitForm = async () => {
   const formData = {
     group: formValues.group,
@@ -829,7 +857,6 @@ const submitForm = async () => {
     type: formValues.type,
   };
 
-  // Собираем поля в зависимости от выбранной группы
   if (formValues.group === "crm" && formValues.type) {
     const fields = getDynamicFields("type", formValues.type);
     fields.forEach((field) => {
@@ -839,6 +866,13 @@ const submitForm = async () => {
     });
   } else if (formValues.group === "messenger" && formValues.messenger) {
     const fields = getDynamicFields("messenger", formValues.messenger);
+    fields.forEach((field) => {
+      if (formValues[field.name]) {
+        formData[field.name] = formValues[field.name];
+      }
+    });
+  } else if (formValues.group === "email") {
+    const fields = getDynamicFields("group", "email");
     fields.forEach((field) => {
       if (formValues[field.name]) {
         formData[field.name] = formValues[field.name];

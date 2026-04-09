@@ -32,6 +32,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "email",
+        name: "Email",
+        enabled: true,
+      },
+      {
         id: "crm",
         name: "CRM",
         enabled: true,
@@ -65,6 +70,11 @@ export const FILTER_CONFIG = {
       {
         id: "bulk",
         name: "Рассылки",
+        enabled: true,
+      },
+      {
+        id: "email",
+        name: "Email",
         enabled: true,
       },
       {

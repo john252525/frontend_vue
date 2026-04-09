@@ -48,7 +48,10 @@
         <template v-else>
           <span
             class="action"
-            v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
+            v-if="
+              !['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type) &&
+              selectedItem.source != 'sms'
+            "
             @click="openTariff"
             >Подписка</span
           >
@@ -56,7 +59,10 @@
             class="action"
             v-if="
               isAdminUser &&
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) &&
+              selectedItem.source != 'sms'
             "
             @click="handleSubmit"
             >{{ t("modalAccount.settings") }}</span
@@ -64,7 +70,9 @@
           <span
             class="action"
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) && selectedItem.source != 'sms'
             "
             @click="changeEditNameModal"
             >Сменить имя</span
@@ -83,7 +91,9 @@
           >
           <span
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) && selectedItem.source != 'sms'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -91,7 +101,9 @@
           >
           <span
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
+                selectedItem.type,
+              ) && selectedItem.source != 'sms'
             "
             class="action"
             @click="forceStopActive"
@@ -102,7 +114,9 @@
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
-              ) && selectedItem.type != 'adapter'
+              ) &&
+              selectedItem.type != 'adapter' &&
+              selectedItem.source != 'sms'
             "
             class="action action-throw"
             @click="openResetAccountModal"
@@ -134,7 +148,8 @@
               !(
                 selectedItem.storage === 'whatsapi' &&
                 selectedItem.type === 'undefined'
-              )
+              ) &&
+              selectedItem.source != 'sms'
             "
             >{{ t("modalAccount.deleteAccount") }}</span
           >
@@ -215,11 +230,25 @@
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-              ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)
+              ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type) &&
+              selectedItem.source != 'sms'
             "
             class="action"
             @click="deleteAccountButton"
             >Удалить аккаунт</span
+          >
+
+          <span
+            v-if="selectedItem.source === 'sms'"
+            class="action action-on"
+            @click="setStateSms(true)"
+            >{{ t("modalAccount.on") }}</span
+          >
+          <span
+            v-if="selectedItem.source === 'sms'"
+            class="action"
+            @click="setStateSms(false)"
+            >{{ t("modalAccount.off") }}</span
           >
         </template>
       </div>
@@ -888,6 +917,59 @@ const changeName = async () => {
       console.log("Огиька level 2");
       console.error("error", error.response.data);
       stationLoading.loading = false;
+    }
+  }
+};
+
+const setStateSms = async (value) => {
+  stationLoading.loading = true;
+  stationLoading.text = t("globalLoading.offAccount");
+
+  const { source, login } = selectedItem.value;
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}setState`,
+      {
+        source: source,
+        login: login,
+        setState: value,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
+
+    if (response.data) {
+      stationLoading.loading = false;
+
+      await handleSendLog(
+        "modalAccount",
+        "setState",
+        { source: source, login: login, setState: true },
+        response.data,
+        response.data,
+      );
+    }
+
+    if (response.data.ok === true) {
+      setLoadingStatus(true, "success");
+    } else if (response.data === 401) {
+      errorBlock.value = true;
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    setLoadingStatus(true, "error");
+    console.error("error", error);
+    if (error.response) {
+      console.error("error:", error.response.data);
     }
   }
 };

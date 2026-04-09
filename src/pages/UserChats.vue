@@ -113,18 +113,14 @@ const fetchChatUrl = async () => {
     const response = await axios.post(
       `${FRONTEND_URL}get-url`,
       {
-        login: route.query?.login,
-        source: route.query?.source,
-        storage: route.query?.storage,
-        type: route.query?.type,
-        uuid: route.query?.uuid,
+        token: token.value,
       },
       {
         headers: {
           Authorization: `Bearer ${token.value}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const { data } = response;

@@ -231,6 +231,11 @@ const handleRemove = async () => {
   color: #1e40af;
 }
 
+.vendor-sms {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
 .modal-footer {
   display: flex;
   gap: 12px;

@@ -648,6 +648,11 @@ onMounted(async () => {
   color: #1e40af;
 }
 
+.vendor-sms {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
 .vendor-info {
   flex: 1;
   min-width: 0;

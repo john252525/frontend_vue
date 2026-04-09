@@ -35,6 +35,7 @@ import Profile from "./pages/Profile.vue";
 import UserChats from "./pages/UserChats.vue";
 import Docs from "./pages/Docs.vue";
 import News from "./pages/News.vue";
+import Mailer from "./pages/Mailer.vue";
 
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "off"; // off, all, error
@@ -268,6 +269,12 @@ const routes = [
     name: "News",
     component: News,
     meta: { title: "Новости" },
+  },
+  {
+    path: "/mailer",
+    name: "News",
+    component: Mailer,
+    meta: { title: "Мейлер" },
   },
   {
     path: "/close",
