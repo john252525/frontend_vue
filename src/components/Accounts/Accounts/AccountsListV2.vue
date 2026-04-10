@@ -98,6 +98,7 @@
       :openMessageHistory="openMessageHistory"
       :openDeleteAccountModal="openDeleteAccountModal"
       :openCustomSourcesModal="openCustomSourcesModal"
+      :openEmailSettings="openEmailSettings"
     />
 
     <SettignsModal
@@ -203,6 +204,12 @@
       :openUonSettingModal="openUonSettingModal"
       :accounts="instanceData"
     />
+
+    <EmailSettings
+      :item="selectedItem"
+      :close="closeEmailSettings"
+      v-if="emailSettingsValue"
+    />
   </section>
 </template>
 
@@ -236,6 +243,7 @@ import Binding from "./ModalAccount/AmoCrm/Binding.vue";
 import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue";
 import WarningAccount from "./WarningAccount.vue";
 import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSources.vue";
+import EmailSettings from "./ModalAccount/email/Settings.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -319,8 +327,17 @@ const editNameModal = ref(false);
 const resetAccountModal = ref(false);
 const deleteAccountModal = ref(false);
 const customSourcesModal = ref(false);
+const emailSettingsValue = ref(false);
 
 // ============= УТИЛИТЫ =============
+
+const closeEmailSettings = () => {
+  emailSettingsValue.value = false;
+};
+
+const openEmailSettings = () => {
+  emailSettingsValue.value = true;
+};
 
 const closeCustomSourcesModal = () => {
   customSourcesModal.value = false;

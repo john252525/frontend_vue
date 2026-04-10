@@ -391,8 +391,8 @@
             {{ field.label }}
           </label>
           <input
-            v-model="formValues[field.name]"
-            :type="field.type"
+            v-model="formValues['_email_' + field.id]"
+            :type="field.type || 'text'"
             :placeholder="field.placeholder"
             :required="field.required"
             :class="`accounts-addAccounts-${field.name}-input`"
@@ -726,7 +726,13 @@ const isFormValid = computed(() => {
   if (formValues.group === "email") {
     const requiredFields = getDynamicFields("group", "email");
     return requiredFields.every((field) => {
-      return field.required ? !!formValues[field.name] : true;
+      const isOptionalByHint =
+        field.label?.toLowerCase().includes("необязательн") ||
+        field.label?.toLowerCase().includes("оставьте пустым") ||
+        field.placeholder?.toLowerCase().includes("необязательн") ||
+        field.placeholder?.toLowerCase().includes("оставьте пустым");
+      if (!field.required || isOptionalByHint) return true;
+      return !!formValues["_email_" + field.id];
     });
   }
 
@@ -874,8 +880,9 @@ const submitForm = async () => {
   } else if (formValues.group === "email") {
     const fields = getDynamicFields("group", "email");
     fields.forEach((field) => {
-      if (formValues[field.name]) {
-        formData[field.name] = formValues[field.name];
+      const value = formValues["_email_" + field.id];
+      if (value) {
+        formData[field.name] = value;
       }
     });
   }

@@ -270,12 +270,7 @@ const routes = [
     component: News,
     meta: { title: "Новости" },
   },
-  {
-    path: "/mailer",
-    name: "News",
-    component: Mailer,
-    meta: { title: "Мейлер" },
-  },
+
   {
     path: "/close",
     name: "close",

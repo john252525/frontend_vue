@@ -90,6 +90,12 @@
             >{{ t("modalAccount.screen") }}</span
           >
           <span
+            v-if="selectedItem.source === 'email'"
+            class="action"
+            @click="openEmailSettings"
+            >Настройки</span
+          >
+          <span
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
@@ -99,6 +105,7 @@
             @click="changeEnableStation"
             >{{ t("modalAccount.on") }}</span
           >
+
           <span
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
@@ -317,6 +324,9 @@ const props = defineProps({
   },
   isModalOpen: {
     type: Boolean,
+  },
+  openEmailSettings: {
+    type: Function,
   },
   changeEditNameModal: {
     type: Function,

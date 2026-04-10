@@ -223,6 +223,11 @@ const handleDelete = async () => {
   color: #1e40af;
 }
 
+.vendor-email {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .vendor-login {
   word-break: break-all;
 }

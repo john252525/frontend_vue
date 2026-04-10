@@ -330,7 +330,7 @@ function getType(type) {
       return "Max";
     case "uon":
       return "U-ON";
-    case "adapter":
+    case "vk-bot":
       return "Вконтакте";
     default:
       return type;

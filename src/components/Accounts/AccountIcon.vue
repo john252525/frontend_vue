@@ -54,6 +54,33 @@
   </svg>
 
   <svg
+    v-if="item.source === 'email'"
+    width="24"
+    height="24"
+    viewBox="0 0 30 30"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <!-- Конверт -->
+    <rect x="1" y="6" width="28" height="20" rx="3" fill="#23C633" />
+    <!-- Клапан конверта -->
+    <path
+      d="M1 9L13.586 18.414C14.367 19.195 15.633 19.195 16.414 18.414L29 9"
+      stroke="white"
+      stroke-width="1.5"
+      stroke-linecap="round"
+    />
+    <!-- Лінії складок -->
+    <path
+      d="M1 26L10 17M29 26L20 17"
+      stroke="white"
+      stroke-width="1.2"
+      stroke-linecap="round"
+      opacity="0.6"
+    />
+  </svg>
+
+  <svg
     v-if="item.source === 'telegram'"
     width="24"
     height="24"

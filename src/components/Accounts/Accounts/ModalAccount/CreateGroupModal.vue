@@ -102,6 +102,16 @@
                 <span class="btn-badge badge-max"></span>
                 Max
               </button>
+
+              <button
+                v-if="!formData.cascade.includes('email')"
+                type="button"
+                @click="addCascadeItem('email')"
+                class="cascade-btn cascade-btn-email"
+              >
+                <span class="btn-badge badge-email"></span>
+                Email
+              </button>
             </div>
           </div>
         </div>
@@ -154,6 +164,8 @@ const getMessengerName = (item) => {
 
     case "max":
       return "Max";
+    case "email":
+      return "Email";
     default:
       return item;
   }
@@ -382,6 +394,9 @@ const handleCreate = async () => {
 .badge-max {
   background: #5b4ef5;
 }
+.badge-email {
+  background: #f59e0b;
+}
 
 .messenger-name {
   font-weight: 600;
@@ -452,6 +467,10 @@ const handleCreate = async () => {
 .cascade-btn-max:hover {
   border-color: #c4b5fd;
   background: rgba(91, 78, 245, 0.05);
+}
+.cascade-btn-email:hover {
+  border-color: #fcd34d;
+  background: rgba(245, 158, 11, 0.05);
 }
 
 .btn-badge {

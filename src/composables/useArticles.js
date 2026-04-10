@@ -23,7 +23,7 @@ export function useArticles() {
 
   const adminHeaders = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${ADMIN_TOKEN}`,
+    "X-Api-Key": ADMIN_TOKEN,
   };
 
   // Проверяем доступ по email пользователя

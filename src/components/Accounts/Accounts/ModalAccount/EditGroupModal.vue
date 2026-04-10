@@ -114,6 +114,17 @@
                 <span class="btn-badge badge-sms"></span>
                 SMS
               </button>
+
+              <button
+                v-if="!formData.cascade.includes('email')"
+                id="email-button"
+                type="button"
+                @click="addCascadeItem('email')"
+                class="cascade-btn cascade-btn-email"
+              >
+                <span class="btn-badge badge-email"></span>
+                Email
+              </button>
             </div>
           </div>
         </div>
@@ -163,7 +174,7 @@ const channelLimit = computed(() => {
 
 // Вычисляем доступные элементы (Добавлен vk)
 const availableCascadeItems = computed(() => {
-  const allItems = ["telegram", "whatsapp", "max", "sms"];
+  const allItems = ["telegram", "whatsapp", "max", "sms", "email"];
   return allItems.filter((item) => !formData.cascade.includes(item));
 });
 
@@ -186,6 +197,8 @@ const getMessengerName = (item) => {
       return "Max";
     case "sms":
       return "SMS";
+    case "email":
+      return "Email";
     default:
       return item;
   }
@@ -421,6 +434,9 @@ const handleUpdate = async () => {
 .badge-sms {
   background: #7c3aed;
 }
+.badge-email {
+  background: #f59e0b;
+}
 
 .messenger-name {
   font-weight: 600;
@@ -485,6 +501,10 @@ const handleUpdate = async () => {
 .cascade-btn-sms:hover {
   border-color: #7c3aed;
   background: rgba(124, 58, 237, 0.05);
+}
+.cascade-btn-email:hover {
+  border-color: #fcd34d;
+  background: rgba(245, 158, 11, 0.05);
 }
 
 .btn-badge {

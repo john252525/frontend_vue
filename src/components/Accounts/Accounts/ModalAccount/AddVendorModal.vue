@@ -16,7 +16,7 @@
       <div class="modal-body">
         <p class="info-text">
           Выберите аккаунты для добавления в группу (максимум по одному для
-          каждого типа: WhatsApp, Telegram, Max)<span v-if="channelLimit !== null">
+          каждого типа: WhatsApp, Telegram, Max, Email)<span v-if="channelLimit !== null">
             · доступно каналов по подписке: {{ channelLimit - currentVendorCount }}</span>
         </p>
 
@@ -51,6 +51,7 @@
                   'badge-whatsapp': acc.source === 'whatsapp',
                   'badge-max': acc.source === 'max',
                   'badge-sms': acc.source === 'sms',
+                  'badge-email': acc.source === 'email',
                 }"
               ></span>
               <span class="acc-type-text">{{ getSource(acc.source) }}</span>
@@ -125,7 +126,8 @@ onMounted(async () => {
           acc.source === "whatsapp" ||
           acc.source === "telegram" ||
           acc.source === "max" ||
-          acc.source === "sms",
+          acc.source === "sms" ||
+          acc.source === "email",
       );
       availableAccounts.value = filtered;
     }
@@ -148,6 +150,8 @@ function getSource(source) {
       return "Max";
     case "sms":
       return "SMS";
+    case "email":
+      return "Email";
     default:
       return source || "Неизвестно";
   }
@@ -185,11 +189,13 @@ const channelLimit = computed(() => {
   return props.group?.subscription_limits?.channel_count ?? props.group?.settings?.channel_count ?? null;
 });
 
+const LIMITED_SOURCES = ["whatsapp", "telegram", "max"];
+
 const currentVendorCount = computed(() => {
   const groupVendors = Array.isArray(props.group.vendors)
     ? props.group.vendors
     : Object.values(props.group.vendors || {});
-  return groupVendors.length;
+  return groupVendors.filter((v) => LIMITED_SOURCES.includes(v.source)).length;
 });
 
 // Проверить, можно ли выбрать аккаунт
@@ -201,15 +207,21 @@ const canSelectAccount = (acc) => {
 
   if (isSelected) return true;
 
-  // Лимит по подписке: нельзя добавить больше channel_count аккаунтов суммарно
+  // Для email и sms ограничений нет
+  if (!LIMITED_SOURCES.includes(source)) return true;
+
+  // Лимит по подписке: только для whatsapp/telegram/max
   if (channelLimit.value !== null) {
-    const totalSelected = selectedVendorUuids.value.length;
-    if (currentVendorCount.value + totalSelected >= channelLimit.value) {
+    const totalLimitedSelected = selectedVendorUuids.value.filter((uuid) => {
+      const a = availableAccounts.value.find((a) => a.uuid === uuid);
+      return LIMITED_SOURCES.includes(a?.source);
+    }).length;
+    if (currentVendorCount.value + totalLimitedSelected >= channelLimit.value) {
       return false;
     }
   }
 
-  // Лимит: 1 аккаунт каждого типа (TG, WA, VK, Max)
+  // Лимит: 1 аккаунт каждого типа для whatsapp/telegram/max
   const selectedCount = countSelectedBySource(source);
   const addedCount = countAddedBySource(source);
 
@@ -223,12 +235,11 @@ const isAdded = (acc) => {
   return (groupVendors || []).some((v) => v.uuid === acc.uuid);
 };
 
-// Сообщение о валидации
+// Сообщение о валидации (только для лимитных типов)
 const validationMessage = computed(() => {
-  const sources = ["telegram", "whatsapp", "max", "sms"];
   const errors = [];
 
-  sources.forEach((s) => {
+  LIMITED_SOURCES.forEach((s) => {
     if (countSelectedBySource(s) + countAddedBySource(s) > 1) {
       errors.push(`Максимум 1 ${getSource(s)}`);
     }
@@ -322,6 +333,9 @@ const close = () => emit("close");
 }
 .badge-sms {
   background-color: #7c3aed;
+}
+.badge-email {
+  background-color: #f59e0b;
 }
 
 .acc-type-text {

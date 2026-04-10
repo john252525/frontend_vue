@@ -210,7 +210,7 @@ const availableAccounts = ref([]);
 
 const filteredAccounts = computed(() => {
   return availableAccounts.value.filter((account) =>
-    ["whatsapp", "telegram"].includes(account.source || account.type),
+    ["whatsapp", "telegram", "email"].includes(account.source || account.type),
   );
 });
 
@@ -651,6 +651,11 @@ onMounted(async () => {
 .vendor-sms {
   background: #f3e8ff;
   color: #6b21a8;
+}
+
+.vendor-email {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .vendor-info {

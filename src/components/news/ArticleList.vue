@@ -1,164 +1,107 @@
 <template>
   <div class="news-page">
-    <!-- Кнопка создания для admin -->
-    <div v-if="isAdmin" class="admin-bar">
-      <button class="create-btn" @click="openCreateForm">+ Новая статья</button>
-    </div>
-
     <div v-if="loading" class="state-msg">Загрузка...</div>
     <div v-else-if="error" class="state-msg error">{{ error }}</div>
 
-    <!-- Сетка карточек -->
-    <div v-else-if="!selectedArticle" class="articles-grid">
-      <article
-        v-for="item in articles"
-        :key="item.id"
-        class="update-card"
-        @click="selectedArticle = item"
-      >
-        <div class="category-strip" :class="item.category"></div>
-
-        <div class="card-content">
-          <div v-if="item.image" class="card-image">
-            <img :src="item.image" :alt="item.title" />
-          </div>
-
-          <div class="card-header">
-            <span class="date">{{ formatDate(item.dt_published || item.dt_ins) }}</span>
-            <span class="category-label" :class="item.category">
-              {{ getCategoryName(item.category) }}
-            </span>
-          </div>
-
-          <h3 class="card-title">{{ item.title }}</h3>
-          <p class="card-text">{{ item.description }}</p>
-
-          <!-- Кнопка редактирования для admin -->
-          <div v-if="isAdmin" class="card-admin-actions" @click.stop>
-            <button class="edit-btn" @click="openEditForm(item)">
-              Редактировать
-            </button>
-          </div>
+    <template v-else-if="!selectedArticle">
+      <!-- Шапка -->
+      <header class="page-header">
+        <div class="header-meta">
+          <span class="header-label">Журнал обновлений</span>
+          <span class="header-date">{{ todayFormatted }}</span>
         </div>
-      </article>
+        <h1 class="page-title">Новости<br />и обновления</h1>
+      </header>
 
       <div v-if="articles.length === 0" class="state-msg">Новостей пока нет</div>
-    </div>
 
-    <!-- Полный просмотр статьи -->
+      <template v-else>
+        <!-- Featured -->
+        <article class="featured" @click="selectedArticle = articles[0]">
+          <div class="featured-image-wrap">
+            <img
+              v-if="articles[0].image"
+              :src="articles[0].image"
+              :alt="articles[0].title"
+              class="featured-img"
+            />
+            <div v-else class="featured-img-placeholder" />
+            <div class="featured-overlay" />
+          </div>
+          <div class="featured-content">
+            <span class="badge" :class="articles[0].category">
+              {{ getCategoryName(articles[0].category) }}
+            </span>
+            <h2 class="featured-title">{{ articles[0].title }}</h2>
+            <p class="featured-desc">{{ articles[0].description }}</p>
+            <div class="featured-footer">
+              <time class="meta-time">
+                {{ formatDate(articles[0].dt_published || articles[0].dt_ins) }}
+              </time>
+              <span class="read-more">Читать →</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Сетка -->
+        <div v-if="articles.length > 1" class="grid-section">
+          <div class="grid-label">Все материалы</div>
+          <div class="articles-grid">
+            <article
+              v-for="(item, i) in articles.slice(1)"
+              :key="item.id"
+              class="card"
+              @click="selectedArticle = item"
+            >
+              <div class="card-index">{{ String(i + 1).padStart(2, "0") }}</div>
+              <div v-if="item.image" class="card-img-wrap">
+                <img :src="item.image" :alt="item.title" class="card-img" />
+              </div>
+              <div class="card-body">
+                <span class="badge sm" :class="item.category">
+                  {{ getCategoryName(item.category) }}
+                </span>
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-desc">{{ item.description }}</p>
+                <time class="meta-time">
+                  {{ formatDate(item.dt_published || item.dt_ins) }}
+                </time>
+              </div>
+            </article>
+          </div>
+        </div>
+      </template>
+    </template>
+
     <Article
       v-else
       :update="mapToArticleProps(selectedArticle)"
       @close="selectedArticle = null"
     />
-
-    <!-- Модальная форма (только admin) -->
-    <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-      <div class="modal-box">
-        <h2 class="modal-title">
-          {{ editingArticle ? "Редактировать статью" : "Новая статья" }}
-        </h2>
-
-        <div v-if="formError" class="form-error">{{ formError }}</div>
-
-        <form @submit.prevent="submitForm" class="article-form">
-          <label class="form-label">
-            Заголовок *
-            <input v-model="form.title" class="form-input" required />
-          </label>
-
-          <label class="form-label">
-            Краткое описание
-            <input v-model="form.description" class="form-input" />
-          </label>
-
-          <label class="form-label">
-            Содержание (Markdown) *
-            <textarea
-              v-model="form.content"
-              class="form-textarea"
-              rows="12"
-              required
-            ></textarea>
-          </label>
-
-          <label class="form-label">
-            URL изображения
-            <input v-model="form.image" class="form-input" placeholder="https://..." />
-          </label>
-
-          <label class="form-label">
-            Категория
-            <select v-model="form.category" class="form-select">
-              <option value="news">Новость</option>
-              <option value="feature">Новая функция</option>
-              <option value="fix">Исправление</option>
-              <option value="announcement">Объявление</option>
-            </select>
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="form.publish" />
-            Опубликовать сразу
-          </label>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" @click="closeForm">
-              Отмена
-            </button>
-            <button type="submit" class="btn-submit" :disabled="formLoading">
-              {{ formLoading ? "Сохранение..." : "Сохранить" }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Article from "./Article.vue";
 import { useArticles } from "@/composables/useArticles";
-import { useAccountStore } from "@/stores/accountStore";
 
-const accountStore = useAccountStore();
-
-const {
-  articles,
-  loading,
-  error,
-  isAdmin,
-  checkAdminAccess,
-  fetchArticles,
-  fetchAllArticles,
-  addArticle,
-  editArticle,
-} = useArticles();
-
+const { articles, loading, error, fetchArticles } = useArticles();
 const selectedArticle = ref(null);
-const showForm = ref(false);
-const editingArticle = ref(null);
-const formLoading = ref(false);
-const formError = ref(null);
-
-const defaultForm = () => ({
-  title: "",
-  description: "",
-  content: "",
-  image: "",
-  category: "news",
-  publish: false,
-});
-
-const form = ref(defaultForm());
 
 onMounted(async () => {
-  checkAdminAccess();
   await fetchArticles();
 });
 
-// Маппинг полей API → пропсы Article.vue
+const todayFormatted = computed(() =>
+  new Date().toLocaleDateString("ru-RU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+);
+
 const mapToArticleProps = (item) => ({
   ...item,
   date: item.dt_published || item.dt_ins,
@@ -182,344 +125,329 @@ const getCategoryName = (cat) => {
   };
   return names[cat] ?? "Новость";
 };
-
-const openCreateForm = () => {
-  editingArticle.value = null;
-  form.value = defaultForm();
-  formError.value = null;
-  showForm.value = true;
-};
-
-const openEditForm = (item) => {
-  editingArticle.value = item;
-  form.value = {
-    title: item.title,
-    description: item.description ?? "",
-    content: item.content ?? "",
-    image: item.image ?? "",
-    category: item.category ?? "news",
-    publish: item.status === "published",
-  };
-  formError.value = null;
-  showForm.value = true;
-};
-
-const closeForm = () => {
-  showForm.value = false;
-  editingArticle.value = null;
-};
-
-const submitForm = async () => {
-  formLoading.value = true;
-  formError.value = null;
-  try {
-    if (editingArticle.value) {
-      await editArticle(editingArticle.value.id, form.value);
-    } else {
-      await addArticle(form.value);
-    }
-    closeForm();
-    await fetchArticles();
-  } catch (err) {
-    formError.value = err.message;
-  } finally {
-    formLoading.value = false;
-  }
-};
 </script>
 
 <style scoped>
-.admin-bar {
+/* ── Base ── */
+.news-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  color: #0a0a0a;
+}
+
+/* ── Header ── */
+.page-header {
+  padding: 3rem 0 2.5rem;
+  border-bottom: 1px solid #0a0a0a;
+  margin-bottom: 3rem;
+}
+
+.header-meta {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 1rem 1.25rem;
-}
-
-.create-btn {
-  background: oklch(0.541 0.198 267);
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.create-btn:hover {
-  background: #565cc8;
-}
-
-.state-msg {
-  text-align: center;
-  padding: 3rem 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: #6b7280;
-  font-size: 1rem;
 }
 
-.state-msg.error {
-  color: #ef4444;
+.page-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0;
+  color: #0a0a0a;
+}
+
+/* ── Badge ── */
+.badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.badge.feature      { background: #dcfce7; color: #15803d; }
+.badge.fix          { background: #fee2e2; color: #b91c1c; }
+.badge.announcement { background: #ede9fe; color: #6d28d9; }
+.badge.news         { background: #e0e7ff; color: #3730a3; }
+
+.badge.sm {
+  font-size: 0.62rem;
+  padding: 3px 8px;
+}
+
+/* ── Featured ── */
+.featured {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-bottom: 4rem;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: #0a0a0a;
+}
+
+.featured-image-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.featured-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  transition: opacity 0.4s, transform 0.6s;
+}
+
+.featured-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.featured:hover .featured-img {
+  opacity: 0.5;
+  transform: scale(1.02);
+}
+
+.featured-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.3) 50%,
+    transparent 100%
+  );
+}
+
+.featured-content {
+  position: relative;
+  padding: 2.5rem 3rem;
+  color: #fff;
+}
+
+.featured-content .badge {
+  margin-bottom: 1rem;
+}
+
+.featured-title {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.75rem;
+  max-width: 680px;
+  color: #fff;
+}
+
+.featured-desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.75);
+  margin: 0 0 1.5rem;
+  max-width: 520px;
+}
+
+.featured-footer {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.read-more {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+  padding-bottom: 1px;
+  transition: border-color 0.2s;
+}
+
+.featured:hover .read-more {
+  border-color: #fff;
+}
+
+/* ── Grid section ── */
+.grid-section {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 2rem;
+}
+
+.grid-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 1.75rem;
 }
 
 .articles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-  gap: 2rem 2.5rem;
-  padding: 0 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
 }
 
-@media (min-width: 1200px) {
-  .articles-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
-  .articles-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-}
-
-/* Карточка */
-.update-card {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.25s ease;
+/* ── Card ── */
+.card {
+  padding: 1.75rem 2rem 1.75rem 0;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
   cursor: pointer;
   position: relative;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
 }
 
-.update-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+.card:nth-child(3n) {
+  border-right: none;
+  padding-right: 0;
 }
 
-.category-strip {
-  width: 6px;
-  height: 100%;
+.card:nth-last-child(-n+3) {
+  border-bottom: none;
+}
+
+.card::before {
+  content: "";
   position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.2s;
 }
 
-.category-strip.feature { background: #10b981; }
-.category-strip.fix { background: #ef4444; }
-.category-strip.announcement { background: #8b5cf6; }
-.category-strip.news { background: oklch(0.541 0.198 267); }
+.card:hover::before  { background: #0a0a0a; }
+.card:hover { background: #fafafa; }
 
-.card-content {
-  padding: 1.75rem 2rem;
+.card:not(:nth-child(3n)) {
+  padding-right: 2rem;
 }
 
-.card-image {
+.card-index {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.card-img-wrap {
   width: 100%;
-  height: 180px;
+  aspect-ratio: 16/9;
   overflow: hidden;
-  margin-bottom: 1.25rem;
-  border-radius: 8px;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  background: #f1f5f9;
 }
 
-.card-image img {
+.card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s;
 }
 
-.card-header {
+.card:hover .card-img {
+  transform: scale(1.04);
+}
+
+.card-body {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: #64748b;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.5rem;
 }
-
-.category-label {
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.category-label.feature { background: #d1fae5; color: #065f46; }
-.category-label.fix { background: #fee2e2; color: #991b1b; }
-.category-label.announcement { background: #f3e8ff; color: #6b21a8; }
-.category-label.news { background: rgba(84, 92, 200, 0.12); color: oklch(0.541 0.198 267); }
 
 .card-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin: 0 0 0.75rem;
-  line-height: 1.35;
-  color: #111827;
-}
-
-.card-text {
   font-size: 1rem;
-  line-height: 1.6;
-  color: #4b5563;
-  margin-bottom: 1rem;
-}
-
-.card-admin-actions {
-  margin-top: 0.75rem;
-}
-
-.edit-btn {
-  background: none;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.edit-btn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-}
-
-/* Модальное окно */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.modal-box {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 700px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-.modal-title {
-  font-size: 1.4rem;
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 1.5rem;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: #0a0a0a;
 }
 
-.form-error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+.card-desc {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.article-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.meta-time {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  margin-top: auto;
+  padding-top: 0.75rem;
 }
 
-.form-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #374151;
+/* ── States ── */
+.state-msg {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: #94a3b8;
+  font-size: 1rem;
 }
 
-.form-input,
-.form-select {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.2s;
+.state-msg.error { color: #ef4444; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .articles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card:nth-child(3n) {
+    border-right: 1px solid #e2e8f0;
+    padding-right: 2rem;
+  }
+  .card:nth-child(2n) {
+    border-right: none;
+    padding-right: 0;
+  }
+  .card:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+  .card:nth-last-child(-n+3) {
+    border-bottom: 1px solid #e2e8f0;
+  }
 }
 
-.form-input:focus,
-.form-select:focus {
-  border-color: oklch(0.541 0.198 267);
-}
-
-.form-textarea {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-family: "Courier New", monospace;
-  color: #111827;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.form-textarea:focus {
-  border-color: oklch(0.541 0.198 267);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #374151;
-  cursor: pointer;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.btn-cancel {
-  background: #f3f4f6;
-  color: #374151;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-cancel:hover {
-  background: #e5e7eb;
-}
-
-.btn-submit {
-  background: oklch(0.541 0.198 267);
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background: #565cc8;
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+@media (max-width: 600px) {
+  .news-page { padding: 0 1rem 4rem; }
+  .articles-grid { grid-template-columns: 1fr; }
+  .card {
+    border-right: none !important;
+    padding-right: 0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+  .card:last-child { border-bottom: none !important; }
+  .featured { min-height: 360px; }
+  .featured-content { padding: 1.5rem; }
 }
 </style>
