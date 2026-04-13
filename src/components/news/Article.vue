@@ -69,7 +69,6 @@
               <dd>~{{ readTime }} минут</dd>
             </dl>
 
-            <div class="share-hint">Поделитесь обновлением с коллегами</div>
           </div>
         </aside>
       </div>
