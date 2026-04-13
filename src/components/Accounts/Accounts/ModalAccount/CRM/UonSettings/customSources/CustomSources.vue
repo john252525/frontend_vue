@@ -2,46 +2,60 @@
   <ModalFrame
     :text="modalText"
     :item="item"
-    :action="saveCustomSources"
+    :action="useCustomSourcesEnabled ? saveCustomSources : undefined"
     :close="close"
     :is-loading="loading"
   >
     <div class="sources-modal">
-      <div class="uon-warning">
-        <div class="uon-warning__icon">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-              stroke="#856404"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-        <div class="uon-warning__content">
-          <p class="uon-warning__text">
-            <strong>Важное уточнение:</strong> Для корректного отображения
-            данных необходимо активировать использование кастомных источников в
-            личном кабинете U-ON.
+      <template v-if="!settingsLoaded">
+        <div class="sources-loading">Загрузка настроек...</div>
+      </template>
+
+      <template v-else-if="!useCustomSourcesEnabled">
+        <div class="sources-gate">
+          <div class="sources-gate__icon">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                stroke="#856404"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <p class="sources-gate__title">Кастомные источники отключены</p>
+          <p class="sources-gate__desc">
+            Для работы кастомных источников необходимо включить соответствующую
+            настройку аккаунта.
           </p>
-          <button @click="goToSettings" class="uon-warning__link">
-            Перейти в настройки U-ON
+          <button
+            class="sources-gate__btn"
+            :disabled="enablingCustomSources"
+            @click="enableCustomSources"
+          >
+            {{
+              enablingCustomSources
+                ? "Включение..."
+                : "Включить кастомные источники"
+            }}
           </button>
         </div>
-      </div>
+      </template>
 
-      <Accounts
-        :accounts="accounts"
-        :custom-sources="sources"
-        @update:source="handleUpdateSource"
-      />
+      <template v-else>
+        <Accounts
+          :accounts="accounts"
+          :custom-sources="sources"
+          @update:source="handleUpdateSource"
+        />
+      </template>
     </div>
   </ModalFrame>
 </template>
@@ -88,6 +102,71 @@ const modalText = {
 };
 
 const loading = ref(false);
+const settingsLoaded = ref(false);
+const settingsOptions = ref({});
+const enablingCustomSources = ref(false);
+
+const useCustomSourcesEnabled = computed(
+  () => !!settingsOptions.value.sources?.use_custom_sources,
+);
+
+const fetchSettings = async () => {
+  const { uuid } = props.item;
+  loading.value = true;
+  try {
+    const response = await axios.get(`${FRONTEND_URL}uon-account/getSettings`, {
+      params: { uuid },
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    if (response.data.ok) {
+      settingsOptions.value = response.data.data;
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки настроек:", error);
+  } finally {
+    loading.value = false;
+    settingsLoaded.value = true;
+  }
+};
+
+const handleUpdate = async () => {
+  const { uuid } = props.item;
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}uon-account/saveSettings`,
+      settingsOptions.value,
+      {
+        params: { uuid },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
+    return response.data.ok === true;
+  } catch (error) {
+    console.error("Ошибка сохранения настроек:", error);
+    return false;
+  }
+};
+
+const enableCustomSources = async () => {
+  enablingCustomSources.value = true;
+  settingsOptions.value = {
+    ...settingsOptions.value,
+    sources: { ...settingsOptions.value.sources, use_custom_sources: true },
+  };
+  const ok = await handleUpdate();
+  if (ok) {
+    await getCustomSources();
+  } else {
+    settingsOptions.value = {
+      ...settingsOptions.value,
+      sources: { ...settingsOptions.value.sources, use_custom_sources: false },
+    };
+  }
+  enablingCustomSources.value = false;
+};
 
 const getCustomSources = async () => {
   loading.value = true;
@@ -185,13 +264,75 @@ const handleUpdateSource = (uuid, newName) => {
     [uuid]: newName,
   };
 };
-onMounted(getCustomSources);
+onMounted(async () => {
+  await fetchSettings();
+  if (useCustomSourcesEnabled.value) {
+    await getCustomSources();
+  }
+});
 </script>
 
 <style scoped>
 .sources-modal {
   max-width: 560px;
   margin: 0 auto;
+}
+
+.sources-loading {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+  font-size: 14px;
+}
+
+.sources-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 16px;
+  gap: 12px;
+}
+
+.sources-gate__icon svg path {
+  stroke: #856404;
+}
+
+.sources-gate__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.sources-gate__desc {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.sources-gate__btn {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sources-gate__btn:hover:not(:disabled) {
+  background-color: #0069d9;
+}
+
+.sources-gate__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .uon-warning {
