@@ -230,14 +230,34 @@ const openEditGroupModal = (group) => {
   showEditModal.value = true;
 };
 
+const ALL_KNOWN_SOURCES = ["whatsapp", "telegram", "max", "sms", "email"];
+
 const getChannelLimit = (group) => {
   return group.subscription_limits?.channel_count || group.settings?.channel_count || null;
 };
 
+const getLimitedSources = (group) => {
+  return group.subscription_limits?.limited_channels?.source ?? ["whatsapp", "telegram", "max"];
+};
+
 const canAddVendor = (group) => {
+  const vendorSources = Object.values(group.vendors).map((v) => v.source);
+  const limitedSources = getLimitedSources(group);
   const limit = getChannelLimit(group);
-  const vendorCount = Object.keys(group.vendors).length;
-  return vendorCount < (limit ?? 4);
+
+  // Можно добавить лимитный источник, если ещё есть слоты по подписке
+  if (limit !== null) {
+    const limitedCount = vendorSources.filter((s) => limitedSources.includes(s)).length;
+    if (limitedCount < limit) return true;
+  }
+
+  // Можно добавить нелимитный источник (или любой при отсутствии подписки),
+  // если он ещё не представлен в группе
+  const unlimitedSources = limit !== null
+    ? ALL_KNOWN_SOURCES.filter((s) => !limitedSources.includes(s))
+    : ALL_KNOWN_SOURCES;
+
+  return unlimitedSources.some((s) => !vendorSources.includes(s));
 };
 
 const formatSubscriptionDate = (dateStr) => {
@@ -312,17 +332,56 @@ const onGroupDeleted = async () => {
   await getGroups();
 };
 
+const syncCascadeWithVendors = async (groupUuid) => {
+  const group = allGroupsList.value.find((g) => g.uuid === groupUuid);
+  if (!group) return;
+
+  const settings =
+    typeof group.settings === "string"
+      ? JSON.parse(group.settings)
+      : group.settings || {};
+
+  const currentCascade = settings.cascade || [];
+  const vendorSources = Object.values(group.vendors).map((v) => v.source);
+
+  // Сохраняем порядок, удаляем источники которых больше нет в группе
+  const synced = currentCascade.filter((source) => vendorSources.includes(source));
+
+  // Добавляем новые источники, которых ещё нет в каскаде
+  for (const source of vendorSources) {
+    if (!synced.includes(source)) {
+      synced.push(source);
+    }
+  }
+
+  const changed =
+    synced.length !== currentCascade.length ||
+    synced.some((s, i) => s !== currentCascade[i]);
+
+  if (changed) {
+    await updateGroup({
+      uuid: group.uuid,
+      name: group.name,
+      settings: { ...settings, cascade: synced },
+    });
+  }
+};
+
 const onVendorAdded = async () => {
   showAddVendorModal.value = false;
+  const groupUuid = selectedGroup.value?.uuid;
   selectedGroup.value = null;
   await getGroups();
+  if (groupUuid) await syncCascadeWithVendors(groupUuid);
 };
 
 const onVendorRemoved = async () => {
   showRemoveVendorModal.value = false;
+  const groupUuid = selectedGroup.value?.uuid;
   selectedGroup.value = null;
   selectedVendor.value = null;
   await getGroups();
+  if (groupUuid) await syncCascadeWithVendors(groupUuid);
 };
 
 onMounted(async () => {

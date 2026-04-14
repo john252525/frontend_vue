@@ -189,13 +189,16 @@ const channelLimit = computed(() => {
   return props.group?.subscription_limits?.channel_count ?? props.group?.settings?.channel_count ?? null;
 });
 
-const LIMITED_SOURCES = ["whatsapp", "telegram", "max"];
+// Источники, ограниченные подпиской — берём из настроек группы, не хардкодим
+const limitedSources = computed(() => {
+  return props.group?.subscription_limits?.limited_channels?.source ?? ["whatsapp", "telegram", "max"];
+});
 
 const currentVendorCount = computed(() => {
   const groupVendors = Array.isArray(props.group.vendors)
     ? props.group.vendors
     : Object.values(props.group.vendors || {});
-  return groupVendors.filter((v) => LIMITED_SOURCES.includes(v.source)).length;
+  return groupVendors.filter((v) => limitedSources.value.includes(v.source)).length;
 });
 
 // Проверить, можно ли выбрать аккаунт
@@ -207,21 +210,18 @@ const canSelectAccount = (acc) => {
 
   if (isSelected) return true;
 
-  // Для email и sms ограничений нет
-  if (!LIMITED_SOURCES.includes(source)) return true;
-
-  // Лимит по подписке: только для whatsapp/telegram/max
-  if (channelLimit.value !== null) {
+  // Для лимитных источников — проверяем лимит подписки
+  if (limitedSources.value.includes(source) && channelLimit.value !== null) {
     const totalLimitedSelected = selectedVendorUuids.value.filter((uuid) => {
       const a = availableAccounts.value.find((a) => a.uuid === uuid);
-      return LIMITED_SOURCES.includes(a?.source);
+      return limitedSources.value.includes(a?.source);
     }).length;
     if (currentVendorCount.value + totalLimitedSelected >= channelLimit.value) {
       return false;
     }
   }
 
-  // Лимит: 1 аккаунт каждого типа для whatsapp/telegram/max
+  // Для всех источников — не более 1 аккаунта каждого типа
   const selectedCount = countSelectedBySource(source);
   const addedCount = countAddedBySource(source);
 
@@ -235,16 +235,15 @@ const isAdded = (acc) => {
   return (groupVendors || []).some((v) => v.uuid === acc.uuid);
 };
 
-// Сообщение о валидации (только для лимитных типов)
+// Сообщение о валидации — для всех типов
 const validationMessage = computed(() => {
   const errors = [];
-
-  LIMITED_SOURCES.forEach((s) => {
+  const allSources = [...new Set(availableAccounts.value.map((a) => a.source))];
+  allSources.forEach((s) => {
     if (countSelectedBySource(s) + countAddedBySource(s) > 1) {
       errors.push(`Максимум 1 ${getSource(s)}`);
     }
   });
-
   return errors.length > 0 ? errors.join(", ") : "";
 });
 

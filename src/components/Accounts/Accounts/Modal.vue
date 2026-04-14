@@ -1154,9 +1154,9 @@ const DeletedBadge = {
 /* Базовые стили для десктопной версии */
 .action-list {
   border-radius: 10px;
-  width: 150px;
+  width: 165px;
   background: #ffffff;
-  position: absolute;
+  position: fixed;
   z-index: 1010;
   display: flex;
   flex-direction: column;

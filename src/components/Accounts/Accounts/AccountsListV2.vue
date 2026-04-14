@@ -214,7 +214,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, inject, computed } from "vue";
+import { ref, reactive, onMounted, provide, inject, computed, nextTick } from "vue";
+import { computePosition, flip, shift, offset } from "@floating-ui/dom";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import LoadingAccount from "./LoadingMoadal/LoadingAccount.vue";
@@ -631,50 +632,6 @@ const getAllAccounts = () => {
   return instanceData.value;
 };
 
-const getActionCount = (item) => {
-  if (!item) return 1;
-
-  if (item.enable === "0") {
-    return 1;
-  }
-
-  let count = 0;
-
-  if (!["amocrm", "bitrix24", "uon", "bulk"].includes(item.type)) {
-    if (!["amocrm", "bitrix24", "uon"].includes(item.type)) count++;
-
-    count += 2;
-
-    if (item.source !== "telegram") count++;
-
-    count += 3;
-
-    count++;
-
-    if (
-      !(
-        (item.storage === "binder" && item.type === "touchapi") ||
-        (item.storage === "whatsapi" && item.type === "undefined")
-      )
-    ) {
-      count++;
-    }
-  } else if (["amocrm", "bitrix24", "uon"].includes(item.type)) {
-    count++;
-
-    if (item.type === "amocrm") {
-      count++;
-    }
-
-    if (item.source !== "telegram") {
-      count++;
-    }
-  } else if (item.type === "bulk") {
-    count += 2;
-  }
-
-  return Math.max(1, count);
-};
 
 const changeEnableStation = (item, locale) => {
   console.log("click changeEnableStation");
@@ -687,91 +644,37 @@ const changeEnableStation = (item, locale) => {
   enableStation.value = !enableStation.value;
 };
 
-const openModal = (event, item) => {
+const openModal = async (event, item) => {
   selectedItem.value = item;
   isModalOpen.value = true;
   updateUserInfo(JSON.stringify(selectedItem.value));
   getInfo();
 
-  // 1. Получаем координаты кнопки относительно видимой области (viewport)
-  const rect = event.currentTarget.getBoundingClientRect();
-  const viewportHeight = window.innerHeight;
-  const viewportWidth = window.innerWidth;
-
-  // Константы для расчетов
-  const modalWidth = 180; // Чуть шире, с запасом
-  const edgeMargin = 15; // Отступ от краев экрана
-  const gap = 4; // Отступ модалки от кнопки
-
-  // 2. Считаем высоту модалки с ЗАПАСОМ
-  // Увеличили высоту пункта до 40px (было 32), чтобы наверняка перекрыть паддинги
-  const actionCount = getActionCount(item);
-  const itemHeight = 40;
-  const containerPadding = 20;
-  const estimatedModalHeight = actionCount * itemHeight + containerPadding;
-
-  // === РАСЧЕТ ВЕРТИКАЛИ (Y) ===
-
-  // Сколько места реально видно снизу под кнопкой?
-  const spaceBelow = viewportHeight - rect.bottom;
-
-  let top;
-
-  // ЖЕСТКАЯ ЛОГИКА:
-  // 1. Если визуально места снизу меньше, чем высота модалки...
-  // 2. ИЛИ если кнопка находится ниже 70% высоты экрана (жесткий триггер)...
-  // ... ТО открываем ВВЕРХ.
-  const isTooLowOnScreen = rect.top > viewportHeight * 0.7;
-
-  if (spaceBelow < estimatedModalHeight || isTooLowOnScreen) {
-    // -- Открываем ВВЕРХ --
-    // Координата: Верх кнопки + Скролл страницы - Высота модалки - Зазор
-    top = rect.top + window.scrollY - estimatedModalHeight - gap;
-
-    // Защита: если при открытии вверх мы улетели за верхний край страницы (top < 0)
-    // Прижимаем к верхнему краю, но не даем уйти в минус
-    if (top < window.scrollY + edgeMargin) {
-      top = window.scrollY + edgeMargin;
-    }
-  } else {
-    // -- Открываем ВНИЗ --
-    // Координата: Низ кнопки + Скролл страницы + Зазор
-    top = rect.bottom + window.scrollY + gap;
-  }
-
-  // === РАСЧЕТ ГОРИЗОНТАЛИ (X) ===
-
-  let left = rect.left + window.scrollX;
-
-  // Мобильная версия (оставляем без изменений логику позиционирования, только стили)
+  // На мобилке позиционирование через CSS (media query), ничего не считаем
   if (window.innerWidth <= 768) {
-    modalPosition.value = {
-      top: "auto",
-      bottom: "10px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "90%",
-      maxWidth: "400px",
-    };
+    modalPosition.value = {};
     return;
   }
 
-  // Если модалка вылезает за правый край экрана
-  // (Координата левого края + ширина модалки > ширины окна + скролл)
-  if (rect.left + modalWidth > viewportWidth - edgeMargin) {
-    // Сдвигаем влево: Правый край кнопки - Ширина модалки
-    left = rect.right + window.scrollX - modalWidth;
-  }
+  // Ждём рендера модалки чтобы получить реальный DOM-элемент
+  await nextTick();
 
-  // Финальная защита левого края
-  if (left < edgeMargin) {
-    left = edgeMargin;
-  }
+  const referenceEl = event.currentTarget;
+  const floatingEl = document.querySelector(".action-list");
+  if (!floatingEl) return;
 
-  modalPosition.value = {
-    top: Math.round(top),
-    left: Math.round(left),
-  };
+  const { x, y } = await computePosition(referenceEl, floatingEl, {
+    placement: "bottom-start",
+    middleware: [
+      offset(6),
+      flip({
+        fallbackPlacements: ["top-start", "bottom-end", "top-end"],
+      }),
+      shift({ padding: 12 }),
+    ],
+  });
+
+  modalPosition.value = { top: Math.round(y), left: Math.round(x) };
 };
 
 const getInfo = async () => {
