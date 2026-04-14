@@ -272,7 +272,6 @@
       class="modal-container"
       v-if="buySection && !paymentsStation.success && !paymentsStation.error"
     >
-      {{ selectedItem }}
       <BuySection
         :changePaymentsStation="changePaymentsStation"
         :selectTariff="selectTariff"
