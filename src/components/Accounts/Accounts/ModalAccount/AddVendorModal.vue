@@ -16,8 +16,12 @@
       <div class="modal-body">
         <p class="info-text">
           Выберите аккаунты для добавления в группу (максимум по одному для
-          каждого типа: WhatsApp, Telegram, Max, Email)<span v-if="channelLimit !== null">
-            · доступно каналов по подписке: {{ channelLimit - currentVendorCount }}</span>
+          каждого типа: WhatsApp, Telegram, Max, Email)<span
+            v-if="channelLimit !== null"
+          >
+            · доступно каналов по подписке:
+            {{ channelLimit - currentVendorCount }}</span
+          >
         </p>
 
         <div v-if="loadingAccounts" class="loading-spinner">
@@ -93,6 +97,8 @@ const props = defineProps({
   group: Object,
   accountListRef: Object,
 });
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -186,19 +192,30 @@ const countAddedBySource = (source) => {
 };
 
 const channelLimit = computed(() => {
-  return props.group?.subscription_limits?.channel_count ?? props.group?.settings?.channel_count ?? null;
+  return (
+    props.group?.subscription_limits?.channel_count ??
+    props.group?.settings?.channel_count ??
+    null
+  );
 });
 
 // Источники, ограниченные подпиской — берём из настроек группы, не хардкодим
 const limitedSources = computed(() => {
-  return props.group?.subscription_limits?.limited_channels?.source ?? ["whatsapp", "telegram", "max"];
+  return (
+    props.group?.subscription_limits?.limited_channels?.source ?? [
+      "whatsapp",
+      "telegram",
+      "max",
+    ]
+  );
 });
 
 const currentVendorCount = computed(() => {
   const groupVendors = Array.isArray(props.group.vendors)
     ? props.group.vendors
     : Object.values(props.group.vendors || {});
-  return groupVendors.filter((v) => limitedSources.value.includes(v.source)).length;
+  return groupVendors.filter((v) => limitedSources.value.includes(v.source))
+    .length;
 });
 
 // Проверить, можно ли выбрать аккаунт
@@ -252,7 +269,7 @@ const handleAddMany = async () => {
   isLoading.value = true;
   try {
     await axios.post(
-      "https://bapi88.developtech.ru/api/v1/groups/addVendors",
+      `${BASE_URL}groups/addVendors`,
       {
         group_uuid: props.group.uuid,
         vendor_uuids: selectedVendorUuids.value,

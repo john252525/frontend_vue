@@ -183,7 +183,9 @@
         <div class="field" :class="{ 'field-error': errors.password }">
           <label class="field-label"
             >Пароль приложения
-            <span class="optional">(оставьте пустым, чтобы не менять)</span></label
+            <span class="optional"
+              >(оставьте пустым, чтобы не менять)</span
+            ></label
           >
           <div class="password-wrapper">
             <input
