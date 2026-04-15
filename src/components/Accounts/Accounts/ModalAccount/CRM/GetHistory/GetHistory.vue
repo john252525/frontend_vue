@@ -110,6 +110,7 @@
               <th>Номер</th>
               <th>Текст сообщения</th>
               <th>Тип устройства</th>
+              <th>Дата</th>
               <th>Статус</th>
             </tr>
           </thead>
@@ -137,6 +138,7 @@
                 v-html="getText(record)"
               ></td>
               <td>{{ getDeviceType(record) }}</td>
+              <td class="date-cell">{{ formatDate(record.dt_ins) }}</td>
               <td>
                 <span class="status-pill" :class="getStatusClass(record)">
                   {{ getStateText(record) }}
@@ -179,6 +181,11 @@
           <div class="card-row">
             <span class="label">Тип</span>
             <span class="value">{{ getDeviceType(record) }}</span>
+          </div>
+
+          <div class="card-row">
+            <span class="label">Дата</span>
+            <span class="value date-value">{{ formatDate(record.dt_ins) }}</span>
           </div>
 
           <div class="card-row">
@@ -303,6 +310,20 @@ const parseResult = (record) => {
   } catch {
     return {};
   }
+};
+
+// Форматирование даты
+const formatDate = (dtIns) => {
+  if (!dtIns) return "N/A";
+  const date = new Date(dtIns.replace(" ", "T"));
+  if (isNaN(date.getTime())) return dtIns;
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 // Сокращение UUID
@@ -939,6 +960,17 @@ onBeforeUnmount(() => {
 
 .uuid-value:active {
   background-color: #e3f2fd;
+}
+
+.date-cell {
+  white-space: nowrap;
+  color: #555;
+  font-size: 13px;
+}
+
+.date-value {
+  color: #555;
+  font-size: 13px;
 }
 
 .text-message {

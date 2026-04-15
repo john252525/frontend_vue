@@ -81,6 +81,7 @@
       @update:loadingStation="updateLoading"
       @update:selectedItems="updateSelectedItems"
       @update:qrCodeData="updateqrCodeData"
+      @sms-auth-code="openSmsAuthCodeModal"
       :changeStationSettingsModal="changeStationSettingsModal"
       :changeStationQrModal="changeStationQrModal"
       :changeStationGetByCode="changeStationGetByCode"
@@ -210,6 +211,13 @@
       :close="closeEmailSettings"
       v-if="emailSettingsValue"
     />
+
+    <SmsAuthCodeModal
+      v-if="smsAuthCodeModal"
+      :authCode="smsAuthCode"
+      :item="selectedItem"
+      :close="closeSmsAuthCodeModal"
+    />
   </section>
 </template>
 
@@ -245,6 +253,7 @@ import RoutingSettings from "./ModalAccount/RoutingSettings/RoutingSettings.vue"
 import WarningAccount from "./WarningAccount.vue";
 import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSources.vue";
 import EmailSettings from "./ModalAccount/email/Settings.vue";
+import SmsAuthCodeModal from "./ModalAccount/Enable/SmsAuthCodeModal.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -329,11 +338,23 @@ const resetAccountModal = ref(false);
 const deleteAccountModal = ref(false);
 const customSourcesModal = ref(false);
 const emailSettingsValue = ref(false);
+const smsAuthCodeModal = ref(false);
+const smsAuthCode = ref("");
 
 // ============= УТИЛИТЫ =============
 
 const closeEmailSettings = () => {
   emailSettingsValue.value = false;
+};
+
+const openSmsAuthCodeModal = (authCode) => {
+  smsAuthCode.value = authCode;
+  smsAuthCodeModal.value = true;
+};
+
+const closeSmsAuthCodeModal = () => {
+  smsAuthCodeModal.value = false;
+  smsAuthCode.value = "";
 };
 
 const openEmailSettings = () => {

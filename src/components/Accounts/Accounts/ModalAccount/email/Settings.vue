@@ -182,7 +182,8 @@
         <!-- Password -->
         <div class="field" :class="{ 'field-error': errors.password }">
           <label class="field-label"
-            >Пароль приложения <span class="required">*</span></label
+            >Пароль приложения
+            <span class="optional">(оставьте пустым, чтобы не менять)</span></label
           >
           <div class="password-wrapper">
             <input
@@ -382,9 +383,6 @@ const showPassword = ref(false);
 const duplicateError = ref("");
 const saveSuccess = ref(false);
 
-// Все конфиги (для проверки дублей)
-const allConfigs = ref([]);
-
 // SMTP пресеты провайдеров
 const PROVIDER_PRESETS = {
   yandex: { smtp_server: "smtp.yandex.ru", smtp_port: 465 },
@@ -399,8 +397,7 @@ const isKnownProvider = computed(() =>
 const isFormValid = computed(() => {
   const emailOk =
     form.value.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email);
-  const passOk = !!form.value.password;
-  return emailOk && passOk;
+  return !!emailOk;
 });
 
 // Применяем пресет при смене провайдера
@@ -441,27 +438,24 @@ const removeWebhook = (index) => {
   webhookUrls.value.splice(index, 1);
 };
 
-// Загрузка всех конфигов (и текущего по uuid)
+// Загрузка конфига текущего аккаунта по uuid
 const fetchConfigs = async () => {
   if (!item.value?.uuid) return;
   initialLoading.value = true;
   try {
     const response = await axios.get(`${BASE_URL}email-sender/config`, {
+      params: { uuid: item.value.uuid },
       headers: {
         Authorization: `Bearer ${token.value}`,
         Referer: REFERER,
       },
     });
 
-    const data = response.data?.data || response.data || [];
-    allConfigs.value = Array.isArray(data) ? data : [];
-
-    // Ищем конфиг текущего вендора
-    const current = allConfigs.value.find((c) => c.uuid === item.value.uuid);
-    if (current) {
+    const current = response.data?.data || null;
+    if (current && typeof current === "object" && !Array.isArray(current)) {
       form.value.email = current.email || "";
       form.value.username = current.username || "";
-      form.value.password = current.password || "";
+      form.value.password = "";
       form.value.provider = current.provider || "";
       form.value.smtp_server = current.smtp_server || "";
       form.value.smtp_port = current.smtp_port ?? 587;
@@ -476,40 +470,20 @@ const fetchConfigs = async () => {
   }
 };
 
-// Проверка на дубль email
-const checkDuplicate = () => {
-  const email = form.value.email.trim().toLowerCase();
-  const duplicate = allConfigs.value.find(
-    (c) => c.email?.toLowerCase() === email && c.uuid !== item.value?.uuid,
-  );
-  return duplicate;
-};
-
 // Сохранение настроек SMTP
 const saveSettings = async () => {
   validateEmail();
-  if (!form.value.password) {
-    errors.value.password = "Пароль обязателен";
-  }
-  if (errors.value.email || errors.value.password) return;
+  if (errors.value.email) return;
 
   duplicateError.value = "";
   saveSuccess.value = false;
-
-  // Проверяем дубль
-  const dup = checkDuplicate();
-  if (dup) {
-    duplicateError.value = `Email уже используется другим аккаунтом (${dup.uuid || ""}). Выберите другой адрес.`;
-    return;
-  }
-
   saving.value = true;
   try {
     const payload = {
       uuid: item.value.uuid,
       email: form.value.email,
       ...(form.value.username && { username: form.value.username }),
-      password: form.value.password,
+      ...(form.value.password && { password: form.value.password }),
       ...(form.value.provider && { provider: form.value.provider }),
       ...(form.value.smtp_server && { smtp_server: form.value.smtp_server }),
       ...(form.value.smtp_port && { smtp_port: form.value.smtp_port }),
@@ -524,13 +498,8 @@ const saveSettings = async () => {
       },
     });
 
-    // Обновляем локальный кеш конфигов
-    const idx = allConfigs.value.findIndex((c) => c.uuid === item.value.uuid);
-    if (idx !== -1) {
-      allConfigs.value[idx] = { ...allConfigs.value[idx], ...payload };
-    } else {
-      allConfigs.value.push(payload);
-    }
+    // Перезагружаем актуальные настройки с сервера
+    await fetchConfigs();
 
     saveSuccess.value = true;
     setTimeout(() => (saveSuccess.value = false), 3000);

@@ -56,6 +56,18 @@
             >Подписка</span
           >
           <span
+            v-if="selectedItem.source === 'sms'"
+            class="action action-on"
+            @click="setStateSms(true)"
+            >{{ t("modalAccount.on") }}</span
+          >
+          <span
+            v-if="selectedItem.source === 'sms'"
+            class="action"
+            @click="setStateSms(false)"
+            >{{ t("modalAccount.off") }}</span
+          >
+          <span
             class="action"
             v-if="
               isAdminUser &&
@@ -70,9 +82,7 @@
           <span
             class="action"
             v-if="
-              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
-                selectedItem.type,
-              ) && selectedItem.source != 'sms'
+              !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(selectedItem.type)
             "
             @click="changeEditNameModal"
             >Сменить имя</span
@@ -155,8 +165,7 @@
               !(
                 selectedItem.storage === 'whatsapi' &&
                 selectedItem.type === 'undefined'
-              ) &&
-              selectedItem.source != 'sms'
+              )
             "
             >{{ t("modalAccount.deleteAccount") }}</span
           >
@@ -204,7 +213,7 @@
             "
             class="action"
             @click="changeStationGetHistory"
-            >История
+            >История уведомлений
           </span>
 
           <span
@@ -237,25 +246,11 @@
           <span
             v-if="
               selectedItem.source != 'telegram' &&
-              ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type) &&
-              selectedItem.source != 'sms'
+              ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)
             "
             class="action"
             @click="deleteAccountButton"
             >Удалить аккаунт</span
-          >
-
-          <span
-            v-if="selectedItem.source === 'sms'"
-            class="action action-on"
-            @click="setStateSms(true)"
-            >{{ t("modalAccount.on") }}</span
-          >
-          <span
-            v-if="selectedItem.source === 'sms'"
-            class="action"
-            @click="setStateSms(false)"
-            >{{ t("modalAccount.off") }}</span
           >
         </template>
       </div>
@@ -398,7 +393,12 @@ import { useLoginWhatsAppChatsStepStore } from "@/stores/loginWhatsAppChatsStepS
 
 const isAdminUser = localStorage.getItem("is_admin") === "true" || false;
 const chatStore = useLoginWhatsAppChatsStepStore();
-const emit = defineEmits();
+const emit = defineEmits([
+  "update:loadingStation",
+  "update:selectedItems",
+  "update:qrCodeData",
+  "sms-auth-code",
+]);
 const { selectedItem, loadingStation, chatsStation } = toRefs(props);
 import { useRouter } from "vue-router";
 import WhatsApp from "./ModalAccount/GetByCode/WhatsApp.vue";
@@ -965,7 +965,12 @@ const setStateSms = async (value) => {
     }
 
     if (response.data.ok === true) {
-      setLoadingStatus(true, "success");
+      if (value === true && response.data.data?.auth_code) {
+        emit("sms-auth-code", response.data.data.auth_code);
+        props.closeModal();
+      } else {
+        setLoadingStatus(true, "success");
+      }
     } else if (response.data === 401) {
       errorBlock.value = true;
       setTimeout(() => {
