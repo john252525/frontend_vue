@@ -379,33 +379,92 @@
       </template>
 
       <template v-if="formValues.group === 'email'">
-        <div
+        <!-- Провайдер -->
+        <div class="form-field">
+          <label class="accounts-addAccounts-emailProvider-label" data-testid="email-provider-label">
+            Провайдер
+          </label>
+          <div class="custom-select" ref="emailProviderSelect" data-testid="email-provider-select">
+            <div
+              class="selected-option"
+              @click="toggleDropdown('emailProvider')"
+              data-testid="email-provider-select-button"
+            >
+              <span>{{ getEmailProviderText() || 'Выберите провайдера' }}</span>
+              <svg
+                class="dropdown-icon"
+                :class="{ 'rotate-180': dropdownOpen.emailProvider }"
+                width="12"
+                height="8"
+                viewBox="0 0 12 8"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M1 1L6 6L11 1" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <teleport to="body" v-if="dropdownOpen.emailProvider">
+              <div
+                class="dropdown-options-global"
+                :style="getDropdownStyle('emailProvider')"
+                data-testid="email-provider-dropdown"
+              >
+                <div
+                  v-for="provider in EMAIL_PROVIDERS"
+                  :key="provider.value"
+                  class="option"
+                  @click="handleEmailProviderSelect(provider)"
+                  :data-testid="`email-provider-option-${provider.value}`"
+                >
+                  {{ provider.text }}
+                </div>
+              </div>
+            </teleport>
+          </div>
+        </div>
+
+        <!-- Динамические поля из API -->
+        <template
           v-for="field in getDynamicFields('group', 'email')"
           :key="field.id"
-          class="form-field"
         >
-          <label
-            :class="`accounts-addAccounts-${field.name}-label`"
-            :data-testid="`${field.name}-label`"
-          >
-            {{ field.label }}
-          </label>
-          <input
-            v-model="formValues['_email_' + field.id]"
-            :type="field.type || 'text'"
-            :placeholder="field.placeholder"
-            :required="field.required"
-            :class="`accounts-addAccounts-${field.name}-input`"
-            :data-testid="`${field.name}-input-${field.id}`"
-          />
-          <p
-            v-if="field.hint"
-            class="field-hint"
-            :data-testid="`${field.name}-hint`"
-          >
-            {{ field.hint }}
-          </p>
-        </div>
+          <div class="form-field">
+            <label
+              :class="`accounts-addAccounts-${field.name}-label`"
+              :data-testid="`${field.name}-label`"
+            >
+              {{ field.label }}
+            </label>
+            <input
+              v-model="formValues['_email_' + field.id]"
+              :type="field.type || 'text'"
+              :placeholder="field.placeholder"
+              :required="field.required"
+              :class="`accounts-addAccounts-${field.name}-input`"
+              :data-testid="`${field.name}-input-${field.id}`"
+            />
+            <p
+              v-if="field.hint"
+              class="field-hint"
+              :data-testid="`${field.name}-hint`"
+            >
+              {{ field.hint }}
+            </p>
+          </div>
+          <!-- Порт сразу после smtp_server -->
+          <div v-if="field.name === 'smtp_server'" class="form-field">
+            <label class="accounts-addAccounts-smtp_port-label" data-testid="smtp_port-label">
+              Порт SMTP
+            </label>
+            <input
+              v-model="formValues.smtp_port"
+              type="number"
+              placeholder="465"
+              class="accounts-addAccounts-smtp_port-input"
+              data-testid="smtp_port-input"
+            />
+          </div>
+        </template>
       </template>
 
       <div
@@ -513,23 +572,35 @@ const changeStationLoading = () => {
 };
 
 const formElements = ref([]);
+const EMAIL_PROVIDERS = [
+  { value: "gmail",   text: "Gmail",           smtp_server: "smtp.gmail.com",    smtp_port: "587" },
+  { value: "yandex",  text: "Яндекс",          smtp_server: "smtp.yandex.ru",    smtp_port: "465" },
+  { value: "mailru",  text: "Mail.ru",          smtp_server: "smtp.mail.ru",      smtp_port: "465" },
+  { value: "rambler", text: "Rambler",          smtp_server: "smtp.rambler.ru",   smtp_port: "465" },
+  { value: "custom",  text: "Другой (вручную)", smtp_server: "",                  smtp_port: ""    },
+];
+
 const formValues = reactive({
   group: "",
   messenger: "",
   type: "",
   domain: "",
   crm_api_key: "",
+  emailProvider: "",
+  smtp_port: "",
 });
 const dropdownOpen = reactive({
   group: false,
   messenger: false,
   type: false,
+  emailProvider: false,
 });
 
 // Refs для элементов select
 const groupSelect = ref(null);
 const messengerSelect = ref(null);
 const typeSelect = ref(null);
+const emailProviderSelect = ref(null);
 
 // Fetch form structure from API
 const fetchFormStructure = async () => {
@@ -756,10 +827,12 @@ const selectOption = (name, value) => {
     formValues.type = "";
     formValues.domain = "";
     formValues.crm_api_key = "";
+    formValues.emailProvider = "";
+    formValues.smtp_port = "";
     // Очищаем потенциальные динамические поля, чтобы не тянуть старые данные
     Object.keys(formValues).forEach((key) => {
       if (
-        !["group", "messenger", "type", "domain", "crm_api_key"].includes(key)
+        !["group", "messenger", "type", "domain", "crm_api_key", "emailProvider", "smtp_port"].includes(key)
       ) {
         formValues[key] = "";
       }
@@ -772,6 +845,24 @@ const selectOption = (name, value) => {
   }
 
   dropdownOpen[name] = false;
+};
+
+// Обработка выбора провайдера Email
+const getEmailProviderText = () => {
+  const provider = EMAIL_PROVIDERS.find(p => p.value === formValues.emailProvider);
+  return provider?.text || "";
+};
+
+const handleEmailProviderSelect = (provider) => {
+  formValues.emailProvider = provider.value;
+  if (provider.value && provider.value !== "custom") {
+    const smtpField = getDynamicFields("group", "email").find(f => f.name === "smtp_server");
+    if (smtpField) {
+      formValues["_email_" + smtpField.id] = provider.smtp_server;
+    }
+    formValues.smtp_port = provider.smtp_port;
+  }
+  dropdownOpen.emailProvider = false;
 };
 
 // Обработка выбора CRM
@@ -807,7 +898,9 @@ const getDropdownStyle = (name) => {
       ? groupSelect
       : name === "messenger"
         ? messengerSelect
-        : typeSelect;
+        : name === "type"
+          ? typeSelect
+          : emailProviderSelect;
 
   if (!selectRef.value) return {};
 
@@ -885,6 +978,9 @@ const submitForm = async () => {
         formData[field.name] = value;
       }
     });
+    if (formValues.smtp_port) {
+      formData.smtp_port = formValues.smtp_port;
+    }
   }
 
   stationLoading.loading = true;

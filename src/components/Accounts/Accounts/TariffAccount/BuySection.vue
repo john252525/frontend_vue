@@ -183,19 +183,23 @@ const promoApplied = ref(false);
 const promoLoading = ref(false);
 const promoError = ref("");
 const promoSuccessMessage = ref("");
-const appliedPromo = ref(null); // объект с данными промокода {discount, type, ...}
+const appliedPromo = ref(null);
+
+// ─── Продолжительность (фиксирована из тарифа) ───────────
+const getPeriodMonths = (period) => {
+  const map = { "1m": 1, "3m": 3, "6m": 6, "12m": 12, "1y": 12, "30d": 1 };
+  return map[period] || 1;
+};
+
+const customDuration = computed(() =>
+  getPeriodMonths(selectTariff.value.period),
+);
 
 // ─── Вычисляемые цены ──────────────────────────────────────
-const originalPrice = computed(() => {
-  return selectTariff.value.final_price &&
-    selectTariff.value.final_price < selectTariff.value.price
-    ? selectTariff.value.price
-    : selectTariff.value.price;
-});
-
-const baseFinalPrice = computed(() => {
-  return selectTariff.value.final_price ?? selectTariff.value.price;
-});
+const originalPrice = computed(() => selectTariff.value.price);
+const baseFinalPrice = computed(
+  () => selectTariff.value.final_price ?? selectTariff.value.price,
+);
 
 const promoDiscount = computed(() => appliedPromo.value?.discount || 0);
 
@@ -315,8 +319,9 @@ const buyTariff = async () => {
       original_price: originalPrice.value,
       discount_percent: discountPercent.value,
       promo_code: appliedPromo.value?.code || null,
+      duration: `${customDuration.value}m`,
       ...(isGroup
-        ? { code: selectTariff.value.code, duration: selectTariff.value.period }
+        ? { code: selectTariff.value.code }
         : { tariff: encodedTariff }),
     };
 
@@ -589,6 +594,7 @@ const encodeTariff = (code, id) => {
   color: #2e7d32;
   font-weight: 500;
 }
+
 
 .promo-section {
   margin: 16px 0;

@@ -62,210 +62,225 @@
       </div>
 
       <div v-else class="tariffs-wrapper">
-        <div class="tariffs-container">
-          <div
-            class="tariff-card"
-            v-for="(tariff, index) in paginatedTariffs"
-            :key="tariff.id"
-            @mouseenter="hoverIndex = currentPage * dynamicItemsPerPage + index"
-            @mouseleave="hoverIndex = -1"
-            :class="{
-              'tariff-card--hovered':
-                hoverIndex === currentPage * dynamicItemsPerPage + index,
-              'tariff-card--discount': hasDiscount(tariff),
-            }"
-          >
-            <!-- Бейдж скидки -->
-            <div v-if="hasDiscount(tariff)" class="discount-badge">
-              <span class="discount-badge__text"
-                >-{{ calculateDiscountPercent(tariff) }}%</span
-              >
-            </div>
 
-            <!-- Бейдж бонусов -->
-            <div v-if="hasBonuses(tariff)" class="bonus-badge">
-              <span class="bonus-badge__text">Бонус</span>
-            </div>
-
-            <div class="tariff-card__header">
-              <h3 class="tariff-name">{{ tariff.name }}</h3>
-              <div class="price-block">
-                <div class="price-display">
-                  <div v-if="hasDiscount(tariff)" class="price-with-discount">
-                    <div class="original-price-wrapper">
-                      <span class="original-price">{{
-                        formatPrice(tariff.price)
-                      }}</span>
-                      <span class="original-currency">{{
-                        tariff.currency
-                      }}</span>
-                    </div>
-                    <div class="final-price-wrapper">
-                      <span class="final-price">{{
-                        formatPrice(tariff.final_price)
-                      }}</span>
-                      <span class="final-currency">{{ tariff.currency }}</span>
-                    </div>
-                  </div>
-                  <div v-else class="price-without-discount">
-                    <span class="regular-price">{{
-                      formatPrice(tariff.price)
-                    }}</span>
-                    <span class="regular-currency">{{ tariff.currency }}</span>
-                  </div>
-                </div>
-
-                <div class="period-text">
-                  /{{ getPeriodText(tariff.period) }}
-                </div>
-              </div>
-            </div>
-
-            <div class="tariff-card__features">
-              <!-- Лимиты тарифа -->
-              <div
-                class="feature-item"
-                v-if="tariff.limits && formatLimit(tariff.limits.dialogs) > 0"
-              >
-                <div class="feature-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14">
-                    <path
-                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                    />
-                  </svg>
-                </div>
-                <span class="feature-text">
-                  Диалогов: {{ formatLimit(tariff.limits.dialogs) }}
-                </span>
-              </div>
-
-              <div
-                class="feature-item"
-                v-if="tariff.limits && formatLimit(tariff.limits.messages) > 0"
-              >
-                <div class="feature-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14">
-                    <path
-                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                    />
-                  </svg>
-                </div>
-                <span class="feature-text">
-                  Сообщений: {{ formatLimit(tariff.limits.messages) }}
-                </span>
-              </div>
-
-              <div class="feature-item" v-if="tariff.limits?.write_first">
-                <div class="feature-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14">
-                    <path
-                      d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                    />
-                  </svg>
-                </div>
-                <span class="feature-text">Написать первым</span>
-              </div>
-
-              <!-- Ежемесячная стоимость -->
-              <div
-                v-if="shouldShowMonthlyPrice(tariff)"
-                class="feature-item monthly-price-item"
-              >
-                <div class="feature-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14">
-                    <path
-                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                    />
-                  </svg>
-                </div>
-                <span class="feature-text">
-                  {{ calculateMonthlyEquivalent(tariff) }} ₽/мес
-                  <span
-                    v-if="calculateSavings(tariff) > 0"
-                    class="savings-text"
-                  >
-                    (Экономия {{ calculateSavings(tariff) }}%)
-                  </span>
-                </span>
-              </div>
-
-              <!-- Бонусы -->
-              <div
-                class="feature-item bonus-item"
-                v-for="bonus in getActiveBonuses(tariff)"
-                :key="bonus.mod_id"
-              >
-                <div class="feature-icon bonus-icon">
-                  <svg viewBox="0 0 24 24" width="14" height="14">
-                    <path
-                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                    />
-                  </svg>
-                </div>
-                <span class="feature-text">
-                  {{ getBonusDescription(tariff, bonus) }}
-                </span>
-              </div>
-            </div>
-
-            <button
-              @click="clickSelectTariff(tariff)"
-              class="select-button"
+        <!-- ══ VENDOR TYPE: слайдер по 2 тарифа ══ -->
+        <template v-if="isVendorType && baseTariff">
+          <div class="tariffs-container">
+            <div
+              class="tariff-card"
+              v-for="(card, index) in paginatedVendorCards"
+              :key="card.months"
+              @mouseenter="hoverIndex = index"
+              @mouseleave="hoverIndex = -1"
               :class="{
-                'select-button--hovered':
-                  hoverIndex === currentPage * dynamicItemsPerPage + index,
+                'tariff-card--hovered': hoverIndex === index,
+                'tariff-card--discount': card.savingsPct > 0,
               }"
             >
-              Выбрать
-            </button>
-          </div>
-        </div>
+              <div v-if="card.savingsPct > 0" class="discount-badge">
+                <span class="discount-badge__text">-{{ card.savingsPct }}%</span>
+              </div>
+              <div v-if="card.months === 12" class="bonus-badge">
+                <span class="bonus-badge__text">Лучший выбор</span>
+              </div>
 
-        <!-- Предложение перейти на 3 канала -->
-        <div
-          v-if="type === 'group' && groupCode === 'group-2-channels'"
-          class="upsell-banner"
-          @click="switchToThreeChannels"
-        >
-          <div class="upsell-banner__icon">
-            <svg viewBox="0 0 24 24" width="20" height="20">
-              <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              />
-            </svg>
+              <div class="tariff-card__header">
+                <h3 class="tariff-name">{{ getPeriodText(`${card.months}m`) }}</h3>
+                <div class="price-block">
+                  <div class="price-display">
+                    <div class="price-without-discount">
+                      <span class="regular-price">{{ formatPrice(card.price) }}</span>
+                      <span class="regular-currency">₽</span>
+                    </div>
+                  </div>
+                  <div class="period-text">/ {{ getPeriodText(`${card.months}m`) }}</div>
+                </div>
+              </div>
+
+              <div class="tariff-card__features">
+                <div class="feature-item monthly-price-item">
+                  <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">
+                    {{ formatPrice(card.monthlyPrice) }} ₽/мес
+                    <span v-if="card.savings > 0" class="savings-text">
+                      (Экономия {{ card.savingsPct }}%)
+                    </span>
+                  </span>
+                </div>
+                <div v-if="card.savings > 0" class="feature-item bonus-item">
+                  <div class="feature-icon bonus-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">
+                    Выгода {{ formatPrice(card.savings) }} ₽
+                  </span>
+                </div>
+              </div>
+
+              <button
+                class="select-button"
+                :class="{ 'select-button--hovered': hoverIndex === index }"
+                @click="clickVendorPreset(card)"
+              >
+                Выбрать
+              </button>
+            </div>
           </div>
-          <div class="upsell-banner__text">
-            <strong>Добавьте 3-й аккаунт — выгоднее!</strong>
-            <span
-              >Тариф на 3 канала стоит всего на {{ upsellDiffPercent }}% дороже,
-              но даёт +50% мощности</span
+
+          <div v-if="vendorTotalPages > 1" class="pagination-controls">
+            <button
+              @click="prevVendorPage"
+              :disabled="vendorPage === 0"
+              class="pagination-button"
+            >&larr;</button>
+            <span class="page-indicator">{{ vendorPage + 1 }} / {{ vendorTotalPages }}</span>
+            <button
+              @click="nextVendorPage"
+              :disabled="vendorPage === vendorTotalPages - 1"
+              class="pagination-button"
+            >&rarr;</button>
+          </div>
+        </template>
+
+        <!-- ══ GROUP / OTHER TYPE: стандартный вид ══ -->
+        <template v-else>
+          <div class="tariffs-container">
+            <div
+              class="tariff-card"
+              v-for="(tariff, index) in paginatedTariffs"
+              :key="tariff.id"
+              @mouseenter="hoverIndex = currentPage * dynamicItemsPerPage + index"
+              @mouseleave="hoverIndex = -1"
+              :class="{
+                'tariff-card--hovered':
+                  hoverIndex === currentPage * dynamicItemsPerPage + index,
+                'tariff-card--discount': hasDiscount(tariff),
+              }"
             >
-          </div>
-          <div class="upsell-banner__arrow">→</div>
-        </div>
+              <div v-if="hasDiscount(tariff)" class="discount-badge">
+                <span class="discount-badge__text"
+                  >-{{ calculateDiscountPercent(tariff) }}%</span
+                >
+              </div>
+              <div v-if="hasBonuses(tariff)" class="bonus-badge">
+                <span class="bonus-badge__text">Бонус</span>
+              </div>
 
-        <div
-          v-if="totalPages > 1 && (windowWidth >= 768 || totalPages > 1)"
-          class="pagination-controls"
-        >
-          <button
-            @click="prevPage"
-            :disabled="currentPage === 0"
-            class="pagination-button"
+              <div class="tariff-card__header">
+                <h3 class="tariff-name">{{ tariff.name }}</h3>
+                <div class="price-block">
+                  <div class="price-display">
+                    <div v-if="hasDiscount(tariff)" class="price-with-discount">
+                      <div class="original-price-wrapper">
+                        <span class="original-price">{{ formatPrice(tariff.price) }}</span>
+                        <span class="original-currency">{{ tariff.currency }}</span>
+                      </div>
+                      <div class="final-price-wrapper">
+                        <span class="final-price">{{ formatPrice(tariff.final_price) }}</span>
+                        <span class="final-currency">{{ tariff.currency }}</span>
+                      </div>
+                    </div>
+                    <div v-else class="price-without-discount">
+                      <span class="regular-price">{{ formatPrice(tariff.price) }}</span>
+                      <span class="regular-currency">{{ tariff.currency }}</span>
+                    </div>
+                  </div>
+                  <div class="period-text">/{{ getPeriodText(tariff.period) }}</div>
+                </div>
+              </div>
+
+              <div class="tariff-card__features">
+                <div class="feature-item" v-if="tariff.limits && formatLimit(tariff.limits.dialogs) > 0">
+                  <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">Диалогов: {{ formatLimit(tariff.limits.dialogs) }}</span>
+                </div>
+                <div class="feature-item" v-if="tariff.limits && formatLimit(tariff.limits.messages) > 0">
+                  <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">Сообщений: {{ formatLimit(tariff.limits.messages) }}</span>
+                </div>
+                <div class="feature-item" v-if="tariff.limits?.write_first">
+                  <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">Написать первым</span>
+                </div>
+                <div v-if="shouldShowMonthlyPrice(tariff)" class="feature-item monthly-price-item">
+                  <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">
+                    {{ calculateMonthlyEquivalent(tariff) }} ₽/мес
+                    <span v-if="calculateSavings(tariff) > 0" class="savings-text">
+                      (Экономия {{ calculateSavings(tariff) }}%)
+                    </span>
+                  </span>
+                </div>
+                <div class="feature-item bonus-item" v-for="bonus in getActiveBonuses(tariff)" :key="bonus.mod_id">
+                  <div class="feature-icon bonus-icon">
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </div>
+                  <span class="feature-text">{{ getBonusDescription(tariff, bonus) }}</span>
+                </div>
+              </div>
+
+              <button
+                @click="clickSelectTariff(tariff)"
+                class="select-button"
+                :class="{ 'select-button--hovered': hoverIndex === currentPage * dynamicItemsPerPage + index }"
+              >
+                Выбрать
+              </button>
+            </div>
+          </div>
+
+          <!-- Предложение перейти на 3 канала -->
+          <div
+            v-if="type === 'group' && groupCode === 'group-2-channels'"
+            class="upsell-banner"
+            @click="switchToThreeChannels"
           >
-            &larr;
-          </button>
-          <span class="page-indicator">
-            {{ currentPage + 1 }} / {{ totalPages }}
-          </span>
-          <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages - 1"
-            class="pagination-button"
+            <div class="upsell-banner__icon">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </div>
+            <div class="upsell-banner__text">
+              <strong>Добавьте 3-й аккаунт — выгоднее!</strong>
+              <span>Тариф на 3 канала стоит всего на {{ upsellDiffPercent }}% дороже, но даёт +50% мощности</span>
+            </div>
+            <div class="upsell-banner__arrow">→</div>
+          </div>
+
+          <div
+            v-if="totalPages > 1 && (windowWidth >= 768 || totalPages > 1)"
+            class="pagination-controls"
           >
-            &rarr;
-          </button>
-        </div>
+            <button @click="prevPage" :disabled="currentPage === 0" class="pagination-button">&larr;</button>
+            <span class="page-indicator">{{ currentPage + 1 }} / {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages - 1" class="pagination-button">&rarr;</button>
+          </div>
+        </template>
+
       </div>
     </div>
     <div
@@ -278,6 +293,7 @@
         :close="changeStationTariff"
         :selectedItem="selectedItem"
         :type="type"
+        :initialDuration="selectedInitialDuration"
       />
     </div>
   </div>
@@ -580,16 +596,76 @@ const switchToThreeChannels = () => {
 };
 
 const selectTariff = ref({});
+const selectedInitialDuration = ref(null);
 
 const changeStationTariff = () => {
   buySection.value = !buySection.value;
 };
 
 const clickSelectTariff = (tariff) => {
-  changeStationTariff();
+  selectedInitialDuration.value = null;
   selectTariff.value = tariff;
-  console.log("Выбран тариф:", selectTariff.value);
+  changeStationTariff();
 };
+
+// ─── Vendor ───────────────────────────────────────────────
+const isVendorType = computed(() => props.type === "vendor");
+
+const baseTariff = computed(() => {
+  if (!isVendorType.value) return null;
+  return (
+    sortedTariffs.value.find((t) => t.period === "1m" || t.period === "30d") ||
+    sortedTariffs.value[0] ||
+    null
+  );
+});
+
+const VENDOR_PRICES = [
+  { months: 1, price: 1900 },
+  { months: 3, price: 5557 },
+  { months: 6, price: 10900 },
+  { months: 12, price: 19990 },
+];
+
+const vendorCards = computed(() => {
+  const baseMonthly = 1900;
+  return VENDOR_PRICES.map(({ months, price }) => {
+    const fullPrice = baseMonthly * months;
+    const savings = Math.max(0, fullPrice - price);
+    const savingsPct = savings > 0 ? Math.round((savings / fullPrice) * 100) : 0;
+    return {
+      months,
+      price,
+      monthlyPrice: Math.round(price / months),
+      savings,
+      savingsPct,
+    };
+  });
+});
+
+const clickVendorPreset = (card) => {
+  if (!baseTariff.value) return;
+  selectTariff.value = {
+    ...baseTariff.value,
+    price: card.price,
+    final_price: card.price,
+    period: `${card.months}m`,
+  };
+  selectedInitialDuration.value = card.months;
+  changeStationTariff();
+};
+
+const VENDOR_PER_PAGE = 2;
+const vendorPage = ref(0);
+const vendorTotalPages = computed(() =>
+  Math.ceil(vendorCards.value.length / VENDOR_PER_PAGE),
+);
+const paginatedVendorCards = computed(() => {
+  const start = vendorPage.value * VENDOR_PER_PAGE;
+  return vendorCards.value.slice(start, start + VENDOR_PER_PAGE);
+});
+const prevVendorPage = () => { if (vendorPage.value > 0) vendorPage.value--; };
+const nextVendorPage = () => { if (vendorPage.value < vendorTotalPages.value - 1) vendorPage.value++; };
 
 const upsellDiffPercent = computed(() => {
   const price2 = GROUP_PRICES["group-2-channels"]["1m"];
@@ -991,10 +1067,6 @@ onMounted(fetchTariffs);
   font-weight: 600;
 }
 
-.savings-text {
-  color: #4caf50;
-  font-size: 12px;
-}
 
 .feature-text {
   flex: 1;
