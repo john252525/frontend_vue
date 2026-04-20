@@ -377,7 +377,7 @@ const form = ref({
   password: "",
   provider: "",
   smtp_server: "",
-  smtp_port: 587,
+  smtp_port: "",
 });
 
 const errors = ref({ email: "", password: "" });
@@ -411,7 +411,7 @@ const onProviderChange = () => {
     form.value.smtp_port = preset.smtp_port;
   } else {
     form.value.smtp_server = "";
-    form.value.smtp_port = 587;
+    form.value.smtp_port = "";
   }
 };
 
@@ -460,7 +460,7 @@ const fetchConfigs = async () => {
       form.value.password = "";
       form.value.provider = current.provider || "";
       form.value.smtp_server = current.smtp_server || "";
-      form.value.smtp_port = current.smtp_port ?? 587;
+      form.value.smtp_port = current.smtp_port ?? "";
       webhookUrls.value = Array.isArray(current.webhookUrls)
         ? [...current.webhookUrls]
         : [];

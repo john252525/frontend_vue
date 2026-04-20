@@ -931,6 +931,10 @@ const isFormValid = computed(() => {
   if (formValues.group === "email") {
     const requiredFields = getDynamicFields("group", "email");
     return requiredFields.every((field) => {
+      // smtp_port рендерится отдельным полем и хранится в formValues.smtp_port
+      if (field.name === "smtp_port") {
+        return !field.required || !!formValues.smtp_port;
+      }
       const isOptionalByHint =
         field.label?.toLowerCase().includes("необязательн") ||
         field.label?.toLowerCase().includes("оставьте пустым") ||

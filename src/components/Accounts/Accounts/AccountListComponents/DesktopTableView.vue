@@ -3,17 +3,25 @@
     <div v-if="dataStation && instanceData.length > 0" class="accounts-list">
       <div
         class="account-row"
+        :class="{ 'account-row--deleted': item.enable === '0' }"
         v-for="(item, index) in instanceData"
         :key="index"
         @click="openAccountModal(item)"
-        style="cursor: pointer"
+        :style="item.enable === '0' ? 'cursor: default' : 'cursor: pointer'"
       >
         <div class="row-section section-identity">
-          <AccountIcon :item="item" class="account-icon-large" />
+          <div class="account-icon-wrapper" :class="{ 'icon-deleted': item.enable === '0' }">
+            <AccountIcon :item="item" class="account-icon-large" />
+            <div v-if="item.enable === '0'" class="deleted-badge-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              </svg>
+            </div>
+          </div>
 
           <div class="identity-info">
-            <span v-if="item.name" class="account-name">{{ item.name }}</span>
-            <span v-else class="account-login">{{ item.login }}</span>
+            <span v-if="item.name" class="account-name" :class="{ 'text-deleted': item.enable === '0' }">{{ item.name }}</span>
+            <span v-else class="account-login" :class="{ 'text-deleted': item.enable === '0' }">{{ item.login }}</span>
 
             <span v-if="item.type != 'undefined'" class="account-type">
               {{ getType(item.type) }}
@@ -301,7 +309,7 @@ const closeSmsAuthModal = () => {
 };
 
 const openAccountModal = (account) => {
-  if (account.type === "bulk") {
+  if (account.type === "bulk" || account.enable === "0") {
     return;
   }
   props.selectAccount(account);
@@ -477,18 +485,66 @@ const emailSettings = () => {
   display: flex;
   align-items: center;
   background: #ffffff;
-  /* border: 1px solid #e2e8f0; */
   border-radius: 10px;
   padding: 12px 20px;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   gap: 20px;
+  border-left: 3px solid transparent;
 }
 
 .account-row:hover {
   border-color: #cbd5e1;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transform: translateY(-1px);
+}
+
+/* Удалённый аккаунт */
+.account-row--deleted {
+  background: #fafafa;
+  border-left: 3px solid #fca5a5;
+  opacity: 0.75;
+}
+
+.account-row--deleted:hover {
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-color: #fca5a5;
+}
+
+.account-row--deleted > *:not(.section-actions) {
+  pointer-events: none;
+}
+
+.account-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.icon-deleted {
+  opacity: 0.5;
+  filter: grayscale(60%);
+}
+
+.deleted-badge-icon {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.text-deleted {
+  color: #9ca3af;
+  text-decoration: line-through;
 }
 
 .row-active {

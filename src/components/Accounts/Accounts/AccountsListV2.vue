@@ -807,7 +807,7 @@ const filterInstances = () => {
 
   const filtered = instancesStore.allInstances.filter((inst) => {
     // Фильтр удалённых аккаунтов
-    if (!showDeleted && inst.deleted) return false;
+    if (!showDeleted && inst.enable === "0") return false;
 
     // Если все фильтры сброшены — показываем всё
     if (sources.length === 0 && types.length === 0) return true;
@@ -914,88 +914,93 @@ const getAccounts = async () => {
           loadDataStation.value = false;
           dataStation.value = true;
 
+          // Сразу показываем аккаунты и разблокируем UI
+          instancesStore.setAllInstances([...instanceData.value]);
+          filterInstances();
+
           if (
             accountStation.value === "whatsapp" ||
             accountStation.value === "telegram"
           ) {
-            const accountsToFetch = instanceData.value.filter(
-              (instance) =>
-                instance.step?.value === 5 &&
-                !["bulk", "amocrm", "bitrix24", "uon"].includes(
-                  instance.type,
-                ) &&
-                ((instance.storage === "binder" &&
-                  instance.type !== "touchapi") ||
-                  (instance.storage === "whatsapi" &&
-                    instance.type === "whatsapi")),
-            );
+            // Фоновый переопрос getInfo — не блокирует интерфейс
+            (async () => {
+              const accountsToFetch = instanceData.value.filter(
+                (instance) =>
+                  instance.step?.value === 5 &&
+                  !["bulk", "amocrm", "bitrix24", "uon"].includes(
+                    instance.type,
+                  ) &&
+                  ((instance.storage === "binder" &&
+                    instance.type !== "touchapi") ||
+                    (instance.storage === "whatsapi" &&
+                      instance.type === "whatsapi")),
+              );
 
-            if (accountsToFetch.length > 0) {
-              try {
-                await new Promise((resolve) =>
-                  setTimeout(resolve, 200 * accountsToFetch.length),
-                );
-                const result = await fetchChats({
-                  token: token.value,
-                  accounts: accountsToFetch,
-                });
-              } catch (e) {
-                console.error("Ошибка при сохранении аккаунтов:", e);
-              }
-            }
-
-            const promises = instanceData.value.map(async (instance) => {
-              const login = instance.login;
-
-              if (
-                instance.type === "bulk" ||
-                instance.type === "amocrm" ||
-                instance.type === "bitrix24" ||
-                instance.type === "uon"
-              ) {
-                instance.loading = false;
-                return;
-              }
-
-              if (
-                (instance.storage === "binder" &&
-                  instance.type !== "touchapi") ||
-                (instance.storage === "whatsapi" &&
-                  instance.type === "whatsapi")
-              ) {
-                instance.loading = false;
-                return;
-              }
-
-              try {
-                const infoResponse = await getInfoWhats(
-                  instance.source,
-                  login,
-                  instance.type,
-                  instance.storage,
-                );
-
-                if (infoResponse?.data?.step) {
-                  instance.step = infoResponse.data.step;
+              if (accountsToFetch.length > 0) {
+                try {
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, 200 * accountsToFetch.length),
+                  );
+                  await fetchChats({
+                    token: token.value,
+                    accounts: accountsToFetch,
+                  });
+                } catch (e) {
+                  console.error("Ошибка при сохранении аккаунтов:", e);
                 }
-              } catch (error) {
-                console.error(`Error for ${login}:`, error);
-              } finally {
-                instance.loading = false;
               }
-            });
 
-            await Promise.all(promises);
-            chatsLoadingChange();
+              const promises = instanceData.value.map(async (instance) => {
+                if (
+                  instance.type === "bulk" ||
+                  instance.type === "amocrm" ||
+                  instance.type === "bitrix24" ||
+                  instance.type === "uon"
+                ) {
+                  instance.loading = false;
+                  return;
+                }
+
+                if (
+                  (instance.storage === "binder" &&
+                    instance.type !== "touchapi") ||
+                  (instance.storage === "whatsapi" &&
+                    instance.type === "whatsapi")
+                ) {
+                  instance.loading = false;
+                  return;
+                }
+
+                try {
+                  const infoResponse = await getInfoWhats(
+                    instance.source,
+                    instance.login,
+                    instance.type,
+                    instance.storage,
+                  );
+
+                  if (infoResponse?.data?.step) {
+                    instance.step = infoResponse.data.step;
+                  }
+                } catch (error) {
+                  console.error(`Error for ${instance.login}:`, error);
+                } finally {
+                  instance.loading = false;
+                }
+              });
+
+              await Promise.all(promises);
+              chatsLoadingChange();
+
+              // Обновляем стор после завершения фоновых запросов
+              instancesStore.setAllInstances([...instanceData.value]);
+              filterInstances();
+            })();
           } else {
             instanceData.value.forEach((instance) => {
               instance.loading = false;
             });
           }
-
-          // Сохраняем все аккаунты в стор, затем применяем фильтры на клиенте
-          instancesStore.setAllInstances([...instanceData.value]);
-          filterInstances();
         }
       }
     } catch (error) {
