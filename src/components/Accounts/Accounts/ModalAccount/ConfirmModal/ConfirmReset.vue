@@ -52,6 +52,9 @@ const props = defineProps({
   selectedItem: {
     type: Object,
   },
+  changeForceStopItemData: {
+    type: Function,
+  },
 });
 
 const { selectedItem } = toRefs(props);
@@ -81,12 +84,15 @@ const createRequest = async (request) => {
       },
     });
 
-    if (response.data.status === "ok") {
+    const isOk = response.data.status === "ok" || response.data.ok === true;
+
+    if (isOk) {
       if (request === "getNewProxy") {
         setLoadingStatus(true, "success");
-        location.reload();
+        props.changeForceStopItemData(selectedItem.value);
+        props.close();
       }
-    } else {
+    } else if (request === "getNewProxy") {
       setLoadingStatus(true, "error");
     }
   } catch (error) {

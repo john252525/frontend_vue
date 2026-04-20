@@ -80,6 +80,7 @@
       <button
         class="action-button"
         @click="createRequest(accountData, '/getNewProxy')"
+        v-if="accountData.source != 'sms'"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +97,11 @@
         Сменить прокси
       </button>
 
-      <button class="action-button" @click="openResetAccountModal">
+      <button
+        class="action-button"
+        @click="openResetAccountModal"
+        v-if="accountData.source != 'sms'"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -128,6 +133,26 @@
         Сменить имя
       </button>
 
+      <button
+        v-if="accountData.source === 'email'"
+        class="action-button"
+        @click="openEmailSettings"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Настройки
+      </button>
+
       <button class="action-button danger" @click="deleteAccount">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -149,6 +174,17 @@
 </template>
 
 <script setup>
+import axios from "axios";
+import { computed } from "vue";
+import { useAccountStore } from "@/stores/accountStore";
+import { useStationLoading } from "@/composables/useStationLoading";
+
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const { setLoadingStatus } = useStationLoading();
+
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
 const props = defineProps({
   accountData: {
     type: Object,
@@ -170,19 +206,72 @@ const props = defineProps({
   deleteAccount: {
     type: Function,
   },
+  openSmsAuthModal: {
+    type: Function,
+    default: null,
+  },
+  setLoading: {
+    type: Function,
+    default: null,
+  },
+  openEmailSettings: {
+    type: Function,
+    default: null,
+  },
 });
 
-const changeStatus = async (item) => {
-  if (props.accountData.step?.value === 5) {
-    const result = await props.createRequest(item, "/forceStop");
+const setStateSms = async (value) => {
+  const { source, login } = props.accountData;
+  props.setLoading && props.setLoading(true);
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}setState`,
+      { source, login, setState: value },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
 
-    if (result === true) {
-      console.log("success force");
-      props.changeForceStopItemData(item);
-      props.accountData.step = null;
+    if (response.data.ok === true) {
+      if (value === true && response.data.data?.auth_code) {
+        props.openSmsAuthModal && props.openSmsAuthModal(response.data.data.auth_code);
+      } else {
+        props.setLoading && props.setLoading(false);
+        setLoadingStatus(true, "success");
+      }
+    } else {
+      props.setLoading && props.setLoading(false);
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    props.setLoading && props.setLoading(false);
+    setLoadingStatus(true, "error");
+    console.error("error", error);
+  }
+};
+
+const changeStatus = async (item) => {
+  if (item.source != "sms") {
+    if (props.accountData.step?.value === 5) {
+      const result = await props.createRequest(item, "/forceStop");
+
+      if (result === true) {
+        console.log("success force");
+        props.changeForceStopItemData(item);
+        props.accountData.step = null;
+      }
+    } else {
+      return;
     }
   } else {
-    return;
+    if (props.accountData.step?.value === 5) {
+      await setStateSms(false);
+    } else {
+      await setStateSms(true);
+    }
   }
 };
 

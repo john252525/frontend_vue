@@ -20,6 +20,9 @@
             :account-data="accountData"
             :changeForceStopItemData="changeForceStopItemData"
             :deleteAccount="deleteAccount"
+            :openSmsAuthModal="openSmsAuthModal"
+            :setLoading="setLoading"
+            :openEmailSettings="openEmailSettings"
           />
         </div>
 
@@ -93,6 +96,9 @@ const props = defineProps({
   changeStationGetHistory: {
     type: Function,
   },
+  openEmailSettings: {
+    type: Function,
+  },
 });
 
 import { useActions } from "@/composables/useActions";
@@ -102,7 +108,16 @@ const { createRequest } = useActions();
 const { accountData } = toRefs(props);
 const loading = ref(false);
 
-const emit = defineEmits(["close", "action"]);
+const setLoading = (val) => {
+  loading.value = val;
+};
+
+const emit = defineEmits(["close", "action", "sms-auth"]);
+
+const openSmsAuthModal = (authCode) => {
+  closeModal();
+  emit("sms-auth", authCode);
+};
 
 const textModal = ref({
   title: "Информация об аккаунте",
@@ -128,7 +143,9 @@ const getAccessToStatus = computed(() => {
     accountData.value.source === "whatsapp" ||
     accountData.value.source === "telegram" ||
     accountData.value.source === "max" ||
-    accountData.value.source === "vk"
+    accountData.value.source === "vk" ||
+    accountData.value.source === "sms" ||
+    accountData.value.source === "email"
   );
 });
 
@@ -137,7 +154,9 @@ const getAccessToAccount = computed(() => {
     accountData.value.source !== "whatsapp" &&
     accountData.value.source !== "telegram" &&
     accountData.value.source !== "max" &&
-    accountData.value.source !== "vk"
+    accountData.value.source !== "vk" &&
+    accountData.value.source !== "sms" &&
+    accountData.value.source !== "email"
   );
 });
 </script>

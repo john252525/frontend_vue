@@ -39,6 +39,7 @@
       </div>
       <Filters
         :getAccounts="getAccountListMethod"
+        :filterInstances="filterInstancesMethod"
         :invalidateCache="invalidateCache"
         :close="openPlatformChoice"
         :isOpen="platformStation"
@@ -110,13 +111,12 @@ import GroupsList from "./Groups/GroupsList.vue";
 import TabToggle from "./Groups/TabToggle.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
 import { useAccountStore } from "@/stores/accountStore";
-import { useAccountsCache } from "@/composables/useAccountsCache";
+import { useInstancesStore } from "@/stores/instancesStore";
 import Filters from "./Filters.vue";
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 
 const accountStore = useAccountStore();
-const { accountsCache, setAccounts, getAccounts, invalidateCache } =
-  useAccountsCache();
+const instancesStore = useInstancesStore();
 
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
@@ -126,15 +126,24 @@ const platformStation = ref(false);
 const setPlatformStation = ref(false);
 const accountListRef = ref(null);
 
-const allAccounts = ref([]);
 const activeTab = ref("accounts");
-const accountsList = ref([]);
 const hasLoadedAccounts = ref(false);
 
+// changeAllAccounts оставляем для совместимости с пропом, но данные уже в сторе
 const changeAllAccounts = (items) => {
-  console.log("✅ Аккаунты получены из AccountList:", items?.length);
-  allAccounts.value = items;
-  setAccounts(items); // Сохраняем в глобальный кеш
+  hasLoadedAccounts.value = true;
+};
+
+// Инвалидация кеша — сбрасываем стор, чтобы следующий getAccounts сделал новый запрос
+const invalidateCache = () => {
+  instancesStore.clearInstances();
+};
+
+// Клиентская фильтрация — применяет текущие фильтры без API-запроса
+const filterInstancesMethod = () => {
+  if (accountListRef.value && accountListRef.value.filterInstances) {
+    accountListRef.value.filterInstances();
+  }
 };
 
 const changeActiveTab = (value) => {
@@ -142,50 +151,26 @@ const changeActiveTab = (value) => {
 };
 
 const availableAccounts = computed(() => {
-  const accounts =
-    accountsCache.value.length > 0 ? accountsCache.value : accountsList.value;
-  const filtered = accounts.filter((account) =>
+  return instancesStore.allInstances.filter((account) =>
     ["whatsapp", "telegram", "vk-bot"].includes(account.source || account.type),
   );
-  console.log("📊 availableAccounts computed:", filtered.length);
-  return filtered;
 });
 
 const getAccountListMethod = async () => {
-  console.log("🚀 Вызван getAccountListMethod");
-  console.log("   - Кеш:", accountsCache.value.length, "аккаунтов");
-  console.log("   - accountListRef существует:", !!accountListRef.value);
-
-  try {
-    // Если есть кеш, возвращаем его
-    if (accountsCache.value.length > 0) {
-      console.log(
-        "📦 Используем кешированные аккаунты:",
-        accountsCache.value.length,
-      );
-      accountsList.value = accountsCache.value;
-      return accountsCache.value;
-    }
-
-    // Если AccountList смонтирован, вызываем его метод
-    if (accountListRef.value && accountListRef.value.getAccounts) {
-      console.log("🔍 Загружаем аккаунты через AccountList");
-      const result = await accountListRef.value.getAccounts();
-      console.log("✅ Получено аккаунтов:", result?.length);
-
-      setAccounts(result || []); // Сохраняем в кеш
-      accountsList.value = result || [];
-      hasLoadedAccounts.value = true;
-
-      return result;
-    }
-
-    console.warn("⚠️ AccountList не смонтирован, возвращаем пустой массив");
-    return [];
-  } catch (error) {
-    console.error("❌ Ошибка в getAccountListMethod:", error);
-    return accountsCache.value; // Возвращаем кеш при ошибке
+  // Возвращаем полный список (allInstances) — без учёта текущих фильтров,
+  // чтобы группы и другие функции всегда имели доступ ко всем аккаунтам
+  if (instancesStore.hasAllInstances && instancesStore.isCacheFresh) {
+    return instancesStore.allInstances;
   }
+
+  // Если кеш пустой/устаревший — перезагружаем через компонент
+  if (accountListRef.value && accountListRef.value.getAccounts) {
+    const result = await accountListRef.value.getAccounts();
+    hasLoadedAccounts.value = true;
+    return result;
+  }
+
+  return [];
 };
 
 function openCrmPlatform() {
@@ -207,14 +192,6 @@ function openAddAccount() {
   openAddAccountStation.value = !openAddAccountStation.value;
 }
 
-watch(allAccounts, (newValue) => {
-  if (newValue) {
-    console.log("👀 Watch: новые аккаунты", newValue.length);
-    hasLoadedAccounts.value = true;
-    accountsList.value = newValue;
-    setAccounts(newValue);
-  }
-});
 </script>
 
 <style scoped>

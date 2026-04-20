@@ -128,6 +128,116 @@
     </div>
   </div>
 
+  <!-- SMS Disclaimer Modal -->
+  <div
+    v-if="showSmsDisclaimerModal"
+    class="modal-overlay sms-disclaimer-overlay"
+    data-testid="sms-disclaimer-modal-overlay"
+  >
+    <div class="modal-container sms-disclaimer-modal" data-testid="sms-disclaimer-modal">
+
+      <!-- Header -->
+      <div class="sms-dm-header">
+        <div class="sms-dm-header-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="24" height="18" rx="3" stroke="#6366f1" stroke-width="1.8"/>
+            <path d="M8 11h12M8 15h8" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="sms-dm-title">Канал SMS</h2>
+          <p class="sms-dm-subtitle">Ознакомьтесь с условиями работы</p>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="sms-dm-body">
+
+        <div class="sms-dm-item">
+          <div class="sms-dm-item-icon sms-dm-icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="2" width="14" height="20" rx="3" stroke="#6366f1" stroke-width="1.8"/>
+              <circle cx="12" cy="18" r="1" fill="#6366f1"/>
+              <path d="M9 6h6M9 9.5h4" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="sms-dm-item-text">
+            <p class="sms-dm-item-title">Ваша SIM-карта и номер</p>
+            <p class="sms-dm-item-desc">Для подключения нужен Android 7.0+. Все сообщения будут уходить с вашего номера телефона через вашу SIM-карту.</p>
+          </div>
+        </div>
+
+        <div class="sms-dm-item">
+          <div class="sms-dm-item-icon sms-dm-icon-amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3L21 20H3L12 3Z" stroke="#d97706" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M12 9v5" stroke="#d97706" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="12" cy="16.5" r="0.75" fill="#d97706"/>
+            </svg>
+          </div>
+          <div class="sms-dm-item-text">
+            <p class="sms-dm-item-title">Разбивка на части</p>
+            <p class="sms-dm-item-desc">SMS ограничен по длине: <strong>160 символов</strong> для латиницы и <strong>70 символов</strong> для кириллицы. Длинное сообщение разбивается на несколько частей — тарифицируется каждая.</p>
+          </div>
+        </div>
+
+        <div class="sms-dm-item">
+          <div class="sms-dm-item-icon sms-dm-icon-red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="9" stroke="#ef4444" stroke-width="1.8"/>
+              <path d="M12 7v5" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="12" cy="15.5" r="0.75" fill="#ef4444"/>
+            </svg>
+          </div>
+          <div class="sms-dm-item-text">
+            <p class="sms-dm-item-title">Ответственность за номера</p>
+            <p class="sms-dm-item-desc">Приложение отправляет сообщение на тот номер, который ему передан. Правильность номеров и кодов стран — ваша ответственность. Мы не возмещаем расходы на международные тарифы.</p>
+          </div>
+        </div>
+
+        <div class="sms-dm-item">
+          <div class="sms-dm-item-icon sms-dm-icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2a7 7 0 0 1 4 12.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26A7 7 0 0 1 12 2Z" stroke="#16a34a" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M9 21h6" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="sms-dm-item-text">
+            <p class="sms-dm-item-title">Рекомендация</p>
+            <p class="sms-dm-item-desc">Поштучная тарификация невыгодна при большом объёме. Проверьте, подключён ли пакет SMS на ваш номер до начала работы.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Checkbox -->
+      <div class="sms-dm-footer">
+        <label class="sms-dm-checkbox" data-testid="sms-disclaimer-checkbox">
+          <input
+            type="checkbox"
+            v-model="smsDisclaimerCheckbox"
+            data-testid="sms-disclaimer-checkbox-input"
+          />
+          <span>Я ознакомился и принимаю условия работы канала SMS</span>
+        </label>
+        <div class="sms-dm-actions">
+          <button class="cancel-btn" @click="handleSmsDisclaimerDecline" data-testid="sms-disclaimer-decline-btn">
+            Отмена
+          </button>
+          <button
+            class="submit-btn"
+            :disabled="!smsDisclaimerCheckbox"
+            @click="handleSmsDisclaimerAccept"
+            data-testid="sms-disclaimer-accept-btn"
+          >
+            Продолжить
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <ModalFrame
     v-if="!stationLoading.loading && !formLoadError"
     :text="modalText"
@@ -423,12 +533,12 @@
           </div>
         </div>
 
-        <!-- Динамические поля из API -->
+        <!-- Динамические поля из API (smtp_port пропускаем — рендерится отдельным блоком ниже) -->
         <template
           v-for="field in getDynamicFields('group', 'email')"
           :key="field.id"
         >
-          <div class="form-field">
+          <div v-if="field.name !== 'smtp_port'" class="form-field">
             <label
               :class="`accounts-addAccounts-${field.name}-label`"
               :data-testid="`${field.name}-label`"
@@ -451,20 +561,23 @@
               {{ field.hint }}
             </p>
           </div>
-          <!-- Порт сразу после smtp_server -->
-          <div v-if="field.name === 'smtp_server'" class="form-field">
-            <label class="accounts-addAccounts-smtp_port-label" data-testid="smtp_port-label">
-              Порт SMTP
-            </label>
-            <input
-              v-model="formValues.smtp_port"
-              type="number"
-              placeholder="465"
-              class="accounts-addAccounts-smtp_port-input"
-              data-testid="smtp_port-input"
-            />
-          </div>
         </template>
+        <!-- Порт SMTP — рендерится один раз, если есть поле smtp_server -->
+        <div
+          v-if="getDynamicFields('group', 'email').some(f => f.name === 'smtp_server')"
+          class="form-field"
+        >
+          <label class="accounts-addAccounts-smtp_port-label" data-testid="smtp_port-label">
+            Порт SMTP
+          </label>
+          <input
+            v-model="formValues.smtp_port"
+            type="number"
+            placeholder="465"
+            class="accounts-addAccounts-smtp_port-input"
+            data-testid="smtp_port-input"
+          />
+        </div>
       </template>
 
       <div
@@ -503,15 +616,17 @@
         </p>
       </div>
 
+      <!-- SMS: небольшой бейдж-напоминание после принятия дисклеймера -->
       <div
-        v-if="formValues.group === 'sms'"
-        class="info-message accounts-addAccounts-sms-warning"
-        data-testid="sms-warning"
+        v-if="formValues.group === 'sms' && smsDisclaimerAccepted"
+        class="sms-accepted-badge"
+        data-testid="sms-accepted-badge"
       >
-        <p>
-          Внимание! Если у вас нет телефона на ОС Android (не ниже версии 7.0),
-          вы не сможете подключить канал СМС
-        </p>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" stroke="#6366f1" stroke-width="1.5"/>
+          <path d="M6 10.5L8.5 13L14 7.5" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Условия работы канала SMS приняты</span>
       </div>
     </div>
   </ModalFrame>
@@ -567,6 +682,23 @@ const showIntegrationModal = ref(false);
 const showWarningModal = ref(false);
 const selectedCrmName = ref("");
 
+// SMS disclaimer modal
+const showSmsDisclaimerModal = ref(false);
+const smsDisclaimerCheckbox = ref(false);
+
+const handleSmsDisclaimerAccept = () => {
+  smsDisclaimerAccepted.value = true;
+  formValues.group = "sms";
+  showSmsDisclaimerModal.value = false;
+  smsDisclaimerCheckbox.value = false;
+};
+
+const handleSmsDisclaimerDecline = () => {
+  showSmsDisclaimerModal.value = false;
+  smsDisclaimerCheckbox.value = false;
+  formValues.group = "";
+};
+
 const changeStationLoading = () => {
   stationLoading.loading = false;
 };
@@ -579,6 +711,8 @@ const EMAIL_PROVIDERS = [
   { value: "rambler", text: "Rambler",          smtp_server: "smtp.rambler.ru",   smtp_port: "465" },
   { value: "custom",  text: "Другой (вручную)", smtp_server: "",                  smtp_port: ""    },
 ];
+
+const smsDisclaimerAccepted = ref(false);
 
 const formValues = reactive({
   group: "",
@@ -807,6 +941,10 @@ const isFormValid = computed(() => {
     });
   }
 
+  if (formValues.group === "sms") {
+    return smsDisclaimerAccepted.value;
+  }
+
   return true;
 });
 
@@ -819,6 +957,13 @@ const toggleDropdown = (name) => {
 };
 
 const selectOption = (name, value) => {
+  // При выборе SMS — сначала показываем дисклеймер, group ставится только после принятия
+  if (name === "group" && value === "sms") {
+    dropdownOpen[name] = false;
+    showSmsDisclaimerModal.value = true;
+    return;
+  }
+
   formValues[name] = value;
 
   // Reset dependent values when parent changes
@@ -829,6 +974,7 @@ const selectOption = (name, value) => {
     formValues.crm_api_key = "";
     formValues.emailProvider = "";
     formValues.smtp_port = "";
+    smsDisclaimerAccepted.value = false;
     // Очищаем потенциальные динамические поля, чтобы не тянуть старые данные
     Object.keys(formValues).forEach((key) => {
       if (
@@ -1329,10 +1475,146 @@ const submitForm = async () => {
   margin: 0;
 }
 
-/* SMS warning */
-.accounts-addAccounts-sms-warning {
-  background-color: #fee2e2;
-  color: #991b1b;
+/* SMS disclaimer modal */
+.sms-disclaimer-overlay {
+  z-index: 1004;
+}
+
+.sms-disclaimer-modal {
+  max-width: 480px;
+  z-index: 1004;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sms-dm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sms-dm-header-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sms-dm-title {
+  margin: 0 0 2px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.sms-dm-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.sms-dm-body {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sms-dm-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.sms-dm-item-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sms-dm-icon-purple { background: #eef2ff; }
+.sms-dm-icon-amber  { background: #fffbeb; }
+.sms-dm-icon-red    { background: #fef2f2; }
+.sms-dm-icon-green  { background: #f0fdf4; }
+
+.sms-dm-item-text {
+  padding-top: 2px;
+}
+
+.sms-dm-item-title {
+  margin: 0 0 3px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.sms-dm-item-desc {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.sms-dm-item-desc strong {
+  color: #374151;
+}
+
+.sms-dm-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sms-dm-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.sms-dm-checkbox input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+.sms-dm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* SMS accepted badge */
+.sms-accepted-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  color: #4338ca;
+  font-weight: 500;
 }
 
 /* Modal footer */

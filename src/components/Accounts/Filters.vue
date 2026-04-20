@@ -129,13 +129,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
-import { useAccountsCache } from "@/composables/useAccountsCache";
 import { useDomain } from "@/composables/getDomain";
 import { getFilterConfigForDomain } from "@/config/filterConfig";
 
 const { stationDomain } = useDomain();
 const accountStore = useAccountStore();
-const { invalidateCache: invalidateCacheComposable } = useAccountsCache();
 
 const props = defineProps({
   isOpen: {
@@ -145,6 +143,9 @@ const props = defineProps({
     type: Function,
   },
   getAccounts: {
+    type: Function,
+  },
+  filterInstances: {
     type: Function,
   },
   invalidateCache: {
@@ -315,14 +316,9 @@ const updateFilterState = () => {
   accountStore.setFilterState(newFilterState);
 };
 
-const applyFilters = async () => {
-  if (props.invalidateCache) {
-    props.invalidateCache();
-  } else {
-    invalidateCacheComposable();
-  }
-  if (props.getAccounts) {
-    await props.getAccounts();
+const applyFilters = () => {
+  if (props.filterInstances) {
+    props.filterInstances();
   }
 };
 </script>

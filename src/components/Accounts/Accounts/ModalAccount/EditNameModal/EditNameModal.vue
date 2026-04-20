@@ -61,6 +61,9 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
+import { useInstancesStore } from "@/stores/instancesStore";
+const instancesStore = useInstancesStore();
+
 import axios from "axios";
 
 const loading = ref(false);
@@ -98,8 +101,12 @@ const changeName = async () => {
         },
       },
     );
-    if ((response.data.ok = true)) {
-      props.getAccounts();
+    const data = typeof response.data === "string"
+      ? JSON.parse(response.data)
+      : response.data;
+
+    if (data?.ok) {
+      instancesStore.updateInstanceByUuid(uuid, { name: newName.value });
       setLoadingStatus(true, "success");
     } else {
       setLoadingStatus(true, "error");
@@ -140,10 +147,10 @@ const validateInput = () => {
   return true;
 };
 
-const saveName = () => {
+const saveName = async () => {
   if (!validateInput()) return;
 
-  changeName();
+  await changeName();
   props.close();
 };
 

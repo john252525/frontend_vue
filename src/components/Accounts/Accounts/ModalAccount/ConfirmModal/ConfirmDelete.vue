@@ -68,6 +68,9 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
+import { useInstancesStore } from "@/stores/instancesStore";
+const instancesStore = useInstancesStore();
+
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
@@ -127,12 +130,18 @@ const createRequest = async (request) => {
       },
     });
 
-    if (response.data.status === "ok") {
+    const isOk = response.data.status === "ok" || response.data.ok === true;
+
+    if (isOk) {
       if (request === "deleteAccount") {
         setLoadingStatus(true, "success");
-        location.reload();
+        const { login, source } = selectedItem.value;
+        instancesStore.removeInstance(login, source);
+        props.close();
       }
-    } else {
+    } else if (request === "deleteAccount") {
+      // Ошибку показываем только если не прошло само удаление
+      // forceStop может вернуть не-ok если аккаунт уже остановлен — это нормально
       setLoadingStatus(true, "error");
     }
   } catch (error) {

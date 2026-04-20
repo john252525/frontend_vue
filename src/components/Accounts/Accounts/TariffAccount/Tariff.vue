@@ -281,6 +281,20 @@
           </div>
         </template>
 
+        <!-- ══ Баннер спецпредложения ══ -->
+        <a href="mailto:support@app.whatsapi.ru" class="special-offer-banner">
+          <div class="special-offer-banner__body">
+            <h3 class="special-offer-banner__title">Масштабируете бизнес<br>или управляете сетью?</h3>
+            <p class="special-offer-banner__desc">
+              <span class="special-offer-banner__dash">—</span>
+              Подготовим специальные условия и персональный тариф для крупных проектов
+            </p>
+          </div>
+          <div class="special-offer-banner__action">
+            <span class="special-offer-banner__btn">Связаться с нами →</span>
+          </div>
+        </a>
+
       </div>
     </div>
     <div
@@ -1320,6 +1334,94 @@ onMounted(fetchTariffs);
   .bonus-badge {
     left: 8px;
     right: auto;
+  }
+}
+
+/* ── Баннер спецпредложения ─────────────────────────────── */
+.special-offer-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 20px;
+  padding: 24px 28px;
+  background: #f2f3f5;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.special-offer-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.special-offer-banner__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.special-offer-banner__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.special-offer-banner__desc {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.special-offer-banner__dash {
+  color: #6732ff;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.special-offer-banner__action {
+  flex-shrink: 0;
+}
+
+.special-offer-banner__btn {
+  display: inline-block;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
+  color: white;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.special-offer-banner:hover .special-offer-banner__btn {
+  background: linear-gradient(135deg, #7a4aff 0%, #9d7aff 100%);
+  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.35);
+}
+
+@media (max-width: 600px) {
+  .special-offer-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .special-offer-banner__title {
+    font-size: 17px;
+  }
+
+  .special-offer-banner__btn {
+    width: 100%;
+    text-align: center;
+    padding: 12px 16px;
   }
 }
 </style>

@@ -220,8 +220,17 @@
       :blacklistModal="blacklistModal"
       :changeStationGetHistory="stationGetHistory"
       :customSources="customSources"
+      :openEmailSettings="emailSettings"
       @close="closeAccountModal"
       @action="handleAccountAction"
+      @sms-auth="openSmsAuthModal"
+    />
+
+    <SmsAuthCodeModal
+      v-if="showSmsAuthModal"
+      :authCode="smsAuthCode"
+      :item="selectedAccount"
+      :close="closeSmsAuthModal"
     />
   </div>
 </template>
@@ -230,6 +239,7 @@
 import AccountIcon from "../../AccountIcon.vue";
 import LoadingAccount from "../LoadingMoadal/LoadingAccount.vue";
 import AccountModal from "./AccountModal.vue";
+import SmsAuthCodeModal from "../ModalAccount/Enable/SmsAuthCodeModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import StatusBadge from "../StatusBadge.vue";
 import { useI18n } from "vue-i18n";
@@ -258,6 +268,7 @@ const props = defineProps({
   changeStationGetHistory: Function,
   openCustomSourcesModal: Function,
   openWarningModal: Function,
+  openEmailSettings: Function,
 });
 
 const { instanceData } = toRefs(props);
@@ -274,6 +285,19 @@ defineEmits([
 
 const selectedAccount = ref(null);
 const isModalVisible = ref(false);
+
+const showSmsAuthModal = ref(false);
+const smsAuthCode = ref("");
+
+const openSmsAuthModal = (authCode) => {
+  smsAuthCode.value = authCode;
+  showSmsAuthModal.value = true;
+};
+
+const closeSmsAuthModal = () => {
+  showSmsAuthModal.value = false;
+  smsAuthCode.value = "";
+};
 
 const openAccountModal = (account) => {
   if (account.type === "bulk") {
@@ -422,6 +446,11 @@ const blacklistModal = () => {
 const customSources = () => {
   isModalVisible.value = false;
   props.openCustomSourcesModal();
+};
+
+const emailSettings = () => {
+  isModalVisible.value = false;
+  props.openEmailSettings();
 };
 </script>
 

@@ -19,6 +19,7 @@
       :openWarningModal="openWarningModal"
       :changeStationGetHistory="changeStationGetHistory"
       :openCustomSourcesModal="openCustomSourcesModal"
+      :openEmailSettings="openEmailSettings"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
@@ -262,6 +263,9 @@ import AccountListMobile from "./AccountComponents/AccountListMobile.vue";
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
+
+import { useInstancesStore } from "@/stores/instancesStore";
+const instancesStore = useInstancesStore();
 const token = computed(() => accountStore.getAccountToken);
 const accountStation = computed(() => accountStore.getAccountStation);
 const sourceGroup = computed(() => accountStore.getSource);
@@ -379,6 +383,18 @@ const openDeleteAccountModal = () => {
 
 const closeDeleteAccountModal = () => {
   deleteAccountModal.value = false;
+  // Если аккаунт исчез из стора (был удалён) — убираем его и из локального списка
+  if (selectedItem.value) {
+    const { login, source } = selectedItem.value;
+    const stillInStore = instancesStore.instances.some(
+      (acc) => acc.login === login && acc.source === source,
+    );
+    if (!stillInStore) {
+      instanceData.value = instanceData.value.filter(
+        (acc) => !(acc.login === login && acc.source === source),
+      );
+    }
+  }
 };
 
 const openResetAccountModal = () => {
@@ -390,7 +406,20 @@ const closeResetAccountModal = () => {
 };
 
 const changeEditNameModal = () => {
+  const wasOpen = editNameModal.value;
   editNameModal.value = !editNameModal.value;
+
+  // При закрытии синхронизируем имя из стора в локальный instanceData
+  if (wasOpen && selectedItem.value) {
+    const { uuid } = selectedItem.value;
+    const storeAccount = instancesStore.instances.find((acc) => acc.uuid === uuid);
+    if (storeAccount) {
+      const idx = instanceData.value.findIndex((acc) => acc.uuid === uuid);
+      if (idx !== -1) {
+        instanceData.value[idx] = { ...instanceData.value[idx], name: storeAccount.name };
+      }
+    }
+  }
 };
 
 const closeMessageHistory = () => {
@@ -455,12 +484,14 @@ const changePayDataForAccounts = (item) => {
       ...instanceData.value[index],
       isPay: true,
     };
+    instancesStore.setInstances([...instanceData.value]);
 
     setTimeout(() => {
       instanceData.value[index] = {
         ...instanceData.value[index],
         isPay: false,
       };
+      instancesStore.setInstances([...instanceData.value]);
     }, 3000);
   }
 };
@@ -612,6 +643,8 @@ const changeForceStopItemData = async (item) => {
       loading: false,
     };
 
+    instancesStore.updateInstanceByUuid(item.uuid, { step: currentStep, loading: false });
+
     if (currentStep.value === 5) {
       updateLocalStorage(item.login, item.source, item.storage, item.type);
     }
@@ -625,6 +658,7 @@ const changeForceStopItemData = async (item) => {
     );
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
+      instancesStore.updateInstanceByUuid(item.uuid, { loading: false });
     }
   }
 };
@@ -761,6 +795,44 @@ const handleSendLog = async (location, method, params, results, answer) => {
   }
 };
 
+// Применяет текущее состояние фильтров из accountStore к allInstances без API-запроса
+const filterInstances = () => {
+  if (!instancesStore.hasAllInstances) return;
+
+  const sources = sourceGroup.value;
+  const types = typeGroup.value;
+  const showDeleted = addDeleted.value;
+
+  const messengerSources = ["telegram", "whatsapp", "max", "vk-bot"];
+
+  const filtered = instancesStore.allInstances.filter((inst) => {
+    // Фильтр удалённых аккаунтов
+    if (!showDeleted && inst.deleted) return false;
+
+    // Если все фильтры сброшены — показываем всё
+    if (sources.length === 0 && types.length === 0) return true;
+
+    // Мессенджеры фильтруются ТОЛЬКО по source, не по type
+    if (messengerSources.includes(inst.source)) {
+      return sources.includes(inst.source);
+    }
+
+    // Остальные аккаунты (SMS, Email, CRM): по source или type
+    if (sources.length > 0 && sources.includes(inst.source)) return true;
+
+    // Соответствие по type (SMS → touchapi, Email → adapter, CRM-типы)
+    if (types.length > 0 && types.includes(inst.type)) return true;
+
+    return false;
+  });
+
+  instanceData.value = filtered.map((inst) => ({ ...inst }));
+  instancesStore.setInstances([...instanceData.value]);
+
+  dataStation.value = instanceData.value.length > 0;
+  dataStationNone.value = instanceData.value.length === 0;
+};
+
 const getAccounts = async () => {
   console.log("🔄 AccountList: начало загрузки");
 
@@ -787,20 +859,22 @@ const getAccounts = async () => {
     console.debug(typeGroup.value, "typeGroup");
 
     if (stationDomain.navigate.value === "touchapi") {
+      // Fetch ALL accounts — client-side filtering applied afterwards
       params = {
-        source: sourceGroup.value,
-        type: typeGroup.value,
-        group: allGroup.value,
-        add_deleted: addDeleted.value,
+        source: ["telegram", "whatsapp", "max", "vk-bot", "sms", "email"],
+        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
+        group: ["messenger", "crm", "bulk"],
+        add_deleted: true,
       };
     }
 
     if (stationDomain.navigate.value === "whatsapi") {
+      // Fetch ALL accounts — client-side filtering applied afterwards
       params = {
-        source: sourceGroup.value,
-        type: typeGroup.value,
-        group: allGroup.value,
-        add_deleted: addDeleted.value,
+        source: ["telegram", "whatsapp", "max", "vk-bot", "sms", "email"],
+        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
+        group: ["messenger", "crm", "bulk"],
+        add_deleted: true,
       };
     }
 
@@ -918,6 +992,10 @@ const getAccounts = async () => {
               instance.loading = false;
             });
           }
+
+          // Сохраняем все аккаунты в стор, затем применяем фильтры на клиенте
+          instancesStore.setAllInstances([...instanceData.value]);
+          filterInstances();
         }
       }
     } catch (error) {
@@ -937,12 +1015,22 @@ const getAccounts = async () => {
 
 onMounted(async () => {
   await chatStore.init();
+
+  // Если в сторе уже есть свежие данные — применяем фильтры клиентски, без API-запроса
+  if (instancesStore.hasAllInstances && instancesStore.isCacheFresh) {
+    console.log("📦 AccountList: берём аккаунты из стора, применяем фильтры:", instancesStore.allInstances.length);
+    filterInstances();
+    loadDataStation.value = false;
+    return;
+  }
+
   await getAccounts();
 });
 
 defineExpose({
   getAccounts,
   getAllAccounts,
+  filterInstances,
 });
 
 provide("selectedItems", { selectedItems });

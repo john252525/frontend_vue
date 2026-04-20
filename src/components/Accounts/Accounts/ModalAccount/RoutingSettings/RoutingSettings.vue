@@ -506,27 +506,32 @@ const saveMessengerRouting = async () => {
 // Реакции на изменения
 // ────────────────────────────────────────────────
 
-// При открытии модалки — загружаем справочники
+// При открытии модалки — загружаем справочники и текущие настройки
 watch(
   () => props.isOpen,
-  (isOpen) => {
+  async (isOpen) => {
     if (isOpen) {
       error.value = "";
       saveError.value = "";
       successMessage.value = "";
-      fetchOfficesAndManagers();
+      selectedVendor.value = props.item?.uuid || "";
+      selectedCompany.value = "";
+      selectedOffice.value = "";
+      selectedManager.value = "";
+      await fetchOfficesAndManagers();
+      await fetchCurrentSettings();
     }
   },
 );
 
-// Главная логика: реагируем на смену канала / item.uuid
+// Реагируем на смену аккаунта (uuid) только если модалка уже открыта
 watch(
   () => props.item?.uuid,
   async (newUuid, oldUuid) => {
-    if (!newUuid || newUuid === oldUuid) return;
+    if (!newUuid || newUuid === oldUuid || !props.isOpen) return;
 
     // Сбрасываем выборы при переключении на другой канал
-    selectedVendor.value = newUuid; // или props.item.uuid — в зависимости от логики VendorList
+    selectedVendor.value = newUuid;
     selectedCompany.value = "";
     selectedOffice.value = "";
     selectedManager.value = "";
@@ -537,7 +542,6 @@ watch(
     // 2. Загружаем сохранённые настройки именно этого канала
     await fetchCurrentSettings();
   },
-  { immediate: true }, // срабатывает сразу при монтировании
 );
 
 // Если выбрали офис — автоматически подставляем компанию (если ещё не выбрана)
