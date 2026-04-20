@@ -52,6 +52,7 @@
             :enableCheckbox="enableCheckbox"
             :changeEnableStartModal="changeEnableStartModal"
             :changeForceStopItemData="changeForceStopItemData"
+            @sms-auth-code="openSmsAuthModal"
           />
         </div>
 
@@ -319,7 +320,8 @@ const enableCheckbox = (item) => {
     item.source === "whatsapp" ||
     item.source === "telegram" ||
     item.source === "max" ||
-    item.source === "vk"
+    item.source === "vk" ||
+    item.source === "sms"
   ) {
     return item.step?.value === 5 || false;
   }

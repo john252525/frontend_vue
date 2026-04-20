@@ -9,6 +9,7 @@
           item.type === 'amocrm' ||
           item.type === 'bitrix24' ||
           item.type === 'uon' ||
+          item.source === 'email' ||
           item.loading
         "
         @click.prevent="changeSwitch(item)"
@@ -24,6 +25,7 @@
 <script setup>
 import axios from "axios";
 import { toRefs, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   item: {
@@ -40,7 +42,10 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["sms-auth-code"]);
+
 const { item } = toRefs(props);
+const router = useRouter();
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
@@ -52,11 +57,62 @@ import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 
 const changeSwitch = (account) => {
+  if (account.source === "sms") {
+    const newValue = !props.enableCheckbox(account);
+    setStateSms(newValue);
+    return;
+  }
+
   if (props.enableCheckbox(account)) {
     forceStop();
   } else {
     // item.value.loading = true;
     props.changeEnableStartModal(account, "accountList");
+  }
+};
+
+const setStateSms = async (value) => {
+  const { source, login } = item.value;
+  item.value.loading = true;
+
+  try {
+    const response = await axios.post(
+      `${FRONTEND_URL}setState`,
+      {
+        source: source,
+        login: login,
+        setState: value,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
+
+    if (response.data.ok === true) {
+      if (value === true && response.data.data?.auth_code) {
+        emit("sms-auth-code", response.data.data.auth_code);
+      } else {
+        setLoadingStatus(true, "success");
+      }
+    } else if (response.data === 401) {
+      setTimeout(() => {
+        localStorage.removeItem("accountToken");
+        router.push("/login");
+      }, 2000);
+    } else {
+      setLoadingStatus(true, "error");
+    }
+  } catch (error) {
+    setLoadingStatus(true, "error");
+    console.error("error", error);
+    if (error.response) {
+      console.error("error:", error.response.data);
+    }
+  } finally {
+    item.value.loading = false;
   }
 };
 

@@ -538,7 +538,7 @@
           v-for="field in getDynamicFields('group', 'email')"
           :key="field.id"
         >
-          <div v-if="field.name !== 'smtp_port'" class="form-field">
+          <div v-if="field.name !== 'smtp_port' && field.label !== 'Порт SMTP'" class="form-field">
             <label
               :class="`accounts-addAccounts-${field.name}-label`"
               :data-testid="`${field.name}-label`"
