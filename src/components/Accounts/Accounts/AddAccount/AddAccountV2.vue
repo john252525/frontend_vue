@@ -1137,15 +1137,30 @@ const submitForm = async () => {
       }
     });
   } else if (formValues.group === "email") {
-    const fields = getDynamicFields("group", "email");
-    fields.forEach((field) => {
-      const value = formValues["_email_" + field.id];
-      if (value) {
-        formData[field.name] = value;
+    const isKnownProvider = formValues.emailProvider && formValues.emailProvider !== "custom";
+
+    if (isKnownProvider) {
+      formData.emailProvider = formValues.emailProvider;
+      // smtp_server и smtp_port не передаём — бэкенд знает параметры провайдера
+      const fields = getDynamicFields("group", "email");
+      fields.forEach((field) => {
+        if (field.name === "smtp_server" || field.name === "smtp_port") return;
+        const value = formValues["_email_" + field.id];
+        if (value) {
+          formData[field.name] = value;
+        }
+      });
+    } else {
+      const fields = getDynamicFields("group", "email");
+      fields.forEach((field) => {
+        const value = formValues["_email_" + field.id];
+        if (value) {
+          formData[field.name] = value;
+        }
+      });
+      if (formValues.smtp_port) {
+        formData.smtp_port = parseInt(formValues.smtp_port, 10);
       }
-    });
-    if (formValues.smtp_port) {
-      formData.smtp_port = formValues.smtp_port;
     }
   }
 
