@@ -914,35 +914,51 @@ const isFormValid = computed(() => {
     if (!formValues.messenger) return false;
 
     const requiredFields = getDynamicFields("messenger", formValues.messenger);
-    return requiredFields.every((field) => {
-      return field.required ? !!formValues[field.name] : true;
-    });
+    for (const field of requiredFields) {
+      if (field.required && !formValues[field.name]) {
+        console.warn("[isFormValid] messenger: поле не заполнено", { name: field.name, value: formValues[field.name], field });
+        return false;
+      }
+    }
+    return true;
   }
 
   if (formValues.group === "crm") {
     if (!formValues.type) return false;
 
     const requiredFields = getDynamicFields("type", formValues.type);
-    return requiredFields.every((field) => {
-      return field.required ? !!formValues[field.name] : true;
-    });
+    for (const field of requiredFields) {
+      if (field.required && !formValues[field.name]) {
+        console.warn("[isFormValid] crm: поле не заполнено", { name: field.name, value: formValues[field.name], field });
+        return false;
+      }
+    }
+    return true;
   }
 
   if (formValues.group === "email") {
     const requiredFields = getDynamicFields("group", "email");
-    return requiredFields.every((field) => {
+    for (const field of requiredFields) {
       // smtp_port рендерится отдельным полем и хранится в formValues.smtp_port
-      if (field.name === "smtp_port") {
-        return !field.required || !!formValues.smtp_port;
+      if (field.name === "smtp_port" || field.label === "Порт SMTP") {
+        if (field.required && !formValues.smtp_port) {
+          console.warn("[isFormValid] email: smtp_port не заполнен", { field });
+          return false;
+        }
+        continue;
       }
       const isOptionalByHint =
         field.label?.toLowerCase().includes("необязательн") ||
         field.label?.toLowerCase().includes("оставьте пустым") ||
         field.placeholder?.toLowerCase().includes("необязательн") ||
         field.placeholder?.toLowerCase().includes("оставьте пустым");
-      if (!field.required || isOptionalByHint) return true;
-      return !!formValues["_email_" + field.id];
-    });
+      if (!field.required || isOptionalByHint) continue;
+      if (!formValues["_email_" + field.id]) {
+        console.warn("[isFormValid] email: поле не заполнено", { name: field.name, id: field.id, value: formValues["_email_" + field.id], field });
+        return false;
+      }
+    }
+    return true;
   }
 
   if (formValues.group === "sms") {
