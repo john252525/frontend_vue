@@ -62,7 +62,7 @@
         :customSources="customSources"
       />
 
-      <button class="action-button danger" @click="emitAction('delete')">
+      <button class="action-button danger" @click="showDeleteConfirm = true">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -80,14 +80,27 @@
       </button>
     </div>
   </div>
+
+  <ConfirmDelete
+    v-if="showDeleteConfirm"
+    :selected-item="accountData"
+    :close="onDeleteClose"
+  />
 </template>
 
 <script setup>
+import { ref } from "vue";
 import ConnectTelegram from "./uon/ConnectTelegram.vue";
 import ActionsButton from "./uon/ActionsButton.vue";
+import ConfirmDelete from "../../ModalAccount/ConfirmModal/ConfirmDelete.vue";
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
+
+import { useInstancesStore } from "@/stores/instancesStore";
+const instancesStore = useInstancesStore();
+
+const emit = defineEmits(["close"]);
 
 const props = defineProps({
   accountData: {
@@ -98,19 +111,15 @@ const props = defineProps({
   changeRoutingSettings: {
     type: Function,
   },
-
   openMessageHistory: {
     type: Function,
   },
-
   uonSettings: {
     type: Function,
   },
-
   blacklistModal: {
     type: Function,
   },
-
   changeStationGetHistory: {
     type: Function,
   },
@@ -118,6 +127,19 @@ const props = defineProps({
     type: Function,
   },
 });
+
+const showDeleteConfirm = ref(false);
+
+const onDeleteClose = () => {
+  showDeleteConfirm.value = false;
+  const { login, source } = props.accountData;
+  const stillExists = instancesStore.instances.some(
+    (acc) => acc.login === login && acc.source === source,
+  );
+  if (!stillExists) {
+    emit("close");
+  }
+};
 
 const formatDateTime = (dateString) => {
   if (!dateString) return "Не указано";

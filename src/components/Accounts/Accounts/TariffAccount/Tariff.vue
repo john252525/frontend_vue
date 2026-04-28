@@ -641,7 +641,25 @@ const VENDOR_PRICES = [
   { months: 12, price: 19990 },
 ];
 
+const SMS_BASE_PRICE = 490;
+const SMS_MONTHS = [1, 3, 6, 12];
+
+const isSmsSource = computed(() => selectedItem.value?.source === "sms");
+
 const vendorCards = computed(() => {
+  if (isSmsSource.value) {
+    return SMS_MONTHS.map((months) => {
+      const price = SMS_BASE_PRICE * months;
+      return {
+        months,
+        price,
+        monthlyPrice: SMS_BASE_PRICE,
+        savings: 0,
+        savingsPct: 0,
+      };
+    });
+  }
+
   const baseMonthly = 1900;
   return VENDOR_PRICES.map(({ months, price }) => {
     const fullPrice = baseMonthly * months;

@@ -223,7 +223,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, inject, computed, nextTick } from "vue";
+import { ref, reactive, onMounted, provide, inject, computed, nextTick, watch } from "vue";
 import { computePosition, flip, shift, offset } from "@floating-ui/dom";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -344,6 +344,18 @@ const customSourcesModal = ref(false);
 const emailSettingsValue = ref(false);
 const smsAuthCodeModal = ref(false);
 const smsAuthCode = ref("");
+
+// Синхронизируем локальный instanceData при удалении аккаунта из стора
+watch(
+  () => instancesStore.instances.length,
+  () => {
+    instanceData.value = instanceData.value.filter((acc) =>
+      instancesStore.instances.some(
+        (inst) => inst.login === acc.login && inst.source === acc.source,
+      ),
+    );
+  },
+);
 
 // ============= УТИЛИТЫ =============
 

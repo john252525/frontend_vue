@@ -152,7 +152,7 @@ const changeActiveTab = (value) => {
 
 const availableAccounts = computed(() => {
   return instancesStore.allInstances.filter((account) =>
-    ["whatsapp", "telegram", "vk-bot"].includes(account.source || account.type),
+    ["whatsapp", "telegram", "max", "vk-bot"].includes(account.source || account.type),
   );
 });
 

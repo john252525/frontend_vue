@@ -35,6 +35,7 @@
             :changeStationGetHistory="changeStationGetHistory"
             :account-data="accountData"
             :customSources="customSources"
+            @close="closeModal"
           />
         </div>
       </div>
