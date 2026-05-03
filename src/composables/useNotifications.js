@@ -78,9 +78,6 @@ export function useNotifications() {
         (n) => n.id !== String(id),
       );
       unreadCount.value = Math.max(0, unreadCount.value - 1);
-
-      const item = notifications.value.find((n) => n.id === String(id));
-      if (item) item.is_read = "1";
     } catch (err) {
       error.value = err.response?.data?.message || "Ошибка при отметке как прочитанное";
     }

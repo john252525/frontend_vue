@@ -223,7 +223,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, inject, computed, nextTick, watch } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  provide,
+  inject,
+  computed,
+  nextTick,
+  watch,
+} from "vue";
 import { computePosition, flip, shift, offset } from "@floating-ui/dom";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -424,11 +433,16 @@ const changeEditNameModal = () => {
   // При закрытии синхронизируем имя из стора в локальный instanceData
   if (wasOpen && selectedItem.value) {
     const { uuid } = selectedItem.value;
-    const storeAccount = instancesStore.instances.find((acc) => acc.uuid === uuid);
+    const storeAccount = instancesStore.instances.find(
+      (acc) => acc.uuid === uuid,
+    );
     if (storeAccount) {
       const idx = instanceData.value.findIndex((acc) => acc.uuid === uuid);
       if (idx !== -1) {
-        instanceData.value[idx] = { ...instanceData.value[idx], name: storeAccount.name };
+        instanceData.value[idx] = {
+          ...instanceData.value[idx],
+          name: storeAccount.name,
+        };
       }
     }
   }
@@ -655,7 +669,10 @@ const changeForceStopItemData = async (item) => {
       loading: false,
     };
 
-    instancesStore.updateInstanceByUuid(item.uuid, { step: currentStep, loading: false });
+    instancesStore.updateInstanceByUuid(item.uuid, {
+      step: currentStep,
+      loading: false,
+    });
 
     if (currentStep.value === 5) {
       updateLocalStorage(item.login, item.source, item.storage, item.type);
@@ -698,7 +715,6 @@ const getAllAccounts = () => {
   console.log("📦 getAllAccounts вызван, возвращаем:", instanceData.value);
   return instanceData.value;
 };
-
 
 const changeEnableStation = (item, locale) => {
   console.log("click changeEnableStation");
@@ -815,7 +831,14 @@ const filterInstances = () => {
   const types = typeGroup.value;
   const showDeleted = addDeleted.value;
 
-  const messengerSources = ["telegram", "whatsapp", "max", "vk-bot"];
+  const messengerSources = [
+    "telegram",
+    "whatsapp",
+    "max",
+    "max-bot",
+    "instagram",
+    "vk-bot",
+  ];
 
   const filtered = instancesStore.allInstances.filter((inst) => {
     // Фильтр удалённых аккаунтов
@@ -873,7 +896,16 @@ const getAccounts = async () => {
     if (stationDomain.navigate.value === "touchapi") {
       // Fetch ALL accounts — client-side filtering applied afterwards
       params = {
-        source: ["telegram", "whatsapp", "max", "vk-bot", "sms", "email"],
+        source: [
+          "telegram",
+          "whatsapp",
+          "max",
+          "vk-bot",
+          "max-bot",
+          "instagram",
+          "sms",
+          "email",
+        ],
         type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
         group: ["messenger", "crm", "bulk"],
         add_deleted: true,
@@ -883,7 +915,16 @@ const getAccounts = async () => {
     if (stationDomain.navigate.value === "whatsapi") {
       // Fetch ALL accounts — client-side filtering applied afterwards
       params = {
-        source: ["telegram", "whatsapp", "max", "vk-bot", "sms", "email"],
+        source: [
+          "telegram",
+          "whatsapp",
+          "max",
+          "vk-bot",
+          "max-bot",
+          "instagram",
+          "sms",
+          "email",
+        ],
         type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
         group: ["messenger", "crm", "bulk"],
         add_deleted: true,
@@ -1035,7 +1076,10 @@ onMounted(async () => {
 
   // Если в сторе уже есть свежие данные — применяем фильтры клиентски, без API-запроса
   if (instancesStore.hasAllInstances && instancesStore.isCacheFresh) {
-    console.log("📦 AccountList: берём аккаунты из стора, применяем фильтры:", instancesStore.allInstances.length);
+    console.log(
+      "📦 AccountList: берём аккаунты из стора, применяем фильтры:",
+      instancesStore.allInstances.length,
+    );
     filterInstances();
     loadDataStation.value = false;
     return;

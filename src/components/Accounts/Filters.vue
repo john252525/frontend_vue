@@ -178,6 +178,16 @@ const items = reactive([
     checked: accountStore.filterState.max,
   },
   {
+    id: "max-bot",
+    name: "Max-Бот",
+    checked: accountStore.filterState["max-bot"],
+  },
+  {
+    id: "instagram",
+    name: "Instagram",
+    checked: accountStore.filterState.instagram,
+  },
+  {
     id: "vk-bot",
     name: "VK",
     checked: accountStore.filterState.vk,
@@ -267,7 +277,7 @@ const updateSources = () => {
 const updateGroups = () => {
   const messengerSelected = visibleItems.value.some(
     (item) =>
-      (item.id === "telegram" || item.id === "whatsapp") && item.checked,
+      (item.id === "telegram" || item.id === "whatsapp" || item.id === "max" || item.id === "max-bot" || item.id === "instagram") && item.checked,
   );
   const crmSelected =
     visibleItems.value.find((item) => item.id === "crm")?.checked || false;
@@ -305,6 +315,10 @@ const updateFilterState = () => {
   const newFilterState = {
     telegram: items.find((i) => i.id === "telegram")?.checked || false,
     whatsapp: items.find((i) => i.id === "whatsapp")?.checked || false,
+    max: items.find((i) => i.id === "max")?.checked || false,
+    "max-bot": items.find((i) => i.id === "max-bot")?.checked || false,
+    instagram: items.find((i) => i.id === "instagram")?.checked || false,
+    vk: items.find((i) => i.id === "vk-bot")?.checked || false,
     sms: items.find((i) => i.id === "sms")?.checked || false,
     email: items.find((i) => i.id === "email")?.checked || false,
     crm: items.find((i) => i.id === "crm")?.checked || false,

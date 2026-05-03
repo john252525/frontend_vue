@@ -243,7 +243,7 @@ const DeletedBadge = {
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 540px;
 }
 
 .table-header {

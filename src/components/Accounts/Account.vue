@@ -330,6 +330,17 @@ header {
   /* margin: 18px 12px 18px 18px; */
 }
 
+@media (max-width: 1100px) {
+  header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .account-section:last-child {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 768px) {
   .crm-list {
     left: 120px;

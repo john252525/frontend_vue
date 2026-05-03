@@ -48,10 +48,7 @@
         <template v-else>
           <span
             class="action"
-            v-if="
-              !['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type) &&
-              selectedItem.source != 'sms'
-            "
+            v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             @click="openTariff"
             >Подписка</span
           >

@@ -17,6 +17,16 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "max-bot",
+        name: "Max-Бот",
+        enabled: true,
+      },
+      {
+        id: "instagram",
+        name: "Instagram",
+        enabled: true,
+      },
+      {
         id: "vk",
         name: "VK",
         enabled: true,
@@ -65,6 +75,16 @@ export const FILTER_CONFIG = {
       {
         id: "max",
         name: "Max",
+        enabled: true,
+      },
+      {
+        id: "max-bot",
+        name: "Max-Бот",
+        enabled: true,
+      },
+      {
+        id: "instagram",
+        name: "Instagram",
         enabled: true,
       },
       {

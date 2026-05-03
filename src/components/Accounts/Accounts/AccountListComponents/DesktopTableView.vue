@@ -10,24 +10,43 @@
         :style="item.enable === '0' ? 'cursor: default' : 'cursor: pointer'"
       >
         <div class="row-section section-identity">
-          <div class="account-icon-wrapper" :class="{ 'icon-deleted': item.enable === '0' }">
+          <div
+            class="account-icon-wrapper"
+            :class="{ 'icon-deleted': item.enable === '0' }"
+          >
             <AccountIcon :item="item" class="account-icon-large" />
             <div v-if="item.enable === '0'" class="deleted-badge-icon">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                />
               </svg>
             </div>
           </div>
 
           <div class="identity-info">
-            <span v-if="item.name" class="account-name" :class="{ 'text-deleted': item.enable === '0' }">{{ item.name }}</span>
-            <span v-else class="account-login" :class="{ 'text-deleted': item.enable === '0' }">{{ item.login }}</span>
+            <span
+              v-if="item.name"
+              class="account-name"
+              :class="{ 'text-deleted': item.enable === '0' }"
+              >{{ item.name }}</span
+            >
+            <span
+              v-else
+              class="account-login"
+              :class="{ 'text-deleted': item.enable === '0' }"
+              >{{ item.login }}</span
+            >
 
-            <span v-if="item.type != 'undefined'" class="account-type">
-              {{ getType(item.type) }}
-            </span>
-            <span v-else class="account-type">
-              {{ getType(item.source) }}
+            <span class="account-type">
+              {{ getDisplayType(item) }}
             </span>
           </div>
 
@@ -328,6 +347,8 @@ const enableCheckbox = (item) => {
     item.source === "whatsapp" ||
     item.source === "telegram" ||
     item.source === "max" ||
+    item.source === "max-bot" ||
+    item.source === "instagram" ||
     item.source === "vk" ||
     item.source === "sms"
   ) {
@@ -362,13 +383,26 @@ function getType(type) {
       return "WhatsApp";
     case "max":
       return "Max";
+    case "max-bot":
+      return "Max-Бот";
+    case "instagram":
+      return "Instagram";
     case "uon":
       return "U-ON";
     case "vk-bot":
       return "Вконтакте";
+    case "email":
+      return "Email";
     default:
       return type;
   }
+}
+
+function getDisplayType(item) {
+  if (item.type === "adapter" || item.type === "undefined") {
+    return getType(item.source);
+  }
+  return getType(item.type);
 }
 
 const showSubscriptionWarning = (item) => {
@@ -539,7 +573,7 @@ const emailSettings = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .text-deleted {

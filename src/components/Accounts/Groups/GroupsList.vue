@@ -76,6 +76,23 @@
           </span>
         </div>
 
+        <div v-if="getCascadeSettings(group).cascade.length > 1" class="cascade-flow">
+          <span class="cascade-flow-title">Каскад:</span>
+          <template v-for="(source, i) in getCascadeSettings(group).cascade" :key="source">
+            <span class="cascade-flow-badge" :class="`vendor-${source}`">
+              {{ getSourceLabel(source) }}
+            </span>
+            <span v-if="i < getCascadeSettings(group).cascade.length - 1" class="cascade-flow-arrow">
+              →
+              <span
+                v-if="formatInterval(getCascadeSettings(group).intervals[i])"
+                class="cascade-flow-interval"
+                :title="`Ожидание ${formatInterval(getCascadeSettings(group).intervals[i])} перед переключением на следующий канал`"
+              >{{ formatInterval(getCascadeSettings(group).intervals[i]) }}</span>
+            </span>
+          </template>
+        </div>
+
         <div class="vendors-list">
           <div
             v-for="vendor in Object.values(group.vendors)"
@@ -258,6 +275,35 @@ const canAddVendor = (group) => {
     : ALL_KNOWN_SOURCES;
 
   return unlimitedSources.some((s) => !vendorSources.includes(s));
+};
+
+const getCascadeSettings = (group) => {
+  try {
+    const settings =
+      typeof group.settings === "string"
+        ? JSON.parse(group.settings)
+        : group.settings || {};
+    return {
+      cascade: settings.cascade || [],
+      intervals: settings.cascade_intervals || [],
+    };
+  } catch {
+    return { cascade: [], intervals: [] };
+  }
+};
+
+const getSourceLabel = (source) => {
+  const labels = { telegram: "TG", whatsapp: "WA", max: "Max", sms: "SMS", email: "Mail" };
+  return labels[source] || source.toUpperCase();
+};
+
+const formatInterval = (seconds) => {
+  if (!seconds) return null;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins > 0 && secs > 0) return `${mins}м ${secs}с`;
+  if (mins > 0) return `${mins}м`;
+  return `${secs}с`;
 };
 
 const formatSubscriptionDate = (dateStr) => {
@@ -666,6 +712,50 @@ onMounted(async () => {
 
 .subscription-channels {
   color: #047857;
+}
+
+.cascade-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 11px;
+}
+
+.cascade-flow-title {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+.cascade-flow-badge {
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.cascade-flow-arrow {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cascade-flow-interval {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: default;
 }
 
 .vendors-list {
