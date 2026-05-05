@@ -1043,4 +1043,5 @@ input:checked + .slider .switch-handle {
     padding-top: 0;
   }
 }
+
 </style>

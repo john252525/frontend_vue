@@ -47,6 +47,12 @@
         <!-- Для активных аккаунтов показываем полный список действий -->
         <template v-else>
           <span
+            v-if="selectedItem.source === 'instagram'"
+            class="action"
+            @click="props.openInstagramAuthModal?.(); props.closeModal();"
+            >Подключить</span
+          >
+          <span
             class="action"
             v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             @click="openTariff"
@@ -106,7 +112,7 @@
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
-              ) && selectedItem.source != 'sms'
+              ) && selectedItem.source != 'sms' && selectedItem.source != 'instagram'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -117,7 +123,7 @@
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
-              ) && selectedItem.source != 'sms'
+              ) && selectedItem.source != 'sms' && selectedItem.source != 'instagram'
             "
             class="action"
             @click="forceStopActive"
@@ -381,6 +387,9 @@ const props = defineProps({
     type: Function,
   },
   openCustomSourcesModal: {
+    type: Function,
+  },
+  openInstagramAuthModal: {
     type: Function,
   },
 });
@@ -1381,6 +1390,7 @@ const DeletedBadge = {
 .action-on:hover {
   color: green;
 }
+
 
 .action-throw:hover,
 .action-delete:hover {

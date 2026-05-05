@@ -101,6 +101,7 @@
       :openDeleteAccountModal="openDeleteAccountModal"
       :openCustomSourcesModal="openCustomSourcesModal"
       :openEmailSettings="openEmailSettings"
+      :openInstagramAuthModal="openInstagramAuthModal"
     />
 
     <SettignsModal
@@ -219,6 +220,13 @@
       :item="selectedItem"
       :close="closeSmsAuthCodeModal"
     />
+
+    <InstagramAuthModal
+      v-if="instagramAuthModal && selectedItem"
+      :item="selectedItem"
+      :close="closeInstagramAuthModal"
+      :getAccounts="getAccounts"
+    />
   </section>
 </template>
 
@@ -264,6 +272,7 @@ import WarningAccount from "./WarningAccount.vue";
 import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSources.vue";
 import EmailSettings from "./ModalAccount/email/Settings.vue";
 import SmsAuthCodeModal from "./ModalAccount/Enable/SmsAuthCodeModal.vue";
+import InstagramAuthModal from "./ModalAccount/InstagramAuthModal.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -353,6 +362,7 @@ const customSourcesModal = ref(false);
 const emailSettingsValue = ref(false);
 const smsAuthCodeModal = ref(false);
 const smsAuthCode = ref("");
+const instagramAuthModal = ref(false);
 
 // Синхронизируем локальный instanceData при удалении аккаунта из стора
 watch(
@@ -380,6 +390,14 @@ const openSmsAuthCodeModal = (authCode) => {
 const closeSmsAuthCodeModal = () => {
   smsAuthCodeModal.value = false;
   smsAuthCode.value = "";
+};
+
+const openInstagramAuthModal = () => {
+  instagramAuthModal.value = true;
+};
+
+const closeInstagramAuthModal = () => {
+  instagramAuthModal.value = false;
 };
 
 const openEmailSettings = () => {

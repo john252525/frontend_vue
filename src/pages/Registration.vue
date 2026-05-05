@@ -168,21 +168,36 @@
       <div class="field" :class="{ 'has-error': fieldErrors.phone }">
         <label>{{ t("registration.phone") }}</label>
         <div class="phone-input" :class="{ 'input-error': fieldErrors.phone }">
-          <div class="country-prefix">
-            <img src="https://flagcdn.com/w20/ru.png" width="20" alt="RU" />
-            <span>+7</span>
+          <div class="country-prefix" @click.stop="countryDropdownOpen = !countryDropdownOpen">
+            <img :src="`https://flagcdn.com/w20/${selectedCountry.code}.png`" width="20" :alt="selectedCountry.code.toUpperCase()" />
+            <span>{{ selectedCountry.dial }}</span>
+            <span class="prefix-arrow"></span>
+            <div v-if="countryDropdownOpen" class="country-dropdown" @click.stop>
+              <input
+                class="country-search"
+                v-model="countrySearch"
+                placeholder="Поиск страны..."
+                @click.stop
+              />
+              <div class="country-list">
+                <div
+                  v-for="c in filteredCountries"
+                  :key="c.code + c.dial"
+                  class="country-option"
+                  :class="{ selected: c.code === selectedCountry.code && c.dial === selectedCountry.dial }"
+                  @click.stop="selectCountry(c)"
+                >
+                  <img :src="`https://flagcdn.com/w20/${c.code}.png`" width="18" :alt="c.code" />
+                  <span class="country-option-name">{{ c.name }}</span>
+                  <span class="country-option-dial">{{ c.dial }}</span>
+                </div>
+              </div>
+            </div>
           </div>
           <input
             type="tel"
-            v-model="phoneFormatter.state.phoneNumber"
-            @input="phoneFormatter.formatPhone"
-            @keydown.delete="phoneFormatter.handleBackspace"
-            :placeholder="
-              phoneFormatter.state.showMask
-                ? '(___) ___-__-__'
-                : t('registration.phonePlaceholder')
-            "
-            :ref="(el) => (phoneFormatter.phoneInput.value = el)"
+            v-model="localPhone"
+            placeholder="Номер телефона"
             required
             :disabled="loading"
             @blur="touch('phone')"
@@ -352,7 +367,6 @@ import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useDomain } from "@/composables/getDomain";
 import useFrontendLogger from "@/composables/useFrontendLogger";
-import { usePhoneFormatter } from "@/composables/usePhoneFormatter";
 
 const { t } = useI18n();
 const { sendLog } = useFrontendLogger();
@@ -370,7 +384,81 @@ const countdown = ref(5);
 const redirectInterval = ref(null);
 const submitted = ref(false);
 
-const phoneFormatter = usePhoneFormatter();
+const localPhone = ref("");
+const countryDropdownOpen = ref(false);
+const countrySearch = ref("");
+
+const countries = [
+  { name: "Россия", code: "ru", dial: "+7" },
+  { name: "Казахстан", code: "kz", dial: "+7" },
+  { name: "Беларусь", code: "by", dial: "+375" },
+  { name: "Украина", code: "ua", dial: "+380" },
+  { name: "Узбекистан", code: "uz", dial: "+998" },
+  { name: "Азербайджан", code: "az", dial: "+994" },
+  { name: "Армения", code: "am", dial: "+374" },
+  { name: "Грузия", code: "ge", dial: "+995" },
+  { name: "Кыргызстан", code: "kg", dial: "+996" },
+  { name: "Таджикистан", code: "tj", dial: "+992" },
+  { name: "Туркменистан", code: "tm", dial: "+993" },
+  { name: "Молдова", code: "md", dial: "+373" },
+  { name: "Литва", code: "lt", dial: "+370" },
+  { name: "Латвия", code: "lv", dial: "+371" },
+  { name: "Эстония", code: "ee", dial: "+372" },
+  { name: "Польша", code: "pl", dial: "+48" },
+  { name: "Германия", code: "de", dial: "+49" },
+  { name: "Франция", code: "fr", dial: "+33" },
+  { name: "Великобритания", code: "gb", dial: "+44" },
+  { name: "Италия", code: "it", dial: "+39" },
+  { name: "Испания", code: "es", dial: "+34" },
+  { name: "Нидерланды", code: "nl", dial: "+31" },
+  { name: "Австрия", code: "at", dial: "+43" },
+  { name: "Швейцария", code: "ch", dial: "+41" },
+  { name: "Швеция", code: "se", dial: "+46" },
+  { name: "Норвегия", code: "no", dial: "+47" },
+  { name: "Дания", code: "dk", dial: "+45" },
+  { name: "Финляндия", code: "fi", dial: "+358" },
+  { name: "Португалия", code: "pt", dial: "+351" },
+  { name: "Чехия", code: "cz", dial: "+420" },
+  { name: "Румыния", code: "ro", dial: "+40" },
+  { name: "Венгрия", code: "hu", dial: "+36" },
+  { name: "Болгария", code: "bg", dial: "+359" },
+  { name: "Сербия", code: "rs", dial: "+381" },
+  { name: "Хорватия", code: "hr", dial: "+385" },
+  { name: "Греция", code: "gr", dial: "+30" },
+  { name: "Турция", code: "tr", dial: "+90" },
+  { name: "Израиль", code: "il", dial: "+972" },
+  { name: "ОАЭ", code: "ae", dial: "+971" },
+  { name: "Египет", code: "eg", dial: "+20" },
+  { name: "Марокко", code: "ma", dial: "+212" },
+  { name: "Индия", code: "in", dial: "+91" },
+  { name: "Китай", code: "cn", dial: "+86" },
+  { name: "Япония", code: "jp", dial: "+81" },
+  { name: "Южная Корея", code: "kr", dial: "+82" },
+  { name: "Сингапур", code: "sg", dial: "+65" },
+  { name: "Таиланд", code: "th", dial: "+66" },
+  { name: "Вьетнам", code: "vn", dial: "+84" },
+  { name: "США", code: "us", dial: "+1" },
+  { name: "Канада", code: "ca", dial: "+1" },
+  { name: "Мексика", code: "mx", dial: "+52" },
+  { name: "Бразилия", code: "br", dial: "+55" },
+  { name: "Аргентина", code: "ar", dial: "+54" },
+  { name: "Австралия", code: "au", dial: "+61" },
+];
+
+const selectedCountry = ref(countries[0]);
+
+const filteredCountries = computed(() => {
+  const q = countrySearch.value.toLowerCase();
+  return q ? countries.filter((c) => c.name.toLowerCase().includes(q) || c.dial.includes(q)) : countries;
+});
+
+const selectCountry = (c) => {
+  selectedCountry.value = c;
+  countryDropdownOpen.value = false;
+  countrySearch.value = "";
+};
+
+const closeCountryDropdown = () => { countryDropdownOpen.value = false; };
 
 const touched = reactive({
   company_name: false,
@@ -446,11 +534,11 @@ const fieldErrors = computed(() => {
   }
 
   if (touched.phone) {
-    const digits = phoneFormatter.state.phoneNumber.replace(/\D/g, "");
+    const digits = localPhone.value.replace(/\D/g, "");
     if (!digits) {
       errors.phone = "Введите номер телефона";
-    } else if (digits.length !== 10) {
-      errors.phone = "Номер телефона должен содержать 10 цифр";
+    } else if (digits.length < 4) {
+      errors.phone = "Слишком короткий номер";
     }
   }
 
@@ -481,13 +569,15 @@ const selectValue = (type, val) => {
   formData[type] = val;
   activeSelect.value = null;
 };
-const closeSelects = () => {
+
+const closeAll = () => {
   activeSelect.value = null;
+  countryDropdownOpen.value = false;
 };
 
-onMounted(() => window.addEventListener("click", closeSelects));
+onMounted(() => window.addEventListener("click", closeAll));
 onUnmounted(() => {
-  window.removeEventListener("click", closeSelects);
+  window.removeEventListener("click", closeAll);
   if (redirectInterval.value) {
     clearInterval(redirectInterval.value);
     redirectInterval.value = null;
@@ -503,7 +593,7 @@ const isFormValid = computed(() => {
     formData.login &&
     formData.password.length >= 6 &&
     formData.password === formData.confirmPassword &&
-    phoneFormatter.state.phoneNumber.replace(/\D/g, "").length === 10 &&
+    localPhone.value.replace(/\D/g, "").length >= 4 &&
     formData.agreeTerms &&
     formData.agreePersonalData
   );
@@ -517,12 +607,11 @@ const handleSubmit = async () => {
   errorMessage.value = "";
 
   try {
-    const internationalPhone = phoneFormatter.getInternationalFormat();
     const requestData = {
       company_name: formData.company_name,
       contact_name: formData.contact_name,
       email: formData.login,
-      phone: "+7" + internationalPhone,
+      phone: selectedCountry.value.dial + localPhone.value.replace(/\D/g, ""),
       country: formData.country,
       ref_id: route.query.ref,
       password: formData.password,
@@ -558,7 +647,7 @@ const handleSubmit = async () => {
         "login",
         {
           username: formData.login,
-          phone: internationalPhone,
+          phone: requestData.phone,
           channels: formData.contact_preferred_channels,
         },
         response.data.ok,
@@ -716,7 +805,7 @@ input:disabled {
   display: flex;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   transition: 0.2s;
 }
 .phone-input:focus-within {
@@ -726,16 +815,90 @@ input:disabled {
 .country-prefix {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 14px;
+  gap: 6px;
+  padding: 0 10px;
   background: #f4f6f8;
   border-right: 1px solid var(--border-color);
+  border-radius: 8px 0 0 8px;
   font-size: 14px;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.country-prefix:hover {
+  background: #ebeef2;
+}
+.prefix-arrow {
+  border: solid var(--text-secondary);
+  border-width: 0 1.5px 1.5px 0;
+  display: inline-block;
+  padding: 2.5px;
+  transform: rotate(45deg);
+  margin-top: -2px;
 }
 .phone-input input {
   border: none;
   flex: 1;
   box-shadow: none;
+  border-radius: 0 8px 8px 0;
+  min-width: 0;
+}
+
+/* ДРОПДАУН СТРАН */
+.country-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 260px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow: hidden;
+}
+.country-search {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+.country-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.country-option:hover {
+  background: #f4f6f8;
+}
+.country-option.selected {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.country-option-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.country-option-dial {
+  color: var(--text-secondary);
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 /* МЕССЕНДЖЕРЫ */
