@@ -102,6 +102,7 @@
       :openCustomSourcesModal="openCustomSourcesModal"
       :openEmailSettings="openEmailSettings"
       :openInstagramAuthModal="openInstagramAuthModal"
+      :openMaxbotAuthModal="openMaxbotAuthModal"
     />
 
     <SettignsModal
@@ -227,6 +228,12 @@
       :close="closeInstagramAuthModal"
       :getAccounts="getAccounts"
     />
+
+    <EnableMaxBot
+      v-if="maxbotAuthModal"
+      :item="selectedItem"
+      :close="closeMaxbotAuthModal"
+    />
   </section>
 </template>
 
@@ -273,6 +280,7 @@ import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSo
 import EmailSettings from "./ModalAccount/email/Settings.vue";
 import SmsAuthCodeModal from "./ModalAccount/Enable/SmsAuthCodeModal.vue";
 import InstagramAuthModal from "./ModalAccount/InstagramAuthModal.vue";
+import EnableMaxBot from "./ModalAccount/Enable/EnableMaxBot.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -363,6 +371,7 @@ const emailSettingsValue = ref(false);
 const smsAuthCodeModal = ref(false);
 const smsAuthCode = ref("");
 const instagramAuthModal = ref(false);
+const maxbotAuthModal = ref(false);
 
 // Синхронизируем локальный instanceData при удалении аккаунта из стора
 watch(
@@ -380,6 +389,14 @@ watch(
 
 const closeEmailSettings = () => {
   emailSettingsValue.value = false;
+};
+
+const openMaxbotAuthModal = () => {
+  maxbotAuthModal.value = true;
+};
+
+const closeMaxbotAuthModal = () => {
+  maxbotAuthModal.value = false;
 };
 
 const openSmsAuthCodeModal = (authCode) => {

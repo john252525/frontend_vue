@@ -10,6 +10,7 @@
           item.type === 'bitrix24' ||
           item.type === 'uon' ||
           item.source === 'email' ||
+          item.source === 'max-bot' ||
           item.loading
         "
         @click.prevent="changeSwitch(item)"

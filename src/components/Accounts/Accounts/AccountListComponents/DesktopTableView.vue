@@ -103,7 +103,7 @@
             @mouseover="$emit('show-message', $event, item.step.message)"
             @mouseleave="$emit('hide-message')"
           >
-            <StatusBadge :status="item.step.value" type="account" />
+            <StatusBadge :status="item.source === 'max-bot' ? 5 : item.step.value" type="account" />
           </span>
           <span
             v-else-if="
@@ -352,6 +352,7 @@ const enableCheckbox = (item) => {
     item.source === "vk" ||
     item.source === "sms"
   ) {
+    if (item.source === 'max-bot') return item.step != null;
     return item.step?.value === 5 || false;
   }
 
@@ -414,7 +415,7 @@ const showSubscriptionWarning = (item) => {
 
   const noSubscription = item.subscription_dt_to === null;
 
-  const stepNotFinished = item.step?.value !== 5;
+  const stepNotFinished = item.source === 'max-bot' ? item.step == null : item.step?.value !== 5;
 
   return noSubscription && stepNotFinished;
 };

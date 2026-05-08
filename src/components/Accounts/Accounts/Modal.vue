@@ -49,7 +49,10 @@
           <span
             v-if="selectedItem.source === 'instagram'"
             class="action"
-            @click="props.openInstagramAuthModal?.(); props.closeModal();"
+            @click="
+              props.openInstagramAuthModal?.();
+              props.closeModal();
+            "
             >Подключить</span
           >
           <span
@@ -57,6 +60,12 @@
             v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             @click="openTariff"
             >Подписка</span
+          >
+          <span
+            v-if="selectedItem.source === 'max-bot'"
+            class="action action-on"
+            @click="openMaxbotAuthModal"
+            >{{ t("modalAccount.on") }}</span
           >
           <span
             v-if="selectedItem.source === 'sms'"
@@ -112,7 +121,10 @@
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
-              ) && selectedItem.source != 'sms' && selectedItem.source != 'instagram'
+              ) &&
+              selectedItem.source != 'sms' &&
+              selectedItem.source != 'instagram' &&
+              selectedItem.source != 'max-bot'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -123,7 +135,10 @@
             v-if="
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
-              ) && selectedItem.source != 'sms' && selectedItem.source != 'instagram'
+              ) &&
+              selectedItem.source != 'sms' &&
+              selectedItem.source != 'max-bot' &&
+              selectedItem.source != 'instagram'
             "
             class="action"
             @click="forceStopActive"
@@ -360,6 +375,9 @@ const props = defineProps({
     type: Function,
   },
   openSupport: {
+    type: Function,
+  },
+  openMaxbotAuthModal: {
     type: Function,
   },
   changeStationQrModal: {
@@ -1390,7 +1408,6 @@ const DeletedBadge = {
 .action-on:hover {
   color: green;
 }
-
 
 .action-throw:hover,
 .action-delete:hover {

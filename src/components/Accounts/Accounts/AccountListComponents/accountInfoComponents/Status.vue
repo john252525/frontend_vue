@@ -19,16 +19,14 @@
       <span class="status-label">Состояние:</span>
       <span
         class="status-value"
-        :class="getStatusClass(accountData.step?.value)"
+        :class="getStatusClass(effectiveStepValue)"
       >
-        {{ getStatusText(accountData.step?.value) }}
+        {{ getStatusText(effectiveStepValue) }}
       </span>
     </div>
     <div class="status-item">
       <span class="status-label">Сообщение:</span>
-      <span class="status-value-message">
-        {{ getMessageText(accountData.step?.value) }}
-      </span>
+      <span class="status-value-message">{{ getMessageText(effectiveStepValue) }}</span>
     </div>
     <div class="status-item" v-if="accountData.last_activity">
       <span class="status-label">Активность:</span>
@@ -42,10 +40,10 @@
       <button
         class="action-button"
         @click="changeStatus(accountData)"
-        :class="accountData.step?.value === 5 ? 'warning' : 'success'"
+        :class="isConnected ? 'warning' : 'success'"
       >
         <svg
-          v-if="accountData.step?.value != 5"
+          v-if="!isConnected"
           xmlns="http://www.w3.org/2000/svg"
           width="16"
           height="16"
@@ -74,7 +72,7 @@
             fill="cbd5e1"
           />
         </svg>
-        {{ accountData.step?.value === 5 ? "Выключить" : "Включить" }}
+        {{ isConnected ? "Выключить" : "Включить" }}
       </button>
 
       <button
@@ -220,6 +218,16 @@ const props = defineProps({
   },
 });
 
+const isConnected = computed(() => {
+  if (props.accountData.source === 'max-bot') return props.accountData.step != null;
+  return props.accountData.step?.value === 5;
+});
+
+const effectiveStepValue = computed(() => {
+  if (props.accountData.source === 'max-bot') return props.accountData.step != null ? 5 : null;
+  return props.accountData.step?.value ?? null;
+});
+
 const setStateSms = async (value) => {
   const { source, login } = props.accountData;
   props.setLoading && props.setLoading(true);
@@ -255,7 +263,7 @@ const setStateSms = async (value) => {
 
 const changeStatus = async (item) => {
   if (item.source != "sms") {
-    if (props.accountData.step?.value === 5) {
+    if (isConnected.value) {
       const result = await props.createRequest(item, "/forceStop");
 
       if (result === true) {
@@ -267,7 +275,7 @@ const changeStatus = async (item) => {
       return;
     }
   } else {
-    if (props.accountData.step?.value === 5) {
+    if (isConnected.value) {
       await setStateSms(false);
     } else {
       await setStateSms(true);
