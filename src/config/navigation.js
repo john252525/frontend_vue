@@ -3,14 +3,16 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useHelpModalStore } from "@/stores/helpModalStore"; // Импортируем стор напрямую
+import { useFeedbackModalStore } from "@/stores/feedbackModalStore";
 
 export const useNavigationConfig = () => {
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
 
-  // Инициализируем стор здесь
+  // Инициализируем сторы здесь
   const helpModalStore = useHelpModalStore();
+  const feedbackModalStore = useFeedbackModalStore();
 
   const isActive = (routeName) => {
     return route.name === routeName;
@@ -100,7 +102,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            feedbackModalStore.openModal();
           },
         },
         {
@@ -183,7 +185,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:hr@developtech.ru`, "_blank");
+            feedbackModalStore.openModal();
           },
         },
         // {
@@ -253,7 +255,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            feedbackModalStore.openModal();
           },
         },
         // {
@@ -323,7 +325,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            feedbackModalStore.openModal();
           },
         },
         // {
@@ -393,7 +395,7 @@ export const useNavigationConfig = () => {
     //           condition: true,
     //           isActive: computed(() => isActive("Support")),
     //           action: () => {
-    //             window.open(`mailto:support@${window.location.hostname}`, "_blank");
+    //             feedbackModalStore.openModal();
     //           },
     //         },
     //         {
@@ -483,7 +485,7 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Support")),
           action: () => {
-            window.open(`mailto:support@${window.location.hostname}`, "_blank");
+            feedbackModalStore.openModal();
           },
         },
         {

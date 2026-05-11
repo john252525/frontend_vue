@@ -5,6 +5,7 @@
 
   <div v-else class="app-wrapper">
     <HelpModal />
+    <FeedbackModal />
     <DownloadsBox />
 
     <Header
@@ -60,6 +61,7 @@ import Navigation from "./components/Navigation/Navigation.vue";
 import ResultModal from "./components/GlobalModal/ResutModal.vue";
 import DownloadsBox from "./components/GlobalModal/GlobalLoadingBlock/DownloadsBox.vue";
 import HelpModal from "./components/GlobalModal/HeplModal/HelpModal.vue";
+import FeedbackModal from "./components/GlobalModal/FeedbackModal/FeedbackModal.vue";
 
 import { useStationLoading } from "@/composables/useStationLoading";
 const { stationLoading, setLoadingStatus } = useStationLoading();
