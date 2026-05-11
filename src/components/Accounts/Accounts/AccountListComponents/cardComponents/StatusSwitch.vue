@@ -43,7 +43,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["sms-auth-code"]);
+const emit = defineEmits(["sms-auth-code", "instagram-auth"]);
 
 const { item } = toRefs(props);
 const router = useRouter();
@@ -64,10 +64,14 @@ const changeSwitch = (account) => {
     return;
   }
 
+  if (account.source === "instagram" && !props.enableCheckbox(account)) {
+    emit("instagram-auth", account);
+    return;
+  }
+
   if (props.enableCheckbox(account)) {
     forceStop();
   } else {
-    // item.value.loading = true;
     props.changeEnableStartModal(account, "accountList");
   }
 };

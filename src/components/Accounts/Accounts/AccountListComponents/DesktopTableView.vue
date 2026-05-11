@@ -80,6 +80,7 @@
             :changeEnableStartModal="changeEnableStartModal"
             :changeForceStopItemData="changeForceStopItemData"
             @sms-auth-code="openSmsAuthModal"
+          @instagram-auth="openInstagramAuthModal"
           />
         </div>
 
@@ -260,6 +261,12 @@
       :item="selectedAccount"
       :close="closeSmsAuthModal"
     />
+
+    <InstagramAuthModal
+      v-if="showInstagramAuthModal && instagramAuthItem"
+      :item="instagramAuthItem"
+      :close="closeInstagramAuthModal"
+    />
   </div>
 </template>
 
@@ -268,6 +275,7 @@ import AccountIcon from "../../AccountIcon.vue";
 import LoadingAccount from "../LoadingMoadal/LoadingAccount.vue";
 import AccountModal from "./AccountModal.vue";
 import SmsAuthCodeModal from "../ModalAccount/Enable/SmsAuthCodeModal.vue";
+import InstagramAuthModal from "../ModalAccount/InstagramAuthModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import StatusBadge from "../StatusBadge.vue";
 import { useI18n } from "vue-i18n";
@@ -316,6 +324,19 @@ const isModalVisible = ref(false);
 
 const showSmsAuthModal = ref(false);
 const smsAuthCode = ref("");
+
+const showInstagramAuthModal = ref(false);
+const instagramAuthItem = ref(null);
+
+const openInstagramAuthModal = (account) => {
+  instagramAuthItem.value = account;
+  showInstagramAuthModal.value = true;
+};
+
+const closeInstagramAuthModal = () => {
+  showInstagramAuthModal.value = false;
+  instagramAuthItem.value = null;
+};
 
 const openSmsAuthModal = (authCode) => {
   smsAuthCode.value = authCode;
