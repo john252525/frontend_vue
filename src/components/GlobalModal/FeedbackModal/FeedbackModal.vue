@@ -5,7 +5,7 @@
     :action="handleSubmit"
     :close="close"
     :isLoading="loading"
-    :isDisabled="!form.name || !form.phone || !!emailError"
+    :isDisabled="!form.name || !form.email || !!emailError"
   >
     <div class="feedback-body">
       <p class="subtitle">Оставьте заявку и мы свяжемся с вами</p>
@@ -24,7 +24,7 @@
         <input
           type="tel"
           v-model="form.phone"
-          placeholder="Номер телефона"
+          placeholder="Номер телефона (необязательно)"
           class="input-field"
           :disabled="loading"
         />
@@ -32,7 +32,7 @@
           <input
             type="email"
             v-model="form.email"
-            placeholder="Email (необязательно)"
+            placeholder="Email"
             class="input-field"
             :class="{ 'input-error': emailError }"
             :disabled="loading"
@@ -72,7 +72,7 @@ const form = reactive({ name: "", phone: "", email: "", question: "" });
 const emailError = ref("");
 
 const validateEmail = () => {
-  if (!form.email) { emailError.value = ""; return; }
+  if (!form.email) { emailError.value = "Введите email"; return; }
   emailError.value = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
     ? ""
     : "Введите корректный email";
