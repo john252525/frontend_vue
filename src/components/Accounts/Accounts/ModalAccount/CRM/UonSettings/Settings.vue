@@ -202,6 +202,28 @@
         </div>
 
         <div class="settings-section">
+          <h4 class="section-title">Сообщения</h4>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <span class="setting-label">Отправлять вложения файлами</span>
+              <p class="setting-description">
+                При включении вложения (фото, документы, голосовые) передаются в
+                CRM как файлы. При отключении - только как ссылки.
+              </p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                v-model="settinsOptions.message.use_content"
+                @change="handleUpdate"
+              />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <h4 class="section-title">Доступ менеджеров</h4>
           <div class="manager-info-box">
             <div class="info-row">

@@ -36,6 +36,7 @@ const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 const props = defineProps({
   item: { type: Object },
   close: { type: Function },
+  getInfo: { type: Function, default: null },
 });
 
 const apiKey = ref("");
@@ -51,6 +52,9 @@ const save = async () => {
         Authorization: `Bearer ${token.value}`,
       },
     });
+    if (props.getInfo) {
+      await props.getInfo();
+    }
   } catch (error) {
     console.error("error", error);
   } finally {

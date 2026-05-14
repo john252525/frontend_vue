@@ -233,6 +233,7 @@
       v-if="maxbotAuthModal"
       :item="selectedItem"
       :close="closeMaxbotAuthModal"
+      :getInfo="getInfo"
     />
   </section>
 </template>
@@ -653,6 +654,7 @@ const getInfoWhats = async (source, login, type, storage) => {
         storage: storage,
       },
       {
+        timeout: 15000,
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           Authorization: `Bearer ${token.value}`,
@@ -1046,6 +1048,7 @@ const getAccounts = async () => {
                   instance.type === "uon"
                 ) {
                   instance.loading = false;
+                  instancesStore.updateInstanceByUuid(instance.uuid, { loading: false });
                   return;
                 }
 
@@ -1056,6 +1059,7 @@ const getAccounts = async () => {
                     instance.type === "whatsapi")
                 ) {
                   instance.loading = false;
+                  instancesStore.updateInstanceByUuid(instance.uuid, { loading: false });
                   return;
                 }
 
@@ -1074,6 +1078,10 @@ const getAccounts = async () => {
                   console.error(`Error for ${instance.login}:`, error);
                 } finally {
                   instance.loading = false;
+                  instancesStore.updateInstanceByUuid(instance.uuid, {
+                    loading: false,
+                    step: instance.step,
+                  });
                 }
               });
 
@@ -1088,6 +1096,8 @@ const getAccounts = async () => {
             instanceData.value.forEach((instance) => {
               instance.loading = false;
             });
+            instancesStore.setAllInstances([...instanceData.value]);
+            filterInstances();
           }
         }
       }

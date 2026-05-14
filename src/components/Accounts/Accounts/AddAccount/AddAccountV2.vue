@@ -550,11 +550,18 @@
               :type="field.type || 'text'"
               :placeholder="field.placeholder"
               :required="field.required"
-              :class="`accounts-addAccounts-${field.name}-input`"
+              :class="[`accounts-addAccounts-${field.name}-input`, { 'input-error': EMAIL_FIELD_ERRORS['_email_' + field.id] }]"
               :data-testid="`${field.name}-input-${field.id}`"
+              @input="validateEmailField(field, $event.target.value)"
             />
             <p
-              v-if="field.hint"
+              v-if="EMAIL_FIELD_ERRORS['_email_' + field.id]"
+              class="field-error"
+            >
+              {{ EMAIL_FIELD_ERRORS['_email_' + field.id] }}
+            </p>
+            <p
+              v-else-if="field.hint"
               class="field-hint"
               :data-testid="`${field.name}-hint`"
             >
@@ -574,9 +581,11 @@
             v-model="formValues.smtp_port"
             type="number"
             placeholder="465"
-            class="accounts-addAccounts-smtp_port-input"
+            :class="['accounts-addAccounts-smtp_port-input', { 'input-error': smtpPortError }]"
             data-testid="smtp_port-input"
+            @input="validateSmtpPort"
           />
+          <p v-if="smtpPortError" class="field-error">{{ smtpPortError }}</p>
         </div>
       </template>
 
@@ -711,6 +720,41 @@ const EMAIL_PROVIDERS = [
   { value: "rambler", text: "Rambler",          smtp_server: "smtp.rambler.ru",   smtp_port: "465" },
   { value: "custom",  text: "Другой (вручную)", smtp_server: "",                  smtp_port: ""    },
 ];
+
+const EMAIL_FIELD_ERRORS = reactive({});
+const smtpPortError = ref(null);
+
+const FIELD_VALIDATION = {
+  email:       { re: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,  msg: "Введите корректный email" },
+  username:    { re: /^[a-zA-Z0-9_-]+$/,             msg: "Только латинские буквы, цифры, _ и -" },
+  smtp_server: { re: /^[a-zA-Z0-9.-]+$/,             msg: "Только латинские буквы, точки и -" },
+};
+
+const getFieldError = (field, value) => {
+  if (!value) return null;
+  const type =
+    field.type === "email" || field.name === "email" ? "email"
+    : field.name === "username" || field.name === "login" ? "username"
+    : field.name === "smtp_server" ? "smtp_server"
+    : null;
+  if (!type) return null;
+  const rule = FIELD_VALIDATION[type];
+  return rule.re.test(value) ? null : rule.msg;
+};
+
+const validateEmailField = (field, value) => {
+  EMAIL_FIELD_ERRORS["_email_" + field.id] = getFieldError(field, value);
+};
+
+const validateSmtpPort = () => {
+  const val = formValues.smtp_port;
+  if (!val) { smtpPortError.value = null; return; }
+  const num = Number(val);
+  smtpPortError.value =
+    Number.isInteger(num) && num >= 1 && num <= 65535
+      ? null
+      : "Введите корректный порт (1–65535)";
+};
 
 const smsDisclaimerAccepted = ref(false);
 
@@ -957,6 +1001,9 @@ const isFormValid = computed(() => {
         console.warn("[isFormValid] email: поле не заполнено", { name: field.name, id: field.id, value: formValues["_email_" + field.id], field });
         return false;
       }
+    }
+    if (Object.values(EMAIL_FIELD_ERRORS).some((e) => e) || smtpPortError.value) {
+      return false;
     }
     return true;
   }
@@ -1494,6 +1541,21 @@ const submitForm = async () => {
   font-size: 0.8rem;
   color: #6b7280;
   font-style: italic;
+}
+
+.field-error {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #ef4444;
+}
+
+.form-field input.input-error {
+  border-color: #ef4444;
+}
+
+.form-field input.input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 /* Info message */
