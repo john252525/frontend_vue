@@ -79,7 +79,9 @@ const showNoAccountsModal = ref(false);
 
 const filteredAccounts = computed(() => {
   return props.availableAccounts.filter((account) =>
-    ["whatsapp", "telegram", "max"].includes(account.source || account.type),
+    ["whatsapp", "telegram", "max", "sms", "max-bot"].includes(
+      account.source || account.type,
+    ),
   );
 });
 

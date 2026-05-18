@@ -647,10 +647,14 @@ const SMS_MONTHS = [1, 3, 6, 12];
 const INSTAGRAM_BASE_PRICE = 790;
 const INSTAGRAM_MONTHS = [1, 3, 6, 12];
 
+const EMAIL_BASE_PRICE = 490;
+const EMAIL_MONTHS = [1, 3, 6, 12];
+
 const isSmsSource = computed(() => selectedItem.value?.source === "sms");
 const isInstagramSource = computed(() =>
   selectedItem.value?.source === "instagram" || selectedItem.value?.source === "max-bot"
 );
+const isEmailSource = computed(() => selectedItem.value?.source === "email");
 
 const vendorCards = computed(() => {
   if (isSmsSource.value) {
@@ -673,6 +677,19 @@ const vendorCards = computed(() => {
         months,
         price,
         monthlyPrice: INSTAGRAM_BASE_PRICE,
+        savings: 0,
+        savingsPct: 0,
+      };
+    });
+  }
+
+  if (isEmailSource.value) {
+    return EMAIL_MONTHS.map((months) => {
+      const price = EMAIL_BASE_PRICE * months;
+      return {
+        months,
+        price,
+        monthlyPrice: EMAIL_BASE_PRICE,
         savings: 0,
         savingsPct: 0,
       };
