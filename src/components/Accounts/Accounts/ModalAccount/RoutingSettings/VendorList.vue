@@ -41,7 +41,7 @@
             width="26"
             height="26"
             viewBox="0 0 24 24"
-            v-if="item.source === 'vk-bot'"
+            v-else-if="item.source === 'vk-bot'"
           >
             <g fill="none" fill-rule="evenodd">
               <path
