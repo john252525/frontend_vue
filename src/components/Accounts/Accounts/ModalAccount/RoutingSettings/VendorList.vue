@@ -23,10 +23,7 @@
           </svg>
           <svg
             v-else-if="item.source === 'max'"
-            width="20"
-            height="20"
             viewBox="0 0 765 761"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -47,7 +44,7 @@
             />
           </svg>
           <svg
-            v-else
+            v-else-if="item.source === 'whatsapp'"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
           >
