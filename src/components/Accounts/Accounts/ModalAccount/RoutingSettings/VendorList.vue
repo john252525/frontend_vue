@@ -93,6 +93,8 @@ function getSource(source) {
       return "WhatsApp";
     case "max":
       return "Max";
+    case "vk-bot":
+      return "Вконтакте";
     default:
       return "Неизвестно";
   }
@@ -106,7 +108,8 @@ onMounted(async () => {
       (acc) =>
         acc.source === "whatsapp" ||
         acc.source === "telegram" ||
-        acc.source === "max"
+        acc.source === "max" ||
+        acc.source === "vk-bot",
     );
     console.log("✅ Отфильтровано аккаунтов:", filtered.length, filtered);
     availableAccounts.value = filtered;
