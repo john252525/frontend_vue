@@ -27,14 +27,11 @@
         getMessageText(effectiveStepValue)
       }}</span>
     </div>
-    <div class="status-item">
-      <span class="status-label">Подключенный телефон:</span>
-      <span
-        v-if="accountData.connectedPhone != ''"
-        class="status-value-message"
-        >{{ accountData.connectedPhone }}</span
-      >
-      <span v-else class="status-value-message">-</span>
+    <div class="status-item" v-if="accountData.last_activity">
+      <span class="status-label">Активность:</span>
+      <span class="status-value">{{
+        formatDateTime(accountData.last_activity)
+      }}</span>
     </div>
   </div>
   <div class="action-section">
@@ -221,105 +218,6 @@ const props = defineProps({
     default: null,
   },
 });
-
-const isConnected = computed(() => {
-  if (props.accountData.source === "max-bot")
-    return props.accountData.step != null;
-  return props.accountData.step?.value === 5;
-});
-
-const effectiveStepValue = computed(() => {
-  if (props.accountData.source === "max-bot")
-    return props.accountData.step != null ? 5 : null;
-  return props.accountData.step?.value ?? null;
-});
-
-const setStateSms = async (value) => {
-  const { source, login } = props.accountData;
-  props.setLoading && props.setLoading(true);
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}setState`,
-      { source, login, setState: value },
-      {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      },
-    );
-
-    if (response.data.ok === true) {
-      if (value === true && response.data.data?.auth_code) {
-        props.openSmsAuthModal &&
-          props.openSmsAuthModal(response.data.data.auth_code);
-      } else {
-        props.setLoading && props.setLoading(false);
-        setLoadingStatus(true, "success");
-      }
-    } else {
-      props.setLoading && props.setLoading(false);
-      setLoadingStatus(true, "error");
-    }
-  } catch (error) {
-    props.setLoading && props.setLoading(false);
-    setLoadingStatus(true, "error");
-    console.error("error", error);
-  }
-};
-
-const changeStatus = async (item) => {
-  if (item.source != "sms") {
-    if (isConnected.value) {
-      const result = await props.createRequest(item, "/forceStop");
-
-      if (result === true) {
-        console.log("success force");
-        props.changeForceStopItemData(item);
-        props.accountData.step = null;
-      }
-    } else {
-      return;
-    }
-  } else {
-    if (isConnected.value) {
-      await setStateSms(false);
-    } else {
-      await setStateSms(true);
-    }
-  }
-};
-
-const getStatusClass = (status) => {
-  switch (status) {
-    case 5:
-      return "status-online";
-    default:
-      return "status-error";
-  }
-};
-
-const getStatusText = (status) => {
-  switch (status) {
-    case 5:
-      return "Активен";
-    default:
-      return "Неактивен";
-  }
-};
-
-const getMessageText = (status) => {
-  switch (status) {
-    case 5:
-      return "Аккаунт готов к использованию";
-    case 2.2:
-      return "Требуется авторизация по QR-коду";
-    case 2.22:
-      return "Требуется авторизация по коду";
-    default:
-      return "Требуется авторизация";
-  }
-};
 </script>
 
 <style scoped>

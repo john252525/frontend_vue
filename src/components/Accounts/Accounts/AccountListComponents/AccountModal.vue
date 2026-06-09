@@ -143,6 +143,7 @@ const getAccessToStatus = computed(() => {
   return (
     accountData.value.source === "whatsapp" ||
     accountData.value.source === "telegram" ||
+    accountData.value.source === "instagram" ||
     accountData.value.source === "max" ||
     accountData.value.source === "vk" ||
     accountData.value.source === "sms" ||
@@ -153,6 +154,7 @@ const getAccessToStatus = computed(() => {
 const getAccessToAccount = computed(() => {
   return (
     accountData.value.source !== "whatsapp" &&
+    accountData.value.source !== "instagram" &&
     accountData.value.source !== "telegram" &&
     accountData.value.source !== "max" &&
     accountData.value.source !== "vk" &&

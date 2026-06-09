@@ -20,6 +20,7 @@
       :changeStationGetHistory="changeStationGetHistory"
       :openCustomSourcesModal="openCustomSourcesModal"
       :openEmailSettings="openEmailSettings"
+      :retryGetInfo="retryGetInfo"
       @show-message="showMessage"
       @hide-message="hideMessage"
       @change-tariff="changeTariffStation"
@@ -695,9 +696,13 @@ const changeForceStopItemData = async (item) => {
 
     const currentStep = infoResponse.data.step || { value: "-", message: "" };
 
+    const connectedPhone = infoResponse.data.connectedPhone || "";
+
     instanceData.value[accountIndex] = {
       ...instanceData.value[accountIndex],
       step: currentStep,
+      connectedPhone,
+      getInfoError: false,
       loading: false,
     };
 
@@ -708,6 +713,8 @@ const changeForceStopItemData = async (item) => {
 
     instancesStore.updateInstanceByUuid(item.uuid, {
       step: currentStep,
+      connectedPhone,
+      getInfoError: false,
       loading: false,
     });
 
@@ -724,8 +731,54 @@ const changeForceStopItemData = async (item) => {
     );
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
-      instancesStore.updateInstanceByUuid(item.uuid, { loading: false });
+      instanceData.value[accountIndex].getInfoError = true;
+      instancesStore.updateInstanceByUuid(item.uuid, { loading: false, getInfoError: true });
     }
+  }
+};
+
+const retryGetInfo = async (item) => {
+  const accountIndex = instanceData.value.findIndex(
+    (acc) => acc.login === item.login && acc.source === item.source,
+  );
+  if (accountIndex === -1) return;
+
+  instanceData.value[accountIndex] = {
+    ...instanceData.value[accountIndex],
+    loading: true,
+    getInfoError: false,
+  };
+  instancesStore.updateInstanceByUuid(item.uuid, { loading: true, getInfoError: false });
+
+  let getInfoError = false;
+  try {
+    const infoResponse = await getInfoWhats(
+      item.source,
+      item.login,
+      item.type,
+      item.storage,
+    );
+
+    if (!infoResponse) {
+      getInfoError = true;
+    } else {
+      if (infoResponse.data?.step) {
+        instanceData.value[accountIndex].step = infoResponse.data.step;
+      }
+      instanceData.value[accountIndex].connectedPhone = infoResponse.data?.connectedPhone || "";
+    }
+  } catch (error) {
+    getInfoError = true;
+    console.error(`Retry getInfo error for ${item.login}:`, error);
+  } finally {
+    instanceData.value[accountIndex].loading = false;
+    instanceData.value[accountIndex].getInfoError = getInfoError;
+    instancesStore.updateInstanceByUuid(item.uuid, {
+      loading: false,
+      step: instanceData.value[accountIndex].step,
+      connectedPhone: instanceData.value[accountIndex].connectedPhone || "",
+      getInfoError,
+    });
   }
 };
 
@@ -1063,6 +1116,7 @@ const getAccounts = async () => {
                   return;
                 }
 
+                let getInfoError = false;
                 try {
                   const infoResponse = await getInfoWhats(
                     instance.source,
@@ -1071,16 +1125,25 @@ const getAccounts = async () => {
                     instance.storage,
                   );
 
-                  if (infoResponse?.data?.step) {
-                    instance.step = infoResponse.data.step;
+                  if (!infoResponse) {
+                    getInfoError = true;
+                  } else {
+                    if (infoResponse.data?.step) {
+                      instance.step = infoResponse.data.step;
+                    }
+                    instance.connectedPhone = infoResponse.data?.connectedPhone || "";
                   }
                 } catch (error) {
+                  getInfoError = true;
                   console.error(`Error for ${instance.login}:`, error);
                 } finally {
                   instance.loading = false;
+                  instance.getInfoError = getInfoError;
                   instancesStore.updateInstanceByUuid(instance.uuid, {
                     loading: false,
                     step: instance.step,
+                    connectedPhone: instance.connectedPhone || "",
+                    getInfoError,
                   });
                 }
               });

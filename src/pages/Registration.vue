@@ -168,11 +168,22 @@
       <div class="field" :class="{ 'has-error': fieldErrors.phone }">
         <label>{{ t("registration.phone") }}</label>
         <div class="phone-input" :class="{ 'input-error': fieldErrors.phone }">
-          <div class="country-prefix" @click.stop="countryDropdownOpen = !countryDropdownOpen">
-            <img :src="`https://flagcdn.com/w20/${selectedCountry.code}.png`" width="20" :alt="selectedCountry.code.toUpperCase()" />
+          <div
+            class="country-prefix"
+            @click.stop="countryDropdownOpen = !countryDropdownOpen"
+          >
+            <img
+              :src="`https://flagcdn.com/w20/${selectedCountry.code}.png`"
+              width="20"
+              :alt="selectedCountry.code.toUpperCase()"
+            />
             <span>{{ selectedCountry.dial }}</span>
             <span class="prefix-arrow"></span>
-            <div v-if="countryDropdownOpen" class="country-dropdown" @click.stop>
+            <div
+              v-if="countryDropdownOpen"
+              class="country-dropdown"
+              @click.stop
+            >
               <input
                 class="country-search"
                 v-model="countrySearch"
@@ -184,10 +195,18 @@
                   v-for="c in filteredCountries"
                   :key="c.code + c.dial"
                   class="country-option"
-                  :class="{ selected: c.code === selectedCountry.code && c.dial === selectedCountry.dial }"
+                  :class="{
+                    selected:
+                      c.code === selectedCountry.code &&
+                      c.dial === selectedCountry.dial,
+                  }"
                   @click.stop="selectCountry(c)"
                 >
-                  <img :src="`https://flagcdn.com/w20/${c.code}.png`" width="18" :alt="c.code" />
+                  <img
+                    :src="`https://flagcdn.com/w20/${c.code}.png`"
+                    width="18"
+                    :alt="c.code"
+                  />
                   <span class="country-option-name">{{ c.name }}</span>
                   <span class="country-option-dial">{{ c.dial }}</span>
                 </div>
@@ -243,7 +262,7 @@
               <div class="select-options" v-if="activeSelect === 'crm'">
                 <div @click.stop="selectValue('crm', 'Bitrix24')">Bitrix24</div>
                 <div @click.stop="selectValue('crm', 'AmoCRM')">AmoCRM</div>
-                <div @click.stop="selectValue('crm', 'uon')">Uon-Travel</div>
+                <div @click.stop="selectValue('crm', 'uon')">U.ON-Travel</div>
               </div>
             </Transition>
           </div>
@@ -449,7 +468,11 @@ const selectedCountry = ref(countries[0]);
 
 const filteredCountries = computed(() => {
   const q = countrySearch.value.toLowerCase();
-  return q ? countries.filter((c) => c.name.toLowerCase().includes(q) || c.dial.includes(q)) : countries;
+  return q
+    ? countries.filter(
+        (c) => c.name.toLowerCase().includes(q) || c.dial.includes(q),
+      )
+    : countries;
 });
 
 const selectCountry = (c) => {
@@ -458,7 +481,9 @@ const selectCountry = (c) => {
   countrySearch.value = "";
 };
 
-const closeCountryDropdown = () => { countryDropdownOpen.value = false; };
+const closeCountryDropdown = () => {
+  countryDropdownOpen.value = false;
+};
 
 const touched = reactive({
   company_name: false,

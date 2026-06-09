@@ -3,7 +3,10 @@
     <div v-if="dataStation && instanceData.length > 0" class="accounts-list">
       <div
         class="account-row"
-        :class="{ 'account-row--deleted': item.enable === '0' }"
+        :class="{
+          'account-row--deleted': item.enable === '0',
+          'account-row--error': item.getInfoError,
+        }"
         v-for="(item, index) in instanceData"
         :key="index"
         @click="openAccountModal(item)"
@@ -88,7 +91,8 @@
 
         <div class="row-section section-data">
           <span class="data-label">Статус</span>
-          <span v-if="item.enable === '0'">
+          <span v-if="item.getInfoError" class="status-error-dash">—</span>
+          <span v-else-if="item.enable === '0'">
             <StatusBadge status="deleted" type="account" />
           </span>
           <span v-else-if="item.type === 'bulk'">
@@ -182,6 +186,28 @@
 
         <div class="row-section section-actions">
           <div class="icon-actions"></div>
+
+          <button
+            v-if="item.getInfoError"
+            class="retry-button"
+            @click.stop="retryGetInfo(item)"
+            title="Повторить запрос"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </button>
 
           <button
             class="action-menu-button"
@@ -305,6 +331,7 @@ const props = defineProps({
   openCustomSourcesModal: Function,
   openWarningModal: Function,
   openEmailSettings: Function,
+  retryGetInfo: Function,
 });
 
 const { instanceData } = toRefs(props);
@@ -566,6 +593,46 @@ const emailSettings = () => {
   transform: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border-color: #fca5a5;
+}
+
+/* Аккаунт с ошибкой getInfo */
+.account-row--error {
+  background: #fafafa;
+  border-left: 3px solid #f87171;
+  opacity: 0.6;
+  filter: grayscale(30%);
+}
+
+.account-row--error:hover {
+  opacity: 0.8;
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-color: #f87171;
+}
+
+.status-error-dash {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.retry-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid #f87171;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #ef4444;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #ef4444;
 }
 
 .account-row--deleted > *:not(.section-actions) {
