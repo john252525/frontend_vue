@@ -22,34 +22,24 @@
         <span class="b-logo">{{ stationDomain.cosmetics.titleLogo }}</span>
       </h1>
 
-      <div class="field" :class="{ 'has-error': fieldErrors.company_name }">
-        <label>Название компании</label>
+      <div class="field">
+        <label>Название компании (Необязательно)</label>
         <input
           type="text"
           v-model="formData.company_name"
           placeholder="Введите название компании"
-          required
           :disabled="loading"
-          @blur="touch('company_name')"
         />
-        <span v-if="fieldErrors.company_name" class="field-error">{{
-          fieldErrors.company_name
-        }}</span>
       </div>
 
-      <div class="field" :class="{ 'has-error': fieldErrors.contact_name }">
-        <label>Контактное лицо</label>
+      <div class="field">
+        <label>Контактное лицо (Необязательно)</label>
         <input
           type="text"
           v-model="formData.contact_name"
           placeholder="Введите имя контактного лица"
-          required
           :disabled="loading"
-          @blur="touch('contact_name')"
         />
-        <span v-if="fieldErrors.contact_name" class="field-error">{{
-          fieldErrors.contact_name
-        }}</span>
       </div>
 
       <div class="field" :class="{ 'has-error': fieldErrors.login }">
@@ -248,7 +238,7 @@
         </div>
 
         <div class="field half">
-          <label>CRM</label>
+          <label>CRM (Необязательно)</label>
           <div
             class="custom-select"
             :class="{ active: activeSelect === 'crm' }"
@@ -270,7 +260,7 @@
       </div>
 
       <div class="field">
-        <label>{{ t("registration.preferredChannels") }}</label>
+        <label>{{ t("registration.preferredChannels") }} (Необязательно)</label>
         <div class="messengers-cont">
           <label
             v-for="channel in availableChannels"
@@ -307,7 +297,7 @@
       </div>
 
       <div class="field">
-        <label>Промокод</label>
+        <label>Промокод (Необязательно)</label>
         <input type="text" v-model="formData.promo" :disabled="loading" />
       </div>
 
@@ -486,8 +476,6 @@ const closeCountryDropdown = () => {
 };
 
 const touched = reactive({
-  company_name: false,
-  contact_name: false,
   login: false,
   password: false,
   confirmPassword: false,
@@ -525,14 +513,6 @@ const formData = reactive({
 
 const fieldErrors = computed(() => {
   const errors = {};
-
-  if (touched.company_name && !formData.company_name.trim()) {
-    errors.company_name = "Введите название компании";
-  }
-
-  if (touched.contact_name && !formData.contact_name.trim()) {
-    errors.contact_name = "Введите имя контактного лица";
-  }
 
   if (touched.login) {
     if (!formData.login.trim()) {
@@ -613,8 +593,6 @@ const navigateTo = (page) => router.push(page);
 
 const isFormValid = computed(() => {
   return (
-    formData.company_name &&
-    formData.contact_name &&
     formData.login &&
     formData.password.length >= 6 &&
     formData.password === formData.confirmPassword &&
@@ -633,14 +611,20 @@ const handleSubmit = async () => {
 
   try {
     const requestData = {
-      company_name: formData.company_name,
-      contact_name: formData.contact_name,
       email: formData.login,
       phone: selectedCountry.value.dial + localPhone.value.replace(/\D/g, ""),
       country: formData.country,
       ref_id: route.query.ref,
       password: formData.password,
     };
+
+    if (formData.company_name) {
+      requestData.company_name = formData.company_name;
+    }
+
+    if (formData.contact_name) {
+      requestData.contact_name = formData.contact_name;
+    }
 
     if (formData.crm) {
       requestData.crm = formData.crm;

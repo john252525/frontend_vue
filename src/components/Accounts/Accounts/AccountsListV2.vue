@@ -1040,7 +1040,7 @@ const getAccounts = async () => {
 
       if (response.data.ok === true) {
         accounts.value = response.data;
-        instanceData.value = accounts.value.data.instances.map((instance) => ({
+        instanceData.value = (accounts.value.data?.instances || []).map((instance) => ({
           ...instance,
           step: instance.step === null ? "Н/Д" : instance.step,
           loading: true,

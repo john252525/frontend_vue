@@ -253,7 +253,7 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
-const API_URL = "https://api22.developtech.ru/api";
+const API_URL = import.meta.env.VITE_PAY_URL;
 
 const props = defineProps({
   changeUsersCount: {
@@ -367,7 +367,7 @@ const getPayments = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token.value}`,
         },
-      }
+      },
     );
 
     if (response.data.success) {

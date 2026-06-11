@@ -122,7 +122,8 @@ const isLoadingChart = ref(false);
 const isCopied = ref(false);
 
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
-const API_URL = "https://api22.developtech.ru/api";
+const FRONTEND_PAY_URL = import.meta.env.VITE_PAY_URL;
+const API_URL = FRONTEND_PAY_URL;
 
 const refId = ref("");
 const refLink = ref(`https://${window.location.hostname}/Registration...`);
