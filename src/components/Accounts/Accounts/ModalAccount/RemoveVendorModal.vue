@@ -1,66 +1,39 @@
 <template>
-  <div
-    class="modal-overlay"
-    @keydown.esc="close"
-    tabindex="0"
-    @click.self="close"
+  <ModalFrame
+    :text="modalText"
+    :close="close"
+    :isLoading="isLoading"
+    :action="handleRemove"
   >
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">Удалить вендора</h2>
-        <button @click="close" class="modal-close">
-          <svg viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="warning-icon">⚠️</div>
-        <p class="warning-title">Удалить аккаунт?</p>
-
-        <div class="vendor-details">
-          <div class="detail-row">
-            <span class="detail-label">Тип:</span>
-            <span class="detail-value">
-              <span class="vendor-badge" :class="`vendor-${vendor.source}`">
-                {{ vendor.source.toUpperCase() }}
-              </span>
-            </span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Логин:</span>
-            <span class="detail-value">{{ vendor.login }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Группа:</span>
-            <span class="detail-value">{{ group.name }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button @click="close" class="button button-secondary">Отмена</button>
-        <button
-          @click="handleRemove"
-          :disabled="isLoading"
-          class="button button-danger"
+    <div class="modal-header">
+      <div class="icon-wrapper">
+        <svg
+          class="danger-icon"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {{ isLoading ? "Загрузка..." : "Удалить" }}
-        </button>
+          <path
+            d="M12 9V11M12 15H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </div>
+      <h2 class="modal-title">Удалить аккаунт из группы?</h2>
     </div>
-  </div>
+  </ModalFrame>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import { useVendorGroups } from "@/composables/useVendorGroups";
 import { useAccountStore } from "@/stores/accountStore";
+import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const props = defineProps({
   group: Object,
@@ -73,6 +46,12 @@ const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const { deleteVendorFromGroup } = useVendorGroups(token);
 
+const modalText = {
+  title: "Подтверждение",
+  close: "Отмена",
+  action: "Продолжить",
+};
+
 const isLoading = ref(false);
 
 const close = () => {
@@ -84,7 +63,7 @@ const handleRemove = async () => {
   try {
     const result = await deleteVendorFromGroup(
       props.group.uuid,
-      props.vendor.uuid
+      props.vendor.uuid,
     );
     if (result?.ok) {
       emit("removed");
@@ -96,184 +75,110 @@ const handleRemove = async () => {
 </script>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+.modal-header {
+  text-align: center;
+}
+
+.icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fee2e2;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  margin: 0 auto 16px;
+  border: 2px solid #fecaca;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+.danger-icon {
+  color: #dc2626;
+  width: 32px;
+  height: 32px;
 }
 
 .modal-title {
+  font-weight: 700;
+  font-size: 20px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.modal-subtitle {
+  font-weight: 400;
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.subscription-alert {
+  margin-top: 20px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+}
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.alert-icon {
+  color: #d97706;
+}
+
+.alert-title {
   font-weight: 600;
-  font-size: 18px;
-  color: var(--text);
+  font-size: 14px;
+  color: #92400e;
+}
+
+.alert-description {
+  font-weight: 400;
+  font-size: 13px;
+  color: #b45309;
+  line-height: 1.5;
   margin: 0;
 }
 
-.modal-close {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.25s;
+.alert-description strong {
+  color: #92400e;
 }
 
-.modal-close:hover {
-  background: #f3f4f6;
-  color: var(--text);
-}
+@media (max-width: 480px) {
+  .confirm-modal {
+    width: 90%;
+    max-width: 380px;
+    margin: 0 16px;
+    border-radius: 16px;
+  }
 
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
+  .modal-header {
+    padding: 24px 24px 20px;
+  }
 
-.modal-body {
-  padding: 20px;
-}
+  .modal-content {
+    padding: 20px 24px;
+  }
 
-.warning-icon {
-  font-size: 48px;
-  text-align: center;
-  margin-bottom: 16px;
-}
+  .modal-actions {
+    padding: 20px 24px 24px;
+    flex-direction: column-reverse;
+  }
 
-.warning-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text);
-  text-align: center;
-  margin: 0 0 8px 0;
-}
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
 
-.warning-description {
-  font-size: 14px;
-  color: #6b7280;
-  text-align: center;
-  margin: 0 0 16px 0;
-}
-
-.vendor-details {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.detail-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  font-size: 14px;
-}
-
-.detail-row:not(:last-child) {
-  border-bottom: 1px solid #fee2e2;
-  padding-bottom: 8px;
-}
-
-.detail-label {
-  font-weight: 600;
-  color: #991b1b;
-}
-
-.detail-value {
-  color: #7f1d1d;
-}
-
-.vendor-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.vendor-whatsapp {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.vendor-telegram {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.vendor-sms {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 12px;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
-  justify-content: flex-end;
-}
-
-.button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-
-.button-danger {
-  background: #ef4444;
-  color: white;
-}
-
-.button-danger:hover:not(:disabled) {
-  background: #dc2626;
-}
-
-.button-danger:disabled {
-  background: #d1d5db;
-  cursor: not-allowed;
-}
-
-.button-secondary {
-  background: #f3f4f6;
-  color: var(--text);
-}
-
-.button-secondary:hover {
-  background: #e5e7eb;
+  .modal-title {
+    font-size: 18px;
+  }
 }
 </style>
