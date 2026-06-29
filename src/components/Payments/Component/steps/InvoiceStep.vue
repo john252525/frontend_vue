@@ -343,12 +343,7 @@ const enableInnEditing = () => {
 };
 
 const canGenerateInvoice = computed(() => {
-  return (
-    innSaved.value &&
-    innFromBackend.value &&
-    props.amount >= 10 &&
-    props.amount <= 50000
-  );
+  return innSaved.value && innFromBackend.value && props.amount >= 10;
 });
 
 // API функции
@@ -409,11 +404,11 @@ const saveInn = async () => {
         "saveInn",
         { inn: innValue.value },
         response.data,
-        response.data
+        response.data,
       );
     } else {
       throw new Error(
-        response.data.message || t("invoiceStep.errors.saveFailed")
+        response.data.message || t("invoiceStep.errors.saveFailed"),
       );
     }
   } catch (error) {
@@ -445,11 +440,11 @@ const generateInvoice = async () => {
     return;
   }
 
-  if (props.amount > 50000) {
-    localError.value = t("invoiceStep.errors.maxAmount");
-    showRetry.value = true;
-    return;
-  }
+  // if (props.amount > 50000) {
+  //   localError.value = t("invoiceStep.errors.maxAmount");
+  //   showRetry.value = true;
+  //   return;
+  // }
 
   generatingInvoice.value = true;
   try {
@@ -462,7 +457,7 @@ const generateInvoice = async () => {
           "Content-Type": "application/json",
         },
         timeout: 15000,
-      }
+      },
     );
 
     if (response.data.ok) {
@@ -471,12 +466,12 @@ const generateInvoice = async () => {
         "generateInvoice",
         { amount: props.amount },
         response.data,
-        response.data
+        response.data,
       );
       emit("invoice-generated", response.data.data);
     } else {
       throw new Error(
-        response.data.message || t("invoiceStep.errors.generateFailed")
+        response.data.message || t("invoiceStep.errors.generateFailed"),
       );
     }
   } catch (error) {

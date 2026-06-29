@@ -167,11 +167,11 @@ const processPayment = async () => {
     return;
   }
 
-  if (props.amount > 50000) {
-    localError.value = t("paymentStep.errors.maxAmount");
-    showRetry.value = true;
-    return;
-  }
+  // if (props.amount > 50000) {
+  //   localError.value = t("paymentStep.errors.maxAmount");
+  //   showRetry.value = true;
+  //   return;
+  // }
 
   try {
     const response = await axios.post(
@@ -186,7 +186,7 @@ const processPayment = async () => {
       {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 10000, // 10 секунд таймаут
-      }
+      },
     );
 
     if (response.data) {
@@ -199,7 +199,7 @@ const processPayment = async () => {
           email: props.email,
         },
         response.data,
-        response.data
+        response.data,
       );
     }
 

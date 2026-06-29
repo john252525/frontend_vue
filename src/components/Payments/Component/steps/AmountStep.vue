@@ -12,7 +12,6 @@
             type="number"
             :placeholder="t('amountStep.enterAmount')"
             min="1"
-            max="50000"
             step="1"
             class="form-input"
             :class="{ 'input-error': amountError }"
@@ -23,7 +22,6 @@
         </div>
         <div class="amount-hints">
           <span class="hint">{{ t("amountStep.min") }}: 10 ₽</span>
-          <span class="hint">{{ t("amountStep.max") }}: 50,000 ₽</span>
         </div>
         <div v-if="amountError" class="error-text">{{ amountError }}</div>
       </div>
@@ -121,7 +119,6 @@ const validateAmount = (amount) => {
   const numAmount = Number(amount);
   if (isNaN(numAmount)) return t("amountStep.errors.amountMustBeNumber");
   if (numAmount < 10) return t("amountStep.errors.minAmount");
-  if (numAmount > 50000) return t("amountStep.errors.maxAmount");
   if (!Number.isInteger(numAmount)) return t("amountStep.errors.wholeNumber");
   return "";
 };
@@ -172,7 +169,7 @@ watch(
     if (value !== null && value !== undefined) {
       localAmount.value = value;
     }
-  }
+  },
 );
 
 watch(
@@ -181,7 +178,7 @@ watch(
     if (value !== null && value !== undefined) {
       localEmail.value = value;
     }
-  }
+  },
 );
 </script>
 
