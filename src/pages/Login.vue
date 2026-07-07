@@ -182,6 +182,15 @@ function errorStyleStation(input, station) {
   }
 }
 
+const russianEmailDomains = [
+  /^[^\s@]+\.(ru|рф|su)$/,
+  /^(mail|list|inbox|bk)\.ru$/,
+  /^yandex\.(ru|by|kz|com)$/,
+  /^ya\.ru$/,
+  /^(rambler|lenta|ro)\.ru$/,
+  /^vk\.com$/,
+];
+
 const validateEmail = () => {
   const email = formData.login.trim();
   if (!email) {
@@ -193,6 +202,13 @@ const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     emailError.value = t("login.errorInvalidEmail");
+    errorStyleStation("login", "on");
+    return false;
+  }
+
+  const domain = email.split("@")[1];
+  if (!russianEmailDomains.some((re) => re.test(domain))) {
+    emailError.value = t("login.errorNotRussianEmail");
     errorStyleStation("login", "on");
     return false;
   }

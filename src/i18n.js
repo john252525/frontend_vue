@@ -570,6 +570,7 @@ const messages = {
         "Your email is not verified. Please check your inbox and confirm your email address.",
       errorAuthFailed: "Authentication error",
       errorServerError: "Server error",
+      errorNotRussianEmail: "Only Russian email services are allowed (mail.ru, yandex.ru, .ru, .рф, etc.)",
     },
     forgotPassword: {
       title: "Password Recovery",
@@ -1213,6 +1214,7 @@ const messages = {
       errorEmailNotVerified: "Ваш email не подтверждён.",
       errorAuthFailed: "Ошибка при авторизации",
       errorServerError: "Ошибка сервера",
+      errorNotRussianEmail: "Регистрация доступна только для российских почтовых сервисов (mail.ru, yandex.ru, .ru, .рф и др.)",
     },
     registration: {
       title: "Регистрация в",

@@ -495,6 +495,20 @@ const touchAll = () => {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const russianEmailDomains = [
+  /^[^\s@]+\.(ru|рф|su)$/,
+  /^(mail|list|inbox|bk)\.ru$/,
+  /^yandex\.(ru|by|kz|com)$/,
+  /^ya\.ru$/,
+  /^(rambler|lenta|ro)\.ru$/,
+  /^vk\.com$/,
+];
+
+const isRussianEmail = (email) => {
+  const domain = email.trim().toLowerCase().split("@")[1];
+  return russianEmailDomains.some((re) => re.test(domain));
+};
+
 const formData = reactive({
   company_name: "",
   contact_name: "",
@@ -519,6 +533,8 @@ const fieldErrors = computed(() => {
       errors.login = "Введите email";
     } else if (!emailRegex.test(formData.login)) {
       errors.login = "Некорректный формат email";
+    } else if (!isRussianEmail(formData.login)) {
+      errors.login = "Регистрация доступна только для российских почтовых сервисов (mail.ru, yandex.ru, .ru, .рф и др.)";
     }
   }
 
@@ -594,6 +610,8 @@ const navigateTo = (page) => router.push(page);
 const isFormValid = computed(() => {
   return (
     formData.login &&
+    emailRegex.test(formData.login) &&
+    isRussianEmail(formData.login) &&
     formData.password.length >= 6 &&
     formData.password === formData.confirmPassword &&
     localPhone.value.replace(/\D/g, "").length >= 4 &&

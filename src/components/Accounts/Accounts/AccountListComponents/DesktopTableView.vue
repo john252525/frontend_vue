@@ -1,17 +1,70 @@
 <template>
   <div class="list-container">
+    <div v-if="dataStation && instanceData.length > 0" class="bulk-toolbar">
+      <button
+        class="bulk-select-btn"
+        :class="{ active: bulkSelectMode }"
+        @click="toggleBulkMode"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6l3 3 4-4M3 12l3 3 4-4M3 18l3 3 4-4M14 7h7M14 13h7M14 19h7" />
+        </svg>
+        {{ bulkSelectMode ? "Отменить" : "Выбрать" }}
+      </button>
+
+      <template v-if="bulkSelectMode">
+        <label class="select-all-label">
+          <input
+            type="checkbox"
+            :checked="allStoppableSelected"
+            @change="toggleSelectAll"
+          />
+          Выбрать все
+        </label>
+
+        <button
+          v-if="selectedAccounts.size > 0"
+          class="bulk-stop-btn"
+          :disabled="bulkStopLoading"
+          @click="bulkForceStop"
+        >
+          <svg v-if="bulkStopLoading" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+          Выключить ({{ selectedAccounts.size }})
+        </button>
+      </template>
+    </div>
+
     <div v-if="dataStation && instanceData.length > 0" class="accounts-list">
       <div
         class="account-row"
         :class="{
           'account-row--deleted': item.enable === '0',
           'account-row--error': item.getInfoError,
+          'account-row--bulk-selected': bulkSelectMode && selectedAccounts.has(getAccountKey(item)),
         }"
         v-for="(item, index) in instanceData"
         :key="index"
         @click="openAccountModal(item)"
-        :style="item.enable === '0' ? 'cursor: default' : 'cursor: pointer'"
+        :style="item.enable === '0' ? 'cursor: default' : (bulkSelectMode ? 'cursor: default' : 'cursor: pointer')"
       >
+        <div
+          v-if="bulkSelectMode"
+          class="bulk-checkbox-wrapper"
+          @click.stop
+        >
+          <input
+            type="checkbox"
+            :checked="selectedAccounts.has(getAccountKey(item))"
+            :disabled="!canBulkStop(item)"
+            @change="toggleAccountSelection(item)"
+          />
+        </div>
+
         <div class="row-section section-identity">
           <div
             class="account-icon-wrapper"
@@ -304,12 +357,18 @@ import SmsAuthCodeModal from "../ModalAccount/Enable/SmsAuthCodeModal.vue";
 import InstagramAuthModal from "../ModalAccount/InstagramAuthModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import StatusBadge from "../StatusBadge.vue";
+import axios from "axios";
 import { useI18n } from "vue-i18n";
-import { ref, computed, toRefs } from "vue";
+import { ref, computed, toRefs, reactive } from "vue";
+import { useAccountStore } from "@/stores/accountStore";
 
 import StatusSwitch from "./cardComponents/StatusSwitch.vue";
 
 const { t } = useI18n();
+
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
+const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
 const props = defineProps({
   dataStation: Boolean,
@@ -335,6 +394,100 @@ const props = defineProps({
 });
 
 const { instanceData } = toRefs(props);
+
+// ============= МАССОВОЕ ОТКЛЮЧЕНИЕ =============
+const bulkSelectMode = ref(false);
+const selectedAccounts = reactive(new Set());
+const bulkStopLoading = ref(false);
+
+const getAccountKey = (acc) => `${acc.login}_${acc.source}`;
+
+// Отдельная проверка для bulk stop — CRM/bulk/email/max-bot не поддерживают forceStop
+const canBulkStop = (item) => {
+  if (
+    item.type === "bulk" ||
+    item.type === "amocrm" ||
+    item.type === "bitrix24" ||
+    item.type === "uon"
+  ) return false;
+  if (item.source === "email" || item.source === "max-bot") return false;
+  return item.step?.value === 5;
+};
+
+const stoppableAccounts = computed(() =>
+  props.instanceData.filter((acc) => canBulkStop(acc))
+);
+
+const allStoppableSelected = computed(
+  () =>
+    stoppableAccounts.value.length > 0 &&
+    stoppableAccounts.value.every((acc) =>
+      selectedAccounts.has(getAccountKey(acc))
+    )
+);
+
+const toggleBulkMode = () => {
+  bulkSelectMode.value = !bulkSelectMode.value;
+  if (!bulkSelectMode.value) {
+    selectedAccounts.clear();
+  }
+};
+
+const toggleSelectAll = () => {
+  if (allStoppableSelected.value) {
+    selectedAccounts.clear();
+  } else {
+    stoppableAccounts.value.forEach((acc) =>
+      selectedAccounts.add(getAccountKey(acc))
+    );
+  }
+};
+
+const toggleAccountSelection = (account) => {
+  const key = getAccountKey(account);
+  if (selectedAccounts.has(key)) {
+    selectedAccounts.delete(key);
+  } else {
+    selectedAccounts.add(key);
+  }
+};
+
+const bulkForceStop = async () => {
+  bulkStopLoading.value = true;
+
+  const accountsToStop = props.instanceData.filter(
+    (acc) => selectedAccounts.has(getAccountKey(acc)) && canBulkStop(acc)
+  );
+
+  await Promise.allSettled(
+    accountsToStop.map(async (account) => {
+      account.loading = true;
+      try {
+        const response = await axios.post(
+          `${FRONTEND_URL}forceStop`,
+          { source: account.source, login: account.login, storage: account.storage },
+          {
+            headers: {
+              "Content-Type": "application/json; charset=utf-8",
+              Authorization: `Bearer ${token.value}`,
+            },
+          }
+        );
+        if (response.data.status === "ok") {
+          props.changeForceStopItemData(account);
+        }
+      } catch (error) {
+        console.error(`Bulk stop error for ${account.login}:`, error);
+      } finally {
+        account.loading = false;
+      }
+    })
+  );
+
+  selectedAccounts.clear();
+  bulkStopLoading.value = false;
+  bulkSelectMode.value = false;
+};
 
 defineEmits([
   "show-message",
@@ -376,6 +529,12 @@ const closeSmsAuthModal = () => {
 };
 
 const openAccountModal = (account) => {
+  if (bulkSelectMode.value) {
+    if (canBulkStop(account)) {
+      toggleAccountSelection(account);
+    }
+    return;
+  }
   if (account.type === "bulk" || account.enable === "0") {
     return;
   }
@@ -1092,6 +1251,114 @@ input:checked + .slider .switch-handle {
 
 .list-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* МАССОВЫЙ ВЫБОР */
+.bulk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 12px;
+  flex-wrap: wrap;
+}
+
+.bulk-select-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 400;
+  transition: all 0.2s;
+}
+
+.bulk-select-btn:hover {
+  background: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.bulk-select-btn.active {
+  color: #64748b;
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-all-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.bulk-stop-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.bulk-stop-btn:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #b91c1c;
+}
+
+.bulk-stop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+.bulk-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+  flex-shrink: 0;
+}
+
+.bulk-checkbox-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.bulk-checkbox-wrapper input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.account-row--bulk-selected {
+  border-left-color: #3b82f6 !important;
+  background: #eff6ff !important;
 }
 
 @media (max-width: 900px) {
