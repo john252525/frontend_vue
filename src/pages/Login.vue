@@ -56,6 +56,9 @@
             <p v-if="inputStyle.loginStation" class="error-message">
               {{ emailError }}
             </p>
+            <p v-else-if="emailWarning" class="warning-message">
+              {{ emailWarning }}
+            </p>
           </transition>
         </div>
       </div>
@@ -151,6 +154,7 @@ const inputStyle = reactive({
 });
 
 const emailError = ref("");
+const emailWarning = ref("");
 const passwordError = ref("");
 
 if (theme.isDark) {
@@ -208,9 +212,10 @@ const validateEmail = () => {
 
   const domain = email.split("@")[1];
   if (!russianEmailDomains.some((re) => re.test(domain))) {
-    emailError.value = t("login.errorNotRussianEmail");
-    errorStyleStation("login", "on");
-    return false;
+    emailWarning.value =
+      "Рекомендуем использовать российскую почту (mail.ru, yandex.ru и др.)";
+  } else {
+    emailWarning.value = "";
   }
 
   if (email.length > 30) {
@@ -256,6 +261,7 @@ const clearEmailError = () => {
     emailError.value = "";
     errorStyleStation("login", "off");
   }
+  emailWarning.value = "";
 };
 
 const clearPasswordError = () => {
@@ -495,6 +501,16 @@ input:disabled {
   margin: 4px 0 0;
   position: absolute;
   width: 100%;
+}
+
+.warning-message {
+  font-weight: 400;
+  font-size: 12px;
+  color: #b07800;
+  margin: 4px 0 0;
+  position: absolute;
+  width: 100%;
+  padding-left: 2px;
 }
 
 .slide-fade-enter-active {

@@ -55,6 +55,9 @@
         <span v-if="fieldErrors.login" class="field-error">{{
           fieldErrors.login
         }}</span>
+        <span v-if="emailWarning && !fieldErrors.login" class="field-warning">{{
+          emailWarning
+        }}</span>
       </div>
 
       <div class="field" :class="{ 'has-error': fieldErrors.password }">
@@ -533,8 +536,6 @@ const fieldErrors = computed(() => {
       errors.login = "Введите email";
     } else if (!emailRegex.test(formData.login)) {
       errors.login = "Некорректный формат email";
-    } else if (!isRussianEmail(formData.login)) {
-      errors.login = "Регистрация доступна только для российских почтовых сервисов (mail.ru, yandex.ru, .ru, .рф и др.)";
     }
   }
 
@@ -607,11 +608,18 @@ onUnmounted(() => {
 
 const navigateTo = (page) => router.push(page);
 
+const emailWarning = computed(() => {
+  const email = formData.login.trim();
+  if (email && emailRegex.test(email) && !isRussianEmail(email)) {
+    return "Рекомендуем использовать российскую почту (mail.ru, yandex.ru и др.) — зарубежные адреса могут вызвать проблемы с авторизацией";
+  }
+  return "";
+});
+
 const isFormValid = computed(() => {
   return (
     formData.login &&
     emailRegex.test(formData.login) &&
-    isRussianEmail(formData.login) &&
     formData.password.length >= 6 &&
     formData.password === formData.confirmPassword &&
     localPhone.value.replace(/\D/g, "").length >= 4 &&
@@ -1189,6 +1197,14 @@ input:checked ~ .custom-checkmark::after {
   color: #dc2626;
   font-size: 12px;
   margin-top: 6px;
+  padding-left: 2px;
+}
+
+.field-warning {
+  display: block;
+  color: #b07800;
+  font-size: 12px;
+  margin-top: 4px;
   padding-left: 2px;
 }
 
