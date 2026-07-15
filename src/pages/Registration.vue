@@ -611,7 +611,7 @@ const navigateTo = (page) => router.push(page);
 const emailWarning = computed(() => {
   const email = formData.login.trim();
   if (email && emailRegex.test(email) && !isRussianEmail(email)) {
-    return "Рекомендуем использовать российскую почту (mail.ru, yandex.ru и др.) — зарубежные адреса могут вызвать проблемы с авторизацией";
+    return "Рекомендуем использовать электронную почту российских сервисов (mail.ru, yandex.ru и др.) пользователям из России в связи с вступлением в силу нового закона.";
   }
   return "";
 });

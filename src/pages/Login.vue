@@ -213,7 +213,7 @@ const validateEmail = () => {
   const domain = email.split("@")[1];
   if (!russianEmailDomains.some((re) => re.test(domain))) {
     emailWarning.value =
-      "Рекомендуем использовать российскую почту (mail.ru, yandex.ru и др.)";
+      "Рекомендуем использовать электронную почту российских сервисов (mail.ru, yandex.ru и др.) пользователям из России в связи с вступлением в силу нового закона.";
   } else {
     emailWarning.value = "";
   }
@@ -489,7 +489,7 @@ input:disabled {
 }
 
 .error-container {
-  min-height: 24px;
+  min-height: 50px;
   position: relative;
   overflow: hidden;
 }
