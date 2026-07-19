@@ -484,7 +484,9 @@ async function getAct() {
     );
 
     const actLink =
-      response.data && response.data.data && response.data.data.act_link;
+      response.data &&
+      response.data.data &&
+      (response.data.data.coc_link || response.data.data.act_link);
     if (actLink) {
       window.open(actLink, "_blank");
     } else {
