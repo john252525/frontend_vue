@@ -190,18 +190,18 @@
                   class="mobile-link"
                   @click.prevent="handleMobileItemClick(item)"
                 >
-                  <img
-                    :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-                    class="svg-icon"
-                  />
+                  <span
+                    class="mobile-icon"
+                    :style="getIconMaskStyle(item.icon)"
+                  ></span>
                   <p class="page">{{ item.text }}</p>
                 </a>
               </template>
               <template v-else>
-                <img
-                  :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-                  class="svg-icon"
-                />
+                <span
+                  class="mobile-icon"
+                  :style="getIconMaskStyle(item.icon)"
+                ></span>
                 <p class="page">{{ item.text }}</p>
               </template>
             </li>
@@ -317,6 +317,14 @@ const navSections = computed(() => {
 
 const navigateTo = (page) => {
   router.push(page);
+};
+
+const getIconMaskStyle = (icon) => {
+  const url = `url("data:image/svg+xml;utf8,${encodeURIComponent(icon)}")`;
+  return {
+    WebkitMaskImage: url,
+    maskImage: url,
+  };
 };
 </script>
 
@@ -670,9 +678,11 @@ ul {
   margin-top: 10px;
 }
 .mobile-item {
-  padding: 12px 0;
-  border-radius: 0;
-  border-bottom: 1px solid #f9f9f9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
 }
 .mobile-link {
   display: flex;
@@ -681,6 +691,26 @@ ul {
   text-decoration: none;
   color: inherit;
   width: 100%;
+}
+.mobile-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background-color: var(--icon-color, #555);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: background-color 0.2s ease;
+}
+.mobile-item.active .mobile-icon {
+  background-color: #778ff2;
+}
+.page {
+  margin: 0;
 }
 
 @media (min-width: 769px) {
