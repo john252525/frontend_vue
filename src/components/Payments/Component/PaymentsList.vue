@@ -250,6 +250,19 @@
                 {{ t("paymentList.close") }}
               </button>
             </div>
+
+            <div v-if="actLink" class="modal-actions">
+              <button class="action-button primary" @click="copyActLink">
+                {{
+                  actLinkCopied
+                    ? t("paymentList.linkCopied")
+                    : t("paymentList.copyLink")
+                }}
+              </button>
+              <button class="action-button primary" @click="openActLink">
+                {{ t("paymentList.goToLink") }}
+              </button>
+            </div>
           </template>
 
           <!-- Up Payment Type -->
@@ -410,6 +423,8 @@ const showModal = ref(false);
 const selectedPayment = ref(null);
 const actLoading = ref(false);
 const actError = ref(null);
+const actLink = ref(null);
+const actLinkCopied = ref(false);
 const apiUrl = import.meta.env.VITE_PAY_URL;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -455,6 +470,8 @@ const fetchPayments = async () => {
 function openPaymentModal(payment) {
   selectedPayment.value = payment;
   actError.value = null;
+  actLink.value = null;
+  actLinkCopied.value = false;
   showModal.value = true;
   document.body.style.overflow = "hidden";
 }
@@ -463,6 +480,8 @@ function closePaymentModal() {
   showModal.value = false;
   selectedPayment.value = null;
   actError.value = null;
+  actLink.value = null;
+  actLinkCopied.value = false;
   document.body.style.overflow = "auto";
 }
 
@@ -471,6 +490,8 @@ async function getAct() {
 
   actLoading.value = true;
   actError.value = null;
+  actLink.value = null;
+  actLinkCopied.value = false;
 
   try {
     const response = await axios.post(
@@ -483,12 +504,12 @@ async function getAct() {
       },
     );
 
-    const actLink =
+    const link =
       response.data &&
       response.data.data &&
       (response.data.data.coc_link || response.data.data.act_link);
-    if (actLink) {
-      window.open(actLink, "_blank");
+    if (link) {
+      actLink.value = link;
     } else {
       actError.value = t("paymentList.actError");
     }
@@ -499,6 +520,26 @@ async function getAct() {
       : t("paymentList.networkError");
   } finally {
     actLoading.value = false;
+  }
+}
+
+function openActLink() {
+  if (actLink.value) {
+    window.open(actLink.value, "_blank");
+  }
+}
+
+async function copyActLink() {
+  if (!actLink.value) return;
+
+  try {
+    await navigator.clipboard.writeText(actLink.value);
+    actLinkCopied.value = true;
+    setTimeout(() => {
+      actLinkCopied.value = false;
+    }, 2000);
+  } catch (error) {
+    console.error("error", error);
   }
 }
 
