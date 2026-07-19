@@ -210,7 +210,7 @@
                 :class="
                   getStatusClass(
                     selectedPayment.payment_type,
-                    selectedPayment.public_status
+                    selectedPayment.public_status,
                   )
                 "
               >
@@ -218,9 +218,22 @@
               </span>
             </div>
 
+            <div v-if="actError" class="act-error">{{ actError }}</div>
+
             <div v-if="selectedPayment.link" class="modal-actions">
               <button class="action-button primary" @click="openCheckLink">
                 {{ t("paymentList.openInvoice") }}
+              </button>
+              <button
+                class="action-button primary"
+                :disabled="actLoading"
+                @click="getAct"
+              >
+                {{
+                  actLoading
+                    ? t("paymentList.gettingAct")
+                    : t("paymentList.getAct")
+                }}
               </button>
               <button
                 class="action-button secondary"
@@ -257,7 +270,7 @@
                 :class="
                   getStatusClass(
                     selectedPayment.payment_type,
-                    selectedPayment.public_status
+                    selectedPayment.public_status,
                   )
                 "
               >
@@ -324,7 +337,7 @@
                 :class="
                   getStatusClass(
                     selectedPayment.payment_type,
-                    selectedPayment.public_status
+                    selectedPayment.public_status,
                   )
                 "
               >
@@ -360,7 +373,7 @@
                 :class="
                   getStatusClass(
                     selectedPayment.payment_type,
-                    selectedPayment.public_status
+                    selectedPayment.public_status,
                   )
                 "
               >
@@ -395,7 +408,10 @@ const payments = ref([]);
 const fetchError = ref(null);
 const showModal = ref(false);
 const selectedPayment = ref(null);
+const actLoading = ref(false);
+const actError = ref(null);
 const apiUrl = import.meta.env.VITE_PAY_URL;
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const paymentsLoadingStation = reactive({
   dataStationNone: false,
@@ -438,6 +454,7 @@ const fetchPayments = async () => {
 
 function openPaymentModal(payment) {
   selectedPayment.value = payment;
+  actError.value = null;
   showModal.value = true;
   document.body.style.overflow = "hidden";
 }
@@ -445,7 +462,42 @@ function openPaymentModal(payment) {
 function closePaymentModal() {
   showModal.value = false;
   selectedPayment.value = null;
+  actError.value = null;
   document.body.style.overflow = "auto";
+}
+
+async function getAct() {
+  if (!selectedPayment.value || !selectedPayment.value.link) return;
+
+  actLoading.value = true;
+  actError.value = null;
+
+  try {
+    const response = await axios.post(
+      `${VITE_BASE_URL}invoices/generateCoc`,
+      { link: selectedPayment.value.link },
+      {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
+
+    const actLink =
+      response.data && response.data.data && response.data.data.act_link;
+    if (actLink) {
+      window.open(actLink, "_blank");
+    } else {
+      actError.value = t("paymentList.actError");
+    }
+  } catch (error) {
+    console.error("error", error);
+    actError.value = error.response
+      ? error.response.data.message || t("paymentList.actError")
+      : t("paymentList.networkError");
+  } finally {
+    actLoading.value = false;
+  }
 }
 
 function openCheckLink() {
@@ -1104,6 +1156,16 @@ tr:hover {
   border-top: 1px solid #e5e7eb;
 }
 
+.act-error {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+  font-size: 13px;
+}
+
 .action-button {
   flex: 1;
   padding: 12px 16px;
@@ -1144,6 +1206,11 @@ tr:hover {
 
 .action-button.secondary:active {
   background: #d1d5db;
+}
+
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Responsive Design */
