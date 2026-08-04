@@ -90,7 +90,7 @@
         Добавить аккаунт
       </button>
 
-      <button
+      <!-- <button
         v-if="activeTab === 'accounts'"
         @click="startOnboardingTour"
         class="help-tour-button"
@@ -112,7 +112,7 @@
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
         Как пользоваться
-      </button>
+      </button> -->
     </section>
   </header>
 
@@ -180,7 +180,9 @@ const changeActiveTab = (value) => {
 
 const availableAccounts = computed(() => {
   return instancesStore.allInstances.filter((account) =>
-    ["whatsapp", "telegram", "max", "vk-bot"].includes(account.source || account.type),
+    ["whatsapp", "telegram", "max", "vk-bot"].includes(
+      account.source || account.type,
+    ),
   );
 });
 
@@ -223,7 +225,6 @@ function openAddAccount() {
 function startOnboardingTour() {
   onboardingTourRef.value?.start();
 }
-
 </script>
 
 <style scoped>
