@@ -11,7 +11,8 @@
           item.type === 'uon' ||
           item.source === 'email' ||
           item.source === 'max-bot' ||
-          item.loading
+          item.loading ||
+          item.source === 'vk-bot'
         "
         @click.prevent="changeSwitch(item)"
       />

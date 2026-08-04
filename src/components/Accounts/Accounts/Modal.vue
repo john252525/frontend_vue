@@ -124,7 +124,8 @@
               ) &&
               selectedItem.source != 'sms' &&
               selectedItem.source != 'instagram' &&
-              selectedItem.source != 'max-bot'
+              selectedItem.source != 'max-bot' &&
+              selectedItem.source != 'vk-bot'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -138,7 +139,8 @@
               ) &&
               selectedItem.source != 'sms' &&
               selectedItem.source != 'max-bot' &&
-              selectedItem.source != 'instagram'
+              selectedItem.source != 'instagram' &&
+              selectedItem.source != 'vk-bot'
             "
             class="action"
             @click="forceStopActive"

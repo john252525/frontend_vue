@@ -6,8 +6,20 @@
         :class="{ active: bulkSelectMode }"
         @click="toggleBulkMode"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6l3 3 4-4M3 12l3 3 4-4M3 18l3 3 4-4M14 7h7M14 13h7M14 19h7" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M3 6l3 3 4-4M3 12l3 3 4-4M3 18l3 3 4-4M14 7h7M14 13h7M14 19h7"
+          />
         </svg>
         {{ bulkSelectMode ? "Отменить" : "Выбрать" }}
       </button>
@@ -28,10 +40,31 @@
           :disabled="bulkStopLoading"
           @click="bulkForceStop"
         >
-          <svg v-if="bulkStopLoading" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-spinner">
+          <svg
+            v-if="bulkStopLoading"
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            class="btn-spinner"
+          >
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <rect x="3" y="3" width="18" height="18" rx="2" />
           </svg>
           Выключить ({{ selectedAccounts.size }})
@@ -45,18 +78,21 @@
         :class="{
           'account-row--deleted': item.enable === '0',
           'account-row--error': item.getInfoError,
-          'account-row--bulk-selected': bulkSelectMode && selectedAccounts.has(getAccountKey(item)),
+          'account-row--bulk-selected':
+            bulkSelectMode && selectedAccounts.has(getAccountKey(item)),
         }"
         v-for="(item, index) in instanceData"
         :key="index"
         @click="openAccountModal(item)"
-        :style="item.enable === '0' ? 'cursor: default' : (bulkSelectMode ? 'cursor: default' : 'cursor: pointer')"
+        :style="
+          item.enable === '0'
+            ? 'cursor: default'
+            : bulkSelectMode
+              ? 'cursor: default'
+              : 'cursor: pointer'
+        "
       >
-        <div
-          v-if="bulkSelectMode"
-          class="bulk-checkbox-wrapper"
-          @click.stop
-        >
+        <div v-if="bulkSelectMode" class="bulk-checkbox-wrapper" @click.stop>
           <input
             type="checkbox"
             :checked="selectedAccounts.has(getAccountKey(item))"
@@ -136,7 +172,7 @@
             :changeEnableStartModal="changeEnableStartModal"
             :changeForceStopItemData="changeForceStopItemData"
             @sms-auth-code="openSmsAuthModal"
-          @instagram-auth="openInstagramAuthModal"
+            @instagram-auth="openInstagramAuthModal"
           />
         </div>
 
@@ -161,7 +197,10 @@
             @mouseover="$emit('show-message', $event, item.step.message)"
             @mouseleave="$emit('hide-message')"
           >
-            <StatusBadge :status="item.source === 'max-bot' ? 5 : item.step.value" type="account" />
+            <StatusBadge
+              :status="item.source === 'max-bot' ? 5 : item.step.value"
+              type="account"
+            />
           </span>
           <span
             v-else-if="
@@ -409,21 +448,22 @@ const canBulkStop = (item) => {
     item.type === "amocrm" ||
     item.type === "bitrix24" ||
     item.type === "uon"
-  ) return false;
+  )
+    return false;
   if (item.source === "email" || item.source === "max-bot") return false;
   return item.step?.value === 5;
 };
 
 const stoppableAccounts = computed(() =>
-  props.instanceData.filter((acc) => canBulkStop(acc))
+  props.instanceData.filter((acc) => canBulkStop(acc)),
 );
 
 const allStoppableSelected = computed(
   () =>
     stoppableAccounts.value.length > 0 &&
     stoppableAccounts.value.every((acc) =>
-      selectedAccounts.has(getAccountKey(acc))
-    )
+      selectedAccounts.has(getAccountKey(acc)),
+    ),
 );
 
 const toggleBulkMode = () => {
@@ -438,7 +478,7 @@ const toggleSelectAll = () => {
     selectedAccounts.clear();
   } else {
     stoppableAccounts.value.forEach((acc) =>
-      selectedAccounts.add(getAccountKey(acc))
+      selectedAccounts.add(getAccountKey(acc)),
     );
   }
 };
@@ -456,7 +496,7 @@ const bulkForceStop = async () => {
   bulkStopLoading.value = true;
 
   const accountsToStop = props.instanceData.filter(
-    (acc) => selectedAccounts.has(getAccountKey(acc)) && canBulkStop(acc)
+    (acc) => selectedAccounts.has(getAccountKey(acc)) && canBulkStop(acc),
   );
 
   await Promise.allSettled(
@@ -465,13 +505,17 @@ const bulkForceStop = async () => {
       try {
         const response = await axios.post(
           `${FRONTEND_URL}forceStop`,
-          { source: account.source, login: account.login, storage: account.storage },
+          {
+            source: account.source,
+            login: account.login,
+            storage: account.storage,
+          },
           {
             headers: {
               "Content-Type": "application/json; charset=utf-8",
               Authorization: `Bearer ${token.value}`,
             },
-          }
+          },
         );
         if (response.data.status === "ok") {
           props.changeForceStopItemData(account);
@@ -481,7 +525,7 @@ const bulkForceStop = async () => {
       } finally {
         account.loading = false;
       }
-    })
+    }),
   );
 
   selectedAccounts.clear();
@@ -557,9 +601,10 @@ const enableCheckbox = (item) => {
     item.source === "max-bot" ||
     item.source === "instagram" ||
     item.source === "vk" ||
-    item.source === "sms"
+    item.source === "sms" ||
+    item.source === "vk-bot"
   ) {
-    if (item.source === 'max-bot') return item.step != null;
+    if (item.source === "max-bot") return item.step != null;
     return item.step?.value === 5 || false;
   }
 
@@ -622,7 +667,8 @@ const showSubscriptionWarning = (item) => {
 
   const noSubscription = item.subscription_dt_to === null;
 
-  const stepNotFinished = item.source === 'max-bot' ? item.step == null : item.step?.value !== 5;
+  const stepNotFinished =
+    item.source === "max-bot" ? item.step == null : item.step?.value !== 5;
 
   return noSubscription && stepNotFinished;
 };
@@ -1399,5 +1445,4 @@ input:checked + .slider .switch-handle {
     padding-top: 0;
   }
 }
-
 </style>
