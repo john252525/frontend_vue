@@ -656,7 +656,9 @@ const BULK_MONTHS = [1, 3, 6, 12];
 const isBulkType = computed(() => selectedItem.value?.type === "bulk");
 const isSmsSource = computed(() => selectedItem.value?.source === "sms");
 const isInstagramSource = computed(() =>
-  selectedItem.value?.source === "instagram" || selectedItem.value?.source === "max-bot"
+  selectedItem.value?.source === "instagram" ||
+  selectedItem.value?.source === "max-bot" ||
+  selectedItem.value?.source === "vk-bot"
 );
 const isEmailSource = computed(() => selectedItem.value?.source === "email");
 

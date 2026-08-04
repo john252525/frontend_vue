@@ -4,7 +4,9 @@
     :openModal="openAddAccount"
     v-if="openAddAccountStation"
   />
-  <header>
+  <AccountsOnboardingTour ref="onboardingTourRef" />
+
+  <header class="accounts-onboarding-header">
     <section class="account-section">
       <h2 class="title">Аккаунты</h2>
       <div
@@ -87,6 +89,30 @@
         </svg>
         Добавить аккаунт
       </button>
+
+      <button
+        v-if="activeTab === 'accounts'"
+        @click="startOnboardingTour"
+        class="help-tour-button"
+        title="Как пользоваться"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        Как пользоваться
+      </button>
     </section>
   </header>
 
@@ -110,6 +136,7 @@ import AccountList from "./Accounts/AccountsListV2.vue";
 import GroupsList from "./Groups/GroupsList.vue";
 import TabToggle from "./Groups/TabToggle.vue";
 import AddAccount from "./Accounts/AddAccount/AddAccountV2.vue";
+import AccountsOnboardingTour from "@/components/tours/AccountsOnboardingTour.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useInstancesStore } from "@/stores/instancesStore";
 import Filters from "./Filters.vue";
@@ -125,6 +152,7 @@ const crmText = accountStore.getCrmPlatformText;
 const platformStation = ref(false);
 const setPlatformStation = ref(false);
 const accountListRef = ref(null);
+const onboardingTourRef = ref(null);
 
 const activeTab = ref("accounts");
 const hasLoadedAccounts = ref(false);
@@ -190,6 +218,10 @@ function changeCrmPlatform(value, valueTwo) {
 
 function openAddAccount() {
   openAddAccountStation.value = !openAddAccountStation.value;
+}
+
+function startOnboardingTour() {
+  onboardingTourRef.value?.start();
 }
 
 </script>
@@ -276,6 +308,29 @@ header {
 
 .add-account-button:active {
   background: #3e43ae;
+}
+
+.help-tour-button {
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--border, #e2e8f0);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headerAccountButtonColor, #64748b);
+  padding: 10px 12px;
+  margin-left: 10px;
+  transition: all 0.25s;
+}
+
+.help-tour-button:hover {
+  background: oklch(0.65 0.22 267 / 0.1);
+  border-color: oklch(0.541 0.198 267);
 }
 
 .black-fon {
