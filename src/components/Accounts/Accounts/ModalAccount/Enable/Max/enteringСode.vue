@@ -221,7 +221,7 @@ const solveChallenge = async () => {
   max-width: 400px;
   width: 100%;
   box-sizing: border-box;
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   border-radius: 8px;
   animation: slideInUp 0.3s ease-out;
 }
@@ -236,7 +236,7 @@ const solveChallenge = async () => {
 .max-code-title {
   font-size: 20px;
   font-weight: 600;
-  color: #000;
+  color: var(--modalColor);
   margin: 0;
   line-height: 1.3;
 }
@@ -246,7 +246,7 @@ const solveChallenge = async () => {
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #000;
+  color: var(--modalColor);
   border-radius: 50%;
   transition: all 0.2s ease;
   display: flex;
@@ -258,8 +258,8 @@ const solveChallenge = async () => {
 }
 
 .max-code-close:hover {
-  background: #f0f2f5;
-  color: #000;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .max-code-body {
@@ -272,7 +272,7 @@ const solveChallenge = async () => {
 
 .max-code-description {
   font-size: 14px;
-  color: #65676b;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin: 0 0 24px 0;
   text-align: center;
@@ -290,8 +290,8 @@ const solveChallenge = async () => {
   height: 48px;
   font-weight: 500;
   font-size: 16px;
-  color: #000;
-  background: #f0f2f5;
+  color: var(--modalColor);
+  background: var(--tableAccountBg);
   text-align: center;
   padding: 0 12px;
   transition: all 0.2s ease;
@@ -300,7 +300,7 @@ const solveChallenge = async () => {
 
 .max-code-input:focus {
   outline: none;
-  background: #fff;
+  background: var(--modalBg, #ffffff);
   box-shadow: 0 0 0 2px #006aff;
 }
 
@@ -314,7 +314,7 @@ const solveChallenge = async () => {
 }
 
 .max-code-input::placeholder {
-  color: #65676b;
+  color: var(--headerAccountText);
   font-weight: 400;
 }
 
@@ -395,7 +395,7 @@ const solveChallenge = async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #65676b;
+  color: var(--headerAccountText);
   font-size: 12px;
 }
 
@@ -404,7 +404,7 @@ const solveChallenge = async () => {
   content: "";
   flex: 1;
   height: 1px;
-  background: #ccc;
+  background: var(--line);
 }
 
 .max-code-switch-method {
@@ -413,7 +413,7 @@ const solveChallenge = async () => {
   justify-content: center;
   gap: 8px;
   background: none;
-  border: 1px solid #ccc;
+  border: 1px solid var(--line);
   padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
@@ -425,7 +425,7 @@ const solveChallenge = async () => {
 }
 
 .max-code-switch-method:hover {
-  background: #f0f2f5;
+  background: var(--tableAccountBg);
   border-color: #006aff;
 }
 

@@ -371,7 +371,7 @@ onMounted(() => {
 .code-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
 }
 
@@ -380,15 +380,15 @@ onMounted(() => {
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: #666;
+  color: var(--headerAccountText);
   border-radius: 6px;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .code-close:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .code-body {
@@ -408,7 +408,7 @@ onMounted(() => {
 label {
   font-size: 14px;
   font-weight: 500;
-  color: #495057;
+  color: var(--headerAccountText);
   text-align: center;
 }
 
@@ -418,9 +418,9 @@ label {
   height: 60px;
   font-weight: 500;
   font-size: 20px;
-  color: #000;
-  border: 1px solid #e9ecef;
-  background: #f8f9fa;
+  color: var(--modalColor);
+  border: 1px solid var(--line);
+  background: var(--tableAccountBg);
   text-align: center;
   padding: 0 16px;
   transition: all 0.2s ease;
@@ -429,12 +429,12 @@ label {
 .code-input:focus {
   outline: none;
   border-color: #4950ca;
-  background: #fff;
+  background: var(--modalBg, #ffffff);
   box-shadow: 0 0 0 3px rgba(73, 80, 202, 0.1);
 }
 
 .code-input::placeholder {
-  color: #adb5bd;
+  color: var(--headerAccountText);
   font-weight: 400;
 }
 

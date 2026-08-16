@@ -930,7 +930,7 @@ tr:not(:last-child):after {
   }
 
   .action-gear {
-    background: oklch(0.65 0.22 267 / 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     border: none;
     border-radius: 8px;
     padding: 6px;
@@ -943,13 +943,13 @@ tr:not(:last-child):after {
   }
 
   .action-gear:hover {
-    background: oklch(0.65 0.22 267 / 0.2);
+    background: rgba(var(--primary-rgb), 0.2);
   }
 
   .action-gear svg {
     width: 16px;
     height: 16px;
-    color: #5a4fc1;
+    color: var(--primary);
   }
 
   .card-content {
@@ -1013,11 +1013,11 @@ tr:not(:last-child):after {
 
   .action-btn {
     width: 100%;
-    background: oklch(0.65 0.22 267 / 0.16);
+    background: rgba(var(--primary-rgb), 0.16);
     border: none;
     padding: 12px;
     border-radius: 8px;
-    color: #5a4fc1;
+    color: var(--primary);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -1025,7 +1025,7 @@ tr:not(:last-child):after {
   }
 
   .action-btn:hover {
-    background: oklch(0.65 0.22 267 / 0.25);
+    background: rgba(var(--primary-rgb), 0.25);
   }
 }
 

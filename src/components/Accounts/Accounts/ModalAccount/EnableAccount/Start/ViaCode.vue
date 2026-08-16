@@ -356,9 +356,9 @@ defineExpose({
   flex-direction: column;
   gap: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   max-width: 400px;
   margin: 0 auto;
 }
@@ -377,9 +377,9 @@ defineExpose({
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: white;
+  background: var(--bg);
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -408,7 +408,7 @@ defineExpose({
 .status-text {
   font-size: 13px;
   font-weight: 600;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 /* Таймеры */
@@ -427,7 +427,7 @@ defineExpose({
 
 .timer-bg {
   fill: none;
-  stroke: #f1f5f9;
+  stroke: var(--tableAccountBg);
   stroke-width: 2;
 }
 
@@ -437,7 +437,7 @@ defineExpose({
 
 .timer-progress {
   fill: none;
-  stroke: #3b82f6;
+  stroke: var(--primary);
   stroke-width: 2;
   stroke-dasharray: 126px;
   stroke-dashoffset: 126px;
@@ -453,12 +453,12 @@ defineExpose({
   position: absolute;
   font-size: 10px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .timer-label {
   font-size: 11px;
-  color: #64748b;
+  color: var(--headerAccountText);
   white-space: nowrap;
 }
 
@@ -477,17 +477,17 @@ defineExpose({
 }
 
 .code-card {
-  background: white;
+  background: var(--bg);
   border-radius: 12px;
   padding: 24px;
   text-align: center;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .code-title {
   font-size: 14px;
-  color: #64748b;
+  color: var(--headerAccountText);
   margin-bottom: 12px;
   font-weight: 500;
 }
@@ -495,10 +495,10 @@ defineExpose({
 .code-value {
   font-size: 32px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
   letter-spacing: 8px;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, var(--primary), var(--primaryHover));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -506,7 +506,7 @@ defineExpose({
 
 .code-hint {
   font-size: 13px;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .code-instruction {
@@ -520,15 +520,15 @@ defineExpose({
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
+  background: var(--bg);
   border-radius: 8px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--line);
 }
 
 .step-number {
   width: 24px;
   height: 24px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -541,7 +541,7 @@ defineExpose({
 
 .step-text {
   font-size: 13px;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 /* Состояние загрузки */
@@ -563,7 +563,7 @@ defineExpose({
   width: 100%;
   height: 100%;
   border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -575,14 +575,14 @@ defineExpose({
   right: -6px;
   bottom: -6px;
   border: 2px solid transparent;
-  border-top: 2px solid #60a5fa;
+  border-top: 2px solid var(--primaryHover);
   border-radius: 50%;
   animation: spin 1.5s linear infinite reverse;
 }
 
 .loading-text {
   font-size: 14px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-weight: 500;
   margin: 0;
 }
@@ -598,20 +598,20 @@ defineExpose({
 }
 
 .ended-icon {
-  color: #94a3b8;
+  color: var(--line);
   opacity: 0.7;
 }
 
 .ended-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0;
 }
 
 .ended-description {
   font-size: 14px;
-  color: #64748b;
+  color: var(--headerAccountText);
   margin: 0;
 }
 
@@ -620,7 +620,7 @@ defineExpose({
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -631,7 +631,7 @@ defineExpose({
 }
 
 .retry-button:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 
@@ -647,7 +647,7 @@ defineExpose({
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -661,7 +661,7 @@ defineExpose({
 
 .progress-text {
   font-size: 11px;
-  color: #64748b;
+  color: var(--headerAccountText);
   text-align: center;
 }
 

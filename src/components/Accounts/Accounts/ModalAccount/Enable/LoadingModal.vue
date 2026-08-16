@@ -70,7 +70,7 @@ const handleCancel = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -79,7 +79,7 @@ const handleCancel = () => {
 }
 
 .loading-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   padding: 2rem;
   border-radius: 12px;
   display: flex;
@@ -120,7 +120,7 @@ const handleCancel = () => {
 
 .loading-text {
   margin: 0;
-  color: #333;
+  color: var(--modalColor);
   font-size: 1.1rem;
   text-align: center;
 }

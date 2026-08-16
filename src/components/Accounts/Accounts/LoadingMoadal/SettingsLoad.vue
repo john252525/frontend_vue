@@ -16,14 +16,14 @@
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 0;
   left: 0;
 }
 
 .loading {
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   position: absolute;
   top: 50%;
   left: 50%;

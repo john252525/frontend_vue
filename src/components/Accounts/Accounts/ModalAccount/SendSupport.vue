@@ -58,7 +58,7 @@
                 </div>
                 <div class="checkmark" v-if="selectedTopic?.id === topic.id">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="8" fill="#6732ff" />
+                    <circle cx="8" cy="8" r="8" fill="var(--primary)" />
                     <path
                       d="M11 6L7 10L5 8"
                       stroke="white"
@@ -279,7 +279,7 @@ ${data.problemDescription}
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -289,7 +289,7 @@ ${data.problemDescription}
 }
 
 .modal-content {
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   width: 100%;
@@ -324,11 +324,11 @@ ${data.problemDescription}
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor, #1a1a1a);
 }
 
 .close-btn {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
   border-radius: 8px;
   width: 32px;
@@ -337,18 +337,18 @@ ${data.problemDescription}
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--line);
+  color: var(--modalColor, #1a1a1a);
 }
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
+  background: var(--line);
   margin: 0;
   flex-shrink: 0;
 }
@@ -368,12 +368,12 @@ ${data.problemDescription}
 }
 
 .modal-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrolBg);
   border-radius: 3px;
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--scrolColor);
   border-radius: 3px;
 }
 
@@ -391,7 +391,7 @@ ${data.problemDescription}
 .section-title {
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--modalColor, #1a1a1a);
   margin: 0 0 16px 0;
 }
 
@@ -406,8 +406,8 @@ ${data.problemDescription}
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -416,23 +416,23 @@ ${data.problemDescription}
 }
 
 .topic-card:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 .topic-card.selected {
   background: #f8f7ff;
-  border-color: #6732ff;
+  border-color: var(--primary);
 }
 
 .topic-icon {
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-top: 2px;
   flex-shrink: 0;
 }
 
 .topic-card.selected .topic-icon {
-  color: #6732ff;
+  color: var(--primary);
 }
 
 .topic-content {
@@ -443,13 +443,13 @@ ${data.problemDescription}
   margin: 0 0 4px 0;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .topic-description {
   margin: 0;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.4;
 }
 
@@ -460,7 +460,7 @@ ${data.problemDescription}
 }
 
 .form-section {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   padding-top: 24px;
   display: flex;
   flex-direction: column;
@@ -475,27 +475,27 @@ ${data.problemDescription}
 
 .form-label {
   font-weight: 500;
-  color: #374151;
+  color: var(--modalColor, #1a1a1a);
   font-size: 0.95rem;
 }
 
 .phone-input {
   width: 100%;
   padding: 12px 16px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: var(--input);
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-family: inherit;
   font-size: 0.95rem;
   transition: all 0.2s;
-  color: #1f2937;
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .phone-input:focus {
   outline: none;
-  border-color: #6732ff;
-  box-shadow: 0 0 0 3px rgba(103, 50, 255, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .phone-input::placeholder {
@@ -505,22 +505,22 @@ ${data.problemDescription}
 .problem-textarea {
   width: 100%;
   padding: 12px 16px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: var(--input);
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-family: inherit;
   font-size: 0.95rem;
   resize: vertical;
   min-height: 100px;
   transition: all 0.2s;
-  color: #1f2937;
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .problem-textarea:focus {
   outline: none;
-  border-color: #6732ff;
-  box-shadow: 0 0 0 3px rgba(103, 50, 255, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .problem-textarea::placeholder {
@@ -530,7 +530,7 @@ ${data.problemDescription}
 .char-counter {
   text-align: right;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .modal-actions {
@@ -555,24 +555,24 @@ ${data.problemDescription}
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: var(--tableAccountBg);
+  color: var(--modalColor, #1a1a1a);
+  border: 1px solid var(--line);
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .btn-primary {
-  background: #6732ff;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: #5a2ae0;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
 
 .btn-primary:disabled {
@@ -602,12 +602,12 @@ ${data.problemDescription}
 .success-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor, #1a1a1a);
   margin: 0 0 8px 0;
 }
 
 .success-text {
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0 0 24px 0;
   font-size: 0.95rem;
 }

@@ -95,26 +95,26 @@ const handleClick = () => {
   margin: 1px 0;
   cursor: pointer;
   border-radius: 6px;
-  color: #64748b; /* Неактивный цвет (серый) */
+  color: var(--headerAccountText); /* Неактивный цвет (серый) */
   transition: all 0.15s ease;
   user-select: none;
 }
 
 .item-row:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--tableHover);
+  color: var(--text);
 }
 
 /* Стили для активного ФАЙЛА */
 .item-row.is-active {
-  background: rgba(204, 212, 245, 0.4) !important;
-  color: #2a3f93 !important;
+  background: var(--tableActiveButton) !important;
+  color: var(--tableActiveButtonColor) !important;
   font-weight: 600;
 }
 
 /* Стили для открытой ПАПКИ (текст чуть темнее, но без заливки) */
 .item-row.folder-open {
-  color: #1e293b;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -149,7 +149,7 @@ const handleClick = () => {
 .children-container {
   margin-left: 18px; /* Сдвигаем вложенные элементы вправо */
   padding-left: 10px;
-  border-left: 1px solid #e2e8f0; /* Линия иерархии */
+  border-left: 1px solid var(--line); /* Линия иерархии */
   overflow: hidden;
 }
 

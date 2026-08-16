@@ -350,8 +350,8 @@ onMounted(fetchHistory);
   display: flex;
   gap: 12px;
   padding: 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #eee;
+  background: var(--tableAccountBg);
+  border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
 }
 
@@ -371,27 +371,31 @@ onMounted(fetchHistory);
 .filter-group label {
   font-size: 11px;
   font-weight: bold;
-  color: #888;
+  color: var(--headerAccountText);
   text-transform: uppercase;
 }
 
 .filter-group input {
   padding: 8px 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;
+  background-color: var(--input);
+  color: var(--text);
 }
 
 .select-wrapper select {
   height: 38px;
   padding: 20px 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;
+  background-color: var(--input);
+  color: var(--text);
 }
 
 .refresh-btn {
@@ -416,10 +420,10 @@ onMounted(fetchHistory);
   display: flex;
   justify-content: space-between;
   padding: 6px 16px;
-  background: #fff;
+  background: var(--bg);
   font-size: 12px;
-  color: #777;
-  border-bottom: 1px solid #f0f0f0;
+  color: var(--headerAccountText);
+  border-bottom: 1px solid var(--line);
 }
 
 /* ТЕЛО: скроллится только здесь */
@@ -431,11 +435,11 @@ onMounted(fetchHistory);
 }
 
 .card {
-  border: 1px solid #eef0f2;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
   margin-bottom: 12px;
-  background: #fff;
+  background: var(--bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   width: 100%;
   box-sizing: border-box;
@@ -451,7 +455,7 @@ onMounted(fetchHistory);
 
 .card-date {
   font-size: 12px;
-  color: #999;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -484,12 +488,12 @@ onMounted(fetchHistory);
 }
 
 .card-row .label {
-  color: #888;
+  color: var(--headerAccountText);
   width: 90px;
   flex-shrink: 0;
 }
 .card-row .value {
-  color: #333;
+  color: var(--text);
   word-break: break-word; /* ПЕРЕНОС длинных слов/ссылок */
   flex: 1;
   min-width: 0;
@@ -524,8 +528,8 @@ onMounted(fetchHistory);
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
   z-index: 10;
 }
 
@@ -544,8 +548,8 @@ onMounted(fetchHistory);
 .page-num {
   width: 32px;
   height: 32px;
-  border: 1px solid #ddd;
-  background: #fff;
+  border: 1px solid var(--line);
+  background: var(--bg);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
@@ -563,8 +567,8 @@ onMounted(fetchHistory);
 
 .pag-nav {
   padding: 6px 14px;
-  border: 1px solid #ddd;
-  background: #fff;
+  border: 1px solid var(--line);
+  background: var(--bg);
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
@@ -580,7 +584,7 @@ onMounted(fetchHistory);
 .full-text-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -588,7 +592,7 @@ onMounted(fetchHistory);
   padding: 20px;
 }
 .full-text-modal {
-  background: #fff;
+  background: var(--modalBg);
   width: 100%;
   max-width: 500px;
   max-height: 80%;
@@ -599,7 +603,7 @@ onMounted(fetchHistory);
 }
 .full-text-header {
   padding: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -617,13 +621,13 @@ onMounted(fetchHistory);
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #aaa;
+  color: var(--headerAccountText);
 }
 
 .state-container {
   padding: 60px 20px;
   text-align: center;
-  color: #999;
+  color: var(--headerAccountText);
 }
 .input-error {
   border-color: #d93025 !important;

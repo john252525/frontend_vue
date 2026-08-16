@@ -205,7 +205,7 @@ watch(
 .form-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 .input-wrapper {
@@ -215,23 +215,24 @@ watch(
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-radius: 12px;
   font-size: 16px;
   transition: all 0.2s;
-  background: white;
+  background: var(--input);
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .form-input:disabled {
-  background: #f9fafb;
-  color: #6b7280;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -244,7 +245,7 @@ watch(
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -253,7 +254,7 @@ watch(
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,7 +264,7 @@ watch(
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--headerAccountText);
 }
 
 .btn-content {
@@ -274,7 +275,7 @@ watch(
 
 .email-hint {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-top: 4px;
 }
 
@@ -306,12 +307,12 @@ watch(
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 

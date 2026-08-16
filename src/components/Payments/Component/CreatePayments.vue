@@ -234,7 +234,7 @@ const closeInvoiceModal = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(8px);
   z-index: 1000;
 }
@@ -245,7 +245,7 @@ const closeInvoiceModal = () => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1001;
-  background: white;
+  background: var(--modalBg);
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   width: 440px;
@@ -261,7 +261,7 @@ const closeInvoiceModal = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--modalBg);
   backdrop-filter: blur(4px);
   border-radius: 20px;
   z-index: 10;
@@ -277,15 +277,15 @@ const closeInvoiceModal = () => {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
-  border-left: 4px solid #3b82f6;
+  border: 4px solid var(--line);
+  border-left: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 12px;
 }
 
 .loading-text {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   font-weight: 500;
 }
@@ -315,7 +315,7 @@ const closeInvoiceModal = () => {
 }
 
 .back-btn {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
   width: 32px;
   height: 32px;
@@ -323,19 +323,19 @@ const closeInvoiceModal = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .back-btn:hover:not(:disabled) {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--line);
+  color: var(--text);
 }
 
 .close-btn {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
   width: 32px;
   height: 32px;
@@ -343,15 +343,15 @@ const closeInvoiceModal = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .close-btn:hover:not(:disabled) {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--line);
+  color: var(--text);
 }
 
 .steps-indicator {
@@ -376,8 +376,8 @@ const closeInvoiceModal = () => {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   font-size: 12px;
   font-weight: 600;
   display: flex;
@@ -387,7 +387,7 @@ const closeInvoiceModal = () => {
 }
 
 .step.active .step-number {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
@@ -398,13 +398,13 @@ const closeInvoiceModal = () => {
 
 .step-label {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   font-weight: 500;
   transition: all 0.3s;
 }
 
 .step.active .step-label {
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .step.completed .step-label {

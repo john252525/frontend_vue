@@ -342,7 +342,7 @@ const handleUpdate = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -350,7 +350,7 @@ const handleUpdate = async () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -364,7 +364,7 @@ const handleUpdate = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-title {
@@ -378,7 +378,7 @@ const handleUpdate = async () => {
   height: 32px;
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -404,21 +404,21 @@ const handleUpdate = async () => {
   box-sizing: border-box;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
 }
 
 .order-hint {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-bottom: 12px;
   font-style: italic;
 }
 
 .cascade-order-container {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;
@@ -441,15 +441,15 @@ const handleUpdate = async () => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #d1d5db;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 6px;
   cursor: grab;
 }
 
 .order-item.drag-over {
   background: rgba(85, 102, 200, 0.1);
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
 }
 
 .order-number {
@@ -458,7 +458,7 @@ const handleUpdate = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -491,7 +491,7 @@ const handleUpdate = async () => {
   background: #5b4ef5;
 }
 .badge-sms {
-  background: #7c3aed;
+  background: var(--primaryHover);
 }
 .badge-email {
   background: #f59e0b;
@@ -516,8 +516,8 @@ const handleUpdate = async () => {
   display: flex;
   align-items: center;
   padding: 6px 12px 6px 52px;
-  background: #f3f4f6;
-  border-left: 2px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border-left: 2px solid var(--line);
   margin-left: 20px;
 }
 
@@ -530,7 +530,7 @@ const handleUpdate = async () => {
 
 .cascade-interval-label {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -538,22 +538,22 @@ const handleUpdate = async () => {
 .cascade-interval-input {
   width: 52px;
   padding: 3px 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 4px;
   font-size: 12px;
   text-align: center;
-  background: white;
+  background: var(--input);
   color: var(--text);
 }
 
 .cascade-interval-input:focus {
   outline: none;
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
 }
 
 .cascade-interval-unit {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   white-space: nowrap;
 }
 
@@ -567,13 +567,13 @@ const handleUpdate = async () => {
 .hint-icon {
   width: 14px;
   height: 14px;
-  fill: #9ca3af;
+  fill: var(--headerAccountText);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .hint-icon:hover {
-  fill: #6b7280;
+  fill: var(--text);
 }
 
 .hint-popup {
@@ -620,7 +620,7 @@ const handleUpdate = async () => {
 
 .add-cascade {
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
 }
 
 .cascade-options {
@@ -633,8 +633,8 @@ const handleUpdate = async () => {
   flex: 1;
   min-width: 100px;
   padding: 10px 12px;
-  border: 2px solid #d1d5db;
-  background: white;
+  border: 2px solid var(--line);
+  background: var(--bg);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -654,7 +654,7 @@ const handleUpdate = async () => {
   background: rgba(91, 78, 245, 0.05);
 }
 .cascade-btn-sms:hover {
-  border-color: #7c3aed;
+  border-color: var(--primaryHover);
   background: rgba(124, 58, 237, 0.05);
 }
 .cascade-btn-email:hover {
@@ -672,7 +672,7 @@ const handleUpdate = async () => {
   display: flex;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   justify-content: flex-end;
 }
 
@@ -684,10 +684,10 @@ const handleUpdate = async () => {
   cursor: pointer;
 }
 .button-primary {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 .button-secondary {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
 }
 </style>

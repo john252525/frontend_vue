@@ -15,6 +15,7 @@ const messages = {
   en: {
     navigation: {
       account: "Accounts",
+      subscriptions: "Subscriptions",
       mailings: "Mailings",
       chats: "Chats",
       profile: "Profile",
@@ -663,6 +664,7 @@ const messages = {
   ru: {
     navigation: {
       account: "Аккаунты",
+      subscriptions: "Подписки",
       mailings: "Рассылки",
       chats: "Чаты",
       profile: "Профиль",

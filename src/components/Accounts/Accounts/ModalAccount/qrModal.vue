@@ -89,7 +89,7 @@ watch(currentQr, (newValue) => {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 0;
   left: 0;
 }
@@ -100,7 +100,7 @@ watch(currentQr, (newValue) => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 20px;
   width: 256px;
   height: 320px;
@@ -122,7 +122,7 @@ watch(currentQr, (newValue) => {
 
 .loading {
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   position: absolute;
   top: 50%;
   left: 50%;

@@ -406,7 +406,7 @@ provide("currentStep", currentStep);
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -415,7 +415,7 @@ provide("currentStep", currentStep);
 }
 
 .subscription-check-container {
-  background-color: white;
+  background-color: var(--modalBg);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
@@ -441,7 +441,7 @@ provide("currentStep", currentStep);
   width: 48px;
   height: 48px;
   border: 4px solid #e1e5eb;
-  border-top: 4px solid #4f46e5;
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -461,12 +461,12 @@ provide("currentStep", currentStep);
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #1f2937;
+  color: var(--modalColor);
 }
 
 .subscription-check-text {
   font-size: 16px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-bottom: 24px;
   line-height: 1.5;
 }
@@ -479,7 +479,7 @@ provide("currentStep", currentStep);
 }
 
 .btn-primary {
-  background-color: #4f46e5;
+  background-color: var(--primary);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -491,12 +491,12 @@ provide("currentStep", currentStep);
 }
 
 .btn-primary:hover {
-  background-color: #4338ca;
+  background-color: var(--primaryHover);
 }
 
 .btn-secondary {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--tableAccountBg);
+  color: var(--text);
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
@@ -507,7 +507,7 @@ provide("currentStep", currentStep);
 }
 
 .btn-secondary:hover {
-  background-color: #e5e7eb;
+  background-color: var(--line);
 }
 
 @keyframes spin {
@@ -537,7 +537,7 @@ provide("currentStep", currentStep);
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -546,7 +546,7 @@ provide("currentStep", currentStep);
 }
 
 .modal-container {
-  background-color: white;
+  background-color: var(--modalBg);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
@@ -559,7 +559,7 @@ provide("currentStep", currentStep);
 
 .modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #e1e5eb;
+  border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   flex-shrink: 0;
@@ -573,23 +573,24 @@ provide("currentStep", currentStep);
   align-items: center;
   gap: 12px;
   flex: 1;
+  color: var(--modalColor);
 }
 
 .modal-close {
   cursor: pointer;
   transition: transform 0.2s;
   flex-shrink: 0;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .modal-close:hover {
   transform: translateX(-3px);
-  color: #475569;
+  color: var(--text);
 }
 
 .modal-progress {
   padding: 16px 24px;
-  border-bottom: 1px solid #e1e5eb;
+  border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 
@@ -606,7 +607,7 @@ provide("currentStep", currentStep);
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #e1e5eb;
+  background-color: var(--line);
   z-index: 1;
 }
 
@@ -623,8 +624,8 @@ provide("currentStep", currentStep);
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: #e1e5eb;
-  color: #64748b;
+  background-color: var(--tableAccountBg);
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -642,7 +643,7 @@ provide("currentStep", currentStep);
 
 .step-title {
   font-size: 14px;
-  color: #64748b;
+  color: var(--headerAccountText);
   font-weight: 500;
   transition: all 0.2s;
   text-align: center;
@@ -654,29 +655,29 @@ provide("currentStep", currentStep);
   left: calc(100% - 15px);
   width: calc(100% - 30px);
   height: 2px;
-  background-color: #e1e5eb;
+  background-color: var(--line);
   z-index: -1;
 }
 
 .step-active .step-number {
-  background-color: #4f46e5;
+  background-color: var(--primary);
   color: white;
   transform: scale(1.1);
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3);
 }
 
 .step-active .step-title {
-  color: #4f46e5;
+  color: var(--primary);
   font-weight: 600;
 }
 
 .step-completed .step-number {
-  background-color: #4f46e5;
+  background-color: var(--primary);
   color: white;
 }
 
 .step-completed .step-title {
-  color: #4f46e5;
+  color: var(--primary);
 }
 
 .step-available {
@@ -688,7 +689,7 @@ provide("currentStep", currentStep);
 }
 
 .step-available:hover .step-title {
-  color: #6366f1;
+  color: var(--primary);
 }
 
 .step:not(.step-available) {

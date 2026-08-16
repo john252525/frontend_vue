@@ -232,7 +232,7 @@ textarea {
 button {
   margin-top: 12px;
   padding: 8px 16px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 4px;

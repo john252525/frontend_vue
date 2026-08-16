@@ -43,10 +43,7 @@
             :title="isCollapsed ? item.text : ''"
           >
             <div class="icon-container">
-              <img
-                :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-                class="svg-icon"
-              />
+              <div class="svg-icon" :style="getIconMaskStyle(item.icon)"></div>
             </div>
             <div class="text-container">
               <span class="page-text">{{ item.text }}</span>
@@ -79,10 +76,7 @@
             :class="{ active: item.isActive }"
             @click="handleItemClick(item)"
           >
-            <img
-              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-              class="svg-icon"
-            />
+            <div class="svg-icon" :style="getIconMaskStyle(item.icon)"></div>
           </li>
         </ul>
       </div>
@@ -104,10 +98,7 @@
             :class="{ active: item.isActive }"
             @click="handleItemClick(item)"
           >
-            <img
-              :src="`data:image/svg+xml;utf8,${encodeURIComponent(item.icon)}`"
-              class="svg-icon"
-            />
+            <div class="svg-icon" :style="getIconMaskStyle(item.icon)"></div>
           </li>
         </ul>
       </div>
@@ -333,7 +324,7 @@ const getIconMaskStyle = (icon) => {
   --sidebar-width: 250px;
   --sidebar-collapsed-width: 80px;
   --primary-color: var(--textNavHover, #eef2ff);
-  --icon-color: var(--svgColor, #555);
+  --icon-color: var(--text, #555);
   --text-color: var(--text, #333);
   --anim-speed: 0.4s;
   --anim-curve: cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -343,7 +334,7 @@ const getIconMaskStyle = (icon) => {
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  background: #ffffff;
+  background: var(--bg);
   height: calc(100vh - 57px);
   z-index: 10;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
@@ -362,14 +353,14 @@ const getIconMaskStyle = (icon) => {
   position: absolute;
   width: 32px;
   height: 32px;
-  background: white;
-  border: 1px solid #eee;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #666;
+  color: var(--headerAccountText);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   z-index: 50;
   transition: all var(--anim-speed) var(--anim-curve);
@@ -380,9 +371,9 @@ const getIconMaskStyle = (icon) => {
 }
 
 .menu-toggle-btn:hover {
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   transform: scale(1.05);
-  color: #000;
+  color: var(--text);
 }
 
 /* Положение кнопки при свернутом меню: ВНИЗУ по центру */
@@ -425,7 +416,7 @@ const getIconMaskStyle = (icon) => {
     sans-serif;
   font-size: 11px;
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 12px;
@@ -468,17 +459,17 @@ ul {
 
 /* Hover/Active - теперь они внутри nav-container и не выходят за границы */
 .list-item:hover {
-  background: rgba(204, 212, 245, 0.4);
+  background: var(--tableHover);
 }
 
 .list-item.active {
-  background: rgba(204, 212, 245, 0.4);
-  color: #778ff2;
+  background: var(--tableAccountBg);
+  color: var(--tableActiveButtonColor);
   font-weight: 500;
 }
 
 .list-item.active .svg-icon {
-  fill: #778ff2;
+  background-color: var(--tableActiveButtonColor);
 }
 
 /* --- ИКОНКИ --- */
@@ -493,8 +484,14 @@ ul {
 .svg-icon {
   width: 22px;
   height: 22px;
-  fill: var(--icon-color);
-  transition: fill 0.2s ease;
+  background-color: var(--icon-color);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: background-color 0.2s ease;
 }
 
 /* --- ТЕКСТ И АНИМАЦИЯ ИСЧЕЗНОВЕНИЯ --- */
@@ -537,13 +534,13 @@ ul {
   position: sticky;
   top: 0;
   height: 100%;
-  background-color: white;
+  background-color: var(--bg);
   width: 80px;
   height: calc(100vh - 57px);
   position: fixed;
   left: 0;
   top: 57px;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--line);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -559,7 +556,7 @@ ul {
 .logo-header-cont-chat {
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
   width: 100%;
   display: flex;
   justify-content: center;
@@ -602,7 +599,7 @@ ul {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: white;
+  background: var(--bg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
@@ -616,7 +613,7 @@ ul {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--backgroundComponentModal);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -634,7 +631,7 @@ ul {
   transform: translateX(-100%); /* ДОБАВЛЕНО: прячем меню за левым краем */
   width: 280px;
   height: 100%;
-  background: white;
+  background: var(--bg);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
   display: flex;
@@ -646,7 +643,7 @@ ul {
 }
 .mobile-menu-header {
   padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 .logo-header-cont {
   display: flex;
@@ -661,6 +658,7 @@ ul {
 .title {
   font-size: 20px;
   font-weight: 600;
+  color: var(--text);
 }
 .close-menu-btn {
   background: none;
@@ -683,6 +681,7 @@ ul {
   gap: 12px;
   padding: 12px 14px;
   border-radius: 12px;
+  color: var(--text);
 }
 .mobile-link {
   display: flex;
@@ -697,7 +696,7 @@ ul {
   flex-shrink: 0;
   width: 22px;
   height: 22px;
-  background-color: var(--icon-color, #555);
+  background-color: var(--text, #555);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -707,7 +706,7 @@ ul {
   transition: background-color 0.2s ease;
 }
 .mobile-item.active .mobile-icon {
-  background-color: #778ff2;
+  background-color: var(--tableActiveButtonColor);
 }
 .page {
   margin: 0;

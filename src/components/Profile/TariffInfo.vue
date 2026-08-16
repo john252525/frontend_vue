@@ -55,11 +55,11 @@ const handleCancel = () => {
 
 <style scoped>
 .profile-section {
-  background: white;
+  background: var(--bg);
   border-radius: 10px;
   padding: 1.25rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   height: 100%;
 }
 
@@ -70,7 +70,7 @@ const handleCancel = () => {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
-  color: #2d3748;
+  color: var(--text);
 }
 
 .icon {
@@ -97,7 +97,7 @@ const handleCancel = () => {
 
 .tariff-badge.basic {
   background: #ebf8ff;
-  color: #3182ce;
+  color: var(--primaryHover);
 }
 
 .tariff-badge.premium {
@@ -110,11 +110,11 @@ const handleCancel = () => {
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
-  color: #718096;
+  color: var(--headerAccountText);
 }
 
 .primary-btn {
-  background: #667eea;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;

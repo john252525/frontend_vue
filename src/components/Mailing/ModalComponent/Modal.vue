@@ -318,7 +318,7 @@ const getMessages = async () => {
 /* Базовые стили для обеих версий */
 .action-list {
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--bg);
   position: absolute;
   z-index: 1010;
   display: flex;
@@ -397,8 +397,8 @@ const getMessages = async () => {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-bottom: 1px solid var(--line);
+  background: var(--tableAccountBg);
   border-radius: 16px 16px 0 0;
 }
 
@@ -411,7 +411,7 @@ const getMessages = async () => {
 .mailing-name-mobile {
   font-weight: 600;
   font-size: 16px;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .close-button {
@@ -426,26 +426,26 @@ const getMessages = async () => {
 }
 
 .close-button:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .close-button svg {
   width: 20px;
   height: 20px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 /* Стили для действий в десктопной версии */
 .action-list.desktop-version .action {
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
   cursor: pointer;
   padding: 4px;
 }
 
 .action-list.desktop-version .action:hover {
-  background-color: #eeeeee;
+  background-color: var(--tableAccountBg);
   border-radius: 5px 0px 0px 5px;
 }
 
@@ -453,10 +453,10 @@ const getMessages = async () => {
 .action-list.mobile-version .action {
   padding: 16px;
   font-size: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
   margin: 0;
   cursor: pointer;
-  color: #000;
+  color: var(--text);
 }
 
 .action-list.mobile-version .action:last-child {
@@ -465,7 +465,7 @@ const getMessages = async () => {
 }
 
 .action-list.mobile-version .action:hover {
-  background-color: #f3f4f6;
+  background-color: var(--tableAccountBg);
   border-radius: 0;
 }
 

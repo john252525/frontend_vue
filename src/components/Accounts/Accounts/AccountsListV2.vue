@@ -294,11 +294,6 @@ const accountStore = useAccountStore();
 
 import { useInstancesStore } from "@/stores/instancesStore";
 const instancesStore = useInstancesStore();
-const token = computed(() => accountStore.getAccountToken);
-const accountStation = computed(() => accountStore.getAccountStation);
-const sourceGroup = computed(() => accountStore.getSource);
-const addDeleted = computed(() => accountStore.getAddDeleted);
-const typeGroup = computed(() => accountStore.getType);
 const allGroup = computed(() => accountStore.getGroup);
 const crmPlatform = computed(() => accountStore.getCrmPlatform);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -311,10 +306,6 @@ const allAcoount = computed(() => chatStore.getLoginWhatsAppChatsStep);
 import { useUserInfoStore } from "@/stores/userInfoStore";
 const userInfoStore = useUserInfoStore();
 const { userInfo } = storeToRefs(userInfoStore);
-
-import { fetchChats } from "@/utils/getChats";
-import { useDomain } from "@/composables/getDomain";
-const { stationDomain } = useDomain();
 
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -331,21 +322,35 @@ const props = defineProps({
 });
 
 // ============= СОСТОЯНИЯ =============
+const chatsLoadingChange = inject("chatsLoadingChange");
+
+import { useAccountsList } from "@/composables/useAccountsList";
+const {
+  dataStationNone,
+  dataStation,
+  loadDataStation,
+  errorAccountBolean,
+  instanceData,
+  accounts,
+  token,
+  accountStation,
+  getInfoWhats,
+  filterInstances,
+  retryGetInfo,
+  getAccounts,
+} = useAccountsList({
+  onAccountsLoaded: props.changeAllAccounts,
+  chatsLoadingChange,
+});
+
 const tariffStation = ref(false);
 const forceStopItemData = ref({});
-const chatsLoadingChange = inject("chatsLoadingChange");
-const dataStationNone = ref(false);
-const dataStation = ref(false);
-const loadDataStation = ref(false);
-const errorAccountBolean = ref(false);
 const qrCodeData = ref([]);
 const enableStation = ref(false);
 const getByCodeStation = ref(false);
 const getScreenStation = ref(false);
 const qrModalStation = ref(false);
 const settingsModalStation = ref(false);
-const instanceData = ref([]);
-const accounts = ref([]);
 const isModalOpen = ref(false);
 const modalPosition = ref({ top: 0, left: 0 });
 const selectedItem = ref(null);
@@ -644,31 +649,6 @@ const hideMessage = () => {
 };
 
 // ============= API ВЫЗОВЫ =============
-const getInfoWhats = async (source, login, type, storage) => {
-  try {
-    const response = await axios.post(
-      `${FRONTEND_URL}getInfo`,
-      {
-        source: source,
-        login: login,
-        type: type,
-        storage: storage,
-      },
-      {
-        timeout: 15000,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          Authorization: `Bearer ${token.value}`,
-        },
-      },
-    );
-    return response;
-  } catch (error) {
-    console.error("Error in getInfoWhats:", error);
-    return null;
-  }
-};
-
 const changeForceStopItemData = async (item) => {
   try {
     forceStopItemData.value = { ...item, loading: true };
@@ -732,53 +712,11 @@ const changeForceStopItemData = async (item) => {
     if (accountIndex !== -1) {
       instanceData.value[accountIndex].loading = false;
       instanceData.value[accountIndex].getInfoError = true;
-      instancesStore.updateInstanceByUuid(item.uuid, { loading: false, getInfoError: true });
+      instancesStore.updateInstanceByUuid(item.uuid, {
+        loading: false,
+        getInfoError: true,
+      });
     }
-  }
-};
-
-const retryGetInfo = async (item) => {
-  const accountIndex = instanceData.value.findIndex(
-    (acc) => acc.login === item.login && acc.source === item.source,
-  );
-  if (accountIndex === -1) return;
-
-  instanceData.value[accountIndex] = {
-    ...instanceData.value[accountIndex],
-    loading: true,
-    getInfoError: false,
-  };
-  instancesStore.updateInstanceByUuid(item.uuid, { loading: true, getInfoError: false });
-
-  let getInfoError = false;
-  try {
-    const infoResponse = await getInfoWhats(
-      item.source,
-      item.login,
-      item.type,
-      item.storage,
-    );
-
-    if (!infoResponse) {
-      getInfoError = true;
-    } else {
-      if (infoResponse.data?.step) {
-        instanceData.value[accountIndex].step = infoResponse.data.step;
-      }
-      instanceData.value[accountIndex].connectedPhone = infoResponse.data?.connectedPhone || "";
-    }
-  } catch (error) {
-    getInfoError = true;
-    console.error(`Retry getInfo error for ${item.login}:`, error);
-  } finally {
-    instanceData.value[accountIndex].loading = false;
-    instanceData.value[accountIndex].getInfoError = getInfoError;
-    instancesStore.updateInstanceByUuid(item.uuid, {
-      loading: false,
-      step: instanceData.value[accountIndex].step,
-      connectedPhone: instanceData.value[accountIndex].connectedPhone || "",
-      getInfoError,
-    });
   }
 };
 
@@ -910,272 +848,6 @@ const handleSendLog = async (location, method, params, results, answer) => {
     await sendLog(location, method, params, results, answer);
   } catch (err) {
     console.error("error", err);
-  }
-};
-
-// Применяет текущее состояние фильтров из accountStore к allInstances без API-запроса
-const filterInstances = () => {
-  if (!instancesStore.hasAllInstances) return;
-
-  const sources = sourceGroup.value;
-  const types = typeGroup.value;
-  const showDeleted = addDeleted.value;
-
-  const messengerSources = [
-    "telegram",
-    "whatsapp",
-    "max",
-    "max-bot",
-    "instagram",
-    "vk-bot",
-  ];
-
-  const filtered = instancesStore.allInstances.filter((inst) => {
-    // Фильтр удалённых аккаунтов
-    if (!showDeleted && inst.enable === "0") return false;
-
-    // Если все фильтры сброшены — показываем всё
-    if (sources.length === 0 && types.length === 0) return true;
-
-    // Мессенджеры фильтруются ТОЛЬКО по source, не по type
-    if (messengerSources.includes(inst.source)) {
-      return sources.includes(inst.source);
-    }
-
-    // Остальные аккаунты (SMS, Email, CRM): по source или type
-    if (sources.length > 0 && sources.includes(inst.source)) return true;
-
-    // Соответствие по type (SMS → touchapi, Email → adapter, CRM-типы)
-    if (types.length > 0 && types.includes(inst.type)) return true;
-
-    return false;
-  });
-
-  instanceData.value = filtered.map((inst) => ({ ...inst }));
-  instancesStore.setInstances([...instanceData.value]);
-
-  dataStation.value = instanceData.value.length > 0;
-  dataStationNone.value = instanceData.value.length === 0;
-};
-
-const getAccounts = async () => {
-  console.log("🔄 AccountList: начало загрузки");
-
-  if (!accountStore || typeof accountStore.setLoading !== "function") {
-    console.error("❌ AccountList: store или setLoading не доступны");
-    return [];
-  }
-
-  try {
-    console.log("🔄 AccountList: устанавливаем loading = true");
-    accountStore.setLoading(true);
-
-    dataStationNone.value = false;
-    errorAccountBolean.value = false;
-    instanceData.value = [];
-
-    let params = {
-      source: accountStation.value,
-      skipDetails: true,
-      group: "messenger",
-    };
-
-    console.debug(stationDomain.navigate.value, "stationDomain navigate value");
-    console.debug(typeGroup.value, "typeGroup");
-
-    if (stationDomain.navigate.value === "touchapi") {
-      // Fetch ALL accounts — client-side filtering applied afterwards
-      params = {
-        source: [
-          "telegram",
-          "whatsapp",
-          "max",
-          "vk-bot",
-          "max-bot",
-          "instagram",
-          "sms",
-          "email",
-        ],
-        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
-        group: ["messenger", "crm", "bulk"],
-        add_deleted: true,
-      };
-    }
-
-    if (stationDomain.navigate.value === "whatsapi") {
-      // Fetch ALL accounts — client-side filtering applied afterwards
-      params = {
-        source: [
-          "telegram",
-          "whatsapp",
-          "max",
-          "vk-bot",
-          "max-bot",
-          "instagram",
-          "sms",
-          "email",
-        ],
-        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
-        group: ["messenger", "crm", "bulk"],
-        add_deleted: true,
-      };
-    }
-
-    console.debug(params, "Params before requesting accounts");
-
-    loadDataStation.value = true;
-    console.log("Параметры отправки", params);
-
-    try {
-      const response = await axios.post(
-        `${FRONTEND_URL}getInfoByToken`,
-        params,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token.value}`,
-          },
-        },
-      );
-
-      if (response.data.ok === true) {
-        accounts.value = response.data;
-        instanceData.value = (accounts.value.data?.instances || []).map((instance) => ({
-          ...instance,
-          step: instance.step === null ? "Н/Д" : instance.step,
-          loading: true,
-          storage: instance.storage || "undefined",
-          type: instance.type || "undefined",
-        }));
-
-        await props.changeAllAccounts(instanceData.value);
-
-        if (instanceData.value.length === 0) {
-          loadDataStation.value = false;
-          dataStationNone.value = true;
-        } else {
-          loadDataStation.value = false;
-          dataStation.value = true;
-
-          // Сразу показываем аккаунты и разблокируем UI
-          instancesStore.setAllInstances([...instanceData.value]);
-          filterInstances();
-
-          if (
-            accountStation.value === "whatsapp" ||
-            accountStation.value === "telegram"
-          ) {
-            // Фоновый переопрос getInfo — не блокирует интерфейс
-            (async () => {
-              const accountsToFetch = instanceData.value.filter(
-                (instance) =>
-                  instance.step?.value === 5 &&
-                  !["bulk", "amocrm", "bitrix24", "uon"].includes(
-                    instance.type,
-                  ) &&
-                  ((instance.storage === "binder" &&
-                    instance.type !== "touchapi") ||
-                    (instance.storage === "whatsapi" &&
-                      instance.type === "whatsapi")),
-              );
-
-              if (accountsToFetch.length > 0) {
-                try {
-                  await new Promise((resolve) =>
-                    setTimeout(resolve, 200 * accountsToFetch.length),
-                  );
-                  await fetchChats({
-                    token: token.value,
-                    accounts: accountsToFetch,
-                  });
-                } catch (e) {
-                  console.error("Ошибка при сохранении аккаунтов:", e);
-                }
-              }
-
-              const promises = instanceData.value.map(async (instance) => {
-                if (
-                  instance.type === "bulk" ||
-                  instance.type === "amocrm" ||
-                  instance.type === "bitrix24" ||
-                  instance.type === "uon"
-                ) {
-                  instance.loading = false;
-                  instancesStore.updateInstanceByUuid(instance.uuid, { loading: false });
-                  return;
-                }
-
-                if (
-                  (instance.storage === "binder" &&
-                    instance.type !== "touchapi") ||
-                  (instance.storage === "whatsapi" &&
-                    instance.type === "whatsapi")
-                ) {
-                  instance.loading = false;
-                  instancesStore.updateInstanceByUuid(instance.uuid, { loading: false });
-                  return;
-                }
-
-                let getInfoError = false;
-                try {
-                  const infoResponse = await getInfoWhats(
-                    instance.source,
-                    instance.login,
-                    instance.type,
-                    instance.storage,
-                  );
-
-                  if (!infoResponse) {
-                    getInfoError = true;
-                  } else {
-                    if (infoResponse.data?.step) {
-                      instance.step = infoResponse.data.step;
-                    }
-                    instance.connectedPhone = infoResponse.data?.connectedPhone || "";
-                  }
-                } catch (error) {
-                  getInfoError = true;
-                  console.error(`Error for ${instance.login}:`, error);
-                } finally {
-                  instance.loading = false;
-                  instance.getInfoError = getInfoError;
-                  instancesStore.updateInstanceByUuid(instance.uuid, {
-                    loading: false,
-                    step: instance.step,
-                    connectedPhone: instance.connectedPhone || "",
-                    getInfoError,
-                  });
-                }
-              });
-
-              await Promise.all(promises);
-              chatsLoadingChange();
-
-              // Обновляем стор после завершения фоновых запросов
-              instancesStore.setAllInstances([...instanceData.value]);
-              filterInstances();
-            })();
-          } else {
-            instanceData.value.forEach((instance) => {
-              instance.loading = false;
-            });
-            instancesStore.setAllInstances([...instanceData.value]);
-            filterInstances();
-          }
-        }
-      }
-    } catch (error) {
-      loadDataStation.value = false;
-      errorAccountBolean.value = true;
-      console.error("Error:", error);
-    }
-  } catch (error) {
-    console.error("❌ AccountList: ошибка в основном блоке:", error);
-  } finally {
-    console.log("✅ AccountList: устанавливаем loading = false");
-    console.log("✅ AccountList: возвращаем аккаунты:", instanceData.value);
-    accountStore.setLoading(false);
-    return instanceData.value;
   }
 };
 

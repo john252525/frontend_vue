@@ -308,13 +308,13 @@ onMounted(() => {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .settings-description {
   margin: 0;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .settings-content {
@@ -332,23 +332,24 @@ onMounted(() => {
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-radius: 0.5rem;
   font-size: 0.95rem;
   transition: all 0.2s;
-  background: white;
+  background: var(--input);
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .form-input:disabled {
-  background: #f9fafb;
-  color: #6b7280;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -361,7 +362,7 @@ onMounted(() => {
   right: 0.5rem;
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.375rem;
@@ -372,8 +373,8 @@ onMounted(() => {
 }
 
 .edit-inn-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .edit-inn-btn:disabled {
@@ -386,17 +387,17 @@ onMounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .inn-loader {
   width: 14px;
   height: 14px;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #3b82f6;
+  border: 2px solid var(--line);
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -453,22 +454,22 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: #3b82f6;
+  background-color: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
 }
 
 .btn-secondary {
-  background-color: #f0f0f0;
-  color: #1a1a1a;
-  border: 1px solid #e0e0e0;
+  background-color: var(--tableAccountBg);
+  color: var(--text);
+  border: 1px solid var(--line);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #e8e8e8;
+  background-color: var(--line);
 }
 
 .btn-loading {

@@ -522,7 +522,7 @@ onMounted(fetchConfigs);
   display: flex;
   gap: 4px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--line);
   padding-bottom: 0;
 }
 
@@ -532,7 +532,7 @@ onMounted(fetchConfigs);
   background: none;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--headerAccountText);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -541,13 +541,13 @@ onMounted(fetchConfigs);
 }
 
 .tab-btn:hover {
-  color: #334155;
-  background: #f8fafc;
+  color: var(--text);
+  background: var(--tableAccountBg);
 }
 
 .tab-btn.active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
+  color: var(--primaryHover);
+  border-bottom-color: var(--primaryHover);
   background: none;
 }
 
@@ -557,8 +557,8 @@ onMounted(fetchConfigs);
 
 /* Информация */
 .info-block {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -568,7 +568,7 @@ onMounted(fetchConfigs);
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--line);
 }
 
 .info-row:last-child {
@@ -578,18 +578,18 @@ onMounted(fetchConfigs);
 .info-label {
   font-size: 13px;
   font-weight: 600;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 .info-value {
   font-size: 13px;
-  color: #334155;
+  color: var(--text);
 }
 
 .uuid-val {
   font-family: monospace;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--headerAccountText);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -617,7 +617,7 @@ onMounted(fetchConfigs);
 /* Вебхуки */
 .section-desc {
   font-size: 13px;
-  color: #64748b;
+  color: var(--headerAccountText);
   margin-bottom: 14px;
 }
 
@@ -632,25 +632,25 @@ onMounted(fetchConfigs);
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg);
 }
 
 .webhook-item.add-row {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-style: dashed;
 }
 
 .wh-icon {
-  color: #94a3b8;
+  color: var(--headerAccountText);
   flex-shrink: 0;
 }
 
 .wh-url {
   flex: 1;
   font-size: 13px;
-  color: #334155;
+  color: var(--text);
   word-break: break-all;
 }
 
@@ -660,11 +660,11 @@ onMounted(fetchConfigs);
   background: none;
   outline: none;
   font-size: 13px;
-  color: #334155;
+  color: var(--text);
 }
 
 .wh-input::placeholder {
-  color: #94a3b8;
+  color: var(--headerAccountText);
 }
 
 .icon-btn {
@@ -673,7 +673,7 @@ onMounted(fetchConfigs);
   padding: 4px;
   cursor: pointer;
   border-radius: 4px;
-  color: #94a3b8;
+  color: var(--headerAccountText);
   transition: all 0.2s;
   flex-shrink: 0;
 }
@@ -709,7 +709,7 @@ onMounted(fetchConfigs);
 .field-label {
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -721,14 +721,14 @@ onMounted(fetchConfigs);
 
 .optional {
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--headerAccountText);
   font-size: 11px;
 }
 
 .badge-auto {
   font-size: 10px;
   background: #dbeafe;
-  color: #2563eb;
+  color: var(--primaryHover);
   padding: 1px 6px;
   border-radius: 10px;
   font-weight: 700;
@@ -736,25 +736,25 @@ onMounted(fetchConfigs);
 
 .field-input {
   padding: 9px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 13px;
-  color: #1e293b;
+  color: var(--text);
   outline: none;
   transition: border-color 0.2s;
-  background: #fff;
+  background: var(--input);
   width: 100%;
   box-sizing: border-box;
 }
 
 .field-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--primaryHover);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .field-input.field-disabled {
-  background: #f8fafc;
-  color: #94a3b8;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -782,14 +782,14 @@ select.field-input {
   border: none;
   background: none;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--headerAccountText);
   padding: 4px;
   display: flex;
   align-items: center;
 }
 
 .toggle-pass:hover {
-  color: #475569;
+  color: var(--text);
 }
 
 .error-msg {

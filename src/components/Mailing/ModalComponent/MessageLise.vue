@@ -331,7 +331,7 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,7 +342,7 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 }
 
 .modal-container {
-  background: #ffffff;
+  background: var(--modalBg);
   border-radius: 12px;
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
@@ -362,15 +362,15 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-bottom: 1px solid #f3f4f6;
-  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+  background: var(--modalBg);
   flex-shrink: 0;
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--modalColor);
   margin: 0;
   display: flex;
   align-items: center;
@@ -379,9 +379,9 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 
 .message-count {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: normal;
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   padding: 2px 8px;
   border-radius: 12px;
 }
@@ -392,13 +392,13 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   transition: all 0.2s;
 }
 
 .close-button:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: var(--tableAccountBg);
+  color: var(--text);
 }
 
 /* --- Контентная область --- */
@@ -427,33 +427,35 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--headerAccountText);
   pointer-events: none;
 }
 
 .filter-input {
   width: 100%;
   padding: 10px 12px 10px 40px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 0.9rem;
   transition: all 0.2s;
   box-sizing: border-box;
+  background: var(--input);
+  color: var(--text);
 }
 
 .filter-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 /* --- Зона скролла (Таблица) --- */
 .scrollable-area {
   flex: 1;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--bg);
   position: relative;
 }
 
@@ -467,24 +469,24 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #f9fafb;
+  background-color: var(--tableAccountBg);
   padding: 12px 16px;
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .table-row {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
   transition: background 0.1s;
 }
 
 .table-row:hover {
-  background-color: #f9fafb;
+  background-color: var(--tableHover);
 }
 
 .table-row td {
@@ -507,8 +509,8 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 }
 
 .id-badge {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
@@ -518,11 +520,11 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #111827;
+  color: var(--text);
 }
 
 .phone-icon {
-  color: #9ca3af;
+  color: var(--headerAccountText);
   flex-shrink: 0;
 }
 
@@ -530,7 +532,7 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #4b5563;
+  color: var(--headerAccountText);
 }
 
 /* Статусы */
@@ -569,14 +571,14 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   align-items: center;
   justify-content: space-between;
   padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--line);
   flex-shrink: 0;
   gap: 12px;
 }
 
 .pagination-info {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .pagination-controls {
@@ -591,16 +593,16 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid #d1d5db;
-  background: white;
+  border: 1px solid var(--line);
+  background: var(--bg);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--tableHover);
+  border-color: var(--line);
 }
 
 .page-btn:disabled {
@@ -611,17 +613,18 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 .page-current {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   min-width: 60px;
   text-align: center;
 }
 
 .limit-select {
   padding: 6px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 0.875rem;
-  background: white;
+  background: var(--input);
+  color: var(--text);
   cursor: pointer;
 }
 
@@ -641,8 +644,8 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #f3f4f6;
-  border-top: 3px solid #3b82f6;
+  border: 3px solid var(--line);
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 12px;
@@ -667,8 +670,8 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   }
 
   .message-card {
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--bg);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 12px 14px;
     margin-bottom: 12px;
@@ -681,7 +684,7 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
     align-items: center;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--line);
     font-size: 0.875rem;
   }
 
@@ -698,12 +701,12 @@ const chaneErrorBlock = () => (errorBlock.value = !errorBlock.value);
   }
 
   .card-label {
-    color: #6b7280;
+    color: var(--headerAccountText);
     min-width: 56px;
   }
 
   .card-value {
-    color: #111827;
+    color: var(--text);
   }
 
   .card-text {

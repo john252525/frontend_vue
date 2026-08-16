@@ -154,13 +154,13 @@ onMounted(() => {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .settings-description {
   margin: 0;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .settings-list {
@@ -174,15 +174,15 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem;
-  background: #f9f9f9;
+  background: var(--tableAccountBg);
   border-radius: 0.375rem;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--line);
   transition: all 0.2s ease;
 }
 
 .setting-item:hover {
-  background: #fcfcfc;
-  border-color: #d9d9d9;
+  background: var(--tableHover);
+  border-color: var(--line);
 }
 
 .setting-info {
@@ -195,7 +195,7 @@ onMounted(() => {
 .setting-label {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   cursor: pointer;
   margin: 0;
 }
@@ -203,7 +203,7 @@ onMounted(() => {
 .setting-hint {
   margin: 0;
   font-size: 0.8125rem;
-  color: #999;
+  color: var(--headerAccountText);
 }
 
 .setting-control {
@@ -250,7 +250,7 @@ onMounted(() => {
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: #3b82f6;
+  background-color: var(--primary);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {

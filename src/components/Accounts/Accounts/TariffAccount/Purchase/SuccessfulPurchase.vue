@@ -116,7 +116,7 @@ const confettiStyle = (i) => {
   max-width: 420px;
   margin: 0 auto;
   padding: 40px 30px;
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   text-align: center;
@@ -211,7 +211,7 @@ const confettiStyle = (i) => {
 }
 
 .purchase-details {
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 25px;
@@ -229,17 +229,17 @@ const confettiStyle = (i) => {
 }
 
 .detail-label {
-  color: #6c757d;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
 .detail-value {
-  color: #212529;
+  color: var(--modalColor);
   font-weight: 600;
 }
 
 .success-message {
-  color: #495057;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin-bottom: 30px;
   padding: 0 10px;

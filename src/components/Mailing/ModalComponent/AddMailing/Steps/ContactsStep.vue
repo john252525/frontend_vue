@@ -180,25 +180,26 @@ const validateAndNext = () => {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
 }
 
 .form-control {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--input);
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .form-control:focus {
-  border-color: #6366f1;
+  border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  background: white;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+  background: var(--input);
 }
 
 textarea.form-control {
@@ -228,11 +229,11 @@ textarea.form-control {
 .file-upload-label {
   flex: 1;
   padding: 10px 12px;
-  border: 1px dashed #cbd5e0;
+  border: 1px dashed var(--line);
   border-radius: 6px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   font-size: 14px;
-  color: #4b5563;
+  color: var(--headerAccountText);
   cursor: pointer;
   transition: all 0.2s;
   overflow: hidden;
@@ -241,7 +242,7 @@ textarea.form-control {
 }
 
 .file-upload-label:hover {
-  border-color: #9ca3af;
+  border-color: var(--headerAccountText);
 }
 
 .file-input {
@@ -251,7 +252,7 @@ textarea.form-control {
 .file-clear-btn {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   font-size: 18px;
   cursor: pointer;
   padding: 0 4px;
@@ -259,14 +260,14 @@ textarea.form-control {
 }
 
 .file-clear-btn:hover {
-  color: #6b7280;
+  color: var(--text);
 }
 
 .step-actions {
   display: flex;
   justify-content: space-between;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   margin-top: 20px;
   flex-shrink: 0;
 }
@@ -282,9 +283,9 @@ textarea.form-control {
 }
 
 .btn-secondary {
-  background: white;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
 }
 
 .btn-secondary:disabled {
@@ -293,17 +294,17 @@ textarea.form-control {
 }
 
 .btn-secondary:not(:disabled):hover {
-  background: #f9fafb;
+  background: var(--tableAccountBg);
 }
 
 .btn-primary {
-  background: #4f46e5;
+  background: var(--primary);
   border: none;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #4338ca;
+  background: var(--primaryHover);
 }
 
 .btn-disabled {

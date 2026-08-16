@@ -83,7 +83,7 @@ const props = defineProps({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,13 +93,13 @@ const props = defineProps({
 }
 
 .warning-modal {
-  background: white;
+  background: var(--modalBg);
   border-radius: 16px;
   padding: 32px;
   max-width: 480px;
   width: 100%;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8eaed;
+  border: 1px solid var(--line);
 }
 
 .modal-header {
@@ -122,7 +122,7 @@ const props = defineProps({
 .modal-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0;
   line-height: 1.2;
 }
@@ -132,7 +132,7 @@ const props = defineProps({
 }
 
 .warning-text {
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin-bottom: 24px;
   text-align: center;
@@ -140,14 +140,14 @@ const props = defineProps({
 }
 
 .consequences-card {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--line);
 }
 
 .consequences-title {
-  color: #374151;
+  color: var(--text);
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -165,7 +165,7 @@ const props = defineProps({
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #4b5563;
+  color: var(--headerAccountText);
 }
 
 .consequence-icon {
@@ -192,21 +192,21 @@ const props = defineProps({
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
 }
 
 @media (max-width: 480px) {

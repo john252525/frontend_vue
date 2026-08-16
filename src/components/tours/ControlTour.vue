@@ -130,12 +130,12 @@ onMounted(() => {
     onHighlightStarted: (element) => {
       if (element?.node) {
         element.node.style.boxShadow =
-          "0 0 0 3px #ffffff, 0 0 0 6px rgba(79, 70, 229, 0.8)";
+          "0 0 0 3px #ffffff, 0 0 0 6px rgba(var(--primary-rgb), 0.8)";
         element.node.style.borderRadius = "8px";
         element.node.style.transition = "all 0.3s ease";
         element.node.style.zIndex = "10019";
         element.node.style.position = "relative";
-        element.node.style.background = "oklch(0.541 0.198 267)";
+        element.node.style.background = "var(--primary)";
         element.node.style.color = "white";
         element.node.style.borderColor = "white";
       }
@@ -260,12 +260,12 @@ defineExpose({
 }
 
 .driver-next-btn {
-  background: #4f46e5 !important;
+  background: var(--primary) !important;
   color: white !important;
 }
 
 .driver-next-btn:hover {
-  background: #4338ca !important;
+  background: var(--primaryHover) !important;
 }
 
 .driver-prev-btn {

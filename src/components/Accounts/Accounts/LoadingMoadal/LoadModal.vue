@@ -66,7 +66,7 @@ const handleBackdropClick = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(2px);
   cursor: pointer;
 }
@@ -77,7 +77,7 @@ const handleBackdropClick = () => {
 }
 
 .loading-content {
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   border-radius: 20px;
   padding: 32px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -102,7 +102,7 @@ const handleBackdropClick = () => {
 .loading-title {
   font-weight: 500;
   font-size: 18px;
-  color: #333;
+  color: var(--modalColor);
   text-align: center;
   margin: 0;
   line-height: 1.4;

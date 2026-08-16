@@ -520,9 +520,9 @@ onMounted(() => {
 /* Компактные стили для ИНН блока */
 .inn-section.compact {
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .section-header.compact {
@@ -533,13 +533,13 @@ onMounted(() => {
 }
 
 .section-header.compact .section-icon {
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .section-title {
   font-size: 15px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text);
   margin: 0;
 }
 
@@ -552,7 +552,7 @@ onMounted(() => {
 .form-label {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 .input-with-action {
@@ -564,23 +564,24 @@ onMounted(() => {
 .form-input.compact {
   width: 100%;
   padding: 10px 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s;
-  background: white;
+  background: var(--input);
+  color: var(--text);
   box-sizing: border-box;
 }
 
 .form-input.compact:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .form-input.compact:disabled {
-  background: #f9fafb;
-  color: #6b7280;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -593,7 +594,7 @@ onMounted(() => {
   right: 6px;
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -604,8 +605,8 @@ onMounted(() => {
 }
 
 .edit-inn-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .inn-loading.compact {
@@ -613,17 +614,17 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .inn-loader {
   width: 14px;
   height: 14px;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #3b82f6;
+  border: 2px solid var(--line);
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -694,13 +695,13 @@ onMounted(() => {
 
 .detail-label {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .detail-value {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 .step-actions {
@@ -731,25 +732,25 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
 
 .btn-outline {
   background: transparent;
-  color: #6b7280;
-  border: 2px solid #e5e7eb;
+  color: var(--headerAccountText);
+  border: 2px solid var(--line);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
   transform: translateY(-1px);
 }
 

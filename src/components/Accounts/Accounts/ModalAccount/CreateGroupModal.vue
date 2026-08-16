@@ -246,7 +246,7 @@ const handleCreate = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,7 +254,7 @@ const handleCreate = async () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -268,7 +268,7 @@ const handleCreate = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-title {
@@ -285,7 +285,7 @@ const handleCreate = async () => {
   justify-content: center;
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
 }
 
@@ -308,27 +308,27 @@ const handleCreate = async () => {
   box-sizing: border-box;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(85, 102, 200, 0.1);
 }
 
 .order-hint {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-bottom: 12px;
   font-style: italic;
 }
 
 .cascade-order-container {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;
@@ -343,8 +343,8 @@ const handleCreate = async () => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #d1d5db;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 6px;
   cursor: grab;
   user-select: none;
@@ -352,7 +352,7 @@ const handleCreate = async () => {
 
 .order-item.drag-over {
   background: rgba(85, 102, 200, 0.1);
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
 }
 
 .order-number {
@@ -361,7 +361,7 @@ const handleCreate = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -418,13 +418,13 @@ const handleCreate = async () => {
 
 .add-cascade {
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
 }
 
 .label-sm {
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-bottom: 10px;
 }
 
@@ -438,8 +438,8 @@ const handleCreate = async () => {
   flex: 1;
   min-width: 100px;
   padding: 10px 12px;
-  border: 2px solid #d1d5db;
-  background: white;
+  border: 2px solid var(--line);
+  background: var(--bg);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -483,7 +483,7 @@ const handleCreate = async () => {
   display: flex;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   justify-content: flex-end;
 }
 
@@ -496,7 +496,7 @@ const handleCreate = async () => {
   cursor: pointer;
 }
 .button-primary {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 .button-primary:disabled {
@@ -504,6 +504,6 @@ const handleCreate = async () => {
   cursor: not-allowed;
 }
 .button-secondary {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
 }
 </style>

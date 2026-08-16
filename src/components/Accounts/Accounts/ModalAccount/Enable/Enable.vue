@@ -457,7 +457,7 @@ provide("accountItems", {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 30px 30px;
   /* width: 300px;
   height: 400px; */

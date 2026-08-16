@@ -308,9 +308,9 @@ const close = () => emit("close");
   align-items: center;
   gap: 12px;
   padding: 12px 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: #fff;
+  background: var(--bg);
   transition: all 0.2s;
   font-size: 14px;
   position: relative;
@@ -319,13 +319,13 @@ const close = () => emit("close");
 
 .account-checkbox:hover:not(.disabled) {
   border-color: #bfdbfe;
-  background: #f9fafb;
+  background: var(--tableAccountBg);
 }
 
 .account-checkbox.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f9fafb;
+  background: var(--tableAccountBg);
 }
 
 .type-badge {
@@ -348,7 +348,7 @@ const close = () => emit("close");
   background-color: #0077ff;
 }
 .badge-sms {
-  background-color: #7c3aed;
+  background-color: var(--primaryHover);
 }
 .badge-email {
   background-color: #f59e0b;
@@ -363,15 +363,15 @@ const close = () => emit("close");
 
 .acc-name {
   font-size: 14px;
-  color: #111827;
+  color: var(--text);
   font-weight: 500;
   flex: 1;
   word-break: break-all;
 }
 
 .acc-badge-in-group {
-  background: #f3f4f6;
-  color: #888;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   font-size: 12px;
   border-radius: 4px;
   padding: 2px 8px;
@@ -389,7 +389,7 @@ input[type="checkbox"] {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,7 +397,7 @@ input[type="checkbox"] {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -410,7 +410,7 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-body {
@@ -430,7 +430,7 @@ input[type="checkbox"] {
   display: flex;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   justify-content: flex-end;
 }
 
@@ -442,7 +442,7 @@ input[type="checkbox"] {
 }
 
 .button-primary {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
 }
@@ -453,7 +453,7 @@ input[type="checkbox"] {
 }
 
 .button-secondary {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
 }
 

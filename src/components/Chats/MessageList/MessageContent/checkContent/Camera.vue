@@ -281,7 +281,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   padding: 10px;
   border-radius: 500px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   margin-top: 26px;
   cursor: pointer;
 }

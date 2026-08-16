@@ -268,7 +268,7 @@ const toggleInfo = (item) => {
 .control-info-btn:hover,
 .control-messages-btn:hover,
 .control-edit-btn:hover {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 

@@ -338,7 +338,7 @@ td {
   padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -349,7 +349,7 @@ td {
 
 .open-tariff-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
 }
 
 .subscription-status {
@@ -383,11 +383,11 @@ td {
 }
 
 .action-table-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: rgba(var(--primary-rgb), 0.86);
   gap: 6px;
   transition: all 0.25s;
   border-radius: 5px;

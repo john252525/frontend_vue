@@ -28,8 +28,11 @@
       </article>
 
       <article class="user-cont">
+        <!-- Переключатель темы -->
+        <ThemeTogle />
+
         <!-- Колокольчик уведомлений -->
-        <NotificationBell />
+        <NotificationBell v-if="stationDomain.navigate.value != 'webest'" />
 
         <!-- Email пользователя -->
         <div v-if="email" class="email-display">
@@ -37,40 +40,42 @@
         </div>
 
         <!-- Баланс -->
-        <h2
-          v-if="
-            (balanceStore.balance || balanceStore.balance === 0) &&
-            !balanceStore.balanceError
-          "
-          @click="toggleBalanceStation"
-          class="balance-user"
-        >
-          {{ balanceStore.formattedBalance }}
-        </h2>
-        <h2
-          v-if="balanceStore.balanceLoading"
-          @click="toggleBalanceStation"
-          class="balance-user"
-        >
-          <LoadingBalance />
-        </h2>
-        <h2
-          v-if="balanceStore.balanceError"
-          @click="toggleBalanceStation"
-          class="balance-user"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
+        <div v-if="stationDomain.navigate.value != 'webest'">
+          <h2
+            v-if="
+              (balanceStore.balance || balanceStore.balance === 0) &&
+              !balanceStore.balanceError
+            "
+            @click="toggleBalanceStation"
+            class="balance-user"
           >
-            <path
-              fill="#015a83"
-              d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
-            />
-          </svg>
-        </h2>
+            {{ balanceStore.formattedBalance }}
+          </h2>
+          <h2
+            v-if="balanceStore.balanceLoading"
+            @click="toggleBalanceStation"
+            class="balance-user"
+          >
+            <LoadingBalance />
+          </h2>
+          <h2
+            v-if="balanceStore.balanceError"
+            @click="toggleBalanceStation"
+            class="balance-user"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#015a83"
+                d="M11.953 2C6.465 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.493 2 11.953 2M13 17h-2v-2h2zm0-4h-2V7h2z"
+              />
+            </svg>
+          </h2>
+        </div>
 
         <!-- Иконка пользователя -->
         <img
@@ -105,6 +110,7 @@ import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
 import NotificationBell from "./NotificationBell.vue";
+import ThemeTogle from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomain";
 import { useBalanceStore } from "@/stores/balanceStore";
 import { useAccountStore } from "@/stores/accountStore";
@@ -113,7 +119,6 @@ const { stationDomain } = useDomain();
 const balanceStore = useBalanceStore();
 const accountStore = useAccountStore();
 
-// Получаем email пользователя из store
 const storedData = computed(() => accountStore.getAccountData);
 const email = computed(() => storedData.value);
 
@@ -186,7 +191,9 @@ onMounted(() => {
 .email-icon {
   color: var(--text);
   cursor: pointer;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
   flex-shrink: 0;
 }
 

@@ -182,7 +182,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -192,7 +192,7 @@ onUnmounted(() => {
 }
 
 .modal-container {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 12px;
   width: 100%;
   max-width: 450px;
@@ -220,14 +220,14 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor, #1a1a1a);
 }
 
 .close-button {
@@ -235,14 +235,14 @@ onUnmounted(() => {
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--headerAccountText);
   border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  color: #374151;
-  background-color: #f3f4f6;
+  color: var(--modalColor, #1a1a1a);
+  background-color: var(--tableAccountBg);
 }
 
 .modal-content {
@@ -257,14 +257,14 @@ onUnmounted(() => {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--modalColor, #1a1a1a);
   font-size: 14px;
 }
 
 .name-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.2s ease;
@@ -273,8 +273,8 @@ onUnmounted(() => {
 
 .name-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .name-input.error {
@@ -288,7 +288,7 @@ onUnmounted(() => {
 .character-counter {
   text-align: right;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin-top: 4px;
 }
 
@@ -316,21 +316,21 @@ onUnmounted(() => {
 }
 
 .cancel-button {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--tableAccountBg);
+  color: var(--modalColor, #1a1a1a);
 }
 
 .cancel-button:hover {
-  background-color: #e5e7eb;
+  background-color: var(--line);
 }
 
 .save-button {
-  background-color: #3b82f6;
+  background-color: var(--primary);
   color: white;
 }
 
 .save-button:hover:not(.disabled) {
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
 }
 
 .save-button.disabled {

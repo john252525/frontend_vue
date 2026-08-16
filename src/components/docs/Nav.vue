@@ -80,9 +80,9 @@ const handleNavClick = () => {
   top: 0;
   box-sizing: border-box;
   /* background: rgba(255, 255, 255, 0.8); */
-  background: white;
+  background: var(--bg);
   backdrop-filter: blur(10px);
-  border-right: 1px solid #f3f4f6;
+  border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -100,7 +100,7 @@ const handleNavClick = () => {
   font-weight: 700;
   font-size: 1.1rem;
   letter-spacing: -0.02em;
-  color: #111827;
+  color: var(--text);
 }
 
 .nav-content {

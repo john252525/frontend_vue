@@ -171,7 +171,7 @@ const getAccessToAccount = computed(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -181,7 +181,7 @@ const getAccessToAccount = computed(() => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg);
   border-radius: 16px;
   max-width: 800px;
   width: 100%;
@@ -202,8 +202,8 @@ const getAccessToAccount = computed(() => {
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--tableAccountBg) 0%, var(--bg) 100%);
   border-radius: 16px 16px 0 0;
 }
 
@@ -224,7 +224,7 @@ const getAccessToAccount = computed(() => {
   right: 0;
   width: 12px;
   height: 12px;
-  border: 2px solid white;
+  border: 2px solid var(--bg);
   border-radius: 50%;
 }
 
@@ -238,14 +238,14 @@ const getAccessToAccount = computed(() => {
   background: #ef4444;
 }
 .account-status.status-loading {
-  background: #3b82f6;
+  background: var(--primary);
 }
 
 .account-title h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   line-height: 1.3;
 }
 
@@ -259,7 +259,7 @@ const getAccessToAccount = computed(() => {
 .account-type {
   font-size: 13px;
   color: white;
-  background: #3b82f6;
+  background: var(--primary);
   padding: 4px 10px;
   border-radius: 20px;
   font-weight: 500;
@@ -267,23 +267,23 @@ const getAccessToAccount = computed(() => {
 
 .account-id {
   font-size: 12px;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .close-button {
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   border: none;
   padding: 8px;
   cursor: pointer;
   border-radius: 8px;
-  color: #64748b;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .close-button:hover {
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--line);
+  color: var(--headerAccountText);
 }
 
 .modal-body {
@@ -308,12 +308,12 @@ const getAccessToAccount = computed(() => {
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 16px 0;
 }
 
 .section-title svg {
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .status-grid,
@@ -325,9 +325,9 @@ const getAccessToAccount = computed(() => {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .status-item,
@@ -347,7 +347,7 @@ const getAccessToAccount = computed(() => {
 .stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -358,7 +358,7 @@ const getAccessToAccount = computed(() => {
 .connection-value,
 .stat-value {
   font-size: 14px;
-  color: #334155;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -390,7 +390,7 @@ const getAccessToAccount = computed(() => {
 }
 .status-loading {
   background: #dbeafe;
-  color: #1d4ed8;
+  color: var(--primaryHover);
 }
 
 .status-on {
@@ -437,10 +437,10 @@ const getAccessToAccount = computed(() => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -449,21 +449,21 @@ const getAccessToAccount = computed(() => {
 }
 
 .action-button:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .action-button.primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .action-button.primary:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--primaryHover);
+  border-color: var(--primaryHover);
 }
 
 .action-button.success {

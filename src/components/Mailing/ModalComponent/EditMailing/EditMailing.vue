@@ -455,7 +455,7 @@ watch(
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(4px);
   z-index: 100;
 }
@@ -465,7 +465,7 @@ watch(
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--modalBg, #ffffff);
+  background: var(--modalBg);
   border-radius: 12px;
   padding: 0;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -486,13 +486,13 @@ watch(
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--border-color, #e8e8e8);
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--modalColor, #1a1a1a);
+  color: var(--modalColor);
   margin: 0;
 }
 
@@ -502,7 +502,7 @@ watch(
   padding: 6px;
   cursor: pointer;
   border-radius: 6px;
-  color: var(--text-secondary, #666);
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -510,14 +510,14 @@ watch(
 }
 
 .close-btn:hover {
-  background: var(--bg-hover, #f5f5f5);
-  color: var(--text-primary, #1a1a1a);
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .edit-section {
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  border-bottom: 1px solid var(--line);
 }
 
 .edit-section:last-of-type {
@@ -527,7 +527,7 @@ watch(
 
 .edit-label {
   font-weight: 500;
-  color: var(--text-secondary, #666);
+  color: var(--headerAccountText);
   font-size: 14px;
   margin-bottom: 12px;
 }
@@ -541,21 +541,21 @@ watch(
 .mailing-textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border-color, #e0e0e0);
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical; /* Позволяет менять высоту, но не ширину */
-  background: var(--bg-primary, #ffffff);
-  color: var(--text-primary, #1a1a1a);
+  background: var(--input);
+  color: var(--text);
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .mailing-textarea:focus {
   outline: none;
-  border-color: oklch(0.541 0.198 267);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
 
 .checkbox-container {
@@ -575,7 +575,7 @@ label {
   padding-left: 24px;
   position: relative;
   font-size: 14px;
-  color: var(--text-primary, #1a1a1a);
+  color: var(--text);
 }
 
 .custom-checkbox {
@@ -586,12 +586,12 @@ label {
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  background-color: var(--bg-secondary, #f0f0f0);
+  background-color: var(--tableAccountBg);
   transition: all 0.2s ease;
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox::after {
@@ -623,18 +623,18 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
 .time-input-group label,
 .timeout-input-group label {
   font-size: 13px;
-  color: var(--text-secondary, #666);
+  color: var(--headerAccountText);
   padding-left: 0;
 }
 
 .time-input-group input,
 .timeout-input-group select {
   padding: 8px 10px;
-  border: 1px solid var(--border-color, #e0e0e0);
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
-  background: var(--bg-primary, #ffffff);
-  color: var(--text-primary, #1a1a1a);
+  background: var(--input);
+  color: var(--text);
 }
 
 .timeout-input-group {
@@ -646,7 +646,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   right: 10px;
   bottom: 8px;
   font-size: 12px;
-  color: var(--text-secondary, #666);
+  color: var(--headerAccountText);
 }
 
 /* Выбор каналов */
@@ -661,23 +661,23 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   align-items: center;
   justify-content: center;
   padding: 12px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--line);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   user-select: none;
 }
 
 .channel-item:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
+  border-color: var(--line);
+  background: var(--tableHover);
 }
 
 .channel-item.active {
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
   background: #eef2ff;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
 
 .channel-checkbox {
@@ -687,12 +687,12 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
 .channel-text {
   font-size: 13px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
   text-align: center;
 }
 
 .channel-item.active .channel-text {
-  color: oklch(0.541 0.198 267);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -700,7 +700,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
 .sequence-info {
   margin: 0;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   margin-bottom: 10px;
 }
 
@@ -708,10 +708,10 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
 }
 
 .cascade-item {
@@ -719,15 +719,15 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .cascade-item:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  border-color: var(--line);
 }
 
 .cascade-position {
@@ -736,7 +736,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   font-weight: 600;
@@ -748,7 +748,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
 }
 
 .cascade-buttons {
@@ -760,10 +760,10 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 4px;
-  background: white;
-  color: #334155;
+  background: var(--bg);
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -776,8 +776,8 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
 
 .btn-move:hover {
   background: #eef2ff;
-  border-color: oklch(0.541 0.198 267);
-  color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .btn-move:active {
@@ -797,7 +797,7 @@ input[type="checkbox"]:checked + label .custom-checkbox::after {
 .edit-btn {
   width: 100%;
   padding: 12px 20px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;

@@ -196,13 +196,13 @@ watch(localMethod, (value) => {
 }
 
 .section-icon {
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text);
   margin: 0;
 }
 
@@ -216,21 +216,21 @@ watch(localMethod, (value) => {
   display: flex;
   align-items: center;
   padding: 12px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  background: white;
+  background: var(--bg);
   gap: 12px;
 }
 
 .method-card:hover:not(.method-disabled) {
-  border-color: #9ca3af;
+  border-color: var(--headerAccountText);
   transform: translateY(-1px);
 }
 
 .method-active {
-  border-color: #3b82f6;
+  border-color: var(--primary);
   background: #f0f9ff;
 }
 
@@ -246,7 +246,7 @@ watch(localMethod, (value) => {
 .icon-wrapper {
   width: 40px;
   height: 40px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -260,13 +260,13 @@ watch(localMethod, (value) => {
 .method-info h4 {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin: 0 0 2px 0;
 }
 
 .method-info p {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0;
 }
 
@@ -277,15 +277,15 @@ watch(localMethod, (value) => {
 .checkmark {
   width: 20px;
   height: 20px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--line);
   border-radius: 50%;
   position: relative;
   transition: all 0.2s;
 }
 
 .method-active .checkmark {
-  border-color: #3b82f6;
-  background: #3b82f6;
+  border-color: var(--primary);
+  background: var(--primary);
 }
 
 .method-active .checkmark::after {
@@ -333,12 +333,12 @@ watch(localMethod, (value) => {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 

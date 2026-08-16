@@ -127,7 +127,7 @@ const isLoading = computed(() => {
 .toggle-wrapper {
   display: flex;
   gap: 8px;
-  background: #f5f5f5;
+  background: var(--tableAccountBg);
   padding: 4px;
   border-radius: 8px;
   width: fit-content;
@@ -140,7 +140,7 @@ const isLoading = computed(() => {
   padding: 6px 16px;
   border: none;
   background: transparent;
-  color: #666;
+  color: var(--headerAccountText);
   font-weight: 500;
   font-size: 14px;
   cursor: pointer;
@@ -153,8 +153,8 @@ const isLoading = computed(() => {
 }
 
 .toggle-button.active {
-  background: white;
-  color: oklch(0.541 0.198 267);
+  background: var(--bg);
+  color: var(--primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -179,8 +179,8 @@ const isLoading = computed(() => {
 }
 
 .toggle-button.active .spinner {
-  border-color: rgba(97, 72, 221, 0.2);
-  border-top-color: oklch(0.541 0.198 267);
+  border-color: rgba(var(--primary-rgb), 0.2);
+  border-top-color: var(--primary);
 }
 
 @keyframes spin {

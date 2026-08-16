@@ -483,7 +483,7 @@ const submitPhoneNumber = async () => {
 .code-auth-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
   line-height: 1.3;
 }
@@ -493,7 +493,7 @@ const submitPhoneNumber = async () => {
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #666;
+  color: var(--headerAccountText);
   border-radius: 8px;
   transition: all 0.2s ease;
   display: flex;
@@ -503,8 +503,8 @@ const submitPhoneNumber = async () => {
 }
 
 .code-auth-close:hover:not(:disabled) {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .code-auth-close:disabled {
@@ -519,8 +519,8 @@ const submitPhoneNumber = async () => {
 /* ===== ЛОГИРОВАНИЕ ===== */
 
 .logs-section {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 20px;
@@ -531,7 +531,7 @@ const submitPhoneNumber = async () => {
 .logs-title {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--headerAccountText);
   margin-bottom: 8px;
 }
 
@@ -542,8 +542,8 @@ const submitPhoneNumber = async () => {
 }
 
 .log-item {
-  background: white;
-  border-left: 3px solid #e9ecef;
+  background: var(--modalBg, #ffffff);
+  border-left: 3px solid var(--line);
   padding: 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -566,12 +566,12 @@ const submitPhoneNumber = async () => {
 
 .log-request {
   font-weight: 600;
-  color: #333;
+  color: var(--modalColor);
   margin-bottom: 4px;
 }
 
 .log-response {
-  color: #666;
+  color: var(--headerAccountText);
   word-break: break-word;
   margin-bottom: 4px;
   max-height: 50px;
@@ -593,7 +593,7 @@ const submitPhoneNumber = async () => {
 
 .phone-description {
   font-size: 14px;
-  color: #666;
+  color: var(--headerAccountText);
   text-align: center;
   margin: 0 0 24px 0;
   line-height: 1.4;
@@ -619,17 +619,17 @@ const submitPhoneNumber = async () => {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
+  color: var(--modalColor);
+  border: 0.5px solid var(--line);
+  background: var(--tableAccountBg);
   flex-grow: 1;
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
 
 .num-input:disabled {
-  background: #f0f0f0;
-  color: #999;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -640,7 +640,7 @@ const submitPhoneNumber = async () => {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--modalColor);
   border: 0.5px solid #be2424;
   background: #ffeaea;
   flex-grow: 1;
@@ -649,8 +649,8 @@ const submitPhoneNumber = async () => {
 }
 
 .num-input-error:disabled {
-  background: #f0f0f0;
-  color: #999;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
@@ -710,10 +710,10 @@ const submitPhoneNumber = async () => {
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  color: #495057;
+  color: var(--headerAccountText);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -722,8 +722,8 @@ const submitPhoneNumber = async () => {
 }
 
 .back-button:hover:not(:disabled) {
-  background: #e9ecef;
-  border-color: #dee2e6;
+  background: var(--line);
+  border-color: var(--line);
 }
 
 .back-button:disabled {

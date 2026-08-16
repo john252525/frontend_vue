@@ -570,7 +570,7 @@ watch(
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,7 +579,7 @@ watch(
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--modalBg);
   border-radius: 6px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   max-width: 700px;
@@ -594,14 +594,14 @@ watch(
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--line);
   gap: 12px;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--modalColor);
   font-weight: 600;
   flex: 1;
 }
@@ -610,7 +610,7 @@ watch(
   background: none;
   border: none;
   font-size: 24px;
-  color: #999;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 0;
   width: 28px;
@@ -623,7 +623,7 @@ watch(
 }
 
 .close-btn:hover {
-  color: #333;
+  color: var(--text);
 }
 
 /* === BODY === */
@@ -632,13 +632,13 @@ watch(
 }
 
 .description {
-  background-color: #f5f5f5;
+  background-color: var(--tableAccountBg);
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 14px;
   font-size: 13px;
-  color: #555;
-  border-left: 3px solid #2563eb;
+  color: var(--headerAccountText);
+  border-left: 3px solid var(--primaryHover);
   line-height: 1.4;
 }
 
@@ -658,7 +658,7 @@ watch(
   width: 16px;
   height: 16px;
   border: 2px solid #dbeafe;
-  border-top-color: #2563eb;
+  border-top-color: var(--primaryHover);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -686,7 +686,7 @@ watch(
   justify-content: center;
   min-width: 22px;
   height: 22px;
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
   color: white;
   border-radius: 50%;
   font-size: 11px;
@@ -696,10 +696,10 @@ watch(
 
 /* === FORM CARD === */
 .form-card {
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 14px;
-  background-color: #fafafa;
+  background-color: var(--tableAccountBg);
   margin-bottom: 14px;
 }
 
@@ -710,20 +710,20 @@ watch(
   gap: 10px;
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--line);
 }
 
 .form-header h3 {
   margin: 0;
   font-size: 14px;
-  color: #333;
+  color: var(--text);
   font-weight: 600;
 }
 
 .form-id {
   font-size: 11px;
   color: white;
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
   padding: 3px 8px;
   border-radius: 3px;
   text-transform: uppercase;
@@ -743,13 +743,13 @@ watch(
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
 }
 
 .section-label {
   font-size: 11px;
   font-weight: 600;
-  color: #666;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
@@ -772,9 +772,9 @@ watch(
   align-items: center;
   gap: 10px;
   padding: 8px;
-  border: 1px solid #d5d5d5;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  background-color: white;
+  background-color: var(--bg);
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
@@ -783,17 +783,17 @@ watch(
 }
 
 .option-item:hover {
-  border-color: #2563eb;
-  background-color: #f9f9f9;
+  border-color: var(--primaryHover);
+  background-color: var(--tableHover);
 }
 
 .option-item.active {
-  border-color: #2563eb;
+  border-color: var(--primaryHover);
   background-color: #f0f7ff;
 }
 
 .option-item.option-alt {
-  color: #777;
+  color: var(--headerAccountText);
   font-style: italic;
   border-style: dashed;
 }
@@ -808,19 +808,19 @@ watch(
 
 .option-title {
   font-weight: 500;
-  color: #333;
+  color: var(--text);
   font-size: 12px;
   word-break: break-word;
 }
 
 .option-meta {
   font-size: 11px;
-  color: #999;
+  color: var(--headerAccountText);
   word-break: break-word;
 }
 
 .option-alt .option-title {
-  color: #777;
+  color: var(--headerAccountText);
 }
 
 .manager-avatar {
@@ -830,7 +830,7 @@ watch(
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
   color: white;
   font-weight: 600;
   font-size: 11px;
@@ -847,11 +847,11 @@ watch(
 .empty-state {
   padding: 12px;
   text-align: center;
-  color: #999;
+  color: var(--headerAccountText);
   font-size: 12px;
-  background-color: white;
+  background-color: var(--bg);
   border-radius: 5px;
-  border: 1px dashed #d5d5d5;
+  border: 1px dashed var(--line);
 }
 
 /* === SELECTION SUMMARY === */
@@ -866,7 +866,7 @@ watch(
 .summary-title {
   font-size: 12px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--primaryHover);
   margin-bottom: 6px;
 }
 
@@ -878,12 +878,12 @@ watch(
 
 .summary-item {
   font-size: 11px;
-  color: #333;
+  color: var(--text);
   line-height: 1.4;
 }
 
 .summary-item strong {
-  color: #2563eb;
+  color: var(--primaryHover);
   font-weight: 600;
 }
 
@@ -946,11 +946,11 @@ watch(
 /* === FOOTER === */
 .modal-footer {
   padding: 12px 16px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--line);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  background-color: #fafafa;
+  background-color: var(--tableAccountBg);
 }
 
 /* === RESPONSIVE === */

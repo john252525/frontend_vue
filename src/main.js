@@ -36,6 +36,7 @@ import UserChats from "./pages/UserChats.vue";
 import Docs from "./pages/Docs.vue";
 import News from "./pages/News.vue";
 import Mailer from "./pages/Mailer.vue";
+import Subscriptions from "./pages/Subscriptions.vue";
 
 const FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 const LOG_SETTINGS = import.meta.env.VITE_LOG_SETTINGS || "off"; // off, all, error
@@ -233,6 +234,12 @@ const routes = [
     name: "UserChats",
     component: UserChats,
     meta: { title: "Чаты" },
+  },
+  {
+    path: "/subscriptions",
+    name: "Subscriptions",
+    component: Subscriptions,
+    meta: { title: "Подписки" },
   },
   {
     path: "/help",
@@ -746,10 +753,7 @@ app.config.errorHandler = (err) => {
 };
 
 const themeStore = useThemeStore();
-document.documentElement.setAttribute(
-  "data-theme",
-  themeStore.isDark ? "dark" : "light",
-);
+themeStore.init();
 
 // Дублирующие перехватчики (убрать если они дублируют функциональность выше)
 axios.interceptors.request.use((config) => {

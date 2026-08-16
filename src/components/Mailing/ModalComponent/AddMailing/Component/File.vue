@@ -560,7 +560,7 @@ label {
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
 }
 
 input[type="checkbox"]:checked + label .custom-checkbox::after {
@@ -651,7 +651,7 @@ input[type="time"]:focus {
 .file-upload-label {
   display: inline-block;
   padding: 4px 8px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: var(--text);
   border-radius: 5px;
   cursor: pointer;
@@ -714,7 +714,7 @@ input[type="time"]:focus {
   border-radius: 5px;
   width: 100%;
   height: 34px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   font-weight: 600;
   font-size: 12px;
   color: var(--text);

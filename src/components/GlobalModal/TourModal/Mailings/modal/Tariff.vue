@@ -126,7 +126,7 @@ const props = defineProps({
 }
 
 .step-number {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   width: 24px;
   height: 24px;

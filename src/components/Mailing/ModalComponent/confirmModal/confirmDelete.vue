@@ -145,7 +145,7 @@ const deleteMailing = async () => {
   border-radius: 5px;
   width: 389px;
   height: 208px;
-  background: #fff;
+  background: var(--modalBg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,7 +178,7 @@ const deleteMailing = async () => {
 .title {
   font-weight: 500;
   font-size: 16px;
-  color: #8b8b8b;
+  color: var(--modalColor);
   margin-bottom: 28px;
 }
 
@@ -199,13 +199,13 @@ const deleteMailing = async () => {
 }
 
 .cansel-button {
-  border: 0.5px solid #c3c3c3;
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   width: 119px;
   height: 36px;
   font-weight: 600;
   font-size: 12px;
-  color: #000;
+  color: var(--modalColor);
   background-color: transparent;
 }
 

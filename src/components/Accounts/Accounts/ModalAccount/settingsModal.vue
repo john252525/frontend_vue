@@ -231,7 +231,7 @@ watch(settingsModalStation, (newValue) => {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 0;
   left: 0;
 }
@@ -242,7 +242,7 @@ form {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 25px 30px;
   border-radius: 10px;
   display: flex;
@@ -252,14 +252,14 @@ form {
 
 .title {
   font-size: 22px;
-  color: rgb(0, 0, 0);
+  color: var(--modalColor, #1a1a1a);
   font-weight: 600;
   margin-bottom: 20px;
 }
 
 .subtitle {
   font-size: 14px;
-  color: rgb(78, 78, 78);
+  color: var(--headerAccountText);
   font-weight: 600;
   margin-bottom: 14px;
 }
@@ -271,11 +271,11 @@ textarea {
   min-height: 400px;
   padding: 10px;
   outline: none;
-  border: 0.5px solid rgb(207, 207, 207);
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   font-family: "Montserrat", serif;
   font-size: 14px;
-  color: rgb(78, 78, 78);
+  color: var(--text);
   font-weight: 500;
   margin-bottom: 8px;
 }
@@ -286,7 +286,7 @@ textarea {
   min-width: 350px;
   min-height: 400px;
   padding: 10px;
-  border: 0.5px solid rgb(207, 207, 207);
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   margin-bottom: 8px;
 }

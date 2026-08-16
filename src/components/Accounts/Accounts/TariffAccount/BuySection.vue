@@ -64,6 +64,7 @@
           </div>
 
           <div class="price-section">
+            <div class="price-caption">Стоимость подписки</div>
             <div class="price-with-discount" v-if="appliedPromo || hasDiscount">
               <div class="original-price">
                 {{ formatPrice(originalPrice) }} {{ selectTariff.currency }}
@@ -376,7 +377,7 @@ const encodeTariff = (code, id) => {
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Это убирает основной скролл */
-  background: white;
+  background: var(--modalBg, #ffffff);
 }
 
 /* ШАПКА: Фиксирована сверху */
@@ -386,7 +387,7 @@ const encodeTariff = (code, id) => {
   align-items: center;
   gap: 16px;
   padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 
 /* ТЕЛО: Только эта часть будет скроллиться, если контента много */
@@ -403,7 +404,7 @@ const encodeTariff = (code, id) => {
   width: 6px;
 }
 .modal-body-scroll::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
+  background: var(--scrolColor);
   border-radius: 10px;
 }
 
@@ -413,7 +414,7 @@ const encodeTariff = (code, id) => {
   gap: 8px;
   background: none;
   border: none;
-  color: #666;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
@@ -423,8 +424,8 @@ const encodeTariff = (code, id) => {
 }
 
 .back-button:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .back-button svg {
@@ -434,7 +435,7 @@ const encodeTariff = (code, id) => {
 .modal-header h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
 }
 
@@ -445,8 +446,8 @@ const encodeTariff = (code, id) => {
 }
 
 .tariff-card {
-  background: white;
-  border: 1px solid #eaeaea;
+  background: var(--modalBg, #ffffff);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -466,7 +467,7 @@ const encodeTariff = (code, id) => {
 .tariff-name {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
 }
 
 .discount-badge {
@@ -480,15 +481,25 @@ const encodeTariff = (code, id) => {
 
 .tariff-period {
   font-size: 14px;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .price-section {
   text-align: center;
   margin-bottom: 24px;
-  padding: 16px;
-  background: #f8f9ff;
-  border-radius: 8px;
+  padding: 18px 16px;
+  background: rgba(var(--primary-rgb), 0.06);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  border-radius: 10px;
+}
+
+.price-caption {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--headerAccountText);
+  margin-bottom: 8px;
 }
 
 .price-with-discount {
@@ -500,7 +511,7 @@ const encodeTariff = (code, id) => {
 .original-price {
   font-size: 16px;
   text-decoration: line-through;
-  color: #9e9e9e;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -514,7 +525,7 @@ const encodeTariff = (code, id) => {
 .price-regular {
   font-size: 32px;
   font-weight: 700;
-  color: #6732ff;
+  color: var(--modalColor);
   line-height: 1;
 }
 
@@ -522,7 +533,7 @@ const encodeTariff = (code, id) => {
 .bonuses-section h4 {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--modalColor);
   margin-bottom: 12px;
 }
 
@@ -538,7 +549,7 @@ const encodeTariff = (code, id) => {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 6px;
 }
 
@@ -554,17 +565,17 @@ const encodeTariff = (code, id) => {
 .limit-value {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
 }
 
 .limit-label {
   font-size: 11px;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .bonuses-section {
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--line);
 }
 
 .bonuses-list {
@@ -578,20 +589,20 @@ const encodeTariff = (code, id) => {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #f0fff4;
+  background: rgba(34, 197, 94, 0.1);
   border-radius: 6px;
-  border: 1px solid #e8f5e8;
+  border: 1px solid rgba(34, 197, 94, 0.25);
 }
 
 .bonus-icon {
-  color: #4caf50;
+  color: #22c55e;
   font-weight: 700;
   font-size: 14px;
 }
 
 .bonus-text {
   font-size: 13px;
-  color: #2e7d32;
+  color: #22c55e;
   font-weight: 500;
 }
 
@@ -599,9 +610,9 @@ const encodeTariff = (code, id) => {
 .promo-section {
   margin: 16px 0;
   padding: 16px;
-  background: #f8f9ff;
+  background: rgba(var(--primary-rgb), 0.05);
   border-radius: 12px;
-  border: 1px solid #e0e0ff;
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
 }
 
 .promo-input-group {
@@ -613,7 +624,9 @@ const encodeTariff = (code, id) => {
 .promo-input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #d0d0d0;
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 10px;
   font-size: 15px;
   outline: none;
@@ -621,14 +634,14 @@ const encodeTariff = (code, id) => {
 }
 
 .promo-input:focus {
-  border-color: #6732ff;
-  box-shadow: 0 0 0 3px rgba(103, 50, 255, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .promo-apply-btn {
   padding: 0 20px;
-  background: #6732ff;
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   border: none;
   border-radius: 10px;
   font-weight: 600;
@@ -638,23 +651,24 @@ const encodeTariff = (code, id) => {
 }
 
 .promo-apply-btn:hover:not(:disabled) {
-  background: #8a63ff;
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 
 .promo-apply-btn:disabled {
-  background: #ccc;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
 .promo-error {
-  color: #d32f2f;
+  color: #ef4444;
   font-size: 13px;
   margin-top: 8px;
 }
 
 .promo-success {
-  color: #2e7d32;
+  color: #22c55e;
   font-size: 13px;
   margin-top: 8px;
   font-weight: 500;
@@ -665,8 +679,8 @@ const encodeTariff = (code, id) => {
   flex-shrink: 0;
   margin-top: auto;
   padding: 16px 24px;
-  background: white;
-  border-top: 1px solid #eaeaea;
+  background: var(--modalBg, #ffffff);
+  border-top: 1px solid var(--line);
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
 }
 
@@ -676,26 +690,26 @@ const encodeTariff = (code, id) => {
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 
 .total-label {
   font-size: 16px;
-  color: #666;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
 .total-amount {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--modalColor);
 }
 
 .buy-button {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   border: none;
   border-radius: 10px;
   font-size: 16px;
@@ -706,12 +720,13 @@ const encodeTariff = (code, id) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
 
 .buy-button:hover {
+  background: var(--primaryHover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(103, 50, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
 }
 
 .button-text {
@@ -729,7 +744,7 @@ const encodeTariff = (code, id) => {
   gap: 8px;
   justify-content: center;
   font-size: 12px;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .security-notice svg {

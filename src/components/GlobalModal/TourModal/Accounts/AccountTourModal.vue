@@ -118,7 +118,7 @@ if (typeof window !== "undefined") {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -127,7 +127,7 @@ if (typeof window !== "undefined") {
 }
 
 .modal {
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   max-width: 400px;
@@ -148,7 +148,7 @@ if (typeof window !== "undefined") {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #000;
+  color: var(--modalColor);
 }
 
 .close-btn {
@@ -157,7 +157,7 @@ if (typeof window !== "undefined") {
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
@@ -165,14 +165,14 @@ if (typeof window !== "undefined") {
 }
 
 .close-btn:hover {
-  background-color: #f3f4f6;
-  color: #374151;
+  background-color: var(--tableAccountBg);
+  color: var(--text);
   transform: scale(1.05);
 }
 
 .header-divider {
   height: 1px;
-  background-color: #e5e7eb;
+  background-color: var(--line);
   margin: 0 24px;
 }
 
@@ -184,13 +184,13 @@ if (typeof window !== "undefined") {
 }
 
 .section-btn {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: var(--tableAccountBg);
+  border: 2px solid var(--line);
   border-radius: 12px;
   padding: 16px 16px;
   font-size: 1.1rem;
   font-weight: 500;
-  color: #000;
+  color: var(--text);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
@@ -209,7 +209,7 @@ if (typeof window !== "undefined") {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(59, 130, 246, 0.1),
+    rgba(var(--primary-rgb), 0.1),
     transparent
   );
   transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -220,12 +220,12 @@ if (typeof window !== "undefined") {
 }
 
 .section-btn:hover {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
-  border-color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25),
-    0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.25),
+    0 4px 12px rgba(var(--primary-rgb), 0.15);
 }
 
 .section-btn:active {

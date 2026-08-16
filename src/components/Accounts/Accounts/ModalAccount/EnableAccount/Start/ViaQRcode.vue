@@ -377,9 +377,9 @@ defineExpose({
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg);
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   position: relative;
   overflow: hidden;
   max-width: 320px;
@@ -399,9 +399,9 @@ defineExpose({
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: white;
+  background: var(--bg);
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -430,7 +430,7 @@ defineExpose({
 .status-text {
   font-size: 13px;
   font-weight: 600;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 .modern-timer {
@@ -448,7 +448,7 @@ defineExpose({
 
 .timer-bg {
   fill: none;
-  stroke: #f1f5f9;
+  stroke: var(--tableAccountBg);
   stroke-width: 2;
 }
 
@@ -458,7 +458,7 @@ defineExpose({
 
 .timer-progress {
   fill: none;
-  stroke: #3b82f6;
+  stroke: var(--primary);
   stroke-width: 2;
   stroke-dasharray: 126px;
   stroke-dashoffset: 126px;
@@ -474,12 +474,12 @@ defineExpose({
   position: absolute;
   font-size: 10px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .timer-label {
   font-size: 11px;
-  color: #64748b;
+  color: var(--headerAccountText);
   white-space: nowrap;
 }
 
@@ -502,17 +502,17 @@ defineExpose({
 .qr-frame {
   position: relative;
   padding: 16px;
-  background: white;
+  background: var(--bg);
   border-radius: 14px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--line);
 }
 
 .qr-corner {
   position: absolute;
   width: 16px;
   height: 16px;
-  border: 2px solid #3b82f6;
+  border: 2px solid var(--primary);
 }
 
 .qr-corner-tl {
@@ -562,14 +562,14 @@ defineExpose({
 
 .scan-line {
   height: 2px;
-  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: scan 3s ease-in-out infinite;
 }
 
 .instruction {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0;
   text-align: center;
 }
@@ -592,7 +592,7 @@ defineExpose({
   width: 100%;
   height: 100%;
   border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -604,14 +604,14 @@ defineExpose({
   right: -6px;
   bottom: -6px;
   border: 2px solid transparent;
-  border-top: 2px solid #60a5fa;
+  border-top: 2px solid var(--primaryHover);
   border-radius: 50%;
   animation: spin 1.5s linear infinite reverse;
 }
 
 .loading-text {
   font-size: 14px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-weight: 500;
   margin: 0;
 }
@@ -628,7 +628,7 @@ defineExpose({
 .reload-icon {
   width: 64px;
   height: 64px;
-  color: #3b82f6;
+  color: var(--primary);
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 50%;
@@ -636,21 +636,21 @@ defineExpose({
 }
 
 .reload-icon:hover {
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   transform: scale(1.05);
-  color: #2563eb;
+  color: var(--primaryHover);
 }
 
 .reload-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0;
 }
 
 .reload-description {
   font-size: 13px;
-  color: #64748b;
+  color: var(--headerAccountText);
   margin: 0;
 }
 
@@ -659,7 +659,7 @@ defineExpose({
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -670,7 +670,7 @@ defineExpose({
 }
 
 .reload-button:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 
@@ -686,7 +686,7 @@ defineExpose({
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -700,7 +700,7 @@ defineExpose({
 
 .progress-text {
   font-size: 11px;
-  color: #64748b;
+  color: var(--headerAccountText);
   text-align: center;
 }
 

@@ -40,7 +40,7 @@ defineEmits(["close"]);
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +48,7 @@ defineEmits(["close"]);
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   max-width: 400px;
@@ -72,7 +72,7 @@ defineEmits(["close"]);
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-title {
@@ -89,15 +89,15 @@ defineEmits(["close"]);
   align-items: center;
   justify-content: center;
   border: none;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.25s;
 }
 
 .close-button:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .close-button svg {
@@ -112,7 +112,7 @@ defineEmits(["close"]);
 
 .modal-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0 0 16px 0;
   line-height: 1.6;
 }
@@ -151,13 +151,13 @@ defineEmits(["close"]);
   display: flex;
   gap: 8px;
   padding: 16px 20px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--line);
 }
 
 .cancel-button {
   width: 100%;
   padding: 10px 16px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -168,10 +168,10 @@ defineEmits(["close"]);
 }
 
 .cancel-button:hover {
-  background: #565cc8;
+  background: var(--primaryHover);
 }
 
 .cancel-button:active {
-  background: #3e43ae;
+  background: var(--primaryActive);
 }
 </style>

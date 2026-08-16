@@ -162,7 +162,7 @@ onMounted(() => {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 0;
   left: 0;
 }
@@ -173,7 +173,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 25px 30px;
   border-radius: 10px;
   display: flex;
@@ -189,13 +189,13 @@ onMounted(() => {
   width: 100%;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--line);
 }
 
 .screen-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--modalColor, #1a1a1a);
   margin: 0;
 }
 
@@ -203,7 +203,7 @@ onMounted(() => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: var(--headerAccountText);
   padding: 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
@@ -213,8 +213,8 @@ onMounted(() => {
 }
 
 .close-button:hover {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: var(--tableAccountBg);
+  color: var(--modalColor, #1a1a1a);
 }
 
 .screen-img {

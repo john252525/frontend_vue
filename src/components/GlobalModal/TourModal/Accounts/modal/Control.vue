@@ -376,7 +376,7 @@ const toggleInfo = (item) => {
 .control-enable-btn:hover,
 .control-disable-btn:hover,
 .control-reset-btn:hover {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 

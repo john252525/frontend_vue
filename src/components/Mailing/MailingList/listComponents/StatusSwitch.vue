@@ -181,7 +181,7 @@ const updateStatus = async (state) => {
 }
 
 input:checked + .slider {
-  background: #3b82f6;
+  background: var(--primary);
 }
 
 input:checked + .slider .switch-handle {
@@ -189,7 +189,7 @@ input:checked + .slider .switch-handle {
 }
 
 .switch-loading .slider {
-  background: rgba(59, 130, 246, 0.5);
+  background: rgba(var(--primary-rgb), 0.5);
 }
 
 .switch-loader {

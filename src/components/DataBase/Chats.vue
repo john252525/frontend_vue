@@ -121,11 +121,11 @@ header {
 }
 
 .action-table-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: rgba(var(--primary-rgb), 0.86);
   margin-right: 10px;
   gap: 6px;
   transition: all 0.25s;

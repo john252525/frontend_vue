@@ -184,7 +184,7 @@ const closeModal = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,7 +194,7 @@ const closeModal = () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   max-width: 500px;
   width: 100%;
@@ -210,7 +210,7 @@ const closeModal = () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 
 .back-button {
@@ -218,7 +218,7 @@ const closeModal = () => {
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #666;
+  color: var(--headerAccountText);
   border-radius: 8px;
   transition: all 0.2s ease;
   display: flex;
@@ -227,14 +227,14 @@ const closeModal = () => {
 }
 
 .back-button:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
   text-align: center;
   flex: 1;
@@ -268,7 +268,7 @@ const closeModal = () => {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -283,20 +283,20 @@ const closeModal = () => {
 .reason-title {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0 0 4px 0;
   line-height: 1.3;
 }
 
 .reason-description {
   font-size: 13px;
-  color: #666;
+  color: var(--headerAccountText);
   line-height: 1.4;
   margin: 0;
 }
 
 .solutions-section {
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 12px;
   padding: 16px;
   margin: 24px 0;
@@ -305,14 +305,14 @@ const closeModal = () => {
 .solutions-title {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0 0 12px 0;
 }
 
 .solutions-list {
   margin: 0;
   padding-left: 16px;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .solutions-list li {
@@ -327,8 +327,8 @@ const closeModal = () => {
 
 .modal-footer {
   padding: 20px 24px;
-  border-top: 1px solid #f0f0f0;
-  background: white;
+  border-top: 1px solid var(--line);
+  background: var(--modalBg, #ffffff);
 }
 
 .try-again-button {
@@ -380,11 +380,11 @@ const closeModal = () => {
 }
 
 .modal-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrolBg);
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--scrolColor);
   border-radius: 2px;
 }
 

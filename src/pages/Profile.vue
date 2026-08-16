@@ -4,6 +4,10 @@
       <ProfileHeader />
 
       <div class="profile-grid">
+        <BalanceInfo class="grid-item" />
+
+        <QuickLinks class="grid-item" />
+
         <UserInfo
           :email="user.email"
           :country="user.country"
@@ -13,9 +17,15 @@
 
         <SecuritySettings @changePassword="changePassword" class="grid-item" />
 
-        <IntegrationSettings class="grid-item" />
+        <IntegrationSettings
+          v-if="stationDomain.navigate.value != 'webest'"
+          class="grid-item"
+        />
 
-        <InnSettings class="grid-item" />
+        <InnSettings
+          v-if="stationDomain.navigate.value != 'webest'"
+          class="grid-item"
+        />
 
         <!-- <NotificationsSettings
           @updateNotifications="updateNotifications"
@@ -36,12 +46,17 @@
 <script setup>
 import { ref } from "vue";
 import ProfileHeader from "@/components/Profile/ProfileHeader.vue";
+import BalanceInfo from "@/components/Profile/BalanceInfo.vue";
+import QuickLinks from "@/components/Profile/QuickLinks.vue";
 import UserInfo from "@/components/Profile/UserInfo.vue";
 import SecuritySettings from "@/components/Profile/SecuritySettings.vue";
 import IntegrationSettings from "@/components/Profile/IntegrationSettings.vue";
 import InnSettings from "@/components/Profile/InnSettings.vue";
 import NotificationsSettings from "@/components/Profile/NotificationsSettings.vue";
 import TariffInfo from "@/components/Profile/TariffInfo.vue";
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
@@ -103,7 +118,7 @@ const cancelSubscription = () => {
 }
 
 .grid-item {
-  background: white;
+  background: var(--bg);
   border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

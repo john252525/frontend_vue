@@ -122,7 +122,7 @@ defineProps({
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.7);
+  background: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -132,7 +132,7 @@ defineProps({
 }
 
 .modal-content {
-  background: #ffffff;
+  background: var(--modalBg);
   width: 100%;
   max-width: 500px;
   border-radius: 20px;
@@ -149,7 +149,7 @@ defineProps({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--line);
 }
 
 .header-left {
@@ -162,7 +162,7 @@ defineProps({
 .modal-header h3 {
   margin: 0;
   font-size: 1.125rem;
-  color: #1e293b;
+  color: var(--modalColor);
   font-weight: 700;
 }
 
@@ -170,10 +170,10 @@ defineProps({
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   padding: 4px 12px 4px 6px;
   border-radius: 100px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .mini-icon {
@@ -183,14 +183,14 @@ defineProps({
 
 .account-name {
   font-size: 12px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-weight: 600;
 }
 
 .close-btn {
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   border: none;
-  color: #64748b;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 8px;
   border-radius: 10px;
@@ -211,7 +211,12 @@ defineProps({
 
 /* --- Скелетоны (Красивая загрузка) --- */
 .skeleton {
-  background: linear-gradient(90deg, #f0f2f5 25%, #e2e8f0 50%, #f0f2f5 75%);
+  background: linear-gradient(
+    90deg,
+    var(--tableAccountBg) 25%,
+    var(--line) 50%,
+    var(--tableAccountBg) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
   border-radius: 6px;
@@ -248,15 +253,15 @@ defineProps({
 /* --- Футер --- */
 .modal-footer {
   padding: 16px 24px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--line);
 }
 
 .active-btn {
-  background: #2563eb;
+  background: var(--primaryHover);
   color: white;
   border: none;
   padding: 10px 24px;
@@ -271,8 +276,8 @@ defineProps({
 }
 
 .active-btn:hover:not(:disabled) {
-  background: #1d4ed8;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  background: var(--primaryHover);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
 .active-btn:disabled {
@@ -281,9 +286,9 @@ defineProps({
 }
 
 .done-btn {
-  background: white;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  color: var(--headerAccountText);
+  border: 1px solid var(--line);
   padding: 10px 20px;
   border-radius: 12px;
   font-weight: 600;

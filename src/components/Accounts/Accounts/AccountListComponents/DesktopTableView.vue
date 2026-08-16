@@ -227,6 +227,7 @@
         </div>
 
         <div
+          v-if="stationDomain.navigate.value != 'webest'"
           @click.stop="$emit('change-tariff', item)"
           class="row-section section-data"
         >
@@ -408,6 +409,9 @@ const { t } = useI18n();
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
+
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
 
 const props = defineProps({
   dataStation: Boolean,
@@ -772,7 +776,7 @@ const emailSettings = () => {
 .account-row {
   display: flex;
   align-items: center;
-  background: #ffffff;
+  background: var(--bg);
   border-radius: 10px;
   padding: 12px 20px;
   transition: all 0.2s ease;
@@ -782,14 +786,14 @@ const emailSettings = () => {
 }
 
 .account-row:hover {
-  border-color: #cbd5e1;
+  border-color: var(--line);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transform: translateY(-1px);
 }
 
 /* Удалённый аккаунт */
 .account-row--deleted {
-  background: #fafafa;
+  background: var(--tableAccountBg);
   border-left: 3px solid #fca5a5;
   opacity: 0.75;
 }
@@ -802,7 +806,7 @@ const emailSettings = () => {
 
 /* Аккаунт с ошибкой getInfo */
 .account-row--error {
-  background: #fafafa;
+  background: var(--tableAccountBg);
   border-left: 3px solid #f87171;
   opacity: 0.6;
   filter: grayscale(30%);
@@ -876,11 +880,11 @@ const emailSettings = () => {
 }
 
 .row-active {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .row-disabled {
-  background: #f5f7fa;
+  background: var(--tableAccountBg);
   opacity: 0.9;
 }
 
@@ -906,20 +910,20 @@ const emailSettings = () => {
 
 .account-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   font-size: 15px;
 }
 
 .account-login {
   font-weight: 500;
-  color: #475569;
+  color: var(--headerAccountText);
   font-size: 15px;
 }
 
 .account-type {
   font-size: 11px;
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--headerAccountText);
+  background: var(--tableAccountBg);
   padding: 2px 8px;
   border-radius: 4px;
   margin-top: 4px;
@@ -957,7 +961,7 @@ const emailSettings = () => {
 .vertical-divider {
   width: 1px;
   height: 32px;
-  background: #e2e8f0;
+  background: var(--line);
 }
 
 /* 3. ДАННЫЕ (СТАТУС И ПОДПИСКА) - Вертикальный стек */
@@ -1033,7 +1037,7 @@ const emailSettings = () => {
 }
 
 input:checked + .slider {
-  background: #3b82f6;
+  background: var(--primary);
 }
 
 input:checked + .slider .switch-handle {
@@ -1041,7 +1045,7 @@ input:checked + .slider .switch-handle {
 }
 
 .switch-loading .slider {
-  background: rgba(59, 130, 246, 0.5);
+  background: rgba(var(--primary-rgb), 0.5);
 }
 
 .switch-loader {
@@ -1105,7 +1109,7 @@ input:checked + .slider .switch-handle {
 .status-loading,
 .status-pending {
   background: #dbeafe;
-  color: #1d4ed8;
+  color: var(--primaryHover);
   border: 1px solid #bfdbfe;
 }
 
@@ -1129,7 +1133,7 @@ input:checked + .slider .switch-handle {
   position: relative;
   z-index: 1;
   padding: 4px 8px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   color: white;
   border: none;
   border-radius: 4px;
@@ -1149,8 +1153,8 @@ input:checked + .slider .switch-handle {
   bottom: 0;
   background: linear-gradient(
     135deg,
-    #7c3aed 0%,
-    #4f46e5 100%
+    var(--primaryHover) 0%,
+    var(--primary) 100%
   ); /* Цвета наоборот или другие */
   opacity: 0;
   z-index: -1;
@@ -1189,15 +1193,15 @@ input:checked + .slider .switch-handle {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .icon-wrapper:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--line);
+  color: var(--text);
 }
 
 .action-menu-button {
@@ -1207,16 +1211,16 @@ input:checked + .slider .switch-handle {
   width: 32px;
   height: 32px;
   background: transparent;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
 }
 
 .action-menu-button:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 /* СОСТОЯНИЯ (Empty, Loading, Error) */
@@ -1239,19 +1243,19 @@ input:checked + .slider .switch-handle {
 }
 
 .empty-state svg {
-  color: #cbd5e0;
+  color: var(--line);
   margin-bottom: 16px;
 }
 
 .empty-state h3 {
-  color: #475569;
+  color: var(--text);
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 18px;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--headerAccountText);
   font-size: 14px;
 }
 
@@ -1259,7 +1263,7 @@ input:checked + .slider .switch-handle {
   width: 24px;
   height: 24px;
   border: 2px solid #f1f5f9;
-  border-top: 2px solid #3b82f6;
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -1287,11 +1291,11 @@ input:checked + .slider .switch-handle {
 }
 
 .list-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--scrolBg);
 }
 
 .list-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrolColor);
   border-radius: 3px;
 }
 
@@ -1324,15 +1328,15 @@ input:checked + .slider .switch-handle {
 }
 
 .bulk-select-btn:hover {
-  background: #f8fafc;
-  color: #64748b;
-  border-color: #e2e8f0;
+  background: var(--tableAccountBg);
+  color: var(--text);
+  border-color: var(--line);
 }
 
 .bulk-select-btn.active {
-  color: #64748b;
-  border-color: #e2e8f0;
-  background: #f8fafc;
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--tableAccountBg);
 }
 
 .select-all-label {
@@ -1340,7 +1344,7 @@ input:checked + .slider .switch-handle {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #475569;
+  color: var(--headerAccountText);
   cursor: pointer;
   user-select: none;
 }
@@ -1349,7 +1353,7 @@ input:checked + .slider .switch-handle {
   width: 15px;
   height: 15px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--primary);
 }
 
 .bulk-stop-btn {
@@ -1394,7 +1398,7 @@ input:checked + .slider .switch-handle {
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--primary);
 }
 
 .bulk-checkbox-wrapper input[type="checkbox"]:disabled {
@@ -1403,7 +1407,7 @@ input:checked + .slider .switch-handle {
 }
 
 .account-row--bulk-selected {
-  border-left-color: #3b82f6 !important;
+  border-left-color: var(--primary) !important;
   background: #eff6ff !important;
 }
 

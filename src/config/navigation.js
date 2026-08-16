@@ -38,6 +38,18 @@ export const useNavigationConfig = () => {
           isActive: computed(() => isActive("PersonalAccount")),
         },
         {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
+        },
+        {
           name: "mailing",
           icon: `<svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M20.9 18.9002V16.9002C20.9 15.8393 20.4786 14.8219 19.7285 14.0718C18.9783 13.3216 17.9609 12.9002 16.9 12.9002H10.9C9.83916 12.9002 8.82174 13.3216 8.0716 14.0718C7.32145 14.8219 6.90002 15.8393 6.90002 16.9002V18.9002M20.9 1.0282C21.7578 1.25057 22.5174 1.75146 23.0597 2.45226C23.602 3.15306 23.8962 4.01409 23.8962 4.9002C23.8962 5.78631 23.602 6.64734 23.0597 7.34814C22.5174 8.04893 21.7578 8.54983 20.9 8.7722M26.9 18.9002V16.9002C26.8994 16.0139 26.6044 15.153 26.0614 14.4525C25.5184 13.7521 24.7582 13.2518 23.9 13.0302" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -137,6 +149,18 @@ export const useNavigationConfig = () => {
           isActive: computed(() => isActive("PersonalAccount")),
         },
         {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
+        },
+        {
           name: "mailing",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="svg-icon"><path d="M8 5c-3.3 0-6 2.7-6 6c0 2 1 3.8 2.5 4.8C1.8 17.2 0 19.9 0 23h2c0-3.3 2.7-6 6-6s6 2.7 6 6h2c0-3.2 2.6-5.9 5.8-6h.2c2.5 0 4.6-1.5 5.5-3.6c0 0 0-.1.1-.1c.1-.1.1-.3.1-.4c0-.1 0-.1.1-.2c0-.1.1-.3.1-.4c0-.1 0-.2.1-.3c0-.1 0-.2.1-.3v-.6c0-3.3-2.7-6-6-6s-6 2.7-6 6c0 2 1 3.8 2.5 4.8c-1.5.7-2.7 1.9-3.5 3.3c-.8-1.4-2-2.6-3.5-3.3C13 14.8 14 13 14 11c0-3.3-2.7-6-6-6m0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m14 0c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m2.1 11v2.1c-.6.1-1.2.4-1.7.7l-1.5-1.5l-1.4 1.4l1.5 1.5c-.4.5-.6 1.1-.7 1.8H18v2h2.1c.1.6.4 1.2.7 1.8l-1.5 1.5l1.4 1.4l1.5-1.5c.5.3 1.1.6 1.7.7V32h2v-2.1c.6-.1 1.2-.4 1.7-.7l1.5 1.5l1.4-1.4l-1.5-1.5c.4-.5.6-1.1.7-1.8H32v-2h-2.1c-.1-.6-.4-1.2-.7-1.8l1.5-1.5l-1.4-1.4l-1.5 1.5c-.5-.3-1.1-.6-1.7-.7V18zm.9 4c1.7 0 3 1.3 3 3s-1.3 3-3 3s-3-1.3-3-3s1.3-3 3-3m0 2a.872.872 0 0 0-.367.086a1.138 1.138 0 0 0-.32.227a1.138 1.138 0 0 0-.227.32A.872.872 0 0 0 24 25c0 .125.031.25.086.367c.055.117.133.227.227.32c.093.094.203.172.32.227A.872.872 0 0 0 25 26c.5 0 1-.5 1-1s-.5-1-1-1"/></svg>`,
           text: computed(() => t("navigation.mailings")),
@@ -207,6 +231,18 @@ export const useNavigationConfig = () => {
           isActive: computed(() => isActive("PersonalAccount")),
         },
         {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
+        },
+        {
           name: "mailing",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="svg-icon"><path d="M8 5c-3.3 0-6 2.7-6 6c0 2 1 3.8 2.5 4.8C1.8 17.2 0 19.9 0 23h2c0-3.3 2.7-6 6-6s6 2.7 6 6h2c0-3.2 2.6-5.9 5.8-6h.2c2.5 0 4.6-1.5 5.5-3.6c0 0 0-.1.1-.1c.1-.1.1-.3.1-.4c0-.1 0-.1.1-.2c0-.1.1-.3.1-.4c0-.1 0-.2.1-.3c0-.1 0-.2.1-.3v-.6c0-3.3-2.7-6-6-6s-6 2.7-6 6c0 2 1 3.8 2.5 4.8c-1.5.7-2.7 1.9-3.5 3.3c-.8-1.4-2-2.6-3.5-3.3C13 14.8 14 13 14 11c0-3.3-2.7-6-6-6m0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m14 0c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m2.1 11v2.1c-.6.1-1.2.4-1.7.7l-1.5-1.5l-1.4 1.4l1.5 1.5c-.4.5-.6 1.1-.7 1.8H18v2h2.1c.1.6.4 1.2.7 1.8l-1.5 1.5l1.4 1.4l1.5-1.5c.5.3 1.1.6 1.7.7V32h2v-2.1c.6-.1 1.2-.4 1.7-.7l1.5 1.5l1.4-1.4l-1.5-1.5c.4-.5.6-1.1.7-1.8H32v-2h-2.1c-.1-.6-.4-1.2-.7-1.8l1.5-1.5l-1.4-1.4l-1.5 1.5c-.5-.3-1.1-.6-1.7-.7V18zm.9 4c1.7 0 3 1.3 3 3s-1.3 3-3 3s-3-1.3-3-3s1.3-3 3-3m0 2a.872.872 0 0 0-.367.086a1.138 1.138 0 0 0-.32.227a1.138 1.138 0 0 0-.227.32A.872.872 0 0 0 24 25c0 .125.031.25.086.367c.055.117.133.227.227.32c.093.094.203.172.32.227A.872.872 0 0 0 25 26c.5 0 1-.5 1-1s-.5-1-1-1"/></svg>`,
           text: computed(() => t("navigation.mailings")),
@@ -275,6 +311,18 @@ export const useNavigationConfig = () => {
           text: computed(() => t("navigation.account")),
           condition: true,
           isActive: computed(() => isActive("PersonalAccount")),
+        },
+        {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
         },
         {
           name: "mailing",
@@ -421,6 +469,18 @@ export const useNavigationConfig = () => {
           isActive: computed(() => isActive("PersonalAccount")),
         },
         {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
+        },
+        {
           name: "mailing",
           icon: `<svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M20.9 18.9002V16.9002C20.9 15.8393 20.4786 14.8219 19.7285 14.0718C18.9783 13.3216 17.9609 12.9002 16.9 12.9002H10.9C9.83916 12.9002 8.82174 13.3216 8.0716 14.0718C7.32145 14.8219 6.90002 15.8393 6.90002 16.9002V18.9002M20.9 1.0282C21.7578 1.25057 22.5174 1.75146 23.0597 2.45226C23.602 3.15306 23.8962 4.01409 23.8962 4.9002C23.8962 5.78631 23.602 6.64734 23.0597 7.34814C22.5174 8.04893 21.7578 8.54983 20.9 8.7722M26.9 18.9002V16.9002C26.8994 16.0139 26.6044 15.153 26.0614 14.4525C25.5184 13.7521 24.7582 13.2518 23.9 13.0302" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -499,6 +559,121 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Docs")),
         },
+      ],
+    },
+    webest: {
+      main: [
+        {
+          name: "accounts",
+          icon: `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14.9 18.9V16.9C14.9 15.8391 14.4786 14.8217 13.7285 14.0716C12.9783 13.3214 11.9609 12.9 10.9 12.9H4.90002C3.83916 12.9 2.82174 13.3214 2.0716 14.0716C1.32145 14.8217 0.900024 15.8391 0.900024 16.9V18.9M14.9 1.02798C15.7578 1.25035 16.5174 1.75125 17.0597 2.45205C17.602 3.15285 17.8962 4.01387 17.8962 4.89998C17.8962 5.7861 17.602 6.64712 17.0597 7.34792C16.5174 8.04872 15.7578 8.54961 14.9 8.77198M20.9 18.9V16.9C20.8994 16.0137 20.6044 15.1528 20.0614 14.4523C19.5184 13.7518 18.7582 13.2516 17.9 13.03" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7.90002 8.89999C10.1092 8.89999 11.9 7.10913 11.9 4.89999C11.9 2.69085 10.1092 0.899994 7.90002 0.899994C5.69089 0.899994 3.90002 2.69085 3.90002 4.89999C3.90002 7.10913 5.69089 8.89999 7.90002 8.89999Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.account")),
+          condition: true,
+          isActive: computed(() => isActive("PersonalAccount")),
+        },
+        {
+          name: "Subscriptions",
+          icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M3 12a9 9 0 0 1 15.5-6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M21 12a9 9 0 0 1-15.5 6.36" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M17 3v4h-4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.subscriptions")),
+          condition: true,
+          isActive: computed(() => isActive("Subscriptions")),
+        },
+
+        //         {
+        //           name: "mailing",
+        //           icon: `<svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        //   <path d="M20.9 18.9002V16.9002C20.9 15.8393 20.4786 14.8219 19.7285 14.0718C18.9783 13.3216 17.9609 12.9002 16.9 12.9002H10.9C9.83916 12.9002 8.82174 13.3216 8.0716 14.0718C7.32145 14.8219 6.90002 15.8393 6.90002 16.9002V18.9002M20.9 1.0282C21.7578 1.25057 22.5174 1.75146 23.0597 2.45226C23.602 3.15306 23.8962 4.01409 23.8962 4.9002C23.8962 5.78631 23.602 6.64734 23.0597 7.34814C22.5174 8.04893 21.7578 8.54983 20.9 8.7722M26.9 18.9002V16.9002C26.8994 16.0139 26.6044 15.153 26.0614 14.4525C25.5184 13.7521 24.7582 13.2518 23.9 13.0302" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        //   <path d="M6.90002 18.7722V16.7722C6.90002 15.7113 7.32145 14.6939 8.0716 13.9438C8.82174 13.1936 9.83916 12.7722 10.9 12.7722H16.9C17.9609 12.7722 18.9783 13.1936 19.7285 13.9438C20.4786 14.6939 20.9 15.7113 20.9 16.7722V18.7722M6.90002 0.900208C6.04227 1.12258 5.28263 1.62347 4.74035 2.32427C4.19806 3.02507 3.90383 3.8861 3.90383 4.77221C3.90383 5.65832 4.19806 6.51935 4.74035 7.22015C5.28263 7.92094 6.04227 8.42184 6.90002 8.64421M0.900024 18.7722V16.7722C0.900685 15.8859 1.19567 15.025 1.73866 14.3245C2.28165 13.6241 3.04189 13.1238 3.90002 12.9022" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        //   <path d="M13.9 8.90021C16.1092 8.90021 17.9 7.10935 17.9 4.90021C17.9 2.69107 16.1092 0.900208 13.9 0.900208C11.6909 0.900208 9.90002 2.69107 9.90002 4.90021C9.90002 7.10935 11.6909 8.90021 13.9 8.90021Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        // </svg>`,
+        //           text: computed(() => t("navigation.mailings")),
+        //           condition: true,
+        //           isActive: computed(() => isActive("Mailing")),
+        //         },
+        {
+          name: "UserChats",
+          icon: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7.00001 1C3.68651 1 1.00001 3.6865 1.00001 7C1.00001 8.0825 1.28601 9.0965 1.78651 9.9725C1.81959 10.0303 1.84079 10.0941 1.84886 10.1603C1.85693 10.2264 1.85171 10.2934 1.83351 10.3575L1.11401 12.887L3.64451 12.167C3.70857 12.1488 3.77563 12.1436 3.84175 12.1516C3.90786 12.1597 3.9717 12.1809 4.02951 12.214C4.93413 12.7307 5.95822 13.0017 7.00001 13C10.314 13 13 10.3135 13 7C13 3.6865 10.314 1 7.00001 1ZM5.81204e-06 7C5.81204e-06 3.134 3.13401 0 7.00001 0C10.866 0 14 3.134 14 7C14 10.866 10.866 14 7.00001 14C5.81601 14 4.69901 13.7055 3.72001 13.1855L0.956006 13.9715C0.827546 14.0079 0.691694 14.0094 0.562481 13.9757C0.433269 13.9421 0.31538 13.8746 0.220992 13.7801C0.126604 13.6857 0.0591384 13.5678 0.0255637 13.4385C-0.00801099 13.3093 -0.00647753 13.1734 0.0300058 13.045L0.816006 10.2815C0.278775 9.27123 -0.00147169 8.14423 5.81204e-06 7ZM4.00001 5.5C4.00001 5.36739 4.05268 5.24021 4.14645 5.14645C4.24022 5.05268 4.3674 5 4.50001 5H9.50001C9.63261 5 9.75979 5.05268 9.85356 5.14645C9.94733 5.24021 10 5.36739 10 5.5C10 5.63261 9.94733 5.75979 9.85356 5.85355C9.75979 5.94732 9.63261 6 9.50001 6H4.50001C4.3674 6 4.24022 5.94732 4.14645 5.85355C4.05268 5.75979 4.00001 5.63261 4.00001 5.5ZM4.50001 8C4.3674 8 4.24022 8.05268 4.14645 8.14645C4.05268 8.24021 4.00001 8.36739 4.00001 8.5C4.00001 8.63261 4.05268 8.75979 4.14645 8.85355C4.24022 8.94732 4.3674 9 4.50001 9H7.50001C7.63261 9 7.75979 8.94732 7.85356 8.85355C7.94733 8.75979 8.00001 8.63261 8.00001 8.5C8.00001 8.36739 7.94733 8.24021 7.85356 8.14645C7.75979 8.05268 7.63261 8 7.50001 8H4.50001Z" fill="black" />
+</svg>`,
+          text: computed(() => t("navigation.chats")),
+          condition: true,
+          isActive: computed(() => isActive("UserChats")),
+          action: () => router.push("view-chats"),
+        },
+      ],
+      settings: [
+        {
+          name: "Profile",
+          icon: `<svg width="16" height="19" viewBox="0 0 16 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14.75 18.25V16.25C14.75 15.1891 14.3286 14.1717 13.5784 13.4216C12.8283 12.6714 11.8109 12.25 10.75 12.25H4.75C3.68913 12.25 2.67172 12.6714 1.92157 13.4216C1.17143 14.1717 0.75 15.1891 0.75 16.25V18.25" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7.58862 8.75C9.79776 8.75 11.5886 6.95914 11.5886 4.75C11.5886 2.54086 9.79776 0.75 7.58862 0.75C5.37948 0.75 3.58862 2.54086 3.58862 4.75C3.58862 6.95914 5.37948 8.75 7.58862 8.75Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.profile")),
+          condition: true,
+          isActive: computed(() => isActive("Profile")),
+        },
+        //         {
+        //           name: "Payments",
+        //           icon: `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        //   <path d="M0.75 8.75C0.75 4.979 0.75 3.093 1.922 1.922C3.094 0.751 4.979 0.75 8.75 0.75H12.75C16.521 0.75 18.407 0.75 19.578 1.922C20.749 3.094 20.75 4.979 20.75 8.75C20.75 12.521 20.75 14.407 19.578 15.578C18.406 16.749 16.521 16.75 12.75 16.75H8.75C4.979 16.75 3.093 16.75 1.922 15.578C0.751 14.406 0.75 12.521 0.75 8.75Z" stroke="black" stroke-width="1.5" />
+        //   <path d="M8.75 12.75H4.75M12.75 12.75H11.25M0.75 6.75H20.75" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+        // </svg>`,
+        //           text: computed(() => t("navigation.payment")),
+        //           condition: true,
+        //           isActive: computed(() => isActive("payments")),
+        //         },
+        //         {
+        //           name: "Referrals",
+        //           icon: `<svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+        //   <path d="M1.75 9.75V17.75C1.75 18.2804 1.96071 18.7891 2.33579 19.1642C2.71086 19.5393 3.21957 19.75 3.75 19.75H15.75C16.2804 19.75 16.7891 19.5393 17.1642 19.1642C17.5393 18.7891 17.75 18.2804 17.75 17.75V9.75" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        //   <path d="M9.75 4.25C9.75 3.32174 9.38125 2.4315 8.72487 1.77513C8.0685 1.11875 7.17826 0.75 6.25 0.75C5.58696 0.75 4.95107 1.01339 4.48223 1.48223C4.01339 1.95107 3.75 2.58696 3.75 3.25C3.75 3.91304 4.01339 4.54893 4.48223 5.01777C4.95107 5.48661 5.58696 5.75 6.25 5.75H9.75M9.75 4.25V5.75M9.75 4.25C9.75 3.32174 10.1187 2.4315 10.7751 1.77513C11.4315 1.11875 12.3217 0.75 13.25 0.75C13.913 0.75 14.5489 1.01339 15.0178 1.48223C15.4866 1.95107 15.75 2.58696 15.75 3.25C15.75 3.5783 15.6853 3.90339 15.5597 4.20671C15.4341 4.51002 15.2499 4.78562 15.0178 5.01777C14.7856 5.24991 14.51 5.43406 14.2067 5.5597C13.9034 5.68534 13.5783 5.75 13.25 5.75H9.75" stroke="black" stroke-width="1.5" stroke-linejoin="round" />
+        //   <path d="M9.75 9.75V19.75M0.75 5.75H18.75V9.75H0.75V5.75Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        // </svg>`,
+        //           text: computed(() => t("navigation.refferals")),
+        //           condition: true,
+        //           isActive: computed(() => isActive("Referrals")),
+        //         },
+      ],
+      help: [
+        {
+          name: "Support",
+          icon: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5.36538 12.7506V7.89543C5.3798 6.94108 5.5824 5.99895 5.96158 5.12302C6.34075 4.24709 6.88905 3.45459 7.57504 2.79092C8.26104 2.12725 9.07126 1.60546 9.95927 1.25544C10.8473 0.90542 11.7956 0.734056 12.75 0.751166C13.7044 0.734056 14.6527 0.90542 15.5407 1.25544C16.4287 1.60546 17.239 2.12725 17.925 2.79092C18.611 3.45459 19.1592 4.24709 19.5384 5.12302C19.9176 5.99895 20.1202 6.94108 20.1346 7.89543V12.7506M16.4423 22.4424C17.4216 22.4424 18.3607 22.0534 19.0532 21.361C19.7456 20.6686 20.1346 19.7295 20.1346 18.7503V14.5966M16.4423 22.4424C16.4423 23.0544 16.1992 23.6414 15.7664 24.0741C15.3336 24.5069 14.7467 24.75 14.1346 24.75H11.3654C10.7533 24.75 10.1664 24.5069 9.7336 24.0741C9.30082 23.6414 9.05769 23.0544 9.05769 22.4424C9.05769 21.8304 9.30082 21.2435 9.7336 20.8107C10.1664 20.378 10.7533 20.1348 11.3654 20.1348H14.1346C14.7467 20.1348 15.3336 20.378 15.7664 20.8107C16.1992 21.2435 16.4423 21.8304 16.4423 22.4424ZM2.59615 9.98149H4.44231C4.68712 9.98149 4.92191 10.0787 5.09502 10.2518C5.26813 10.4249 5.36538 10.6597 5.36538 10.9045V16.4427C5.36538 16.6875 5.26813 16.9223 5.09502 17.0954C4.92191 17.2685 4.68712 17.3657 4.44231 17.3657H2.59615C2.10652 17.3657 1.63695 17.1712 1.29073 16.825C0.944505 16.4788 0.75 16.0093 0.75 15.5197V11.8276C0.75 11.3379 0.944505 10.8684 1.29073 10.5222C1.63695 10.176 2.10652 9.98149 2.59615 9.98149ZM22.9038 17.3657H21.0577C20.8129 17.3657 20.5781 17.2685 20.405 17.0954C20.2319 16.9223 20.1346 16.6875 20.1346 16.4427V10.9045C20.1346 10.6597 20.2319 10.4249 20.405 10.2518C20.5781 10.0787 20.8129 9.98149 21.0577 9.98149H22.9038C23.3935 9.98149 23.8631 10.176 24.2093 10.5222C24.5555 10.8684 24.75 11.3379 24.75 11.8276V15.5197C24.75 16.0093 24.5555 16.4788 24.2093 16.825C23.8631 17.1712 23.3935 17.3657 22.9038 17.3657Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+          text: computed(() => t("navigation.support")),
+          condition: true,
+          isActive: computed(() => isActive("Support")),
+          action: () => {
+            feedbackModalStore.openModal();
+          },
+        },
+        {
+          name: "Docs",
+          icon: `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0.75 6.75C0.75 3.922 0.75 2.507 1.629 1.629C2.507 0.75 3.922 0.75 6.75 0.75H10.75C13.578 0.75 14.993 0.75 15.871 1.629C16.75 2.507 16.75 3.922 16.75 6.75V14.75C16.75 17.578 16.75 18.993 15.871 19.871C14.993 20.75 13.578 20.75 10.75 20.75H6.75C3.922 20.75 2.507 20.75 1.629 19.871C0.75 18.993 0.75 17.578 0.75 14.75V6.75Z" stroke="black" stroke-width="1.5" />
+  <path d="M16.648 14.75H4.648C3.718 14.75 3.253 14.75 2.871 14.852C2.36231 14.9884 1.89849 15.2563 1.52618 15.6288C1.15386 16.0013 0.886165 16.4652 0.75 16.974" stroke="black" stroke-width="1.5" />
+  <path d="M4.75 5.75H12.75M4.75 9.25H9.75" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+</svg>`,
+          text: "База Знаний",
+          condition: true,
+          isActive: computed(() => isActive("Docs")),
+        },
+        //         {
+        //           name: "News",
+        //           icon: `<svg width="14" height="19" viewBox="0 0 14 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+        //   <path d="M12 0H1.5C1.10218 0 0.720644 0.158035 0.43934 0.43934C0.158035 0.720644 0 1.10218 0 1.5V18C6.65975e-05 18.1338 0.0359509 18.2652 0.103929 18.3805C0.171907 18.4958 0.269503 18.5908 0.386587 18.6557C0.503672 18.7206 0.635979 18.7529 0.76978 18.7494C0.90358 18.7458 1.034 18.7066 1.1475 18.6356L6.75 15.1341L12.3534 18.6356C12.4669 18.7063 12.5972 18.7454 12.7309 18.7488C12.8646 18.7522 12.9967 18.7198 13.1136 18.655C13.2306 18.5902 13.3281 18.4953 13.396 18.3801C13.4639 18.2649 13.4998 18.1337 13.5 18V1.5C13.5 1.10218 13.342 0.720644 13.0607 0.43934C12.7794 0.158035 12.3978 0 12 0ZM12 16.6472L7.14656 13.6144C7.02736 13.5399 6.88963 13.5004 6.74906 13.5004C6.6085 13.5004 6.47076 13.5399 6.35156 13.6144L1.5 16.6472V1.5H12V16.6472Z" fill="black" />
+        // </svg>`,
+        //           text: "Новости",
+        //           condition: true,
+        //           isActive: computed(() => isActive("News")),
+        //         },
       ],
     },
   });

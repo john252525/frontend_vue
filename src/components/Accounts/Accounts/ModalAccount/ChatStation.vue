@@ -121,13 +121,13 @@ const handleOverlayClick = (event) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(4px);
   z-index: -1;
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   padding: 32px;
   text-align: center;
@@ -144,20 +144,20 @@ const handleOverlayClick = (event) => {
 .modal-title {
   font-size: 20px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--modalColor, #1a1a1a);
   margin-bottom: 12px;
   line-height: 1.4;
 }
 
 .modal-message {
   font-size: 16px;
-  color: #718096;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin-bottom: 24px;
 }
 
 .continue-button {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
 
   color: white;
   border: none;

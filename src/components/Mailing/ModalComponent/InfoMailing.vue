@@ -262,7 +262,7 @@ const statusClass = computed(() => {
 .edit-btn {
   width: 100%;
   padding: 12px 20px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -273,7 +273,7 @@ const statusClass = computed(() => {
 }
 
 .edit-btn:hover {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   opacity: 0.9;
   transform: translateY(-1px);
 }

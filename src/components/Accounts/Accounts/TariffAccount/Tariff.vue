@@ -870,7 +870,7 @@ onMounted(fetchTariffs);
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -882,7 +882,7 @@ onMounted(fetchTariffs);
 }
 
 .modal-container {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   width: 100%;
   max-width: 900px;
@@ -901,12 +901,12 @@ onMounted(fetchTariffs);
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-header h2 {
   font-size: 22px;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
   font-weight: 700;
 }
@@ -925,11 +925,11 @@ onMounted(fetchTariffs);
 }
 
 .close-button:hover {
-  background: #f8f9ff;
+  background: var(--tableHover);
 }
 
 .close-button svg {
-  fill: #666;
+  fill: var(--headerAccountText);
   transition: fill 0.3s ease;
   width: 20px;
   height: 20px;
@@ -948,10 +948,10 @@ onMounted(fetchTariffs);
 
 .tariff-card {
   position: relative;
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--line);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -961,13 +961,13 @@ onMounted(fetchTariffs);
 
 .tariff-card--hovered {
   transform: translateY(-4px);
-  border-color: #6732ff;
-  box-shadow: 0 8px 20px rgba(103, 50, 255, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.15);
 }
 
 .tariff-card--discount {
-  border-color: #ffcdd2;
-  background: linear-gradient(135deg, #fff 0%, #fffaf5 100%);
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.06);
 }
 
 .discount-badge {
@@ -1006,13 +1006,13 @@ onMounted(fetchTariffs);
   text-align: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--line);
 }
 
 .tariff-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin-bottom: 12px;
   line-height: 1.3;
 }
@@ -1041,13 +1041,13 @@ onMounted(fetchTariffs);
 .original-price {
   font-size: 14px;
   text-decoration: line-through;
-  color: #9e9e9e;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
 .original-currency {
   font-size: 12px;
-  color: #9e9e9e;
+  color: var(--headerAccountText);
 }
 
 .final-price-wrapper {
@@ -1079,19 +1079,19 @@ onMounted(fetchTariffs);
 .regular-price {
   font-size: 24px;
   font-weight: 800;
-  color: #6732ff;
+  color: var(--modalColor);
   line-height: 1;
 }
 
 .regular-currency {
   font-size: 14px;
-  color: #6732ff;
+  color: var(--modalColor);
   font-weight: 600;
 }
 
 .period-text {
   font-size: 13px;
-  color: #666;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -1105,17 +1105,17 @@ onMounted(fetchTariffs);
   align-items: flex-start;
   margin-bottom: 10px;
   font-size: 13px;
-  color: #555;
+  color: var(--headerAccountText);
   line-height: 1.4;
   gap: 8px;
 }
 
 .feature-icon {
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  background: #f0f4ff;
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  background: rgba(var(--primary-rgb), 0.12);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1123,34 +1123,34 @@ onMounted(fetchTariffs);
 }
 
 .feature-icon svg {
-  fill: #6732ff;
+  fill: var(--primary);
   width: 12px;
   height: 12px;
 }
 
 .bonus-icon {
-  background: #f0fff4;
+  background: rgba(34, 197, 94, 0.14);
 }
 
 .bonus-icon svg {
-  fill: #4caf50;
+  fill: #22c55e;
 }
 
 .monthly-price-item .feature-icon {
-  background: #fff3e0;
+  background: rgba(245, 158, 11, 0.14);
 }
 
 .monthly-price-item .feature-icon svg {
-  fill: #ff9800;
+  fill: #f59e0b;
 }
 
 .bonus-item .feature-text {
-  color: #2e7d32;
+  color: #22c55e;
   font-weight: 600;
 }
 
 .monthly-price-item .feature-text {
-  color: #e65100;
+  color: #f59e0b;
   font-weight: 600;
 }
 
@@ -1165,8 +1165,8 @@ onMounted(fetchTariffs);
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1177,7 +1177,7 @@ onMounted(fetchTariffs);
 .select-button:hover,
 .select-button--hovered {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, #7a4aff 0%, #9d7aff 100%);
+  background: var(--primaryHover);
 }
 
 .loading-container {
@@ -1188,9 +1188,9 @@ onMounted(fetchTariffs);
 }
 
 .loader {
-  border: 3px solid rgba(101, 52, 255, 0.1);
+  border: 3px solid rgba(var(--primary-rgb), 0.1);
   border-radius: 50%;
-  border-top: 3px solid #6732ff;
+  border-top: 3px solid var(--primary);
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
@@ -1207,8 +1207,8 @@ onMounted(fetchTariffs);
 .retry-button {
   margin-top: 15px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -1218,6 +1218,7 @@ onMounted(fetchTariffs);
 }
 
 .retry-button:hover {
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 
@@ -1264,12 +1265,12 @@ onMounted(fetchTariffs);
 
 .upsell-banner__text strong {
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--modalColor);
 }
 
 .upsell-banner__text span {
   font-size: 12px;
-  color: #666;
+  color: var(--headerAccountText);
 }
 
 .upsell-banner__arrow {
@@ -1288,8 +1289,8 @@ onMounted(fetchTariffs);
 }
 
 .pagination-button {
-  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -1304,17 +1305,19 @@ onMounted(fetchTariffs);
 }
 
 .pagination-button:disabled {
-  background: #ccc;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 
 .pagination-button:hover:not(:disabled) {
+  background: var(--primaryHover);
   transform: translateY(-1px);
 }
 
 .page-indicator {
   font-size: 13px;
-  color: #666;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -1418,7 +1421,7 @@ onMounted(fetchTariffs);
   gap: 24px;
   margin-top: 20px;
   padding: 24px 28px;
-  background: #f2f3f5;
+  background: var(--tableAccountBg);
   border-radius: 14px;
   text-decoration: none;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
@@ -1438,14 +1441,14 @@ onMounted(fetchTariffs);
 .special-offer-banner__title {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--modalColor);
   margin: 0;
   line-height: 1.3;
 }
 
 .special-offer-banner__desc {
   font-size: 14px;
-  color: #555;
+  color: var(--headerAccountText);
   margin: 0;
   display: flex;
   align-items: flex-start;
@@ -1453,7 +1456,7 @@ onMounted(fetchTariffs);
 }
 
 .special-offer-banner__dash {
-  color: #6732ff;
+  color: var(--primary);
   font-weight: 700;
   font-size: 16px;
   flex-shrink: 0;
@@ -1466,8 +1469,8 @@ onMounted(fetchTariffs);
 .special-offer-banner__btn {
   display: inline-block;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #6732ff 0%, #8a63ff 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primaryText);
   border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
@@ -1476,8 +1479,8 @@ onMounted(fetchTariffs);
 }
 
 .special-offer-banner:hover .special-offer-banner__btn {
-  background: linear-gradient(135deg, #7a4aff 0%, #9d7aff 100%);
-  box-shadow: 0 4px 12px rgba(103, 50, 255, 0.35);
+  background: var(--primaryHover);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.35);
 }
 
 @media (max-width: 600px) {

@@ -267,7 +267,7 @@ const renderedContent = computed(() => {
   color: white;
 }
 .category-badge.news {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 
@@ -359,7 +359,7 @@ const renderedContent = computed(() => {
 }
 
 .back-button {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 1rem 2.5rem;
@@ -371,9 +371,9 @@ const renderedContent = computed(() => {
 }
 
 .back-button:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 10px 25px rgba(var(--primary-rgb), 0.25);
 }
 
 @media (max-width: 1024px) {

@@ -331,7 +331,7 @@ onMounted(fetchSettings);
 .section-title {
   font-size: 11px;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--headerAccountText);
   letter-spacing: 0.1em;
   margin-bottom: 12px;
   font-weight: 700;

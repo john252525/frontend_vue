@@ -140,8 +140,8 @@
       <div class="sms-dm-header">
         <div class="sms-dm-header-icon">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="5" width="24" height="18" rx="3" stroke="#6366f1" stroke-width="1.8"/>
-            <path d="M8 11h12M8 15h8" stroke="#6366f1" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="2" y="5" width="24" height="18" rx="3" stroke="var(--primary)" stroke-width="1.8"/>
+            <path d="M8 11h12M8 15h8" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
         <div>
@@ -156,9 +156,9 @@
         <div class="sms-dm-item">
           <div class="sms-dm-item-icon sms-dm-icon-purple">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="5" y="2" width="14" height="20" rx="3" stroke="#6366f1" stroke-width="1.8"/>
-              <circle cx="12" cy="18" r="1" fill="#6366f1"/>
-              <path d="M9 6h6M9 9.5h4" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="5" y="2" width="14" height="20" rx="3" stroke="var(--primary)" stroke-width="1.8"/>
+              <circle cx="12" cy="18" r="1" fill="var(--primary)"/>
+              <path d="M9 6h6M9 9.5h4" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
           <div class="sms-dm-item-text">
@@ -632,8 +632,8 @@
         data-testid="sms-accepted-badge"
       >
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="10" cy="10" r="9" stroke="#6366f1" stroke-width="1.5"/>
-          <path d="M6 10.5L8.5 13L14 7.5" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="10" r="9" stroke="var(--primary)" stroke-width="1.5"/>
+          <path d="M6 10.5L8.5 13L14 7.5" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>Условия работы канала SMS приняты</span>
       </div>
@@ -1281,7 +1281,7 @@ const submitForm = async () => {
 .error-message {
   margin: 0;
   font-size: 0.95rem;
-  color: #374151;
+  color: var(--modalColor);
   line-height: 1.5;
   font-weight: 500;
 }
@@ -1289,7 +1289,7 @@ const submitForm = async () => {
 .error-hint {
   margin: 0;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   font-style: italic;
 }
 
@@ -1321,7 +1321,7 @@ const submitForm = async () => {
 }
 
 .integration-question strong {
-  color: #6366f1;
+  color: var(--primary);
 }
 
 .warning-message {
@@ -1368,7 +1368,7 @@ const submitForm = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1379,7 +1379,7 @@ const submitForm = async () => {
 }
 
 .modal-container {
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
@@ -1395,7 +1395,7 @@ const submitForm = async () => {
 /* Modal header */
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1406,7 +1406,7 @@ const submitForm = async () => {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--modalColor);
 }
 
 .close-btn {
@@ -1414,13 +1414,13 @@ const submitForm = async () => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--headerAccountText);
   padding: 0;
   line-height: 1;
 }
 
 .close-btn:hover {
-  color: #111827;
+  color: var(--modalColor);
 }
 
 /* Modal content */
@@ -1442,7 +1442,7 @@ const submitForm = async () => {
   margin-bottom: 6px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--headerAccountText);
 }
 
 /* Custom select styles */
@@ -1454,19 +1454,19 @@ const submitForm = async () => {
 
 .selected-option {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   transition: all 0.2s;
   position: relative;
   z-index: 2;
 }
 
 .selected-option:hover {
-  border-color: #9ca3af;
+  border-color: var(--line);
 }
 
 .dropdown-icon {
@@ -1482,8 +1482,8 @@ const submitForm = async () => {
   position: fixed;
   max-height: 200px;
   overflow-y: auto;
-  background-color: white;
-  border: 1px solid #e5e7eb;
+  background-color: var(--modalBg, #ffffff);
+  border: 1px solid var(--line);
   border-radius: 6px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 10010;
@@ -1497,11 +1497,11 @@ const submitForm = async () => {
 }
 
 .option:hover {
-  background-color: #f3f4f6;
+  background-color: var(--tableAccountBg);
 }
 
 .option:not(:last-child) {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 /* Form fields */
@@ -1518,13 +1518,13 @@ const submitForm = async () => {
   margin-bottom: 6px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--headerAccountText);
 }
 
 .form-field input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 0.875rem;
   transition: border-color 0.2s;
@@ -1532,14 +1532,14 @@ const submitForm = async () => {
 
 .form-field input:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
 }
 
 .field-hint {
   margin-top: 6px;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-style: italic;
 }
 
@@ -1589,7 +1589,7 @@ const submitForm = async () => {
   align-items: center;
   gap: 14px;
   padding: 22px 24px 18px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .sms-dm-header-icon {
@@ -1607,13 +1607,13 @@ const submitForm = async () => {
   margin: 0 0 2px;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--modalColor);
 }
 
 .sms-dm-subtitle {
   margin: 0;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--headerAccountText);
 }
 
 .sms-dm-body {
@@ -1652,23 +1652,23 @@ const submitForm = async () => {
   margin: 0 0 3px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--modalColor);
 }
 
 .sms-dm-item-desc {
   margin: 0;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.5;
 }
 
 .sms-dm-item-desc strong {
-  color: #374151;
+  color: var(--modalColor);
 }
 
 .sms-dm-footer {
   padding: 16px 24px 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -1680,7 +1680,7 @@ const submitForm = async () => {
   gap: 10px;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #374151;
+  color: var(--modalColor);
   line-height: 1.45;
 }
 
@@ -1689,7 +1689,7 @@ const submitForm = async () => {
   margin-top: 1px;
   width: 16px;
   height: 16px;
-  accent-color: #6366f1;
+  accent-color: var(--primary);
   cursor: pointer;
 }
 
@@ -1710,14 +1710,14 @@ const submitForm = async () => {
   border-radius: 8px;
   margin-bottom: 4px;
   font-size: 0.82rem;
-  color: #4338ca;
+  color: var(--primaryHover);
   font-weight: 500;
 }
 
 /* Modal footer */
 .modal-footer {
   padding: 16px 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -1726,10 +1726,10 @@ const submitForm = async () => {
 
 .cancel-btn {
   padding: 8px 16px;
-  background-color: white;
-  border: 1px solid #d1d5db;
+  background-color: var(--modalBg, #ffffff);
+  border: 1px solid var(--line);
   border-radius: 6px;
-  color: #374151;
+  color: var(--modalColor);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -1737,14 +1737,14 @@ const submitForm = async () => {
 }
 
 .cancel-btn:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
+  background-color: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 .submit-btn {
   padding: 8px 16px;
-  background-color: #6366f1;
-  border: 1px solid #6366f1;
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
   border-radius: 6px;
   color: white;
   font-size: 0.875rem;
@@ -1754,8 +1754,8 @@ const submitForm = async () => {
 }
 
 .submit-btn:hover {
-  background-color: #4f46e5;
-  border-color: #4f46e5;
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 .submit-btn:disabled {
@@ -1806,26 +1806,26 @@ const submitForm = async () => {
 
 .messenger-card {
   padding: 12px 14px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--line);
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
-  background: white;
+  color: var(--modalColor);
+  background: var(--modalBg, #ffffff);
   transition: all 0.15s;
   user-select: none;
 }
 
 .messenger-card:hover {
-  border-color: #9ca3af;
-  background: #f9fafb;
+  border-color: var(--line);
+  background: var(--tableAccountBg);
 }
 
 .messenger-card-active {
-  border-color: #6366f1;
+  border-color: var(--primary);
   background: #eef2ff;
-  color: #4338ca;
+  color: var(--primaryHover);
 }
 
 /* Адаптивные стили для мобильных устройств */

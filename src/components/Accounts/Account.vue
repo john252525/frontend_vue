@@ -268,7 +268,7 @@ header {
 }
 
 .account-list-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
@@ -294,7 +294,7 @@ header {
 }
 
 .add-account-button {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   font-weight: 600;
   font-size: 12px;
   color: #fff;
@@ -304,11 +304,11 @@ header {
 }
 
 .add-account-button:hover {
-  background: #565cc8;
+  background: var(--primaryHover);
 }
 
 .add-account-button:active {
-  background: #3e43ae;
+  background: var(--primaryActive);
 }
 
 .help-tour-button {
@@ -330,8 +330,8 @@ header {
 }
 
 .help-tour-button:hover {
-  background: oklch(0.65 0.22 267 / 0.1);
-  border-color: oklch(0.541 0.198 267);
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary);
 }
 
 .black-fon {
@@ -339,7 +339,7 @@ header {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -353,7 +353,7 @@ header {
   border-radius: 10px;
   width: 108px;
   height: 100px;
-  background: #ffffff;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -373,12 +373,12 @@ header {
 }
 
 .crm-platform:hover {
-  background-color: #eeeeee;
+  background-color: var(--tableAccountBg);
   border-radius: 5px;
 }
 
 .crm-platform.active {
-  background-color: #eeeeee;
+  background-color: var(--tableAccountBg);
   border-radius: 5px;
 }
 

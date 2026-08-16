@@ -254,7 +254,7 @@ header {
 }
 
 .help-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   border: none;
   border-radius: 5px;
   padding: 10px 12px;
@@ -297,8 +297,8 @@ header {
 .account {
   font-weight: 700;
   font-size: 18px;
-  color: #6b7280;
-  background: #f9f9f9;
+  color: var(--headerAccountText);
+  background: var(--tableAccountBg);
   border-radius: 5px;
   padding: 5px 10px;
   display: flex;
@@ -324,11 +324,11 @@ header {
 }
 
 .account-list-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: rgba(var(--primary-rgb), 0.86);
   margin-right: 10px;
   display: flex;
   align-items: center;
@@ -355,7 +355,7 @@ header {
 }
 
 .add-account-button {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   font-weight: 600;
   font-size: 12px;
   color: #fff;
@@ -365,12 +365,12 @@ header {
 }
 
 .add-account-button:hover:not(:disabled) {
-  background: #565cc8;
+  background: var(--primaryHover);
   transition: all 0.25s;
 }
 
 .add-account-button:active:not(:disabled) {
-  background: #3e43ae;
+  background: var(--primaryActive);
   transition: all 0.25s;
 }
 
@@ -399,7 +399,7 @@ header {
   border-radius: 10px;
   width: 100px;
   height: 70px;
-  background: #ffffff;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -415,7 +415,7 @@ header {
   border-radius: 10px;
   width: 108px;
   height: 70px;
-  background: #ffffff;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -468,7 +468,7 @@ header {
 .platform:hover {
   text-align: center;
   width: 80px;
-  background-color: #eeeeee;
+  background-color: var(--tableAccountBg);
   border-radius: 5px;
   transition: all 0.2s;
 }

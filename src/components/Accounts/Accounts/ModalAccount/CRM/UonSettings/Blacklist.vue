@@ -210,12 +210,12 @@ onMounted(fetchBlockedList);
 .black-fon {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45); /* Только прозрачность, без блюра */
+  background: var(--backgroundComponentModal); /* Только прозрачность, без блюра */
 }
 
 .modal-card {
   position: relative;
-  background: white;
+  background: var(--modalBg, #ffffff);
   width: 100%;
   max-width: 420px;
   padding: 24px;
@@ -241,14 +241,14 @@ onMounted(fetchBlockedList);
   background: none;
   border: none;
   font-size: 24px;
-  color: #aaa;
+  color: var(--headerAccountText);
   cursor: pointer;
 }
 
 .custom-input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 6px;
   margin-bottom: 12px;
   box-sizing: border-box;
@@ -273,13 +273,13 @@ onMounted(fetchBlockedList);
   color: white;
 }
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--modalColor, #1a1a1a);
 }
 
 .list-section {
   margin-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--line);
   padding-top: 15px;
 }
 
@@ -292,7 +292,7 @@ onMounted(fetchBlockedList);
   display: flex;
   justify-content: space-between;
   padding: 8px;
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   margin-bottom: 5px;
 }
@@ -304,7 +304,7 @@ onMounted(fetchBlockedList);
 }
 .phone {
   font-size: 12px;
-  color: #888;
+  color: var(--headerAccountText);
 }
 
 .btn-remove {

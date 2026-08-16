@@ -536,7 +536,7 @@ provide("selectedItem", { selectedItem });
 .account-row {
   display: flex;
   align-items: center;
-  background: #ffffff;
+  background: var(--bg);
   border-radius: 10px;
   padding: 12px 20px;
   transition: all 0.2s ease;
@@ -545,17 +545,17 @@ provide("selectedItem", { selectedItem });
 }
 
 .account-row:hover {
-  border-color: #cbd5e1;
+  border-color: var(--line);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   transform: translateY(-1px);
 }
 
 .row-active {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .row-disabled {
-  background: #f5f7fa;
+  background: var(--tableAccountBg);
   opacity: 0.9;
 }
 
@@ -579,20 +579,20 @@ provide("selectedItem", { selectedItem });
 
 .account-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   font-size: 15px;
 }
 
 .account-login {
   font-weight: 500;
-  color: #475569;
+  color: var(--headerAccountText);
   font-size: 15px;
 }
 
 .account-type {
   font-size: 11px;
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--headerAccountText);
+  background: var(--tableAccountBg);
   padding: 2px 8px;
   border-radius: 4px;
   margin-top: 4px;
@@ -630,7 +630,7 @@ provide("selectedItem", { selectedItem });
 .vertical-divider {
   width: 1px;
   height: 32px;
-  background: #e2e8f0;
+  background: var(--line);
 }
 
 /* 3. ДАННЫЕ (СТАТУС И ПОДПИСКА) - Вертикальный стек */
@@ -669,8 +669,8 @@ provide("selectedItem", { selectedItem });
   height: 36px;
   border-radius: 8px;
   border: 1px solid transparent;
-  background-color: #f7fafc;
-  color: #718096;
+  background-color: var(--tableAccountBg);
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -679,14 +679,14 @@ provide("selectedItem", { selectedItem });
 }
 
 .action-btn:hover {
-  background-color: #edf2f7;
-  color: #4a5568;
+  background-color: var(--tableHover);
+  color: var(--text);
   transform: translateY(-1px);
 }
 
 .action-btn.edit-btn:hover {
   background-color: #ebf8ff;
-  color: #3182ce;
+  color: var(--primaryHover);
   border-color: #bee3f8;
 }
 
@@ -738,7 +738,7 @@ provide("selectedItem", { selectedItem });
 }
 
 input:checked + .slider {
-  background: #3b82f6;
+  background: var(--primary);
 }
 
 input:checked + .slider .switch-handle {
@@ -746,7 +746,7 @@ input:checked + .slider .switch-handle {
 }
 
 .switch-loading .slider {
-  background: rgba(59, 130, 246, 0.5);
+  background: rgba(var(--primary-rgb), 0.5);
 }
 
 .switch-loader {
@@ -803,7 +803,7 @@ input:checked + .slider .switch-handle {
 .status-text {
   font-size: 12px;
   font-weight: 500;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 .status-empty {
@@ -815,7 +815,7 @@ input:checked + .slider .switch-handle {
   position: relative;
   z-index: 1;
   padding: 4px 8px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   color: white;
   border: none;
   border-radius: 4px;
@@ -835,8 +835,8 @@ input:checked + .slider .switch-handle {
   bottom: 0;
   background: linear-gradient(
     135deg,
-    #7c3aed 0%,
-    #4f46e5 100%
+    var(--primaryHover) 0%,
+    var(--primary) 100%
   ); /* Цвета наоборот или другие */
   opacity: 0;
   z-index: -1;
@@ -875,15 +875,15 @@ input:checked + .slider .switch-handle {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .icon-wrapper:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--line);
+  color: var(--text);
 }
 
 .action-menu-button {
@@ -893,16 +893,16 @@ input:checked + .slider .switch-handle {
   width: 32px;
   height: 32px;
   background: transparent;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
 }
 
 .action-menu-button:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 /* СОСТОЯНИЯ (Empty, Loading, Error) */
@@ -925,27 +925,27 @@ input:checked + .slider .switch-handle {
 }
 
 .empty-state svg {
-  color: #cbd5e0;
+  color: var(--line);
   margin-bottom: 16px;
 }
 
 .empty-state h3 {
-  color: #475569;
+  color: var(--text);
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 18px;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--headerAccountText);
   font-size: 14px;
 }
 
 .loading-spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid #f1f5f9;
-  border-top: 2px solid #3b82f6;
+  border: 2px solid var(--line);
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -973,16 +973,16 @@ input:checked + .slider .switch-handle {
 }
 
 .list-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--scrolBg);
 }
 
 .list-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrolColor);
   border-radius: 3px;
 }
 
 .list-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scrolColor);
 }
 
 /* АДАПТИВНОСТЬ */
@@ -995,7 +995,7 @@ input:checked + .slider .switch-handle {
   .section-identity {
     flex: 100%;
     min-width: 100%;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--line);
     padding-bottom: 8px;
   }
 
@@ -1017,7 +1017,7 @@ input:checked + .slider .switch-handle {
     margin-left: 0;
     width: 100%;
     justify-content: flex-end;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--line);
     padding-top: 8px;
   }
 }

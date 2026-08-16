@@ -151,7 +151,7 @@ const toggleNone = (uuid, isChecked) => {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #1d4ed8;
+  accent-color: var(--primaryHover);
 }
 
 .input-control {

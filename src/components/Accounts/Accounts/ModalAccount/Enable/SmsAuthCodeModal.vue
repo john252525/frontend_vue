@@ -157,7 +157,7 @@ const copyCode = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #2563eb;
+  color: var(--primaryHover);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -175,7 +175,7 @@ const copyCode = async () => {
 
 .downloaded-btn {
   width: 100%;
-  background: #2563eb;
+  background: var(--primaryHover);
   color: white;
   border: none;
   padding: 12px 20px;
@@ -187,7 +187,7 @@ const copyCode = async () => {
 }
 
 .downloaded-btn:hover {
-  background: #1d4ed8;
+  background: var(--primaryHover);
 }
 
 .code-block {
@@ -214,7 +214,7 @@ const copyCode = async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #2563eb;
+  background: var(--primaryHover);
   color: white;
   border: none;
   padding: 8px 14px;
@@ -228,7 +228,7 @@ const copyCode = async () => {
 }
 
 .copy-btn:hover {
-  background: #1d4ed8;
+  background: var(--primaryHover);
 }
 
 .copy-btn.copied {

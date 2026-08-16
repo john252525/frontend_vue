@@ -80,7 +80,7 @@ onMounted(() => {
 
     onHighlightStarted: (element) => {
       if (element?.node) {
-        element.node.style.boxShadow = "0 0 0 3px rgba(79, 70, 229, 0.8)";
+        element.node.style.boxShadow = "0 0 0 3px rgba(var(--primary-rgb), 0.8)";
         element.node.style.borderRadius = "4px";
         element.node.style.transition = "box-shadow 0.2s ease";
         element.node.style.zIndex = "10001";
@@ -217,12 +217,12 @@ defineExpose({
 }
 
 .driver-next-btn {
-  background: #4f46e5 !important;
+  background: var(--primary) !important;
   color: white !important;
 }
 
 .driver-next-btn:hover {
-  background: #4338ca !important;
+  background: var(--primaryHover) !important;
 }
 
 .driver-prev-btn {
@@ -245,6 +245,6 @@ defineExpose({
 
 .driver-highlighted-element {
   border-radius: 4px !important;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.8) !important;
 }
 </style>

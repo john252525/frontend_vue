@@ -102,7 +102,7 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
   flex-direction: column;
   align-items: center;
   /* padding: 24px; */
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 12px;
   /* border: 1px solid #e5e7eb; */
   /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); */
@@ -123,12 +123,12 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
 .error-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0 0 12px 0;
 }
 
 .error-message {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   line-height: 1.5;
   margin: 0 0 16px 0;
@@ -139,19 +139,19 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
 }
 
 .account-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--modalColor);
   font-size: 12px;
 }
 
 .account-login {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 12px;
   font-weight: 500;
 }
@@ -169,7 +169,7 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -179,17 +179,17 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
 }
 
 .code-button {
-  background: #f8fafc;
-  color: #3b82f6;
+  background: var(--tableAccountBg);
+  color: var(--primary);
 }
 
 .code-button:hover {
   background: #eff6ff;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .qr-button {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   color: #10b981;
 }
 
@@ -199,13 +199,13 @@ defineEmits(["connectWithCode", "connectWithQR", "cancel"]);
 }
 
 .cancel-button {
-  background: #f8fafc;
-  color: #6b7280;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
 }
 
 .cancel-button:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 .action-button svg {

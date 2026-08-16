@@ -1177,7 +1177,7 @@ const DeletedBadge = {
   z-index: 1000;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 0;
   left: 0;
 }
@@ -1186,7 +1186,7 @@ const DeletedBadge = {
 .action-list {
   border-radius: 10px;
   width: 165px;
-  background: #ffffff;
+  background: var(--modalBg, #ffffff);
   position: fixed;
   z-index: 1010;
   display: flex;
@@ -1240,8 +1240,8 @@ const DeletedBadge = {
     justify-content: space-between;
     align-items: center;
     padding: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
+    border-bottom: 1px solid var(--line);
+    background: var(--tableAccountBg);
     border-radius: 16px 16px 0 0;
   }
 
@@ -1250,7 +1250,7 @@ const DeletedBadge = {
   .action-list .action-support {
     padding: 16px;
     font-size: 16px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--line);
     margin: 0;
   }
 
@@ -1262,7 +1262,7 @@ const DeletedBadge = {
 
   .action-list .action:hover,
   .action-list .action-support:hover {
-    background-color: #f3f4f6;
+    background-color: var(--tableAccountBg);
     border-radius: 0;
   }
 }
@@ -1283,7 +1283,7 @@ const DeletedBadge = {
 
   .action-list .action:hover,
   .action-list .action-support:hover {
-    background-color: #eeeeee;
+    background-color: var(--tableAccountBg);
     border-radius: 5px;
   }
 }
@@ -1302,7 +1302,7 @@ const DeletedBadge = {
 .account-login-mobile {
   font-weight: 600;
   font-size: 16px;
-  color: #1f2937;
+  color: var(--modalColor, #1a1a1a);
 }
 
 .close-button {
@@ -1317,13 +1317,13 @@ const DeletedBadge = {
 }
 
 .close-button:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .close-button svg {
   width: 20px;
   height: 20px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 /* Бейдж удаленного аккаунта */
@@ -1337,7 +1337,7 @@ const DeletedBadge = {
 .action-support {
   font-weight: 400;
   font-size: 14px;
-  color: #6732ff;
+  color: var(--primary);
   cursor: pointer;
 }
 
@@ -1349,7 +1349,7 @@ const DeletedBadge = {
 .action-chat-false {
   font-weight: 400;
   font-size: 14px;
-  color: #616161;
+  color: var(--headerAccountText);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1360,14 +1360,14 @@ const DeletedBadge = {
 .action {
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--modalColor, #1a1a1a);
   cursor: pointer;
 }
 
 .action-loading {
   font-weight: 400;
   font-size: 14px;
-  color: #5f5f5f;
+  color: var(--headerAccountText);
   cursor: pointer;
   animation: shimmer 1s infinite;
   display: flex;

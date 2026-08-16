@@ -228,20 +228,20 @@ const hasCompletedDownloads = computed(() => {
   position: relative;
   width: 50px;
   height: 50px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--primary), var(--primaryHover));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3);
   transition: all 0.3s ease;
   animation: bounce-in 0.6s ease;
 }
 
 .downloads-icon:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.4);
 }
 
 .downloads-icon .loading-icon {
@@ -274,7 +274,7 @@ const hasCompletedDownloads = computed(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(var(--primary-rgb), 0.3);
   border-radius: 50%;
   animation: pulse 2s infinite;
   z-index: -1;
@@ -285,10 +285,10 @@ const hasCompletedDownloads = computed(() => {
   bottom: 60px;
   right: 0;
   width: 320px;
-  background: white;
+  background: var(--bg);
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   overflow: hidden;
   animation: slide-up 0.3s ease;
 }
@@ -298,14 +298,14 @@ const hasCompletedDownloads = computed(() => {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border-bottom: 1px solid var(--line);
 }
 
 .downloads-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text);
   margin: 0;
 }
 
@@ -315,13 +315,13 @@ const hasCompletedDownloads = computed(() => {
   padding: 4px;
   cursor: pointer;
   border-radius: 4px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .downloads-list {
@@ -332,7 +332,7 @@ const hasCompletedDownloads = computed(() => {
 
 .download-item {
   padding: 12px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .download-item:last-child {
@@ -349,7 +349,7 @@ const hasCompletedDownloads = computed(() => {
 
 .download-name {
   font-size: 14px;
-  color: #374151;
+  color: var(--text);
   font-weight: 500;
   flex: 1;
   overflow: hidden;
@@ -366,7 +366,7 @@ const hasCompletedDownloads = computed(() => {
 
 .download-progress {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 600;
 }
 
@@ -376,7 +376,7 @@ const hasCompletedDownloads = computed(() => {
 }
 
 .status-loading {
-  color: #3b82f6;
+  color: var(--primary);
   animation: spin 1s linear infinite;
 }
 
@@ -397,14 +397,14 @@ const hasCompletedDownloads = computed(() => {
 .progress-bar {
   flex: 1;
   height: 4px;
-  background: #e5e7eb;
+  background: var(--line);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, var(--primary), var(--primaryHover));
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -412,12 +412,12 @@ const hasCompletedDownloads = computed(() => {
 .empty-state {
   padding: 40px 20px;
   text-align: center;
-  color: #9ca3af;
+  color: var(--headerAccountText);
 }
 
 .empty-state svg {
   margin-bottom: 12px;
-  color: #d1d5db;
+  color: var(--line);
 }
 
 .empty-state p {
@@ -427,8 +427,8 @@ const hasCompletedDownloads = computed(() => {
 
 .downloads-actions {
   padding: 16px 20px;
-  background: #f8fafc;
-  border-top: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border-top: 1px solid var(--line);
   display: flex;
   gap: 8px;
 }
@@ -445,12 +445,12 @@ const hasCompletedDownloads = computed(() => {
 }
 
 .clear-button {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .clear-button:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .clear-all-button {

@@ -278,7 +278,7 @@ const enableByCode = async () => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 25px 30px;
   border-radius: 10px;
   display: flex;
@@ -289,7 +289,7 @@ const enableByCode = async () => {
 .code-text {
   font-size: 25px;
   padding: 10px 50px;
-  border: 0.5px solid #c1c1c1;
+  border: 0.5px solid var(--line);
   border-radius: 5px;
 }
 
@@ -329,9 +329,9 @@ const enableByCode = async () => {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
+  color: var(--text);
+  border: 0.5px solid var(--line);
+  background: var(--input);
 }
 
 .num-input-error {
@@ -341,7 +341,7 @@ const enableByCode = async () => {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--modalColor, #1a1a1a);
   border: 0.5px solid #be2424;
   background: #ffeaea;
 }

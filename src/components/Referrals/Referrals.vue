@@ -31,7 +31,7 @@
                   height="32"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="oklch(0.541 0.198 267)"
+                  stroke="var(--primary)"
                   stroke-width="2"
                 >
                   <path
@@ -185,14 +185,14 @@ const initChart = () => {
           {
             label: t("referrals.operationsCount"),
             data: data.datasets[0].data,
-            borderColor: "#4f46e5",
-            backgroundColor: "rgba(79, 70, 229, 0.08)",
+            borderColor: "var(--primary)",
+            backgroundColor: "rgba(var(--primary-rgb), 0.08)",
             borderWidth: 2.5,
             tension: 0.3,
             fill: true,
             pointRadius: 5,
             pointHoverRadius: 7,
-            pointBackgroundColor: "#4f46e5",
+            pointBackgroundColor: "var(--primary)",
             pointBorderColor: "#fff",
             pointBorderWidth: 2,
           },
@@ -418,7 +418,7 @@ header {
 }
 
 .stat-block.referral-block {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 20px;
 }
@@ -512,7 +512,7 @@ header {
 }
 
 .copy-button-primary {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   border: none;
   color: white;
   padding: 12px 20px;
@@ -597,9 +597,9 @@ header {
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  background-color: #4f46e5;
+  background-color: var(--primary);
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 2px 4px rgba(var(--primary-rgb), 0.2);
 }
 
 /* Адаптив */

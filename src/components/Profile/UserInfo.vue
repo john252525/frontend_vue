@@ -551,11 +551,11 @@ onMounted(() => {
 
 <style scoped>
 .profile-section {
-  background: white;
+  background: var(--bg);
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   width: 100%;
   max-width: 100%;
   overflow: hidden;
@@ -569,7 +569,7 @@ onMounted(() => {
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: #2d3748;
+  color: var(--text);
   width: 100%;
 }
 
@@ -597,7 +597,7 @@ onMounted(() => {
 }
 
 .info-label {
-  color: #718096;
+  color: var(--headerAccountText);
   font-size: 0.875rem;
   font-weight: 500;
   min-width: 110px;
@@ -617,7 +617,7 @@ onMounted(() => {
 
 .info-value {
   font-weight: 500;
-  color: #4a5568;
+  color: var(--text);
   word-break: break-word;
   flex: 1;
   min-width: 0;
@@ -630,11 +630,11 @@ onMounted(() => {
 
 .edit-btn {
   background: none;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0.375rem;
   cursor: pointer;
-  color: #718096;
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -646,9 +646,9 @@ onMounted(() => {
 }
 
 .edit-btn:hover:not(:disabled) {
-  background: #f7fafc;
-  color: #4a5568;
-  border-color: #cbd5e0;
+  background: var(--tableAccountBg);
+  color: var(--text);
+  border-color: var(--line);
 }
 
 .edit-btn:disabled {
@@ -676,7 +676,7 @@ onMounted(() => {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: #2d3748;
+  color: var(--text);
   width: 100%;
 }
 
@@ -696,13 +696,13 @@ onMounted(() => {
 
 .form-label {
   font-weight: 500;
-  color: #4a5568;
+  color: var(--text);
   font-size: 0.875rem;
   margin: 0;
 }
 
 .form-input {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   box-sizing: border-box;
   padding: 0.625rem;
@@ -710,7 +710,8 @@ onMounted(() => {
   width: 100%;
   max-width: 100%;
   transition: border-color 0.2s;
-  background: white;
+  background: var(--input);
+  color: var(--text);
   margin: 0;
 }
 
@@ -721,7 +722,7 @@ onMounted(() => {
 }
 
 .form-input:disabled {
-  background-color: #f7fafc;
+  background-color: var(--tableAccountBg);
   opacity: 0.7;
   cursor: not-allowed;
 }
@@ -756,23 +757,23 @@ onMounted(() => {
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   transition: all 0.2s;
-  background: white;
+  background: var(--bg);
   width: 100%;
   box-sizing: border-box;
   margin: 0;
 }
 
 .channel-option:hover:not(.disabled) {
-  background: #f7fafc;
-  border-color: #cbd5e0;
+  background: var(--tableHover);
+  border-color: var(--line);
 }
 
 .channel-option.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: #f7fafc;
+  background: var(--tableAccountBg);
 }
 
 .channel-checkbox {
@@ -788,7 +789,7 @@ onMounted(() => {
 
 .channel-label {
   font-size: 0.875rem;
-  color: #4a5568;
+  color: var(--text);
   font-weight: 500;
   margin: 0;
 }
@@ -820,12 +821,12 @@ onMounted(() => {
 }
 
 .save-btn {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
 }
 
 .save-btn:hover:not(:disabled) {
-  background: #3e43ae;
+  background: var(--primaryActive);
 }
 
 .save-btn:disabled {
@@ -834,13 +835,13 @@ onMounted(() => {
 }
 
 .cancel-btn {
-  background: #e2e8f0;
-  color: #4a5568;
-  border: 1px solid #cbd5e0;
+  background: var(--tableAccountBg);
+  color: var(--text);
+  border: 1px solid var(--line);
 }
 
 .cancel-btn:hover:not(:disabled) {
-  background: #cbd5e0;
+  background: var(--line);
 }
 
 .cancel-btn:disabled {
@@ -855,7 +856,7 @@ onMounted(() => {
   justify-content: center;
   gap: 0.5rem;
   padding: 1.5rem;
-  color: #718096;
+  color: var(--headerAccountText);
   width: 100%;
   margin: 0;
 }
@@ -863,7 +864,7 @@ onMounted(() => {
 .loading-spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--line);
   border-top: 2px solid #4299e1;
   border-radius: 50%;
   animation: spin 1s linear infinite;

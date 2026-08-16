@@ -305,12 +305,12 @@ defineExpose({
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0 0 4px 0;
 }
 
 .section-description {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   margin: 0;
   line-height: 1.4;
@@ -326,15 +326,15 @@ defineExpose({
   position: relative;
   display: flex;
   align-items: center;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--modalBg, #ffffff);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px 16px;
   transition: all 0.2s ease;
 }
 
 .input-wrapper:focus-within {
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .input-wrapper.error {
@@ -347,14 +347,14 @@ defineExpose({
   outline: none;
   font-size: 14px;
   font-weight: 500;
-  color: #1f2937;
+  color: var(--modalColor);
   background: transparent;
   padding: 0;
   width: 100%;
 }
 
 .phone-input::placeholder {
-  color: #9ca3af;
+  color: var(--headerAccountText);
   font-weight: 400;
 }
 
@@ -372,10 +372,10 @@ defineExpose({
 .continue-button {
   width: 100%;
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: white;
-  color: #374151;
+  background: var(--modalBg, #ffffff);
+  color: var(--modalColor);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -384,15 +384,15 @@ defineExpose({
 }
 
 .continue-button:not(:disabled):hover {
-  background: #f8fafc;
-  border-color: #d1d5db;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 .continue-button:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--line);
 }
 
 .hint {
@@ -400,11 +400,11 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   text-align: center;
 }
 

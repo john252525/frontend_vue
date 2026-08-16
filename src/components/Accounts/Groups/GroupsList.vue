@@ -473,7 +473,7 @@ onMounted(async () => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -484,11 +484,11 @@ onMounted(async () => {
 }
 
 .create-group-button:hover {
-  background: #565cc8;
+  background: var(--primaryHover);
 }
 
 .create-group-button:active {
-  background: #3e43ae;
+  background: var(--primaryActive);
 }
 
 .icon {
@@ -528,7 +528,7 @@ onMounted(async () => {
   position: relative;
   z-index: 1;
   padding: 10px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -541,7 +541,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid oklch(0.541 0.198 267);
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -576,7 +576,7 @@ onMounted(async () => {
 .empty-icon {
   width: 64px;
   height: 64px;
-  fill: #d1d5db;
+  fill: var(--line);
   margin-bottom: 16px;
 }
 
@@ -588,14 +588,14 @@ onMounted(async () => {
 }
 
 .empty-description {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   margin: 0 0 16px 0;
 }
 
 .empty-action-button {
   padding: 8px 16px;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -606,7 +606,7 @@ onMounted(async () => {
 }
 
 .empty-action-button:hover {
-  background: #565cc8;
+  background: var(--primaryHover);
 }
 
 .groups-grid {
@@ -616,8 +616,8 @@ onMounted(async () => {
 }
 
 .group-card {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -625,7 +625,7 @@ onMounted(async () => {
 }
 
 .group-card:hover {
-  border-color: #d1d5db;
+  border-color: var(--line);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -635,7 +635,7 @@ onMounted(async () => {
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .group-info {
@@ -651,7 +651,7 @@ onMounted(async () => {
 
 .group-type {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0;
   text-transform: uppercase;
 }
@@ -668,7 +668,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   border: none;
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.25s;
@@ -681,7 +681,7 @@ onMounted(async () => {
 }
 
 .edit-button {
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .edit-button:hover {
@@ -748,11 +748,11 @@ onMounted(async () => {
 }
 
 .cascade-flow-interval {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 3px;
   padding: 1px 5px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 10px;
   font-weight: 600;
   cursor: default;
@@ -769,13 +769,13 @@ onMounted(async () => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9fafb;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   transition: all 0.25s;
 }
 
 .vendor-item:hover {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
 }
 
 .vendor-badge {
@@ -855,9 +855,9 @@ onMounted(async () => {
   flex: 1;
   width: 100%;
   padding: 10px;
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--line);
   background: transparent;
-  color: #6b7280;
+  color: var(--headerAccountText);
   border-radius: 6px;
   font-weight: 500;
   font-size: 13px;
@@ -871,8 +871,8 @@ onMounted(async () => {
 }
 
 .add-vendor-button:hover {
-  border-color: oklch(0.541 0.198 267);
-  color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
+  color: var(--primary);
   background: rgba(85, 102, 200, 0.02);
 }
 

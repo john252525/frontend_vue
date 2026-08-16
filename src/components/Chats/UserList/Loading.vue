@@ -49,7 +49,7 @@
   border: 7px solid currentColor;
   border-radius: 50%;
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: oklch(0.541 0.198 267) transparent transparent transparent;
+  border-color: var(--primary) transparent transparent transparent;
 }
 .lds-ring div:nth-child(1) {
   animation-delay: -0.45s;

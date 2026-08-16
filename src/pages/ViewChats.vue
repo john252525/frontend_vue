@@ -159,7 +159,7 @@ onMounted(() => {
   width: 50px;
   height: 50px;
   border: 3px solid #e0e0e0;
-  border-top: 3px solid #5a4fc1;
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -202,7 +202,7 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 12px 24px;
-  background-color: #5a4fc1;
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;

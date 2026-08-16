@@ -437,7 +437,7 @@ provide("accountData", { accountData });
   border-radius: 10px;
   width: 593px;
   height: 625px;
-  background: #fff;
+  background: var(--modalBg, #ffffff);
   display: flex;
   /* justify-content: center; */
   align-items: center;
@@ -447,7 +447,7 @@ provide("accountData", { accountData });
 .title {
   font-weight: 600;
   font-size: 18px;
-  color: #000;
+  color: var(--modalColor);
   margin-top: 24px;
 }
 
@@ -488,16 +488,16 @@ provide("accountData", { accountData });
 
 .dropdown-select {
   position: relative;
-  border: 0.5px solid #c1c1c1;
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   width: 490px;
   height: 45px;
-  background: #fcfcfc;
+  background: var(--tableAccountBg);
   display: flex;
   align-items: center;
   font-weight: 500;
   font-size: 16px;
-  color: #343434;
+  color: var(--modalColor);
   margin-top: 30px;
 }
 
@@ -506,7 +506,7 @@ provide("accountData", { accountData });
   font-size: 14px;
   font-weight: 500;
   margin-left: 12px;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 0px 8px;
   top: -11px;
   transition: all 0.15s;
@@ -530,7 +530,7 @@ provide("accountData", { accountData });
   font-size: 16px;
   font-weight: 500;
   margin-left: 12px;
-  color: #696969;
+  color: var(--headerAccountText);
   transition: all 0.05s;
 }
 
@@ -546,13 +546,13 @@ provide("accountData", { accountData });
 
 .dropdown-options {
   position: absolute;
-  border: 0.5px solid #c1c1c1;
+  border: 0.5px solid var(--line);
   border-top: 0px;
   border-radius: 5px;
   padding: 10px;
   width: 470px;
   height: auto;
-  background: #fcfcfc;
+  background: var(--tableAccountBg);
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -567,7 +567,7 @@ provide("accountData", { accountData });
   transition: all 0.15s;
 }
 .dropdown-option:hover {
-  background-color: #eeeeee;
+  background-color: var(--line);
   transition: all 0.15s;
 }
 
@@ -620,14 +620,14 @@ provide("accountData", { accountData });
 }
 
 .input-data {
-  border: 0.5px solid #c1c1c1;
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   width: 478px;
   height: 45px;
-  background: #fcfcfc;
+  background: var(--tableAccountBg);
   font-weight: 500;
   font-size: 14px;
-  color: #343434;
+  color: var(--modalColor);
   margin-top: 30px;
   padding-left: 10px;
 }

@@ -110,6 +110,67 @@ export const FILTER_CONFIG = {
     ],
     showDeletedToggle: true,
   },
+
+  webest: {
+    filters: [
+      {
+        id: "telegram",
+        name: "Telegram",
+        enabled: true,
+      },
+      {
+        id: "whatsapp",
+        name: "WhatsApp",
+        enabled: true,
+      },
+      {
+        id: "max",
+        name: "Max",
+        enabled: true,
+      },
+      {
+        id: "max-bot",
+        name: "Max-Бот",
+        enabled: true,
+      },
+      {
+        id: "instagram",
+        name: "Instagram",
+        enabled: true,
+      },
+      {
+        id: "vk",
+        name: "VK",
+        enabled: true,
+      },
+      {
+        id: "bulk",
+        name: "Рассылки",
+        enabled: false,
+      },
+      {
+        id: "sms",
+        name: "SMS",
+        enabled: true,
+      },
+      {
+        id: "email",
+        name: "Email",
+        enabled: true,
+      },
+      {
+        id: "crm",
+        name: "CRM",
+        enabled: false,
+        subFilters: [
+          { id: "amocrm", name: "AmoCRM", enabled: false },
+          { id: "bitrix24", name: "Bitrix24", enabled: false },
+          { id: "uon", name: "U-ON", enabled: false },
+        ],
+      },
+    ],
+    showDeletedToggle: true,
+  },
 };
 
 export const getFilterConfigForDomain = (domainValue) => {

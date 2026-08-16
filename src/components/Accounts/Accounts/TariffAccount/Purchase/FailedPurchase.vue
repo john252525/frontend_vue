@@ -174,7 +174,7 @@ const createPayment = async (amount) => {
   max-width: 420px;
   margin: 0 auto;
   padding: 40px 30px;
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   text-align: center;
@@ -226,7 +226,7 @@ const createPayment = async (amount) => {
 }
 
 .purchase-details {
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 25px;
@@ -248,17 +248,17 @@ const createPayment = async (amount) => {
 }
 
 .detail-label {
-  color: #6c757d;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
 .detail-value {
-  color: #212529;
+  color: var(--modalColor);
   font-weight: 600;
 }
 
 .help-message {
-  color: #495057;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin-bottom: 30px;
   padding: 0 10px;
@@ -298,14 +298,14 @@ const createPayment = async (amount) => {
 }
 
 .close-btn {
-  background: white;
-  color: #495057;
-  border: 1px solid #dee2e6;
+  background: var(--modalBg, #ffffff);
+  color: var(--modalColor);
+  border: 1px solid var(--line);
 }
 
 .close-btn:hover {
-  background: #f8f9fa;
-  border-color: #ced4da;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
   transform: translateY(-2px);
 }
 

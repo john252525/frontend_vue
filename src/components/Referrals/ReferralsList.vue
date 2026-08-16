@@ -438,9 +438,9 @@ onMounted(async () => {
 }
 
 .tab-button.active {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
 
 .tab-button svg {

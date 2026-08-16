@@ -730,7 +730,7 @@ onMounted(fetchPayments);
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: var(--tableHeaderBg, #f9f9f9);
+  background-color: var(--tableAccountBg);
 }
 
 .table {
@@ -799,14 +799,14 @@ td {
   padding: 1rem;
   font-weight: 500;
   font-size: 11px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   text-align: left;
 }
 
 td {
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
 }
 
 tr {
@@ -820,7 +820,7 @@ tr:not(:last-child):after {
   right: 0;
   bottom: 0;
   height: 1px;
-  background-color: #ebebeb;
+  background-color: var(--line);
 }
 
 tr:hover {
@@ -847,32 +847,32 @@ tr:hover {
 
 /* Operation Type Styles */
 .operation-up {
-  color: black;
+  color: var(--text);
   font-weight: 500;
 }
 
 .operation-check {
-  color: black;
+  color: var(--text);
   font-weight: 500;
 }
 
 .operation-tariff {
-  color: black;
+  color: var(--text);
   font-weight: 500;
 }
 
 .operation-admin-up {
-  color: black;
+  color: var(--text);
   font-weight: 500;
 }
 
 .operation-admin-down {
-  color: black;
+  color: var(--text);
   font-weight: 500;
 }
 
 .operation-unknown {
-  color: gray;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -886,20 +886,20 @@ tr:hover {
 }
 
 .pending {
-  color: gray;
+  color: var(--headerAccountText);
 }
 
 .admin-adjustment {
-  color: #000;
+  color: var(--text);
 }
 
 /* Desktop Buttons */
 .details-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
-  color: oklch(0.4 0.18 267 / 0.86);
+  color: rgba(var(--primary-rgb), 0.86);
   transition: all 0.25s;
   border-radius: 5px;
 }
@@ -927,8 +927,8 @@ tr:hover {
 }
 
 .payment-card {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -952,13 +952,13 @@ tr:hover {
 .id-label {
   font-weight: 600;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .id-value {
   font-weight: 600;
   font-size: 13px;
-  color: #1f2937;
+  color: var(--text);
 }
 
 .card-title {
@@ -982,7 +982,7 @@ tr:hover {
 }
 
 .amount-neutral {
-  color: #1f2937;
+  color: var(--text);
 }
 
 .card-content {
@@ -994,7 +994,7 @@ tr:hover {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .card-row:last-child {
@@ -1003,27 +1003,27 @@ tr:hover {
 
 .card-label {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
 .card-value {
   font-size: 14px;
-  color: #1f2937;
+  color: var(--text);
   font-weight: 500;
   text-align: right;
 }
 
 .card-footer {
   padding-top: 12px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--line);
 }
 
 .details-button-mobile {
   width: 100%;
   padding: 12px;
   font-size: 14px;
-  background: rgb(65, 105, 225);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -1033,17 +1033,17 @@ tr:hover {
 }
 
 .details-button-mobile:hover {
-  background: rgb(54, 88, 189);
+  background: var(--primaryHover);
 }
 
 .details-button-mobile:active {
-  background: rgb(45, 74, 158);
+  background: var(--primaryActive);
 }
 
 .no-data {
   padding: 24px;
   text-align: center;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .no-data h2 {
@@ -1059,7 +1059,7 @@ tr:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1078,7 +1078,7 @@ tr:hover {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   width: 100%;
   max-width: 500px;
@@ -1107,7 +1107,7 @@ tr:hover {
   background: none;
   border: none;
   font-size: 24px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   width: 32px;
   height: 32px;
@@ -1120,26 +1120,26 @@ tr:hover {
 }
 
 .modal-close:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background-color: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .modal-header {
   padding: 24px 24px 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-header h2 {
   margin: 0 0 8px 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
 }
 
 .modal-id {
   margin: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -1152,7 +1152,7 @@ tr:hover {
   flex-direction: column;
   gap: 8px;
   padding: 16px 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
 }
 
 .detail-row:first-child {
@@ -1166,7 +1166,7 @@ tr:hover {
 
 .detail-row label {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1174,7 +1174,7 @@ tr:hover {
 
 .detail-row span {
   font-size: 15px;
-  color: #1f2937;
+  color: var(--text);
   font-weight: 500;
   word-break: break-word;
 }
@@ -1187,7 +1187,7 @@ tr:hover {
 
 .feature-item {
   font-size: 14px;
-  color: #374151;
+  color: var(--text);
   padding-left: 8px;
 }
 
@@ -1196,7 +1196,7 @@ tr:hover {
   gap: 12px;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
 }
 
 .act-error {
@@ -1225,30 +1225,30 @@ tr:hover {
 }
 
 .action-button.primary {
-  background: rgb(65, 105, 225);
+  background: var(--primary);
   color: white;
 }
 
 .action-button.primary:hover {
-  background: rgb(54, 88, 189);
+  background: var(--primaryHover);
 }
 
 .action-button.primary:active {
-  background: rgb(45, 74, 158);
+  background: var(--primaryActive);
 }
 
 .action-button.secondary {
-  background: #f3f4f6;
-  color: #1f2937;
-  border: 1px solid #e5e7eb;
+  background: var(--tableAccountBg);
+  color: var(--text);
+  border: 1px solid var(--line);
 }
 
 .action-button.secondary:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .action-button.secondary:active {
-  background: #d1d5db;
+  background: var(--line);
 }
 
 .action-button:disabled {

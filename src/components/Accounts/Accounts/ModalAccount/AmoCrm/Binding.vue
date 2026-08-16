@@ -712,7 +712,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -720,7 +720,7 @@ onMounted(() => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   width: 90%;
   max-width: 520px;
@@ -735,29 +735,29 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-header h3 {
   margin: 0;
   font-weight: 600;
   font-size: 18px;
-  color: #111827;
+  color: var(--modalColor);
 }
 
 .close-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--headerAccountText);
   padding: 4px;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .modal-body {
@@ -773,12 +773,12 @@ onMounted(() => {
 
 .crm-install-content h4 {
   margin: 16px 0 8px;
-  color: #111827;
+  color: var(--modalColor);
   font-weight: 600;
 }
 
 .crm-install-content p {
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin-bottom: 24px;
 }
@@ -795,7 +795,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 8px;
   text-align: left;
 }
@@ -815,18 +815,18 @@ onMounted(() => {
 }
 
 .step-text {
-  color: #374151;
+  color: var(--text);
   font-size: 14px;
 }
 
 .loading {
   text-align: center;
   padding: 40px 20px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .spinner {
-  border: 2px solid #f3f4f6;
+  border: 2px solid var(--tableAccountBg);
   border-top: 2px solid #3c61e0;
   border-radius: 50%;
   width: 32px;
@@ -848,7 +848,7 @@ onMounted(() => {
 .no-data {
   text-align: center;
   padding: 40px 20px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .error {
@@ -880,19 +880,19 @@ onMounted(() => {
 .single-pipeline {
   text-align: center;
   padding: 32px 20px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .single-pipeline h4 {
-  color: #111827;
+  color: var(--modalColor);
   margin: 16px 0 8px;
   font-weight: 600;
 }
 
 .single-pipeline p {
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.5;
   margin: 0;
 }
@@ -922,10 +922,10 @@ onMounted(() => {
 }
 
 .pipeline-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 20px;
-  background: white;
+  background: var(--bg);
   transition: border-color 0.2s;
 }
 
@@ -943,13 +943,13 @@ onMounted(() => {
 
 .pipeline-info h4 {
   margin: 0 0 4px 0;
-  color: #111827;
+  color: var(--text);
   font-weight: 600;
   font-size: 16px;
 }
 
 .pipeline-id {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 13px;
 }
 
@@ -1040,9 +1040,9 @@ onMounted(() => {
 }
 
 .accounts-dropdown {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: white;
+  background: var(--bg);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   margin-top: 8px;
 }
@@ -1052,8 +1052,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--line);
+  background: var(--tableAccountBg);
   border-radius: 8px 8px 0 0;
   font-weight: 500;
   font-size: 14px;
@@ -1063,14 +1063,14 @@ onMounted(() => {
   background: none;
   border: none;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--headerAccountText);
   padding: 4px;
   border-radius: 4px;
   transition: background 0.2s;
 }
 
 .close-dropdown:hover {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
 }
 
 .accounts-list {
@@ -1083,13 +1083,13 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .account-item:hover {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
 }
 
 .account-item:last-child {
@@ -1129,13 +1129,13 @@ onMounted(() => {
 
 .account-name {
   font-weight: 500;
-  color: #111827;
+  color: var(--text);
   margin-bottom: 2px;
   font-size: 14px;
 }
 
 .account-login {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 12px;
   font-family: monospace;
 }
@@ -1147,7 +1147,7 @@ onMounted(() => {
 .attach-loader {
   width: 16px;
   height: 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--line);
   border-top: 2px solid #3c61e0;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -1194,7 +1194,7 @@ onMounted(() => {
 
 .modal-footer {
   padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line);
   display: flex;
   justify-content: flex-end;
   gap: 12px;

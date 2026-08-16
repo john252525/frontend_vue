@@ -347,12 +347,12 @@ const submit = () => {
 }
 
 .step-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrolColor);
   border-radius: 3px;
 }
 
 .step-content::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scrolColor);
 }
 
 .form-group {
@@ -364,17 +364,18 @@ const submit = () => {
   margin-bottom: 4px; /* Уменьшил отступ для текста ошибки */
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
 }
 
 .form-control {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--input);
+  color: var(--text);
   box-sizing: border-box;
 }
 
@@ -405,7 +406,8 @@ const submit = () => {
   padding: 8px;
   text-align: center;
   border-radius: 6px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
+  color: var(--text);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
@@ -414,14 +416,14 @@ const submit = () => {
 }
 
 .day-item:hover {
-  border-color: #6366f1;
-  background: #f1f5f9;
+  border-color: var(--primary);
+  background: var(--tableHover);
 }
 
 .day-item.active {
-  background: #6366f1;
+  background: var(--primary);
   color: white;
-  border-color: #4f46e5;
+  border-color: var(--primary);
 }
 
 .day-checkbox {
@@ -439,25 +441,26 @@ const submit = () => {
 .interval-select {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
-  background: #f8fafc;
+  background: var(--input);
+  color: var(--text);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .time-input:focus,
 .interval-select:focus {
-  border-color: #6366f1;
+  border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  background: white;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+  background: var(--input);
 }
 
 .time-separator,
 .interval-separator {
-  color: #cbd5e1;
+  color: var(--headerAccountText);
   font-size: 14px;
   font-weight: 500;
 }
@@ -473,23 +476,23 @@ const submit = () => {
   align-items: center;
   justify-content: center;
   padding: 12px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--line);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   user-select: none;
 }
 
 .channel-item:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
+  border-color: var(--line);
+  background: var(--tableHover);
 }
 
 .channel-item.active {
-  border-color: #6366f1;
+  border-color: var(--primary);
   background: #eef2ff;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
 
 .channel-checkbox {
@@ -499,19 +502,19 @@ const submit = () => {
 .channel-text {
   font-size: 13px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
   text-align: center;
 }
 
 .channel-item.active .channel-text {
-  color: #6366f1;
+  color: var(--primary);
   font-weight: 600;
 }
 
 .sequence-info {
   margin: 0;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--headerAccountText);
   margin-bottom: 10px;
 }
 
@@ -519,10 +522,10 @@ const submit = () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
 }
 
 .cascade-item {
@@ -530,15 +533,15 @@ const submit = () => {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .cascade-item:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  border-color: var(--line);
 }
 
 .cascade-position {
@@ -547,7 +550,7 @@ const submit = () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: #6366f1;
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   font-weight: 600;
@@ -559,7 +562,7 @@ const submit = () => {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
 }
 
 .cascade-buttons {
@@ -571,10 +574,10 @@ const submit = () => {
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 4px;
-  background: white;
-  color: #334155;
+  background: var(--bg);
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -587,8 +590,8 @@ const submit = () => {
 
 .btn-move:hover {
   background: #eef2ff;
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .btn-move:active {
@@ -606,13 +609,13 @@ const submit = () => {
   align-items: center;
   cursor: pointer;
   font-size: 14px;
-  color: #334155;
+  color: var(--text);
   padding: 8px 0;
   user-select: none;
 }
 
 .option-item:hover {
-  color: #6366f1;
+  color: var(--primary);
 }
 
 .real-checkbox {
@@ -628,16 +631,16 @@ const submit = () => {
   width: 16px;
   height: 16px;
   min-width: 16px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--line);
   border-radius: 4px;
   margin-right: 10px;
-  background: white;
+  background: var(--bg);
   transition: all 0.2s;
 }
 
 .custom-checkbox.checked {
-  background: #6366f1;
-  border-color: #6366f1;
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .custom-checkbox.checked::after {
@@ -658,7 +661,7 @@ const submit = () => {
   gap: 12px;
   padding-top: 16px;
   margin-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--line);
   flex-shrink: 0;
 }
 
@@ -674,23 +677,23 @@ const submit = () => {
 }
 
 .btn-secondary {
-  background: white;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
 }
 
 .btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #cbd5e1;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 .btn-primary {
-  background: #6366f1;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #4f46e5;
+  background: var(--primary);
 }
 
 @media (max-width: 768px) {

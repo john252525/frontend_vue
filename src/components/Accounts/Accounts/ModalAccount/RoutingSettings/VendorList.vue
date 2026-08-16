@@ -129,9 +129,9 @@ onMounted(async () => {
 .vendors-section {
   margin-bottom: 16px;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: var(--tableAccountBg);
   border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--line);
 }
 
 .form-label {
@@ -141,7 +141,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
 }
 
 .step-badge {
@@ -150,7 +150,7 @@ onMounted(async () => {
   justify-content: center;
   min-width: 22px;
   height: 22px;
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
   color: white;
   border-radius: 50%;
   font-size: 11px;
@@ -169,9 +169,9 @@ onMounted(async () => {
   align-items: center;
   gap: 10px;
   padding: 10px;
-  border: 1px solid #d5d5d5;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  background: white;
+  background: var(--bg);
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
@@ -179,12 +179,12 @@ onMounted(async () => {
 }
 
 .vendor-card:hover {
-  border-color: #2563eb;
-  background-color: #f9f9f9;
+  border-color: var(--primaryHover);
+  background-color: var(--tableAccountBg);
 }
 
 .vendor-card.active {
-  border-color: #2563eb;
+  border-color: var(--primaryHover);
   background-color: #f0f7ff;
 }
 
@@ -194,15 +194,15 @@ onMounted(async () => {
   justify-content: center;
   width: 36px;
   height: 36px;
-  background-color: #f0f0f0;
+  background-color: var(--tableAccountBg);
   border-radius: 5px;
-  color: #2563eb;
+  color: var(--primaryHover);
   font-size: 18px;
   flex-shrink: 0;
 }
 
 .vendor-card.active .vendor-icon {
-  background-color: #2563eb;
+  background-color: var(--primaryHover);
   color: white;
 }
 
@@ -221,12 +221,12 @@ onMounted(async () => {
 
 .vendor-name {
   font-weight: 600;
-  color: #333;
+  color: var(--text);
   font-size: 13px;
 }
 
 .vendor-label {
-  color: #777;
+  color: var(--headerAccountText);
   font-size: 11px;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -124,7 +124,7 @@ const handleSubmit = async () => {
 .subtitle {
   margin: 0;
   font-size: 14px;
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .fields {
@@ -135,8 +135,9 @@ const handleSubmit = async () => {
 
 .input-field,
 .textarea-field {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: var(--input);
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 15px;
@@ -148,7 +149,7 @@ const handleSubmit = async () => {
 
 .input-field:focus,
 .textarea-field:focus {
-  border-color: #2563eb;
+  border-color: var(--primaryHover);
 }
 
 .textarea-field {

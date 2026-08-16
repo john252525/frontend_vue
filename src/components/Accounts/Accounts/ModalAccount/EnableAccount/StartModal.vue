@@ -373,13 +373,13 @@ const displayName = computed(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(4px);
 }
 
 .modal-content {
   position: relative;
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
@@ -395,14 +395,14 @@ const displayName = computed(() => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--line);
+  background: var(--tableAccountBg);
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0;
 }
 
@@ -412,13 +412,13 @@ const displayName = computed(() => {
   padding: 4px;
   cursor: pointer;
   border-radius: 6px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .modal-body {
@@ -430,9 +430,9 @@ const displayName = computed(() => {
 .account-info {
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
 }
 
 .info-item {
@@ -443,7 +443,7 @@ const displayName = computed(() => {
 
 .info-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--modalColor);
   min-width: 80px;
 }
 
@@ -454,7 +454,7 @@ const displayName = computed(() => {
 }
 
 .info-value {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-weight: 500;
 }
 
@@ -465,12 +465,12 @@ const displayName = computed(() => {
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin-bottom: 8px;
 }
 
 .section-description {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   margin-bottom: 20px;
 }
@@ -486,9 +486,9 @@ const displayName = computed(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: white;
+  background: var(--modalBg, #ffffff);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
@@ -496,8 +496,8 @@ const displayName = computed(() => {
 }
 
 .option-button:hover {
-  border-color: #3b82f6;
-  background: #f8fafc;
+  border-color: var(--primary);
+  background: var(--tableAccountBg);
 }
 
 .option-content {
@@ -507,7 +507,7 @@ const displayName = computed(() => {
 }
 
 .option-icon {
-  color: #3b82f6;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
@@ -519,43 +519,43 @@ const displayName = computed(() => {
 
 .option-title {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   font-size: 14px;
 }
 
 .option-description {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 12px;
 }
 
 .arrow-icon {
-  color: #9ca3af;
+  color: var(--headerAccountText);
   flex-shrink: 0;
 }
 
 .modal-footer {
   display: flex;
   padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-top: 1px solid var(--line);
+  background: var(--tableAccountBg);
 }
 
 .cancel-button {
   flex: 1;
   padding: 10px 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
-  color: #374151;
+  background: var(--modalBg, #ffffff);
+  color: var(--modalColor);
 }
 
 .cancel-button:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
 }
 
 /* Адаптивность */

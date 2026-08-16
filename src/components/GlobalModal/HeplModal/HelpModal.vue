@@ -152,7 +152,7 @@ const handleClick = (item) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -168,7 +168,7 @@ const handleClick = (item) => {
 }
 
 .modal {
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
@@ -190,7 +190,7 @@ const handleClick = (item) => {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
   border-radius: 12px 12px 0 0;
 }
 
@@ -227,7 +227,7 @@ const handleClick = (item) => {
 
 .divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
   margin: 0 24px;
 }
 
@@ -242,8 +242,8 @@ const handleClick = (item) => {
 .section-btn {
   width: 100%;
   padding: 16px 20px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--tableAccountBg);
+  border: 1px solid var(--line);
   border-radius: 8px;
   text-align: left;
   cursor: pointer;
@@ -256,20 +256,20 @@ const handleClick = (item) => {
 }
 
 .section-btn:hover {
-  background: #e9ecef;
-  border-color: #667eea;
+  background: var(--line);
+  border-color: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.1);
 }
 
 .section-title {
   font-weight: 500;
-  color: #2d3748;
+  color: var(--text);
 }
 
 .section-arrow {
   transition: transform 0.3s ease;
-  color: #667eea;
+  color: var(--primary);
   font-size: 0.8rem;
 }
 
@@ -278,7 +278,7 @@ const handleClick = (item) => {
 }
 
 .subsection {
-  background: #f8f9fa;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   margin: 4px 0 12px 0;
   overflow: hidden;
@@ -319,8 +319,8 @@ const handleClick = (item) => {
   text-align: left;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #4a5568;
-  border-bottom: 1px solid #e2e8f0;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
@@ -333,7 +333,7 @@ const handleClick = (item) => {
 }
 
 .subsection-item:hover {
-  background: #667eea;
+  background: var(--primary);
   color: white;
   transform: translateX(4px);
 }
@@ -343,7 +343,7 @@ const handleClick = (item) => {
 }
 
 .bullet {
-  color: #667eea;
+  color: var(--primary);
   margin-right: 12px;
   font-size: 1.2rem;
   transition: color 0.2s ease;
@@ -354,16 +354,16 @@ const handleClick = (item) => {
 }
 
 .modal::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrolBg);
   border-radius: 3px;
 }
 
 .modal::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--scrolColor);
   border-radius: 3px;
 }
 
 .modal::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--scrolColor);
 }
 </style>

@@ -162,7 +162,7 @@ const emit = defineEmits(["continue", "view-details"]);
 
 // Стили для конфетти
 const getConfettiStyle = (index) => {
-  const colors = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444"];
+  const colors = ["#10b981", "var(--primary)", "#8b5cf6", "#f59e0b", "#ef4444"];
   const rotations = [0, 45, 90, 135];
 
   return {
@@ -195,7 +195,7 @@ onMounted(() => {
   justify-content: center;
   min-height: 600px;
   padding: 40px 24px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg);
   border-radius: 24px;
   position: relative;
   overflow: hidden;
@@ -230,7 +230,7 @@ onMounted(() => {
 .circle-2 {
   width: 80px;
   height: 80px;
-  background: #3b82f6;
+  background: var(--primary);
   top: 60%;
   right: 10%;
   animation-delay: 2s;
@@ -360,7 +360,7 @@ onMounted(() => {
 .success-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 12px 0;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   -webkit-background-clip: text;
@@ -370,7 +370,7 @@ onMounted(() => {
 
 .success-description {
   font-size: 16px;
-  color: #64748b;
+  color: var(--headerAccountText);
   margin: 0;
   line-height: 1.5;
 }
@@ -381,10 +381,10 @@ onMounted(() => {
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  background: white;
+  background: var(--bg);
   padding: 20px;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -401,21 +401,21 @@ onMounted(() => {
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: #f1f5f9;
+  background: var(--tableAccountBg);
   border-radius: 8px;
-  color: #475569;
+  color: var(--headerAccountText);
 }
 
 .detail-label {
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--headerAccountText);
   min-width: 80px;
 }
 
 .detail-value {
   font-size: 14px;
-  color: #1e293b;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -426,7 +426,7 @@ onMounted(() => {
   align-items: center;
   width: 100%;
   padding: 20px 0;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--line);
 }
 
 .status-badge {
@@ -483,29 +483,29 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background: white;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  color: var(--headerAccountText);
+  border: 1px solid var(--line);
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   transform: translateY(-1px);
 }
 
 /* Следующие шаги */
 .next-steps {
   width: 100%;
-  background: white;
+  background: var(--bg);
   padding: 24px;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .steps-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 16px 0;
 }
 
@@ -536,8 +536,8 @@ onMounted(() => {
 }
 
 .step-item:not(.completed):not(.current) {
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--headerAccountText);
+  background: var(--tableAccountBg);
 }
 
 .step-icon {
@@ -557,13 +557,13 @@ onMounted(() => {
 }
 
 .step-item.current .step-icon {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .step-item:not(.completed):not(.current) .step-icon {
-  background: #cbd5e1;
-  color: #64748b;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
 }
 
 .step-text {

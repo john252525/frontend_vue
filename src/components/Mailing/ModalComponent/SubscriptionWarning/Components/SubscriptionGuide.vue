@@ -93,7 +93,7 @@ const steps = [
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,13 +103,13 @@ const steps = [
 }
 
 .guide-modal {
-  background: white;
+  background: var(--modalBg);
   border-radius: 16px;
   padding: 32px;
   max-width: 500px;
   width: 100%;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8eaed;
+  border: 1px solid var(--line);
 }
 
 .modal-header {
@@ -128,14 +128,14 @@ const steps = [
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3b82f6;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
 .modal-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0;
   text-align: center;
   flex: 1;
@@ -143,9 +143,9 @@ const steps = [
 }
 
 .close-btn {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -159,8 +159,8 @@ const steps = [
 }
 
 .close-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--line);
+  color: var(--text);
 }
 
 .modal-content {
@@ -182,7 +182,7 @@ const steps = [
 }
 
 .step:hover {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
 }
 
 .step-indicator {
@@ -195,7 +195,7 @@ const steps = [
 .step-number {
   width: 32px;
   height: 32px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -209,7 +209,7 @@ const steps = [
 
 .step-line {
   width: 2px;
-  background: #e5e7eb;
+  background: var(--line);
   flex: 1;
   margin: 4px 0;
 }
@@ -222,14 +222,14 @@ const steps = [
 .step-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text);
   margin: 0 0 4px 0;
   line-height: 1.3;
 }
 
 .step-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   line-height: 1.4;
   margin: 0;
 }
@@ -252,12 +252,12 @@ const steps = [
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
 }
 
 @media (max-width: 480px) {

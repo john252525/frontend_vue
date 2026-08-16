@@ -210,7 +210,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1002;
-  background: white;
+  background: var(--modalBg);
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   width: 400px;
@@ -232,12 +232,12 @@ onMounted(() => {
 .modal-title {
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
+  color: var(--modalColor);
   margin: 0;
 }
 
 .close-btn {
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border: none;
   width: 32px;
   height: 32px;
@@ -245,14 +245,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--line);
+  color: var(--text);
 }
 
 .invoice-success {
@@ -278,7 +278,7 @@ onMounted(() => {
 }
 
 .invoice-details {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
@@ -292,18 +292,18 @@ onMounted(() => {
 }
 
 .detail-item:not(:last-child) {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .detail-label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--headerAccountText);
 }
 
 .detail-value {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 /* Стили для статуса сохранения */
@@ -392,12 +392,12 @@ onMounted(() => {
 
 .btn-outline {
   background: transparent;
-  color: #3b82f6;
-  border: 2px solid #3b82f6;
+  color: var(--primary);
+  border: 2px solid var(--primary);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 

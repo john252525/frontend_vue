@@ -227,12 +227,12 @@ const props = defineProps({
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text);
   margin: 0 0 16px 0;
 }
 
 .section-title svg {
-  color: #64748b;
+  color: var(--headerAccountText);
 }
 
 .status-grid,
@@ -252,9 +252,9 @@ const props = defineProps({
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .status-label,
@@ -264,7 +264,7 @@ const props = defineProps({
 .stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -277,7 +277,7 @@ const props = defineProps({
 
 .status-value {
   font-size: 14px;
-  color: #334155;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -329,10 +329,10 @@ const props = defineProps({
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -341,40 +341,40 @@ const props = defineProps({
 }
 
 .action-button:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .action-button.success {
-  background: #dcfce7;
-  color: #166534;
-  border-color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .action-button.success:hover {
-  background: #bbf7d0;
+  background: rgba(34, 197, 94, 0.2);
 }
 
 .action-button.danger {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .action-button.danger:hover {
-  background: #fecaca;
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .action-button.warning {
-  background: #fef3c7;
-  color: #92400e;
-  border-color: #fde68a;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .action-button.warning:hover {
-  background: #fde68a;
+  background: rgba(245, 158, 11, 0.2);
 }
 
 .action-button svg {

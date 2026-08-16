@@ -17,7 +17,7 @@
 .loader {
   border: 4px solid rgba(101, 52, 255, 0.1);
   border-radius: 50%;
-  border-top: 4px solid #6732ff;
+  border-top: 4px solid var(--primary);
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;

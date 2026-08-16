@@ -70,7 +70,7 @@ header {
 }
 
 .account-list-button {
-  background: oklch(0.65 0.22 267 / 0.16);
+  background: rgba(var(--primary-rgb), 0.16);
   font-weight: 600;
   font-size: 12px;
   padding: 10px 12px;
@@ -101,7 +101,7 @@ header {
 }
 
 .add-account-button {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   font-weight: 600;
   font-size: 12px;
   color: #fff;
@@ -123,12 +123,12 @@ header {
 }
 
 .add-account-button:hover {
-  background: #565cc8;
+  background: var(--primaryHover);
   transition: all 0.25s;
 }
 
 .add-account-button:active {
-  background: #3e43ae;
+  background: var(--primaryActive);
   transition: all 0.25s;
 }
 

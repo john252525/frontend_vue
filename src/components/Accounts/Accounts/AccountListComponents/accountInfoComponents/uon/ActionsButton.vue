@@ -148,10 +148,10 @@ const props = defineProps({
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  color: #475569;
+  color: var(--headerAccountText);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -160,8 +160,8 @@ const props = defineProps({
 }
 
 .action-button:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--tableAccountBg);
+  border-color: var(--line);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }

@@ -169,11 +169,11 @@ const formatSubscriptionDate = (dateString) => {
   }
 
   .account-card {
-    background: white;
+    background: var(--bg);
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--line);
     display: flex;
     flex-direction: column;
     min-height: 200px;
@@ -187,7 +187,7 @@ const formatSubscriptionDate = (dateString) => {
     align-items: flex-start;
     margin-bottom: 12px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--line);
     min-width: 0;
     gap: 8px;
   }
@@ -203,7 +203,7 @@ const formatSubscriptionDate = (dateString) => {
   .account-login {
     font-weight: 600;
     font-size: 16px;
-    color: #1f2937;
+    color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -211,7 +211,7 @@ const formatSubscriptionDate = (dateString) => {
   }
 
   .action-gear {
-    background: oklch(0.65 0.22 267 / 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     border: none;
     border-radius: 8px;
     padding: 6px;
@@ -224,13 +224,13 @@ const formatSubscriptionDate = (dateString) => {
   }
 
   .action-gear:hover {
-    background: oklch(0.65 0.22 267 / 0.2);
+    background: rgba(var(--primary-rgb), 0.2);
   }
 
   .action-gear svg {
     width: 16px;
     height: 16px;
-    color: #5a4fc1;
+    color: var(--primary);
   }
 
   .card-content {
@@ -250,7 +250,7 @@ const formatSubscriptionDate = (dateString) => {
 
   .label {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--headerAccountText);
     font-weight: 500;
     white-space: nowrap;
     flex-shrink: 0;
@@ -258,7 +258,7 @@ const formatSubscriptionDate = (dateString) => {
 
   .value {
     font-size: 14px;
-    color: #374151;
+    color: var(--text);
     font-weight: 500;
     text-align: right;
     min-width: 0;
@@ -283,7 +283,7 @@ const formatSubscriptionDate = (dateString) => {
 
   .payment-btn {
     width: 100%;
-    background: #6732ff;
+    background: var(--primary);
     color: white;
     border: none;
     padding: 12px;
@@ -308,7 +308,7 @@ const formatSubscriptionDate = (dateString) => {
 
   .mobile-states .none-account-cont,
   .mobile-states .load-cont {
-    background: white;
+    background: var(--bg);
     border-radius: 12px;
     padding: 20px;
     text-align: center;
@@ -318,7 +318,7 @@ const formatSubscriptionDate = (dateString) => {
 
   .mobile-states .none-account-cont h2 {
     font-size: 16px;
-    color: #6b7280;
+    color: var(--headerAccountText);
     margin: 0;
   }
 

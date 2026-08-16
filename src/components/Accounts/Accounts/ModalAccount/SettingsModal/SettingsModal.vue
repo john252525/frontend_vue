@@ -486,13 +486,13 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   backdrop-filter: blur(4px);
 }
 
 .modal-content {
   position: relative;
-  background: white;
+  background: var(--modalBg);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
@@ -508,14 +508,14 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--line);
+  background: var(--tableAccountBg);
 }
 
 .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0;
 }
 
@@ -525,13 +525,13 @@ onMounted(() => {
   padding: 4px;
   cursor: pointer;
   border-radius: 6px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .modal-body {
@@ -545,9 +545,9 @@ onMounted(() => {
 .account-info {
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
 }
 
 .info-item {
@@ -562,12 +562,12 @@ onMounted(() => {
 
 .info-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text);
   min-width: 80px;
 }
 
 .info-value {
-  color: #6b7280;
+  color: var(--headerAccountText);
   flex: 1;
   text-align: right;
 }
@@ -579,12 +579,12 @@ onMounted(() => {
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
 .section-description {
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
   margin-bottom: 16px;
 }
@@ -605,18 +605,18 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: white;
+  background: var(--bg);
   transition: all 0.2s ease;
 }
 
 .webhook-item:hover {
-  border-color: #d1d5db;
+  border-color: var(--line);
 }
 
 .webhook-item.add-webhook {
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-style: dashed;
 }
 
@@ -628,13 +628,13 @@ onMounted(() => {
 }
 
 .webhook-icon {
-  color: #6b7280;
+  color: var(--headerAccountText);
   flex-shrink: 0;
 }
 
 .webhook-url {
   font-size: 14px;
-  color: #374151;
+  color: var(--text);
   word-break: break-all;
 }
 
@@ -644,12 +644,12 @@ onMounted(() => {
   background: none;
   outline: none;
   font-size: 14px;
-  color: #374151;
+  color: var(--text);
   padding: 0;
 }
 
 .webhook-input::placeholder {
-  color: #9ca3af;
+  color: var(--headerAccountText);
 }
 
 .delete-button,
@@ -659,7 +659,7 @@ onMounted(() => {
   padding: 4px;
   cursor: pointer;
   border-radius: 4px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
@@ -686,7 +686,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--modalBg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -697,7 +697,7 @@ onMounted(() => {
 
 .loading-overlay p {
   margin-top: 12px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   font-size: 14px;
 }
 
@@ -705,8 +705,8 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-top: 1px solid var(--line);
+  background: var(--tableAccountBg);
 }
 
 .cancel-button,
@@ -722,21 +722,21 @@ onMounted(() => {
 }
 
 .cancel-button {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--text);
 }
 
 .cancel-button:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 .save-button {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .save-button:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primaryHover);
 }
 
 .save-button:disabled {

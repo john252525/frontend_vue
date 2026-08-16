@@ -305,7 +305,8 @@ onMounted(async () => {
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--bg);
+  color: var(--text);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -326,39 +327,45 @@ onMounted(async () => {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b778c;
+  color: var(--headerAccountText);
 }
 .kb-search-input {
   width: 100%;
   padding: 8px 12px 8px 38px;
-  border: 1px solid #dfe1e6;
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 10px;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
 }
 .kb-search-input:focus {
-  border-color: #4c9aff;
+  border-color: var(--primary);
 }
 .kb-search-results {
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
-  background: white;
-  border: 1px solid #dfe1e6;
+  background: var(--bg);
+  border: 1px solid var(--line);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 .kb-search-item {
   padding: 10px;
   cursor: pointer;
-  border-bottom: 1px solid #f4f5f7;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s ease;
+}
+.kb-search-item:hover {
+  background: var(--tableHover);
 }
 .content-area {
   flex: 1;
   overflow-y: auto;
-  background: #fff;
+  background: var(--bg);
 }
 
 .content-container {
@@ -373,7 +380,7 @@ onMounted(async () => {
 .main-title {
   font-size: 32px;
   font-weight: 500;
-  color: #172b4d;
+  color: var(--text);
   margin-bottom: 12px;
   letter-spacing: -0.01em;
 }
@@ -382,7 +389,7 @@ onMounted(async () => {
   display: flex;
   gap: 16px;
   font-size: 14px;
-  color: #6b778c;
+  color: var(--headerAccountText);
   margin-bottom: 24px;
 }
 
@@ -390,13 +397,13 @@ onMounted(async () => {
 .markdown-body {
   font-size: 16px;
   line-height: 1.6;
-  color: #172b4d;
+  color: var(--text);
 }
 
 .markdown-body :deep(h1),
 .markdown-body :deep(h2),
 .markdown-body :deep(h3) {
-  color: #172b4d;
+  color: var(--text);
   margin-top: 28px;
   margin-bottom: 12px;
   font-weight: 600;
@@ -404,7 +411,7 @@ onMounted(async () => {
 
 .markdown-body :deep(h1) {
   font-size: 24px;
-  border-bottom: 1px solid #dfe1e6;
+  border-bottom: 1px solid var(--line);
   padding-bottom: 8px;
 }
 .markdown-body :deep(h2) {
@@ -431,7 +438,7 @@ onMounted(async () => {
   height: auto;
   display: block;
   margin: 32px 0; /* Отступы сверху и снизу */
-  border: 1px solid #dfe1e6;
+  border: 1px solid var(--line);
   border-radius: 4px;
   box-shadow:
     0 2px 4px rgba(9, 30, 66, 0.08),
@@ -445,7 +452,8 @@ onMounted(async () => {
 
 /* Код */
 .markdown-body :deep(code) {
-  background: #f4f5f7;
+  background: var(--tableAccountBg);
+  color: var(--text);
   padding: 2px 4px;
   border-radius: 3px;
   font-family: monospace;
@@ -456,8 +464,8 @@ onMounted(async () => {
 .loader-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #ebecf0;
-  border-top-color: #0052cc;
+  border: 3px solid var(--line);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

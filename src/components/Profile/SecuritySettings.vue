@@ -8,7 +8,7 @@
         viewBox="0 0 24 24"
       >
         <path
-          fill="#000000"
+          fill="currentColor"
           d="M17 9V7A5 5 0 0 0 7 7v2a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-7a3 3 0 0 0-3-3ZM9 7a3 3 0 0 1 6 0v2H9Zm9 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1Z"
         />
       </svg>
@@ -157,11 +157,11 @@ const handleChangePassword = async () => {
 
 <style scoped>
 .profile-section {
-  background: white;
+  background: var(--bg);
   border-radius: 10px;
   padding: 1.25rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   height: 100%;
 }
 
@@ -172,7 +172,7 @@ const handleChangePassword = async () => {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
-  color: #2d3748;
+  color: var(--text);
 }
 
 .icon {
@@ -195,11 +195,13 @@ const handleChangePassword = async () => {
 .form-group input {
   width: 100%;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 0.9rem;
   transition: all 0.2s;
   box-sizing: border-box;
+  background: var(--input);
+  color: var(--text);
 }
 
 .form-group input.input-error {
@@ -209,8 +211,8 @@ const handleChangePassword = async () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
 }
 
 .form-group input.input-error:focus {
@@ -235,7 +237,7 @@ const handleChangePassword = async () => {
 }
 
 .change-password-btn {
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   color: white;
   border: none;
   padding: 0.6rem;
@@ -248,7 +250,7 @@ const handleChangePassword = async () => {
 }
 
 .change-password-btn:hover:not(:disabled) {
-  background: #3e43ae;
+  background: var(--primaryActive);
 }
 
 .change-password-btn:disabled {

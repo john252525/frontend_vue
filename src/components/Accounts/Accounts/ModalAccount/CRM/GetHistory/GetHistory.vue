@@ -587,7 +587,7 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg);
   padding: 30px;
   border-radius: 12px;
   max-height: 85vh;
@@ -604,7 +604,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--line);
   padding-bottom: 20px;
 }
 
@@ -612,7 +612,7 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--modalColor);
 }
 
 .close-btn {
@@ -620,7 +620,7 @@ onBeforeUnmount(() => {
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: #ccc;
+  color: var(--headerAccountText);
   transition:
     color 0.3s,
     transform 0.2s;
@@ -633,7 +633,7 @@ onBeforeUnmount(() => {
 }
 
 .close-btn:hover {
-  color: #666;
+  color: var(--text);
   transform: scale(1.1);
 }
 
@@ -641,9 +641,9 @@ onBeforeUnmount(() => {
 .filters-container {
   margin-bottom: 25px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8f9fb 0%, #f0f4f8 100%);
+  background: var(--tableAccountBg);
   border-radius: 10px;
-  border: 1px solid #e8eef5;
+  border: 1px solid var(--line);
 }
 
 .filters-grid {
@@ -662,7 +662,7 @@ onBeforeUnmount(() => {
 .filter-group label {
   font-size: 13px;
   font-weight: 600;
-  color: #555;
+  color: var(--headerAccountText);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -678,7 +678,7 @@ onBeforeUnmount(() => {
   left: 12px;
   width: 18px;
   height: 18px;
-  color: #999;
+  color: var(--headerAccountText);
   pointer-events: none;
   stroke-width: 2;
 }
@@ -686,13 +686,13 @@ onBeforeUnmount(() => {
 .filter-group input,
 .filter-group select {
   padding: 10px 12px 10px 40px;
-  border: 2px solid #e0e6f0;
+  border: 2px solid var(--line);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
-  background-color: white;
+  background-color: var(--input);
   transition: all 0.3s;
-  color: #333;
+  color: var(--text);
 }
 
 .filter-group input:focus,
@@ -700,11 +700,11 @@ onBeforeUnmount(() => {
   outline: none;
   border-color: #1976d2;
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-  background-color: #fbfcfd;
+  background-color: var(--input);
 }
 
 .filter-group input::placeholder {
-  color: #999;
+  color: var(--headerAccountText);
 }
 
 .btn-refresh {
@@ -746,7 +746,7 @@ onBeforeUnmount(() => {
   margin-bottom: 20px;
   flex: 1;
   border-radius: 8px;
-  border: 1px solid #e8eef5;
+  border: 1px solid var(--line);
 }
 
 .history-table table {
@@ -759,13 +759,13 @@ onBeforeUnmount(() => {
   padding: 14px 16px;
   text-align: left;
   font-size: 14px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--line);
 }
 
 .history-table th {
   font-weight: 700;
-  color: #666;
-  background-color: #f8f9fb;
+  color: var(--headerAccountText);
+  background-color: var(--tableAccountBg);
   white-space: nowrap;
   text-transform: uppercase;
   font-size: 12px;
@@ -785,7 +785,7 @@ onBeforeUnmount(() => {
 }
 
 .history-table tr:hover {
-  background-color: #f9f9f9;
+  background-color: var(--tableHover);
 }
 
 .history-table tr.row-success:hover {
@@ -822,7 +822,7 @@ onBeforeUnmount(() => {
   word-wrap: break-word;
   white-space: normal;
   line-height: 1.4;
-  color: #333;
+  color: var(--text);
 }
 
 .phone {
@@ -875,9 +875,9 @@ onBeforeUnmount(() => {
 
 .history-card {
   border-radius: 10px;
-  border: 2px solid #e8eef5;
+  border: 2px solid var(--line);
   padding: 16px;
-  background: white;
+  background: var(--bg);
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -922,7 +922,7 @@ onBeforeUnmount(() => {
 
 .card-row .label {
   font-size: 12px;
-  color: #888;
+  color: var(--headerAccountText);
   font-weight: 700;
   min-width: 70px;
   flex-shrink: 0;
@@ -932,7 +932,7 @@ onBeforeUnmount(() => {
 
 .card-row .value {
   font-size: 14px;
-  color: #222;
+  color: var(--text);
   text-align: right;
   flex: 1;
   word-break: break-word;
@@ -964,12 +964,12 @@ onBeforeUnmount(() => {
 
 .date-cell {
   white-space: nowrap;
-  color: #555;
+  color: var(--headerAccountText);
   font-size: 13px;
 }
 
 .date-value {
-  color: #555;
+  color: var(--headerAccountText);
   font-size: 13px;
 }
 
@@ -977,7 +977,7 @@ onBeforeUnmount(() => {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
-  color: #333;
+  color: var(--text);
 }
 
 /* Пагинация */
@@ -987,7 +987,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 20px;
   padding-top: 20px;
-  border-top: 2px solid #f0f0f0;
+  border-top: 2px solid var(--line);
   margin-top: auto;
 }
 
@@ -997,14 +997,14 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 6px;
   padding: 10px 20px;
-  background-color: #f5f7fb;
-  border: 2px solid #e0e6f0;
+  background-color: var(--tableAccountBg);
+  border: 2px solid var(--line);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 14px;
   font-weight: 600;
-  color: #555;
+  color: var(--headerAccountText);
 }
 
 .btn-page svg {
@@ -1014,7 +1014,7 @@ onBeforeUnmount(() => {
 }
 
 .btn-page:hover:not(:disabled) {
-  background-color: #e8eef5;
+  background-color: var(--tableHover);
   border-color: #1976d2;
   color: #1976d2;
   transform: translateY(-2px);
@@ -1033,7 +1033,7 @@ onBeforeUnmount(() => {
 .page-info {
   font-size: 15px;
   font-weight: 600;
-  color: #555;
+  color: var(--headerAccountText);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1045,18 +1045,18 @@ onBeforeUnmount(() => {
 }
 
 .page-divider {
-  color: #ccc;
+  color: var(--headerAccountText);
 }
 
 .page-total {
-  color: #999;
+  color: var(--headerAccountText);
 }
 
 /* Статусы */
 .loading {
   padding: 60px 30px;
   text-align: center;
-  color: #666;
+  color: var(--headerAccountText);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1066,7 +1066,7 @@ onBeforeUnmount(() => {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f0f0f0;
+  border: 4px solid var(--line);
   border-top-color: #1976d2;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -1085,7 +1085,7 @@ onBeforeUnmount(() => {
 .no-data {
   padding: 60px 30px;
   text-align: center;
-  color: #999;
+  color: var(--headerAccountText);
   display: flex;
   flex-direction: column;
   align-items: center;

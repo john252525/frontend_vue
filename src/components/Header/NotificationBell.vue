@@ -138,7 +138,7 @@ onUnmounted(() => {
 .bell-btn:hover,
 .bell-btn.active {
   background: rgba(64, 71, 202, 0.08);
-  color: oklch(0.541 0.198 267);
+  color: var(--primary);
 }
 
 .badge {
@@ -194,7 +194,7 @@ onUnmounted(() => {
 
 .notif-count {
   font-size: 0.8rem;
-  color: oklch(0.541 0.198 267);
+  color: var(--primary);
   font-weight: 600;
   background: rgba(84, 92, 200, 0.1);
   padding: 2px 8px;
@@ -238,7 +238,7 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: oklch(0.541 0.198 267);
+  background: var(--primary);
   margin-top: 5px;
   flex-shrink: 0;
 }
@@ -290,8 +290,8 @@ onUnmounted(() => {
 }
 
 .read-all-btn:hover:not(:disabled) {
-  border-color: oklch(0.541 0.198 267);
-  color: oklch(0.541 0.198 267);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .read-all-btn:disabled {

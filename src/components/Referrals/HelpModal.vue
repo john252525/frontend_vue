@@ -167,7 +167,7 @@ onUnmounted(() => {
 }
 
 .step-number {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   width: 28px;
   height: 28px;
@@ -206,7 +206,7 @@ onUnmounted(() => {
 }
 
 .got-it-button {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -218,7 +218,7 @@ onUnmounted(() => {
 }
 
 .got-it-button:hover {
-  background: #2563eb;
+  background: var(--primaryHover);
 }
 
 @keyframes fadeIn {

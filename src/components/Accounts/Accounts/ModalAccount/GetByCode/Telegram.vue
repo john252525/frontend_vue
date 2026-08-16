@@ -177,7 +177,7 @@ if (getByCodeStation.value === true) {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background-color: white;
+  background-color: var(--modalBg, #ffffff);
   padding: 25px 30px;
   border-radius: 10px;
   display: flex;
@@ -192,9 +192,9 @@ if (getByCodeStation.value === true) {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
-  border: 0.5px solid #c1c1c1;
-  background: #fcfcfc;
+  color: var(--text);
+  border: 0.5px solid var(--line);
+  background: var(--input);
 }
 
 .num-input-error {
@@ -204,7 +204,7 @@ if (getByCodeStation.value === true) {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--modalColor, #1a1a1a);
   border: 0.5px solid #be2424;
   background: #ffeaea;
 }

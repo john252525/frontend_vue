@@ -155,9 +155,22 @@ const props = defineProps({
 
 // --- ЛОГИКА КОНФИГУРАЦИИ ДОМЕНА ---
 const domainConfig = computed(() => {
-  const domain = stationDomain.value?.navigate?.value || "whatsapi";
+  const domain = stationDomain.navigate.value || "whatsapi";
   return getFilterConfigForDomain(domain);
 });
+
+// Позволяет каждому домену иметь свою логику видимости/доступности фильтров
+const isFilterEnabled = (id) => {
+  const filterConfig = domainConfig.value.filters.find((f) => f.id === id);
+  return filterConfig?.enabled !== false;
+};
+
+const isCrmSubFilterEnabled = (id) => {
+  if (!isFilterEnabled("crm")) return false;
+  const crmConfig = domainConfig.value.filters.find((f) => f.id === "crm");
+  const subFilterConfig = crmConfig?.subFilters?.find((sf) => sf.id === id);
+  return subFilterConfig?.enabled !== false;
+};
 
 // --- ЛОГИКА ЗАГРУЗКИ ---
 const isLoading = computed(() => {
@@ -311,21 +324,29 @@ const updateCrmTypes = () => {
   accountStore.setType(result.type);
 };
 
+const getItemChecked = (id) =>
+  (isFilterEnabled(id) && items.find((i) => i.id === id)?.checked) || false;
+
+const getCrmSubItemChecked = (id) =>
+  (isCrmSubFilterEnabled(id) &&
+    crmSubItems.find((i) => i.id === id)?.checked) ||
+  false;
+
 const updateFilterState = () => {
   const newFilterState = {
-    telegram: items.find((i) => i.id === "telegram")?.checked || false,
-    whatsapp: items.find((i) => i.id === "whatsapp")?.checked || false,
-    max: items.find((i) => i.id === "max")?.checked || false,
-    "max-bot": items.find((i) => i.id === "max-bot")?.checked || false,
-    instagram: items.find((i) => i.id === "instagram")?.checked || false,
-    vk: items.find((i) => i.id === "vk-bot")?.checked || false,
-    sms: items.find((i) => i.id === "sms")?.checked || false,
-    email: items.find((i) => i.id === "email")?.checked || false,
-    crm: items.find((i) => i.id === "crm")?.checked || false,
-    amocrm: crmSubItems.find((i) => i.id === "amocrm")?.checked || false,
-    bitrix24: crmSubItems.find((i) => i.id === "bitrix24")?.checked || false,
-    uon: crmSubItems.find((i) => i.id === "uon")?.checked || false,
-    bulk: items.find((i) => i.id === "bulk")?.checked || false,
+    telegram: getItemChecked("telegram"),
+    whatsapp: getItemChecked("whatsapp"),
+    max: getItemChecked("max"),
+    "max-bot": getItemChecked("max-bot"),
+    instagram: getItemChecked("instagram"),
+    vk: getItemChecked("vk-bot"),
+    sms: getItemChecked("sms"),
+    email: getItemChecked("email"),
+    crm: getItemChecked("crm"),
+    amocrm: getCrmSubItemChecked("amocrm"),
+    bitrix24: getCrmSubItemChecked("bitrix24"),
+    uon: getCrmSubItemChecked("uon"),
+    bulk: getItemChecked("bulk"),
   };
   accountStore.setFilterState(newFilterState);
 };
@@ -335,6 +356,39 @@ const applyFilters = () => {
     props.filterInstances();
   }
 };
+
+// Домен может запретить фильтр целиком (например, webest всегда отключает
+// Рассылки и CRM) — принудительно гасим такие фильтры и синхронизируем стор,
+// не дожидаясь взаимодействия пользователя с чекбоксами.
+watch(
+  domainConfig,
+  () => {
+    let changed = false;
+
+    items.forEach((item) => {
+      if (!isFilterEnabled(item.id) && item.checked) {
+        item.checked = false;
+        changed = true;
+      }
+    });
+
+    crmSubItems.forEach((subItem) => {
+      if (!isCrmSubFilterEnabled(subItem.id) && subItem.checked) {
+        subItem.checked = false;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      updateSources();
+      updateGroups();
+      updateCrmTypes();
+      updateFilterState();
+      applyFilters();
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
@@ -348,7 +402,7 @@ const applyFilters = () => {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background-color: #4f46e5;
+  background-color: var(--primary);
   color: white;
   border-radius: 6px;
   cursor: pointer;
@@ -358,7 +412,7 @@ const applyFilters = () => {
 }
 
 .filter-trigger:hover {
-  background-color: #4338ca;
+  background-color: var(--primaryHover);
 }
 
 .filter-trigger svg {
@@ -377,11 +431,11 @@ const applyFilters = () => {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: white;
+  background: var(--bg);
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   width: 140px;
   position: relative;
 }
@@ -401,7 +455,7 @@ const applyFilters = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -415,14 +469,14 @@ const applyFilters = () => {
   width: 20px;
   height: 20px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #4f46e5;
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 .loading-text {
   font-size: 12px;
-  color: #4f46e5;
+  color: var(--primary);
   font-weight: 500;
 }
 
@@ -453,7 +507,7 @@ const applyFilters = () => {
 .deleted-accounts-toggle {
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .toggle-label {
@@ -461,11 +515,11 @@ const applyFilters = () => {
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, var(--bg) 0%, var(--tableAccountBg) 100%);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   font-size: 13px;
   font-weight: 500;
 }
@@ -520,18 +574,18 @@ const applyFilters = () => {
   align-items: center;
   justify-content: center;
   padding: 6px 3px;
-  background-color: #f9fafb;
+  background-color: var(--tableAccountBg);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   font-size: 13px;
 }
 
 .filter-item.active .filter-label {
   background-color: #eef2ff;
   border-color: #c7d2fe;
-  color: #4f46e5;
+  color: var(--primary);
 }
 
 .filter-icon {
@@ -555,11 +609,11 @@ const applyFilters = () => {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: white;
+  background: var(--bg);
   padding: 6px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   z-index: 20;
   min-width: 10px;
 }
@@ -574,18 +628,18 @@ const applyFilters = () => {
   width: 100%;
   gap: 6px;
   padding: 4px 8px;
-  background-color: #f9fafb;
+  background-color: var(--tableAccountBg);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   font-size: 14px;
 }
 
 .sub-filter-item.active .sub-filter-label {
   background-color: #eef2ff;
   border-color: #c7d2fe;
-  color: #4f46e5;
+  color: var(--primary);
 }
 
 .sub-filter-checkbox {
@@ -625,7 +679,7 @@ const applyFilters = () => {
 .debug-info {
   margin-top: 16px;
   padding: 12px;
-  background: #f3f4f6;
+  background: var(--tableAccountBg);
   border-radius: 6px;
   font-size: 12px;
 }
@@ -640,7 +694,7 @@ pre {
   z-index: 5;
   width: 100%;
   height: 100vh;
-  background: rgba(117, 117, 117, 0.3);
+  background: var(--backgroundComponentModal);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);

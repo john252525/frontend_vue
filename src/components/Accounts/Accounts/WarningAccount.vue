@@ -122,7 +122,7 @@ const getAccountType = (type) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--backgroundComponentModal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +131,7 @@ const getAccountType = (type) => {
 }
 
 .warning-modal {
-  background: white;
+  background: var(--modalBg, #ffffff);
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -155,7 +155,7 @@ const getAccountType = (type) => {
   display: flex;
   align-items: center;
   padding: 24px 24px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--line);
   position: relative;
 }
 
@@ -173,7 +173,7 @@ const getAccountType = (type) => {
 .warning-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0;
   flex: 1;
 }
@@ -183,14 +183,14 @@ const getAccountType = (type) => {
   border: none;
   padding: 8px;
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .close-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .warning-modal-content {
@@ -202,7 +202,7 @@ const getAccountType = (type) => {
   align-items: center;
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--tableAccountBg);
   border-radius: 12px;
 }
 
@@ -217,13 +217,13 @@ const getAccountType = (type) => {
 .account-name {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--modalColor);
   margin: 0 0 4px 0;
 }
 
 .account-type {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0;
 }
 
@@ -233,7 +233,7 @@ const getAccountType = (type) => {
 
 .message-text {
   font-size: 16px;
-  color: #374151;
+  color: var(--modalColor);
   margin: 0 0 16px 0;
   line-height: 1.5;
 }
@@ -249,7 +249,7 @@ const getAccountType = (type) => {
   align-items: center;
   padding: 8px 0;
   font-size: 14px;
-  color: #374151;
+  color: var(--modalColor);
 }
 
 .check-icon {
@@ -268,7 +268,7 @@ const getAccountType = (type) => {
 
 .additional-info {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--headerAccountText);
   margin: 0;
   line-height: 1.5;
   padding: 12px 16px;
@@ -294,7 +294,7 @@ const getAccountType = (type) => {
 }
 
 .action-button.primary {
-  background: #6732ff;
+  background: var(--primary);
   color: white;
 }
 
@@ -303,12 +303,12 @@ const getAccountType = (type) => {
 }
 
 .action-button.secondary {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--tableAccountBg);
+  color: var(--modalColor);
 }
 
 .action-button.secondary:hover {
-  background: #e5e7eb;
+  background: var(--line);
 }
 
 @media (max-width: 640px) {
