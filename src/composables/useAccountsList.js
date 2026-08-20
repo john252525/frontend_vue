@@ -66,6 +66,7 @@ export function useAccountsList(options = {}) {
     const messengerSources = [
       "telegram",
       "whatsapp",
+      "waba",
       "max",
       "max-bot",
       "instagram",
@@ -174,6 +175,7 @@ export function useAccountsList(options = {}) {
           source: [
             "telegram",
             "whatsapp",
+            "waba",
             "max",
             "vk-bot",
             "max-bot",
@@ -193,6 +195,7 @@ export function useAccountsList(options = {}) {
           source: [
             "telegram",
             "whatsapp",
+            "waba",
             "max",
             "vk-bot",
             "max-bot",
@@ -209,6 +212,7 @@ export function useAccountsList(options = {}) {
           source: [
             "telegram",
             "whatsapp",
+            "waba",
             "max",
             "vk-bot",
             "max-bot",

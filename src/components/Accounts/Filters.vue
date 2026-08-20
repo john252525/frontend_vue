@@ -215,6 +215,11 @@ const items = reactive([
     name: "WhatsApp",
     checked: accountStore.filterState.whatsapp,
   },
+  {
+    id: "waba",
+    name: "WABA",
+    checked: accountStore.filterState.waba,
+  },
   { id: "email", name: "Email", checked: accountStore.filterState.email },
   { id: "bulk", name: "Рассылки", checked: accountStore.filterState.bulk },
   { id: "crm", name: "CRM", checked: accountStore.filterState.crm },
@@ -290,7 +295,7 @@ const updateSources = () => {
 const updateGroups = () => {
   const messengerSelected = visibleItems.value.some(
     (item) =>
-      (item.id === "telegram" || item.id === "whatsapp" || item.id === "max" || item.id === "max-bot" || item.id === "instagram") && item.checked,
+      (item.id === "telegram" || item.id === "whatsapp" || item.id === "waba" || item.id === "max" || item.id === "max-bot" || item.id === "instagram") && item.checked,
   );
   const crmSelected =
     visibleItems.value.find((item) => item.id === "crm")?.checked || false;
@@ -336,6 +341,7 @@ const updateFilterState = () => {
   const newFilterState = {
     telegram: getItemChecked("telegram"),
     whatsapp: getItemChecked("whatsapp"),
+    waba: getItemChecked("waba"),
     max: getItemChecked("max"),
     "max-bot": getItemChecked("max-bot"),
     instagram: getItemChecked("instagram"),

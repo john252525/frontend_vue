@@ -12,6 +12,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "waba",
+        name: "WABA",
+        enabled: true,
+      },
+      {
         id: "max",
         name: "Max",
         enabled: true,
@@ -73,6 +78,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "waba",
+        name: "WABA",
+        enabled: true,
+      },
+      {
         id: "max",
         name: "Max",
         enabled: true,
@@ -121,6 +131,11 @@ export const FILTER_CONFIG = {
       {
         id: "whatsapp",
         name: "WhatsApp",
+        enabled: true,
+      },
+      {
+        id: "waba",
+        name: "WABA",
         enabled: true,
       },
       {

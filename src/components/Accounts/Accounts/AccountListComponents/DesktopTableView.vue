@@ -600,6 +600,7 @@ const enableCheckbox = (item) => {
   console.log("check start", item);
   if (
     item.source === "whatsapp" ||
+    item.source === "waba" ||
     item.source === "telegram" ||
     item.source === "max" ||
     item.source === "max-bot" ||
@@ -638,6 +639,8 @@ function getType(type) {
       return "SMS";
     case "whatsapp":
       return "WhatsApp";
+    case "waba":
+      return "WABA";
     case "max":
       return "Max";
     case "max-bot":

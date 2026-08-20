@@ -90,7 +90,7 @@
         Добавить аккаунт
       </button>
 
-      <!-- <button
+      <button
         v-if="activeTab === 'accounts'"
         @click="startOnboardingTour"
         class="help-tour-button"
@@ -112,7 +112,7 @@
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
         Как пользоваться
-      </button> -->
+      </button>
     </section>
   </header>
 

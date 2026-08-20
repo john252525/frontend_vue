@@ -265,6 +265,8 @@ function getType(type) {
       return "Telegram";
     case "whatsapp":
       return "WhatsApp";
+    case "waba":
+      return "WABA";
     default:
       return type;
   }

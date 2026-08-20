@@ -13,12 +13,13 @@ export const useAccountStore = defineStore("accountStore", {
     crmPlatformText: "AmoCRM",
     allSource: [],
     add_deleted: false,
-    source: ["telegram", "whatsapp", "max", "max-bot", "instagram", "vk-bot", "sms", "email"],
+    source: ["telegram", "whatsapp", "waba", "max", "max-bot", "instagram", "vk-bot", "sms", "email"],
     group: ["messenger", "crm", "bulk"],
     type: ["amocrm", "bitrix24", "uon", "bulk", "adapter"],
     filterState: {
       telegram: true,
       whatsapp: true,
+      waba: true,
       max: true,
       "max-bot": true,
       instagram: true,
@@ -140,6 +141,7 @@ export const useAccountStore = defineStore("accountStore", {
       this.filterState = {
         telegram: false,
         whatsapp: false,
+        waba: false,
         max: false,
         "max-bot": false,
         instagram: false,

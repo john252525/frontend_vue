@@ -56,6 +56,15 @@
             >Подключить</span
           >
           <span
+            v-if="selectedItem.source === 'waba'"
+            class="action"
+            @click="
+              props.openWabaAuthModal?.();
+              props.closeModal();
+            "
+            >Подключить</span
+          >
+          <span
             class="action"
             v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
             @click="openTariff"
@@ -125,7 +134,8 @@
               selectedItem.source != 'sms' &&
               selectedItem.source != 'instagram' &&
               selectedItem.source != 'max-bot' &&
-              selectedItem.source != 'vk-bot'
+              selectedItem.source != 'vk-bot' &&
+              selectedItem.source != 'waba'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -140,7 +150,8 @@
               selectedItem.source != 'sms' &&
               selectedItem.source != 'max-bot' &&
               selectedItem.source != 'instagram' &&
-              selectedItem.source != 'vk-bot'
+              selectedItem.source != 'vk-bot' &&
+              selectedItem.source != 'waba'
             "
             class="action"
             @click="forceStopActive"
@@ -410,6 +421,9 @@ const props = defineProps({
     type: Function,
   },
   openInstagramAuthModal: {
+    type: Function,
+  },
+  openWabaAuthModal: {
     type: Function,
   },
 });

@@ -103,6 +103,7 @@
       :openCustomSourcesModal="openCustomSourcesModal"
       :openEmailSettings="openEmailSettings"
       :openInstagramAuthModal="openInstagramAuthModal"
+      :openWabaAuthModal="openWabaAuthModal"
       :openMaxbotAuthModal="openMaxbotAuthModal"
     />
 
@@ -230,6 +231,13 @@
       :getAccounts="getAccounts"
     />
 
+    <WabaAuthModal
+      v-if="wabaAuthModal && selectedItem"
+      :item="selectedItem"
+      :close="closeWabaAuthModal"
+      :getAccounts="getAccounts"
+    />
+
     <EnableMaxBot
       v-if="maxbotAuthModal"
       :item="selectedItem"
@@ -282,6 +290,7 @@ import CustomSources from "./ModalAccount/CRM/UonSettings/customSources/CustomSo
 import EmailSettings from "./ModalAccount/email/Settings.vue";
 import SmsAuthCodeModal from "./ModalAccount/Enable/SmsAuthCodeModal.vue";
 import InstagramAuthModal from "./ModalAccount/InstagramAuthModal.vue";
+import WabaAuthModal from "./ModalAccount/WabaAuthModal.vue";
 import EnableMaxBot from "./ModalAccount/Enable/EnableMaxBot.vue";
 
 // Импортируем новые компоненты
@@ -378,6 +387,7 @@ const emailSettingsValue = ref(false);
 const smsAuthCodeModal = ref(false);
 const smsAuthCode = ref("");
 const instagramAuthModal = ref(false);
+const wabaAuthModal = ref(false);
 const maxbotAuthModal = ref(false);
 
 // Синхронизируем локальный instanceData при удалении аккаунта из стора
@@ -422,6 +432,14 @@ const openInstagramAuthModal = () => {
 
 const closeInstagramAuthModal = () => {
   instagramAuthModal.value = false;
+};
+
+const openWabaAuthModal = () => {
+  wabaAuthModal.value = true;
+};
+
+const closeWabaAuthModal = () => {
+  wabaAuthModal.value = false;
 };
 
 const openEmailSettings = () => {

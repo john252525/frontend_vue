@@ -12,7 +12,8 @@
           item.source === 'email' ||
           item.source === 'max-bot' ||
           item.loading ||
-          item.source === 'vk-bot'
+          item.source === 'vk-bot' ||
+          item.source === 'waba'
         "
         @click.prevent="changeSwitch(item)"
       />
