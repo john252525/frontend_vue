@@ -267,6 +267,16 @@ const result = reactive({
 
 // --- МЕТОДЫ ---
 const handleCheckboxChange = (item) => {
+  // Родительский пункт "CRM" сам по себе не соответствует ни одному типу
+  // аккаунта, поэтому работает как "выбрать все / снять все" для вложенных
+  // CRM-подпунктов — иначе клик по нему ничего не фильтрует, пока не будет
+  // отдельно отмечен конкретный CRM (Bitrix24 и т.п.).
+  if (item.id === "crm") {
+    visibleCrmSubItems.value.forEach((subItem) => {
+      subItem.checked = item.checked;
+    });
+  }
+
   updateSources();
   updateGroups();
   updateCrmTypes();
@@ -275,6 +285,15 @@ const handleCheckboxChange = (item) => {
 };
 
 const handleCrmSubItemChange = (subItem) => {
+  // Держим родительский чекбокс согласованным с подпунктами: отмечен, пока
+  // выбран хотя бы один CRM-подпункт, и снимается, когда сняты все —
+  // так его состояние всегда честно отражает, применяется ли CRM-фильтр.
+  const crmItem = items.find((i) => i.id === "crm");
+  if (crmItem) {
+    crmItem.checked = visibleCrmSubItems.value.some((si) => si.checked);
+  }
+
+  updateGroups();
   updateCrmTypes();
   updateFilterState();
   applyFilters();

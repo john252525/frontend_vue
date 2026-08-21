@@ -1,4 +1,5 @@
 <template>
+  <div class="toggle-group">
   <div class="toggle-wrapper">
     <button
       @click="updateVersion(1)"
@@ -41,6 +42,31 @@
       Версия 2
     </button>
   </div>
+
+    <button
+      type="button"
+      class="version-info-btn"
+      v-tooltip="{ content: versionInfoTooltip, html: true, theme: 'light-dropdown' }"
+      aria-label="Чем отличаются версии рассылок"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5" />
+        <path
+          d="M10 9v5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+      </svg>
+    </button>
+  </div>
 </template>
 
 <script setup>
@@ -50,6 +76,47 @@ import { useMailingVersion } from "@/stores/mailingVersion";
 const mailingVersion = useMailingVersion();
 const getVersion = computed(() => mailingVersion.getVersion);
 const isLoading = ref(false);
+
+const versionInfoTooltip = computed(
+  () => `
+    <div class="version-compare">
+      <div class="version-compare-head">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="10" cy="6.5" r="1" fill="currentColor"/>
+        </svg>
+        <span>Чем отличаются версии</span>
+      </div>
+
+      <div class="version-compare-card version-compare-card--accent">
+        <div class="version-compare-card-head">
+          <span class="version-compare-chip version-compare-chip--accent">Версия 2</span>
+          <span class="version-compare-recommended">Рекомендуется</span>
+        </div>
+        <ul class="version-compare-list">
+          <li>Автозапуск рассылки сразу после создания</li>
+          <li>Не останавливается, если аккаунт временно неактивен</li>
+          <li>Текст рассылки можно отредактировать после запуска</li>
+        </ul>
+      </div>
+
+      <div class="version-compare-card">
+        <div class="version-compare-card-head">
+          <span class="version-compare-chip">Версия 1</span>
+        </div>
+        <ul class="version-compare-list">
+          <li>В логе рассылки виден текст каждого отправленного сообщения — удобно для аудита</li>
+          <li>Нет автозапуска и редактирования текста после создания</li>
+        </ul>
+      </div>
+
+      <div class="version-compare-foot">
+        Каналы отправки (WhatsApp, Telegram, Max) и вложения одинаковы для обеих версий
+      </div>
+    </div>
+  `,
+);
 
 const updateVersion = async (version) => {
   if (version === getVersion.value) return;
@@ -64,6 +131,12 @@ const updateVersion = async (version) => {
 </script>
 
 <style scoped>
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .toggle-wrapper {
   display: flex;
   gap: 8px;
@@ -71,6 +144,27 @@ const updateVersion = async (version) => {
   padding: 4px;
   border-radius: 8px;
   width: fit-content;
+}
+
+.version-info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--headerAccountText);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.version-info-btn:hover {
+  background: var(--tableAccountBg);
+  color: var(--primary);
 }
 
 .toggle-button {
@@ -130,6 +224,12 @@ const updateVersion = async (version) => {
 }
 
 @media (max-width: 500px) {
+  .version-info-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+
   .toggle-wrapper {
     display: flex;
     gap: 8px;
@@ -158,5 +258,132 @@ const updateVersion = async (version) => {
     width: 12px;
     height: 11px;
   }
+}
+</style>
+
+<style>
+.v-popper--theme-light-dropdown .v-popper__inner {
+  background: var(--modalBg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  padding: 0 !important;
+}
+
+.v-popper--theme-light-dropdown .v-popper__arrow-inner {
+  visibility: visible;
+  border-color: var(--modalBg) !important;
+}
+
+.v-popper--theme-light-dropdown .v-popper__arrow-outer {
+  border-color: var(--line) !important;
+}
+
+.version-compare {
+  width: 300px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.version-compare-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.version-compare-head svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.version-compare-card {
+  border-radius: 10px;
+  background: var(--tableAccountBg);
+  border: 1px solid transparent;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.version-compare-card--accent {
+  background: rgba(var(--primary-rgb), 0.08);
+  border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+.version-compare-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.version-compare-chip {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.version-compare-chip--accent {
+  color: var(--primary);
+}
+
+.version-compare-recommended {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--primary);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.version-compare-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text);
+}
+
+.version-compare-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 4px;
+}
+
+.version-compare-list li:last-child {
+  margin-bottom: 0;
+}
+
+.version-compare-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--headerAccountText);
+}
+
+.version-compare-card--accent .version-compare-list li::before {
+  background: var(--primary);
+}
+
+.version-compare-foot {
+  font-size: 12px;
+  color: var(--headerAccountText);
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 </style>
