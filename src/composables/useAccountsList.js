@@ -67,6 +67,7 @@ export function useAccountsList(options = {}) {
       "telegram",
       "whatsapp",
       "waba",
+      "fbm",
       "max",
       "max-bot",
       "instagram",
@@ -150,6 +151,122 @@ export function useAccountsList(options = {}) {
     }
   };
 
+  // Вынесено из getAccounts, чтобы refreshAccountsSilently ниже могла делать
+  // тот же запрос без дублирования этой логики построения параметров.
+  const buildAccountsParams = () => {
+    let params = {
+      source: accountStation.value,
+      skipDetails: true,
+      group: "messenger",
+    };
+
+    if (stationDomain.navigate.value === "touchapi") {
+      // Fetch ALL accounts — client-side filtering applied afterwards
+      params = {
+        source: [
+          "telegram",
+          "whatsapp",
+          "waba",
+          "fbm",
+          "max",
+          "vk-bot",
+          "max-bot",
+          "instagram",
+          "sms",
+          "email",
+        ],
+        type: ["amocrm", "bitrix24", "uon", "adapter", "touchapi"],
+        group: ["messenger", "crm"],
+        add_deleted: true,
+      };
+    }
+
+    if (stationDomain.navigate.value === "whatsapi") {
+      // Fetch ALL accounts — client-side filtering applied afterwards
+      params = {
+        source: [
+          "telegram",
+          "whatsapp",
+          "waba",
+          "fbm",
+          "max",
+          "vk-bot",
+          "max-bot",
+          "instagram",
+          "sms",
+          "email",
+        ],
+        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
+        group: ["messenger", "crm", "bulk"],
+        add_deleted: true,
+      };
+    } else if (stationDomain.navigate.value === "webest") {
+      params = {
+        source: [
+          "telegram",
+          "whatsapp",
+          "waba",
+          "fbm",
+          "max",
+          "vk-bot",
+          "max-bot",
+          "instagram",
+          "sms",
+          "email",
+        ],
+        type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
+        group: ["messenger", "crm", "bulk"],
+        add_deleted: true,
+      };
+    }
+
+    return params;
+  };
+
+  // Тихое обновление списка — в отличие от getAccounts НЕ сбрасывает
+  // instanceData в [] и не трогает loadDataStation/dataStationNone, поэтому
+  // уже показанный список не "гаснет" во время обновления (используется
+  // сразу после создания аккаунта, пока пользователь продолжает работать
+  // со страницей).
+  const refreshAccountsSilently = async () => {
+    try {
+      const response = await axios.post(
+        `${FRONTEND_URL}getInfoByToken`,
+        buildAccountsParams(),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token.value}`,
+          },
+        },
+      );
+
+      if (response.data.ok === true) {
+        const freshList = (response.data.data?.instances || []).map(
+          (instance) => ({
+            ...instance,
+            step: instance.step === null ? "Н/Д" : instance.step,
+            loading: false,
+            storage: instance.storage || "undefined",
+            type: instance.type || "undefined",
+          }),
+        );
+
+        instanceData.value = freshList;
+        instancesStore.setAllInstances([...freshList]);
+        filterInstances();
+        dataStation.value = freshList.length > 0;
+        dataStationNone.value = freshList.length === 0;
+
+        return freshList;
+      }
+    } catch (error) {
+      console.error("Ошибка тихого обновления списка аккаунтов:", error);
+    }
+
+    return instanceData.value;
+  };
+
   const getAccounts = async () => {
     if (!accountStore || typeof accountStore.setLoading !== "function") {
       console.error("❌ useAccountsList: store или setLoading не доступны");
@@ -163,68 +280,7 @@ export function useAccountsList(options = {}) {
       errorAccountBolean.value = false;
       instanceData.value = [];
 
-      let params = {
-        source: accountStation.value,
-        skipDetails: true,
-        group: "messenger",
-      };
-
-      if (stationDomain.navigate.value === "touchapi") {
-        // Fetch ALL accounts — client-side filtering applied afterwards
-        params = {
-          source: [
-            "telegram",
-            "whatsapp",
-            "waba",
-            "max",
-            "vk-bot",
-            "max-bot",
-            "instagram",
-            "sms",
-            "email",
-          ],
-          type: ["amocrm", "bitrix24", "uon", "adapter", "touchapi"],
-          group: ["messenger", "crm"],
-          add_deleted: true,
-        };
-      }
-
-      if (stationDomain.navigate.value === "whatsapi") {
-        // Fetch ALL accounts — client-side filtering applied afterwards
-        params = {
-          source: [
-            "telegram",
-            "whatsapp",
-            "waba",
-            "max",
-            "vk-bot",
-            "max-bot",
-            "instagram",
-            "sms",
-            "email",
-          ],
-          type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
-          group: ["messenger", "crm", "bulk"],
-          add_deleted: true,
-        };
-      } else if (stationDomain.navigate.value === "webest") {
-        params = {
-          source: [
-            "telegram",
-            "whatsapp",
-            "waba",
-            "max",
-            "vk-bot",
-            "max-bot",
-            "instagram",
-            "sms",
-            "email",
-          ],
-          type: ["amocrm", "bitrix24", "uon", "bulk", "adapter", "touchapi"],
-          group: ["messenger", "crm", "bulk"],
-          add_deleted: true,
-        };
-      }
+      const params = buildAccountsParams();
 
       loadDataStation.value = true;
 
@@ -403,5 +459,6 @@ export function useAccountsList(options = {}) {
     filterInstances,
     retryGetInfo,
     getAccounts,
+    refreshAccountsSilently,
   };
 }

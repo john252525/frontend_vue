@@ -65,8 +65,20 @@
             >Подключить</span
           >
           <span
+            v-if="selectedItem.source === 'fbm'"
             class="action"
-            v-if="!['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)"
+            @click="
+              props.openFbmAuthModal?.();
+              props.closeModal();
+            "
+            >Подключить</span
+          >
+          <span
+            class="action"
+            v-if="
+              !['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type) &&
+              stationDomain.navigate.value != 'webest'
+            "
             @click="openTariff"
             >Подписка</span
           >
@@ -135,7 +147,8 @@
               selectedItem.source != 'instagram' &&
               selectedItem.source != 'max-bot' &&
               selectedItem.source != 'vk-bot' &&
-              selectedItem.source != 'waba'
+              selectedItem.source != 'waba' &&
+              selectedItem.source != 'fbm'
             "
             class="action action-on"
             @click="changeEnableStation"
@@ -151,7 +164,8 @@
               selectedItem.source != 'max-bot' &&
               selectedItem.source != 'instagram' &&
               selectedItem.source != 'vk-bot' &&
-              selectedItem.source != 'waba'
+              selectedItem.source != 'waba' &&
+              selectedItem.source != 'fbm'
             "
             class="action"
             @click="forceStopActive"
@@ -424,6 +438,9 @@ const props = defineProps({
     type: Function,
   },
   openWabaAuthModal: {
+    type: Function,
+  },
+  openFbmAuthModal: {
     type: Function,
   },
 });
@@ -806,7 +823,7 @@ const deleteAccountButton = async () => {
         },
       },
     );
-    if ((response.data.ok = true)) {
+    if (response.data.ok === true) {
       chatStore.removeChat(login, source);
       stationLoading.loading = false;
       props.getAccounts();

@@ -2,7 +2,31 @@
   <div class="referrals-container">
     <header>
       <section class="account-section">
-        <h2 class="title">{{ t("referrals.title") }}</h2>
+        <div class="title-row">
+          <h2 class="title">{{ t("referrals.title") }}</h2>
+          <button
+            @click="startReferralsTour"
+            class="help-tour-button"
+            title="Как пользоваться"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Как пользоваться
+          </button>
+        </div>
       </section>
 
       <!-- Блоки статистики сверху -->
@@ -93,6 +117,7 @@
 
     <ReferralsList :changeUsersCount="changeUsersCount" />
     <HelpModal v-if="showHelpModal" @close="closeHelpModal" />
+    <ReferralsOnboardingTour ref="referralsTourRef" />
   </div>
 </template>
 
@@ -101,6 +126,7 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 import ReferralsList from "./ReferralsList.vue";
 import HelpModal from "./HelpModal.vue";
+import ReferralsOnboardingTour from "@/components/tours/ReferralsOnboardingTour.vue";
 import { ref, onMounted, nextTick, computed } from "vue";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
@@ -110,6 +136,10 @@ const { t } = useI18n();
 
 const usersCount = ref(0);
 const showHelpModal = ref(false);
+const referralsTourRef = ref(null);
+const startReferralsTour = () => {
+  referralsTourRef.value?.start();
+};
 const statistics = ref({
   balance: 0,
   count: 0,
@@ -366,11 +396,41 @@ header {
   width: 100%;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
 .title {
   font-weight: 500;
   font-size: 22px;
   color: var(--text);
   margin: 0;
+}
+
+.help-tour-button {
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--border, #e2e8f0);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headerAccountButtonColor, #64748b);
+  padding: 10px 12px;
+  transition: all 0.25s;
+}
+
+.help-tour-button:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary);
 }
 
 .stats-section {

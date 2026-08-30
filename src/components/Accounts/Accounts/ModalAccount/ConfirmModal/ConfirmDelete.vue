@@ -130,25 +130,27 @@ const createRequest = async (request) => {
       },
     });
 
-    const isOk = response.data.status === "ok" || response.data.ok === true;
-
-    if (isOk) {
-      if (request === "deleteAccount") {
-        setLoadingStatus(true, "success");
-        const { login, source } = selectedItem.value;
-        instancesStore.removeInstance(login, source);
-        props.close();
-      }
-    } else if (request === "deleteAccount") {
-      // Ошибку показываем только если не прошло само удаление
-      // forceStop может вернуть не-ok если аккаунт уже остановлен — это нормально
-      setLoadingStatus(true, "error");
+    if (request === "deleteAccount") {
+      // deleteAccount отвечает 200 при успешном удалении, но тело ответа не
+      // всегда содержит status:"ok"/ok:true — раньше это приводило к тому,
+      // что удаление реально проходило, а сайт всё равно показывал ошибку.
+      // Раз мы дошли до этой строки без исключения — axios уже гарантировал,
+      // что ответ 2xx (иначе он бросил бы исключение и мы оказались бы в
+      // catch ниже), так что запрос считаем успешным без проверки тела.
+      setLoadingStatus(true, "success");
+      const { login, source } = selectedItem.value;
+      instancesStore.removeInstance(login, source);
+      props.close();
     }
   } catch (error) {
     console.error(`error`, error);
 
     if (error.response) {
       console.error("error", error.response.data);
+    }
+
+    if (request === "deleteAccount") {
+      setLoadingStatus(true, "error");
     }
   } finally {
     if (request === "deleteAccount") {

@@ -267,6 +267,8 @@ function getType(type) {
       return "WhatsApp";
     case "waba":
       return "WABA";
+    case "fbm":
+      return "Facebook";
     default:
       return type;
   }

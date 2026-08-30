@@ -17,6 +17,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "fbm",
+        name: "Facebook",
+        enabled: true,
+      },
+      {
         id: "max",
         name: "Max",
         enabled: true,
@@ -83,6 +88,11 @@ export const FILTER_CONFIG = {
         enabled: true,
       },
       {
+        id: "fbm",
+        name: "Facebook",
+        enabled: true,
+      },
+      {
         id: "max",
         name: "Max",
         enabled: true,
@@ -136,6 +146,11 @@ export const FILTER_CONFIG = {
       {
         id: "waba",
         name: "WABA",
+        enabled: true,
+      },
+      {
+        id: "fbm",
+        name: "Facebook",
         enabled: true,
       },
       {

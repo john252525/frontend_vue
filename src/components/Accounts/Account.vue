@@ -1,8 +1,8 @@
 <template>
   <AddAccount
-    :getAccounts="getAccountListMethod"
     :openModal="openAddAccount"
     v-if="openAddAccountStation"
+    :onCreated="onAccountCreated"
   />
   <AccountsOnboardingTour ref="onboardingTourRef" />
 
@@ -93,8 +93,9 @@
       <button
         v-if="activeTab === 'accounts'"
         @click="startOnboardingTour"
+        :disabled="!hasLoadedAccounts"
         class="help-tour-button"
-        title="Как пользоваться"
+        :title="hasLoadedAccounts ? 'Как пользоваться' : 'Дождитесь загрузки аккаунтов'"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -140,10 +141,12 @@ import AccountsOnboardingTour from "@/components/tours/AccountsOnboardingTour.vu
 import { useAccountStore } from "@/stores/accountStore";
 import { useInstancesStore } from "@/stores/instancesStore";
 import Filters from "./Filters.vue";
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
+import { useStationLoading } from "@/composables/useStationLoading";
 
 const accountStore = useAccountStore();
 const instancesStore = useInstancesStore();
+const { setLoadingStatus } = useStationLoading();
 
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);
@@ -218,12 +221,61 @@ function changeCrmPlatform(value, valueTwo) {
   location.reload();
 }
 
+// Снимок ключей аккаунтов "до" — делаем прямо перед открытием формы, чтобы
+// после успешного создания однозначно определить, какая строка в списке
+// новая (для подсветки и, если в этот момент шёл тур, для его продолжения).
+let existingKeysBeforeAdd = [];
+
 function openAddAccount() {
+  if (!openAddAccountStation.value) {
+    existingKeysBeforeAdd = Array.from(
+      document.querySelectorAll(".account-row"),
+    )
+      .map((el) => el.dataset.accountKey)
+      .filter(Boolean);
+  }
   openAddAccountStation.value = !openAddAccountStation.value;
 }
 
 function startOnboardingTour() {
+  if (!hasLoadedAccounts.value) return;
   onboardingTourRef.value?.start();
+}
+
+// Вызывается AddAccountV2 сразу после успешного создания аккаунта —
+// страница больше не перезагружается (см. AddAccountV2.vue), поэтому сами
+// обновляем список (сбросив кеш, чтобы не получить старые данные), находим
+// новую строку по снимку "до", подсвечиваем её и, если в этот момент шёл
+// тур на шаге "создадим аккаунт вместе", даём ему продолжить показ уже на
+// только что созданном аккаунте. Общая плашка "Добавляется аккаунт..."
+// уже показана из AddAccountV2.vue — здесь переключаем её в "успех" сразу
+// после того, как список реально обновился.
+async function onAccountCreated() {
+  // Шаг 2 из 2 — "Добавление": POST на создание уже успешно отработал
+  // (см. AddAccountV2.vue), теперь тихо переопрашиваем список, не пряча
+  // текущий (пользователь может продолжать работать со страницей).
+  setLoadingStatus(true, "loading", "Добавление аккаунта...", 90);
+
+  await accountListRef.value?.refreshAccountsSilently();
+  await nextTick();
+
+  const rows = Array.from(document.querySelectorAll(".account-row"));
+  const newRow = rows.find(
+    (el) =>
+      el.dataset.accountKey &&
+      !existingKeysBeforeAdd.includes(el.dataset.accountKey),
+  );
+  const newKey = newRow?.dataset.accountKey || null;
+
+  if (newKey) {
+    accountListRef.value?.flashNewAccount(newKey);
+  }
+
+  setLoadingStatus(true, "success", "Аккаунт добавлен");
+
+  if (newKey) {
+    await onboardingTourRef.value?.continueAfterAccountCreated(newKey);
+  }
 }
 </script>
 
@@ -329,9 +381,14 @@ header {
   transition: all 0.25s;
 }
 
-.help-tour-button:hover {
+.help-tour-button:hover:not(:disabled) {
   background: rgba(var(--primary-rgb), 0.1);
   border-color: var(--primary);
+}
+
+.help-tour-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .black-fon {

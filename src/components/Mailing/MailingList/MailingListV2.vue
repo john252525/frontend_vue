@@ -253,6 +253,7 @@ const errorMailing = ref(false);
 const dataStationNone = ref(false);
 const dataStation = ref(false);
 const loadDataStation = ref(false);
+const hasLoadedMailings = ref(false);
 
 const selectedItem = ref(null);
 const mailingLists = ref([]);
@@ -337,6 +338,12 @@ const getMailingLists = async () => {
     errorMailing.value = true;
     loadDataStation.value = false;
     dataStationNone.value = false;
+  } finally {
+    // Единожды становится true после первой попытки загрузки (успешной или
+    // нет) — используется родителем, чтобы не давать открыть тур, пока
+    // список ещё не готов (иначе тур мог бы неверно решить, что рассылок
+    // ещё ни одной нет, просто застав их не успевшими загрузиться).
+    hasLoadedMailings.value = true;
   }
 };
 
@@ -514,6 +521,7 @@ watch(getVersion, async (newVersion) => {
 
 onMounted(getMailingLists);
 provide("selectedItem", { selectedItem });
+defineExpose({ hasLoadedMailings });
 </script>
 
 <style scoped>

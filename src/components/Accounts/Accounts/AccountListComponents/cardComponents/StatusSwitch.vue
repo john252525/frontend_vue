@@ -13,7 +13,8 @@
           item.source === 'max-bot' ||
           item.loading ||
           item.source === 'vk-bot' ||
-          item.source === 'waba'
+          item.source === 'waba' ||
+          item.source === 'fbm'
         "
         @click.prevent="changeSwitch(item)"
       />

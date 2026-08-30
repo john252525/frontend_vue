@@ -1,7 +1,9 @@
 <template>
   <div class="profile-page">
+    <ProfileOnboardingTour ref="profileTourRef" />
+
     <div class="profile-container">
-      <ProfileHeader />
+      <ProfileHeader @start-tour="startProfileTour" />
 
       <div class="profile-grid">
         <BalanceInfo class="grid-item" />
@@ -54,12 +56,18 @@ import IntegrationSettings from "@/components/Profile/IntegrationSettings.vue";
 import InnSettings from "@/components/Profile/InnSettings.vue";
 import NotificationsSettings from "@/components/Profile/NotificationsSettings.vue";
 import TariffInfo from "@/components/Profile/TariffInfo.vue";
+import ProfileOnboardingTour from "@/components/tours/ProfileOnboardingTour.vue";
 
 import { useDomain } from "@/composables/getDomain";
 const { stationDomain } = useDomain();
 
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
+
+const profileTourRef = ref(null);
+const startProfileTour = () => {
+  profileTourRef.value?.start();
+};
 
 const user = ref({
   email: accountStore.getAccountData,

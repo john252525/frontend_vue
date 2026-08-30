@@ -1,7 +1,7 @@
 <template>
   <LoadModal
-    :changeStationLoading="changeStationLoading"
     :stationLoading="stationLoading"
+    textLoadin="Загрузка формы..."
   />
 
   <div
@@ -652,12 +652,11 @@ const props = defineProps({
   openModal: {
     type: Function,
   },
-  getAccounts: {
+  onCreated: {
     type: Function,
   },
 });
 
-const emit = defineEmits(["close", "submit"]);
 const FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 const FRONTEND_URL_FORMS = import.meta.env.VITE_FRONTEND_URL_FORMS;
 
@@ -706,10 +705,6 @@ const handleSmsDisclaimerDecline = () => {
   showSmsDisclaimerModal.value = false;
   smsDisclaimerCheckbox.value = false;
   formValues.group = "";
-};
-
-const changeStationLoading = () => {
-  stationLoading.loading = false;
 };
 
 const formElements = ref([]);
@@ -1156,12 +1151,6 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
 });
 
-const handleSomeAction = () => {
-  if (props.getAccounts) {
-    props.getAccounts();
-  }
-};
-
 const submitForm = async () => {
   const formData = {
     group: formValues.group,
@@ -1211,7 +1200,22 @@ const submitForm = async () => {
     }
   }
 
-  stationLoading.loading = true;
+  // Захватываем ссылку на колбэк ДО закрытия модалки — сама модалка сейчас
+  // закроется и компонент, скорее всего, размонтируется ещё до того, как
+  // ответит сервер; Vue-эмит в этот момент до родителя уже не долетает
+  // (инстанс к тому времени отключён от дерева), а обычный вызов заранее
+  // захваченной функции — самый простой JS-замыкание — от этого не зависит
+  // и сработает в любом случае.
+  const notifyCreated = props.onCreated;
+
+  // Закрываем модалку сразу по клику — дальше всё происходит в фоне через
+  // общую плашку сверху экрана, держать форму открытой до ответа сервера
+  // незачем и только мешает пользователю продолжать работу.
+  if (props.openModal) {
+    props.openModal();
+  }
+  // Шаг 1 из 2 — "Создание".
+  setLoadingStatus(true, "loading", "Создание аккаунта...", 50);
   try {
     const response = await axios.post(
       `${FRONTEND_URL_USERS}addAccount`,
@@ -1225,18 +1229,13 @@ const submitForm = async () => {
     );
 
     if (response.data.ok) {
-      emit("submit", formData);
-      if (props.openModal) {
-        props.openModal();
-        location.reload();
-      }
-      handleSomeAction(); // Если нужно обновить список аккаунтов
+      notifyCreated?.(formData);
+    } else {
+      setLoadingStatus(true, "error", "Не удалось добавить аккаунт");
     }
   } catch (error) {
     console.error("Ошибка при отправке формы:", error);
     setLoadingStatus(true, "error");
-  } finally {
-    stationLoading.loading = false;
   }
 };
 </script>

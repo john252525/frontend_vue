@@ -1,54 +1,73 @@
 <template>
   <Teleport to="body">
-    <div v-if="isActive" class="ob-dim">
+    <!-- На шаге "создадим аккаунт вместе" не затемняем и не блокируем экран
+         кликами вообще — пользователю нужно по-настоящему нажать кнопку и
+         пройти форму добавления аккаунта, а не смотреть на подсказку поверх
+         недоступного интерфейса. Вместо тёмной подложки — лёгкое подсвечивающее
+         кольцо вокруг кнопки и плавающая табличка с инструкцией. -->
+    <div v-if="isActive && !currentStep.guidedAction" class="ob-dim">
       <div class="ob-spot" :style="spotStyle"></div>
     </div>
+
+    <div
+      v-if="isActive && currentStep.guidedAction && targetRect.visible"
+      class="ob-highlight-ring"
+      :style="ringStyle"
+    ></div>
 
     <div v-if="isActive" class="ob-layer">
       <button class="ob-skip" @click="close">Пропустить ✕</button>
 
-      <div v-if="currentStep.title" class="ob-title" :style="currentStep.titleStyle">
-        {{ currentStep.title }}
-      </div>
+      <template v-if="currentStep.guidedAction">
+        <div class="ob-guide-pill">
+          <div class="ob-guide-text" v-html="currentStep.text"></div>
+        </div>
+      </template>
 
-      <div
-        v-if="currentStep.bare"
-        class="ob-text ob-text-bare"
-        :style="effectiveCalloutStyle"
-        v-html="currentStep.text"
-      ></div>
-      <div v-else class="ob-callout" :style="currentStep.calloutStyle">
-        <div class="ob-text" v-html="currentStep.text"></div>
-      </div>
+      <template v-else>
+        <div v-if="currentStep.title" class="ob-title" :style="currentStep.titleStyle">
+          {{ currentStep.title }}
+        </div>
 
-      <svg
-        v-if="currentStep.arrow"
-        class="ob-arrow"
-        :style="effectiveArrowStyle"
-        width="173"
-        height="91"
-        viewBox="0 0 173 91"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M3.0895 2.49977C-4.05967 60.5189 55.3373 104.402 94.6454 81.3623C116.391 68.6167 100.049 39.9005 89.4225 44.9912C78.7957 50.0818 86.3641 69.6847 104.785 66.7333C123.206 63.782 147.745 49.7812 170.02 22.7661M155.694 25.4637L170.02 22.7661L170.458 37.63"
-          stroke="#22D92A"
-          stroke-width="5"
-          stroke-miterlimit="16"
-          stroke-linecap="round"
-        />
-      </svg>
+        <div
+          v-if="currentStep.bare"
+          class="ob-text ob-text-bare"
+          :style="effectiveCalloutStyle"
+          v-html="currentStep.text"
+        ></div>
+        <div v-else class="ob-callout" :style="currentStep.calloutStyle">
+          <div class="ob-text" v-html="currentStep.text"></div>
+        </div>
 
-      <div class="ob-nav">
-        <button class="ob-nav-btn" :disabled="stepIndex === 0" @click="prev">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-        </button>
-        <button class="ob-nav-btn" @click="next">
-          <svg v-if="stepIndex < steps.length - 1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-        </button>
-      </div>
+        <svg
+          v-if="currentStep.arrow"
+          class="ob-arrow"
+          :style="effectiveArrowStyle"
+          width="173"
+          height="91"
+          viewBox="0 0 173 91"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3.0895 2.49977C-4.05967 60.5189 55.3373 104.402 94.6454 81.3623C116.391 68.6167 100.049 39.9005 89.4225 44.9912C78.7957 50.0818 86.3641 69.6847 104.785 66.7333C123.206 63.782 147.745 49.7812 170.02 22.7661M155.694 25.4637L170.02 22.7661L170.458 37.63"
+            stroke="#22D92A"
+            stroke-width="5"
+            stroke-miterlimit="16"
+            stroke-linecap="round"
+          />
+        </svg>
+
+        <div class="ob-nav">
+          <button class="ob-nav-btn" :disabled="stepIndex === 0" @click="prev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button class="ob-nav-btn" @click="next">
+            <svg v-if="stepIndex < activeSteps.length - 1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+          </button>
+        </div>
+      </template>
     </div>
   </Teleport>
 </template>
@@ -71,11 +90,18 @@ let rafId = null;
 
 const waitFrame = (ms = 60) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const clickIfExists = (selector) => {
-  const el = document.querySelector(selector);
-  if (el) el.click();
+// Диспатчим настоящее MouseEvent, а не вызываем el.click() — у SVGElement
+// этого метода может не быть вовсе, и вызов молча роняет исключение,
+// обрывая всю цепочку afterHide/finish (см. аналогичный баг в
+// MailingOnboardingTour.vue, где так закрывался мастер рассылки).
+const dispatchClick = (el) => {
+  if (el) {
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+  }
   return el;
 };
+
+const clickIfExists = (selector) => dispatchClick(document.querySelector(selector));
 
 // Пункты меню управления аккаунтом не имеют уникальных классов/id — находим
 // их по видимому тексту (тот же текст, что показывается пользователю).
@@ -92,7 +118,7 @@ const findActionByText = (text) => {
 const openControlMenu = async () => {
   if (document.querySelector(".action-list")) return;
 
-  const btn = document.querySelector(".account-row .action-menu-button");
+  const btn = getTargetAccountRow()?.querySelector(".action-menu-button");
   if (btn) btn.click();
   await waitFrame(150);
 
@@ -108,16 +134,47 @@ const openControlMenu = async () => {
   }
 };
 
-// Закрывает меню, только если следующий шаг НЕ относится к той же группе —
-// иначе оно остаётся открытым при переходах между её шагами.
-const closeControlMenu = async (nextStep) => {
+// Закрывает само меню управления аккаунтом, только если следующий шаг НЕ
+// относится к той же группе — иначе оно остаётся открытым при переходах
+// между её шагами (в т.ч. между шагами, которые поверх него открывают
+// модалку тарифов/смены имени — само меню под ней никуда не девается).
+const leaveControlMenuGroupIfNeeded = async (nextStep) => {
   if (nextStep?.group === "control-menu") return;
   clearRowHighlight();
   clickIfExists(".black-fon");
   await waitFrame(80);
 };
 
-const steps = [
+const closeControlMenu = async (nextStep) => {
+  await leaveControlMenuGroupIfNeeded(nextStep);
+};
+
+// Общий afterHide для шагов, которые поверх меню открывают отдельную
+// модалку (тарифы, смена имени) — сначала закрывает именно её, затем, если
+// пользователь уходит из всей группы целиком, закрывает и само меню.
+const closeDetailModal = (closeSelector) => async (nextStep) => {
+  clickIfExists(closeSelector);
+  await waitFrame(80);
+  await leaveControlMenuGroupIfNeeded(nextStep);
+};
+
+// Аккаунт, на который нужно указывать шаги после "create-account" — либо
+// не задан при обычном запуске (первый существующий аккаунт), либо после
+// реального создания нового (см. continueAfterAccountCreated).
+const targetAccountKey = ref(null);
+
+const getTargetAccountRow = () => {
+  if (targetAccountKey.value) {
+    const rows = Array.from(document.querySelectorAll(".account-row"));
+    const match = rows.find(
+      (el) => el.dataset.accountKey === targetAccountKey.value,
+    );
+    if (match) return match;
+  }
+  return document.querySelector(".account-row");
+};
+
+const allSteps = [
   {
     key: "list-overview",
     getElement: () => document.querySelector(".account-list-section"),
@@ -137,8 +194,19 @@ const steps = [
     arrowStyle: { top: "95px", left: "51%", width: "130px", transform: "rotate(0deg)" },
   },
   {
+    // Показывается только пользователю без единого аккаунта (см. start()) —
+    // не автоматизируем создание сами, а даём реально нажать кнопку и пройти
+    // форму: это единственный шаг тура, требующий настоящего действия
+    // пользователя, а не programmatic-клика.
+    key: "create-account",
+    guidedAction: true,
+    getElement: () => document.querySelector(".add-account-button"),
+    text:
+      'Теперь давайте создадим ваш первый аккаунт вместе! Нажмите кнопку «Добавить аккаунт», выберите категорию <span class="hl">Messenger</span> и любой мессенджер — например WhatsApp или Telegram, заполните данные и сохраните. Мы подождём и продолжим показ уже на созданном аккаунте.',
+  },
+  {
     key: "account-card",
-    getElement: () => document.querySelector(".account-row"),
+    getElement: getTargetAccountRow,
     text:
       'На <span class="hl">карточке</span> отображаются название аккаунта, его статус и подписка. По клику на карточку открывается <span class="hl">меню управления аккаунтом</span>.',
     calloutStyle: { top: "300px", left: "24px", maxWidth: "320px" },
@@ -148,7 +216,7 @@ const steps = [
   {
     key: "account-modal",
     beforeShow: async () => {
-      clickIfExists(".account-row");
+      dispatchClick(getTargetAccountRow());
       await waitFrame(120);
     },
     afterHide: async () => {
@@ -176,6 +244,22 @@ const steps = [
     arrow: true,
   },
   {
+    key: "control-menu-subscription-detail",
+    group: "control-menu",
+    beforeShow: async () => {
+      await openControlMenu();
+      findActionByText("Подписка")?.click();
+      await waitFrame(220);
+    },
+    afterHide: closeDetailModal(".modal-overlay .close-button"),
+    getElement: () => document.querySelector(".modal-overlay .modal-container"),
+    bare: true,
+    text: 'Здесь вы можете выбрать и приобрести подходящий <span class="hl">тариф</span> для вашего аккаунта.',
+    calloutStyle: { top: "280px", left: "24px", maxWidth: "260px" },
+    arrow: true,
+    arrowStyle: { top: "220px", left: "260px", width: "220px", transform: "rotate(40deg)" },
+  },
+  {
     key: "control-menu-rename",
     group: "control-menu",
     beforeShow: openControlMenu,
@@ -187,6 +271,24 @@ const steps = [
     bare: true,
     text: '<span class="hl">Переименование аккаунта</span> — изменение отображаемого имени',
     arrow: true,
+  },
+  {
+    key: "control-menu-rename-detail",
+    group: "control-menu",
+    beforeShow: async () => {
+      await openControlMenu();
+      findActionByText("Сменить имя")?.click();
+      await waitFrame(180);
+    },
+    afterHide: closeDetailModal(".modal-overlay .close-btn"),
+    getElement: () => document.querySelector(".modal-overlay .modal-content"),
+    title: "ИЗМЕНЕНИЕ ИМЕНИ",
+    titleStyle: { top: "60px", left: "3%", maxWidth: "480px" },
+    bare: true,
+    text: 'Здесь вы можете изменить <span class="hl">отображаемое имя</span> вашего аккаунта.',
+    calloutStyle: { top: "260px", left: "24px", maxWidth: "280px" },
+    arrow: true,
+    arrowStyle: { top: "180px", left: "290px", width: "180px", transform: "rotate(35deg)" },
   },
   {
     key: "control-menu-enable",
@@ -242,7 +344,13 @@ const steps = [
   },
 ];
 
-const currentStep = computed(() => steps[stepIndex.value] || {});
+// Список шагов зависит от того, есть ли у пользователя уже хотя бы один
+// аккаунт: если нет — включаем шаг "создадим вместе" и после него указываем
+// на реально созданный аккаунт; если аккаунты уже есть — ведём себя как
+// раньше, показывая шаги на первом существующем (см. start()).
+const activeSteps = ref(allSteps);
+
+const currentStep = computed(() => activeSteps.value[stepIndex.value] || {});
 
 // Для шагов с `pointAt` (пункты меню управления аккаунтом) подсветка
 // (spotStyle) остаётся на всём меню целиком — читаемы все пункты сразу, как
@@ -270,31 +378,36 @@ const isMobileViewport = () =>
 // На узких экранах меню занимает почти всю ширину — слева не остаётся места
 // для текста и стрелки сбоку, поэтому текст переносится над подсвеченным
 // пунктом на всю ширину экрана, а декоративная стрелка на мобильном скрыта.
+// Координаты ниже берём из pointRect даже когда он "невидим" — сам pointRect
+// хранит последнее реальное измерение (trackTarget не сбрасывает top/left,
+// только флаг visible), поэтому при исчезновении цели подсказка просто
+// плавно гаснет на месте (opacity), а не прыгает в position:auto и обратно.
 const dynamicCalloutStyle = computed(() => {
-  if (!pointRect.visible) return { opacity: 0 };
   if (isMobileViewport()) {
     return {
       top: `${Math.max(120, pointRect.top - 96)}px`,
       left: "16px",
       right: "16px",
       maxWidth: "none",
+      opacity: pointRect.visible ? 1 : 0,
     };
   }
   return {
     top: `${pointRect.top - 6}px`,
     left: `${pointRect.left - CALLOUT_WIDTH - ARROW_WIDTH - ARROW_GAP * 2}px`,
     maxWidth: `${CALLOUT_WIDTH}px`,
+    opacity: pointRect.visible ? 1 : 0,
   };
 });
 
 const dynamicArrowStyle = computed(() => {
-  if (!pointRect.visible || isMobileViewport()) return { opacity: 0 };
+  if (isMobileViewport()) return { opacity: 0 };
   return {
     top: `${pointRect.top - 22}px`,
     left: `${pointRect.left - ARROW_WIDTH - ARROW_GAP}px`,
     width: `${ARROW_WIDTH}px`,
     transform: "rotate(5deg)",
-    opacity: 1,
+    opacity: pointRect.visible ? 1 : 0,
   };
 });
 
@@ -312,9 +425,20 @@ const effectiveArrowStyle = computed(() => {
 
 const spotStyle = computed(() => {
   if (!targetRect.visible) {
-    // Цель ещё не найдена/сейчас меняется — держим экран полностью тёмным,
-    // без выреза (вырез за экраном), чтобы не было белой вспышки исходной страницы.
-    return { top: "-9999px", left: "-9999px", width: "0px", height: "0px" };
+    // Цель ещё не найдена/сейчас меняется — схлопываем вырез в точку ПРЯМО
+    // НА МЕСТЕ (в центре последней известной цели), а не телепортируем его
+    // за экран: box-shadow всё так же держит весь экран тёмным (вырез
+    // нулевого размера), но CSS-переход при этом не гоняет подсветку через
+    // весь экран туда-обратно на каждом шаге — только плавно "схлопывается"
+    // и "раскрывается" на месте.
+    const cx = targetRect.left + targetRect.width / 2;
+    const cy = targetRect.top + targetRect.height / 2;
+    return {
+      top: `${cy}px`,
+      left: `${cx}px`,
+      width: "0px",
+      height: "0px",
+    };
   }
   return {
     top: `${targetRect.top - PADDING}px`,
@@ -323,6 +447,15 @@ const spotStyle = computed(() => {
     height: `${targetRect.height + PADDING * 2}px`,
   };
 });
+
+// Подсвечивающее кольцо вокруг кнопки на шаге "создадим аккаунт вместе" —
+// в отличие от spotStyle не гасит остальной экран, только обводит цель.
+const ringStyle = computed(() => ({
+  top: `${targetRect.top - PADDING}px`,
+  left: `${targetRect.left - PADDING}px`,
+  width: `${targetRect.width + PADDING * 2}px`,
+  height: `${targetRect.height + PADDING * 2}px`,
+}));
 
 const stopTracking = () => {
   if (rafId) {
@@ -369,33 +502,72 @@ const trackTarget = () => {
   rafId = requestAnimationFrame(trackTarget);
 };
 
-const goToStep = async (index) => {
-  const prevStep = steps[stepIndex.value];
-  if (prevStep?.afterHide) {
-    await prevStep.afterHide(steps[index]);
+// Хук может кликать по реальным элементам страницы (селекторы могут
+// перестать совпадать после правок вёрстки) — если он бросит исключение,
+// оно не должно заблокировать навигацию по туру и оставить оверлей
+// висящим поверх страницы намертво.
+const safeCall = async (fn, ...args) => {
+  try {
+    await fn?.(...args);
+  } catch (e) {
+    console.error("AccountsOnboardingTour hook failed:", e);
   }
+};
 
+// Прыжок на шаг БЕЗ afterHide предыдущего — нужен обычному первому шагу,
+// у которого попросту нет предыдущего.
+const jumpToStep = async (index) => {
   stepIndex.value = index;
   targetRect.visible = false;
   pointRect.visible = false;
 
-  const nextStep = steps[stepIndex.value];
-  if (nextStep?.beforeShow) {
-    await nextStep.beforeShow();
-  }
+  const step = activeSteps.value[index];
+  await safeCall(step?.beforeShow);
 
   await nextTick();
+};
+
+const goToStep = async (index) => {
+  const prevStep = activeSteps.value[stepIndex.value];
+  await safeCall(prevStep?.afterHide, activeSteps.value[index]);
+  await jumpToStep(index);
 };
 
 const start = async () => {
   isActive.value = true;
   stopTracking();
-  await goToStep(0);
+
+  // Шаг "создадим аккаунт вместе" показываем только тому, у кого ещё нет ни
+  // одного аккаунта — иначе тур каждый раз заставлял бы уже опытного
+  // пользователя создавать лишний аккаунт просто чтобы посмотреть подсказки.
+  const hasExistingAccount = !!document.querySelector(".account-row");
+  activeSteps.value = hasExistingAccount
+    ? allSteps.filter((s) => s.key !== "create-account")
+    : allSteps;
+  targetAccountKey.value = null;
+
+  await jumpToStep(0);
+  trackTarget();
+};
+
+// Вызывается из Account.vue сразу после того, как форма добавления
+// аккаунта реально отработала успешно (и список аккаунтов уже обновлён) —
+// страница больше не перезагружается, поэтому продолжаем показ в рамках
+// того же инстанса компонента, просто определив, какая строка новая.
+const continueAfterAccountCreated = async (accountKey) => {
+  if (currentStep.value.key !== "create-account" || !accountKey) return;
+
+  targetAccountKey.value = accountKey;
+  activeSteps.value = allSteps.filter((s) => s.key !== "create-account");
+
+  const idx = activeSteps.value.findIndex((s) => s.key === "account-card");
+  stopTracking();
+  await jumpToStep(idx >= 0 ? idx : 0);
   trackTarget();
 };
 
 const next = async () => {
-  if (stepIndex.value >= steps.length - 1) {
+  if (stepIndex.value >= activeSteps.value.length - 1) {
     await finish();
     return;
   }
@@ -413,16 +585,14 @@ const prev = async () => {
 
 const finish = async () => {
   stopTracking();
-  const step = steps[stepIndex.value];
-  if (step?.afterHide) await step.afterHide();
+  await safeCall(activeSteps.value[stepIndex.value]?.afterHide);
   isActive.value = false;
   emit("tour-complete");
 };
 
 const close = async () => {
   stopTracking();
-  const step = steps[stepIndex.value];
-  if (step?.afterHide) await step.afterHide();
+  await safeCall(activeSteps.value[stepIndex.value]?.afterHide);
   isActive.value = false;
   emit("tour-close");
 };
@@ -431,7 +601,7 @@ onBeforeUnmount(() => {
   stopTracking();
 });
 
-defineExpose({ start });
+defineExpose({ start, continueAfterAccountCreated });
 </script>
 
 <style scoped>
@@ -495,6 +665,10 @@ defineExpose({ start });
   border-radius: 16px;
   padding: 20px 24px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  transition:
+    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease;
 }
 
 .ob-title {
@@ -539,6 +713,63 @@ defineExpose({ start });
   position: absolute;
   height: auto;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Кольцо вокруг кнопки "Добавить аккаунт" на шаге "создадим вместе" — сама
+   страница остаётся полностью интерактивной (см. .ob-dim, который на этом
+   шаге не рендерится вовсе), кольцо только помогает найти нужную кнопку. */
+.ob-highlight-ring {
+  position: fixed;
+  z-index: 999997;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px rgba(34, 217, 42, 0.85);
+  animation: ob-ring-pulse 1.6s ease-in-out infinite;
+  transition:
+    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes ob-ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(34, 217, 42, 0.85);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(34, 217, 42, 0.35);
+  }
+}
+
+/* Плавающая табличка-инструкция на шаге "создадим вместе" — не перекрывает
+   реальную форму добавления аккаунта (та открывается по центру экрана),
+   поэтому размещена вверху и не затемняет ничего вокруг. */
+.ob-guide-pill {
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 480px;
+  width: calc(100% - 32px);
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(34, 217, 42, 0.4);
+  border-radius: 16px;
+  padding: 18px 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.ob-guide-text {
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.ob-guide-text :deep(.hl) {
+  color: #22d92a;
 }
 
 .ob-nav {

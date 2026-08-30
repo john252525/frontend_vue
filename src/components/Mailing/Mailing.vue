@@ -10,20 +10,6 @@
   <header>
     <section class="account-section">
       <h2 class="title">{{ t("mailing.title") }}</h2>
-      <button @click="changeMailingTourModal" class="help-button">
-        <svg
-          class="help-icon"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Как пользоваться
-      </button>
     </section>
 
     <section class="account-section">
@@ -42,16 +28,35 @@
         </svg>
         {{ getWidht > 500 ? "Добавить рассылку" : "Добавить " }}
       </button>
+
+      <button
+        @click="startMailingTour"
+        :disabled="!mailingsReady"
+        class="help-tour-button"
+        :title="mailingsReady ? 'Как пользоваться' : 'Дождитесь загрузки рассылок'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        Как пользоваться
+      </button>
     </section>
   </header>
-  <MailingList :changeResultModal="changeResultModal" />
+  <MailingList ref="mailingListRef" :changeResultModal="changeResultModal" />
   <AddMailing :changeAddMailing="changeAddMailing" v-if="addMailing" />
-  <MailingTour ref="mailingTour" />
-  <MailingsTourModal
-    :startTour="startMailingTour"
-    v-if="mailingTourModal"
-    :close="changeMailingTourModal"
-  />
+  <MailingOnboardingTour ref="mailingTour" />
 </template>
 
 <script setup>
@@ -59,8 +64,7 @@ import AddMailing from "./ModalComponent/AddMailing/AddMailing.vue";
 import MailingList from "./MailingList/MailingListV2.vue";
 import AlertManager from "./ModalComponent/SubscriptionWarning/AlertManager.vue";
 import LoadingMoadal from "../Accounts/Accounts/LoadingMoadal/LoadingMoadal.vue";
-import MailingTour from "../../components/tours/MailingsTour.vue";
-import MailingsTourModal from "../GlobalModal/TourModal/Mailings/MailingsTourModal.vue";
+import MailingOnboardingTour from "../../components/tours/MailingOnboardingTour.vue";
 import ToggleVersion from "./toggleVersion.vue";
 import axios from "axios";
 
@@ -79,8 +83,12 @@ const route = useRoute();
 const { t } = useI18n();
 
 const mailingTour = ref(null);
-const mailingTourModal = ref(null);
+const mailingListRef = ref(null);
 const showSubscriptionAlert = ref(false);
+
+const mailingsReady = computed(
+  () => !!mailingListRef.value?.hasLoadedMailings,
+);
 
 const subscriptionCheck = reactive({
   loading: false,
@@ -96,12 +104,8 @@ const subscriptionStatus = reactive({
 
 const startMailingTour = () => {
   if (mailingTour.value) {
-    mailingTour.value.startTour();
+    mailingTour.value.start();
   }
-};
-
-const changeMailingTourModal = () => {
-  mailingTourModal.value = !mailingTourModal.value;
 };
 
 async function checkSubscription() {
@@ -220,7 +224,7 @@ onMounted(() => {
 
   if (route.query.tour === "true") {
     if (mailingTour.value) {
-      mailingTour.value.startTour();
+      mailingTour.value.start();
     }
   }
 });
@@ -253,45 +257,32 @@ header {
   margin-right: 8px;
 }
 
-.help-button {
-  background: rgba(var(--primary-rgb), 0.16);
-  border: none;
+.help-tour-button {
   border-radius: 5px;
-  padding: 10px 12px;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--headerAccountButtonColor);
-  cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  transition: all 0.25s;
-  flex-shrink: 0;
-}
-
-.help-button:hover {
-  background: rgba(0, 13, 255, 0.2);
-  transition: all 0.25s;
-}
-
-.help-button:active {
-  background: rgba(17, 21, 93, 0.2);
+  cursor: pointer;
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--border, #e2e8f0);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--headerAccountButtonColor, #64748b);
+  padding: 10px 12px;
+  margin-left: 10px;
   transition: all 0.25s;
 }
 
-.help-icon {
-  width: 0.875rem;
-  height: 0.875rem;
-  fill: currentColor;
-  opacity: 0.8;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
-  transition: all 0.25s ease;
+.help-tour-button:hover:not(:disabled) {
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary);
 }
 
-.help-button:hover .help-icon {
-  opacity: 1;
-  transform: scale(1.05);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+.help-tour-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .account {
@@ -511,8 +502,8 @@ header {
     top: 180px;
   }
 
-  .help-button {
-    margin-right: 0;
+  .help-tour-button {
+    margin-left: 0;
   }
 }
 </style>

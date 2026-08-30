@@ -75,11 +75,13 @@
     <div v-if="dataStation && instanceData.length > 0" class="accounts-list">
       <div
         class="account-row"
+        :data-account-key="getAccountKey(item)"
         :class="{
           'account-row--deleted': item.enable === '0',
           'account-row--error': item.getInfoError,
           'account-row--bulk-selected':
             bulkSelectMode && selectedAccounts.has(getAccountKey(item)),
+          'account-row--just-created': getAccountKey(item) === justCreatedKey,
         }"
         v-for="(item, index) in instanceData"
         :key="index"
@@ -434,6 +436,7 @@ const props = defineProps({
   openWarningModal: Function,
   openEmailSettings: Function,
   retryGetInfo: Function,
+  justCreatedKey: String,
 });
 
 const { instanceData } = toRefs(props);
@@ -601,6 +604,7 @@ const enableCheckbox = (item) => {
   if (
     item.source === "whatsapp" ||
     item.source === "waba" ||
+    item.source === "fbm" ||
     item.source === "telegram" ||
     item.source === "max" ||
     item.source === "max-bot" ||
@@ -641,6 +645,8 @@ function getType(type) {
       return "WhatsApp";
     case "waba":
       return "WABA";
+    case "fbm":
+      return "Facebook";
     case "max":
       return "Max";
     case "max-bot":
@@ -799,6 +805,25 @@ const emailSettings = () => {
   background: var(--tableAccountBg);
   border-left: 3px solid #fca5a5;
   opacity: 0.75;
+}
+
+/* Секундная вспышка обводкой для только что добавленного (в фоне, без
+   перезагрузки страницы) аккаунта — только контур, без заливки фона, чтобы
+   не выглядело слишком ярко/навязчиво. */
+.account-row--just-created {
+  animation: account-row-flash 1s ease;
+}
+
+@keyframes account-row-flash {
+  0% {
+    box-shadow: inset 0 0 0 1.5px rgba(var(--primary-rgb), 0.55);
+  }
+  70% {
+    box-shadow: inset 0 0 0 1.5px rgba(var(--primary-rgb), 0.55);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(var(--primary-rgb), 0);
+  }
 }
 
 .account-row--deleted:hover {
@@ -1136,7 +1161,11 @@ input:checked + .slider .switch-handle {
   position: relative;
   z-index: 1;
   padding: 4px 8px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primaryHover) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primaryHover) 100%
+  );
   color: white;
   border: none;
   border-radius: 4px;
@@ -1424,7 +1453,7 @@ input:checked + .slider .switch-handle {
   .section-identity {
     flex: 1 1 100%; /* Занимает всю верхнюю строку */
     min-width: 100%;
-    border-bottom: 1px solid #f1f5f9;
+    /* border-bottom: 1px solid #f1f5f9; */
     padding-bottom: 8px;
     margin-bottom: 4px;
   }

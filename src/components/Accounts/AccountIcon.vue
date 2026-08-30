@@ -232,6 +232,23 @@
   </svg>
 
   <svg
+    v-if="item.source === 'fbm'"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="12" r="12" fill="#0084FF" />
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M12 4c-4.632 0-8.25 3.393-8.25 7.875c0 2.482 1.11 4.635 2.916 6.11a.65.65 0 0 1 .234.474l.06 1.943a.65.65 0 0 0 .911.578l2.169-.955a.66.66 0 0 1 .44-.033c.487.13.998.2 1.52.2c4.632 0 8.25-3.393 8.25-7.875S16.632 4 12 4Zm-4.94 9.99l2.407-3.816a1.22 1.22 0 0 1 1.766-.325l1.918 1.437a.49.49 0 0 0 .59 0l2.585-1.96c.345-.262.79.145.559.514l-2.407 3.815a1.22 1.22 0 0 1-1.766.326l-1.918-1.437a.49.49 0 0 0-.59 0l-2.585 1.96c-.345.263-.79-.144-.559-.514Z"
+      fill="white"
+    />
+  </svg>
+
+  <svg
     xmlns="http://www.w3.org/2000/svg"
     width="26"
     height="26"
@@ -312,7 +329,8 @@
       item.storage === 'binder' &&
       item.source != 'telegram' &&
       item.source != 'whatsapp' &&
-      item.source != 'waba'
+      item.source != 'waba' &&
+      item.source != 'fbm'
     "
     viewBox="0 0 24 24"
   >

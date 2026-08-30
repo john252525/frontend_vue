@@ -6,6 +6,7 @@
       :dataStationNone="dataStationNone"
       :loadDataStation="loadDataStation"
       :errorAccountBolean="errorAccountBolean"
+      :justCreatedKey="justCreatedKey"
       :changeForceStopItemData="changeForceStopItemData"
       :changeEnableStartModal="changeEnableStation"
       :changeEditNameModal="changeEditNameModal"
@@ -104,6 +105,7 @@
       :openEmailSettings="openEmailSettings"
       :openInstagramAuthModal="openInstagramAuthModal"
       :openWabaAuthModal="openWabaAuthModal"
+      :openFbmAuthModal="openFbmAuthModal"
       :openMaxbotAuthModal="openMaxbotAuthModal"
     />
 
@@ -238,6 +240,13 @@
       :getAccounts="getAccounts"
     />
 
+    <FbmAuthModal
+      v-if="fbmAuthModal && selectedItem"
+      :item="selectedItem"
+      :close="closeFbmAuthModal"
+      :getAccounts="getAccounts"
+    />
+
     <EnableMaxBot
       v-if="maxbotAuthModal"
       :item="selectedItem"
@@ -291,6 +300,7 @@ import EmailSettings from "./ModalAccount/email/Settings.vue";
 import SmsAuthCodeModal from "./ModalAccount/Enable/SmsAuthCodeModal.vue";
 import InstagramAuthModal from "./ModalAccount/InstagramAuthModal.vue";
 import WabaAuthModal from "./ModalAccount/WabaAuthModal.vue";
+import FbmAuthModal from "./ModalAccount/FbmAuthModal.vue";
 import EnableMaxBot from "./ModalAccount/Enable/EnableMaxBot.vue";
 
 // Импортируем новые компоненты
@@ -347,10 +357,26 @@ const {
   filterInstances,
   retryGetInfo,
   getAccounts,
+  refreshAccountsSilently,
 } = useAccountsList({
   onAccountsLoaded: props.changeAllAccounts,
   chatsLoadingChange,
 });
+
+// Ключ только что созданного аккаунта — на секунду подсвечивает его строку
+// в таблице (см. flashNewAccount), чтобы пользователь сразу увидел, какая
+// именно карточка появилась после фонового добавления.
+const justCreatedKey = ref(null);
+let flashTimer = null;
+
+const flashNewAccount = (key) => {
+  if (flashTimer) clearTimeout(flashTimer);
+  justCreatedKey.value = key;
+  flashTimer = setTimeout(() => {
+    justCreatedKey.value = null;
+    flashTimer = null;
+  }, 1200);
+};
 
 const tariffStation = ref(false);
 const forceStopItemData = ref({});
@@ -388,6 +414,7 @@ const smsAuthCodeModal = ref(false);
 const smsAuthCode = ref("");
 const instagramAuthModal = ref(false);
 const wabaAuthModal = ref(false);
+const fbmAuthModal = ref(false);
 const maxbotAuthModal = ref(false);
 
 // Синхронизируем локальный instanceData при удалении аккаунта из стора
@@ -440,6 +467,14 @@ const openWabaAuthModal = () => {
 
 const closeWabaAuthModal = () => {
   wabaAuthModal.value = false;
+};
+
+const openFbmAuthModal = () => {
+  fbmAuthModal.value = true;
+};
+
+const closeFbmAuthModal = () => {
+  fbmAuthModal.value = false;
 };
 
 const openEmailSettings = () => {
@@ -890,6 +925,8 @@ defineExpose({
   getAccounts,
   getAllAccounts,
   filterInstances,
+  refreshAccountsSilently,
+  flashNewAccount,
 });
 
 provide("selectedItems", { selectedItems });
