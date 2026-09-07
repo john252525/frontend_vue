@@ -32,6 +32,7 @@ import axios from "axios";
 import Support from "./pages/Support.vue";
 import Help from "./pages/Help.vue";
 import Profile from "./pages/Profile.vue";
+import OrganizationPage from "./pages/OrganizationPage.vue";
 import UserChats from "./pages/UserChats.vue";
 import Docs from "./pages/Docs.vue";
 import News from "./pages/News.vue";
@@ -252,6 +253,12 @@ const routes = [
     name: "Profile",
     component: Profile,
     meta: { title: "Профиль" },
+  },
+  {
+    path: "/organization",
+    name: "Organization",
+    component: OrganizationPage,
+    meta: { title: "Организация" },
   },
   {
     path: "/docs",

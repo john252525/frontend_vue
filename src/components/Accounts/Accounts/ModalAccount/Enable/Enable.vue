@@ -1,5 +1,10 @@
 <template>
   <div @click="changeEnableStation" class="black-fon"></div>
+  <VpnWarning
+    v-if="showVpnWarning"
+    :close="changeEnableStation"
+    :continueAction="confirmVpnOff"
+  />
   <ErrorBlock v-if="errorBlock" :changeIncorrectPassword="chaneErrorBlock" />
   <section class="enable-section">
     <QrCode
@@ -75,12 +80,13 @@ import EnteringPassword from "./ChallengeRequired/EnteringPassword.vue";
 import LoadingModal from "./LoadingModal.vue";
 import Max from "./Max/Max.vue";
 import ResultModalTrue from "./ResultModalTrue.vue";
+import VpnWarning from "@/components/GlobalModal/disclaimerModal/VpnWarning.vue";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 const router = useRouter();
-import { ref, toRefs, provide, onMounted, reactive, computed } from "vue";
+import { ref, toRefs, provide, reactive, computed } from "vue";
 import axios from "axios";
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
 
@@ -106,6 +112,12 @@ const props = defineProps({
 const errorBlock = ref(false);
 const chaneErrorBlock = () => {
   errorBlock.value = errorBlock.value;
+};
+
+const showVpnWarning = ref(true);
+const confirmVpnOff = () => {
+  showVpnWarning.value = false;
+  startFunc();
 };
 
 let isRunning = false; // Флаг для отслеживания выполнения функции
@@ -437,10 +449,6 @@ const startFunc = async () => {
     await setState();
   }
 };
-
-onMounted(() => {
-  startFunc();
-});
 
 provide("accountItems", {
   startFunc,

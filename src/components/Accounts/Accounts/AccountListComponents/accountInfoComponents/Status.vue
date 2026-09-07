@@ -42,6 +42,7 @@
       <button
         class="action-button"
         @click="changeStatus(accountData)"
+        v-if="accountData.source != 'vk-bot'"
         :class="isConnected ? 'warning' : 'success'"
       >
         <svg
@@ -80,7 +81,7 @@
       <button
         class="action-button"
         @click="createRequest(accountData, '/getNewProxy')"
-        v-if="accountData.source != 'sms'"
+        v-if="accountData.source != 'sms' && accountData.source != 'vk-bot'"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +101,7 @@
       <button
         class="action-button"
         @click="openResetAccountModal"
-        v-if="accountData.source != 'sms'"
+        v-if="accountData.source != 'sms' && accountData.source != 'vk-bot'"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

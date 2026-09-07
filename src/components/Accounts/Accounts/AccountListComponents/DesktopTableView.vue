@@ -175,6 +175,8 @@
             :changeForceStopItemData="changeForceStopItemData"
             @sms-auth-code="openSmsAuthModal"
             @instagram-auth="openInstagramAuthModal"
+            @waba-auth="openWabaAuthModal"
+            @fbm-auth="openFbmAuthModal"
           />
         </div>
 
@@ -388,6 +390,18 @@
       :item="instagramAuthItem"
       :close="closeInstagramAuthModal"
     />
+
+    <WabaAuthModal
+      v-if="showWabaAuthModal && wabaAuthItem"
+      :item="wabaAuthItem"
+      :close="closeWabaAuthModal"
+    />
+
+    <FbmAuthModal
+      v-if="showFbmAuthModal && fbmAuthItem"
+      :item="fbmAuthItem"
+      :close="closeFbmAuthModal"
+    />
   </div>
 </template>
 
@@ -397,6 +411,8 @@ import LoadingAccount from "../LoadingMoadal/LoadingAccount.vue";
 import AccountModal from "./AccountModal.vue";
 import SmsAuthCodeModal from "../ModalAccount/Enable/SmsAuthCodeModal.vue";
 import InstagramAuthModal from "../ModalAccount/InstagramAuthModal.vue";
+import WabaAuthModal from "../ModalAccount/WabaAuthModal.vue";
+import FbmAuthModal from "../ModalAccount/FbmAuthModal.vue";
 import errorAccount from "@/components/Mailing/MailingList/errorAccount.vue";
 import StatusBadge from "../StatusBadge.vue";
 import axios from "axios";
@@ -567,6 +583,32 @@ const openInstagramAuthModal = (account) => {
 const closeInstagramAuthModal = () => {
   showInstagramAuthModal.value = false;
   instagramAuthItem.value = null;
+};
+
+const showWabaAuthModal = ref(false);
+const wabaAuthItem = ref(null);
+
+const openWabaAuthModal = (account) => {
+  wabaAuthItem.value = account;
+  showWabaAuthModal.value = true;
+};
+
+const closeWabaAuthModal = () => {
+  showWabaAuthModal.value = false;
+  wabaAuthItem.value = null;
+};
+
+const showFbmAuthModal = ref(false);
+const fbmAuthItem = ref(null);
+
+const openFbmAuthModal = (account) => {
+  fbmAuthItem.value = account;
+  showFbmAuthModal.value = true;
+};
+
+const closeFbmAuthModal = () => {
+  showFbmAuthModal.value = false;
+  fbmAuthItem.value = null;
 };
 
 const openSmsAuthModal = (authCode) => {

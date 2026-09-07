@@ -35,6 +35,14 @@
 
     <div class="menu-footer">
       <div class="line"></div>
+      <button
+        v-if="isDevAdmin"
+        class="clear-ls-button"
+        title="Полная очистка localStorage и перезагрузка — для отладки"
+        @click="clearLocalStorage"
+      >
+        Очистить ЛС
+      </button>
       <button class="out-account-button" @click="leaveAccount">
         {{ t("personalAccount.out") }}
       </button>
@@ -63,6 +71,11 @@ const email = computed(() => storedData.value || "guest@mail.com");
 // Первая буква для аватара
 const avatarLetter = computed(() => email.value.charAt(0).toUpperCase());
 
+// Кнопка-утилита для отладки — видна только с этой почты, не общая роль
+const isDevAdmin = computed(
+  () => email.value?.toLowerCase() === "maksim.birykov.2007@mail.ru",
+);
+
 // Ширина (теперь чуть шире для боковой панели)
 const menuWidth = ref("320px");
 
@@ -76,6 +89,14 @@ const leaveAccount = () => {
   localStorage.clear(); // Очищаем всё разом для надежности
   location.reload();
   router.push("/login");
+};
+
+// Дев-утилита: сбросить весь локальный кеш/persisted-стейт и перезагрузиться
+// на этой же странице (без принудительного редиректа на /login) — если
+// токена не останется, обычный route-guard сам уведёт на логин.
+const clearLocalStorage = () => {
+  localStorage.clear();
+  location.reload();
 };
 </script>
 
@@ -193,6 +214,25 @@ const leaveAccount = () => {
 .out-account-button:hover {
   background: #ff4d4f;
   color: #fff;
+}
+
+.clear-ls-button {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 10px;
+}
+
+.clear-ls-button:hover {
+  background: #eef2f7;
+  border-color: #94a3b8;
+  color: #334155;
 }
 
 .line {

@@ -619,6 +619,19 @@ export const useNavigationConfig = () => {
           condition: true,
           isActive: computed(() => isActive("Profile")),
         },
+        {
+          name: "Organization",
+          icon: `<svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M2.75 18.25V2.75C2.75 2.19772 3.19772 1.75 3.75 1.75H10.75C11.3023 1.75 11.75 2.19772 11.75 2.75V18.25" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M11.75 8.75H14.75C15.3023 8.75 15.75 9.19772 15.75 9.75V18.25" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M0.75 18.25H17.25" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M5.5 4.75H6.5M5.5 8H6.5M5.5 11.25H6.5M9 4.75H10M9 8H10M9 11.25H10" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+</svg>`,
+          text: "Организация",
+          condition: true,
+          isActive: computed(() => isActive("Organization")),
+          action: () => router.push({ name: "Organization" }),
+        },
         //         {
         //           name: "Payments",
         //           icon: `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">

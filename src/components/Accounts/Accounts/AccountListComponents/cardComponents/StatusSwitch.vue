@@ -12,9 +12,7 @@
           item.source === 'email' ||
           item.source === 'max-bot' ||
           item.loading ||
-          item.source === 'vk-bot' ||
-          item.source === 'waba' ||
-          item.source === 'fbm'
+          item.source === 'vk-bot'
         "
         @click.prevent="changeSwitch(item)"
       />
@@ -46,7 +44,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["sms-auth-code", "instagram-auth"]);
+const emit = defineEmits(["sms-auth-code", "instagram-auth", "waba-auth", "fbm-auth"]);
 
 const { item } = toRefs(props);
 const router = useRouter();
@@ -69,6 +67,18 @@ const changeSwitch = (account) => {
 
   if (account.source === "instagram" && !props.enableCheckbox(account)) {
     emit("instagram-auth", account);
+    return;
+  }
+
+  // У waba/fbm нет включения/выключения — единственное действие тумблера
+  // для них это открыть окно подключения, независимо от текущего статуса.
+  if (account.source === "waba") {
+    emit("waba-auth", account);
+    return;
+  }
+
+  if (account.source === "fbm") {
+    emit("fbm-auth", account);
     return;
   }
 

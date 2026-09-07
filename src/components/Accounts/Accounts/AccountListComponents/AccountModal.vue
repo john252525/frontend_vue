@@ -145,9 +145,11 @@ const getAccessToStatus = computed(() => {
     accountData.value.source === "telegram" ||
     accountData.value.source === "instagram" ||
     accountData.value.source === "max" ||
-    accountData.value.source === "vk" ||
+    accountData.value.source === "vk-bot" ||
     accountData.value.source === "sms" ||
-    accountData.value.source === "email"
+    accountData.value.source === "email" ||
+    accountData.value.source === "waba" ||
+    accountData.value.source === "fcb"
   );
 });
 
@@ -157,9 +159,10 @@ const getAccessToAccount = computed(() => {
     accountData.value.source !== "instagram" &&
     accountData.value.source !== "telegram" &&
     accountData.value.source !== "max" &&
-    accountData.value.source !== "vk" &&
+    accountData.value.source !== "vk-bot" &&
     accountData.value.source !== "sms" &&
-    accountData.value.source !== "email"
+    accountData.value.source !== "email" &&
+    accountData.value.source !== "waba"
   );
 });
 </script>
