@@ -72,7 +72,7 @@
         Фильтры
       </button>
       <button
-        v-if="activeTab === 'accounts'"
+        v-if="activeTab === 'accounts' && can('accounts', 'add')"
         @click="openAddAccount"
         class="add-account-button"
       >
@@ -143,10 +143,12 @@ import { useInstancesStore } from "@/stores/instancesStore";
 import Filters from "./Filters.vue";
 import { ref, computed, nextTick } from "vue";
 import { useStationLoading } from "@/composables/useStationLoading";
+import { usePermissions } from "@/composables/usePermissions";
 
 const accountStore = useAccountStore();
 const instancesStore = useInstancesStore();
 const { setLoadingStatus } = useStationLoading();
+const { can } = usePermissions();
 
 const platformStationTextValue = ref("telegram");
 const openAddAccountStation = ref(false);

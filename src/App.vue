@@ -66,6 +66,13 @@ import FeedbackModal from "./components/GlobalModal/FeedbackModal/FeedbackModal.
 import { useStationLoading } from "@/composables/useStationLoading";
 const { stationLoading, setLoadingStatus } = useStationLoading();
 
+import { usePermissions } from "@/composables/usePermissions";
+import { useCompanyApi } from "@/composables/useCompanyApi";
+import { useCompanyStore } from "@/stores/companyStore";
+const { isOwner, currentRole } = usePermissions();
+const { fetchRolePermissions } = useCompanyApi();
+const companyStore = useCompanyStore();
+
 const offModal = () => {
   setLoadingStatus(false);
 };
@@ -98,6 +105,7 @@ const isAuthPage = computed(() => {
     "PasswordRecovery",
     "VerifyEmail",
     "ResetPassword",
+    "LoginByLink",
   ].includes(routeName);
 });
 
@@ -124,6 +132,31 @@ onMounted(async () => {
     console.log("Текущий домен:", currentDomain.value);
   } else {
     console.log("Неизвестный домен:", currentDomain.value);
+  }
+
+  // Реальные (возможно, изменённые владельцем) права роли нужны сразу везде
+  // в приложении, а не только на странице "Организация" — иначе can()
+  // молча падает на DEFAULT_PERMISSIONS, даже если владелец уже урезал
+  // права этой роли и сохранил их на бэке. Важно: запрашиваем ТОЛЬКО права
+  // своей собственной роли (fetchRolePermissions), а не всех трёх разом
+  // (fetchRolesAll) — тот метод предназначен для владельца, который
+  // настраивает матрицу целиком в RolesTab.vue; сотруднику бэк на попытку
+  // посмотреть чужие роли отвечает 403 "Access denied".
+  if (!isOwner.value && currentRole.value) {
+    fetchRolePermissions(currentRole.value)
+      .then((permissions) => {
+        // Пустой объект — не то же самое, что "прав нет": это бэковский
+        // ответ для роли, которую ещё ни разу не сохраняли. Не кладём его в
+        // стор — иначе он (truthy) перебьёт DEFAULT_PERMISSIONS в
+        // usePermissions.js.
+        if (permissions && Object.keys(permissions).length > 0) {
+          companyStore.setRolePermissions(currentRole.value, permissions);
+        }
+      })
+      .catch(() => {
+        // Роль ещё ни разу не сохранялась или бэк отказал — молча остаёмся
+        // на DEFAULT_PERMISSIONS, это ожидаемое состояние, а не сбой.
+      });
   }
 
   await nextTick();

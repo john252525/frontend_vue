@@ -61,10 +61,13 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useCompanyStore } from "@/stores/companyStore";
 import { useCompanyApi } from "@/composables/useCompanyApi";
 import { useStationLoading } from "@/composables/useStationLoading";
+import { DEFAULT_PERMISSIONS } from "@/config/rolePermissions";
+import { usePermissions } from "@/composables/usePermissions";
 
 const companyStore = useCompanyStore();
 const { fetchRolesAll, saveRolePermissions } = useCompanyApi();
 const { setLoadingStatus } = useStationLoading();
+const { isOwner } = usePermissions();
 
 const ROLES = [
   { id: "manager", label: "Менеджер" },
@@ -130,41 +133,6 @@ const PERMISSION_GROUPS = [
   },
 ];
 
-// Значения по умолчанию — ровно то, что описано в требованиях (три роли),
-// используются, пока бэкенд не прислал реально сохранённые права для
-// компании (метод пока "не отлажен", ответ может быть пустым).
-const DEFAULT_PERMISSIONS = {
-  manager: {
-    accounts: { view_all: false, add: false, delete: false },
-    chats: { view_all: false, connect_any: false },
-    mailings: { view: true, create: true },
-    managers: { add: false, delete: false, attach_accounts: false, detach_accounts: false },
-    subscriptions: { pay: false },
-    profile: { edit_own: true },
-    crm: { write_from_crm: false },
-  },
-  senior_manager: {
-    accounts: { view_all: true, add: false, delete: false },
-    chats: { view_all: true, connect_any: true },
-    mailings: { view: true, create: true },
-    // add — по умолчанию выключено, но, в отличие от manager, для этой роли
-    // видно и можно включить (коллега подтвердил именно так).
-    managers: { add: false, delete: false, attach_accounts: true, detach_accounts: true },
-    subscriptions: { pay: false },
-    profile: { edit_own: true },
-    crm: { write_from_crm: false },
-  },
-  admin: {
-    accounts: { view_all: true, add: true, delete: true },
-    chats: { view_all: true, connect_any: true },
-    mailings: { view: true, create: true },
-    managers: { add: true, delete: true, attach_accounts: true, detach_accounts: true },
-    subscriptions: { pay: true },
-    profile: { edit_own: true },
-    crm: { write_from_crm: true },
-  },
-};
-
 const loading = ref(true);
 const saving = ref(false);
 const activeRole = ref("manager");
@@ -210,7 +178,11 @@ const handleSave = async () => {
 
 onMounted(async () => {
   loading.value = true;
-  const rolesFromApi = await fetchRolesAll();
+  // Разом все три роли (fetchRolesAll) бэк разрешает смотреть только
+  // владельцу — сотруднику отвечает 403 "Access denied" на роли, отличные
+  // от его собственной. Эта вкладка целиком про настройку прав ДРУГИХ
+  // ролей владельцем, сотруднику там реально нечего сохранять.
+  const rolesFromApi = isOwner.value ? await fetchRolesAll() : {};
   ROLES.forEach((role) => {
     localPermissions[role.id] = rolesFromApi?.[role.id] || DEFAULT_PERMISSIONS[role.id];
   });

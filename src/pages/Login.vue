@@ -113,7 +113,6 @@ import { ref, reactive } from "vue";
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock.vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useI18n } from "vue-i18n";
-import { useThemeStore } from "@/stores/theme";
 import axios from "axios";
 import LoginForGoogle from "@/components/Login/LoginForGoogle.vue";
 import useFrontendLogger from "@/composables/useFrontendLogger";
@@ -126,7 +125,6 @@ const { stationDomain } = useDomain();
 const { t } = useI18n();
 const router = useRouter();
 const accountStore = useAccountStore();
-const theme = useThemeStore();
 const { sendLog } = useFrontendLogger();
 
 const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL;
@@ -140,12 +138,12 @@ const formData = reactive({
 
 const inputStyle = reactive({
   password: {
-    border: "0.5px solid #c1c1c1",
-    background: "#fcfcfc",
+    border: "0.5px solid var(--line)",
+    background: "var(--input)",
   },
   login: {
-    border: "0.5px solid #c1c1c1",
-    background: "#fcfcfc",
+    border: "0.5px solid var(--line)",
+    background: "var(--input)",
   },
   passwordStation: false,
   loginStation: false,
@@ -157,10 +155,9 @@ const emailError = ref("");
 const emailWarning = ref("");
 const passwordError = ref("");
 
-if (theme.isDark) {
-  inputStyle.password.background = "#1f2937";
-  inputStyle.login.background = "#1f2937";
-}
+// Границы/фон полей теперь заданы через var(--line)/var(--input) — CSS
+// переменные сами подхватывают текущую тему, живой переключатель темы
+// (ThemeTogle) их автоматически обновит без ручного патча тут.
 
 function errorStyleStation(input, station) {
   if (input === "login") {
@@ -169,8 +166,8 @@ function errorStyleStation(input, station) {
       inputStyle.login.background = "#ffeaea";
       inputStyle.loginStation = true;
     } else if (station === "off") {
-      inputStyle.login.border = "0.5px solid #c1c1c1";
-      inputStyle.login.background = "#fcfcfc";
+      inputStyle.login.border = "0.5px solid var(--line)";
+      inputStyle.login.background = "var(--input)";
       inputStyle.loginStation = false;
     }
   } else if (input === "password") {
@@ -179,8 +176,8 @@ function errorStyleStation(input, station) {
       inputStyle.password.background = "#ffeaea";
       inputStyle.passwordStation = true;
     } else if (station === "off") {
-      inputStyle.password.border = "0.5px solid #c1c1c1";
-      inputStyle.password.background = "#fcfcfc";
+      inputStyle.password.border = "0.5px solid var(--line)";
+      inputStyle.password.background = "var(--input)";
       inputStyle.passwordStation = false;
     }
   }
@@ -376,7 +373,7 @@ const navigateTo = (page) => {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
+  border: 4px solid var(--line);
   border-top: 4px solid #4950ca;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -479,11 +476,11 @@ input {
   height: 45px;
   font-weight: 400;
   font-size: 14px;
-  color: #000;
+  color: var(--text);
 }
 
 input:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--tableAccountBg);
   cursor: not-allowed;
   opacity: 0.7;
 }

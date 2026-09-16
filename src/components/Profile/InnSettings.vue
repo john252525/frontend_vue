@@ -28,6 +28,7 @@
           :disabled="true"
         />
         <button
+          v-if="canEdit"
           type="button"
           @click="enableInnEditing"
           class="edit-inn-btn"
@@ -58,7 +59,7 @@
           maxlength="12"
           class="form-input"
           :class="{ 'input-error': innError }"
-          :disabled="isSaving"
+          :disabled="isSaving || !canEdit"
           @input="validateInnOnInput"
         />
       </div>
@@ -95,7 +96,7 @@
     <!-- Кнопка сохранить ИНН -->
     <div class="action-buttons">
       <button
-        v-if="!innFromBackend || isEditingInn"
+        v-if="(!innFromBackend || isEditingInn) && canEdit"
         type="button"
         @click="saveInn"
         class="btn btn-primary"
@@ -135,9 +136,12 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import { usePermissions } from "@/composables/usePermissions";
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
+const { can } = usePermissions();
+const canEdit = computed(() => can("profile", "edit_own"));
 const VITE_INVOICES_URL = import.meta.env.VITE_INVOICES_URL;
 
 const innValue = ref("");

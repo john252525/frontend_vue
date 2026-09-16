@@ -1,8 +1,8 @@
 <template>
   <div class="employees-tab">
     <Teleport to="#organization-header-actions">
-      <button v-if="canInvite" class="btn btn-primary" @click="openInviteModal">
-        + Отправить приглашение
+      <button v-if="canInvite" class="btn btn-primary" @click="openAddModal">
+        + Добавить сотрудника
       </button>
     </Teleport>
 
@@ -38,13 +38,23 @@
       <tbody>
         <tr v-for="employee in employees" :key="employee.id">
           <td>{{ fullName(employee) }}</td>
-          <td>{{ employee.email }}</td>
+          <td>{{ employee.email || "—" }}</td>
           <td>{{ roleLabel(employee.role) }}</td>
           <td>{{ employee.position || "—" }}</td>
           <td>
-            <span :class="['status-badge', employee.enabled === false ? 'inactive' : 'active']">
-              {{ employee.enabled === false ? "Отключён" : "Активен" }}
-            </span>
+            <div class="status-cell">
+              <label class="switch" :title="employee.enabled === false ? 'Включить сотрудника' : 'Отключить сотрудника'">
+                <input
+                  type="checkbox"
+                  :checked="employee.enabled !== false"
+                  @click.prevent="openToggleConfirm(employee)"
+                />
+                <span class="slider round"></span>
+              </label>
+              <span :class="['status-badge', employee.enabled === false ? 'inactive' : 'active']">
+                {{ employee.enabled === false ? "Отключён" : "Активен" }}
+              </span>
+            </div>
           </td>
           <td class="actions-cell">
             <button class="icon-btn" title="Редактировать" @click="openEditModal(employee)">
@@ -53,45 +63,69 @@
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
             </button>
-            <button
-              v-if="employee.enabled !== false"
-              class="icon-btn danger"
-              title="Отключить сотрудника"
-              @click="handleDisable(employee)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M4.9 4.9l14.2 14.2" />
-              </svg>
-            </button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Приглашение нового сотрудника — регистрацию и пароль сотрудник
-         задаёт себе сам по ссылке из письма, как сейчас с верификацией
-         почты; здесь только запускаем отправку. -->
+    <!-- Добавление сотрудника — двухшаговый процесс, обязательно в этом
+         порядке: сначала создаём запись в БД (email/роль/имя/должность/
+         офисы), и только затем шлём приглашение на ту же почту — метод
+         sendInvitation не создаёт сотрудника сам, а лишь ищет уже
+         существующую запись и шлёт ей одноразовую ссылку для входа. -->
     <ModalFrame
-      v-if="showInviteModal"
-      :text="inviteModalText"
-      :close="closeInviteModal"
-      :action="handleSendInvitation"
-      :is-disabled="!inviteEmail"
-      :is-loading="inviting"
+      v-if="showAddModal"
+      :text="addModalText"
+      :close="closeAddModal"
+      :action="handleAddEmployee"
+      :is-disabled="!canSubmitAdd"
+      :is-loading="adding"
     >
       <div class="form-group">
         <label class="form-label">Email сотрудника</label>
-        <input v-model.trim="inviteEmail" type="email" class="form-input" placeholder="employee@example.com" />
+        <input v-model.trim="addForm.email" type="email" class="form-input" placeholder="employee@example.com" />
       </div>
-      <p class="pending-note">
-        На почту придёт приглашение со ссылкой — по ней сотрудник сам
-        зарегистрируется и задаст пароль. Роль и доступы можно будет
-        настроить после того, как он завершит регистрацию.
-      </p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Имя</label>
+          <input v-model.trim="addForm.first_name" type="text" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Фамилия</label>
+          <input v-model.trim="addForm.last_name" type="text" class="form-input" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Отчество</label>
+        <input v-model.trim="addForm.middle_name" type="text" class="form-input" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Роль</label>
+          <select v-model="addForm.role" class="form-input">
+            <option v-for="role in ROLES" :key="role.id" :value="role.id">{{ role.label }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Должность</label>
+          <input v-model.trim="addForm.position" type="text" class="form-input" placeholder="Например, менеджер продаж" />
+        </div>
+      </div>
+
+      <div v-if="offices.length > 0" class="form-group">
+        <label class="form-label">Офисы</label>
+        <div class="office-checklist">
+          <label v-for="office in offices" :key="office.id" class="office-checkbox">
+            <input type="checkbox" :value="office.id" v-model="addForm.office_ids" />
+            {{ office.name }}
+          </label>
+        </div>
+      </div>
     </ModalFrame>
 
-    <!-- Редактирование уже зарегистрированного сотрудника -->
+    <!-- Редактирование уже добавленного сотрудника. Роль после создания не
+         меняется этим методом (её нет в схеме employees/update), поэтому
+         показываем её здесь только для справки. -->
     <ModalFrame
       v-if="showEditModal"
       :text="editModalText"
@@ -116,9 +150,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Роль</label>
-          <select v-model="form.role" class="form-input">
-            <option v-for="role in ROLES" :key="role.id" :value="role.id">{{ role.label }}</option>
-          </select>
+          <input :value="roleLabel(form.role)" type="text" class="form-input" disabled />
         </div>
         <div class="form-group">
           <label class="form-label">Должность</label>
@@ -136,6 +168,27 @@
         </div>
       </div>
     </ModalFrame>
+
+    <!-- Подтверждение включения/отключения — доступ в кабинет пропадает/
+         появляется сразу, поэтому не даём переключить в один клик. -->
+    <ModalFrame
+      v-if="showToggleConfirm"
+      :text="toggleConfirmText"
+      :close="closeToggleConfirm"
+      :action="handleConfirmToggle"
+      :is-loading="toggling"
+    >
+      <p class="confirm-text">
+        <template v-if="confirmToggleEmployee?.enabled === false">
+          Включить сотрудника «{{ fullName(confirmToggleEmployee) }}»? Он
+          снова получит доступ в личный кабинет.
+        </template>
+        <template v-else>
+          Отключить сотрудника «{{ fullName(confirmToggleEmployee) }}»? Он
+          потеряет доступ в личный кабинет.
+        </template>
+      </p>
+    </ModalFrame>
   </div>
 </template>
 
@@ -148,8 +201,15 @@ import { useStationLoading } from "@/composables/useStationLoading";
 import { usePermissions } from "@/composables/usePermissions";
 
 const companyStore = useCompanyStore();
-const { fetchEmployees, fetchOffices, sendEmployeeInvitation, updateEmployee, disableEmployee } =
-  useCompanyApi();
+const {
+  fetchEmployees,
+  fetchOffices,
+  addEmployee,
+  sendEmployeeInvitation,
+  updateEmployee,
+  disableEmployee,
+  enableEmployee,
+} = useCompanyApi();
 const { setLoadingStatus } = useStationLoading();
 const { isOwner, can } = usePermissions();
 
@@ -161,15 +221,24 @@ const ROLES = [
 
 const loading = ref(true);
 const saving = ref(false);
-const inviting = ref(false);
-const showInviteModal = ref(false);
+const adding = ref(false);
+const showAddModal = ref(false);
 const showEditModal = ref(false);
 const editingEmployee = ref(null);
-const inviteEmail = ref("");
 
 // Добавление сотрудников — тоже часть ролевой матрицы (owner может всегда,
 // остальным нужно явно разрешённое право managers.add).
 const canInvite = computed(() => isOwner.value || can("managers", "add"));
+
+const addForm = reactive({
+  email: "",
+  role: "manager",
+  first_name: "",
+  last_name: "",
+  middle_name: "",
+  position: "",
+  office_ids: [],
+});
 
 const form = reactive({
   role: "manager",
@@ -180,6 +249,10 @@ const form = reactive({
   office_ids: [],
 });
 
+const canSubmitAdd = computed(
+  () => !!addForm.email && !!addForm.first_name && !!addForm.last_name,
+);
+
 const employees = computed(() => companyStore.getEmployees);
 const offices = computed(() => companyStore.getOffices);
 
@@ -187,18 +260,25 @@ const roleLabel = (roleId) => ROLES.find((r) => r.id === roleId)?.label || roleI
 
 const fullName = (employee) =>
   [employee.last_name, employee.first_name, employee.middle_name].filter(Boolean).join(" ") ||
-  employee.email;
+  employee.email ||
+  "—";
 
-const inviteModalText = { title: "Пригласить сотрудника", close: "Отмена", action: "Отправить приглашение" };
+const addModalText = { title: "Добавить сотрудника", close: "Отмена", action: "Добавить и пригласить" };
 const editModalText = { title: "Редактировать сотрудника", close: "Отмена", action: "Сохранить" };
 
-const openInviteModal = () => {
-  inviteEmail.value = "";
-  showInviteModal.value = true;
+const openAddModal = () => {
+  addForm.email = "";
+  addForm.role = "manager";
+  addForm.first_name = "";
+  addForm.last_name = "";
+  addForm.middle_name = "";
+  addForm.position = "";
+  addForm.office_ids = [];
+  showAddModal.value = true;
 };
 
-const closeInviteModal = () => {
-  showInviteModal.value = false;
+const closeAddModal = () => {
+  showAddModal.value = false;
 };
 
 const openEditModal = (employee) => {
@@ -208,7 +288,9 @@ const openEditModal = (employee) => {
   form.last_name = employee.last_name || "";
   form.middle_name = employee.middle_name || "";
   form.position = employee.position || "";
-  form.office_ids = employee.office_ids ? [...employee.office_ids] : [];
+  // Бэк отдаёт список офисов сотрудника в поле "offices" (не "office_ids" —
+  // это имя только у поля записи в employees/add и employees/update).
+  form.office_ids = employee.offices ? [...employee.offices] : [];
   showEditModal.value = true;
 };
 
@@ -217,18 +299,48 @@ const closeEditModal = () => {
   editingEmployee.value = null;
 };
 
-const handleSendInvitation = async () => {
-  if (!inviteEmail.value) return;
-  inviting.value = true;
+// Строго три шага по порядку: 1) создаём запись сотрудника — она создаётся
+// с enabled=0, отключённой; 2) включаем её (employees/enable), иначе
+// sendInvitation дальше вернёт 403 "Employee not found or disabled" — она
+// не только ищет запись, но и требует, чтобы та была активна; 3) только
+// после этого шлём приглашение на ту же почту. Если создание прошло, а
+// включение/письмо не удались — сотрудник всё равно считается добавленным,
+// сообщаем об этом отдельным тостом, а не полным провалом.
+const handleAddEmployee = async () => {
+  if (!canSubmitAdd.value) return;
+  adding.value = true;
   try {
-    await sendEmployeeInvitation(inviteEmail.value);
-    setLoadingStatus(true, "success", `Приглашение отправлено на ${inviteEmail.value}`);
-    showInviteModal.value = false;
+    const created = await addEmployee({
+      email: addForm.email,
+      role: addForm.role,
+      first_name: addForm.first_name,
+      last_name: addForm.last_name,
+      middle_name: addForm.middle_name,
+      position: addForm.position,
+      office_ids: addForm.office_ids,
+    });
+    showAddModal.value = false;
+    try {
+      if (created?.employee_id) {
+        await enableEmployee(created.employee_id);
+      }
+      await sendEmployeeInvitation(addForm.email);
+      setLoadingStatus(true, "success", `Сотрудник добавлен, приглашение отправлено на ${addForm.email}`);
+    } catch (inviteError) {
+      console.error("Ошибка при включении/отправке приглашения:", inviteError);
+      setLoadingStatus(
+        true,
+        "error",
+        `Сотрудник добавлен, но приглашение отправить не удалось: ${
+          inviteError.response?.data?.message || "неизвестная ошибка"
+        }`,
+      );
+    }
   } catch (error) {
-    console.error("Ошибка при отправке приглашения:", error);
-    setLoadingStatus(true, "error", error.response?.data?.message || "Не удалось отправить приглашение");
+    console.error("Ошибка при добавлении сотрудника:", error);
+    setLoadingStatus(true, "error", error.response?.data?.message || "Не удалось добавить сотрудника");
   } finally {
-    inviting.value = false;
+    adding.value = false;
   }
 };
 
@@ -237,13 +349,11 @@ const handleSaveEdit = async () => {
   saving.value = true;
   try {
     await updateEmployee(editingEmployee.value.id, {
-      role: form.role,
       first_name: form.first_name,
       last_name: form.last_name,
       middle_name: form.middle_name,
       position: form.position,
       office_ids: form.office_ids,
-      enabled: editingEmployee.value.enabled !== false,
     });
     setLoadingStatus(true, "success", "Сотрудник сохранён");
     showEditModal.value = false;
@@ -255,13 +365,58 @@ const handleSaveEdit = async () => {
   }
 };
 
-const handleDisable = async (employee) => {
+const showToggleConfirm = ref(false);
+const confirmToggleEmployee = ref(null);
+const toggling = ref(false);
+
+const toggleConfirmText = computed(() => {
+  const enabling = confirmToggleEmployee.value?.enabled === false;
+  return {
+    title: enabling ? "Включить сотрудника" : "Отключить сотрудника",
+    close: "Отмена",
+    action: enabling ? "Включить" : "Отключить",
+  };
+});
+
+const openToggleConfirm = (employee) => {
+  confirmToggleEmployee.value = employee;
+  showToggleConfirm.value = true;
+};
+
+const closeToggleConfirm = () => {
+  showToggleConfirm.value = false;
+  confirmToggleEmployee.value = null;
+};
+
+const handleConfirmToggle = async () => {
+  const employee = confirmToggleEmployee.value;
+  if (!employee) return;
+  const enabling = employee.enabled === false;
+  toggling.value = true;
   try {
-    await disableEmployee(employee.id);
-    setLoadingStatus(true, "success", "Сотрудник отключён");
+    if (enabling) {
+      await enableEmployee(employee.id);
+    } else {
+      await disableEmployee(employee.id);
+    }
+    // disable/enable выше уже перезапрашивают список сам по себе, но бэк
+    // иногда не успевает отразить новое enabled в getAll сразу — патчим
+    // локально тем, что точно должно было произойти, поверх результата
+    // рефетча, чтобы статус в таблице не "зависал" на старом значении.
+    companyStore.upsertEmployee({ ...employee, enabled: enabling });
+    setLoadingStatus(true, "success", enabling ? "Сотрудник включён" : "Сотрудник отключён");
+    showToggleConfirm.value = false;
+    confirmToggleEmployee.value = null;
   } catch (error) {
-    console.error("Ошибка при отключении сотрудника:", error);
-    setLoadingStatus(true, "error", "Не удалось отключить сотрудника");
+    console.error("Ошибка при изменении статуса сотрудника:", error);
+    setLoadingStatus(
+      true,
+      "error",
+      error.response?.data?.message ||
+        (enabling ? "Не удалось включить сотрудника" : "Не удалось отключить сотрудника"),
+    );
+  } finally {
+    toggling.value = false;
   }
 };
 
@@ -382,6 +537,66 @@ onMounted(async () => {
   border-bottom: none;
 }
 
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #cbd5e1;
+  transition: all 0.3s ease;
+  border-radius: 20px;
+}
+
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background: var(--primary);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(16px);
+}
+
+.confirm-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
 .status-badge {
   padding: 4px 10px;
   border-radius: 6px;
@@ -489,17 +704,6 @@ onMounted(async () => {
   font-size: 0.85rem;
   color: var(--text);
   cursor: pointer;
-}
-
-.pending-note {
-  margin: 1rem 0 0;
-  padding: 0.65rem 0.75rem;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  border-radius: 0.5rem;
-  font-size: 0.78rem;
-  color: #78350f;
-  line-height: 1.4;
 }
 
 @media (max-width: 640px) {

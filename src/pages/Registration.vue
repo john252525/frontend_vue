@@ -726,15 +726,19 @@ const startRedirectTimer = () => {
 </script>
 
 <style scoped>
-/* ПЕРЕМЕННЫЕ ЦВЕТОВ */
+/* Локальные алиасы поверх глобальных переменных темы (main.css) — раньше
+   тут были хардкоженые светлые литералы, из-за чего вся страница не
+   реагировала на тёмную тему вообще. Имена оставлены как есть, чтобы не
+   трогать полсотни мест использования ниже — меняется только то, на что
+   они указывают. */
 .registration-container {
-  --primary-color: #4950ca;
-  --primary-hover: #595fd1;
-  --primary-light: rgba(73, 80, 202, 0.15);
-  --border-color: #e1e5eb;
-  --text-main: #1a1a1a;
-  --text-secondary: #7a828a;
-  --bg-input: #fcfdfe;
+  --primary-color: var(--primary);
+  --primary-hover: var(--primaryHover);
+  --primary-light: rgba(var(--primary-rgb), 0.15);
+  --border-color: var(--line);
+  --text-main: var(--text);
+  --text-secondary: var(--headerAccountText);
+  --bg-input: var(--input);
 
   font-family: "Inter", sans-serif;
   width: 100%;
@@ -810,7 +814,7 @@ input:focus {
 }
 
 input:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--tableAccountBg);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -852,7 +856,7 @@ input:disabled {
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  background: #f4f6f8;
+  background: var(--tableAccountBg);
   border-right: 1px solid var(--border-color);
   border-radius: 8px 0 0 8px;
   font-size: 14px;
@@ -863,7 +867,7 @@ input:disabled {
   flex-shrink: 0;
 }
 .country-prefix:hover {
-  background: #ebeef2;
+  background: var(--tableHover);
 }
 .prefix-arrow {
   border: solid var(--text-secondary);
@@ -887,7 +891,7 @@ input:disabled {
   top: calc(100% + 4px);
   left: 0;
   width: 260px;
-  background: #fff;
+  background: var(--bg);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -902,6 +906,8 @@ input:disabled {
   font-size: 13px;
   outline: none;
   box-sizing: border-box;
+  background: var(--input);
+  color: var(--text-main);
 }
 .country-list {
   max-height: 220px;
@@ -917,7 +923,7 @@ input:disabled {
   transition: background 0.15s;
 }
 .country-option:hover {
-  background: #f4f6f8;
+  background: var(--tableAccountBg);
 }
 .country-option.selected {
   background: var(--primary-light);
@@ -990,7 +996,7 @@ input:disabled {
   justify-content: center;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   color: transparent;
-  background: #fff;
+  background: var(--bg-input);
 }
 
 .messenger-label:hover:not(.disabled) .messenger-check {
@@ -1052,7 +1058,7 @@ input:disabled {
   top: 110%;
   left: 0;
   right: 0;
-  background: #fff;
+  background: var(--bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
@@ -1065,7 +1071,7 @@ input:disabled {
   transition: 0.2s;
 }
 .select-options div:hover {
-  background: #f4f6f8;
+  background: var(--tableAccountBg);
   color: var(--primary-color);
 }
 
@@ -1100,7 +1106,7 @@ input:disabled {
   flex-shrink: 0;
   height: 22px;
   width: 22px;
-  background: #fff;
+  background: var(--bg-input);
   border: 2px solid var(--border-color);
   border-radius: 6px;
   margin-right: 12px;
@@ -1137,7 +1143,7 @@ input:checked ~ .custom-checkmark::after {
 .checkbox-text {
   font-size: 13px;
   line-height: 1.5;
-  color: #4a4a4a;
+  color: var(--text-secondary);
   padding-top: 2px;
 }
 .checkbox-text a {
@@ -1171,8 +1177,8 @@ input:checked ~ .custom-checkmark::after {
   transform: translateY(-1px);
 }
 .submit-btn:disabled {
-  background: #e1e5eb;
-  color: #a0a5ab;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
   cursor: not-allowed;
 }
 

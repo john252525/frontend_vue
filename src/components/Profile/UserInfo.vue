@@ -28,6 +28,7 @@
         <div class="value-container">
           <span class="info-value">{{ formattedPhone || "—" }}</span>
           <button
+            v-if="canEdit"
             @click="startEditingPhone"
             class="edit-btn"
             :disabled="saving"
@@ -51,6 +52,7 @@
             {{ formattedChannels || "—" }}
           </span>
           <button
+            v-if="canEdit"
             @click="startEditingChannels"
             class="edit-btn"
             :disabled="saving"
@@ -72,6 +74,7 @@
         <div class="value-container">
           <span class="info-value">{{ userContactName || "—" }}</span>
           <button
+            v-if="canEdit"
             @click="startEditingContactInfo"
             class="edit-btn"
             :disabled="saving"
@@ -231,10 +234,13 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAccountStore } from "@/stores/accountStore";
 import { usePhoneFormatter } from "@/composables/usePhoneFormatter";
+import { usePermissions } from "@/composables/usePermissions";
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+const { can } = usePermissions();
+const canEdit = computed(() => can("profile", "edit_own"));
 
 const props = defineProps({
   email: String,

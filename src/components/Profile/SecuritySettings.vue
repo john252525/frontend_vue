@@ -19,7 +19,9 @@
       {{ successMessage }}
     </div>
 
-    <div class="password-form">
+    <p v-if="!canEdit" class="readonly-note">Недоступно для вашей роли</p>
+
+    <div v-else class="password-form">
       <div class="form-group">
         <input
           type="password"
@@ -68,6 +70,10 @@ const VITE_FRONTEND_URL_AUTH = import.meta.env.VITE_FRONTEND_URL_AUTH;
 import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+
+import { usePermissions } from "@/composables/usePermissions";
+const { can } = usePermissions();
+const canEdit = computed(() => can("profile", "edit_own"));
 
 const currentPassword = ref("");
 const newPassword = ref("");
@@ -234,6 +240,15 @@ const handleChangePassword = async () => {
   color: #065f46;
   border-radius: 8px;
   font-size: 0.9rem;
+}
+
+.readonly-note {
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--tableAccountBg);
+  color: var(--headerAccountText);
+  border-radius: 8px;
+  font-size: 0.875rem;
 }
 
 .change-password-btn {

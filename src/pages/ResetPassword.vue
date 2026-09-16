@@ -219,7 +219,7 @@ const handleSubmit = async () => {
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--headerAccountText);
   text-align: center;
   margin-bottom: 32px;
   line-height: 1.4;
@@ -243,7 +243,7 @@ const handleSubmit = async () => {
 input {
   width: 100%;
   height: 48px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 16px;
   font-size: 15px;

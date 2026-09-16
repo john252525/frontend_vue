@@ -18,6 +18,7 @@ import Payments from "./pages/Payments.vue";
 import ChatsDataBase from "./pages/ChatsDataBase.vue";
 import MessagesDataBase from "./pages/MessagesDataBase.vue";
 import ResetPassword from "./pages/ResetPassword.vue";
+import LoginByLink from "./pages/LoginByLink.vue";
 import Referrals from "./pages/ReferralsPage.vue";
 import Setings from "./pages/Setings.vue";
 import NotFound from "./pages/NotFound.vue";
@@ -315,6 +316,12 @@ const routes = [
     meta: { title: "Сброс пароля" },
   },
   {
+    path: "/login-by-link",
+    name: "LoginByLink",
+    component: LoginByLink,
+    meta: { title: "Вход по ссылке" },
+  },
+  {
     path: "/",
     name: "MainPage",
     redirect: (to) => {
@@ -557,6 +564,7 @@ const DOMAIN_CONFIG = {
       "payments",
       "VerifyEmail",
       "ResetPassword",
+      "LoginByLink",
       "Referrals",
     ],
     defaultRoute: "/Accounts",
@@ -571,6 +579,7 @@ const DOMAIN_CONFIG = {
       "payments",
       "VerifyEmail",
       "ResetPassword",
+      "LoginByLink",
       "Referrals",
     ],
     defaultRoute: "/Accounts",
@@ -590,6 +599,7 @@ const DOMAIN_CONFIG = {
       "PasswordRecovery",
       "VerifyEmail",
       "ResetPassword",
+      "LoginByLink",
       "Referrals",
     ],
     defaultRoute: "/settings",
@@ -604,6 +614,7 @@ const checkRouteAccess = (to, domain) => {
     "PasswordRecovery",
     "VerifyEmail",
     "ResetPassword",
+    "LoginByLink",
   ];
 
   if (publicPages.includes(to.name)) {
@@ -662,6 +673,7 @@ router.beforeEach(async (to, from, next) => {
       "PasswordRecovery",
       "VerifyEmail",
       "ResetPassword",
+      "LoginByLink",
     ];
 
     // Пропускаем NotFound
@@ -705,6 +717,11 @@ router.beforeEach(async (to, from, next) => {
       to.name !== "ResetPassword"
     ) {
       return next({ name: "ResetPassword", query: to.query });
+    } else if (
+      requestedPath.includes("/login-by-link") &&
+      to.name !== "LoginByLink"
+    ) {
+      return next({ name: "LoginByLink", query: to.query });
     }
 
     // Проверка доступа по домену для непубличных страниц

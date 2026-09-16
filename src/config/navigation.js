@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useHelpModalStore } from "@/stores/helpModalStore"; // Импортируем стор напрямую
 import { useFeedbackModalStore } from "@/stores/feedbackModalStore";
+import { usePermissions } from "@/composables/usePermissions";
 
 export const useNavigationConfig = () => {
   const { t } = useI18n();
@@ -13,6 +14,7 @@ export const useNavigationConfig = () => {
   // Инициализируем сторы здесь
   const helpModalStore = useHelpModalStore();
   const feedbackModalStore = useFeedbackModalStore();
+  const { can, isOwner, currentRole } = usePermissions();
 
   const isActive = (routeName) => {
     return route.name === routeName;
@@ -57,7 +59,7 @@ export const useNavigationConfig = () => {
   <path d="M13.9 8.90021C16.1092 8.90021 17.9 7.10935 17.9 4.90021C17.9 2.69107 16.1092 0.900208 13.9 0.900208C11.6909 0.900208 9.90002 2.69107 9.90002 4.90021C9.90002 7.10935 11.6909 8.90021 13.9 8.90021Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.mailings")),
-          condition: true,
+          condition: computed(() => can("mailings", "view")),
           isActive: computed(() => isActive("Mailing")),
         },
         {
@@ -89,7 +91,7 @@ export const useNavigationConfig = () => {
   <path d="M8.75 12.75H4.75M12.75 12.75H11.25M0.75 6.75H20.75" stroke="black" stroke-width="1.5" stroke-linecap="round" />
 </svg>`,
           text: computed(() => t("navigation.payment")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("payments")),
         },
         {
@@ -157,14 +159,14 @@ export const useNavigationConfig = () => {
   <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.subscriptions")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("Subscriptions")),
         },
         {
           name: "mailing",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="svg-icon"><path d="M8 5c-3.3 0-6 2.7-6 6c0 2 1 3.8 2.5 4.8C1.8 17.2 0 19.9 0 23h2c0-3.3 2.7-6 6-6s6 2.7 6 6h2c0-3.2 2.6-5.9 5.8-6h.2c2.5 0 4.6-1.5 5.5-3.6c0 0 0-.1.1-.1c.1-.1.1-.3.1-.4c0-.1 0-.1.1-.2c0-.1.1-.3.1-.4c0-.1 0-.2.1-.3c0-.1 0-.2.1-.3v-.6c0-3.3-2.7-6-6-6s-6 2.7-6 6c0 2 1 3.8 2.5 4.8c-1.5.7-2.7 1.9-3.5 3.3c-.8-1.4-2-2.6-3.5-3.3C13 14.8 14 13 14 11c0-3.3-2.7-6-6-6m0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m14 0c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m2.1 11v2.1c-.6.1-1.2.4-1.7.7l-1.5-1.5l-1.4 1.4l1.5 1.5c-.4.5-.6 1.1-.7 1.8H18v2h2.1c.1.6.4 1.2.7 1.8l-1.5 1.5l1.4 1.4l1.5-1.5c.5.3 1.1.6 1.7.7V32h2v-2.1c.6-.1 1.2-.4 1.7-.7l1.5 1.5l1.4-1.4l-1.5-1.5c.4-.5.6-1.1.7-1.8H32v-2h-2.1c-.1-.6-.4-1.2-.7-1.8l1.5-1.5l-1.4-1.4l-1.5 1.5c-.5-.3-1.1-.6-1.7-.7V18zm.9 4c1.7 0 3 1.3 3 3s-1.3 3-3 3s-3-1.3-3-3s1.3-3 3-3m0 2a.872.872 0 0 0-.367.086a1.138 1.138 0 0 0-.32.227a1.138 1.138 0 0 0-.227.32A.872.872 0 0 0 24 25c0 .125.031.25.086.367c.055.117.133.227.227.32c.093.094.203.172.32.227A.872.872 0 0 0 25 26c.5 0 1-.5 1-1s-.5-1-1-1"/></svg>`,
           text: computed(() => t("navigation.mailings")),
-          condition: true,
+          condition: computed(() => can("mailings", "view")),
           isActive: computed(() => isActive("Mailing")),
         },
         {
@@ -190,7 +192,7 @@ export const useNavigationConfig = () => {
           name: "Payments",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="currentColor" d="M2 9.5A4.5 4.5 0 0 1 6.5 5h19A4.5 4.5 0 0 1 30 9.5v13a4.5 4.5 0 0 1-4.5 4.5h-19A4.5 4.5 0 0 1 2 22.5zM6.5 7A2.5 2.5 0 0 0 4 9.5V11h24V9.5A2.5 2.5 0 0 0 25.5 7zM4 22.5A2.5 2.5 0 0 0 6.5 25h19a2.5 2.5 0 0 0 2.5-2.5V13H4zM21 19h3a1 1 0 1 1 0 2h-3a1 1 0 1 1 0-2"/></svg>`,
           text: computed(() => t("navigation.payment")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("payments")),
         },
         {
@@ -239,14 +241,14 @@ export const useNavigationConfig = () => {
   <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.subscriptions")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("Subscriptions")),
         },
         {
           name: "mailing",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="svg-icon"><path d="M8 5c-3.3 0-6 2.7-6 6c0 2 1 3.8 2.5 4.8C1.8 17.2 0 19.9 0 23h2c0-3.3 2.7-6 6-6s6 2.7 6 6h2c0-3.2 2.6-5.9 5.8-6h.2c2.5 0 4.6-1.5 5.5-3.6c0 0 0-.1.1-.1c.1-.1.1-.3.1-.4c0-.1 0-.1.1-.2c0-.1.1-.3.1-.4c0-.1 0-.2.1-.3c0-.1 0-.2.1-.3v-.6c0-3.3-2.7-6-6-6s-6 2.7-6 6c0 2 1 3.8 2.5 4.8c-1.5.7-2.7 1.9-3.5 3.3c-.8-1.4-2-2.6-3.5-3.3C13 14.8 14 13 14 11c0-3.3-2.7-6-6-6m0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m14 0c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m2.1 11v2.1c-.6.1-1.2.4-1.7.7l-1.5-1.5l-1.4 1.4l1.5 1.5c-.4.5-.6 1.1-.7 1.8H18v2h2.1c.1.6.4 1.2.7 1.8l-1.5 1.5l1.4 1.4l1.5-1.5c.5.3 1.1.6 1.7.7V32h2v-2.1c.6-.1 1.2-.4 1.7-.7l1.5 1.5l1.4-1.4l-1.5-1.5c.4-.5.6-1.1.7-1.8H32v-2h-2.1c-.1-.6-.4-1.2-.7-1.8l1.5-1.5l-1.4-1.4l-1.5 1.5c-.5-.3-1.1-.6-1.7-.7V18zm.9 4c1.7 0 3 1.3 3 3s-1.3 3-3 3s-3-1.3-3-3s1.3-3 3-3m0 2a.872.872 0 0 0-.367.086a1.138 1.138 0 0 0-.32.227a1.138 1.138 0 0 0-.227.32A.872.872 0 0 0 24 25c0 .125.031.25.086.367c.055.117.133.227.227.32c.093.094.203.172.32.227A.872.872 0 0 0 25 26c.5 0 1-.5 1-1s-.5-1-1-1"/></svg>`,
           text: computed(() => t("navigation.mailings")),
-          condition: true,
+          condition: computed(() => can("mailings", "view")),
           isActive: computed(() => isActive("Mailing")),
         },
         {
@@ -272,7 +274,7 @@ export const useNavigationConfig = () => {
           name: "Payments",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="currentColor" d="M2 9.5A4.5 4.5 0 0 1 6.5 5h19A4.5 4.5 0 0 1 30 9.5v13a4.5 4.5 0 0 1-4.5 4.5h-19A4.5 4.5 0 0 1 2 22.5zM6.5 7A2.5 2.5 0 0 0 4 9.5V11h24V9.5A2.5 2.5 0 0 0 25.5 7zM4 22.5A2.5 2.5 0 0 0 6.5 25h19a2.5 2.5 0 0 0 2.5-2.5V13H4zM21 19h3a1 1 0 1 1 0 2h-3a1 1 0 1 1 0-2"/></svg>`,
           text: computed(() => t("navigation.payment")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("payments")),
         },
         {
@@ -321,14 +323,14 @@ export const useNavigationConfig = () => {
   <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.subscriptions")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("Subscriptions")),
         },
         {
           name: "mailing",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="svg-icon"><path d="M8 5c-3.3 0-6 2.7-6 6c0 2 1 3.8 2.5 4.8C1.8 17.2 0 19.9 0 23h2c0-3.3 2.7-6 6-6s6 2.7 6 6h2c0-3.2 2.6-5.9 5.8-6h.2c2.5 0 4.6-1.5 5.5-3.6c0 0 0-.1.1-.1c.1-.1.1-.3.1-.4c0-.1 0-.1.1-.2c0-.1.1-.3.1-.4c0-.1 0-.2.1-.3c0-.1 0-.2.1-.3v-.6c0-3.3-2.7-6-6-6s-6 2.7-6 6c0 2 1 3.8 2.5 4.8c-1.5.7-2.7 1.9-3.5 3.3c-.8-1.4-2-2.6-3.5-3.3C13 14.8 14 13 14 11c0-3.3-2.7-6-6-6m0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m14 0c2.2 0 4 1.8 4 4s-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4m2.1 11v2.1c-.6.1-1.2.4-1.7.7l-1.5-1.5l-1.4 1.4l1.5 1.5c-.4.5-.6 1.1-.7 1.8H18v2h2.1c.1.6.4 1.2.7 1.8l-1.5 1.5l1.4 1.4l1.5-1.5c.5.3 1.1.6 1.7.7V32h2v-2.1c.6-.1 1.2-.4 1.7-.7l1.5 1.5l1.4-1.4l-1.5-1.5c.4-.5.6-1.1.7-1.8H32v-2h-2.1c-.1-.6-.4-1.2-.7-1.8l1.5-1.5l-1.4-1.4l-1.5 1.5c-.5-.3-1.1-.6-1.7-.7V18zm.9 4c1.7 0 3 1.3 3 3s-1.3 3-3 3s-3-1.3-3-3s1.3-3 3-3m0 2a.872.872 0 0 0-.367.086a1.138 1.138 0 0 0-.32.227a1.138 1.138 0 0 0-.227.32A.872.872 0 0 0 24 25c0 .125.031.25.086.367c.055.117.133.227.227.32c.093.094.203.172.32.227A.872.872 0 0 0 25 26c.5 0 1-.5 1-1s-.5-1-1-1"/></svg>`,
           text: computed(() => t("navigation.mailings")),
-          condition: true,
+          condition: computed(() => can("mailings", "view")),
           isActive: computed(() => isActive("Mailing")),
         },
         {
@@ -354,7 +356,7 @@ export const useNavigationConfig = () => {
           name: "Payments",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="currentColor" d="M2 9.5A4.5 4.5 0 0 1 6.5 5h19A4.5 4.5 0 0 1 30 9.5v13a4.5 4.5 0 0 1-4.5 4.5h-19A4.5 4.5 0 0 1 2 22.5zM6.5 7A2.5 2.5 0 0 0 4 9.5V11h24V9.5A2.5 2.5 0 0 0 25.5 7zM4 22.5A2.5 2.5 0 0 0 6.5 25h19a2.5 2.5 0 0 0 2.5-2.5V13H4zM21 19h3a1 1 0 1 1 0 2h-3a1 1 0 1 1 0-2"/></svg>`,
           text: computed(() => t("navigation.payment")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("payments")),
         },
         {
@@ -488,7 +490,7 @@ export const useNavigationConfig = () => {
   <path d="M13.9 8.90021C16.1092 8.90021 17.9 7.10935 17.9 4.90021C17.9 2.69107 16.1092 0.900208 13.9 0.900208C11.6909 0.900208 9.90002 2.69107 9.90002 4.90021C9.90002 7.10935 11.6909 8.90021 13.9 8.90021Z" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.mailings")),
-          condition: true,
+          condition: computed(() => can("mailings", "view")),
           isActive: computed(() => isActive("Mailing")),
         },
         {
@@ -520,7 +522,7 @@ export const useNavigationConfig = () => {
   <path d="M8.75 12.75H4.75M12.75 12.75H11.25M0.75 6.75H20.75" stroke="black" stroke-width="1.5" stroke-linecap="round" />
 </svg>`,
           text: computed(() => t("navigation.payment")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("payments")),
         },
         {
@@ -582,7 +584,7 @@ export const useNavigationConfig = () => {
   <path d="M7 21v-4h4" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`,
           text: computed(() => t("navigation.subscriptions")),
-          condition: true,
+          condition: computed(() => can("subscriptions", "pay")),
           isActive: computed(() => isActive("Subscriptions")),
         },
 
@@ -628,7 +630,12 @@ export const useNavigationConfig = () => {
   <path d="M5.5 4.75H6.5M5.5 8H6.5M5.5 11.25H6.5M9 4.75H10M9 8H10M9 11.25H10" stroke="black" stroke-width="1.5" stroke-linecap="round" />
 </svg>`,
           text: "Организация",
-          condition: true,
+          // Раздел почти целиком про настройку компании/ролей/сотрудников —
+          // реальная польза для рядового сотрудника минимальна, а часть
+          // действий там всё равно доступна только владельцу/админу. Прячем
+          // от manager/senior_manager, оставляем owner (нет роли в токене)
+          // и admin.
+          condition: computed(() => isOwner.value || currentRole.value === "admin"),
           isActive: computed(() => isActive("Organization")),
           action: () => router.push({ name: "Organization" }),
         },

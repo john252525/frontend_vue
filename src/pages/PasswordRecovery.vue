@@ -243,7 +243,7 @@ input.error {
 }
 
 input {
-  border: 0.5px solid #c1c1c1;
+  border: 0.5px solid var(--line);
   border-radius: 5px;
   padding-left: 10px;
   width: 550px;

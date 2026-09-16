@@ -4,7 +4,7 @@
       <section class="account-section">
         <h2 class="title">Организация</h2>
       </section>
-      <section v-if="hasCompany" class="account-section">
+      <section v-if="hasCompany && canAccessOrganization" class="account-section">
         <div class="tab-switcher">
           <button
             v-for="tab in tabs"
@@ -30,8 +30,8 @@
         Загрузка...
       </div>
 
-      <!-- Компания есть — показываем вкладки -->
-      <template v-else-if="hasCompany">
+      <!-- Компания есть, и раздел доступен этой роли — показываем вкладки -->
+      <template v-else-if="hasCompany && canAccessOrganization">
         <div class="tab-content">
           <CompanyTab v-if="activeTab === 'company'" />
           <OfficesTab v-else-if="activeTab === 'offices'" />
@@ -39,6 +39,15 @@
           <EmployeesTab v-else-if="activeTab === 'employees'" />
         </div>
       </template>
+
+      <!-- Компания есть, но роли сотрудника (manager/senior_manager) этот
+           раздел не положен по умолчанию — реально управлять там всё равно
+           почти нечем, доступно только owner/admin. -->
+      <div v-else-if="hasCompany && !canAccessOrganization" class="upsell-card">
+        <p class="upsell-description">
+          Раздел доступен только владельцу аккаунта и администраторам.
+        </p>
+      </div>
 
       <!-- Компании нет и создать её может только владелец аккаунта -->
       <div v-else-if="!isOwner" class="upsell-card">
@@ -114,7 +123,7 @@ import EmployeesTab from "@/components/Organization/EmployeesTab.vue";
 const companyStore = useCompanyStore();
 const { fetchCompany, createCompany, fetchRolesAll } = useCompanyApi();
 const { setLoadingStatus } = useStationLoading();
-const { isOwner } = usePermissions();
+const { isOwner, currentRole } = usePermissions();
 
 const loading = ref(true);
 const showCreateForm = ref(false);
@@ -122,6 +131,10 @@ const creating = ref(false);
 const newCompany = reactive({ name: "", phone: "" });
 
 const hasCompany = computed(() => companyStore.hasCompany);
+// Раздел доступен владельцу и админу — manager/senior_manager реально
+// нечем в нём пользоваться (см. пункт меню в navigation.js, скрытый для них
+// же), прямой заход по URL тоже должен упираться в то же ограничение.
+const canAccessOrganization = computed(() => isOwner.value || currentRole.value === "admin");
 
 const activeTab = ref("company");
 const tabs = [
@@ -151,8 +164,11 @@ onMounted(async () => {
   await fetchCompany();
   // Права нужны сразу всем вкладкам (кнопки "Добавить офис"/"Пригласить
   // сотрудника" гейтятся по ним) — грузим один раз здесь, а не в каждой
-  // вкладке отдельно.
-  if (companyStore.hasCompany) {
+  // вкладке отдельно. Но bulk-запрос (все 3 роли разом) бэк разрешает
+  // только владельцу — сотруднику на попытку посмотреть чужие роли отвечает
+  // 403 "Access denied" (уже наступали на это в App.vue). Своя роль
+  // сотруднику уже подгружена глобально в App.vue, второй раз не нужно.
+  if (companyStore.hasCompany && isOwner.value) {
     await fetchRolesAll();
   }
   loading.value = false;

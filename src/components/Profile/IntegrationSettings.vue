@@ -23,7 +23,7 @@
               type="checkbox"
               v-model="localSettings.disable_messenger_outgoing"
               @change="onSettingChange"
-              :disabled="isSaving"
+              :disabled="isSaving || !canEdit"
             />
             <span class="toggle-slider"></span>
           </label>
@@ -38,13 +38,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { useAccountStore } from "@/stores/accountStore";
+import { usePermissions } from "@/composables/usePermissions";
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
+const { can } = usePermissions();
+const canEdit = computed(() => can("profile", "edit_own"));
 const VITE_FRONTEND_URL_USERS = import.meta.env.VITE_FRONTEND_URL_USERS;
 
 const localSettings = ref({

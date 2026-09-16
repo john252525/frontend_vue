@@ -200,6 +200,7 @@
             class="action action-delete"
             @click="openDeleteAccountModal"
             v-if="
+              can('accounts', 'delete') &&
               !['amocrm', 'bitrix24', 'uon', 'bulk'].includes(
                 selectedItem.type,
               ) &&
@@ -290,6 +291,7 @@
 
           <span
             v-if="
+              can('accounts', 'delete') &&
               selectedItem.source != 'telegram' &&
               ['amocrm', 'bitrix24', 'uon'].includes(selectedItem.type)
             "
@@ -465,6 +467,8 @@ const token = computed(() => accountStore.getAccountToken);
 import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
+import { usePermissions } from "@/composables/usePermissions";
+const { can } = usePermissions();
 
 const qrData = ref([]);
 const router = useRouter();

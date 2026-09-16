@@ -2,8 +2,21 @@
 import { ref, shallowRef, onMounted, computed, watch } from "vue";
 import Fuse from "fuse.js";
 import Nav from "./Nav.vue";
+import { useDomain } from "@/composables/getDomain";
 
-const brandName = ref("whatsapi");
+const { stationDomain } = useDomain();
+
+// У каждого домена своя папка в src/docs/<brand>/ — сейчас (пока контент не
+// разошёлся) там одинаковые файлы, но уже разложены отдельно, чтобы дальше
+// можно было менять их независимо. Только эти три ключа реально достижимы
+// через доменную конфигурацию (env.config.json/.env) — остальные бренды из
+// navConfig (ctacrew/mwi/chatserv) сейчас ни одним доменом не используются
+// и папки под них не заводим, пока не появится реальный домен.
+const AVAILABLE_DOC_BRANDS = ["whatsapi", "webest", "touchapi"];
+const brandName = computed(() => {
+  const value = stationDomain?.navigate?.value;
+  return AVAILABLE_DOC_BRANDS.includes(value) ? value : "whatsapi";
+});
 
 const renderModules = import.meta.glob("@/docs/**/*.md");
 

@@ -62,7 +62,11 @@
         :customSources="customSources"
       />
 
-      <button class="action-button danger" @click="showDeleteConfirm = true">
+      <button
+        v-if="can('accounts', 'delete')"
+        class="action-button danger"
+        @click="showDeleteConfirm = true"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -99,6 +103,9 @@ const { stationDomain } = useDomain();
 
 import { useInstancesStore } from "@/stores/instancesStore";
 const instancesStore = useInstancesStore();
+
+import { usePermissions } from "@/composables/usePermissions";
+const { can } = usePermissions();
 
 const emit = defineEmits(["close"]);
 

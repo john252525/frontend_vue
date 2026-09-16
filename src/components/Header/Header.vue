@@ -34,6 +34,12 @@
         <!-- Колокольчик уведомлений -->
         <NotificationBell v-if="stationDomain.navigate.value != 'webest'" />
 
+        <!-- Роль сотрудника — у владельца аккаунта роли в токене нет вообще,
+             бейдж для него не показываем. -->
+        <div v-if="roleLabel" class="role-badge">
+          <span class="role-badge-text">{{ roleLabel }}</span>
+        </div>
+
         <!-- Email пользователя -->
         <div v-if="email" class="email-display">
           <span class="email-text">{{ email }}</span>
@@ -114,13 +120,22 @@ import ThemeTogle from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomain";
 import { useBalanceStore } from "@/stores/balanceStore";
 import { useAccountStore } from "@/stores/accountStore";
+import { usePermissions } from "@/composables/usePermissions";
 
 const { stationDomain } = useDomain();
 const balanceStore = useBalanceStore();
 const accountStore = useAccountStore();
+const { currentRole } = usePermissions();
 
 const storedData = computed(() => accountStore.getAccountData);
 const email = computed(() => storedData.value);
+
+const ROLE_LABELS = {
+  manager: "Менеджер",
+  senior_manager: "Старший менеджер",
+  admin: "Администратор",
+};
+const roleLabel = computed(() => ROLE_LABELS[currentRole.value] || "");
 
 const balanseStation = ref(false);
 const AccountMenuStation = ref(false);
@@ -202,6 +217,23 @@ onMounted(() => {
   color: #4047ca;
 }
 
+.role-badge {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: rgba(64, 71, 202, 0.08);
+  border-radius: 5px;
+  border: 1px solid rgba(64, 71, 202, 0.15);
+  flex-shrink: 0;
+}
+
+.role-badge-text {
+  font-size: 12px;
+  color: #4047ca;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Email display */
 .email-display {
   display: flex;
@@ -275,7 +307,8 @@ onMounted(() => {
 
 /* Планшет 768px - скрываем email текст, оставляем иконку */
 @media (max-width: 768px) {
-  .email-display {
+  .email-display,
+  .role-badge {
     display: none;
   }
 

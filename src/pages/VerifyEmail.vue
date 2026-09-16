@@ -175,7 +175,7 @@ onMounted(() => {
   width: 100%;
   margin: 0 auto;
   padding: 2.5rem;
-  background: #ffffff;
+  background: var(--bg);
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -191,7 +191,7 @@ onMounted(() => {
   font-size: 1.5rem;
   font-weight: 600;
   margin: 1.5rem 0 0.5rem;
-  color: #000000;
+  color: var(--text);
 }
 
 .error-text {
@@ -200,7 +200,7 @@ onMounted(() => {
 
 .message {
   font-size: 1rem;
-  color: #666666;
+  color: var(--headerAccountText);
   margin-bottom: 2rem;
   line-height: 1.5;
 }

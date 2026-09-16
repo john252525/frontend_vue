@@ -14,7 +14,11 @@
 
     <section class="account-section">
       <ToggleVersion />
-      <button @click="handleAddMailing" class="add-account-button">
+      <button
+        v-if="can('mailings', 'create')"
+        @click="handleAddMailing"
+        class="add-account-button"
+      >
         <svg
           class="svg-icon"
           viewBox="0 0 20 20"
@@ -73,9 +77,11 @@ import { computed, ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 import { useI18n } from "vue-i18n";
+import { usePermissions } from "@/composables/usePermissions";
 
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
+const { can } = usePermissions();
 
 const router = useRouter();
 const route = useRoute();
