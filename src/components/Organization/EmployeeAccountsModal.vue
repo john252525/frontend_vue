@@ -147,7 +147,10 @@ onMounted(async () => {
     ]);
     accounts.value = available;
     available.forEach((account) => {
-      const actions = granted.find((g) => g.uuid === account.uuid)?.data?.actions || {};
+      // В спеке getAll отдаёт поле uuid, но реальный ответ бэка — vendor_uuid
+      // (плюс id и owner_user_id); принимаем оба.
+      const actions =
+        granted.find((g) => (g.vendor_uuid || g.uuid) === account.uuid)?.data?.actions || {};
       perms[account.uuid] = {
         view: !!actions.view,
         use: !!actions.use,
