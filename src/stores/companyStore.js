@@ -6,6 +6,7 @@ export const useCompanyStore = defineStore("companyStore", {
     offices: [],
     roles: {}, // { manager: {...permissions}, senior_manager: {...}, admin: {...} }
     employees: [],
+    queues: [], // очереди сотрудников (employee-queues)
   }),
 
   getters: {
@@ -14,6 +15,7 @@ export const useCompanyStore = defineStore("companyStore", {
     getOffices: (state) => state.offices,
     getRoles: (state) => state.roles,
     getEmployees: (state) => state.employees,
+    getQueues: (state) => state.queues,
   },
 
   actions: {
@@ -37,6 +39,10 @@ export const useCompanyStore = defineStore("companyStore", {
       this.employees = data || [];
     },
 
+    setQueues(data) {
+      this.queues = data || [];
+    },
+
     upsertEmployee(employee) {
       const index = this.employees.findIndex((e) => e.id === employee.id);
       if (index !== -1) {
@@ -51,6 +57,7 @@ export const useCompanyStore = defineStore("companyStore", {
       this.offices = [];
       this.roles = {};
       this.employees = [];
+      this.queues = [];
     },
   },
 

@@ -717,11 +717,6 @@ router.beforeEach(async (to, from, next) => {
       to.name !== "ResetPassword"
     ) {
       return next({ name: "ResetPassword", query: to.query });
-    } else if (
-      requestedPath.includes("/login-by-link") &&
-      to.name !== "LoginByLink"
-    ) {
-      return next({ name: "LoginByLink", query: to.query });
     }
 
     // Проверка доступа по домену для непубличных страниц

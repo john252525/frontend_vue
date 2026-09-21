@@ -2,6 +2,7 @@ import { computed } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useCompanyStore } from "@/stores/companyStore";
 import { DEFAULT_PERMISSIONS } from "@/config/rolePermissions";
+import { decodeJwtPayload } from "@/utils/jwt";
 
 // Три единственные роли, которые вообще существуют в системе — см.
 // RolesTab.vue. Любое другое значение в токене (в т.ч. какой-то свой,
@@ -13,17 +14,8 @@ import { DEFAULT_PERMISSIONS } from "@/config/rolePermissions";
 const KNOWN_ROLES = ["manager", "senior_manager", "admin"];
 
 const decodeJwtRole = (token) => {
-  if (!token || typeof token !== "string") return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const payload = JSON.parse(
-      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
-    );
-    return KNOWN_ROLES.includes(payload.role) ? payload.role : null;
-  } catch (e) {
-    return null;
-  }
+  const payload = decodeJwtPayload(token);
+  return KNOWN_ROLES.includes(payload?.role) ? payload.role : null;
 };
 
 export function usePermissions() {

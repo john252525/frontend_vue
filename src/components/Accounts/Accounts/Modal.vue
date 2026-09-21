@@ -290,6 +290,26 @@
           >
 
           <span
+            v-if="selectedItem.type === 'bitrix24'"
+            class="action"
+            @click="
+              props.openBitrix24ConnectorsModal?.();
+              props.closeModal();
+            "
+            >Коннекторы</span
+          >
+
+          <span
+            v-if="isOwner && !['amocrm', 'uon', 'bulk'].includes(selectedItem.type)"
+            class="action"
+            @click="
+              props.openAccountRoutingModal?.();
+              props.closeModal();
+            "
+            >Маршрутизация</span
+          >
+
+          <span
             v-if="
               can('accounts', 'delete') &&
               selectedItem.source != 'telegram' &&
@@ -445,6 +465,12 @@ const props = defineProps({
   openFbmAuthModal: {
     type: Function,
   },
+  openBitrix24ConnectorsModal: {
+    type: Function,
+  },
+  openAccountRoutingModal: {
+    type: Function,
+  },
 });
 
 import { storeToRefs } from "pinia";
@@ -468,7 +494,7 @@ import { useStationLoading } from "@/composables/useStationLoading";
 const { setLoadingStatus } = useStationLoading();
 const updateLoadingStation = ref(false);
 import { usePermissions } from "@/composables/usePermissions";
-const { can } = usePermissions();
+const { can, isOwner } = usePermissions();
 
 const qrData = ref([]);
 const router = useRouter();

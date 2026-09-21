@@ -57,6 +57,20 @@
             </div>
           </td>
           <td class="actions-cell">
+            <template v-if="isOwner">
+              <button class="icon-btn" title="Доступ к аккаунтам" @click="accountsEmployee = employee">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </button>
+              <button class="icon-btn" title="Связь с пользователем CRM" @click="crmEmployee = employee">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              </button>
+            </template>
             <button class="icon-btn" title="Редактировать" @click="openEditModal(employee)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -169,6 +183,18 @@
       </div>
     </ModalFrame>
 
+    <EmployeeAccountsModal
+      v-if="accountsEmployee"
+      :employee="accountsEmployee"
+      :close="() => (accountsEmployee = null)"
+    />
+
+    <EmployeeCrmLinkModal
+      v-if="crmEmployee"
+      :employee="crmEmployee"
+      :close="() => (crmEmployee = null)"
+    />
+
     <!-- Подтверждение включения/отключения — доступ в кабинет пропадает/
          появляется сразу, поэтому не даём переключить в один клик. -->
     <ModalFrame
@@ -195,6 +221,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
+import EmployeeAccountsModal from "@/components/Organization/EmployeeAccountsModal.vue";
+import EmployeeCrmLinkModal from "@/components/Organization/EmployeeCrmLinkModal.vue";
 import { useCompanyStore } from "@/stores/companyStore";
 import { useCompanyApi } from "@/composables/useCompanyApi";
 import { useStationLoading } from "@/composables/useStationLoading";
@@ -225,6 +253,8 @@ const adding = ref(false);
 const showAddModal = ref(false);
 const showEditModal = ref(false);
 const editingEmployee = ref(null);
+const accountsEmployee = ref(null);
+const crmEmployee = ref(null);
 
 // Добавление сотрудников — тоже часть ролевой матрицы (owner может всегда,
 // остальным нужно явно разрешённое право managers.add).

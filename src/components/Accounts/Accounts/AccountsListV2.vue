@@ -107,6 +107,8 @@
       :openWabaAuthModal="openWabaAuthModal"
       :openFbmAuthModal="openFbmAuthModal"
       :openMaxbotAuthModal="openMaxbotAuthModal"
+      :openBitrix24ConnectorsModal="openBitrix24ConnectorsModal"
+      :openAccountRoutingModal="openAccountRoutingModal"
     />
 
     <SettignsModal
@@ -253,6 +255,18 @@
       :close="closeMaxbotAuthModal"
       :getInfo="getInfo"
     />
+
+    <Bitrix24ConnectorsModal
+      v-if="bitrix24ConnectorsModal && selectedItem"
+      :item="selectedItem"
+      :close="closeBitrix24ConnectorsModal"
+    />
+
+    <AccountRoutingModal
+      v-if="accountRoutingModal && selectedItem"
+      :item="selectedItem"
+      :close="closeAccountRoutingModal"
+    />
   </section>
 </template>
 
@@ -302,6 +316,8 @@ import InstagramAuthModal from "./ModalAccount/InstagramAuthModal.vue";
 import WabaAuthModal from "./ModalAccount/WabaAuthModal.vue";
 import FbmAuthModal from "./ModalAccount/FbmAuthModal.vue";
 import EnableMaxBot from "./ModalAccount/Enable/EnableMaxBot.vue";
+import Bitrix24ConnectorsModal from "./ModalAccount/CRM/Bitrix24ConnectorsModal.vue";
+import AccountRoutingModal from "./ModalAccount/AccountRoutingModal.vue";
 
 // Импортируем новые компоненты
 import DesktopTableView from "./AccountListComponents/DesktopTableView.vue";
@@ -416,6 +432,8 @@ const instagramAuthModal = ref(false);
 const wabaAuthModal = ref(false);
 const fbmAuthModal = ref(false);
 const maxbotAuthModal = ref(false);
+const bitrix24ConnectorsModal = ref(false);
+const accountRoutingModal = ref(false);
 
 // Синхронизируем локальный instanceData при удалении аккаунта из стора
 watch(
@@ -475,6 +493,22 @@ const openFbmAuthModal = () => {
 
 const closeFbmAuthModal = () => {
   fbmAuthModal.value = false;
+};
+
+const openBitrix24ConnectorsModal = () => {
+  bitrix24ConnectorsModal.value = true;
+};
+
+const closeBitrix24ConnectorsModal = () => {
+  bitrix24ConnectorsModal.value = false;
+};
+
+const openAccountRoutingModal = () => {
+  accountRoutingModal.value = true;
+};
+
+const closeAccountRoutingModal = () => {
+  accountRoutingModal.value = false;
 };
 
 const openEmailSettings = () => {

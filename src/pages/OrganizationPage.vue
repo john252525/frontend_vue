@@ -37,6 +37,7 @@
           <OfficesTab v-else-if="activeTab === 'offices'" />
           <RolesTab v-else-if="activeTab === 'roles'" />
           <EmployeesTab v-else-if="activeTab === 'employees'" />
+          <QueuesTab v-else-if="activeTab === 'queues'" />
         </div>
       </template>
 
@@ -119,6 +120,7 @@ import CompanyTab from "@/components/Organization/CompanyTab.vue";
 import OfficesTab from "@/components/Organization/OfficesTab.vue";
 import RolesTab from "@/components/Organization/RolesTab.vue";
 import EmployeesTab from "@/components/Organization/EmployeesTab.vue";
+import QueuesTab from "@/components/Organization/QueuesTab.vue";
 
 const companyStore = useCompanyStore();
 const { fetchCompany, createCompany, fetchRolesAll } = useCompanyApi();
@@ -137,12 +139,15 @@ const hasCompany = computed(() => companyStore.hasCompany);
 const canAccessOrganization = computed(() => isOwner.value || currentRole.value === "admin");
 
 const activeTab = ref("company");
-const tabs = [
+// Очереди пока доступны на бэке только владельцу (employee-queues/* → 403
+// для остальных), поэтому и вкладку показываем только ему.
+const tabs = computed(() => [
   { id: "company", label: "Организация" },
   { id: "offices", label: "Офисы" },
   { id: "roles", label: "Роли" },
   { id: "employees", label: "Сотрудники" },
-];
+  ...(isOwner.value ? [{ id: "queues", label: "Очереди" }] : []),
+]);
 
 const handleCreateCompany = async () => {
   if (!newCompany.name) return;
