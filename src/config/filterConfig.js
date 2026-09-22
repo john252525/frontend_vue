@@ -191,10 +191,10 @@ export const FILTER_CONFIG = {
       {
         id: "crm",
         name: "CRM",
-        enabled: false,
+        enabled: true,
         subFilters: [
           { id: "amocrm", name: "AmoCRM", enabled: false },
-          { id: "bitrix24", name: "Bitrix24", enabled: false },
+          { id: "bitrix24", name: "Bitrix24", enabled: true },
           { id: "uon", name: "U-ON", enabled: false },
         ],
       },
