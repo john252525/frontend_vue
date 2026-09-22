@@ -147,6 +147,9 @@ const props = defineProps({
   updateLoadingStatus: {
     type: Function,
   },
+  changeMax: {
+    type: Function,
+  },
 });
 
 const countries = ref([
@@ -365,6 +368,24 @@ const stationLoading = ref(true);
 const intervalId = ref(null);
 const isRunning = ref(false);
 let previousLink = "";
+// Успех/переход на 2FA может прийти и от getQr ("QR is undefined" — старая
+// эвристика), и от getInfo (step.value === 5 / 2.1 / 2.25) — оба опрашиваются
+// в одном тике через Promise.all, поэтому нужен общий флаг: без него можно
+// либо сработать дважды (openEnableMenuTrue в Enable.vue не устанавливает, а
+// переключает resultTrue — повторный вызов её погасит), либо после уже
+// обработанного успеха/переключения на пароль всё равно продолжить обычную
+// ветку startEnableByQR и заново запустить QR-поллинг поверх.
+let flowHandled = false;
+
+const handleQrSuccess = () => {
+  if (flowHandled) return;
+  flowHandled = true;
+  clearInterval(intervalId.value);
+  isRunning.value = false;
+  stopSessionTimer();
+  props.changeForceStopItemData(selectedItem.value);
+  props.openEnableMenuTrue();
+};
 
 // НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ТАЙМЕРА
 const SESSION_DURATION = 60; // 60 секунд
@@ -469,6 +490,14 @@ const getQr = async () => {
       );
     }
 
+    // getQr и getAccountInfo опрашиваются параллельно (см. Promise.all в
+    // startEnableByQR). Если getAccountInfo в этом же тике уже увёл на
+    // пароль/успех (flowHandled), ответ getQr устарел — например, бэк уже
+    // отвечает "False step", потому что шаг аккаунта сменился на 2.1, и без
+    // этой проверки regenerateQrCode() ниже заново запустит генерацию QR
+    // поверх уже открытого экрана пароля.
+    if (flowHandled) return;
+
     if (response.data.status === "ok") {
       previousLink = qrCodeData.link;
       qrCodeData.link = response.data.value;
@@ -481,12 +510,8 @@ const getQr = async () => {
         router.push("/login");
       }, 2000);
     } else if (response.data.error.message === "QR is undefined") {
-      props.changeForceStopItemData(selectedItem.value);
-      props.openEnableMenuTrue();
-      clearInterval(intervalId.value); // Используем .value для ref
-      isRunning.value = false; // Добавляем эту строку
       qrCodeData.link = previousLink;
-      // changeEnableStation();
+      handleQrSuccess();
     } else if (response.data.error.message === "False step") {
       props.updateLoadingStatus(false);
       regenerateQrCode();
@@ -501,6 +526,60 @@ const getQr = async () => {
     console.error("Ошибка при создании аккаунта:", error);
     station.error = true;
     return;
+  }
+};
+
+// Параллельно с getQr опрашиваем реальный статус аккаунта — так же, как
+// сделано в Telegram.vue (Enable/QrCode/Telegram.vue). До этого getQr не
+// опрашивался вовсе, и успех подключения определялся только косвенно через
+// ошибку "QR is undefined" у getQr, из-за чего переопрос "не всегда" ловил
+// момент авторизации.
+const getAccountInfo = async () => {
+  let params = {
+    source: source,
+    login: login,
+  };
+  if (stationDomain.navigate.value === "whatsapi") {
+    params.storage = storage;
+  }
+
+  try {
+    const response = await axios.post(`${FRONTEND_URL}getInfo`, params, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    if (response.data) {
+      await handleSendLog(
+        "getQr",
+        "getInfo",
+        params,
+        response.data.ok,
+        response.data
+      );
+    }
+
+    const step = Number(response.data?.step?.value);
+
+    if (step === 5) {
+      handleQrSuccess();
+    } else if ((step === 2.1 || step === 2.25) && props.changeMax) {
+      // Аккаунту нужен пароль/код после сканирования QR — переключаемся на
+      // тот же флоу ввода пароля/кода, что и при подключении по номеру.
+      if (flowHandled) return;
+      flowHandled = true;
+      clearInterval(intervalId.value);
+      isRunning.value = false;
+      stopSessionTimer();
+      props.changeMax();
+    }
+  } catch (error) {
+    console.error("Ошибка при получении статуса аккаунта:", error);
+    if (error.response) {
+      console.error("Ошибка сервера:", error.response.data);
+    }
   }
 };
 
@@ -545,8 +624,10 @@ const regenerateQrCode = async () => {
 const startEnableByQR = async () => {
   if (isRunning.value) return;
 
+  flowHandled = false;
   props.updateLoadingStatus(true, "Генерирация QR-кода");
-  await getQr();
+  await Promise.all([getQr(), getAccountInfo()]);
+  if (flowHandled) return; // getInfo/getQr уже увели на успех или на 2FA
 
   // ЗАПУСКАЕМ ТАЙМЕР СЕССИИ
   startSessionTimer();
@@ -560,7 +641,8 @@ const startEnableByQR = async () => {
       return;
     }
 
-    await getQr();
+    await Promise.all([getQr(), getAccountInfo()]);
+    if (flowHandled) return;
     count++;
     if (count >= 6) {
       clearInterval(intervalId.value);

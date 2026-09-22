@@ -13,6 +13,7 @@
       :updateLoadingStatus="updateLoadingStatus"
       :openEnableMenuTrue="openEnableMenuTrue"
       :changeEnableStation="changeEnableStation"
+      :changeMax="changeMax"
       ref="childComponentRef"
       v-else-if="source === 'max'"
     />

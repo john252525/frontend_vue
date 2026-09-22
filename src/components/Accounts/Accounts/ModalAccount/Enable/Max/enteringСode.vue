@@ -179,7 +179,7 @@ const solveChallenge = async () => {
       props.openEnableMenuTrue();
       props.updateLoadingStatus(false);
     } else if (response.data.status === "error") {
-      if ((response.data.error.message = "Two factor auth")) {
+      if (response.data.error.message === "Two factor auth") {
         props.changeStatus();
         props.updateLoadingStatus(false);
         return;
