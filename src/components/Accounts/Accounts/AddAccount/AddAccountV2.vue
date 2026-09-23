@@ -668,6 +668,9 @@ import { useAccountStore } from "@/stores/accountStore";
 const accountStore = useAccountStore();
 const token = computed(() => accountStore.getAccountToken);
 
+import { useDomain } from "@/composables/getDomain";
+const { stationDomain } = useDomain();
+
 const modalText = ref({
   title: "Настройка интеграции",
   close: "Отмена",
@@ -856,12 +859,22 @@ const getOptions = (selectName) => {
   const select = getSelectElement(selectName);
   if (!select) return [];
 
-  return formElements.value
+  let options = formElements.value
     .filter((el) => el.parent_id === select.id && el.element === "option")
     .map((option) => ({
       value: option.value,
       text: option.text_content,
     }));
+
+  // На webest из CRM разрешён только Bitrix24 — остальные (amoCRM, U-ON и
+  // т.д.) скрываем из списка, чтобы их нельзя было подключить через эту форму.
+  if (selectName === "type" && stationDomain?.navigate?.value === "webest") {
+    options = options.filter((option) =>
+      String(option.value).toLowerCase().includes("bitrix"),
+    );
+  }
+
+  return options;
 };
 
 const getSelectedText = (selectName) => {

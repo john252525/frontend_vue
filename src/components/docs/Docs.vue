@@ -1,10 +1,12 @@
 <script setup>
 import { ref, shallowRef, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import Fuse from "fuse.js";
 import Nav from "./Nav.vue";
 import { useDomain } from "@/composables/getDomain";
 
 const { stationDomain } = useDomain();
+const router = useRouter();
 
 // У каждого домена своя папка в src/docs/<brand>/ — сейчас (пока контент не
 // разошёлся) там одинаковые файлы, но уже разложены отдельно, чтобы дальше
@@ -209,6 +211,45 @@ const loadDoc = async (path) => {
   }
 };
 
+// Ссылки внутри статей markdown рендерятся как обычные <a href="...">.
+// Без перехвата клик по ним делает полную перезагрузку страницы браузером:
+// относительный путь к другой статье (Файл.md) ведёт на несуществующий URL
+// (404), а абсолютная ссылка на страницу приложения (/Accounts) хоть и
+// открывается, но убивает SPA-навигацию. Перехватываем клик и разруливаем
+// сами: .md-ссылка — грузим статью через loadDoc, внутренняя ссылка на
+// приложение — через vue-router, внешняя (http/mailto/tel) — не трогаем.
+const handleContentClick = (event) => {
+  const anchor = event.target.closest("a");
+  if (!anchor) return;
+
+  const href = anchor.getAttribute("href");
+  if (!href) return;
+
+  if (/^([a-z][a-z0-9+.-]*:)/i.test(href) && !href.toLowerCase().startsWith("md:")) {
+    // Есть схема (http:, https:, mailto:, tel: и т.д.) — внешняя ссылка,
+    // пускаем как есть.
+    return;
+  }
+
+  event.preventDefault();
+
+  if (href.toLowerCase().endsWith(".md")) {
+    const fileName = decodeURIComponent(href.split("/").pop());
+    const brandSegment = `/${brandName.value}/`;
+    const match = Object.keys(renderModules).find(
+      (path) => path.includes(brandSegment) && path.endsWith(`/${fileName}`),
+    );
+    if (match) {
+      loadDoc(match);
+    } else {
+      errorMsg.value = `Статья не найдена: ${fileName}`;
+    }
+    return;
+  }
+
+  router.push(href);
+};
+
 onMounted(async () => {
   try {
     menu.value = buildTree();
@@ -287,7 +328,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="content-container">
+      <div class="content-container" @click="handleContentClick">
         <transition name="page-fade" mode="out-in">
           <div
             :key="currentPath"

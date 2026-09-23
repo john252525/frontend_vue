@@ -53,14 +53,18 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
 import { useFeedbackModalStore } from "@/stores/feedbackModalStore";
+import { useAccountStore } from "@/stores/accountStore";
 import ModalFrame from "@/components/GlobalModal/ModalFrame.vue";
 
 const feedbackModalStore = useFeedbackModalStore();
 const { isOpen } = storeToRefs(feedbackModalStore);
+
+const accountStore = useAccountStore();
+const token = computed(() => accountStore.getAccountToken);
 
 const API_URL = `${import.meta.env.VITE_BASE_URL}`;
 
@@ -86,14 +90,23 @@ const handleSubmit = async () => {
   errorMessage.value = "";
 
   try {
-    await axios.post(`${API_URL}/support/sendInquiry`, {
-      name: form.name,
-      phone: form.phone,
-      email: form.email || undefined,
-      message: form.question,
-      inquiry_source: "lc",
-      submitted_from: "modal",
-    });
+    await axios.post(
+      `${API_URL}support/sendInquiry`,
+      {
+        name: form.name,
+        phone: form.phone,
+        email: form.email || undefined,
+        message: form.question,
+        inquiry_source: "lc",
+        submitted_from: "modal",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `Bearer ${token.value}`,
+        },
+      },
+    );
 
     successMessage.value = "Заявка отправлена!";
     form.name = "";
