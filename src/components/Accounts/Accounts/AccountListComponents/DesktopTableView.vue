@@ -142,6 +142,9 @@
             <span class="account-type">
               {{ getDisplayType(item) }}
             </span>
+            <span v-if="isCrmType(item.type) && item.source" class="account-portal">
+              {{ item.source }}
+            </span>
           </div>
 
           <div
@@ -713,6 +716,12 @@ function getDisplayType(item) {
   return getType(item.type);
 }
 
+// Портал CRM (домен) хранится в item.source только у amocrm/bitrix24/uon —
+// у остальных типов source это мессенджер (whatsapp/telegram/...).
+function isCrmType(type) {
+  return ["amocrm", "bitrix24", "uon"].includes(type);
+}
+
 const showSubscriptionWarning = (item) => {
   const isExcludedType = ["amocrm", "bitrix24", "uon", "bulk"].includes(
     item.type,
@@ -999,6 +1008,12 @@ const emailSettings = () => {
   margin-top: 4px;
   display: inline-block;
   align-self: flex-start;
+}
+
+.account-portal {
+  font-size: 11px;
+  color: var(--headerAccountText);
+  margin-top: 2px;
 }
 
 .subscription-warning-desktop {

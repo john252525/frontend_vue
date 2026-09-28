@@ -7,6 +7,7 @@
           <div class="account-badge">
             <AccountIcon :item="props.item" class="mini-icon" />
             <span class="account-name">{{ props.item.name || props.item.login }}</span>
+            <span v-if="props.item.source" class="account-portal">{{ props.item.source }}</span>
           </div>
         </div>
 
@@ -185,6 +186,14 @@ onMounted(load);
   font-size: 12px;
   color: var(--headerAccountText);
   font-weight: 600;
+}
+
+.account-portal {
+  font-size: 12px;
+  color: var(--headerAccountText);
+  font-weight: 400;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
 }
 
 .close-btn {
