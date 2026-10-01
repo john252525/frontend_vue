@@ -34,6 +34,11 @@
         <!-- Колокольчик уведомлений -->
         <NotificationBell v-if="stationDomain.navigate.value != 'webest'" />
 
+        <!-- Основной аккаунт Bitrix24 — на webest это не рядовой пункт
+             списка аккаунтов, а единственная CRM-интеграция ЛК, поэтому
+             показываем её отдельным значком с меню в шапке. -->
+        <BitrixAccountBadge v-if="stationDomain.navigate.value === 'webest'" />
+
         <!-- Роль сотрудника — у владельца аккаунта роли в токене нет вообще,
              бейдж для него не показываем. -->
         <div v-if="roleLabel" class="role-badge">
@@ -116,6 +121,7 @@ import LoadingBalance from "./Loading/LoadingBalance.vue";
 import Balance from "./Balance.vue";
 import AccountMenu from "./AccountMenu.vue";
 import NotificationBell from "./NotificationBell.vue";
+import BitrixAccountBadge from "./BitrixAccountBadge.vue";
 import ThemeTogle from "./ThemeTogle.vue";
 import { useDomain } from "@/composables/getDomain";
 import { useBalanceStore } from "@/stores/balanceStore";

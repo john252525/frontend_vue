@@ -75,6 +75,16 @@ export function useAccountsList(options = {}) {
     ];
 
     const filtered = instancesStore.allInstances.filter((inst) => {
+      // На webest Bitrix24 — не рядовой аккаунт в списке, а единственная
+      // CRM-интеграция ЛК; её показываем отдельным значком в шапке
+      // (BitrixAccountBadge.vue), поэтому из общего списка убираем.
+      if (
+        stationDomain.navigate.value === "webest" &&
+        inst.type === "bitrix24"
+      ) {
+        return false;
+      }
+
       // Фильтр удалённых аккаунтов
       if (!showDeleted && inst.enable === "0") return false;
 
